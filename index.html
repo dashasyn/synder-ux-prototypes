@@ -19,68 +19,71 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
+      line-height: 1.4;
     }
     .wrap {
-      max-width: 720px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 48px 24px 64px;
+      padding: 32px 20px 48px;
     }
     h1 {
-      font-size: 1.75rem;
+      font-size: 1.35rem;
       font-weight: 650;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       letter-spacing: -0.02em;
     }
     .intro {
       color: var(--muted);
-      margin: 0 0 32px;
-      font-size: 0.95rem;
+      margin: 0 0 20px;
+      font-size: 0.875rem;
     }
     .list {
       list-style: none;
       padding: 0;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
     }
     .card {
       display: block;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
+      border-radius: 8px;
+      padding: 12px 14px;
       text-decoration: none;
       color: inherit;
+      min-height: 88px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .card:hover {
       border-color: #c8c8c4;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     }
     .card-title {
       font-weight: 600;
-      font-size: 1.05rem;
-      margin: 0 0 4px;
+      font-size: 0.9rem;
+      margin: 0 0 2px;
       color: var(--accent);
     }
-    .card:hover .card-title {
-      text-decoration: underline;
-    }
+    .card:hover .card-title { text-decoration: underline; }
     .card-meta {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: var(--muted);
-      margin: 0 0 8px;
+      margin: 0 0 6px;
     }
     .card-desc {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.75rem;
       color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .note {
-      margin-top: 28px;
-      font-size: 0.85rem;
+      margin-top: 20px;
+      font-size: 0.8rem;
       color: var(--muted);
     }
   </style>
@@ -88,17 +91,17 @@
 <body>
   <div class="wrap">
     <h1>Synder UX prototypes</h1>
-    <p class="intro">A simple gallery of interactive UX prototypes. Open a card to try one.</p>
+    <p class="intro">Interactive UX prototypes. Each opens in a new tab.</p>
     <ul class="list">
       <li>
-        <a class="card" href="prototypes/payment-matching-rules/">
+        <a class="card" href="prototypes/payment-matching-rules/" target="_blank" rel="noopener noreferrer">
           <div class="card-title">Payment matching rules</div>
           <p class="card-meta">v2.8</p>
-          <p class="card-desc">Configure and review rules for matching payments to invoices and open items.</p>
+          <p class="card-desc">Match payments to open invoices — default vs custom rules.</p>
         </a>
       </li>
     </ul>
-    <p class="note">New prototypes will appear here as they are added.</p>
+    <p class="note">New prototypes appear here as they are added.</p>
   </div>
 </body>
 </html>
