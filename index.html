@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synder UX prototypes</title>
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5c5c5c;
+      --border: #e5e5e2;
+      --accent: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 650;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .intro {
+      color: var(--muted);
+      margin: 0 0 32px;
+      font-size: 0.95rem;
+    }
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: #c8c8c4;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    .card-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 4px;
+      color: var(--accent);
+    }
+    .card:hover .card-title {
+      text-decoration: underline;
+    }
+    .card-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .card-desc {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .note {
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Synder UX prototypes</h1>
+    <p class="intro">A simple gallery of interactive UX prototypes. Open a card to try one.</p>
+    <ul class="list">
+      <li>
+        <a class="card" href="prototypes/payment-matching-rules/">
+          <div class="card-title">Payment matching rules</div>
+          <p class="card-meta">v2.8</p>
+          <p class="card-desc">Configure and review rules for matching payments to invoices and open items.</p>
+        </a>
+      </li>
+    </ul>
+    <p class="note">New prototypes will appear here as they are added.</p>
+  </div>
+</body>
+</html>
