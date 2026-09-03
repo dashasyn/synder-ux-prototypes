@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.6)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.7)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -311,11 +311,6 @@
       border-top: 1px solid var(--border-default);
     }
     .nl-row:first-of-type { border-top: 0; }
-    /* Then refine: checkbox-first — no left combinator column */
-    #refineRows .nl-row {
-      grid-template-columns: minmax(22px, auto) minmax(0, 1fr) auto;
-    }
-    #refineRows .nl-row:first-of-type { border-top: 0; }
     .nl-join {
       display: flex; align-items: center;
       height: 32px; margin-top: 0;
@@ -335,16 +330,6 @@
       display: inline-flex; align-items: center; flex-shrink: 0;
     }
     .refine-combinator[hidden] { display: none !important; }
-    /* Muted AND/OR caption between extra condition rows (not a row cell) */
-    .refine-between {
-      display: flex; align-items: center;
-      padding: 0 0 0 2px;
-      margin: -2px 0;
-      font-size: 14px; font-weight: 700; letter-spacing: .05em;
-      color: var(--text-secondary); text-transform: uppercase;
-      user-select: none; pointer-events: none;
-      line-height: 16px;
-    }
     .nl-enable { margin-top: 0; }
     .nl-sentence {
       display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center;
@@ -819,7 +804,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.6</span>
+        <span>v3.7</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
@@ -1075,13 +1060,6 @@
       if (combWrap) combWrap.hidden = extras.length < 2;
       if ($("refineCombinator")) $("refineCombinator").value = draft.refineAny ? "or" : "and";
       extras.forEach((row, index) => {
-        if (index > 0) {
-          const between = document.createElement("div");
-          between.className = "refine-between";
-          between.setAttribute("aria-hidden", "true");
-          between.textContent = draft.refineAny ? "OR" : "AND";
-          refineWrap.appendChild(between);
-        }
         refineWrap.appendChild(buildRowEl(row, index, "refine"));
       });
     }
@@ -1132,16 +1110,16 @@
         refresh();
       };
 
-      // Scope keeps left AND column. Refine rows start with checkbox only —
-      // shared AND/OR lives in the Then refine header (FDD).
+      // Scope stays AND. Refine rows get a muted non-interactive AND/OR
+      // join column (combinator is chosen in the Then refine header).
+      const join = document.createElement("div");
+      join.className = "nl-join";
       if (section === "scope") {
-        const join = document.createElement("div");
-        join.className = "nl-join";
         join.textContent = "AND";
-        el.append(join, enableSlot, sentence, remove);
       } else {
-        el.append(enableSlot, sentence, remove);
+        join.textContent = draft.refineAny ? "OR" : "AND";
       }
+      el.append(join, enableSlot, sentence, remove);
       return el;
     }
 
@@ -1424,8 +1402,10 @@
 
       $("openRules").disabled = !$("gspApply").checked;
 
-      document.querySelectorAll("#refineRows .refine-between").forEach((el) => {
-        el.textContent = draft.refineAny ? "OR" : "AND";
+      document.querySelectorAll("#refineRows .nl-row").forEach((el) => {
+        const join = el.querySelector(".nl-join");
+        if (!join) return;
+        join.textContent = draft.refineAny ? "OR" : "AND";
       });
 
       document.querySelectorAll("#scopeRows .nl-row").forEach((el) => {
