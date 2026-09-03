@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.0)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.1)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -300,33 +300,46 @@
       display: grid;
       grid-template-columns: 56px minmax(22px, auto) minmax(0, 1fr) auto;
       gap: 8px;
-      align-items: start;
+      /* First-line lock: checkbox + WHEN/AND sit on the control baseline.
+         Single-line text-only rows use center (rule below). */
+      align-items: flex-start;
       padding: 8px 0;
       border-top: 1px solid var(--border-default);
+    }
+    /* Text-only rows (e.g. customer): one optical line — center the checkbox/join. */
+    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) {
+      align-items: center;
     }
     .nl-row:first-of-type { border-top: 0; }
     .nl-join {
       font-size: var(--font-caption); font-weight: 700; letter-spacing: .05em;
       color: var(--text-secondary); text-transform: uppercase;
       user-select: none; pointer-events: none;
-      margin-top: 10px;
+      line-height: 16px;
+      /* Optical center on the 32px first-line control: (32 - 16) / 2 */
+      margin-top: 8px;
     }
     .nl-join-select {
       width: auto; min-width: 58px; height: 28px;
       padding: 2px 24px 2px 8px !important;
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       color: var(--color-primary); text-transform: uppercase;
-      margin-top: 6px;
+      /* Optical center on the 32px first-line control: (32 - 28) / 2 */
+      margin-top: 2px;
     }
-    .nl-enable { margin-top: 10px; }
+    /* Optical center on the 32px first-line control: (32 - 18) / 2 */
+    .nl-enable { margin-top: 7px; }
+    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-join,
+    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-enable {
+      margin-top: 0;
+    }
     .nl-sentence {
-      display: flex; flex-wrap: nowrap; gap: 6px 8px; align-items: flex-start;
+      display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center;
       color: var(--text-primary);
       min-width: 0;
     }
-    .nl-sentence.disabled { opacity: .45; }
     .nl-sentence > span {
-      margin-top: 8px; white-space: nowrap;
+      margin-top: 0; white-space: nowrap;
       font-size: var(--font-body2);
       letter-spacing: var(--font-body2-letter-spacing);
     }
@@ -354,7 +367,7 @@
       font-weight: 400;
     }
     .nl-field-err.show { display: block; }
-    .nl-remove { margin-top: 4px; }
+    .nl-remove { margin-top: 0; }
     .nl-remove .material-icons { font-size: 18px; }
     .nl-remove[hidden] { visibility: hidden; display: inline-flex !important; }
 
@@ -479,10 +492,58 @@
     }
     .toast.show { display: block; }
 
-    .nl-enable:disabled { cursor: not-allowed; opacity: 0.7; }
     .nl-enable-slot {
-      display: flex; justify-content: flex-start; align-items: flex-start;
-      margin-top: 2px; flex-shrink: 0; min-width: 18px;
+      display: flex; justify-content: flex-start; align-items: center;
+      margin-top: 7px; flex-shrink: 0; min-width: 18px;
+    }
+    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-enable-slot {
+      margin-top: 0;
+    }
+
+    /* ------------------------------------------------------------------
+       Local overrides — do not fork the kit.
+       Reason: the kit's disabled treatment is too faint in this layout.
+       Kit form :disabled already uses muted text, and kit also applies
+       `.disabled, [disabled] { opacity: 0.5 }`, which washes fields out.
+       Disabled must read as "present but locked", not "missing".
+       ------------------------------------------------------------------ */
+    .select:disabled,
+    .input:disabled,
+    select:disabled,
+    input[type="text"]:disabled,
+    input[type="number"]:disabled {
+      opacity: 1;
+      color: var(--color-grey-50);
+      background-color: var(--color-grey-5);
+      border: 1px solid var(--color-grey-20);
+      cursor: not-allowed;
+    }
+
+    /* Greyed (unchecked) condition rows: keep copy readable.
+       Kit `.disabled { opacity: 0.5 }` plus the old .45 fade made text vanish. */
+    .nl-sentence.disabled {
+      opacity: 1;
+      color: var(--color-grey-50);
+    }
+    .nl-sentence.disabled > span,
+    .nl-sentence.disabled .fixed,
+    .nl-sentence.disabled .hint {
+      color: var(--color-grey-50);
+    }
+
+    /* Locked date checkbox (non-admin, required): kit :disabled overrides
+       :checked, so the white tick sat on grey-10 and looked broken.
+       Keep the tick, mute the fill, no extra opacity — deliberately locked. */
+    input.checkbox.nl-enable[type="checkbox"]:disabled {
+      opacity: 1;
+      cursor: not-allowed;
+    }
+    input.checkbox.nl-enable[type="checkbox"]:disabled:checked {
+      background: var(--color-grey-50);
+      border-color: var(--color-grey-50);
+    }
+    input.checkbox.nl-enable[type="checkbox"]:disabled:checked::after {
+      border-color: var(--color-white);
     }
   </style>
 </head>
@@ -689,7 +750,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.0</span>
+        <span>v3.1</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
