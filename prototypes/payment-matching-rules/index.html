@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.4)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.5)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -288,7 +288,7 @@
       margin-top: 2px; padding-top: 12px;
     }
     .match-section-head {
-      display: flex; align-items: flex-start; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       gap: 12px; margin-bottom: 6px;
     }
     .match-section-title {
@@ -319,10 +319,6 @@
       user-select: none; pointer-events: none;
       line-height: 16px;
     }
-    .nl-join.nl-join-control {
-      pointer-events: auto;
-      user-select: auto;
-    }
     .nl-join-select {
       width: auto; min-width: 58px; height: 28px;
       padding: 2px 24px 2px 8px !important;
@@ -330,6 +326,10 @@
       color: var(--color-primary); text-transform: uppercase;
       margin-top: 0;
     }
+    .refine-combinator {
+      display: inline-flex; align-items: center; flex-shrink: 0;
+    }
+    .refine-combinator[hidden] { display: none !important; }
     .nl-enable { margin-top: 0; }
     .nl-sentence {
       display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center;
@@ -486,7 +486,12 @@
     }
 
     /* Customer attribution — checkbox + inherit note (no radios) */
-    .attr-block { margin: 0 0 2px; }
+    .attr-block {
+      margin: 0 0 2px;
+      padding-bottom: 8px;
+      /* Light dashed rule between Customer and Invoice date decisions */
+      border-bottom: 1px dashed var(--border-default);
+    }
     .attr-block .nl-row { border-top: 0; padding-top: 4px; }
     .attr-inherit-tip { display: none; margin-top: 6px; margin-bottom: 4px; }
     .attr-inherit-tip.show { display: flex; }
@@ -747,6 +752,12 @@
                     <div class="match-section" id="refineSection">
                       <div class="match-section-head">
                         <h3 class="match-section-title">Then refine</h3>
+                        <div class="refine-combinator" id="refineCombinatorWrap" hidden>
+                          <select id="refineCombinator" class="select nl-join-select" aria-label="Combine extra conditions with AND or OR">
+                            <option value="and">AND</option>
+                            <option value="or">OR</option>
+                          </select>
+                        </div>
                       </div>
                       <div id="refineRows"></div>
                       <div class="refine-empty" id="refineEmpty">Optional — add conditions to refine further.</div>
@@ -793,7 +804,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.4</span>
+        <span>v3.5</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
@@ -1016,6 +1027,7 @@
       $("modeCustom").checked = !draft.useDefault;
       $("overpay").checked = draft.overpay;
       $("adminEnabled").checked = adminEnabled;
+      if ($("refineCombinator")) $("refineCombinator").value = draft.refineAny ? "or" : "and";
       applyAttributionToDom();
       syncCancelToggles();
       renderMode();
@@ -1044,6 +1056,9 @@
 
       const extras = refineRowsList();
       $("refineEmpty").style.display = extras.length ? "none" : "block";
+      const combWrap = $("refineCombinatorWrap");
+      if (combWrap) combWrap.hidden = extras.length < 2;
+      if ($("refineCombinator")) $("refineCombinator").value = draft.refineAny ? "or" : "and";
       extras.forEach((row, index) => {
         refineWrap.appendChild(buildRowEl(row, index, "refine"));
       });
@@ -1057,32 +1072,13 @@
       const join = document.createElement("div");
       join.className = "nl-join";
       if (section === "scope") {
-        // Customer attribution row above owns WHEN.
+        // Customer attribution row above owns WHEN; scope stays AND.
         join.textContent = "AND";
       } else if (index === 0) {
+        // Shared AND/OR lives in the Then refine header (2+ extras).
         join.textContent = "";
-      } else if (index === 1) {
-        // Compact shared AND/OR join control — only when 2+ refine rows.
-        join.className = "nl-join nl-join-control";
-        join.textContent = "";
-        const sel = document.createElement("select");
-        sel.id = "refineCombinator";
-        sel.className = "select nl-join-select";
-        sel.setAttribute("aria-label", "Combine extra conditions with AND or OR");
-        [["and", "AND"], ["or", "OR"]].forEach(([val, label]) => {
-          const o = document.createElement("option");
-          o.value = val;
-          o.textContent = label;
-          if ((val === "or") === !!draft.refineAny) o.selected = true;
-          sel.appendChild(o);
-        });
-        sel.onchange = () => {
-          draft.refineAny = sel.value === "or";
-          renderRows();
-          refresh();
-        };
-        join.appendChild(sel);
       } else {
+        // Muted non-interactive label — chosen combinator for scan.
         join.textContent = draft.refineAny ? "OR" : "AND";
       }
 
@@ -1412,7 +1408,7 @@
 
       document.querySelectorAll("#refineRows .nl-row").forEach((el, index) => {
         const join = el.querySelector(".nl-join");
-        if (!join || join.classList.contains("nl-join-control")) return;
+        if (!join) return;
         join.textContent = index === 0 ? "" : (draft.refineAny ? "OR" : "AND");
       });
 
@@ -1576,6 +1572,11 @@
       refresh();
     });
 
+    $("refineCombinator").addEventListener("change", () => {
+      draft.refineAny = $("refineCombinator").value === "or";
+      renderRows();
+      refresh();
+    });
 
     $("addCond").onclick = () => {
       ensureSeeded();
