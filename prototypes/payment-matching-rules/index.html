@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.3)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.4)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -36,7 +36,7 @@
       width: 24px; height: 24px; border-radius: var(--radius-sm);
       background: var(--color-primary); color: var(--text-on-primary);
       display: grid; place-items: center;
-      font-size: 12px; font-weight: 700;
+      font-size: 14px; font-weight: 700;
     }
 
     .main { display: flex; flex-direction: column; min-width: 0; background: var(--bg-page); }
@@ -47,7 +47,7 @@
       line-height: var(--font-h2-line-height);
       color: var(--text-primary);
     }
-    .top-meta { color: var(--text-secondary); font-size: var(--font-caption); }
+    .top-meta { color: var(--text-secondary); font-size: 14px; }
 
     .content {
       display: grid;
@@ -63,7 +63,7 @@
     .tab .tab-x {
       width: 16px; height: 16px; border-radius: var(--radius-sm); border: 0;
       background: transparent; color: var(--text-secondary); cursor: pointer;
-      font-size: 13px; line-height: 1; padding: 0;
+      font-size: 14px; line-height: 1; padding: 0;
       display: inline-flex; align-items: center; justify-content: center;
     }
     .tab .tab-x:hover { background: var(--bg-hover); color: var(--text-primary); }
@@ -133,8 +133,8 @@
     }
     .toggle-row p {
       margin: 0; color: var(--text-secondary);
-      font-size: var(--font-caption);
-      line-height: var(--font-caption-line-height);
+      font-size: 14px;
+      line-height: 20px;
       max-width: 520px;
     }
 
@@ -145,7 +145,7 @@
     }
     .config-status {
       display: inline-flex; align-items: center; gap: 6px;
-      margin-left: 8px; font-size: var(--font-caption); font-weight: 500;
+      margin-left: 8px; font-size: 14px; font-weight: 500;
       color: var(--text-secondary);
     }
     .config-status.on { color: var(--color-green); }
@@ -269,8 +269,8 @@
     }
     .mode-radio .mode-desc {
       color: var(--text-secondary);
-      font-size: var(--font-caption);
-      line-height: var(--font-caption-line-height);
+      font-size: 14px;
+      line-height: 20px;
     }
     .mode-custom-body {
       grid-column: 1 / -1;
@@ -314,7 +314,7 @@
     .nl-join {
       display: flex; align-items: center;
       height: 32px; margin-top: 0;
-      font-size: var(--font-caption); font-weight: 700; letter-spacing: .05em;
+      font-size: 14px; font-weight: 700; letter-spacing: .05em;
       color: var(--text-secondary); text-transform: uppercase;
       user-select: none; pointer-events: none;
       line-height: 16px;
@@ -326,7 +326,7 @@
     .nl-join-select {
       width: auto; min-width: 58px; height: 28px;
       padding: 2px 24px 2px 8px !important;
-      font-size: 11px; font-weight: 700; letter-spacing: .04em;
+      font-size: 14px; font-weight: 700; letter-spacing: .04em;
       color: var(--color-primary); text-transform: uppercase;
       margin-top: 0;
     }
@@ -360,7 +360,7 @@
     }
     .nl-field-err {
       display: none;
-      font-size: var(--font-caption);
+      font-size: 14px;
       color: var(--color-red);
       line-height: 1.2;
       font-weight: 400;
@@ -377,7 +377,7 @@
     .add-row { margin-top: 2px; padding-top: 4px; }
     .refine-empty {
       color: var(--text-secondary);
-      font-size: var(--font-caption);
+      font-size: 14px;
       padding: 2px 0 0;
       font-style: italic;
     }
@@ -407,8 +407,8 @@
     }
     .option-card p {
       margin: 0; color: var(--text-secondary);
-      font-size: var(--font-caption);
-      line-height: var(--font-caption-line-height);
+      font-size: 14px;
+      line-height: 20px;
       max-width: 480px;
     }
     .option-side {
@@ -425,7 +425,7 @@
     }
     .plain-rail > h4 {
       margin: 0 0 6px;
-      font-size: var(--font-overline);
+      font-size: 14px;
       font-weight: var(--font-overline-weight);
       letter-spacing: var(--font-overline-letter-spacing);
       text-transform: uppercase;
@@ -435,7 +435,7 @@
     .plain-rail .plain-sec:first-child { margin-top: 0; }
     .plain-rail .plain-sec-title {
       display: block;
-      font-size: var(--font-caption);
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-primary);
       margin: 0 0 2px;
@@ -443,8 +443,8 @@
     .plain-rail .plain-sec p {
       margin: 0;
       color: var(--text-secondary);
-      font-size: var(--font-caption);
-      line-height: var(--font-caption-line-height);
+      font-size: 14px;
+      line-height: 20px;
     }
 
     .sheet-foot {
@@ -452,23 +452,23 @@
       border-top: 1px solid var(--border-default);
       display: flex; align-items: center; gap: 10px;
       color: var(--text-muted);
-      font-size: var(--font-caption);
+      font-size: 14px;
       flex-shrink: 0;
       background: var(--bg-surface);
     }
     .sheet-foot .form-check {
       color: var(--text-muted);
-      font-size: var(--font-caption);
+      font-size: 14px;
     }
 
     .multi-match-hint {
       margin: 8px 0 0;
       padding: 0 2px;
       color: var(--text-secondary);
-      font-size: var(--font-caption);
+      font-size: 14px;
       line-height: 1.4;
     }
-    .hint { color: var(--text-secondary); font-size: var(--font-caption); }
+    .hint { color: var(--text-secondary); font-size: 14px; }
 
     .toast {
       position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
@@ -494,8 +494,8 @@
     .cancel-helper {
       margin: 0;
       color: var(--text-secondary);
-      font-size: var(--font-caption);
-      line-height: var(--font-caption-line-height);
+      font-size: 14px;
+      line-height: 20px;
       max-width: 560px;
     }
     .overlay-cancel {
@@ -551,6 +551,16 @@
     }
     input.checkbox.nl-enable[type="checkbox"]:disabled:checked::after {
       border-color: var(--color-white);
+    }
+
+    /* ------------------------------------------------------------------
+       Minimum type size floor — product rule: nothing below 14px.
+       Kit tokens/components that resolve smaller (caption 12, overline 10,
+       sidebar-section-title 11) are floored here without forking the kit.
+       ------------------------------------------------------------------ */
+    .sidebar-section-title {
+      font-size: 14px;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
@@ -783,7 +793,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.3</span>
+        <span>v3.4</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
