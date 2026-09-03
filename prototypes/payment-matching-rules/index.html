@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v2.8)</title>
+  <title>Synder · Apply payments · matching rules (prototype v2.9)</title>
   <style>
     :root {
       --bg: #f0f3f7;
@@ -793,7 +793,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v2.8</span>
+        <span>v2.9</span>
         <label style="display:flex;align-items:center;gap:5px">
           <input type="checkbox" id="adminEnabled" />
           Admin-enabled org
@@ -1132,8 +1132,9 @@
         const key = document.createElement("input");
         key.type = "text";
         key.className = "key-input";
-        key.placeholder = "Key";
-        key.setAttribute("aria-label", "Metadata key");
+        key.placeholder = "Key *";
+        key.setAttribute("aria-label", "Metadata key (required)");
+        key.required = true;
         key.dataset.rowId = row.id;
         key.value = row.key || "";
         key.disabled = !row.enabled;
