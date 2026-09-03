@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.7)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.8)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -320,14 +320,19 @@
       line-height: 16px;
     }
     .nl-join-select {
-      width: auto; min-width: 58px; height: 28px;
+      width: auto; min-width: 52px; height: 28px;
       padding: 2px 24px 2px 8px !important;
-      font-size: 14px; font-weight: 700; letter-spacing: .04em;
-      color: var(--color-primary); text-transform: uppercase;
+      font-size: 14px; font-weight: 500; letter-spacing: 0;
+      color: var(--color-primary); text-transform: none;
       margin-top: 0;
     }
     .refine-combinator {
       display: inline-flex; align-items: center; flex-shrink: 0;
+      gap: 6px;
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
     .refine-combinator[hidden] { display: none !important; }
     .nl-enable { margin-top: 0; }
@@ -753,10 +758,12 @@
                       <div class="match-section-head">
                         <h3 class="match-section-title">Then refine</h3>
                         <div class="refine-combinator" id="refineCombinatorWrap" hidden>
-                          <select id="refineCombinator" class="select nl-join-select" aria-label="Combine extra conditions with AND or OR">
-                            <option value="and">AND</option>
-                            <option value="or">OR</option>
+                          <span>Match</span>
+                          <select id="refineCombinator" class="select nl-join-select" aria-label="Match all or any of these extra conditions">
+                            <option value="and">all</option>
+                            <option value="or">any</option>
                           </select>
+                          <span>of these</span>
                         </div>
                       </div>
                       <div id="refineRows"></div>
@@ -804,7 +811,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.7</span>
+        <span>v3.8</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
