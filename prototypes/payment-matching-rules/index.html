@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.8)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.9)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -492,12 +492,13 @@
 
     /* Customer attribution — checkbox + inherit note (no radios) */
     .attr-block {
-      margin: 0 0 2px;
-      padding-bottom: 8px;
-      /* Light dashed rule between Customer and Invoice date decisions */
-      border-bottom: 1px dashed var(--border-default);
+      margin: 0;
     }
-    .attr-block .nl-row { border-top: 0; padding-top: 4px; }
+    .attr-block .nl-row { border-top: 0; }
+    /* Invoice date is first in #scopeRows; use the same solid hairline as later rows. */
+    #scopeRows .nl-row:first-of-type {
+      border-top: 1px solid var(--border-default);
+    }
     .attr-inherit-tip { display: none; margin-top: 6px; margin-bottom: 4px; }
     .attr-inherit-tip.show { display: flex; }
     /* Cancel sync — shared GSP + overlay pattern (no info icon) */
@@ -811,7 +812,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.8</span>
+        <span>v3.9</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
