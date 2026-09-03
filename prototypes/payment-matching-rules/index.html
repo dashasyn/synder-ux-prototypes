@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.9)</title>
+  <title>Synder · Apply payments · matching rules (prototype v4.0)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -355,7 +355,8 @@
     .nl-sentence .select { max-width: 260px; flex: 1 1 150px; }
     .nl-sentence .days { width: 70px; flex: 0 0 auto; }
     .nl-sentence .key-input { width: 112px; flex: 0 0 auto; }
-    .nl-sentence .key-input.invalid {
+    .nl-sentence .key-input.invalid,
+    .nl-sentence .days.invalid {
       border-color: var(--border-error);
       background: var(--color-red-light);
     }
@@ -369,6 +370,8 @@
       color: var(--color-red);
       line-height: 1.2;
       font-weight: 400;
+      white-space: normal;
+      max-width: 260px;
     }
     .nl-field-err.show { display: block; }
     .nl-remove {
@@ -501,6 +504,15 @@
     }
     .attr-inherit-tip { display: none; margin-top: 6px; margin-bottom: 4px; }
     .attr-inherit-tip.show { display: flex; }
+    .nl-row.scope-invalid {
+      background: var(--color-red-light);
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 0 0 1px var(--border-error);
+    }
+    .nl-row.scope-invalid .nl-enable {
+      outline: 2px solid var(--color-red);
+      outline-offset: 1px;
+    }
     /* Cancel sync — shared GSP + overlay pattern (no info icon) */
     .cancel-helper {
       margin: 0;
@@ -649,7 +661,7 @@
           <div class="toggle-row">
             <div>
               <h3>Cancel sync if there is no matching open invoice found for a payment</h3>
-              <p class="cancel-helper">If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
+              <p class="cancel-helper" id="gspCancelHelp">If no matching invoice is found, the payment still syncs as a payment without a matched invoice.</p>
             </div>
             <label class="form-check">
               <input type="checkbox" class="switch" id="gspCancel" />
@@ -700,9 +712,8 @@
 
       <div class="sheet-scroll">
         <div class="sheet-intro">
-          <h2 id="sheetTitle">Payment matching rules</h2>
-          <p class="sub" id="sheetSub">Choose how Synder applies payments to invoices in your books. You can change these anytime.</p>
-          <div class="alert alert-error banner sheet-submit-alert" id="submitAlert">Fix the highlighted fields</div>
+          <p class="sub" id="sheetSub">Choose how Synder applies payments to invoices in your books.</p>
+          <div class="alert alert-error banner sheet-submit-alert" id="submitAlert">Keep either Customer or the invoice-number match on — otherwise Synder has to look at every invoice in your books.</div>
         </div>
 
         <div class="sheet-layout">
@@ -711,7 +722,7 @@
               <label class="mode-radio mode-default">
                 <input type="radio" class="radio" name="matchMode" id="modeDefault" value="default" checked />
                 <div class="mode-radio-head">
-                  <strong>Use default settings</strong>
+                  <strong>Use default rules</strong>
                   <span class="mode-desc" id="defaultRuleDesc">Match invoices for the same customer whose invoice number equals the payment’s invoice number, 45 days before and 45 days after the payment date.</span>
                 </div>
               </label>
@@ -727,7 +738,7 @@
                   <div class="match-card">
                     <div class="match-section" id="narrowSection">
                       <div class="match-section-head">
-                        <h3 class="match-section-title">How Synder matches invoices</h3>
+                        <h3 class="match-section-title">Match payments to invoices</h3>
                       </div>
 
                       <div class="attr-block" id="attrBlock">
@@ -744,7 +755,7 @@
                           </button>
                         </div>
                         <div class="alert alert-info char-tip attr-inherit-tip" id="attrInheritTip">
-                          Note: Synder will take the customer from the invoice it matches (inherited customer).
+                          Note: Synder will use the customer already on the invoice it matches.
                         </div>
                       </div>
 
@@ -795,7 +806,7 @@
               <div class="toggle-row">
                 <div>
                   <h3>Cancel sync if there is no matching open invoice found for a payment</h3>
-                  <p class="cancel-helper">If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
+                  <p class="cancel-helper" id="overlayCancelHelp">If no matching invoice is found, the payment still syncs as a payment without a matched invoice.</p>
                 </div>
                 <label class="form-check">
                   <input type="checkbox" class="switch" id="overlayCancel" />
@@ -812,7 +823,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.9</span>
+        <span>v4.0</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
@@ -914,6 +925,7 @@
 
     let lastIntegration = "stripe";
     let draft = makeRules();
+    let overlayCancelDraft = false;
     let adminEnabled = false;
     let uidSeq = 1;
     function uid() { return "r" + (uidSeq++); }
@@ -974,16 +986,36 @@
       syncRulesStatus();
     }
 
+    const CANCEL_HELP_ON = "If no matching invoice is found, this payment is not synced.";
+    const CANCEL_HELP_OFF = "If no matching invoice is found, the payment still syncs as a payment without a matched invoice.";
+
+    function cancelHelpText(on) {
+      return on ? CANCEL_HELP_ON : CANCEL_HELP_OFF;
+    }
+
+    function overlayIsOpen() {
+      return $("backdrop").classList.contains("open");
+    }
+
+    function updateCancelHelpers() {
+      const gspHelp = $("gspCancelHelp");
+      if (gspHelp) gspHelp.textContent = cancelHelpText(!!$("gspCancel")?.checked);
+      const overlayHelp = $("overlayCancelHelp");
+      if (overlayHelp) overlayHelp.textContent = cancelHelpText(!!overlayCancelDraft);
+    }
+
     function syncCancelToggles() {
       const on = !!current().cancelSync;
       if ($("gspCancel")) $("gspCancel").checked = on;
-      if ($("overlayCancel")) $("overlayCancel").checked = on;
+      if (!overlayIsOpen()) {
+        overlayCancelDraft = on;
+        if ($("overlayCancel")) $("overlayCancel").checked = on;
+      }
+      updateCancelHelpers();
     }
 
-    function setCancelSync(on) {
-      current().cancelSync = !!on;
-      syncCancelToggles();
-      if ($("backdrop").classList.contains("open")) renderPlain();
+    function liveCancelSync() {
+      return overlayIsOpen() ? !!overlayCancelDraft : !!current().cancelSync;
     }
 
     function scopeRows() {
@@ -1023,9 +1055,22 @@
     function applyAttributionToDom() {
       const same = draft.attribution === "same";
       const cb = $("attrCustomer");
-      if (cb) cb.checked = same;
+      if (cb) {
+        cb.checked = same;
+        cb.setAttribute("aria-label", same
+          ? "Same customer as the payment"
+          : "Use the customer already on the invoice");
+      }
       const sentence = $("attrSentence");
-      if (sentence) sentence.classList.toggle("disabled", !same);
+      if (sentence) {
+        sentence.classList.toggle("disabled", !same);
+        const label = sentence.querySelector(".fixed");
+        if (label) {
+          label.textContent = same
+            ? "Same customer as the payment"
+            : "Use the customer already on the invoice";
+        }
+      }
       const tip = $("attrInheritTip");
       if (tip) tip.classList.toggle("show", !same);
     }
@@ -1037,7 +1082,9 @@
       $("adminEnabled").checked = adminEnabled;
       if ($("refineCombinator")) $("refineCombinator").value = draft.refineAny ? "or" : "and";
       applyAttributionToDom();
-      syncCancelToggles();
+      overlayCancelDraft = !!current().cancelSync;
+      if ($("overlayCancel")) $("overlayCancel").checked = overlayCancelDraft;
+      updateCancelHelpers();
       renderMode();
       renderRows();
       refresh();
@@ -1136,18 +1183,35 @@
 
       if (row.kind === "date") {
         host.append(span("Invoice date is within"));
+        const wrap = document.createElement("div");
+        wrap.className = "nl-field";
         const days = document.createElement("input");
         days.type = "number";
         days.className = "input days";
         days.min = "1";
-        days.value = row.days || DEFAULT_DAYS;
+        days.dataset.rowId = row.id;
+        days.setAttribute("aria-label", "Days before and after the payment date");
+        days.value = row.days === "" ? "" : (row.days || DEFAULT_DAYS);
         days.disabled = !row.enabled;
         days.oninput = () => {
-          const n = Number(days.value);
-          if (Number.isFinite(n) && n > 0) row.days = n;
+          const raw = days.value.trim();
+          const n = Number(raw);
+          if (raw === "" || !Number.isFinite(n) || n <= 0) {
+            row.days = "";
+          } else {
+            row.days = n;
+            days.classList.remove("invalid");
+            const errEl = wrap.querySelector(".nl-field-err");
+            if (errEl) errEl.classList.remove("show");
+          }
+          if (submitAttempted) applyFieldErrors();
           refresh();
         };
-        host.append(days, span("days before and after the payment date"));
+        const err = document.createElement("div");
+        err.className = "form-error-msg nl-field-err";
+        err.textContent = "Required";
+        wrap.append(days, err);
+        host.append(wrap, span("days before and after the payment date"));
         if (!row.enabled) {
           host.append(span("· no date limit", "hint"));
         }
@@ -1210,7 +1274,7 @@
         };
         const err = document.createElement("div");
         err.className = "form-error-msg nl-field-err";
-        err.textContent = "Required";
+        err.textContent = "Enter the metadata key to match on.";
         wrap.append(key, err);
         parts.push(wrap);
       }
@@ -1255,7 +1319,7 @@
     let submitAttempted = false;
 
     function validation() {
-      const result = { scope: null, attribution: false, keyRowIds: [], hasErrors: false };
+      const result = { scope: null, attribution: false, keyRowIds: [], daysRowIds: [], hasErrors: false };
       if (draft.useDefault) return result;
 
       // Checkbox+note: checked = same, unchecked = inherit (always explicit).
@@ -1263,13 +1327,21 @@
         draft.attribution = "inherit";
       }
 
-      if (!customerOn() && !numberOn()) {
-        result.scope = "Keep either same-customer matching or the invoice-number match on — otherwise Synder has to look at every invoice in your books.";
+      // FDD S3.2: only Customer + scope invoice-number bound the query.
+      if (!customerOn() && !scopeNumberOn()) {
+        result.scope = "Keep either Customer or the invoice-number match on — otherwise Synder has to look at every invoice in your books.";
         result.hasErrors = true;
       }
 
       draft.rows.forEach((r) => {
         if (!r.enabled) return;
+        if (r.kind === "date") {
+          const n = Number(r.days);
+          if (r.days === "" || r.days == null || !Number.isFinite(n) || n <= 0) {
+            result.daysRowIds.push(r.id);
+            result.hasErrors = true;
+          }
+        }
         if ((r.kind === "number" || r.removable) && sourceNeedsKey(r.source) && !(r.key || "").trim()) {
           result.keyRowIds.push(r.id);
           result.hasErrors = true;
@@ -1281,7 +1353,8 @@
 
     function clearFieldErrors() {
       document.querySelectorAll(".nl-field-err").forEach((el) => el.classList.remove("show"));
-      document.querySelectorAll(".key-input").forEach((el) => el.classList.remove("invalid"));
+      document.querySelectorAll(".key-input, .days").forEach((el) => el.classList.remove("invalid"));
+      document.querySelectorAll(".nl-row.scope-invalid").forEach((el) => el.classList.remove("scope-invalid"));
       const scopeErr = $("scopeErr");
       if (scopeErr) {
         scopeErr.classList.remove("show");
@@ -1305,6 +1378,22 @@
         const err = input.parentElement && input.parentElement.querySelector(".nl-field-err");
         if (err) err.classList.add("show");
       });
+      (v.daysRowIds || []).forEach((id) => {
+        const input = document.querySelector('.days[data-row-id="' + id + '"]');
+        if (!input) return;
+        input.classList.add("invalid");
+        const err = input.parentElement && input.parentElement.querySelector(".nl-field-err");
+        if (err) err.classList.add("show");
+      });
+
+      if (v.scope) {
+        const attrRow = $("attrRow");
+        if (attrRow) attrRow.classList.add("scope-invalid");
+        document.querySelectorAll("#scopeRows .nl-row").forEach((el) => {
+          const row = draft.rows.find((r) => r.id === el.dataset.id);
+          if (row && row.kind === "number") el.classList.add("scope-invalid");
+        });
+      }
 
       const scopeErr = $("scopeErr");
       if (v.scope && scopeErr) {
@@ -1313,7 +1402,11 @@
       }
 
       if (v.hasErrors) {
-        $("submitAlert").classList.add("show");
+        const alert = $("submitAlert");
+        alert.textContent = v.scope
+          ? v.scope
+          : "Fix the highlighted fields";
+        alert.classList.add("show");
       }
     }
 
@@ -1336,9 +1429,9 @@
       const applyOff = !$("gspApply").checked
         ? " Apply payments is off, so matching will not run."
         : "";
-      const noneMatch = (current().cancelSync
-        ? "Cancel the payment sync."
-        : "Process as usual.") + applyOff;
+      const noneMatch = (liveCancelSync()
+        ? "The payment is not synced."
+        : "The payment still syncs as a payment without a matched invoice.") + applyOff;
 
       if (draft.useDefault) {
         addPlainSec(host, "Default matching rule", DEFAULT_RULE_TEXT + " (" + integrationLabel() + ")");
@@ -1364,7 +1457,7 @@
       if (!scopeBits.length) scopeBits.push("no active filters");
       addPlainSec(
         host,
-        "How Synder matches invoices",
+        "Match payments to invoices",
         "Invoices for " + integrationLabel() + ": " + scopeBits.join("; ") + " (all required)."
       );
 
@@ -1475,7 +1568,9 @@
         rows: draft.rows,
         overpay: draft.overpay,
       };
-      return JSON.stringify(savedRules()) !== JSON.stringify(draftNorm);
+      const rulesDirty = JSON.stringify(savedRules()) !== JSON.stringify(draftNorm);
+      const cancelDirty = !!overlayCancelDraft !== !!current().cancelSync;
+      return rulesDirty || cancelDirty;
     }
 
     function openOverlay() {
@@ -1552,10 +1647,17 @@
     });
 
     $("gspCancel").addEventListener("change", () => {
-      setCancelSync($("gspCancel").checked);
+      current().cancelSync = $("gspCancel").checked;
+      if (!overlayIsOpen()) {
+        overlayCancelDraft = current().cancelSync;
+        if ($("overlayCancel")) $("overlayCancel").checked = overlayCancelDraft;
+      }
+      updateCancelHelpers();
     });
     $("overlayCancel").addEventListener("change", () => {
-      setCancelSync($("overlayCancel").checked);
+      overlayCancelDraft = $("overlayCancel").checked;
+      updateCancelHelpers();
+      renderPlain();
     });
 
     $("gspApply").addEventListener("change", () => {
@@ -1606,10 +1708,11 @@
       if (v.hasErrors) return;
       submitAttempted = false;
       draft.overpay = $("overpay").checked;
-      if (draft.useDefault) {
-        draft = makeRules();
-      }
+      // FDD S1.5: keep custom rows/attribution/overpay when saving defaults.
       current().saved = clone(draft);
+      current().cancelSync = !!overlayCancelDraft;
+      if ($("gspCancel")) $("gspCancel").checked = current().cancelSync;
+      updateCancelHelpers();
       syncRulesStatus();
       closeOverlay(true);
       toast("Matching rules updated");
@@ -1625,6 +1728,7 @@
     $("openRules").disabled = !$("gspApply").checked;
     syncRulesStatus();
     syncCancelToggles();
+    updateCancelHelpers();
   </script>
 </body>
 </html>
