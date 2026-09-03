@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synder · Apply payments · matching rules (prototype v3.2)</title>
+  <title>Synder · Apply payments · matching rules (prototype v3.3)</title>
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -305,43 +305,37 @@
       display: grid;
       grid-template-columns: 56px minmax(22px, auto) minmax(0, 1fr) auto;
       gap: 8px;
-      /* First-line lock: checkbox + WHEN/AND sit on the control baseline.
-         Single-line text-only rows use center (rule below). */
+      /* First-line lock: checkbox + WHEN/AND/AND·OR sit on the 32px control baseline. */
       align-items: flex-start;
       padding: 8px 0;
       border-top: 1px solid var(--border-default);
     }
-    /* Text-only rows (e.g. customer): one optical line — center the checkbox/join. */
-    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) {
-      align-items: center;
-    }
     .nl-row:first-of-type { border-top: 0; }
     .nl-join {
+      display: flex; align-items: center;
+      height: 32px; margin-top: 0;
       font-size: var(--font-caption); font-weight: 700; letter-spacing: .05em;
       color: var(--text-secondary); text-transform: uppercase;
       user-select: none; pointer-events: none;
       line-height: 16px;
-      /* Optical center on the 32px first-line control: (32 - 16) / 2 */
-      margin-top: 8px;
+    }
+    .nl-join.nl-join-control {
+      pointer-events: auto;
+      user-select: auto;
     }
     .nl-join-select {
       width: auto; min-width: 58px; height: 28px;
       padding: 2px 24px 2px 8px !important;
       font-size: 11px; font-weight: 700; letter-spacing: .04em;
       color: var(--color-primary); text-transform: uppercase;
-      /* Optical center on the 32px first-line control: (32 - 28) / 2 */
-      margin-top: 2px;
-    }
-    /* Optical center on the 32px first-line control: (32 - 18) / 2 */
-    .nl-enable { margin-top: 7px; }
-    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-join,
-    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-enable {
       margin-top: 0;
     }
+    .nl-enable { margin-top: 0; }
     .nl-sentence {
       display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center;
       color: var(--text-primary);
       min-width: 0;
+      min-height: 32px;
     }
     .nl-sentence > span {
       margin-top: 0; white-space: nowrap;
@@ -372,7 +366,11 @@
       font-weight: 400;
     }
     .nl-field-err.show { display: block; }
-    .nl-remove { margin-top: 0; }
+    .nl-remove {
+      margin-top: 0;
+      align-self: flex-start;
+      height: 32px;
+    }
     .nl-remove .material-icons { font-size: 18px; }
     .nl-remove[hidden] { visibility: hidden; display: inline-flex !important; }
 
@@ -382,16 +380,6 @@
       font-size: var(--font-caption);
       padding: 2px 0 0;
       font-style: italic;
-    }
-    .refine-combinator {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: var(--font-caption);
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-    .refine-combinator[hidden] { display: none !important; }
-    .refine-combinator .select {
-      width: auto; min-width: 72px;
     }
 
     .char-tip { display: none; margin-top: 10px; margin-bottom: 0; }
@@ -494,75 +482,21 @@
 
     .nl-enable-slot {
       display: flex; justify-content: flex-start; align-items: center;
-      margin-top: 7px; flex-shrink: 0; min-width: 18px;
-    }
-    .nl-row:not(:has(.nl-sentence .select)):not(:has(.nl-sentence .input)) .nl-enable-slot {
-      margin-top: 0;
+      height: 32px; margin-top: 0; flex-shrink: 0; min-width: 18px;
     }
 
-    /* Customer attribution — mutually exclusive cards, nested explain */
-    .attr-block { margin: 4px 0 8px; }
-    .attr-label {
-      margin: 0 0 8px;
-      font-size: var(--font-body2);
-      font-weight: 500;
-      letter-spacing: var(--font-body2-letter-spacing);
-      color: var(--text-primary);
-    }
-    .attr-label .req { color: var(--color-red); font-weight: 500; }
-    .attr-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .attr-option {
-      display: grid;
-      grid-template-columns: 20px 1fr;
-      gap: 10px;
-      padding: 10px 12px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      align-items: start;
-    }
-    .attr-option:has(> input:checked) {
-      background: var(--color-primary-10);
-      border-color: var(--color-primary-20);
-    }
-    .attr-option > input { margin-top: 2px; }
-    .attr-option strong {
-      display: block;
-      font-size: var(--font-body2);
-      font-weight: 500;
-      letter-spacing: var(--font-body2-letter-spacing);
-      color: var(--text-primary);
-    }
-    .attr-explain {
-      display: none;
-      margin: 6px 0 0;
+    /* Customer attribution — checkbox + inherit note (no radios) */
+    .attr-block { margin: 0 0 2px; }
+    .attr-block .nl-row { border-top: 0; padding-top: 4px; }
+    .attr-inherit-tip { display: none; margin-top: 6px; margin-bottom: 4px; }
+    .attr-inherit-tip.show { display: flex; }
+    /* Cancel sync — shared GSP + overlay pattern (no info icon) */
+    .cancel-helper {
+      margin: 0;
       color: var(--text-secondary);
       font-size: var(--font-caption);
       line-height: var(--font-caption-line-height);
-    }
-    .attr-option:has(> input:checked) .attr-explain { display: block; }
-    .attr-block.invalid .attr-option {
-      border-color: var(--border-error);
-    }
-    .attr-block .nl-field-err { margin-top: 4px; }
-
-    /* Cancel sync — shared GSP + overlay pattern */
-    .cancel-helper {
-      display: flex !important;
-      align-items: flex-start;
-      gap: 6px;
       max-width: 560px;
-    }
-    .cancel-helper .material-icons {
-      font-size: 16px;
-      line-height: 1.35;
-      flex-shrink: 0;
-      color: var(--text-secondary);
     }
     .overlay-cancel {
       background: var(--bg-surface);
@@ -694,7 +628,7 @@
           <div class="toggle-row">
             <div>
               <h3>Cancel sync if there is no matching open invoice found for a payment</h3>
-              <p class="cancel-helper"><span class="material-icons" aria-hidden="true">info</span>If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
+              <p class="cancel-helper">If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
             </div>
             <label class="form-check">
               <input type="checkbox" class="switch" id="gspCancel" />
@@ -776,24 +710,21 @@
                       </div>
 
                       <div class="attr-block" id="attrBlock">
-                        <div class="attr-label">Customer attribution <span class="req" aria-hidden="true">*</span></div>
-                        <div class="attr-group" role="radiogroup" aria-label="Customer attribution">
-                          <label class="attr-option">
-                            <input type="radio" class="radio" name="attribution" id="attrSame" value="same" />
-                            <div>
-                              <strong>Match the same customer as the payment</strong>
-                              <p class="attr-explain">Synder only searches invoices for the customer on the payment.</p>
-                            </div>
-                          </label>
-                          <label class="attr-option">
-                            <input type="radio" class="radio" name="attribution" id="attrInherit" value="inherit" />
-                            <div>
-                              <strong>Take the customer from the invoice we match</strong>
-                              <p class="attr-explain">Synder takes the customer from the invoice it matches. Use this when you turn customer matching off.</p>
-                            </div>
-                          </label>
+                        <div class="nl-row attr-customer-row" id="attrRow">
+                          <div class="nl-join">WHEN</div>
+                          <div class="nl-enable-slot">
+                            <input type="checkbox" class="checkbox nl-enable" id="attrCustomer" checked aria-label="Same customer as the payment" />
+                          </div>
+                          <div class="nl-sentence" id="attrSentence">
+                            <span class="fixed">Same customer as the payment</span>
+                          </div>
+                          <button type="button" class="btn-icon nl-remove" hidden aria-hidden="true" tabindex="-1">
+                            <span class="material-icons">close</span>
+                          </button>
                         </div>
-                        <div class="form-error-msg nl-field-err" id="attrErr">Required</div>
+                        <div class="alert alert-info char-tip attr-inherit-tip" id="attrInheritTip">
+                          Note: Synder will take the customer from the invoice it matches (inherited customer).
+                        </div>
                       </div>
 
                       <div id="scopeRows"></div>
@@ -806,13 +737,6 @@
                     <div class="match-section" id="refineSection">
                       <div class="match-section-head">
                         <h3 class="match-section-title">Then refine</h3>
-                        <label class="refine-combinator" id="refineCombinatorWrap" hidden>
-                          Extra conditions
-                          <select id="refineCombinator" class="select nl-join-select" aria-label="Combine extra conditions with AND or OR">
-                            <option value="and">AND</option>
-                            <option value="or">OR</option>
-                          </select>
-                        </label>
                       </div>
                       <div id="refineRows"></div>
                       <div class="refine-empty" id="refineEmpty">Optional — add conditions to refine further.</div>
@@ -842,7 +766,7 @@
               <div class="toggle-row">
                 <div>
                   <h3>Cancel sync if there is no matching open invoice found for a payment</h3>
-                  <p class="cancel-helper"><span class="material-icons" aria-hidden="true">info</span>If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
+                  <p class="cancel-helper">If you enable this setting, Synder will search across the existing invoices in your books and if the matching invoice doesn't exist, it will cancel synchronization.</p>
                 </div>
                 <label class="form-check">
                   <input type="checkbox" class="switch" id="overlayCancel" />
@@ -859,7 +783,7 @@
       </div>
 
       <div class="sheet-foot">
-        <span>v3.2</span>
+        <span>v3.3</span>
         <label class="form-check">
           <input type="checkbox" class="checkbox" id="adminEnabled" />
           Admin-enabled org
@@ -938,7 +862,7 @@
         useDefault: true,
         seeded: false,
         refineAny: false,
-        attribution: "",
+        attribution: "same",
         rows: [],
         overpay: true,
       };
@@ -1046,6 +970,9 @@
         draft.rows = seedCustomRows();
         draft.seeded = true;
       }
+      if (draft.attribution !== "same" && draft.attribution !== "inherit") {
+        draft.attribution = "same";
+      }
     }
 
     function customerOn() {
@@ -1065,8 +992,13 @@
     }
 
     function applyAttributionToDom() {
-      $("attrSame").checked = draft.attribution === "same";
-      $("attrInherit").checked = draft.attribution === "inherit";
+      const same = draft.attribution === "same";
+      const cb = $("attrCustomer");
+      if (cb) cb.checked = same;
+      const sentence = $("attrSentence");
+      if (sentence) sentence.classList.toggle("disabled", !same);
+      const tip = $("attrInheritTip");
+      if (tip) tip.classList.toggle("show", !same);
     }
 
     function applyDraftToDom() {
@@ -1074,7 +1006,6 @@
       $("modeCustom").checked = !draft.useDefault;
       $("overpay").checked = draft.overpay;
       $("adminEnabled").checked = adminEnabled;
-      $("refineCombinator").value = draft.refineAny ? "or" : "and";
       applyAttributionToDom();
       syncCancelToggles();
       renderMode();
@@ -1096,15 +1027,13 @@
       if (draft.useDefault) return;
 
       const scopes = scopeRows();
+      // Customer row owns WHEN; scope conditions join with AND.
       scopes.forEach((row, index) => {
         scopeWrap.appendChild(buildRowEl(row, index, "scope"));
       });
 
       const extras = refineRowsList();
       $("refineEmpty").style.display = extras.length ? "none" : "block";
-      const combWrap = $("refineCombinatorWrap");
-      if (combWrap) combWrap.hidden = extras.length < 2;
-      $("refineCombinator").value = draft.refineAny ? "or" : "and";
       extras.forEach((row, index) => {
         refineWrap.appendChild(buildRowEl(row, index, "refine"));
       });
@@ -1118,11 +1047,37 @@
       const join = document.createElement("div");
       join.className = "nl-join";
       if (section === "scope") {
-        join.textContent = index === 0 ? "WHEN" : "AND";
+        // Customer attribution row above owns WHEN.
+        join.textContent = "AND";
+      } else if (index === 0) {
+        join.textContent = "";
+      } else if (index === 1) {
+        // Compact shared AND/OR join control — only when 2+ refine rows.
+        join.className = "nl-join nl-join-control";
+        join.textContent = "";
+        const sel = document.createElement("select");
+        sel.id = "refineCombinator";
+        sel.className = "select nl-join-select";
+        sel.setAttribute("aria-label", "Combine extra conditions with AND or OR");
+        [["and", "AND"], ["or", "OR"]].forEach(([val, label]) => {
+          const o = document.createElement("option");
+          o.value = val;
+          o.textContent = label;
+          if ((val === "or") === !!draft.refineAny) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.onchange = () => {
+          draft.refineAny = sel.value === "or";
+          renderRows();
+          refresh();
+        };
+        join.appendChild(sel);
       } else {
-        join.textContent = index === 0 ? "" : (draft.refineAny ? "OR" : "AND");
+        join.textContent = draft.refineAny ? "OR" : "AND";
       }
 
+      const enableSlot = document.createElement("div");
+      enableSlot.className = "nl-enable-slot";
       const enable = document.createElement("input");
       enable.type = "checkbox";
       enable.className = "checkbox nl-enable";
@@ -1144,6 +1099,7 @@
         row.enabled = enable.checked;
         refresh();
       };
+      enableSlot.appendChild(enable);
 
       const sentence = document.createElement("div");
       sentence.className = "nl-sentence" + (row.enabled ? "" : " disabled");
@@ -1161,7 +1117,7 @@
         refresh();
       };
 
-      el.append(join, enable, sentence, remove);
+      el.append(join, enableSlot, sentence, remove);
       return el;
     }
 
@@ -1292,9 +1248,9 @@
       const result = { scope: null, attribution: false, keyRowIds: [], hasErrors: false };
       if (draft.useDefault) return result;
 
+      // Checkbox+note: checked = same, unchecked = inherit (always explicit).
       if (draft.attribution !== "same" && draft.attribution !== "inherit") {
-        result.attribution = true;
-        result.hasErrors = true;
+        draft.attribution = "inherit";
       }
 
       if (!customerOn() && !numberOn()) {
@@ -1339,11 +1295,6 @@
         const err = input.parentElement && input.parentElement.querySelector(".nl-field-err");
         if (err) err.classList.add("show");
       });
-
-      if (v.attribution) {
-        $("attrBlock").classList.add("invalid");
-        $("attrErr").classList.add("show");
-      }
 
       const scopeErr = $("scopeErr");
       if (v.scope && scopeErr) {
@@ -1449,14 +1400,16 @@
 
       $("openRules").disabled = !$("gspApply").checked;
 
-      document.querySelectorAll("#refineRows .nl-join").forEach((el, index) => {
-        el.textContent = index === 0 ? "" : (draft.refineAny ? "OR" : "AND");
+      document.querySelectorAll("#refineRows .nl-row").forEach((el, index) => {
+        const join = el.querySelector(".nl-join");
+        if (!join || join.classList.contains("nl-join-control")) return;
+        join.textContent = index === 0 ? "" : (draft.refineAny ? "OR" : "AND");
       });
 
-      document.querySelectorAll("#scopeRows .nl-row").forEach((el, index) => {
+      document.querySelectorAll("#scopeRows .nl-row").forEach((el) => {
         const join = el.querySelector(".nl-join");
         if (!join) return;
-        join.textContent = index === 0 ? "WHEN" : "AND";
+        join.textContent = "AND";
       });
 
       document.querySelectorAll("#scopeRows .nl-row, #refineRows .nl-row").forEach((el) => {
@@ -1576,14 +1529,12 @@
     });
 
     function onAttributionChange() {
-      if ($("attrSame").checked) draft.attribution = "same";
-      else if ($("attrInherit").checked) draft.attribution = "inherit";
-      else draft.attribution = "";
+      draft.attribution = $("attrCustomer").checked ? "same" : "inherit";
+      applyAttributionToDom();
       if (submitAttempted) applyFieldErrors();
       refresh();
     }
-    $("attrSame").addEventListener("change", onAttributionChange);
-    $("attrInherit").addEventListener("change", onAttributionChange);
+    $("attrCustomer").addEventListener("change", onAttributionChange);
 
     $("overpay").addEventListener("change", () => {
       draft.overpay = $("overpay").checked;
@@ -1615,11 +1566,6 @@
       refresh();
     });
 
-    $("refineCombinator").addEventListener("change", () => {
-      draft.refineAny = $("refineCombinator").value === "or";
-      renderRows();
-      refresh();
-    });
 
     $("addCond").onclick = () => {
       ensureSeeded();
