@@ -12,6 +12,9 @@
       --muted: #5c5c5c;
       --border: #e5e5e2;
       --accent: #2563eb;
+      --folder-bg: #f0f4ff;
+      --folder-border: #c7d2fe;
+      --folder-label: #4338ca;
     }
     * { box-sizing: border-box; }
     body {
@@ -19,7 +22,8 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.4;
+      line-height: 1.45;
+      font-size: 14px; /* min font size */
     }
     .wrap {
       max-width: 960px;
@@ -27,16 +31,26 @@
       padding: 32px 20px 48px;
     }
     h1 {
-      font-size: 1.35rem;
+      font-size: 22px;
       font-weight: 650;
       margin: 0 0 6px;
       letter-spacing: -0.02em;
     }
     .intro {
       color: var(--muted);
-      margin: 0 0 20px;
-      font-size: 0.875rem;
+      margin: 0 0 28px;
+      font-size: 14px;
+      max-width: 52ch;
     }
+    h2 {
+      font-size: 14px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+    .section { margin-bottom: 28px; }
     .list {
       list-style: none;
       padding: 0;
@@ -45,6 +59,8 @@
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 10px;
     }
+
+    /* Shared card base — keep small for many items */
     .card {
       display: block;
       background: var(--card);
@@ -53,7 +69,7 @@
       padding: 12px 14px;
       text-decoration: none;
       color: inherit;
-      min-height: 88px;
+      min-height: 72px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .card:hover {
@@ -62,46 +78,112 @@
     }
     .card-title {
       font-weight: 600;
-      font-size: 0.9rem;
-      margin: 0 0 2px;
+      font-size: 14px;
+      margin: 0 0 4px;
       color: var(--accent);
     }
     .card:hover .card-title { text-decoration: underline; }
     .card-meta {
-      font-size: 0.7rem;
+      font-size: 14px;
       color: var(--muted);
-      margin: 0 0 6px;
+      margin: 0;
     }
     .card-desc {
-      margin: 0;
-      font-size: 0.75rem;
+      margin: 4px 0 0;
+      font-size: 14px;
       color: var(--muted);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
+    /* Folder cards — distinct from prototype cards */
+    .card-folder {
+      background: var(--folder-bg);
+      border-color: var(--folder-border);
+    }
+    .card-folder:hover {
+      border-color: #a5b4fc;
+      box-shadow: 0 1px 4px rgba(67, 56, 202, 0.08);
+    }
+    .folder-badge {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--folder-label);
+      margin: 0 0 4px;
+    }
+    .card-folder .card-title {
+      color: var(--text);
+    }
+    .card-folder:hover .card-title { text-decoration: none; }
+
     .note {
-      margin-top: 20px;
-      font-size: 0.8rem;
+      margin-top: 8px;
+      font-size: 14px;
       color: var(--muted);
+    }
+    .empty {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Synder UX prototypes</h1>
-    <p class="intro">Interactive UX prototypes. Each opens in a new tab.</p>
-    <ul class="list">
-      <li>
-        <a class="card" href="prototypes/payment-matching-rules/" target="_blank" rel="noopener noreferrer">
-          <div class="card-title">Payment matching rules</div>
-          <p class="card-meta">v4.0</p>
-          <p class="card-desc">Match payments to invoices — sentence-builder heading, retain custom on default, overlay cancel-sync rides Update (v4.0).</p>
-        </a>
-      </li>
-    </ul>
-    <p class="note">New prototypes appear here as they are added.</p>
+    <p class="intro">Browse by folder or open a standalone prototype. Folders stay in this tab; each prototype opens in a new tab.</p>
+
+    <!-- ========== FOLDERS ==========
+         To add a folder card: copy a <li>…</li> block below.
+         href → folders/<slug>/  (same tab — no target="_blank")
+         Update the count in card-meta to match prototypes in that folder.
+    -->
+    <section class="section" aria-labelledby="folders-heading">
+      <h2 id="folders-heading">Folders</h2>
+      <ul class="list">
+        <li>
+          <a class="card card-folder" href="folders/payment-application/">
+            <span class="folder-badge">Folder</span>
+            <div class="card-title">Payment application</div>
+            <p class="card-meta">1 prototype</p>
+          </a>
+        </li>
+        <!--
+        <li>
+          <a class="card card-folder" href="folders/your-folder/">
+            <span class="folder-badge">Folder</span>
+            <div class="card-title">Your folder name</div>
+            <p class="card-meta">N prototypes</p>
+          </a>
+        </li>
+        -->
+      </ul>
+    </section>
+
+    <!-- ========== SINGLES (standalone prototypes, not in a folder) ==========
+         Omit this whole <section> when there are none.
+         To add a single: copy a <li>…</li> with target="_blank" rel="noopener noreferrer".
+         href → prototypes/<slug>/
+    -->
+    <!-- Singles section omitted — no standalone prototypes yet.
+    <section class="section" aria-labelledby="singles-heading">
+      <h2 id="singles-heading">Singles</h2>
+      <ul class="list">
+        <li>
+          <a class="card" href="prototypes/example/" target="_blank" rel="noopener noreferrer">
+            <div class="card-title">Example prototype</div>
+            <p class="card-meta">v1.0</p>
+            <p class="card-desc">Short description.</p>
+          </a>
+        </li>
+      </ul>
+    </section>
+    -->
+
+    <p class="note">Add a folder under <code>folders/</code> or a single under <code>prototypes/</code>, then drop a card into the lists above.</p>
   </div>
 </body>
 </html>

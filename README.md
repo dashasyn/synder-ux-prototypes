@@ -4,22 +4,38 @@ Public gallery of simple, static UX prototypes for Synder. No frameworks — ope
 
 ## View on GitHub Pages
 
-Once Pages is enabled for this repo (main branch, `/` root):
-
 **https://dashasyn.github.io/synder-ux-prototypes/**
 
-- Gallery home: `/`
-- Payment matching rules (v2.8): `/prototypes/payment-matching-rules/`
+- Gallery home (folders + singles): `/`
+- Folder — Payment application: `/folders/payment-application/`
+- Prototype — Payment matching rules (v4.0): `/prototypes/payment-matching-rules/`
+
+## Structure
+
+```
+index.html                          # hub: Folders + Singles
+folders/<slug>/index.html           # folder page (Back → hub, same tab)
+prototypes/<slug>/index.html        # prototype (open in new tab from hub/folder)
+```
+
+Folders open in the same tab. Prototypes always open in a new tab.
 
 ## Local preview
 
 ```bash
 cd synder-ux-prototypes
-# any static server, e.g.:
 python3 -m http.server 8080
 ```
 
 Then open `http://localhost:8080/`.
+
+## Adding content
+
+1. Put the prototype under `prototypes/<slug>/`.
+2. Either add a card on a folder page (`folders/<slug>/index.html`) or under **Singles** on the hub.
+3. Update the folder’s prototype count on the hub card.
+
+HTML comments in each file show the copy-paste card pattern.
 
 ## Maintenance
 
