@@ -23,7 +23,7 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.45;
-      font-size: 14px; /* min font size */
+      font-size: 14px;
     }
     .wrap {
       max-width: 960px;
@@ -59,8 +59,6 @@
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 10px;
     }
-
-    /* Shared card base — keep small for many items */
     .card {
       display: block;
       background: var(--card);
@@ -97,8 +95,6 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-
-    /* Folder cards — distinct from prototype cards */
     .card-folder {
       background: var(--folder-bg);
       border-color: var(--folder-border);
@@ -118,16 +114,10 @@
       color: var(--text);
     }
     .card-folder:hover .card-title { text-decoration: none; }
-
     .note {
       margin-top: 8px;
       font-size: 14px;
       color: var(--muted);
-    }
-    .empty {
-      font-size: 14px;
-      color: var(--muted);
-      margin: 0;
     }
   </style>
 </head>
@@ -136,61 +126,68 @@
     <h1>Synder UX prototypes</h1>
     <p class="intro">Browse by folder or open a standalone prototype. Folders stay in this tab; each prototype opens in a new tab.</p>
 
-    <!-- ========== FOLDERS ==========
-         To add a folder card: copy a <li>…</li> block below.
-         href → folders/<slug>/  (same tab — no target="_blank")
-         Update the count in card-meta to match prototypes in that folder.
-    -->
     <section class="section" aria-labelledby="folders-heading">
       <h2 id="folders-heading">Folders</h2>
       <ul class="list">
         <li>
+          <a class="card card-folder" href="folders/reconciliation/">
+            <span class="folder-badge">Folder</span>
+            <div class="card-title">Reconciliation</div>
+            <p class="card-meta">10 prototypes</p>
+          </a>
+        </li>
+        <li>
           <a class="card card-folder" href="folders/payment-application/">
             <span class="folder-badge">Folder</span>
             <div class="card-title">Payment application</div>
-            <p class="card-meta">1 prototype</p>
+            <p class="card-meta">5 prototypes</p>
           </a>
         </li>
         <li>
-          <a class="card card-folder" href="folders/txnrecon-setup/">
+          <a class="card card-folder" href="folders/dashboard/">
             <span class="folder-badge">Folder</span>
-            <div class="card-title">Transaction reconciliation setup</div>
+            <div class="card-title">Dashboard</div>
+            <p class="card-meta">14 prototypes</p>
+          </a>
+        </li>
+        <li>
+          <a class="card card-folder" href="folders/settings/">
+            <span class="folder-badge">Folder</span>
+            <div class="card-title">Settings</div>
             <p class="card-meta">3 prototypes</p>
           </a>
         </li>
-        <!--
         <li>
-          <a class="card card-folder" href="folders/your-folder/">
+          <a class="card card-folder" href="folders/onboarding/">
             <span class="folder-badge">Folder</span>
-            <div class="card-title">Your folder name</div>
-            <p class="card-meta">N prototypes</p>
+            <div class="card-title">Onboarding</div>
+            <p class="card-meta">2 prototypes</p>
           </a>
         </li>
-        -->
       </ul>
     </section>
 
-    <!-- ========== SINGLES (standalone prototypes, not in a folder) ==========
-         Omit this whole <section> when there are none.
-         To add a single: copy a <li>…</li> with target="_blank" rel="noopener noreferrer".
-         href → prototypes/<slug>/
-    -->
-    <!-- Singles section omitted — no standalone prototypes yet.
     <section class="section" aria-labelledby="singles-heading">
       <h2 id="singles-heading">Singles</h2>
       <ul class="list">
         <li>
-          <a class="card" href="prototypes/example/" target="_blank" rel="noopener noreferrer">
-            <div class="card-title">Example prototype</div>
-            <p class="card-meta">v1.0</p>
-            <p class="card-desc">Short description.</p>
+          <a class="card" href="prototypes/monitoring-prototype/" target="_blank" rel="noopener noreferrer">
+            <div class="card-title">Monitoring</div>
+            <p class="card-meta">Prototype</p>
+            <p class="card-desc">Monitoring prototype.</p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="prototypes/synder-homepage/" target="_blank" rel="noopener noreferrer">
+            <div class="card-title">Synder homepage</div>
+            <p class="card-meta">Redesign v1</p>
+            <p class="card-desc">Homepage redesign prototype.</p>
           </a>
         </li>
       </ul>
     </section>
-    -->
 
-    <p class="note">Add a folder under <code>folders/</code> or a single under <code>prototypes/</code>, then drop a card into the lists above.</p>
+    <p class="note">36 prototypes across 5 folders + 2 singles. Open a folder to browse; prototypes always open in a new tab.</p>
   </div>
 </body>
 </html>

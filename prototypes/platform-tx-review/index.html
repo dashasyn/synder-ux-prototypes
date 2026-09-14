@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Platform transactions — Synder</title>
+  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell synder-app">
+    <header class="topbar synder-topbar">
+      <div class="topbar-left">
+        <div class="syncs-meter" title="Sync quota">
+          <span class="syncs-meter-label">1000 syncs left</span>
+          <div class="syncs-meter-bar"><div class="syncs-meter-fill"></div></div>
+        </div>
+      </div>
+      <div class="topbar-actions synder-topbar-actions">
+        <button type="button" class="topbar-icon-btn" aria-label="Notifications">
+          <span class="material-icons">notifications</span>
+        </button>
+        <button type="button" class="topbar-icon-btn" aria-label="Help">
+          <span class="material-icons">help_outline</span>
+        </button>
+        <div class="topbar-avatar" aria-label="Account">IP</div>
+      </div>
+    </header>
+
+    <div class="synder-layout app-main">
+      <aside class="sidebar synder-sidebar">
+        <div class="sidebar-org">
+          <span class="sidebar-org-avatar">PT</span>
+          <span class="sidebar-org-name">Per transaction test</span>
+          <span class="material-icons" style="font-size:18px;color:var(--text-secondary)">expand_more</span>
+        </div>
+        <div class="sidebar-syncs">
+          <div class="syncs-meter">
+            <span class="syncs-meter-label">1000 syncs left</span>
+            <div class="syncs-meter-bar"><div class="syncs-meter-fill"></div></div>
+          </div>
+        </div>
+
+        <a class="sidebar-item" href="#"><span class="material-icons">dashboard</span> Dashboard</a>
+        <a class="sidebar-item" href="#" id="nav-transactions">
+          <span class="material-icons">receipt_long</span> Transactions
+          <span class="badge-new">New</span>
+          <span class="material-icons nav-chevron">expand_more</span>
+        </a>
+        <a class="sidebar-item sidebar-item--child active" href="#">Platform transactions</a>
+        <a class="sidebar-item sidebar-item--child" href="#">Import activity log</a>
+        <a class="sidebar-item sidebar-item--child" href="#">Transaction reconciliation <span class="badge-new">New</span></a>
+        <a class="sidebar-item" href="#"><span class="material-icons">rule</span> Smart rules</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">request_quote</span> Invoicing</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">insights</span> Analytics</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">trending_up</span> Revenue recognition</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">settings</span> Settings</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">smart_toy</span> AI Agents</a>
+        <a class="sidebar-item" href="#"><span class="material-icons">campaign</span> What's New</a>
+      </aside>
+
+      <main class="content synder-content">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1 class="page-title">Platform transactions</h1>
+            <p class="page-subtitle">Transactions from your connected platforms.</p>
+          </div>
+          <div class="page-header-actions">
+            <button type="button" class="btn" disabled>Import historical data</button>
+            <button type="button" class="btn-outline">View in Books</button>
+          </div>
+        </div>
+
+        <div class="tx-toolbar">
+          <input
+            id="search-input"
+            class="input input-search tx-search"
+            type="search"
+            placeholder="Search customer, transaction ID or type, then press Enter"
+            autocomplete="off"
+          />
+          <div class="filters-btn-wrap">
+            <button type="button" id="filters-open" class="btn-outline">
+              <span class="material-icons icon-sm">filter_list</span>
+              Filters
+            </button>
+            <span id="filters-badge" class="filters-badge hidden">0</span>
+          </div>
+        </div>
+
+        <div id="filter-chips" class="filter-chips" aria-live="polite"></div>
+
+        <div class="tabs synder-tabs" id="tabs" role="tablist"></div>
+
+        <div id="bulk-bar" class="bulk-bar" aria-live="polite">
+          <span id="bulk-count" class="bulk-count">0 selected</span>
+          <button type="button" id="bulk-sync" class="btn">Sync now</button>
+          <button type="button" id="bulk-rollback" class="btn-outline" hidden>Rollback</button>
+          <button type="button" id="bulk-export" class="btn-outline">Export</button>
+          <button type="button" id="bulk-clear" class="btn-text">Clear selection</button>
+        </div>
+
+        <div id="table-panel" class="table-panel">
+          <div class="table-wrap">
+            <table class="table" id="tx-table">
+              <thead>
+                <tr>
+                  <th class="col-check">
+                    <input type="checkbox" class="checkbox" id="select-all" aria-label="Select all on this page" />
+                  </th>
+                  <th>Integration</th>
+                  <th>Transaction info</th>
+                  <th>Type</th>
+                  <th class="sortable col-amount" data-sort="amount">
+                    Amount<span class="sort-hint">↕</span>
+                  </th>
+                  <th class="sortable sorted desc" data-sort="date">
+                    Date<span class="sort-hint">▼</span>
+                  </th>
+                  <th>Sync status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tx-tbody"></tbody>
+            </table>
+          </div>
+          <div id="empty-state" class="table-empty empty-state">
+            <div class="empty-state-icon"><span class="material-icons" style="font-size:48px">inbox</span></div>
+            <div class="empty-state-title">No transactions match</div>
+            <div class="empty-state-desc">Try clearing filters or switching tabs to see more results.</div>
+            <button type="button" class="btn-outline" id="empty-clear">Clear filters</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Filter side sheet -->
+  <div id="sheet-overlay" class="sheet-overlay" hidden></div>
+  <aside id="side-sheet" class="side-sheet" aria-hidden="true" role="dialog" aria-labelledby="sheet-title">
+    <div class="side-sheet-header">
+      <div>
+        <div class="side-sheet-title" id="sheet-title">Filters</div>
+        <p class="side-sheet-desc">Configure filters and click Apply to update results.</p>
+      </div>
+      <button type="button" class="close-x" id="sheet-close" aria-label="Close filters">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="side-sheet-body">
+      <div class="form-field">
+        <label class="form-label" for="f-date">Date range</label>
+        <select id="f-date" class="select">
+          <option value="30">Last 30 days</option>
+          <option value="90" selected>Last 90 days</option>
+          <option value="365">Last year</option>
+          <option value="all">All dates</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-platform">Platform</label>
+        <select id="f-platform" class="select">
+          <option value="">All platforms</option>
+          <option value="Stripe">Stripe</option>
+          <option value="Shopify">Shopify</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-type">Type</label>
+        <select id="f-type" class="select">
+          <option value="">All types</option>
+          <option value="Subscription payment">Subscription payment</option>
+          <option value="Payout">Payout</option>
+          <option value="Refund">Refund</option>
+          <option value="Order">Order</option>
+          <option value="Invoice payment">Invoice payment</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Amount</label>
+        <div class="amount-row">
+          <div class="form-field">
+            <input id="f-amount-min" class="input" type="number" step="0.01" placeholder="Min" />
+          </div>
+          <div class="form-field">
+            <input id="f-amount-max" class="input" type="number" step="0.01" placeholder="Max" />
+          </div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="f-customer">Customer</label>
+        <input id="f-customer" class="input" type="text" placeholder="Customer name" />
+      </div>
+
+      <div id="failure-reasons" class="form-field failure-reasons">
+        <label class="form-label">Failure reason</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="failed" data-fail /> Failed</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="rollback-failed" data-fail /> Rollback failed</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="rule-failed" data-fail /> Rule failed</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="not-parsed" data-fail /> Not parsed</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="canceled" data-fail /> Canceled</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="rollback-canceled" data-fail /> Rollback canceled</label>
+        <label class="checkbox-wrap"><input type="checkbox" class="checkbox" value="synced-with-warnings" data-fail /> Synced with warnings</label>
+      </div>
+    </div>
+    <div class="side-sheet-footer">
+      <button type="button" class="btn" id="sheet-apply">Apply filters</button>
+      <button type="button" class="btn-text" id="sheet-reset">Reset filters</button>
+    </div>
+  </aside>
+
+  <!-- Date clear confirm -->
+  <div id="date-modal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
+    <div class="modal">
+      <div class="modal-header" id="date-modal-title">Clear date range?</div>
+      <div class="modal-body">
+        <p>Date range helps keep results fast.</p>
+        <p class="hint">Showing all dates may load slowly on large accounts.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" id="date-keep">Keep 90 days</button>
+        <button type="button" class="btn" id="date-show-all">Show all dates</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

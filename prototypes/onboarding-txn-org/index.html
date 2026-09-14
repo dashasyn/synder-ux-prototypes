@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synder · Choose how Synder organizes your transactions — Variants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
+  <style>
+    .proto-bar {
+      background: #111827;
+      color: #F9FAFB;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .proto-bar .brand {
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: .02em;
+      opacity: .9;
+      white-space: nowrap;
+    }
+    .proto-tabs { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+    .proto-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #9CA3AF;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .proto-tab:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .proto-tab.active {
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+      border-color: var(--color-primary, #0053CC);
+    }
+    .proto-note { font-size: 12px; color: #9CA3AF; white-space: nowrap; }
+
+    body {
+      background: var(--color-grey-5, #F7F8FA);
+      min-height: 100vh;
+      margin: 0;
+      font-family: Roboto, system-ui, sans-serif;
+    }
+    .onboard-shell {
+      display: flex;
+      min-height: calc(100vh - 48px);
+      background: #fff;
+    }
+    .logo-strip {
+      width: 72px;
+      flex-shrink: 0;
+      background: var(--color-grey-5, #F7F8FA);
+      border-right: 1px solid var(--border-default, #DFE4EC);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.5px;
+    }
+    .main-pane {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .progress-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border-default, #DFE4EC);
+      background: #fff;
+    }
+    .progress-tab {
+      padding: 14px 12px 12px;
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-secondary, #6B778C);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .progress-tab.current {
+      color: var(--color-primary, #0053CC);
+      border-bottom-color: var(--color-primary, #0053CC);
+      font-weight: 500;
+    }
+    .progress-tab.done { color: var(--text-primary, #1A1B24); }
+    .progress-spacer { flex: 1; }
+    .close-btn {
+      width: 36px; height: 36px;
+      border: none; background: none;
+      color: var(--text-secondary, #6B778C);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .close-btn:hover { background: var(--bg-hover, #EFF1F5); }
+
+    .content-wrap {
+      flex: 1;
+      padding: 32px 40px 24px;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .step-title {
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 36px;
+      color: var(--text-primary, #1A1B24);
+      margin: 0 0 8px;
+    }
+    .step-subtitle {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-secondary, #6B778C);
+      margin: 0 0 20px;
+      max-width: 640px;
+    }
+
+    .variant { display: none; }
+    .variant.active { display: block; }
+
+    /* Current: chevron flow */
+    .chevron-flow {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .chevron-flow .flow-step {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary, #6B778C);
+      padding: 6px 10px;
+      background: var(--color-grey-5, #F7F8FA);
+      border-radius: 4px;
+    }
+    .chevron-flow .flow-step.here {
+      color: var(--color-primary, #0053CC);
+      background: var(--color-primary-10, #E0EBFD);
+    }
+    .chevron-flow .material-icons {
+      font-size: 18px;
+      color: var(--text-secondary, #6B778C);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 720px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .content-wrap { padding: 24px 20px; }
+      .logo-strip { display: none; }
+      .step-footer { padding: 16px 20px 24px !important; }
+    }
+
+    .radio-card {
+      position: relative;
+      border: 1px solid var(--border-default, #DFE4EC);
+      border-radius: 8px;
+      padding: 20px 20px 18px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .radio-card:hover { border-color: var(--color-primary-50, #80A9E5); }
+    .radio-card.selected {
+      border-color: var(--color-primary, #0053CC);
+      background: var(--color-primary-5, #F2F6FC);
+      box-shadow: 0 0 0 1px var(--color-primary, #0053CC);
+    }
+    .radio-card .rec-badge {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--color-green-light, #ECFDDC);
+      color: var(--color-green, #1F8940);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 16px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .radio-card-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .radio-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--control-unchecked, #6B778C);
+      flex-shrink: 0;
+      margin-top: 1px;
+      position: relative;
+      background: #fff;
+    }
+    .radio-card.selected .radio-dot { border-color: var(--color-primary, #0053CC); }
+    .radio-card.selected .radio-dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-primary, #0053CC);
+    }
+    .card-name {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 24px;
+      letter-spacing: 0.5px;
+      color: var(--text-primary, #1A1B24);
+    }
+    .card-one-liner {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-secondary, #6B778C);
+      margin: 0 0 0 30px;
+    }
+    .card-outcome {
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-primary, #1A1B24);
+      margin: 10px 0 0 30px;
+      padding: 8px 10px;
+      background: var(--color-grey-5, #F7F8FA);
+      border-radius: 4px;
+      border-left: 3px solid var(--color-primary-50, #80A9E5);
+    }
+    .radio-card.selected .card-outcome {
+      background: #fff;
+      border-left-color: var(--color-primary, #0053CC);
+    }
+
+    /* Current long bullet lists */
+    .current-bullets {
+      margin: 12px 0 0 30px;
+      padding: 0;
+      list-style: none;
+    }
+    .current-bullets li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-secondary, #6B778C);
+      margin-bottom: 8px;
+    }
+    .current-bullets li .material-icons {
+      font-size: 16px;
+      color: var(--color-primary, #0053CC);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .details-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin: 12px 0 0 30px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--text-link, #0053CC);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .details-toggle .material-icons {
+      font-size: 18px;
+      transition: transform .15s;
+    }
+    .details-toggle[aria-expanded="true"] .material-icons { transform: rotate(180deg); }
+    .details-list {
+      display: none;
+      margin: 8px 0 0 30px;
+      padding: 0;
+      list-style: none;
+    }
+    .details-list.open { display: block; }
+    .details-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-secondary, #6B778C);
+      margin-bottom: 6px;
+    }
+    .details-list li .material-icons {
+      font-size: 16px;
+      color: var(--color-primary, #0053CC);
+      margin-top: 1px;
+    }
+
+    /* Why recommended */
+    .rec-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--color-primary-10, #E0EBFD);
+      color: var(--color-primary, #0053CC);
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 18px;
+      margin-bottom: 16px;
+      max-width: 720px;
+    }
+    .rec-chip .material-icons { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+    .sum-note {
+      display: none;
+      margin: -8px 0 16px;
+      padding: 8px 14px 8px 40px;
+      font-size: 12px;
+      line-height: 18px;
+      color: var(--text-secondary, #6B778C);
+      max-width: 720px;
+    }
+    .sum-note.visible { display: block; }
+
+    /* Realistic books preview */
+    .preview-panel {
+      border: 1px solid var(--border-default, #DFE4EC);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      background: #fff;
+    }
+    .preview-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--color-grey-5, #F7F8FA);
+      border-bottom: 1px solid var(--border-default, #DFE4EC);
+      font-size: 12px;
+      color: var(--text-secondary, #6B778C);
+      flex-wrap: wrap;
+    }
+    .preview-label strong {
+      color: var(--text-primary, #1A1B24);
+      font-weight: 500;
+      font-size: 13px;
+    }
+    .example-tag {
+      font-size: 11px;
+      background: var(--color-yellow-light, #FFF1DD);
+      color: var(--color-yellow, #CB7515);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .preview-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary, #6B778C);
+      border-bottom: 1px solid var(--border-default, #DFE4EC);
+      background: #fff;
+      white-space: nowrap;
+    }
+    .preview-table th.amt,
+    .preview-table td.amt {
+      text-align: right;
+    }
+    .preview-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border-light, #EFF1F5);
+      color: var(--text-primary, #1A1B24);
+      vertical-align: middle;
+    }
+    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table .amt {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .preview-table .amt.neg { color: var(--color-red, #CC2929); }
+    .preview-table .memo {
+      color: var(--text-primary, #1A1B24);
+    }
+    .preview-table .account {
+      color: var(--text-secondary, #6B778C);
+      font-size: 12px;
+    }
+    .type-pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .type-pill.payment { background: var(--color-green-light, #ECFDDC); color: var(--color-green, #1F8940); }
+    .type-pill.sales-receipt { background: var(--color-green-light, #ECFDDC); color: var(--color-green, #1F8940); }
+    .type-pill.expense { background: var(--color-grey-10, #EFF1F5); color: var(--text-secondary, #6B778C); }
+    .type-pill.refund { background: var(--color-red-light, #FFECE8); color: var(--color-red, #CC2929); }
+    .type-pill.deposit { background: var(--color-primary-10, #E0EBFD); color: var(--color-primary, #0053CC); }
+    .type-pill.journal { background: var(--color-primary-10, #E0EBFD); color: var(--color-primary, #0053CC); }
+    .preview-caption {
+      padding: 10px 14px;
+      font-size: 12px;
+      line-height: 18px;
+      color: var(--text-secondary, #6B778C);
+      background: var(--color-grey-5, #F7F8FA);
+      border-top: 1px solid var(--border-default, #DFE4EC);
+    }
+    .preview-caption strong {
+      color: var(--text-primary, #1A1B24);
+      font-weight: 500;
+    }
+
+    /* Matrix */
+    .matrix-wrap {
+      border: 1px solid var(--border-default, #DFE4EC);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .matrix thead th {
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.25px;
+      color: var(--text-primary, #1A1B24);
+      background: var(--color-grey-5, #F7F8FA);
+      border-bottom: 1px solid var(--border-default, #DFE4EC);
+      transition: background .2s, color .2s, opacity .2s;
+    }
+    .matrix thead th.col-per,
+    .matrix thead th.col-sum {
+      width: 36%;
+    }
+    .matrix tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-default, #DFE4EC);
+      vertical-align: top;
+      line-height: 18px;
+      transition: background .2s, opacity .2s;
+    }
+    .matrix tbody tr:last-child td { border-bottom: none; }
+    .matrix .crit {
+      font-weight: 500;
+      color: var(--text-primary, #1A1B24);
+      width: 28%;
+    }
+    .cell-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .cell-label.good { background: var(--color-green-light, #ECFDDC); color: var(--color-green, #1F8940); }
+    .cell-label.ok { background: var(--color-grey-10, #EFF1F5); color: var(--text-secondary, #6B778C); }
+    .cell-label.tradeoff { background: var(--color-yellow-light, #FFF1DD); color: var(--color-yellow, #CB7515); }
+    .cell-desc { display: block; color: var(--text-secondary, #6B778C); font-size: 12px; }
+
+    /* Matrix column highlight when mode selected */
+    .matrix.mode-per thead th.col-per {
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+    }
+    .matrix.mode-per thead th.col-sum {
+      opacity: 0.55;
+    }
+    .matrix.mode-per tbody td.col-per {
+      background: var(--color-primary-5, #F2F6FC);
+    }
+    .matrix.mode-per tbody td.col-sum {
+      opacity: 0.45;
+    }
+
+    .matrix.mode-sum thead th.col-sum {
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+    }
+    .matrix.mode-sum thead th.col-per {
+      opacity: 0.55;
+    }
+    .matrix.mode-sum tbody td.col-sum {
+      background: var(--color-primary-5, #F2F6FC);
+    }
+    .matrix.mode-sum tbody td.col-per {
+      opacity: 0.45;
+    }
+
+    .reassure {
+      margin: 4px 0 16px;
+      padding: 14px 16px;
+      background: var(--color-grey-5, #F7F8FA);
+      border-radius: 6px;
+      border: 1px solid var(--border-default, #DFE4EC);
+    }
+    .reassure p {
+      margin: 0 0 8px;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-secondary, #6B778C);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .reassure p:last-child { margin-bottom: 0; }
+    .reassure .material-icons {
+      font-size: 16px;
+      color: var(--color-green, #1F8940);
+      margin-top: 1px;
+    }
+    .unsure-link {
+      display: inline-block;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text-link, #0053CC);
+      text-decoration: underline;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .step-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px 24px;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+      border-top: 1px solid var(--border-light, #EFF1F5);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="proto-bar">
+    <span class="brand">Synder · Txn organization</span>
+    <div class="proto-tabs" role="tablist">
+      <button type="button" class="proto-tab active" data-variant="current" role="tab" aria-selected="true">Current</button>
+      <button type="button" class="proto-tab" data-variant="a" role="tab" aria-selected="false">Variant A · Outcome + preview</button>
+      <button type="button" class="proto-tab" data-variant="b" role="tab" aria-selected="false">Variant B · Criteria matrix</button>
+      <button type="button" class="proto-tab" data-variant="c" role="tab" aria-selected="false">Variant C · Why + reversible</button>
+    </div>
+    <span class="proto-note">Default: Per transaction · V2</span>
+  </div>
+
+  <div class="onboard-shell">
+    <aside class="logo-strip" aria-hidden="true">
+      <div class="logo-mark">S</div>
+    </aside>
+
+    <div class="main-pane">
+      <nav class="progress-tabs" aria-label="Onboarding progress">
+        <span class="progress-tab done">Tell us about you</span>
+        <span class="progress-tab done">Provide business details</span>
+        <span class="progress-tab current">Select integrations</span>
+        <span class="progress-tab">Connect integrations</span>
+        <span class="progress-spacer"></span>
+        <button type="button" class="close-btn" aria-label="Close" tabindex="-1">
+          <span class="material-icons">close</span>
+        </button>
+      </nav>
+
+      <div class="content-wrap">
+        <h1 class="step-title">Choose how Synder organizes your transactions</h1>
+        <p class="step-subtitle">Synder can record every transaction individually, or group them into summary entries.</p>
+
+        <!-- ========== CURRENT (baseline) ========== -->
+        <section class="variant active" id="variant-current" data-variant="current" aria-label="Current baseline">
+          <div class="chevron-flow" aria-hidden="true">
+            <span class="flow-step">Import</span>
+            <span class="material-icons">chevron_right</span>
+            <span class="flow-step here">Organize</span>
+            <span class="material-icons">chevron_right</span>
+            <span class="flow-step">Customize</span>
+            <span class="material-icons">chevron_right</span>
+            <span class="flow-step">Sync</span>
+          </div>
+
+          <div class="card-grid">
+            <div class="radio-card selected" data-mode="per" role="button" tabindex="0" aria-pressed="true">
+              <span class="rec-badge">Recommended</span>
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Per transaction</span>
+              </div>
+              <p class="card-one-liner">Record each sale, refund, and fee as a separate transaction in your books.</p>
+              <ul class="current-bullets">
+                <li><span class="material-icons">check</span> See what each customer paid and each invoice</li>
+                <li><span class="material-icons">check</span> Close open invoices automatically</li>
+                <li><span class="material-icons">check</span> Taxes broken down by state/country</li>
+                <li><span class="material-icons">check</span> Track inventory per sale</li>
+                <li><span class="material-icons">check</span> Detailed product and customer reports</li>
+                <li><span class="material-icons">check</span> Reconcile after sync</li>
+                <li><span class="material-icons">check</span> Match payments to invoices one-by-one</li>
+              </ul>
+            </div>
+
+            <div class="radio-card" data-mode="sum" role="button" tabindex="0" aria-pressed="false">
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Summarized</span>
+              </div>
+              <p class="card-one-liner">Group sales and fees into summary entries that match your payouts.</p>
+              <ul class="current-bullets">
+                <li><span class="material-icons">check</span> Less clutter in the register</li>
+                <li><span class="material-icons">check</span> Easier to match with bank deposits</li>
+                <li><span class="material-icons">check</span> Income by product still available</li>
+                <li><span class="material-icons">check</span> Costs and inventory totals</li>
+                <li><span class="material-icons">check</span> Taxes calculated for reports</li>
+                <li><span class="material-icons">check</span> Faster sync for high-volume stores</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== VARIANT A ========== -->
+        <section class="variant" id="variant-a" data-variant="a" aria-label="Variant A">
+          <div class="rec-chip">
+            <span class="material-icons">tips_and_updates</span>
+            <span><strong>Recommended for Shopify + QuickBooks Online</strong> — you’ll want to close invoices per sale.</span>
+          </div>
+          <p class="sum-note" data-sum-note="a">Summarized is fine if you mainly match bank deposits and don’t need per-invoice detail.</p>
+
+          <div class="card-grid">
+            <div class="radio-card selected" data-mode="per" role="button" tabindex="0" aria-pressed="true">
+              <span class="rec-badge">Recommended</span>
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Per transaction</span>
+              </div>
+              <p class="card-one-liner">Every sale, refund, and fee shows up separately.</p>
+              <p class="card-outcome"><strong>In your books:</strong> one line per sale, refund, and fee.</p>
+              <span class="details-toggle" role="button" tabindex="0" aria-expanded="false" data-details="a-per">
+                See details <span class="material-icons">expand_more</span>
+              </span>
+              <ul class="details-list" id="a-per">
+                <li><span class="material-icons">check</span> Close open invoices sale-by-sale</li>
+                <li><span class="material-icons">check</span> Taxes broken down by state/country</li>
+                <li><span class="material-icons">check</span> Track inventory per sale</li>
+                <li><span class="material-icons">check</span> See what each customer paid</li>
+              </ul>
+            </div>
+
+            <div class="radio-card" data-mode="sum" role="button" tabindex="0" aria-pressed="false">
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Summarized</span>
+              </div>
+              <p class="card-one-liner">Sales and fees combined into simple entries.</p>
+              <p class="card-outcome"><strong>In your books:</strong> one deposit per payout + fee summary.</p>
+              <span class="details-toggle" role="button" tabindex="0" aria-expanded="false" data-details="a-sum">
+                See details <span class="material-icons">expand_more</span>
+              </span>
+              <ul class="details-list" id="a-sum">
+                <li><span class="material-icons">check</span> Fewer lines — easier bank match</li>
+                <li><span class="material-icons">check</span> Income by product still available</li>
+                <li><span class="material-icons">check</span> Costs and inventory totals</li>
+                <li><span class="material-icons">check</span> Taxes calculated for reports</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="preview-panel" aria-live="polite" data-preview="a">
+            <div class="preview-label">
+              <strong>Example in QuickBooks after sync</strong>
+              <span class="example-tag">Example data</span>
+            </div>
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Name / Memo</th>
+                  <th>Account</th>
+                  <th class="amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="preview-body"></tbody>
+            </table>
+            <div class="preview-caption"></div>
+          </div>
+        </section>
+
+        <!-- ========== VARIANT B ========== -->
+        <section class="variant" id="variant-b" data-variant="b" aria-label="Variant B">
+          <div class="rec-chip">
+            <span class="material-icons">tips_and_updates</span>
+            <span><strong>Recommended for Shopify + QuickBooks Online</strong> — you’ll want to close invoices per sale.</span>
+          </div>
+          <p class="sum-note" data-sum-note="b">Summarized is fine if you mainly match bank deposits and don’t need per-invoice detail.</p>
+
+          <div class="card-grid">
+            <div class="radio-card selected" data-mode="per" role="button" tabindex="0" aria-pressed="true">
+              <span class="rec-badge">Recommended</span>
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Per transaction</span>
+              </div>
+              <p class="card-one-liner">Every sale, refund, and fee as its own line.</p>
+            </div>
+            <div class="radio-card" data-mode="sum" role="button" tabindex="0" aria-pressed="false">
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Summarized</span>
+              </div>
+              <p class="card-one-liner">Sales and fees rolled into simple payout entries.</p>
+            </div>
+          </div>
+
+          <div class="matrix-wrap">
+            <table class="matrix mode-per" id="matrix-b">
+              <thead>
+                <tr>
+                  <th>Compare</th>
+                  <th class="col-per">Per transaction</th>
+                  <th class="col-sum">Summarized</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="crit">Books clutter</td>
+                  <td class="col-per">
+                    <span class="cell-label tradeoff">Tradeoff</span>
+                    <span class="cell-desc">More lines — one per sale, refund, fee</span>
+                  </td>
+                  <td class="col-sum">
+                    <span class="cell-label good">Good</span>
+                    <span class="cell-desc">Fewer lines — one deposit per payout</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="crit">Invoice matching</td>
+                  <td class="col-per">
+                    <span class="cell-label good">Good</span>
+                    <span class="cell-desc">Close invoices sale-by-sale</span>
+                  </td>
+                  <td class="col-sum">
+                    <span class="cell-label tradeoff">Tradeoff</span>
+                    <span class="cell-desc">Totals only — not per invoice</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="crit">Tax detail</td>
+                  <td class="col-per">
+                    <span class="cell-label good">Good</span>
+                    <span class="cell-desc">Breakdown by state/country per sale</span>
+                  </td>
+                  <td class="col-sum">
+                    <span class="cell-label ok">OK</span>
+                    <span class="cell-desc">Taxes calculated for reports</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="crit">Inventory</td>
+                  <td class="col-per">
+                    <span class="cell-label good">Good</span>
+                    <span class="cell-desc">Track stock changes per sale</span>
+                  </td>
+                  <td class="col-sum">
+                    <span class="cell-label ok">OK</span>
+                    <span class="cell-desc">Know costs and inventory totals</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="crit">Bank reconciliation</td>
+                  <td class="col-per">
+                    <span class="cell-label ok">OK</span>
+                    <span class="cell-desc">Reconcile after sync</span>
+                  </td>
+                  <td class="col-sum">
+                    <span class="cell-label good">Good</span>
+                    <span class="cell-desc">Easier to match bank deposits</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="preview-panel" aria-live="polite" data-preview="b">
+            <div class="preview-label">
+              <strong>Example in QuickBooks after sync</strong>
+              <span class="example-tag">Example data</span>
+            </div>
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Name / Memo</th>
+                  <th>Account</th>
+                  <th class="amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="preview-body"></tbody>
+            </table>
+            <div class="preview-caption"></div>
+          </div>
+        </section>
+
+        <!-- ========== VARIANT C ========== -->
+        <section class="variant" id="variant-c" data-variant="c" aria-label="Variant C">
+          <div class="rec-chip">
+            <span class="material-icons">tips_and_updates</span>
+            <span><strong>Recommended for Shopify + QuickBooks Online</strong> — you’ll want to close invoices per sale.</span>
+          </div>
+          <p class="sum-note" data-sum-note="c">Summarized is fine if you mainly match bank deposits and don’t need per-invoice detail.</p>
+
+          <div class="card-grid">
+            <div class="radio-card selected" data-mode="per" role="button" tabindex="0" aria-pressed="true">
+              <span class="rec-badge">Recommended</span>
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Per transaction</span>
+              </div>
+              <p class="card-one-liner">Separate lines for each sale, refund, and fee — best for invoice matching.</p>
+            </div>
+            <div class="radio-card" data-mode="sum" role="button" tabindex="0" aria-pressed="false">
+              <div class="radio-card-head">
+                <span class="radio-dot" aria-hidden="true"></span>
+                <span class="card-name">Summarized</span>
+              </div>
+              <p class="card-one-liner">One simple entry per payout — less clutter, easier bank match.</p>
+            </div>
+          </div>
+
+          <div class="reassure">
+            <p><span class="material-icons">check_circle</span> You can change this later in Settings.</p>
+            <p><span class="material-icons">check_circle</span> Want to compare? Create another organization anytime (free) — takes a few minutes.</p>
+          </div>
+
+          <button type="button" class="unsure-link" id="start-per-link">Not sure? Start with Per transaction</button>
+
+          <div class="preview-panel" aria-live="polite" data-preview="c" style="margin-top: 16px;">
+            <div class="preview-label">
+              <strong>Example in QuickBooks after sync</strong>
+              <span class="example-tag">Example data</span>
+            </div>
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Name / Memo</th>
+                  <th>Account</th>
+                  <th class="amt">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="preview-body"></tbody>
+            </table>
+            <div class="preview-caption"></div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="step-footer">
+        <button type="button" class="btn-outlined">Back</button>
+        <button type="button" class="btn-primary">Next step</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var PREVIEW = {
+        per: {
+          caption: '<strong>4 lines for one payout day</strong> — each sale/fee separate',
+          rows: [
+            { date: 'Mar 10', type: 'Payment', typeClass: 'payment', memo: 'Olivia Taylor · #1042', account: 'Undeposited Funds', amt: '89.00', neg: false },
+            { date: 'Mar 10', type: 'Sales Receipt', typeClass: 'sales-receipt', memo: 'Jane Smith · #1043', account: 'Undeposited Funds', amt: '42.50', neg: false },
+            { date: 'Mar 10', type: 'Expense', typeClass: 'expense', memo: 'Shopify fee', account: 'Bank Fees', amt: '−3.82', neg: true },
+            { date: 'Mar 10', type: 'Refund', typeClass: 'refund', memo: 'Alex Lee · #1038', account: 'Undeposited Funds', amt: '−18.00', neg: true }
+          ]
+        },
+        sum: {
+          caption: '<strong>1–2 lines for the same payout day</strong> — easier to match the bank deposit',
+          rows: [
+            { date: 'Mar 10', type: 'Deposit', typeClass: 'deposit', memo: 'Shopify payout Mar 10', account: 'Checking', amt: '1,284.30', neg: false },
+            { date: 'Mar 10', type: 'Journal', typeClass: 'journal', memo: 'Shopify fees · Mar 10', account: 'Bank Fees', amt: '−38.52', neg: true }
+          ]
+        }
+      };
+
+      var selection = { current: 'per', a: 'per', b: 'per', c: 'per' };
+
+      function renderPreview(variantKey, mode) {
+        var panel = document.querySelector('[data-preview="' + variantKey + '"]');
+        if (!panel) return;
+        var body = panel.querySelector('.preview-body');
+        var caption = panel.querySelector('.preview-caption');
+        var data = PREVIEW[mode] || PREVIEW.per;
+        body.innerHTML = data.rows.map(function (r) {
+          return '<tr>' +
+            '<td>' + r.date + '</td>' +
+            '<td><span class="type-pill ' + r.typeClass + '">' + r.type + '</span></td>' +
+            '<td class="memo">' + r.memo + '</td>' +
+            '<td class="account">' + r.account + '</td>' +
+            '<td class="amt' + (r.neg ? ' neg' : '') + '">' + r.amt + '</td>' +
+            '</tr>';
+        }).join('');
+        caption.innerHTML = data.caption;
+      }
+
+      function setCardSelection(variantEl, mode) {
+        variantEl.querySelectorAll('.radio-card[data-mode]').forEach(function (card) {
+          var selected = card.getAttribute('data-mode') === mode;
+          card.classList.toggle('selected', selected);
+          card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+      }
+
+      function updateSumNote(variantKey, mode) {
+        var note = document.querySelector('[data-sum-note="' + variantKey + '"]');
+        if (!note) return;
+        note.classList.toggle('visible', mode === 'sum');
+      }
+
+      function updateMatrix(mode) {
+        var matrix = document.getElementById('matrix-b');
+        if (!matrix) return;
+        matrix.classList.remove('mode-per', 'mode-sum');
+        matrix.classList.add(mode === 'sum' ? 'mode-sum' : 'mode-per');
+      }
+
+      function applySelection(variantKey, mode) {
+        selection[variantKey] = mode;
+        var variantEl = document.getElementById('variant-' + variantKey);
+        if (!variantEl) return;
+        setCardSelection(variantEl, mode);
+        updateSumNote(variantKey, mode);
+        if (variantKey === 'a' || variantKey === 'b' || variantKey === 'c') {
+          renderPreview(variantKey, mode);
+        }
+        if (variantKey === 'b') {
+          updateMatrix(mode);
+        }
+      }
+
+      document.querySelectorAll('.proto-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var v = tab.getAttribute('data-variant');
+          document.querySelectorAll('.proto-tab').forEach(function (t) {
+            var on = t.getAttribute('data-variant') === v;
+            t.classList.toggle('active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          document.querySelectorAll('.variant').forEach(function (panel) {
+            panel.classList.toggle('active', panel.getAttribute('data-variant') === v);
+          });
+          applySelection(v, selection[v]);
+        });
+      });
+
+      document.querySelectorAll('.variant').forEach(function (variantEl) {
+        var key = variantEl.getAttribute('data-variant');
+        variantEl.querySelectorAll('.radio-card[data-mode]').forEach(function (card) {
+          function select() { applySelection(key, card.getAttribute('data-mode')); }
+          card.addEventListener('click', function (e) {
+            if (e.target.closest('.details-toggle')) return;
+            select();
+          });
+          card.addEventListener('keydown', function (e) {
+            if (e.target.closest('.details-toggle')) return;
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(); }
+          });
+        });
+      });
+
+      function toggleDetails(btn) {
+        var id = btn.getAttribute('data-details');
+        var list = document.getElementById(id);
+        if (!list) return;
+        var open = list.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
+      document.querySelectorAll('.details-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          toggleDetails(btn);
+        });
+        btn.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleDetails(btn);
+          }
+        });
+      });
+
+      var startPer = document.getElementById('start-per-link');
+      if (startPer) {
+        startPer.addEventListener('click', function () {
+          applySelection('c', 'per');
+        });
+      }
+
+      applySelection('current', 'per');
+      applySelection('a', 'per');
+      applySelection('b', 'per');
+      applySelection('c', 'per');
+    })();
+  </script>
+</body>
+</html>

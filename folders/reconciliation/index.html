@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reconciliation — Synder UX prototypes</title>
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5c5c5c;
+      --border: #e5e5e2;
+      --accent: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .back {
+      display: inline-block;
+      font-size: 14px;
+      color: var(--accent);
+      text-decoration: none;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .back:hover { text-decoration: underline; }
+    h1 {
+      font-size: 22px;
+      font-weight: 650;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+    .intro {
+      color: var(--muted);
+      margin: 0 0 20px;
+      font-size: 14px;
+      max-width: 52ch;
+    }
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-decoration: none;
+      color: inherit;
+      min-height: 72px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: #c8c8c4;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    .card-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin: 0 0 4px;
+      color: var(--accent);
+    }
+    .card:hover .card-title { text-decoration: underline; }
+    .card-meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .card-desc {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="../../">← Back to hub</a>
+    <h1>Reconciliation</h1>
+    <p class="intro">Txn recon setup (including Var 1/2), flows, checks, and balance recon. Each opens in a new tab.</p>
+    <ul class="list">
+      <li>
+        <a class="card" href="../../prototypes/txnrecon-setup-compare/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Compare · Var 1 vs Var 2</div>
+          <p class="card-meta">Present this</p>
+          <p class="card-desc">Dark top switcher between Button switcher and Tab switcher in one view.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/txnrecon-var1-button/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Var 1 · Button switcher</div>
+          <p class="card-meta">Team finalist</p>
+          <p class="card-desc">Automatic retrieval + Set import methods (Accounting | Integration).</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/txnrecon-var2-tabs/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Var 2 · Tab switcher</div>
+          <p class="card-meta">Team finalist</p>
+          <p class="card-desc">Pull automatically / Choose how to import — dual Books | Integration.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/txnrecon-setup/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">TxnRecon setup (variants hub)</div>
+          <p class="card-meta">Canonical</p>
+          <p class="card-desc">All setup variants in one place — finalists, A/B/C/D overlays, team compare.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/recon-setup/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Recon setup</div>
+          <p class="card-meta">One column</p>
+          <p class="card-desc">New reconciliation — one-column setup flow.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/recon-checks/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Recon checks</div>
+          <p class="card-meta">Dashboard block</p>
+          <p class="card-desc">Checks block on the dashboard.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/recon-oneclick/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Recon one-click</div>
+          <p class="card-meta">First-run</p>
+          <p class="card-desc">Transaction reconciliation — first-run empty state.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/reconciliation-flow/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Reconciliation flow</div>
+          <p class="card-meta">v1</p>
+          <p class="card-desc">Reconciliation results flow.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/reconciliation-flow-v2/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Reconciliation flow v2</div>
+          <p class="card-meta">v2</p>
+          <p class="card-desc">Updated transaction reconciliation flow prototype.</p>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="../../prototypes/balance-recon/" target="_blank" rel="noopener noreferrer">
+          <div class="card-title">Balance reconciliation</div>
+          <p class="card-meta">DIS-259</p>
+          <p class="card-desc">Balance reconciliation prototype.</p>
+        </a>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>
