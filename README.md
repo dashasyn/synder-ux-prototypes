@@ -8,7 +8,9 @@ Public gallery of simple, static UX prototypes for Synder. No frameworks — ope
 
 - Gallery home (folders + singles): `/`
 - Folder — Payment application: `/folders/payment-application/`
+- Folder — Transaction reconciliation setup: `/folders/txnrecon-setup/`
 - Prototype — Payment matching rules (v4.0): `/prototypes/payment-matching-rules/`
+- Prototype — TxnRecon compare (Var 1 vs 2): `/prototypes/txnrecon-setup-compare/`
 
 ## Structure
 
