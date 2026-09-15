@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synder · Mappings list · bulk apply (prototype)</title>
+  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    /* Layout-only — colors/fonts/heights from kit variables */
+    html, body { height: 100%; margin: 0; background: var(--bg-page); }
+
+    .shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+    }
+    .shell > .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--border-nav);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px;
+      font-weight: 500; font-size: 16px; color: var(--text-primary);
+    }
+    .brand-mark {
+      width: 24px; height: 24px; border-radius: var(--radius-sm);
+      background: var(--color-primary); color: var(--text-on-primary);
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 700;
+    }
+
+    .main { display: flex; flex-direction: column; min-width: 0; background: var(--bg-page); }
+    .topbar h1 {
+      margin: 0;
+      font-size: var(--font-h2);
+      font-weight: var(--font-h2-weight);
+      line-height: var(--font-h2-line-height);
+      color: var(--text-primary);
+    }
+    .top-meta { color: var(--text-secondary); font-size: var(--font-caption); }
+
+    .content {
+      flex: 1;
+      padding: 20px 24px 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .page-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .page-head h2 {
+      margin: 0 0 4px;
+      font-size: var(--font-subtitle1);
+      font-weight: var(--font-subtitle1-weight);
+      letter-spacing: var(--font-subtitle1-letter-spacing);
+      line-height: var(--font-subtitle1-line-height);
+      color: var(--text-primary);
+    }
+    .page-sub {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: var(--font-caption);
+      line-height: var(--font-caption-line-height);
+    }
+
+    .filters {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+    .filters label {
+      font-size: var(--font-caption);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .filters .select { min-width: 140px; width: auto; }
+    .filters .input { min-width: 220px; width: 240px; }
+    .filter-count {
+      margin-left: auto;
+      font-size: var(--font-caption);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .selection-bar {
+      display: none;
+      align-items: center; gap: 12px;
+      padding: 8px 12px;
+      background: var(--color-primary-10);
+      border: 1px solid var(--color-primary-20);
+      border-radius: var(--radius-md);
+      font-size: var(--font-body2);
+      color: var(--text-primary);
+    }
+    .selection-bar.show { display: flex; }
+    .selection-bar .sel-text { font-weight: 500; }
+    .selection-bar .sel-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+    .table-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      min-width: 0;
+    }
+    .table-scroll {
+      overflow-x: auto;
+      overflow-y: visible;
+      max-width: 100%;
+    }
+
+    table.mappings {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: var(--font-body2);
+    }
+    table.mappings thead th {
+      position: sticky; top: 0; z-index: 2;
+      height: 40px;
+      padding: 0 12px;
+      text-align: left;
+      font-weight: 500;
+      font-size: var(--font-caption);
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      white-space: nowrap;
+    }
+    table.mappings tbody td {
+      height: 52px;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border-default);
+      color: var(--text-primary);
+      vertical-align: middle;
+      background: var(--bg-surface);
+      white-space: nowrap;
+    }
+    table.mappings tbody tr:hover td { background: var(--bg-row-hover); }
+    table.mappings tbody tr.row-selected td { background: var(--bg-row-selected); }
+
+    /* Sticky checkbox + group columns */
+    table.mappings .col-check {
+      width: 44px; min-width: 44px; max-width: 44px;
+      position: sticky; left: 0; z-index: 3;
+      text-align: center;
+      box-shadow: 1px 0 0 var(--border-default);
+    }
+    table.mappings thead th.col-check { z-index: 4; }
+    table.mappings .col-group {
+      min-width: 220px; max-width: 280px;
+      position: sticky; left: 44px; z-index: 3;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.04);
+    }
+    table.mappings thead th.col-group { z-index: 4; }
+    table.mappings .col-integration { min-width: 110px; }
+    table.mappings .col-account,
+    table.mappings .col-class,
+    table.mappings .col-location,
+    table.mappings .col-tax { min-width: 200px; width: 220px; }
+
+    .group-name {
+      font-weight: 500;
+      overflow: hidden; text-overflow: ellipsis;
+      max-width: 240px;
+    }
+    .group-sub {
+      font-size: var(--font-caption);
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+    .integ-pill {
+      display: inline-flex; align-items: center;
+      height: 20px; padding: 0 6px;
+      border-radius: var(--radius-sm);
+      background: var(--color-status-grey-bg);
+      color: var(--color-grey-50);
+      font-size: var(--font-caption);
+      font-weight: 500;
+    }
+    .integ-pill.stripe { background: var(--color-status-blue-bg); color: var(--color-blue); }
+    .integ-pill.shopify { background: var(--color-status-green-bg); color: var(--color-green); }
+    .integ-pill.paypal { background: var(--color-status-yellow-bg); color: var(--color-yellow); }
+
+    .cell-field { position: relative; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+    .cell-field .select { width: 100%; min-width: 180px; }
+    .apply-hint {
+      display: none;
+      font-size: 12px;
+      line-height: 16px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--color-primary);
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .apply-hint:hover { text-decoration: underline; }
+    .apply-hint.show { display: inline; }
+
+    /* Modal extras */
+    .modal-summary {
+      margin: 0 0 14px;
+      font-size: var(--font-body2);
+      color: var(--text-primary);
+      line-height: var(--font-body2-line-height);
+    }
+    .modal-summary strong { font-weight: 500; }
+    .modal-detail {
+      margin: 0 0 16px;
+      font-size: var(--font-body2);
+      color: var(--text-secondary);
+      line-height: var(--font-body2-line-height);
+    }
+    .modal-detail .scope-links {
+      display: inline;
+    }
+    .scope-link {
+      display: inline;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      background: transparent;
+      color: var(--color-primary);
+      font-size: inherit;
+      font-family: inherit;
+      font-weight: 400;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .scope-link:hover { text-decoration: underline; }
+    .scope-link.active { font-weight: 500; text-decoration: underline; }
+
+    .form-grid { display: flex; flex-direction: column; gap: 12px; }
+    .form-row label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: var(--font-caption);
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .form-row .select { width: 100%; }
+    .form-row.prefilled label::after {
+      content: " · from row";
+      font-weight: 400;
+      color: var(--color-primary);
+    }
+
+    .toast {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      background: var(--text-primary); color: var(--text-on-primary);
+      padding: 10px 16px; border-radius: var(--radius-sm);
+      display: none; z-index: 60;
+      font-size: var(--font-body2);
+      box-shadow: var(--shadow-elevated);
+    }
+    .toast.show { display: block; }
+
+    .empty-state {
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--font-body2);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">S</span> Synder</div>
+      <div class="sidebar-section-title">Workspace</div>
+      <div class="sidebar-item"><span class="material-icons">dashboard</span> Dashboard</div>
+      <div class="sidebar-item"><span class="material-icons">receipt_long</span> Transactions</div>
+      <div class="sidebar-item"><span class="material-icons">account_balance</span> Summaries</div>
+      <div class="sidebar-item active"><span class="material-icons">swap_horiz</span> Mappings</div>
+      <div class="sidebar-item"><span class="material-icons">extension</span> Integrations</div>
+      <div class="sidebar-item"><span class="material-icons">settings</span> Settings</div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <h1>Mappings</h1>
+        <div class="top-meta">QuickBooks Online · Chart of Accounts</div>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <div>
+            <h2>Account mapping</h2>
+            <p class="page-sub">Map payment groups to accounts, classes, locations, and tax codes. Bulk apply targets the current filter only.</p>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label for="filterIntegration">Integration</label>
+          <select id="filterIntegration" class="select" aria-label="Filter by integration">
+            <option value="all">All</option>
+            <option value="Stripe">Stripe</option>
+            <option value="Shopify">Shopify</option>
+            <option value="PayPal">PayPal</option>
+          </select>
+          <label for="filterSearch">Search</label>
+          <input id="filterSearch" class="input" type="search" placeholder="Group name…" aria-label="Search groups" />
+          <span class="filter-count" id="filterCount">0 rows</span>
+        </div>
+
+        <div class="selection-bar" id="selectionBar" role="status">
+          <span class="sel-text" id="selectionText">0 selected</span>
+          <div class="sel-actions">
+            <button type="button" class="btn" id="bulkMapBtn">Map</button>
+            <button type="button" class="btn-text" id="clearSelectionBtn">Clear</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll" id="tableScroll">
+            <table class="table mappings" id="mappingsTable">
+              <thead>
+                <tr>
+                  <th class="col-check">
+                    <input type="checkbox" id="selectAll" aria-label="Select all filtered rows" />
+                  </th>
+                  <th class="col-group">Group / name</th>
+                  <th class="col-integration">Integration</th>
+                  <th class="col-account">Account</th>
+                  <th class="col-class">Class</th>
+                  <th class="col-location">Location</th>
+                  <th class="col-tax">Tax</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="emptyState" hidden>No rows match this filter.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk mapping modal -->
+  <div class="modal-bg" id="bulkModal" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+    <div class="modal">
+      <div class="modal-header" id="bulkTitle">Bulk mapping</div>
+      <div class="modal-body">
+        <p class="modal-summary" id="bulkSummary">Apply to all filtered.</p>
+        <p class="modal-detail" id="bulkDetail">Selected values will be applied to 0 lines.</p>
+        <p class="modal-detail" id="bulkScope" hidden></p>
+
+        <div class="form-grid">
+          <div class="form-row" id="fieldAccount">
+            <label for="bulkAccount">Account</label>
+            <select id="bulkAccount" class="select"></select>
+          </div>
+          <div class="form-row" id="fieldClass">
+            <label for="bulkClass">Class</label>
+            <select id="bulkClass" class="select"></select>
+          </div>
+          <div class="form-row" id="fieldLocation">
+            <label for="bulkLocation">Location</label>
+            <select id="bulkLocation" class="select"></select>
+          </div>
+          <div class="form-row" id="fieldTax">
+            <label for="bulkTax">Tax</label>
+            <select id="bulkTax" class="select"></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outlined" id="bulkCancel">Cancel</button>
+        <button type="button" class="btn" id="bulkSave">Save mapping</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+(function () {
+  const ACCOUNTS = [
+    "",
+    "Stripe Clearing",
+    "Shopify Clearing",
+    "PayPal Clearing",
+    "Sales — Online",
+    "Sales — Retail",
+    "Processing Fees",
+    "Refunds Expense",
+    "Payouts Clearing",
+    "Bank Transfers",
+    "Uncategorized Income",
+    "Uncategorized Expense"
+  ];
+  const CLASSES = ["", "Online", "Retail", "Wholesale", "Marketplace", "Internal"];
+  const LOCATIONS = ["", "US — East", "US — West", "EU — DE", "UK", "CA — ON", "Remote"];
+  const TAXES = ["", "Taxable", "Non-taxable", "Exempt", "Zero-rated", "Out of scope"];
+
+  const GROUP_TEMPLATES = [
+    { name: "Sales", subtype: "Orders" },
+    { name: "Sales", subtype: "Subscriptions" },
+    { name: "Fees", subtype: "Processing" },
+    { name: "Fees", subtype: "Dispute" },
+    { name: "Refunds", subtype: "Customer" },
+    { name: "Refunds", subtype: "Partial" },
+    { name: "Payouts", subtype: "Standard" },
+    { name: "Payouts", subtype: "Instant" },
+    { name: "Transfers", subtype: "To bank" },
+    { name: "Adjustments", subtype: "Balance" },
+    { name: "Chargebacks", subtype: "Lost" },
+    { name: "Application fees", subtype: "Platform" }
+  ];
+
+  const INTEGRATIONS = [
+    { id: "Stripe", store: "mzkt.by" },
+    { id: "Stripe", store: "northwind-co" },
+    { id: "Shopify", store: "acme-store" },
+    { id: "Shopify", store: "lumen-goods" },
+    { id: "PayPal", store: "acme-paypal" }
+  ];
+
+  function pick(arr, i) { return arr[i % arr.length]; }
+
+  /** Build ~36 fake mapping rows across Stripe / Shopify / PayPal */
+  function buildRows() {
+    const rows = [];
+    let id = 1;
+    INTEGRATIONS.forEach((integ, ii) => {
+      const count = integ.id === "PayPal" ? 6 : 7; // ~7*4 + 6 = 34 rows
+      for (let i = 0; i < count; i++) {
+        const g = pick(GROUP_TEMPLATES, i + ii);
+        const defaultAccount =
+          integ.id === "Stripe" ? "Stripe Clearing" :
+          integ.id === "Shopify" ? "Shopify Clearing" : "PayPal Clearing";
+        rows.push({
+          id: id++,
+          name: g.name + " · " + g.subtype,
+          subtype: g.subtype,
+          integration: integ.id,
+          store: integ.store,
+          account: i % 4 === 0 ? defaultAccount : (i % 5 === 0 ? "" : pick(ACCOUNTS.filter(Boolean), i + ii)),
+          class: i % 3 === 0 ? "" : pick(CLASSES.filter(Boolean), i),
+          location: i % 4 === 1 ? "" : pick(LOCATIONS.filter(Boolean), i + 2),
+          tax: i % 5 === 2 ? "" : pick(TAXES.filter(Boolean), i)
+        });
+      }
+    });
+    return rows;
+  }
+
+  const state = {
+    rows: buildRows(),
+    filterIntegration: "all",
+    filterSearch: "",
+    selected: new Set(),
+    applyHint: null, // { rowId, field }
+    bulk: {
+      open: false,
+      source: null, // 'selection' | 'apply'
+      field: null,  // 'account'|'class'|'location'|'tax'|null
+      prefill: {},
+      scopeIntegration: null // null = all in filtered set; or 'Stripe' etc.
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function filteredRows() {
+    const q = state.filterSearch.trim().toLowerCase();
+    return state.rows.filter((r) => {
+      if (state.filterIntegration !== "all" && r.integration !== state.filterIntegration) return false;
+      if (q && !(r.name + " " + r.store).toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+
+  function bulkTargetRows() {
+    let rows = filteredRows();
+    if (state.bulk.source === "selection") {
+      rows = rows.filter((r) => state.selected.has(r.id));
+    }
+    if (state.bulk.scopeIntegration) {
+      rows = rows.filter((r) => r.integration === state.bulk.scopeIntegration);
+    }
+    return rows;
+  }
+
+  function optionHtml(list, selected) {
+    return list.map((v) => {
+      const label = v === "" ? "— Unmapped —" : v;
+      const sel = v === selected ? " selected" : "";
+      return '<option value="' + escapeAttr(v) + '"' + sel + ">" + escapeHtml(label) + "</option>";
+    }).join("");
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function integClass(name) {
+    return name.toLowerCase();
+  }
+
+  function renderTable() {
+    const rows = filteredRows();
+    const tbody = $("tbody");
+    const empty = $("emptyState");
+    $("filterCount").textContent = rows.length + (rows.length === 1 ? " row" : " rows");
+
+    if (!rows.length) {
+      tbody.innerHTML = "";
+      empty.hidden = false;
+      updateSelectAll();
+      updateSelectionBar();
+      return;
+    }
+    empty.hidden = true;
+
+    tbody.innerHTML = rows.map((r) => {
+      const checked = state.selected.has(r.id) ? " checked" : "";
+      const selectedCls = state.selected.has(r.id) ? " row-selected" : "";
+      const hint = state.applyHint;
+      function applyBtn(field) {
+        const show = hint && hint.rowId === r.id && hint.field === field ? " show" : "";
+        return '<button type="button" class="apply-hint' + show + '" data-apply="' + r.id + '" data-field="' + field + '">Apply to filtered rows</button>';
+      }
+      return (
+        '<tr data-id="' + r.id + '" class="' + selectedCls.trim() + '">' +
+          '<td class="col-check"><input type="checkbox" class="row-check" data-id="' + r.id + '"' + checked + ' aria-label="Select row" /></td>' +
+          '<td class="col-group"><div class="group-name">' + escapeHtml(r.name) + '</div><div class="group-sub">' + escapeHtml(r.store) + '</div></td>' +
+          '<td class="col-integration"><span class="integ-pill ' + integClass(r.integration) + '">' + escapeHtml(r.integration) + '</span></td>' +
+          '<td class="col-account"><div class="cell-field">' +
+            '<select class="select cell-select" data-id="' + r.id + '" data-field="account">' + optionHtml(ACCOUNTS, r.account) + '</select>' +
+            applyBtn("account") +
+          '</div></td>' +
+          '<td class="col-class"><div class="cell-field">' +
+            '<select class="select cell-select" data-id="' + r.id + '" data-field="class">' + optionHtml(CLASSES, r.class) + '</select>' +
+            applyBtn("class") +
+          '</div></td>' +
+          '<td class="col-location"><div class="cell-field">' +
+            '<select class="select cell-select" data-id="' + r.id + '" data-field="location">' + optionHtml(LOCATIONS, r.location) + '</select>' +
+            applyBtn("location") +
+          '</div></td>' +
+          '<td class="col-tax"><div class="cell-field">' +
+            '<select class="select cell-select" data-id="' + r.id + '" data-field="tax">' + optionHtml(TAXES, r.tax) + '</select>' +
+            applyBtn("tax") +
+          '</div></td>' +
+        '</tr>'
+      );
+    }).join("");
+
+    updateSelectAll();
+    updateSelectionBar();
+  }
+
+  function updateSelectAll() {
+    const rows = filteredRows();
+    const el = $("selectAll");
+    if (!rows.length) {
+      el.checked = false;
+      el.indeterminate = false;
+      return;
+    }
+    const n = rows.filter((r) => state.selected.has(r.id)).length;
+    el.checked = n === rows.length;
+    el.indeterminate = n > 0 && n < rows.length;
+  }
+
+  function updateSelectionBar() {
+    // Keep selection only for currently filtered? Spec: classic path selects checkboxes.
+    // Count selected among filtered for the bar.
+    const rows = filteredRows();
+    const n = rows.filter((r) => state.selected.has(r.id)).length;
+    const bar = $("selectionBar");
+    if (n > 0) {
+      bar.classList.add("show");
+      $("selectionText").textContent = n + " selected";
+    } else {
+      bar.classList.remove("show");
+    }
+  }
+
+  function openBulk(opts) {
+    // opts: { source: 'selection'|'apply', field?, prefill? }
+    state.bulk.open = true;
+    state.bulk.source = opts.source;
+    state.bulk.field = opts.field || null;
+    state.bulk.prefill = opts.prefill || {};
+    state.bulk.scopeIntegration = null;
+
+    // Prefill selects: only the field user came from; others empty (= unchanged)
+    const emptyOpt = '<option value="">— Leave unchanged —</option>';
+    function fill(selectId, list, field) {
+      const sel = $(selectId);
+      const pre = state.bulk.field === field ? (state.bulk.prefill[field] || "") : "";
+      const opts = list.filter((v) => v !== "").map((v) => {
+        const s = v === pre ? " selected" : "";
+        return '<option value="' + escapeAttr(v) + '"' + s + ">" + escapeHtml(v) + "</option>";
+      }).join("");
+      sel.innerHTML = emptyOpt + opts;
+      if (state.bulk.field === field && pre) sel.value = pre;
+      else sel.value = "";
+      const row = $("field" + field.charAt(0).toUpperCase() + field.slice(1));
+      if (state.bulk.field === field) row.classList.add("prefilled");
+      else row.classList.remove("prefilled");
+    }
+    fill("bulkAccount", ACCOUNTS, "account");
+    fill("bulkClass", CLASSES, "class");
+    fill("bulkLocation", LOCATIONS, "location");
+    fill("bulkTax", TAXES, "tax");
+
+    refreshBulkSummary();
+    $("bulkModal").classList.add("show");
+  }
+
+  function fieldLabel(field) {
+    return ({ account: "account", class: "class", location: "location", tax: "tax" })[field] || "details";
+  }
+
+  function selectedFieldPhrase() {
+    const parts = [];
+    const map = [
+      ["bulkAccount", "account"],
+      ["bulkClass", "class"],
+      ["bulkLocation", "location"],
+      ["bulkTax", "tax"]
+    ];
+    map.forEach(([id, label]) => {
+      const el = $(id);
+      if (el && el.value) parts.push(label);
+    });
+    if (!parts.length && state.bulk.field) parts.push(fieldLabel(state.bulk.field));
+    if (!parts.length) return "Selected details";
+    if (parts.length === 1) return "Selected " + parts[0];
+    if (parts.length === 2) return "Selected " + parts[0] + " and " + parts[1];
+    return "Selected " + parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+  }
+
+  function refreshBulkSummary() {
+    let base = filteredRows();
+    if (state.bulk.source === "selection") {
+      base = base.filter((r) => state.selected.has(r.id));
+    }
+    const integCounts = {};
+    base.forEach((r) => { integCounts[r.integration] = (integCounts[r.integration] || 0) + 1; });
+    const integs = Object.keys(integCounts).sort();
+
+    const targets = bulkTargetRows();
+    const n = targets.length;
+    const noun = n === 1 ? "line" : "lines";
+
+    if (state.bulk.scopeIntegration) {
+      $("bulkSummary").textContent = "Apply to filtered " + state.bulk.scopeIntegration + " rows.";
+    } else {
+      $("bulkSummary").textContent = "Apply to all filtered.";
+    }
+    $("bulkDetail").textContent = selectedFieldPhrase() + " will be applied to " + n + " " + noun + ".";
+
+    const scopeEl = $("bulkScope");
+    if (integs.length > 1 && !state.bulk.scopeIntegration) {
+      scopeEl.hidden = false;
+      scopeEl.innerHTML =
+        "These lines include " + escapeHtml(integs.join(" and ")) + ". " +
+        '<span class="scope-links">' +
+        integs.map((name) => {
+          const c = integCounts[name];
+          return '<button type="button" class="scope-link" data-scope="' + escapeAttr(name) + '">Only ' + escapeHtml(name) + " (" + c + ")</button>";
+        }).join(" · ") +
+        "</span>";
+    } else if (integs.length > 1 && state.bulk.scopeIntegration) {
+      scopeEl.hidden = false;
+      scopeEl.innerHTML =
+        'Showing ' + escapeHtml(state.bulk.scopeIntegration) + " only. " +
+        '<button type="button" class="scope-link" data-scope="">Back to all filtered</button>';
+    } else {
+      scopeEl.hidden = true;
+      scopeEl.innerHTML = "";
+    }
+  }
+
+  function closeBulk() {
+    state.bulk.open = false;
+    $("bulkModal").classList.remove("show");
+  }
+
+  function saveBulk() {
+    const targets = bulkTargetRows();
+    const updates = {
+      account: $("bulkAccount").value,
+      class: $("bulkClass").value,
+      location: $("bulkLocation").value,
+      tax: $("bulkTax").value
+    };
+    const hasAny = Object.values(updates).some((v) => v !== "");
+    if (!hasAny || !targets.length) {
+      toast(targets.length ? "Choose at least one field to map" : "No rows in scope");
+      return;
+    }
+    const idSet = new Set(targets.map((r) => r.id));
+    state.rows.forEach((r) => {
+      if (!idSet.has(r.id)) return;
+      if (updates.account) r.account = updates.account;
+      if (updates.class) r.class = updates.class;
+      if (updates.location) r.location = updates.location;
+      if (updates.tax) r.tax = updates.tax;
+    });
+    state.applyHint = null;
+    if (state.bulk.source === "selection") {
+      state.selected.clear();
+    }
+    closeBulk();
+    renderTable();
+    toast(targets.length + " row" + (targets.length === 1 ? "" : "s") + " updated");
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+  }
+
+  // Events
+  $("filterIntegration").addEventListener("change", (e) => {
+    state.filterIntegration = e.target.value;
+    state.applyHint = null;
+    // Drop selection for rows no longer visible? Keep ids but bar counts filtered.
+    renderTable();
+  });
+  $("filterSearch").addEventListener("input", (e) => {
+    state.filterSearch = e.target.value;
+    state.applyHint = null;
+    renderTable();
+  });
+
+  $("selectAll").addEventListener("change", (e) => {
+    const rows = filteredRows();
+    if (e.target.checked) rows.forEach((r) => state.selected.add(r.id));
+    else rows.forEach((r) => state.selected.delete(r.id));
+    renderTable();
+  });
+
+  $("clearSelectionBtn").addEventListener("click", () => {
+    filteredRows().forEach((r) => state.selected.delete(r.id));
+    renderTable();
+  });
+
+  $("bulkMapBtn").addEventListener("click", () => {
+    openBulk({ source: "selection" });
+  });
+
+  $("bulkCancel").addEventListener("click", closeBulk);
+  $("bulkSave").addEventListener("click", saveBulk);
+  $("bulkModal").addEventListener("click", (e) => {
+    if (e.target === $("bulkModal")) closeBulk();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && state.bulk.open) closeBulk();
+  });
+
+  $("bulkScope").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-scope]");
+    if (!btn) return;
+    const v = btn.getAttribute("data-scope");
+    state.bulk.scopeIntegration = v || null;
+    refreshBulkSummary();
+  });
+
+  ["bulkAccount", "bulkClass", "bulkLocation", "bulkTax"].forEach((id) => {
+    $(id).addEventListener("change", () => {
+      if (state.bulk.open) refreshBulkSummary();
+    });
+  });
+
+  $("tbody").addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.classList.contains("row-check")) {
+      const id = Number(t.getAttribute("data-id"));
+      if (t.checked) state.selected.add(id);
+      else state.selected.delete(id);
+      const tr = t.closest("tr");
+      if (tr) tr.classList.toggle("row-selected", t.checked);
+      updateSelectAll();
+      updateSelectionBar();
+      return;
+    }
+    if (t.classList.contains("cell-select")) {
+      const id = Number(t.getAttribute("data-id"));
+      const field = t.getAttribute("data-field");
+      const row = state.rows.find((r) => r.id === id);
+      if (!row) return;
+      row[field] = t.value;
+      state.applyHint = { rowId: id, field };
+      // Update only apply hints without full re-render to keep focus — full re-render is fine for prototype
+      renderTable();
+    }
+  });
+
+  $("tbody").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-apply]");
+    if (!btn) return;
+    const id = Number(btn.getAttribute("data-apply"));
+    const field = btn.getAttribute("data-field");
+    const row = state.rows.find((r) => r.id === id);
+    if (!row) return;
+    const prefill = {};
+    prefill[field] = row[field];
+    openBulk({ source: "apply", field, prefill });
+  });
+
+  renderTable();
+})();
+  </script>
+</body>
+</html>
