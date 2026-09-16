@@ -362,6 +362,67 @@
   .tip.on .mark { background: #DBEAFE; }
   .tip h3 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
   .tip p { margin: 0; color: var(--muted); line-height: 1.4; }
+
+  .month-hero { margin: 0 0 8px; }
+  .month-hero .m {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .month-hero .line {
+    margin: 6px 0 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .month-hero .imported {
+    margin: 10px 0 0;
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .month-picks {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 16px;
+    flex-wrap: wrap;
+  }
+  .month-pick {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .month-pick.on {
+    border-color: var(--blue);
+    color: var(--text);
+    box-shadow: 0 0 0 1px var(--blue);
+    font-weight: 600;
+  }
+  .acct {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .acct.this {
+    border-color: #BFDBFE;
+    background: #F8FAFF;
+  }
+  .acct h3 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+  .acct p { margin: 0; color: var(--muted); line-height: 1.4; }
+  .acct .cnt { font-weight: 700; white-space: nowrap; }
   .lofi-note {
     text-align: center;
     color: var(--muted);
@@ -375,6 +436,7 @@
     <div class="brand">Synder · TxnRecon concepts</div>
     <div class="proto-tabs" role="tablist" aria-label="Conceptual approaches">
       <button type="button" class="proto-tab active" role="tab" aria-selected="true" data-pane="ready">Ready</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="month">Month</button>
       <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="goal">Goal</button>
       <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="health">Health</button>
       <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="sheet">Worksheet</button>
@@ -476,6 +538,73 @@
         </div>
       </div>
       <p class="lofi-note">Low-fi concept · counts first, defaults filled, customize optional</p>
+    </section>
+
+    <!-- Month-first -->
+    <section class="pane" id="pane-month">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> The month is the close. 1,200 is Stripe import inventory. The recon still runs on one books account — the usual Stripe (required for Synder) subset.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span class="on">Data both sides</span>
+          <span>Matching</span>
+        </div>
+        <div class="body">
+          <div class="month-picks" role="group" aria-label="Month">
+            <button type="button" class="month-pick" data-month="July">July</button>
+            <button type="button" class="month-pick on" data-month="August">August</button>
+            <button type="button" class="month-pick" data-month="September">September</button>
+          </div>
+          <div class="month-hero">
+            <span class="m" id="month-name">August</span>
+            <p class="line">is ready to reconcile.</p>
+            <p class="imported"><strong>1,200</strong> Stripe transactions imported. Time to reconcile.</p>
+          </div>
+          <div class="summary" style="margin-top:16px">
+            <div class="head">
+              <h3>This run</h3>
+              <button type="button" class="ghost" id="toggle-custom-month">Customize</button>
+            </div>
+            <div class="kv"><span class="k">Period</span><span id="month-period">August 1–31, 2026</span></div>
+            <div class="kv"><span class="k">Books account</span><span>Stripe (required for Synder)</span></div>
+            <div class="kv"><span class="k">Integration</span><span>Stripe · Automated</span></div>
+            <div class="custom" id="custom-box-month">
+              <label class="field">
+                <span>Books account</span>
+                <select id="month-acct">
+                  <option>Stripe (required for Synder)</option>
+                  <option>Stripe Fees</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Import method</span>
+                <select><option>Automated</option><option>Upload files</option></select>
+              </label>
+            </div>
+          </div>
+          <p class="tips" style="margin-top:14px"><strong>What the 1,200 are</strong></p>
+          <div class="acct this">
+            <div>
+              <h3>Stripe (required for Synder)</h3>
+              <p>Payouts mapped to this clearing account. This is the recon.</p>
+            </div>
+            <div class="cnt">48</div>
+          </div>
+          <div class="acct">
+            <div>
+              <h3>Other imported Stripe activity</h3>
+              <p>Charges and fees mapped to sales or P&amp;L. Not in this run.</p>
+            </div>
+            <div class="cnt">1,152</div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Review matching rules</button>
+            <button type="button" class="btn primary" id="month-cta">Reconcile August</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · month first · import count is inventory · run is per account</p>
     </section>
 
     <!-- 1 Goal-first -->
@@ -691,6 +820,7 @@
   var tabs = document.querySelectorAll('.proto-tab');
   var panes = {
     ready: document.getElementById('pane-ready'),
+    month: document.getElementById('pane-month'),
     goal: document.getElementById('pane-goal'),
     health: document.getElementById('pane-health'),
     sheet: document.getElementById('pane-sheet'),
@@ -720,6 +850,31 @@
         c.classList.remove('selected');
       });
       card.classList.add('selected');
+    });
+  });
+
+
+  var customBtnM = document.getElementById('toggle-custom-month');
+  var customBoxM = document.getElementById('custom-box-month');
+  if (customBtnM && customBoxM) {
+    customBtnM.addEventListener('click', function () {
+      var open = customBoxM.classList.toggle('open');
+      customBtnM.textContent = open ? 'Hide options' : 'Customize';
+    });
+  }
+  var months = {
+    July: 'July 1–31, 2026',
+    August: 'August 1–31, 2026',
+    September: 'September 1–30, 2026'
+  };
+  document.querySelectorAll('.month-pick').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.month-pick').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      var m = b.getAttribute('data-month');
+      document.getElementById('month-name').textContent = m;
+      document.getElementById('month-period').textContent = months[m];
+      document.getElementById('month-cta').textContent = 'Reconcile ' + m;
     });
   });
 
