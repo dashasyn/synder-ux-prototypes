@@ -6,15 +6,12 @@ Public gallery of simple, static UX prototypes for Synder. No frameworks — ope
 
 **https://dashasyn.github.io/synder-ux-prototypes/**
 
-## Folders
-
-| Folder | Path |
-|--------|------|
-| Reconciliation | `/folders/reconciliation/` |
-| Payment application | `/folders/payment-application/` |
-| Dashboard | `/folders/dashboard/` |
-| Settings | `/folders/settings/` |
-| Onboarding | `/folders/onboarding/` |
+- Gallery home (folders + singles): `/`
+- Folder — Payment application: `/folders/payment-application/`
+- Folder — Transaction reconciliation setup: `/folders/txnrecon-setup/`
+- Prototype — Payment matching rules (v4.0): `/prototypes/payment-matching-rules/`
+- Prototype — TxnRecon compare (Var 1 vs 2): `/prototypes/txnrecon-setup-compare/`
+- Prototype — TxnRecon concepts (5 approaches): `/prototypes/txnrecon-concepts-compare/`
 
 ## Structure
 
@@ -24,7 +21,7 @@ folders/<slug>/index.html           # folder page (Back → hub, same tab)
 prototypes/<slug>/index.html        # prototype (open in new tab from hub/folder)
 ```
 
-Folders open in the same tab. Prototypes always open in a new tab. Min font size 14px on hub/folder pages.
+Folders open in the same tab. Prototypes always open in a new tab.
 
 ## Local preview
 
@@ -34,3 +31,15 @@ python3 -m http.server 8080
 ```
 
 Then open `http://localhost:8080/`.
+
+## Adding content
+
+1. Put the prototype under `prototypes/<slug>/`.
+2. Either add a card on a folder page (`folders/<slug>/index.html`) or under **Singles** on the hub.
+3. Update the folder’s prototype count on the hub card.
+
+HTML comments in each file show the copy-paste card pattern.
+
+## Maintenance
+
+Ignat’s assistant updates this repository when new prototypes are ready.
