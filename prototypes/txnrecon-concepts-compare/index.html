@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TxnRecon — five conceptual approaches</title>
+<title>TxnRecon — conceptual approaches</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -256,6 +256,112 @@
     margin-bottom: 14px;
     line-height: 1.4;
   }
+
+  .hero-count {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 4px;
+  }
+  .hero-count .n {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .hero-count .n-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .sides {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0 16px;
+  }
+  @media (max-width: 560px) { .sides { grid-template-columns: 1fr; } }
+  .side {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    background: #FAFAFA;
+  }
+  .side .n {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .side .lbl {
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .bar {
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 99px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    background: var(--blue);
+    border-radius: 99px;
+  }
+  .bar.books > i { background: #059669; width: 98.7%; }
+  .bar.sync > i { width: 100%; }
+  .summary {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .summary .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #FAFAFA;
+    border-bottom: 1px solid var(--line);
+  }
+  .summary .head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .summary .kv { padding: 8px 12px; }
+  .summary .kv:last-child { padding-bottom: 10px; }
+  .custom { display: none; padding: 12px; border-top: 1px solid var(--line); }
+  .custom.open { display: block; }
+  .tips { margin: 0 0 4px; }
+  .tip {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .tip.on {
+    border-color: #BFDBFE;
+    background: #F8FAFF;
+  }
+  .tip .mark {
+    flex: 0 0 auto;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #DBEAFE;
+    color: #1E40AF;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .tip.on .mark { background: #DBEAFE; }
+  .tip h3 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+  .tip p { margin: 0; color: var(--muted); line-height: 1.4; }
   .lofi-note {
     text-align: center;
     color: var(--muted);
@@ -268,17 +374,112 @@
   <div class="proto-bar">
     <div class="brand">Synder · TxnRecon concepts</div>
     <div class="proto-tabs" role="tablist" aria-label="Conceptual approaches">
-      <button type="button" class="proto-tab active" role="tab" aria-selected="true" data-pane="goal">1 · Goal-first</button>
-      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="health">2 · Health</button>
-      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="sheet">3 · Worksheet</button>
-      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="alive">4 · Always-on</button>
-      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="play">5 · Playbook</button>
+      <button type="button" class="proto-tab active" role="tab" aria-selected="true" data-pane="ready">Ready</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="goal">Goal</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="health">Health</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="sheet">Worksheet</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="alive">Always-on</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="play">Playbook</button>
     </div>
   </div>
 
   <div class="stage">
+    <!-- Ready counts + defaults -->
+    <section class="pane active" id="pane-ready">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Lead with how much data is already here. Prefill the usual Stripe + Automated close. Customize only if this run is different.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span class="on">Data both sides</span>
+          <span class="on">Matching</span>
+        </div>
+        <div class="body">
+          <div class="hero-count">
+            <span class="n">1,200</span>
+            <span class="n-label">transactions ready to reconcile</span>
+          </div>
+          <p class="sub">Last month · Stripe Clearing ↔ Stripe · Automated</p>
+          <div class="sides">
+            <div class="side">
+              <div class="n">1,200</div>
+              <div class="lbl">Synced from Stripe</div>
+              <div class="bar sync"><i></i></div>
+            </div>
+            <div class="side">
+              <div class="n">1,184</div>
+              <div class="lbl">Imported in QuickBooks</div>
+              <div class="bar books"><i></i></div>
+            </div>
+          </div>
+          <div class="summary">
+            <div class="head">
+              <h3>This run</h3>
+              <button type="button" class="ghost" id="toggle-custom">Customize</button>
+            </div>
+            <div class="kv"><span class="k">Period</span><span>Last month · Aug 1–31, 2026</span></div>
+            <div class="kv"><span class="k">Books account</span><span>Stripe (required for Synder)</span></div>
+            <div class="kv"><span class="k">Integration</span><span>Stripe</span></div>
+            <div class="kv"><span class="k">Import method</span><span>Automated</span></div>
+            <div class="custom" id="custom-box">
+              <label class="field">
+                <span>Period</span>
+                <select>
+                  <option>Last month · Aug 1–31, 2026</option>
+                  <option>Last week</option>
+                  <option>Last quarter</option>
+                  <option>Custom…</option>
+                </select>
+              </label>
+              <div class="row2">
+                <label class="field">
+                  <span>Books account</span>
+                  <select><option>Stripe (required for Synder)</option><option>Stripe Fees</option></select>
+                </label>
+                <label class="field">
+                  <span>Integration</span>
+                  <select><option>Stripe</option></select>
+                </label>
+              </div>
+              <label class="field">
+                <span>Import method</span>
+                <select><option>Automated</option><option>Upload files</option></select>
+              </label>
+            </div>
+          </div>
+          <p class="tips"><strong>Faster this time</strong></p>
+          <div class="tip on">
+            <div class="mark">1</div>
+            <div>
+              <h3>Keep Automated</h3>
+              <p>1,200 Stripe transactions are already synced. No file upload.</p>
+            </div>
+          </div>
+          <div class="tip on">
+            <div class="mark">2</div>
+            <div>
+              <h3>Keep last month</h3>
+              <p>Usual close period. Counts above already cover Aug 1–31.</p>
+            </div>
+          </div>
+          <div class="tip on">
+            <div class="mark">3</div>
+            <div>
+              <h3>Keep Stripe + Stripe (required for Synder)</h3>
+              <p>Most users run this pair. Matching rules from last close still apply.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Review matching rules</button>
+            <button type="button" class="btn primary">Reconcile 1,200 transactions</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · counts first, defaults filled, customize optional</p>
+    </section>
+
     <!-- 1 Goal-first -->
-    <section class="pane active" id="pane-goal">
+    <section class="pane" id="pane-goal">
       <div class="shell">
         <div class="idea"><strong>Idea:</strong> Start from the close you want. Period and accounts first. Sources and matching are proposed next.</div>
         <div class="need">
@@ -489,6 +690,7 @@
 <script>
   var tabs = document.querySelectorAll('.proto-tab');
   var panes = {
+    ready: document.getElementById('pane-ready'),
     goal: document.getElementById('pane-goal'),
     health: document.getElementById('pane-health'),
     sheet: document.getElementById('pane-sheet'),
@@ -496,7 +698,7 @@
     play: document.getElementById('pane-play')
   };
   function show(id) {
-    if (!panes[id]) id = 'goal';
+    if (!panes[id]) id = 'ready';
     tabs.forEach(function (t) {
       var on = t.getAttribute('data-pane') === id;
       t.classList.toggle('active', on);
@@ -520,6 +722,15 @@
       card.classList.add('selected');
     });
   });
+
+  var customBtn = document.getElementById('toggle-custom');
+  var customBox = document.getElementById('custom-box');
+  if (customBtn && customBox) {
+    customBtn.addEventListener('click', function () {
+      var open = customBox.classList.toggle('open');
+      customBtn.textContent = open ? 'Hide options' : 'Customize';
+    });
+  }
   var hash = (location.hash || '').replace(/^#/, '');
   if (panes[hash]) show(hash);
 </script>
