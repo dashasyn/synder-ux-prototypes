@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TxnRecon — five conceptual approaches</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB;
+    --text: #1A1B24;
+    --muted: #6B7280;
+    --line: #E5E7EB;
+    --bg: #F3F4F6;
+    --card: #fff;
+    --ok: #059669;
+    --warn: #D97706;
+    --bad: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .proto-bar {
+    background: #111827;
+    color: #F9FAFB;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    z-index: 100;
+  }
+  .proto-bar .brand {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .02em;
+    opacity: .9;
+    white-space: nowrap;
+  }
+  .proto-tabs { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+  .proto-tab {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #9CA3AF;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .proto-tab:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .proto-tab.active {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .stage {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    background: var(--bg);
+  }
+  .pane { display: none; padding: 20px 16px 40px; }
+  .pane.active { display: block; }
+  .shell {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .idea {
+    padding: 12px 16px;
+    background: #EEF2FF;
+    border-bottom: 1px solid #C7D2FE;
+    color: #312E81;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .idea strong { font-weight: 600; }
+  .need {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #FAFAFA;
+  }
+  .need span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 9px;
+  }
+  .need span.on {
+    color: #1E3A8A;
+    border-color: #BFDBFE;
+    background: #EFF6FF;
+  }
+  .body { padding: 18px 16px 20px; }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    margin: 0 0 16px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  label.field {
+    display: block;
+    margin: 0 0 12px;
+  }
+  label.field > span {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .ctrl, select, input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .card h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .card p { margin: 0; color: var(--muted); line-height: 1.4; }
+  .card.pick {
+    cursor: pointer;
+    border-color: #BFDBFE;
+    background: #F8FAFF;
+  }
+  .card.pick.selected {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 1px var(--blue);
+  }
+  .pill {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .pill.ok { background: #D1FAE5; color: #065F46; }
+  .pill.warn { background: #FEF3C7; color: #92400E; }
+  .pill.bad { background: #FEE2E2; color: #991B1B; }
+  .pill.neutral { background: #E5E7EB; color: #374151; }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .ghost {
+    color: var(--blue);
+    background: none;
+    border: none;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+  }
+  .muted { color: var(--muted); }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .kv:last-child { border-bottom: 0; }
+  .kv .k { color: var(--muted); }
+  .worksheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .worksheet th, .worksheet td {
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .worksheet th { background: #F9FAFB; font-weight: 600; }
+  .match-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    margin-right: 6px;
+  }
+  .match-dot.open { background: var(--warn); }
+  .banner {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .lofi-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 10px 0 0;
+  }
+</style>
+</head>
+<body>
+  <div class="proto-bar">
+    <div class="brand">Synder · TxnRecon concepts</div>
+    <div class="proto-tabs" role="tablist" aria-label="Conceptual approaches">
+      <button type="button" class="proto-tab active" role="tab" aria-selected="true" data-pane="goal">1 · Goal-first</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="health">2 · Health</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="sheet">3 · Worksheet</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="alive">4 · Always-on</button>
+      <button type="button" class="proto-tab" role="tab" aria-selected="false" data-pane="play">5 · Playbook</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <!-- 1 Goal-first -->
+    <section class="pane active" id="pane-goal">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Start from the close you want. Period and accounts first. Sources and matching are proposed next.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span>Data both sides</span>
+          <span>Matching</span>
+        </div>
+        <div class="body">
+          <h1>Close the books for a period</h1>
+          <p class="sub">Tell us what you’re reconciling. We’ll figure out how to get the data.</p>
+          <label class="field">
+            <span>Period</span>
+            <select><option>Last month · Aug 1–31, 2026</option><option>Last quarter</option><option>Custom…</option></select>
+          </label>
+          <div class="row2">
+            <label class="field">
+              <span>Books account</span>
+              <select><option>Stripe Clearing (required for Synder)</option></select>
+            </label>
+            <label class="field">
+              <span>Integration</span>
+              <select><option>Stripe · Main account</option></select>
+            </label>
+          </div>
+          <div class="card">
+            <h3>We’ll prepare</h3>
+            <p>Pull QuickBooks + Stripe for Aug 1–31 · Use default matching rules · Email when ready</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Adjust data sources</button>
+            <button type="button" class="btn primary">Prepare reconciliation</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · only period + what to match up front</p>
+    </section>
+
+    <!-- 2 Health -->
+    <section class="pane" id="pane-health">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Setup is diagnosis. Fix readiness, then run. Form fields stay secondary.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span class="on">Data both sides</span>
+          <span>Matching</span>
+        </div>
+        <div class="body">
+          <h1>Ready to reconcile?</h1>
+          <p class="sub">Aug 1–31 · Stripe Clearing ↔ Stripe Main</p>
+          <div class="card">
+            <h3>QuickBooks <span class="pill ok">Ready</span></h3>
+            <p>Last sync 12 min ago · Clearing account mapped</p>
+          </div>
+          <div class="card">
+            <h3>Stripe <span class="pill warn">1 gap</span></h3>
+            <p>Payouts OK · Fee detail missing for 3 days</p>
+            <p style="margin-top:8px"><button type="button" class="ghost">Fix Stripe gaps</button></p>
+          </div>
+          <div class="card">
+            <h3>Matching rules <span class="pill ok">Default</span></h3>
+            <p>Same rules as last close · <button type="button" class="ghost">Review</button></p>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Change period or accounts</button>
+            <button type="button" class="btn primary">Run anyway</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · health first, Run second</p>
+    </section>
+
+    <!-- 3 Worksheet -->
+    <section class="pane" id="pane-sheet">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Skip the setup form. Land on a two-sided worksheet and reconcile in place.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span class="on">Data both sides</span>
+          <span class="on">Matching</span>
+        </div>
+        <div class="body">
+          <h1>Reconciliation worksheet</h1>
+          <p class="sub">Stripe Clearing ↔ Stripe · Aug 1–31 · <button type="button" class="ghost">Change</button></p>
+          <div class="row2" style="margin-bottom:12px">
+            <div class="card" style="margin:0">
+              <h3>Books</h3>
+              <p>142 lines · auto-loaded</p>
+            </div>
+            <div class="card" style="margin:0">
+              <h3>Stripe</h3>
+              <p>138 lines · auto-loaded</p>
+            </div>
+          </div>
+          <table class="worksheet">
+            <thead>
+              <tr><th>Books</th><th>Integration</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Aug 3 · Deposit $1,240.00</td>
+                <td>Payout po_8f2 · $1,240.00</td>
+                <td><span class="match-dot"></span>Matched</td>
+              </tr>
+              <tr>
+                <td>Aug 7 · Deposit $890.50</td>
+                <td>Payout po_91a · $890.50</td>
+                <td><span class="match-dot"></span>Matched</td>
+              </tr>
+              <tr>
+                <td>Aug 12 · Fee $42.10</td>
+                <td>—</td>
+                <td><span class="match-dot open"></span>Needs review</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td>Refund re_22 · $15.00</td>
+                <td><span class="match-dot open"></span>Needs review</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="actions">
+            <button type="button" class="btn">Upload missing file</button>
+            <button type="button" class="btn primary">Finish · 2 open</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · worksheet is the setup</p>
+    </section>
+
+    <!-- 4 Always-on -->
+    <section class="pane" id="pane-alive">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Matching already runs in the background. This screen is only “catch up this period.”</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span>Data both sides</span>
+          <span>Matching</span>
+        </div>
+        <div class="body">
+          <div class="banner">Always-on matching is active for Stripe Clearing ↔ Stripe Main.</div>
+          <h1>Catch up a period</h1>
+          <p class="sub">Most days are already matched. Choose what to close.</p>
+          <label class="field">
+            <span>Period to catch up</span>
+            <select><option>Last month · Aug 1–31, 2026</option><option>Last week</option><option>Custom…</option></select>
+          </label>
+          <div class="card">
+            <h3>Already done</h3>
+            <div class="kv"><span class="k">Auto-matched</span><span>128 of 142</span></div>
+            <div class="kv"><span class="k">Open items</span><span>14 to review</span></div>
+            <div class="kv"><span class="k">Data gaps</span><span>None</span></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Review open items</button>
+            <button type="button" class="btn primary">Close August</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · period + accounts only when catching up</p>
+    </section>
+
+    <!-- 5 Playbook -->
+    <section class="pane" id="pane-play">
+      <div class="shell">
+        <div class="idea"><strong>Idea:</strong> Pick a named close. The four required pieces are already filled by the playbook.</div>
+        <div class="need">
+          <span class="on">Period</span>
+          <span class="on">What to match</span>
+          <span class="on">Data both sides</span>
+          <span class="on">Matching</span>
+        </div>
+        <div class="body">
+          <h1>Start from a playbook</h1>
+          <p class="sub">Same close every month — edit only what changed.</p>
+          <div class="card pick selected">
+            <h3>Monthly Stripe settlement <span class="pill neutral">Usual</span></h3>
+            <p>Last month · Stripe Clearing ↔ Stripe · Auto pull · Default rules</p>
+          </div>
+          <div class="card pick">
+            <h3>PayPal weekly payouts</h3>
+            <p>Last week · PayPal Clearing ↔ PayPal · Auto pull</p>
+          </div>
+          <div class="card pick">
+            <h3>Custom one-off…</h3>
+            <p>Build period, accounts, and sources from scratch</p>
+          </div>
+          <div class="card">
+            <h3>This run</h3>
+            <div class="kv"><span class="k">Period</span><span>Aug 1–31, 2026</span></div>
+            <div class="kv"><span class="k">What to match</span><span>Stripe Clearing ↔ Stripe</span></div>
+            <div class="kv"><span class="k">Data</span><span>Auto pull both sides</span></div>
+            <div class="kv"><span class="k">Matching</span><span>Default rules</span></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn">Edit playbook</button>
+            <button type="button" class="btn primary">Run playbook</button>
+          </div>
+        </div>
+      </div>
+      <p class="lofi-note">Low-fi concept · four requirements prefilled</p>
+    </section>
+  </div>
+
+<script>
+  var tabs = document.querySelectorAll('.proto-tab');
+  var panes = {
+    goal: document.getElementById('pane-goal'),
+    health: document.getElementById('pane-health'),
+    sheet: document.getElementById('pane-sheet'),
+    alive: document.getElementById('pane-alive'),
+    play: document.getElementById('pane-play')
+  };
+  function show(id) {
+    if (!panes[id]) id = 'goal';
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-pane') === id;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    Object.keys(panes).forEach(function (k) {
+      panes[k].classList.toggle('active', k === id);
+    });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      show(t.getAttribute('data-pane'));
+    });
+  });
+  document.querySelectorAll('.card.pick').forEach(function (card) {
+    card.addEventListener('click', function () {
+      card.parentElement.querySelectorAll('.card.pick').forEach(function (c) {
+        c.classList.remove('selected');
+      });
+      card.classList.add('selected');
+    });
+  });
+  var hash = (location.hash || '').replace(/^#/, '');
+  if (panes[hash]) show(hash);
+</script>
+</body>
+</html>
