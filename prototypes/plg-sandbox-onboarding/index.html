@@ -885,20 +885,23 @@
       if (key === 'channels' || key === 'urgency') {
         // clear soft if picking regular
         selectInGroup('#' + listId, state[key]);
-        if (softId) $(softId).classList.remove('selected');
+        if (softId) { const soft = $('#' + softId); if (soft) soft.classList.remove('selected'); }
       } else {
         selectInGroup('#' + listId, state[key]);
       }
       updateContinueButtons();
     });
     if (softId) {
-      $(softId).addEventListener('click', () => {
-        state[key] = 'shortcut';
-        selectInGroup('#' + listId, null);
-        $$( '#' + listId + ' .opt-card').forEach(c => c.classList.remove('selected'));
-        $(softId).classList.add('selected');
-        updateContinueButtons();
-      });
+      const soft = $('#' + softId);
+      if (soft) {
+        soft.addEventListener('click', () => {
+          state[key] = 'shortcut';
+          selectInGroup('#' + listId, null);
+          $$('#' + listId + ' .opt-card').forEach(c => c.classList.remove('selected'));
+          soft.classList.add('selected');
+          updateContinueButtons();
+        });
+      }
     }
   }
 
