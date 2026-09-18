@@ -14,6 +14,7 @@
     - Outcome/Contact chips in the dark bar are Success-view demo overrides only.
     - Health Score: Summary /6 vs Per-txn /5; Smart Rules callout after test sync
       (not scored); completing score does not unlock Auto-sync / Historical / Smart Rules.
+    - Health Layout: Sidebar (full widget) | Main (compact sidebar + full checklist on Dashboard).
     - User-facing copy uses “Synder specialist” (not CSM).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
@@ -447,6 +448,44 @@
     }
     .hs-rules.show { display: block; }
     .hs-rules a { color: #0053CC; text-decoration: underline; cursor: pointer; }
+    .hs-compact-cta {
+      display: none; appearance: none; border: none; background: none;
+      color: #0053CC; font: inherit; font-size: 12px; font-weight: 500;
+      cursor: pointer; padding: 0; margin-top: 2px;
+      align-items: center; gap: 4px;
+    }
+    .hs-compact-cta .material-icons-round { font-size: 14px; }
+    .sidebar-health.layout-compact .hs-full { display: none; }
+    .sidebar-health.layout-compact .hs-compact-cta { display: inline-flex; }
+    .sidebar-health.layout-full .hs-compact-cta { display: none; }
+
+    .main-health {
+      border: 1px solid #DFE4EC; border-radius: 8px;
+      background: #fff; padding: 20px 20px 16px; margin-bottom: 20px;
+    }
+    .main-health h2 {
+      margin: 0 0 6px; font-size: 18px; font-weight: 700; letter-spacing: .15px;
+      color: #1A1B24; display: flex; align-items: center; gap: 8px;
+    }
+    .main-health h2 .material-icons-round { font-size: 20px; color: #0053CC; }
+    .main-health .hs-meta { font-size: 13px; margin-bottom: 8px; }
+    .main-health .hs-bar { height: 8px; margin-bottom: 14px; }
+    .main-health .hs-list {
+      display: block; margin: 0 0 14px; padding: 0;
+      border: 1px solid #EFF1F5; border-radius: 6px; overflow: hidden;
+    }
+    .main-health .hs-list li {
+      padding: 10px 12px; font-size: 13px; line-height: 18px;
+      border-bottom: 1px solid #EFF1F5; background: #F7F8FA;
+    }
+    .main-health .hs-list li:last-child { border-bottom: none; }
+    .main-health .hs-list li:nth-child(even) { background: #fff; }
+    .main-health .hs-next { margin-bottom: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
+    .main-health .hs-book { font-size: 13px; margin-bottom: 4px; }
+    .main-health .hs-rules { margin-top: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
+    .main-health-anchor { scroll-margin-top: 64px; }
+    .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
+
     .sidebar-bottom { margin-top: auto; }
 
     .app-main {
@@ -523,6 +562,14 @@
         <button type="button" data-score="mid">Mid</button>
         <button type="button" data-score="almost">Almost</button>
         <button type="button" data-score="complete">Complete</button>
+      </div>
+    </div>
+
+    <div class="proto-group proto-app-only">
+      <span class="proto-label">Layout</span>
+      <div class="seg" id="seg-layout">
+        <button type="button" data-layout="sidebar" class="active">Sidebar</button>
+        <button type="button" data-layout="main">Main</button>
       </div>
     </div>
 
@@ -791,22 +838,27 @@
           </button>
 
           <!-- Setup Health Score widget (sandbox only) -->
-          <div class="sidebar-health" id="health-widget">
+          <div class="sidebar-health layout-full" id="health-widget">
             <h4><span class="material-icons-round">favorite</span> Setup health</h4>
             <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <button type="button" class="hs-toggle" id="hs-toggle">
-              Checklist <span class="material-icons-round" id="hs-chevron">expand_more</span>
-            </button>
-            <ul class="hs-list open" id="hs-list"></ul>
-            <div class="hs-next" id="hs-next"></div>
-            <a class="hs-book" id="hs-book" href="#">
-              <span class="material-icons-round">event</span> Book setup session
-            </a>
-            <div class="hs-rules" id="hs-rules">
-              Your sync looks active — any transaction exceptions? Smart Rules can help.
-              <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
+            <div class="hs-full" id="hs-full">
+              <button type="button" class="hs-toggle" id="hs-toggle">
+                Checklist <span class="material-icons-round" id="hs-chevron">expand_more</span>
+              </button>
+              <ul class="hs-list open" id="hs-list"></ul>
+              <div class="hs-next" id="hs-next"></div>
+              <a class="hs-book" id="hs-book" href="#">
+                <span class="material-icons-round">event</span> Book setup session
+              </a>
+              <div class="hs-rules" id="hs-rules">
+                Your sync looks active — any transaction exceptions? Smart Rules can help.
+                <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
+              </div>
             </div>
+            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="View checklist on main screen">
+              View checklist <span class="material-icons-round">arrow_forward</span>
+            </button>
           </div>
 
           <div class="sidebar-bottom">
@@ -854,6 +906,7 @@
     usedShortcut: false,
     syncMode: 'summary',  // 'summary' | 'per-txn'
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete'
+    healthLayout: 'sidebar', // 'sidebar' | 'main'
     checklistOpen: true,
     appPage: 'dashboard',
     demoOutcome: 'auto',
@@ -1210,19 +1263,18 @@
     return list.slice(0, count).map(c => c.id);
   }
 
-  function renderHealth() {
+  function healthModel() {
     const list = CHECKPOINTS[state.syncMode];
     const done = new Set(completedIds());
     const total = list.length;
     const count = done.size;
     const pct = Math.round((count / total) * 100);
-
-    $('#hs-meta').textContent = 'Setup: ' + count + ' / ' + total + ' complete';
-    const bar = $('#hs-bar');
-    bar.classList.toggle('complete', count === total);
-    bar.firstElementChild.style.width = pct + '%';
-
-    $('#hs-list').innerHTML = list.map(c => {
+    const next = list.find(c => !done.has(c.id));
+    const showRules = done.has('test-sync');
+    const nextHtml = next
+      ? `<strong>Next</strong>${NEXT_ACTION[next.id] || next.label}`
+      : `<strong>Next</strong>All scored steps complete — Synder specialist verification may still be pending. Completing the score does not unlock Auto-sync, Historical import, or Smart Rules.`;
+    const listHtml = list.map(c => {
       const isDone = done.has(c.id);
       return `<li class="${isDone ? 'done' : ''}">
         <span class="ico ${isDone ? 'done' : 'todo'}">
@@ -1231,24 +1283,83 @@
         <span>${c.label}</span>
       </li>`;
     }).join('');
+    return { list, done, total, count, pct, next, showRules, nextHtml, listHtml };
+  }
 
-    // next action = lowest incomplete scored step
-    const next = list.find(c => !done.has(c.id));
-    const nextEl = $('#hs-next');
-    if (next) {
+  function paintScoreMeta(metaEl, barEl, model) {
+    if (!metaEl || !barEl) return;
+    metaEl.textContent = 'Setup: ' + model.count + ' / ' + model.total + ' complete';
+    barEl.classList.toggle('complete', model.count === model.total);
+    if (barEl.firstElementChild) barEl.firstElementChild.style.width = model.pct + '%';
+  }
+
+  function renderHealth() {
+    const model = healthModel();
+    const widget = $('#health-widget');
+    const isMain = state.healthLayout === 'main';
+
+    widget.classList.toggle('layout-compact', isMain);
+    widget.classList.toggle('layout-full', !isMain);
+
+    paintScoreMeta($('#hs-meta'), $('#hs-bar'), model);
+
+    if (!isMain) {
+      $('#hs-list').innerHTML = model.listHtml;
+      const nextEl = $('#hs-next');
       nextEl.style.display = 'block';
-      nextEl.innerHTML = `<strong>Next</strong>${NEXT_ACTION[next.id] || next.label}`;
-    } else {
-      nextEl.style.display = 'block';
-      nextEl.innerHTML = `<strong>Next</strong>All scored steps complete — Synder specialist verification may still be pending. Completing the score does not unlock Auto-sync, Historical import, or Smart Rules.`;
+      nextEl.innerHTML = model.nextHtml;
+      $('#hs-rules').classList.toggle('show', model.showRules);
+      $('#hs-list').classList.toggle('open', state.checklistOpen);
+      $('#hs-chevron').textContent = state.checklistOpen ? 'expand_less' : 'expand_more';
     }
 
-    // Smart Rules callout after test-sync complete (NOT scored)
-    const showRules = done.has('test-sync');
-    $('#hs-rules').classList.toggle('show', showRules);
+    // Keep main checklist in sync when it is already on screen
+    const main = $('#main-health');
+    if (main) paintMainHealth(main, model);
+  }
 
-    $('#hs-list').classList.toggle('open', state.checklistOpen);
-    $('#hs-chevron').textContent = state.checklistOpen ? 'expand_less' : 'expand_more';
+  function paintMainHealth(root, model) {
+    paintScoreMeta($('#main-hs-meta', root), $('#main-hs-bar', root), model);
+    const listEl = $('#main-hs-list', root);
+    if (listEl) listEl.innerHTML = model.listHtml;
+    const nextEl = $('#main-hs-next', root);
+    if (nextEl) {
+      nextEl.style.display = 'block';
+      nextEl.innerHTML = model.nextHtml;
+    }
+    const rulesEl = $('#main-hs-rules', root);
+    if (rulesEl) rulesEl.classList.toggle('show', model.showRules);
+  }
+
+  function mainHealthPanelHtml(model) {
+    return `
+      <section class="main-health main-health-anchor" id="main-health" aria-label="Setup health checklist">
+        <h2><span class="material-icons-round">favorite</span> Setup health</h2>
+        <div class="hs-meta" id="main-hs-meta">Setup: ${model.count} / ${model.total} complete</div>
+        <div class="hs-bar${model.count === model.total ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
+        <ul class="hs-list open" id="main-hs-list">${model.listHtml}</ul>
+        <div class="hs-next" id="main-hs-next">${model.nextHtml}</div>
+        <a class="hs-book" id="main-hs-book" href="#">
+          <span class="material-icons-round">event</span> Book setup session
+        </a>
+        <div class="hs-rules${model.showRules ? ' show' : ''}" id="main-hs-rules">
+          Your sync looks active — any transaction exceptions? Smart Rules can help.
+          <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
+        </div>
+      </section>`;
+  }
+
+  function focusMainChecklist() {
+    if (state.appPage !== 'dashboard') {
+      state.appPage = 'dashboard';
+      renderApp();
+    }
+    const el = $('#main-health');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 900);
+    }
   }
 
   function renderAppPage() {
@@ -1269,10 +1380,17 @@
       settings: 'Settings',
     };
     const title = titles[page] || 'Dashboard';
+    const model = healthModel();
 
     let body = '';
     if (page === 'dashboard') {
-      body = `
+      if (state.healthLayout === 'main') {
+        body = `
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:16px">Sandbox overview — complete setup using the checklist below.</p>
+        ${mainHealthPanelHtml(model)}`;
+      } else {
+        body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
         <p class="page-subtitle" style="margin-bottom:16px">Sandbox overview — explore freely while you complete setup.</p>
         <div class="placeholder-grid lockable">
@@ -1280,6 +1398,7 @@
           <div class="placeholder-card"><div class="ph-title">Open exceptions</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Channels</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
+      }
     } else if (locked) {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
@@ -1311,8 +1430,8 @@
   }
 
   function renderApp() {
-    renderHealth();
     renderAppPage();
+    renderHealth();
     $$('.nav-item').forEach(b => {
       b.classList.toggle('active', b.dataset.page === state.appPage);
     });
@@ -1330,6 +1449,7 @@
     if (!btn) return;
     state.syncMode = btn.dataset.sync;
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b === btn));
+    if (state.healthLayout === 'main' && state.appPage === 'dashboard') renderAppPage();
     renderHealth();
   });
 
@@ -1338,7 +1458,24 @@
     if (!btn) return;
     state.scoreProgress = btn.dataset.score;
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b === btn));
+    if (state.healthLayout === 'main' && state.appPage === 'dashboard') renderAppPage();
     renderHealth();
+  });
+
+  $('#seg-layout').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    state.healthLayout = btn.dataset.layout;
+    $$('#seg-layout button').forEach(b => b.classList.toggle('active', b === btn));
+    // Main checklist lives on Dashboard — jump there when switching to Main
+    if (state.healthLayout === 'main' && state.appPage !== 'dashboard') {
+      state.appPage = 'dashboard';
+    }
+    renderApp();
+  });
+
+  $('#hs-open-main').addEventListener('click', () => {
+    focusMainChecklist();
   });
 
   $('#demo-outcome').addEventListener('change', e => {
@@ -1379,6 +1516,7 @@
     state.usedShortcut = false;
     state.syncMode = 'summary';
     state.scoreProgress = 'empty';
+    state.healthLayout = 'sidebar';
     state.checklistOpen = true;
     state.appPage = 'dashboard';
     state.demoOutcome = 'auto';
@@ -1391,6 +1529,7 @@
     $('#demo-contact').value = 'auto';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
+    $$('#seg-layout button').forEach(b => b.classList.toggle('active', b.dataset.layout === 'sidebar'));
     $('#outcome-chips').classList.remove('show');
     clearAllStepErrors();
 
@@ -1401,7 +1540,7 @@
 
   // Book links — demo only
   document.addEventListener('click', e => {
-    if (e.target.closest('#hs-book') || e.target.closest('#banner-book')) {
+    if (e.target.closest('#hs-book') || e.target.closest('#main-hs-book') || e.target.closest('#banner-book')) {
       e.preventDefault();
       // stay in prototype; subtle feedback
       const t = e.target.closest('a,button');
