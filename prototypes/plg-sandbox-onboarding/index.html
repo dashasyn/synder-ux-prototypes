@@ -1702,7 +1702,8 @@
     let body = '';
     if (page === 'setup-checklist') {
       body = `
-        <h1 class="page-title" style="margin-bottom:16px">${title}</h1>
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:20px">Check these off before your call — a little prep goes a long way, and you’re already doing great.</p>
         ${mainHealthPanelHtml(model)}`;
     } else if (page === 'dashboard') {
       body = `
