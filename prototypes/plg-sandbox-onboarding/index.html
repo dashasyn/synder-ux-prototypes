@@ -509,8 +509,9 @@
     .sidebar-health .hs-compact-cta { display: inline-flex; }
 
     .main-health {
-      border: 1px solid #DFE4EC; border-radius: 8px;
-      background: #fff; padding: 20px 20px 16px; margin-bottom: 20px;
+      border: none; border-radius: 0;
+      background: transparent; padding: 0; margin-bottom: 20px;
+      width: 100%; max-width: 720px; box-sizing: border-box;
     }
     .main-health h2 {
       margin: 0 0 6px; font-size: 18px; font-weight: 700; letter-spacing: .15px;
@@ -523,13 +524,17 @@
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
 
     .hs-all-done {
-      display: none;
+      display: flex;
+      visibility: hidden;
+      pointer-events: none;
       align-items: flex-start; gap: 12px;
       margin: 0 0 16px; padding: 14px 16px;
       border-radius: 8px; background: #ECFDDC;
       color: #1A1B24;
+      min-height: 64px;
+      box-sizing: border-box;
     }
-    .hs-all-done.show { display: flex; }
+    .hs-all-done.show { visibility: visible; pointer-events: auto; }
     .hs-all-done .material-icons-round {
       font-size: 22px; color: #1F8940; flex-shrink: 0; margin-top: 1px;
     }
@@ -594,10 +599,17 @@
 
     .app-main {
       flex: 1; min-width: 0; padding: 24px; background: #F7F8FA;
+      scrollbar-gutter: stable;
     }
     .page-panel {
       background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
       padding: 24px; min-height: 420px; position: relative;
+      width: 100%; max-width: 880px; box-sizing: border-box;
+    }
+    .page-panel.is-checklist {
+      /* checklist page: no panel frame so steps don’t sit in a bordered box */
+      background: transparent; border: none; border-radius: 0; padding: 0;
+      max-width: 720px;
     }
     .soft-lock-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -917,15 +929,12 @@
     <div class="ob-content">
     <div class="success-card">
       <div class="success-icon"><span class="material-icons-round">check</span></div>
-      <h1 class="page-title success-title" id="success-headline">You’re all set — your Synder specialist will take it from here.</h1>
-      <p class="success-sub" id="success-sub">We’ll follow up using the contact option you chose. Meantime, a few things you can explore in Sandbox.</p>
+      <h1 class="page-title success-title" id="success-headline">You’re all set.</h1>
+      <p class="success-sub" id="success-sub">Your Synder specialist has what they need. Open Synder and work through Setup checklist before the call.</p>
 
       <div class="contact-block" id="contact-block">
         <!-- filled by JS -->
       </div>
-
-      <p class="tips-label">Tips</p>
-      <ul class="meantime-tips" id="success-checklist"></ul>
 
       <div class="success-actions">
         <button type="button" class="btn btn-primary" id="btn-enter-app">Enter Synder →</button>
@@ -1020,6 +1029,8 @@
     contact: null,        // 'zoom' | 'phone' | 'email'
     phone: '',
     timeWindow: 'morning',
+    accountEmail: 'jane@greenleafstore.com',
+    phoneTimezone: 'Eastern Time (ET)',
     surveyIncomplete: false,
     usedShortcut: false,
     syncMode: 'summary',  // 'summary' | 'per-txn'
@@ -1349,11 +1360,17 @@
     return 'pending';
   }
 
-  function headlineFor(_outcome) {
-    // One neutral header for all outcomes (urgency/complexity variants removed).
+  function headlineFor(_outcome, contactPref) {
+    const email = state.accountEmail || 'your account email';
+    const subs = {
+      zoom: 'Your Zoom details are below. Open Synder and work through Setup checklist before the call.',
+      phone: 'We’ll call you in the window below. Open Synder and work through Setup checklist before the call.',
+      email: 'We’ll write to ' + email + '. Open Synder and work through Setup checklist before the call.',
+      pending: 'Your Synder specialist will reach out soon. Open Synder and work through Setup checklist to prepare.',
+    };
     return {
-      h: 'You’re all set — your Synder specialist will take it from here.',
-      s: 'We’ll follow up using the contact option you chose. Meantime, a few things you can explore in Sandbox.',
+      h: 'You’re all set.',
+      s: subs[contactPref] || subs.pending,
     };
   }
 
@@ -1368,11 +1385,12 @@
 
   function zoomConfirmedHtml(slot) {
     const when = slot ? (slot.dayLabel + ' · ' + slot.time + ' · 45 min') : 'Tue 22 Apr · 10:30 AM · 45 min';
+    const email = state.accountEmail || 'your account email';
     return `
       <h3>Zoom session confirmed</h3>
       <div class="contact-meta">
         <div class="row"><span class="material-icons-round">event</span> ${when}</div>
-        <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent to your email</div>
+        <div class="row"><span class="material-icons-round">mail</span> Calendar invite → ${email}</div>
       </div>`;
   }
 
@@ -1479,17 +1497,25 @@
         bindHubspotCalendar();
       }
     } else if (pref === 'phone') {
+      const windowFull = {
+        morning: 'Morning (9:00–12:00)',
+        afternoon: 'Afternoon (12:00–17:00)',
+        evening: 'Evening (17:00–20:00)',
+      }[state.timeWindow] || 'Morning (9:00–12:00)';
+      const tz = state.phoneTimezone || 'Eastern Time (ET)';
       el.innerHTML = `
         <h3>We’ll call you</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">schedule</span> ${windowLabel} window · ${phoneDisplay}</div>
-          <div class="row"><span class="material-icons-round">support_agent</span> We’ll do our best to reach you in your window</div>
+          <div class="row"><span class="material-icons-round">call</span> ${phoneDisplay}</div>
+          <div class="row"><span class="material-icons-round">schedule</span> ${windowFull} · ${tz}</div>
+          <div class="row"><span class="material-icons-round">support_agent</span> We’ll do our best to reach you in that window</div>
         </div>`;
     } else if (pref === 'email') {
+      const email = state.accountEmail || 'your account email';
       el.innerHTML = `
         <h3>We’ll email you first</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">mail</span> Check your account email for a short questionnaire</div>
+          <div class="row"><span class="material-icons-round">mail</span> ${email}</div>
           <div class="row"><span class="material-icons-round">schedule</span> Expect a reply within one business day</div>
           <div class="row"><span class="material-icons-round">support_agent</span> Your Synder specialist will propose next steps by email</div>
         </div>`;
@@ -1501,7 +1527,7 @@
   function renderSuccess() {
     const outcome = deriveOutcome();
     const contact = deriveContact();
-    const hl = headlineFor(outcome);
+    const hl = headlineFor(outcome, contact);
     $('#success-headline').textContent = hl.h;
     $('#success-sub').textContent = hl.s;
 
@@ -1517,23 +1543,6 @@
     }
 
     renderContactBlock(contact);
-
-    const multi = outcome.complexity === 'multi';
-    const items = multi
-      ? [
-          { t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
-          { t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
-          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
-        ]
-      : [
-          { t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
-          { t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
-          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
-        ];
-    $('#success-checklist').innerHTML = items.map(it =>
-      `<li><span class="tip-body"><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
-    ).join('');
-
     $('#contact-chips').classList.add('show');
   }
 
@@ -1684,6 +1693,7 @@
     const panel = $('#page-panel');
     const banner = $('#lock-banner');
     panel.classList.toggle('locked', locked);
+    panel.classList.toggle('is-checklist', page === 'setup-checklist');
     banner.classList.toggle('show', locked);
 
     const titles = {
