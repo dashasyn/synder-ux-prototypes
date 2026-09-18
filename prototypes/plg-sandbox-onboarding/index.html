@@ -11,7 +11,7 @@
       success with result-only contact (“we’ll be in touch”) + complexity=high.
     - “I’ll fill this in later” on every survey step → success with surveyIncomplete=true, complexity=high.
     - Back preserves answers; survey state survives view switches until Reset.
-    - Outcome/Contact chips in the dark bar are Success-view demo overrides only.
+    - Outcome chips + Contact (Zoom/Phone/Email only) in the dark bar are Success-view demo overrides.
     - Health Score: Summary /6 vs Per-txn /5; Smart Rules callout after test sync
       (not scored); completing score does not unlock Auto-sync / Historical / Smart Rules.
     - Health Layout: Sidebar (full widget) | Main (compact sidebar + full checklist on Dashboard).
@@ -651,11 +651,9 @@
       </label>
       <label>Contact
         <select id="demo-contact">
-          <option value="auto">From survey</option>
           <option value="zoom">Zoom</option>
           <option value="phone">Phone</option>
           <option value="email">Email</option>
-          <option value="book">We’ll be in touch</option>
         </select>
       </label>
     </div>
@@ -976,7 +974,7 @@
     checklistOpen: true,
     appPage: 'dashboard',
     demoOutcome: 'auto',
-    demoContact: 'auto',
+    demoContact: 'zoom',
   };
 
   const CHECKPOINTS = {
@@ -1213,9 +1211,11 @@
   }
 
   function deriveContact() {
-    if (state.demoContact !== 'auto') return state.demoContact;
-    if (state.surveyIncomplete || state.usedShortcut || !state.contact) return 'book';
-    return state.contact;
+    // Contact has only Zoom / Phone / Email (survey options). Demo bar forces one of these.
+    const allowed = ['zoom', 'phone', 'email'];
+    if (allowed.includes(state.demoContact)) return state.demoContact;
+    if (allowed.includes(state.contact)) return state.contact;
+    return 'email';
   }
 
   function headlineFor(outcome) {
@@ -1276,12 +1276,12 @@
           <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
         </div>`;
     } else {
-      // fill-later / shortcut / no contact pref — result only, never a booking CTA
+      // Fallback: treat as email result (only Zoom / Phone / Email exist)
       el.innerHTML = `
-        <h3>We’ll be in touch</h3>
+        <h3>Your Synder specialist will be in touch</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">support_agent</span> A Synder specialist will reach out to walk through your setup and activate your account.</div>
-          <div class="row"><span class="material-icons-round">schedule</span> Expect contact within one business day</div>
+          <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
+          <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
         </div>`;
     }
   }
@@ -1292,6 +1292,8 @@
     const hl = headlineFor(outcome);
     $('#success-headline').textContent = hl.h;
     $('#success-sub').textContent = hl.s;
+    state.demoContact = contact;
+    $('#demo-contact').value = contact;
     renderContactBlock(contact);
 
     const multi = outcome.complexity === 'multi';
@@ -1586,13 +1588,13 @@
     state.checklistOpen = true;
     state.appPage = 'dashboard';
     state.demoOutcome = 'auto';
-    state.demoContact = 'auto';
+    state.demoContact = 'zoom';
 
     $$('.opt-card').forEach(c => c.classList.remove('selected'));
     $$('#time-chips .time-chip').forEach(c => c.classList.toggle('active', c.dataset.time === 'morning'));
     $('#phone-number').value = '';
     $('#demo-outcome').value = 'auto';
-    $('#demo-contact').value = 'auto';
+    $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
     $$('#seg-layout button').forEach(b => b.classList.toggle('active', b.dataset.layout === 'sidebar'));
