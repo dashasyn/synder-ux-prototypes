@@ -11,8 +11,9 @@
     - Activation-session shortcut on steps 1–2 jumps to step 3 (contact) — never Success.
     - Success: one neutral header for all outcomes; contact block kept; beige CSM callout removed.
     - Zoom + completed survey → HubSpot-style calendar; Phone / Email contact results as before.
-    - Health Score: Main-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
-    - Soft-lock + Book free setup call (FDD); no named specialist.
+    - App: Dashboard is a normal welcome/summary placeholder; Setup checklist is its own nav page.
+    - Setup checklist: Main-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
+    - Soft-lock: Learn + talk-to-specialist only (no Book CTAs — call booked on Success).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -483,32 +484,12 @@
     }
     .hs-list .ico .material-icons-round { font-size: 12px; }
     .hs-list li.done { color: #6B778C; }
-    .hs-next {
-      font-size: 12px; line-height: 16px; color: #1A1B24;
-      background: #E0EBFD; border-radius: 4px; padding: 8px;
-      margin-bottom: 8px;
-    }
-    .hs-next strong { display: block; font-size: 11px; color: #0053CC;
-      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
-    .hs-book {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 12px; color: #0053CC; text-decoration: underline; cursor: pointer;
-      margin-top: 4px;
-    }
-    .hs-book .material-icons-round { font-size: 14px; }
     .hs-help {
       display: flex; align-items: flex-start; gap: 4px;
       font-size: 12px; line-height: 16px; color: #6B778C;
       margin-bottom: 4px;
     }
     .hs-help .material-icons-round { font-size: 14px; color: #0053CC; }
-    .hs-rules {
-      display: none; margin-top: 8px; padding: 8px;
-      background: #F2F6FC; border-radius: 4px;
-      font-size: 12px; line-height: 16px; color: #1A1B24;
-    }
-    .hs-rules.show { display: block; }
-    .hs-rules a { color: #0053CC; text-decoration: underline; cursor: pointer; }
     .hs-compact-cta {
       display: none; appearance: none; border: none; background: none;
       color: #0053CC; font: inherit; font-size: 12px; font-weight: 500;
@@ -516,7 +497,7 @@
       align-items: center; gap: 4px;
     }
     .hs-compact-cta .material-icons-round { font-size: 14px; }
-    /* Main-only: sidebar keeps a progress chip; full checklist lives on Dashboard */
+    /* Main-only: sidebar keeps a progress chip; full checklist lives on Setup checklist page */
     .sidebar-health .hs-full { display: none; }
     .sidebar-health .hs-compact-cta { display: inline-flex; }
 
@@ -531,10 +512,6 @@
     .main-health h2 .material-icons-round { font-size: 20px; color: #0053CC; }
     .main-health .hs-meta { font-size: 13px; margin-bottom: 8px; }
     .main-health .hs-bar { height: 8px; margin-bottom: 16px; }
-    .main-health .hs-next { margin-bottom: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
-    .main-health .hs-help { font-size: 13px; margin-bottom: 4px; }
-    .main-health .hs-book { font-size: 13px; margin-bottom: 4px; display: inline-flex; }
-    .main-health .hs-rules { margin-top: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
     .main-health-anchor { scroll-margin-top: 64px; }
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
 
@@ -622,15 +599,6 @@
     }
     .soft-lock-banner .banner-help:hover { text-decoration: underline; }
     .soft-lock-banner .banner-help .material-icons-round { font-size: 18px; }
-    .soft-lock-banner .banner-book {
-      display: inline-flex; align-items: center; gap: 4px;
-      height: 32px; padding: 0 12px; border-radius: 4px;
-      background: var(--color-primary, #0053CC); color: #fff;
-      font: inherit; font-size: 14px; font-weight: 500;
-      text-decoration: none; cursor: pointer; border: none;
-    }
-    .soft-lock-banner .banner-book:hover { filter: brightness(1.05); }
-    .soft-lock-banner .banner-book .ext { font-size: 12px; opacity: .9; }
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
     .placeholder-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
@@ -726,7 +694,7 @@
       <div class="seg" id="seg-view">
         <button type="button" data-view="survey" class="active">Survey</button>
         <button type="button" data-view="success">Success</button>
-        <button type="button" data-view="app">App (Health Score)</button>
+        <button type="button" data-view="app">App (Setup checklist)</button>
       </div>
     </div>
 
@@ -739,7 +707,7 @@
     </div>
 
     <div class="proto-group proto-app-only">
-      <span class="proto-label">Score</span>
+      <span class="proto-label">Progress</span>
       <div class="seg" id="seg-score">
         <button type="button" data-score="empty" class="active">Empty</button>
         <button type="button" data-score="mid">Mid</button>
@@ -966,7 +934,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════ FLOW C — App + Health Score ═══════════════ -->
+  <!-- ═══════════════ FLOW C — App + Setup checklist ═══════════════ -->
   <div class="view" id="view-app">
     <div class="app-shell">
       <div class="app-topbar">
@@ -981,6 +949,9 @@
         <aside class="app-sidebar">
           <button type="button" class="nav-item active" data-page="dashboard">
             <span class="material-icons">dashboard</span> Dashboard
+          </button>
+          <button type="button" class="nav-item" data-page="setup-checklist">
+            <span class="material-icons">checklist</span> Setup checklist
           </button>
           <button type="button" class="nav-item" data-page="transactions">
             <span class="material-icons">receipt_long</span> Transactions
@@ -1001,13 +972,13 @@
             <span class="material-icons lock">lock</span>
           </button>
 
-          <!-- Setup Health Score chip (sandbox only) — full checklist on Dashboard -->
+          <!-- Compact progress chip — full checklist on Setup checklist page -->
           <div class="sidebar-health" id="health-widget">
-            <h4><span class="material-icons-round">favorite</span> Setup health</h4>
+            <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
             <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="View checklist on main screen">
-              View checklist <span class="material-icons-round">arrow_forward</span>
+            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
+              Open checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
 
@@ -1026,7 +997,6 @@
                 <strong>Available after your setup session</strong>
                 <div>We’ll verify your setup with your Synder specialist before unlocking this feature.</div>
                 <div class="actions">
-                  <a href="#" class="banner-book" id="banner-book">Book free setup call <span class="ext" aria-hidden="true">↗</span></a>
                   <button type="button" class="btn btn-outlined" id="banner-learn">Learn what we verify</button>
                   <a href="#" class="banner-help" id="banner-talk"><span class="material-icons-round">support_agent</span> Talk to your Synder specialist</a>
                 </div>
@@ -1107,10 +1077,10 @@
       {
         id: 'csm',
         title: 'Complete setup call',
-        desc: 'Book a free setup call so your Synder specialist can verify onboarding.',
-        where: 'Book free setup call',
-        whereHint: 'Book free setup call',
-        book: true,
+        desc: 'Attend your scheduled setup call so your Synder specialist can verify onboarding.',
+        where: 'Talk to your Synder specialist',
+        whereHint: 'Talk to specialist',
+        talk: true,
       },
     ],
     'per-txn': [
@@ -1145,10 +1115,10 @@
       {
         id: 'csm',
         title: 'Complete setup call',
-        desc: 'Book a free setup call so your Synder specialist can verify onboarding.',
-        where: 'Book free setup call',
-        whereHint: 'Book free setup call',
-        book: true,
+        desc: 'Attend your scheduled setup call so your Synder specialist can verify onboarding.',
+        where: 'Talk to your Synder specialist',
+        whereHint: 'Talk to specialist',
+        talk: true,
       },
     ],
   };
@@ -1583,7 +1553,7 @@
 
   $('#btn-enter-app').addEventListener('click', () => setView('app'));
 
-  /* ── health score ────────────────────────────────────── */
+  /* ── setup checklist ─────────────────────────────────── */
   function presetDoneIds(prog) {
     const list = CHECKPOINTS[state.syncMode];
     const n = list.length;
@@ -1614,16 +1584,16 @@
     const total = list.length;
     const count = list.filter(c => done.has(c.id)).length;
     const pct = Math.round((count / total) * 100);
-    const next = list.find(c => !done.has(c.id));
-    const showRules = done.has('test-sync');
-    const nextHtml = next
-      ? `<strong>Next</strong>${next.desc}`
-      : `<strong>Next</strong>All scored steps complete — Synder specialist verification may still be pending. Completing the score does not unlock Auto-sync, Historical import, or Smart Rules.`;
     const stepsHtml = list.map(c => {
       const isDone = done.has(c.id);
-      const whereBtn = c.book
-        ? `<button type="button" class="hs-where hs-book-link" data-book="1"><span class="material-icons-round">event</span> ${c.where}</button>`
-        : `<button type="button" class="hs-where" data-where="${c.id}"><span class="material-icons-round">open_in_new</span> ${c.where}</button>`;
+      let whereBtn = '';
+      if (c.where) {
+        if (c.talk) {
+          whereBtn = `<button type="button" class="hs-where hs-talk-link" data-talk="1"><span class="material-icons-round">support_agent</span> ${c.where}</button>`;
+        } else {
+          whereBtn = `<button type="button" class="hs-where" data-where="${c.id}"><span class="material-icons-round">open_in_new</span> ${c.where}</button>`;
+        }
+      }
       return `<article class="hs-step-card${isDone ? ' is-done' : ''}" data-step-id="${c.id}">
         <div class="hs-step-top">
           <span class="ico ${isDone ? 'done' : 'todo'}">
@@ -1642,7 +1612,7 @@
         </div>
       </article>`;
     }).join('');
-    return { list, done, total, count, pct, next, showRules, nextHtml, stepsHtml };
+    return { list, done, total, count, pct, stepsHtml };
   }
 
   function paintScoreMeta(metaEl, barEl, model) {
@@ -1663,30 +1633,15 @@
     paintScoreMeta($('#main-hs-meta', root), $('#main-hs-bar', root), model);
     const stepsEl = $('#main-hs-steps', root);
     if (stepsEl) stepsEl.innerHTML = model.stepsHtml;
-    const nextEl = $('#main-hs-next', root);
-    if (nextEl) {
-      nextEl.style.display = 'block';
-      nextEl.innerHTML = model.nextHtml;
-    }
-    const rulesEl = $('#main-hs-rules', root);
-    if (rulesEl) rulesEl.classList.toggle('show', model.showRules);
   }
 
   function mainHealthPanelHtml(model) {
     return `
-      <section class="main-health main-health-anchor" id="main-health" aria-label="Setup health checklist">
-        <h2><span class="material-icons-round">favorite</span> Setup health</h2>
+      <section class="main-health main-health-anchor" id="main-health" aria-label="Setup checklist">
+        <h2><span class="material-icons-round">checklist</span> Setup checklist</h2>
         <div class="hs-meta" id="main-hs-meta">Setup: ${model.count} / ${model.total} complete</div>
         <div class="hs-bar${model.count === model.total ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
         <div class="hs-steps" id="main-hs-steps">${model.stepsHtml}</div>
-        <div class="hs-next" id="main-hs-next">${model.nextHtml}</div>
-        <a class="hs-book" id="main-hs-book" href="#">
-          <span class="material-icons-round">event</span> Book free setup call
-        </a>
-        <div class="hs-rules${model.showRules ? ' show' : ''}" id="main-hs-rules">
-          Your sync looks active — any transaction exceptions? Smart Rules can help.
-          <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
-        </div>
       </section>`;
   }
 
@@ -1717,8 +1672,8 @@
   }
 
   function focusMainChecklist() {
-    if (state.appPage !== 'dashboard') {
-      state.appPage = 'dashboard';
+    if (state.appPage !== 'setup-checklist') {
+      state.appPage = 'setup-checklist';
       renderApp();
     }
     const el = $('#main-health');
@@ -1739,6 +1694,7 @@
 
     const titles = {
       dashboard: 'Dashboard',
+      'setup-checklist': 'Setup checklist',
       transactions: 'Transactions',
       summaries: 'Summaries',
       'auto-sync': 'Auto-sync',
@@ -1750,11 +1706,20 @@
     const model = healthModel();
 
     let body = '';
-    if (page === 'dashboard') {
+    if (page === 'setup-checklist') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle" style="margin-bottom:16px">Sandbox overview — complete setup using the checklist below. Mark steps done as you finish them.</p>
+        <p class="page-subtitle" style="margin-bottom:16px">Mark steps done as you finish them. Progress is Summary /6 or Per-transaction /5 depending on sync mode.</p>
         ${mainHealthPanelHtml(model)}`;
+    } else if (page === 'dashboard') {
+      body = `
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:16px">Welcome to your Synder Sandbox — a quick overview of your org.</p>
+        <div class="placeholder-grid">
+          <div class="placeholder-card"><div class="ph-title">Sync summary</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Recent activity</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Connected channels</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        </div>`;
     } else if (locked) {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
@@ -1807,7 +1772,7 @@
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b === btn));
     // Re-apply current score preset for the new mode’s checkpoint count
     presetDoneIds(state.scoreProgress);
-    if (state.appPage === 'dashboard') renderAppPage();
+    if (state.appPage === 'setup-checklist') renderAppPage();
     renderHealth();
   });
 
@@ -1816,7 +1781,7 @@
     if (!btn) return;
     presetDoneIds(btn.dataset.score);
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b === btn));
-    if (state.appPage === 'dashboard') renderAppPage();
+    if (state.appPage === 'setup-checklist') renderAppPage();
     renderHealth();
   });
 
@@ -1895,7 +1860,7 @@
     const whereBtn = e.target.closest('.hs-where');
     if (whereBtn) {
       e.preventDefault();
-      if (whereBtn.dataset.book === '1' || whereBtn.classList.contains('hs-book-link')) {
+      if (whereBtn.dataset.talk === '1' || whereBtn.classList.contains('hs-talk-link')) {
         const prev = whereBtn.innerHTML;
         whereBtn.textContent = 'Opening…';
         setTimeout(() => { whereBtn.innerHTML = prev; }, 800);
@@ -1904,32 +1869,12 @@
       if (whereBtn.dataset.where) navigateWhere(whereBtn.dataset.where);
       return;
     }
-    const book = e.target.closest('#hs-book, #main-hs-book, #banner-book, #banner-talk');
-    if (book) {
+    const talk = e.target.closest('#banner-talk');
+    if (talk) {
       e.preventDefault();
-      const t = book;
-      const prev = t.tagName === 'BUTTON' || t.classList.contains('banner-book')
-        ? t.textContent
-        : null;
-      if (t.tagName === 'BUTTON' || t.classList.contains('banner-book')) {
-        const label = t.classList.contains('banner-book') ? 'Book free setup call ↗' : (prev || '');
-        t.textContent = 'Opening…';
-        setTimeout(() => {
-          if (t.classList.contains('banner-book')) {
-            t.innerHTML = 'Book free setup call <span class="ext" aria-hidden="true">↗</span>';
-          } else {
-            t.textContent = label;
-          }
-        }, 800);
-      } else if (t.classList.contains('hs-book')) {
-        const html = t.innerHTML;
-        t.textContent = 'Opening…';
-        setTimeout(() => { t.innerHTML = html; }, 800);
-      } else if (t.id === 'banner-talk') {
-        const html = t.innerHTML;
-        t.textContent = 'Opening…';
-        setTimeout(() => { t.innerHTML = html; }, 800);
-      }
+      const html = talk.innerHTML;
+      talk.textContent = 'Opening…';
+      setTimeout(() => { talk.innerHTML = html; }, 800);
     }
     if (e.target.closest('#banner-learn')) {
       e.preventDefault();
