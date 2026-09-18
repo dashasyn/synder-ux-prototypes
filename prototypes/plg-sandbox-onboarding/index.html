@@ -436,11 +436,11 @@
     }
     .hs-next strong { display: block; font-size: 11px; color: #0053CC;
       text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
-    .hs-book {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 12px; color: #0053CC; text-decoration: underline; cursor: pointer;
+    .hs-help {
+      display: flex; align-items: flex-start; gap: 4px;
+      font-size: 12px; line-height: 16px; color: #6B778C;
     }
-    .hs-book .material-icons-round { font-size: 14px; }
+    .hs-help .material-icons-round { font-size: 14px; color: #0053CC; }
     .hs-rules {
       display: none; margin-top: 8px; padding: 8px;
       background: #F2F6FC; border-radius: 4px;
@@ -481,7 +481,7 @@
     .main-health .hs-list li:last-child { border-bottom: none; }
     .main-health .hs-list li:nth-child(even) { background: #fff; }
     .main-health .hs-next { margin-bottom: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
-    .main-health .hs-book { font-size: 13px; margin-bottom: 4px; }
+    .main-health .hs-help { font-size: 13px; margin-bottom: 4px; }
     .main-health .hs-rules { margin-top: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
     .main-health-anchor { scroll-margin-top: 64px; }
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
@@ -506,6 +506,11 @@
     .soft-lock-banner .actions {
       display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
     }
+    .soft-lock-banner .banner-help {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 8px 0; font-weight: 500;
+    }
+    .soft-lock-banner .banner-help .material-icons-round { font-size: 18px; }
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
     .placeholder-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
@@ -848,9 +853,10 @@
               </button>
               <ul class="hs-list open" id="hs-list"></ul>
               <div class="hs-next" id="hs-next"></div>
-              <a class="hs-book" id="hs-book" href="#">
-                <span class="material-icons-round">event</span> Book setup session
-              </a>
+              <div class="hs-help" id="hs-help">
+                <span class="material-icons-round">support_agent</span>
+                <span>We’ll unlock this after your setup session with your Synder specialist.</span>
+              </div>
               <div class="hs-rules" id="hs-rules">
                 Your sync looks active — any transaction exceptions? Smart Rules can help.
                 <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
@@ -876,7 +882,7 @@
                 <strong>Available after your setup session</strong>
                 <div>We’ll verify your setup with your Synder specialist before unlocking this feature.</div>
                 <div class="actions">
-                  <button type="button" class="btn btn-primary" id="banner-book">Book session</button>
+                  <span class="banner-help"><span class="material-icons-round">support_agent</span> Talk to your Synder specialist</span>
                   <button type="button" class="btn btn-outlined" id="banner-learn">Learn what we verify</button>
                 </div>
               </div>
@@ -938,7 +944,7 @@
     clearing: 'Confirm your clearing account under Settings → Sales.',
     'test-sync': 'Run a test sync and confirm it completes with 0 errors.',
     historical: 'Scope historical import — or confirm it isn’t needed.',
-    csm: 'Book your setup session so your Synder specialist can verify onboarding.',
+    csm: 'Your Synder specialist will verify onboarding in your setup session.',
   };
 
   /* ── helpers ─────────────────────────────────────────── */
@@ -1339,9 +1345,10 @@
         <div class="hs-bar${model.count === model.total ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
         <ul class="hs-list open" id="main-hs-list">${model.listHtml}</ul>
         <div class="hs-next" id="main-hs-next">${model.nextHtml}</div>
-        <a class="hs-book" id="main-hs-book" href="#">
-          <span class="material-icons-round">event</span> Book setup session
-        </a>
+        <div class="hs-help" id="main-hs-help">
+          <span class="material-icons-round">support_agent</span>
+          <span>We’ll unlock this after your setup session with your Synder specialist.</span>
+        </div>
         <div class="hs-rules${model.showRules ? ' show' : ''}" id="main-hs-rules">
           Your sync looks active — any transaction exceptions? Smart Rules can help.
           <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
@@ -1538,20 +1545,7 @@
     updateContinueButtons();
   }
 
-  // Book links — demo only
   document.addEventListener('click', e => {
-    if (e.target.closest('#hs-book') || e.target.closest('#main-hs-book') || e.target.closest('#banner-book')) {
-      e.preventDefault();
-      // stay in prototype; subtle feedback
-      const t = e.target.closest('a,button');
-      if (t) {
-        const prev = t.textContent;
-        if (t.tagName === 'BUTTON') {
-          t.textContent = 'Opening…';
-          setTimeout(() => { t.textContent = prev; }, 800);
-        }
-      }
-    }
     if (e.target.closest('#banner-learn')) {
       e.preventDefault();
     }
