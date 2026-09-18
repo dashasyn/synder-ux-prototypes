@@ -522,14 +522,27 @@
     .main-health-anchor { scroll-margin-top: 64px; }
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
 
+    .hs-all-done {
+      display: none;
+      align-items: flex-start; gap: 12px;
+      margin: 0 0 16px; padding: 14px 16px;
+      border-radius: 8px; background: #ECFDDC;
+      color: #1A1B24;
+    }
+    .hs-all-done.show { display: flex; }
+    .hs-all-done .material-icons-round {
+      font-size: 22px; color: #1F8940; flex-shrink: 0; margin-top: 1px;
+    }
+    .hs-all-done strong { display: block; font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+    .hs-all-done p { margin: 0; font-size: 13px; line-height: 18px; color: #3D4A5C; }
     .hs-steps { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; }
     .hs-step-card {
-      border: 1px solid #DFE4EC; border-radius: 8px;
+      border: none; border-radius: 8px;
       background: #F7F8FA; padding: 14px 16px;
-      transition: border-color .15s, background .15s;
+      transition: background .15s;
     }
     .hs-step-card.is-done {
-      background: #fff; border-color: #C6E8B5;
+      background: #F3FAF0;
     }
     .hs-step-top {
       display: flex; align-items: flex-start; gap: 12px;
@@ -1563,7 +1576,7 @@
         if (c.talk) {
           whereBtn = `<button type="button" class="hs-where hs-talk-link" data-talk="1"><span class="material-icons-round">support_agent</span> ${c.where}</button>`;
         } else {
-          whereBtn = `<button type="button" class="hs-where" data-where="${c.id}"><span class="material-icons-round">open_in_new</span> ${c.where}</button>`;
+          whereBtn = `<button type="button" class="hs-where" data-where="${c.id}">${c.where}</button>`;
         }
       }
       return `<article class="hs-step-card${isDone ? ' is-done' : ''}" data-step-id="${c.id}">
@@ -1605,14 +1618,23 @@
     paintScoreMeta($('#main-hs-meta', root), $('#main-hs-bar', root), model);
     const stepsEl = $('#main-hs-steps', root);
     if (stepsEl) stepsEl.innerHTML = model.stepsHtml;
+    const doneBanner = $('#hs-all-done', root);
+    if (doneBanner) doneBanner.classList.toggle('show', model.count === model.total && model.total > 0);
   }
 
   function mainHealthPanelHtml(model) {
+    const allDone = model.count === model.total && model.total > 0;
     return `
       <section class="main-health main-health-anchor" id="main-health" aria-label="Setup checklist">
-        <h2><span class="material-icons-round">checklist</span> Setup checklist</h2>
+        <div class="hs-all-done${allDone ? ' show' : ''}" id="hs-all-done" role="status">
+          <span class="material-icons-round">celebration</span>
+          <div>
+            <strong>Nice work — you’re ready for your setup call</strong>
+            <p>Every checklist step is done. Your Synder specialist can take it from here and get you fully live.</p>
+          </div>
+        </div>
         <div class="hs-meta" id="main-hs-meta">Setup: ${model.count} / ${model.total} complete</div>
-        <div class="hs-bar${model.count === model.total ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
+        <div class="hs-bar${allDone ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
         <div class="hs-steps" id="main-hs-steps">${model.stepsHtml}</div>
       </section>`;
   }
@@ -1680,8 +1702,7 @@
     let body = '';
     if (page === 'setup-checklist') {
       body = `
-        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle" style="margin-bottom:16px">Mark steps done as you finish them. Progress is Summary /6 or Per-transaction /5 depending on sync mode.</p>
+        <h1 class="page-title" style="margin-bottom:16px">${title}</h1>
         ${mainHealthPanelHtml(model)}`;
     } else if (page === 'dashboard') {
       body = `
