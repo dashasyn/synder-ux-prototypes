@@ -6,14 +6,15 @@
   <title>PLG Sandbox onboarding — Synder</title>
   <!--
     Logic improvements vs earlier mockups:
-    - Continue/Done stay disabled until a valid selection (phone needs number).
+    - Continue/Done stay enabled; empty click shows inline validation (clears on select).
     - Activation-session shortcut from step 1 or 2 skips remaining questions →
       success with booking emphasis + complexity=high.
-    - “I’ll fill this in later” → success with surveyIncomplete=true, complexity=high.
+    - “I’ll fill this in later” on every survey step → success with surveyIncomplete=true, complexity=high.
     - Back preserves answers; survey state survives view switches until Reset.
     - Outcome/Contact chips in the dark bar are Success-view demo overrides only.
     - Health Score: Summary /6 vs Per-txn /5; Smart Rules callout after test sync
       (not scored); completing score does not unlock Auto-sync / Historical / Smart Rules.
+    - User-facing copy uses “Synder specialist” (not CSM).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -235,6 +236,16 @@
     .survey-footer .btn-back .material-icons-round { font-size: 16px; }
     .survey-footer .grow { flex: 1; }
     .survey-footer .btn { min-width: 108px; }
+    .survey-footer .btn-back + .fill-later { margin-left: 4px; }
+
+    .field-error {
+      display: none; align-items: flex-start; gap: 6px;
+      margin-top: 14px; padding: 10px 12px; border-radius: 6px;
+      background: #FDECEA; border: 1px solid #F5C6C2;
+      color: #B42318; font-size: 13px; line-height: 18px;
+    }
+    .field-error.show { display: flex; }
+    .field-error .material-icons-round { font-size: 18px; color: #B42318; margin-top: 0; }
 
     /* ── Success ──────────────────────────────────────── */
     #view-success {
@@ -542,8 +553,8 @@
 
       <!-- Step 1 -->
       <div class="survey-step active" data-step="1" id="step-1">
-        <h2 class="q-title">How many sales channels / payment platforms?</h2>
-        <p class="q-helper">We’ll tailor setup guidance to your stack.</p>
+        <h2 class="q-title">How many sales channels or payment platforms are you connecting?</h2>
+        <p class="q-helper">This helps us understand how involved your setup will be.</p>
         <div class="opt-list" id="opts-channels">
           <div class="opt-card" data-value="1" role="radio" tabindex="0">
             <div class="radio-dot"></div>
@@ -554,39 +565,55 @@
           </div>
           <div class="opt-card" data-value="2-3" role="radio" tabindex="0">
             <div class="radio-dot"></div>
-            <span class="opt-label">2–3 platforms</span>
+            <div>
+              <span class="opt-label">2–3 platforms</span>
+              <span class="opt-sub">e.g. Stripe + Shopify, or PayPal + Square</span>
+            </div>
           </div>
           <div class="opt-card" data-value="4+" role="radio" tabindex="0">
             <div class="radio-dot"></div>
-            <span class="opt-label">4 or more</span>
+            <div>
+              <span class="opt-label">4 or more</span>
+              <span class="opt-sub">Multiple channels or marketplaces</span>
+            </div>
           </div>
           <div class="opt-card" data-value="not-sure" role="radio" tabindex="0">
             <div class="radio-dot"></div>
-            <span class="opt-label">Not sure yet</span>
+            <div>
+              <span class="opt-label">Not sure yet</span>
+              <span class="opt-sub">I’ll figure this out as I go</span>
+            </div>
           </div>
         </div>
         <div class="or-divider">or</div>
         <div class="opt-list">
           <div class="opt-card soft" data-value="shortcut" data-group="channels" role="radio" tabindex="0" id="shortcut-1">
             <div class="radio-dot"></div>
-            <span class="opt-label">Let’s just have an activation session — I’ll tell you everything there</span>
+            <div>
+              <span class="opt-label">Let’s just have an activation session — I’ll tell you everything there</span>
+              <span class="opt-sub">Skip the form and go straight to booking</span>
+            </div>
           </div>
         </div>
+        <div class="field-error" id="err-1" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span>Please select an option to continue.</span>
+        </div>
         <div class="survey-footer">
-          <button type="button" class="fill-later" id="fill-later">I’ll fill this in later</button>
+          <button type="button" class="fill-later">I’ll fill this in later</button>
           <div class="grow"></div>
-          <button type="button" class="btn btn-primary" id="btn-continue-1" disabled>Continue</button>
+          <button type="button" class="btn btn-primary" id="btn-continue-1">Continue</button>
         </div>
       </div>
 
       <!-- Step 2 -->
       <div class="survey-step" data-step="2" id="step-2">
-        <h2 class="q-title">When do you need books fully synced / reconciled?</h2>
-        <p class="q-helper">Helps us prioritize your onboarding.</p>
+        <h2 class="q-title">When do you need your books fully synced and reconciled?</h2>
+        <p class="q-helper">We’ll prioritize your support based on your timeline.</p>
         <div class="opt-list" id="opts-urgency">
           <div class="opt-card" data-value="no-rush" role="radio" tabindex="0">
             <div class="radio-dot"></div>
-            <span class="opt-label">No rush — getting started gradually</span>
+            <span class="opt-label">No rush — I’m getting started gradually</span>
           </div>
           <div class="opt-card" data-value="2-weeks" role="radio" tabindex="0">
             <div class="radio-dot"></div>
@@ -601,15 +628,23 @@
         <div class="opt-list">
           <div class="opt-card soft" data-value="shortcut" data-group="urgency" role="radio" tabindex="0" id="shortcut-2">
             <div class="radio-dot"></div>
-            <span class="opt-label">Let’s just have an activation session — I’ll tell you everything there</span>
+            <div>
+              <span class="opt-label">Let’s just have an activation session — I’ll tell you everything there</span>
+              <span class="opt-sub">Skip the form and go straight to booking</span>
+            </div>
           </div>
+        </div>
+        <div class="field-error" id="err-2" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span>Please select an option to continue.</span>
         </div>
         <div class="survey-footer">
           <button type="button" class="btn-back" id="btn-back-2">
             <span class="material-icons-round">arrow_back</span> Back
           </button>
+          <button type="button" class="fill-later">I’ll fill this in later</button>
           <div class="grow"></div>
-          <button type="button" class="btn btn-primary" id="btn-continue-2" disabled>Continue</button>
+          <button type="button" class="btn btn-primary" id="btn-continue-2">Continue</button>
         </div>
       </div>
 
@@ -619,7 +654,7 @@
         <p class="q-helper">Pick what works — we’ll follow up accordingly.</p>
         <div class="callout-beige">
           <span class="material-icons-round">info</span>
-          <div>This isn’t just a setup call — your CSM reviews your needs and shows how automation delivers full value.</div>
+          <div>This isn’t just a setup call — your Synder specialist will review your business needs and show you everything Synder can automate for you, so you get full value for what you’re paying for.</div>
         </div>
         <div class="opt-list" id="opts-contact">
           <div class="opt-card" data-value="zoom" role="radio" tabindex="0">
@@ -629,27 +664,29 @@
                 Video call (Zoom)
                 <span class="badge-rec">Recommended</span>
               </span>
-              <span class="opt-sub">Fastest — CSM configures live with you</span>
+              <span class="opt-sub">Fastest way to go live — your Synder specialist configures everything with you in real time and activates your account before the call ends.</span>
             </div>
           </div>
           <div class="opt-card" data-value="phone" role="radio" tabindex="0" id="opt-phone">
             <div class="radio-dot"></div>
             <div style="flex:1; min-width:0">
               <span class="opt-label">Phone call</span>
+              <span class="opt-sub">Your Synder specialist will call you within your preferred time window to walk through your setup and discuss what else Synder can automate for you.</span>
               <div class="phone-expand" id="phone-expand">
                 <div>
-                  <label class="field-label">Phone number</label>
+                  <label class="field-label">What’s the best number to call you on?</label>
                   <div class="phone-input-row">
                     <input class="cc" type="text" value="+1" readonly tabindex="-1" />
-                    <input type="tel" id="phone-number" placeholder="(555) 000-0000" autocomplete="tel" />
+                    <input type="tel" id="phone-number" placeholder="(415) 555-0192" autocomplete="tel" />
                   </div>
                 </div>
                 <div>
-                  <label class="field-label">Preferred time window</label>
+                  <label class="field-label">When’s the best time window for us to call?</label>
+                  <p class="opt-sub" style="margin:0 0 8px">We’ll do our best to call within your preferred window — we can’t guarantee an exact time.</p>
                   <div class="chip-row" id="time-chips">
-                    <button type="button" class="time-chip active" data-time="morning">Morning</button>
-                    <button type="button" class="time-chip" data-time="afternoon">Afternoon</button>
-                    <button type="button" class="time-chip" data-time="evening">Evening</button>
+                    <button type="button" class="time-chip active" data-time="morning">Morning (9:00 am – 12:00 pm)</button>
+                    <button type="button" class="time-chip" data-time="afternoon">Afternoon (12:00 pm – 5:00 pm)</button>
+                    <button type="button" class="time-chip" data-time="evening">Evening (5:00 pm – 8:00 pm)</button>
                   </div>
                 </div>
               </div>
@@ -659,16 +696,21 @@
             <div class="radio-dot"></div>
             <div>
               <span class="opt-label">Email first</span>
-              <span class="opt-sub">Best if your schedule is unpredictable</span>
+              <span class="opt-sub">Your Synder specialist will email you to agree a time. Works if your schedule is unpredictable.</span>
             </div>
           </div>
+        </div>
+        <div class="field-error" id="err-3" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span id="err-3-text">Please select how you’d like us to reach you.</span>
         </div>
         <div class="survey-footer">
           <button type="button" class="btn-back" id="btn-back-3">
             <span class="material-icons-round">arrow_back</span> Back
           </button>
+          <button type="button" class="fill-later">I’ll fill this in later</button>
           <div class="grow"></div>
-          <button type="button" class="btn btn-primary" id="btn-done" disabled>Done</button>
+          <button type="button" class="btn btn-primary" id="btn-done">Done</button>
         </div>
       </div>
     </div>
@@ -687,7 +729,7 @@
 
       <div class="callout-beige" style="margin-bottom:20px">
         <span class="material-icons-round">info</span>
-        <div>Your CSM will review your setup so you get full automation value — not just a connected account.</div>
+        <div>Your Synder specialist will review your setup, understand your needs, and make sure Synder is delivering full value for you — not just the basics.</div>
       </div>
 
       <p class="section-label">In the meantime, you can already</p>
@@ -749,7 +791,7 @@
             </a>
             <div class="hs-rules" id="hs-rules">
               Your sync looks active — any transaction exceptions? Smart Rules can help.
-              <a href="#">Learn more</a> · <a href="#">Ask your CSM</a>
+              <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
             </div>
           </div>
 
@@ -766,7 +808,7 @@
               <span class="material-icons-round">lock</span>
               <div>
                 <strong>Available after your setup session</strong>
-                <div>We’ll verify your setup with your CSM before unlocking this feature.</div>
+                <div>We’ll verify your setup with your Synder specialist before unlocking this feature.</div>
                 <div class="actions">
                   <button type="button" class="btn btn-primary" id="banner-book">Book session</button>
                   <button type="button" class="btn btn-outlined" id="banner-learn">Learn what we verify</button>
@@ -811,14 +853,14 @@
       { id: 'period', label: 'Aggregation period chosen + first summary Ready to sync' },
       { id: 'test-sync', label: 'Test sync completed — ≥1 summary synced, 0 errors' },
       { id: 'historical', label: 'Historical import scoped or confirmed not needed' },
-      { id: 'csm', label: 'Onboarding call completed + CSM verified' },
+      { id: 'csm', label: 'Onboarding call completed + Synder specialist verified' },
     ],
     'per-txn': [
       { id: 'channel', label: 'Sales channel connected' },
       { id: 'clearing', label: 'Clearing account confirmed (Settings → Sales)' },
       { id: 'test-sync', label: 'First successful sync — ≥3 transactions, 0 errors' },
       { id: 'historical', label: 'Historical import scoped or confirmed not needed' },
-      { id: 'csm', label: 'Onboarding call + CSM verified' },
+      { id: 'csm', label: 'Onboarding call + Synder specialist verified' },
     ],
   };
 
@@ -829,7 +871,7 @@
     clearing: 'Confirm your clearing account under Settings → Sales.',
     'test-sync': 'Run a test sync and confirm it completes with 0 errors.',
     historical: 'Scope historical import — or confirm it isn’t needed.',
-    csm: 'Book your setup session so your CSM can verify onboarding.',
+    csm: 'Book your setup session so your Synder specialist can verify onboarding.',
   };
 
   /* ── helpers ─────────────────────────────────────────── */
@@ -865,14 +907,31 @@
     }
   }
 
-  function updateContinueButtons() {
-    $('#btn-continue-1').disabled = !state.channels;
-    $('#btn-continue-2').disabled = !state.urgency;
-    let doneOk = !!state.contact;
-    if (state.contact === 'phone') {
-      doneOk = state.phone.trim().length >= 7;
+  function showStepError(step, message) {
+    const el = $('#err-' + step);
+    if (!el) return;
+    if (message && step === 3) {
+      const t = $('#err-3-text');
+      if (t) t.textContent = message;
     }
-    $('#btn-done').disabled = !doneOk;
+    el.classList.add('show');
+  }
+
+  function clearStepError(step) {
+    const el = $('#err-' + step);
+    if (!el) return;
+    el.classList.remove('show');
+  }
+
+  function clearAllStepErrors() {
+    [1, 2, 3].forEach(clearStepError);
+  }
+
+  function updateContinueButtons() {
+    // Continue/Done stay enabled; validation happens on click.
+    $('#btn-continue-1').disabled = false;
+    $('#btn-continue-2').disabled = false;
+    $('#btn-done').disabled = false;
   }
 
   /* ── survey interactions ─────────────────────────────── */
@@ -889,6 +948,8 @@
       } else {
         selectInGroup('#' + listId, state[key]);
       }
+      if (key === 'channels') clearStepError(1);
+      if (key === 'urgency') clearStepError(2);
       updateContinueButtons();
     });
     if (softId) {
@@ -899,6 +960,8 @@
           selectInGroup('#' + listId, null);
           $$('#' + listId + ' .opt-card').forEach(c => c.classList.remove('selected'));
           soft.classList.add('selected');
+          if (key === 'channels') clearStepError(1);
+          if (key === 'urgency') clearStepError(2);
           updateContinueButtons();
         });
       }
@@ -914,11 +977,13 @@
     if (!card) return;
     state.contact = card.dataset.value;
     selectInGroup('#opts-contact', state.contact);
+    clearStepError(3);
     updateContinueButtons();
   });
 
   $('#phone-number').addEventListener('input', e => {
     state.phone = e.target.value;
+    if (state.phone.trim().length >= 7) clearStepError(3);
     updateContinueButtons();
   });
 
@@ -930,6 +995,11 @@
   });
 
   $('#btn-continue-1').addEventListener('click', () => {
+    if (!state.channels) {
+      showStepError(1);
+      return;
+    }
+    clearStepError(1);
     if (state.channels === 'shortcut') {
       finishShortcut();
       return;
@@ -938,6 +1008,11 @@
   });
 
   $('#btn-continue-2').addEventListener('click', () => {
+    if (!state.urgency) {
+      showStepError(2);
+      return;
+    }
+    clearStepError(2);
     if (state.urgency === 'shortcut') {
       finishShortcut();
       return;
@@ -945,24 +1020,35 @@
     setStep(3);
   });
 
-  $('#btn-back-2').addEventListener('click', () => setStep(1));
-  $('#btn-back-3').addEventListener('click', () => setStep(2));
+  $('#btn-back-2').addEventListener('click', () => { clearStepError(2); setStep(1); });
+  $('#btn-back-3').addEventListener('click', () => { clearStepError(3); setStep(2); });
 
   $('#btn-done').addEventListener('click', () => {
+    if (!state.contact) {
+      showStepError(3, 'Please select how you’d like us to reach you.');
+      return;
+    }
+    if (state.contact === 'phone' && state.phone.trim().length < 7) {
+      showStepError(3, 'Please enter a phone number so we can reach you.');
+      return;
+    }
+    clearStepError(3);
     state.surveyIncomplete = false;
     state.usedShortcut = false;
     setView('success');
   });
 
-  $('#fill-later').addEventListener('click', () => {
+  function fillLater() {
     state.surveyIncomplete = true;
     state.usedShortcut = false;
     // Incomplete survey → treat as high complexity (multi)
     state.channels = 'not-sure';
     state.urgency = state.urgency && state.urgency !== 'shortcut' ? state.urgency : 'no-rush';
     state.contact = null;
+    clearAllStepErrors();
     setView('success');
-  });
+  }
+  $$('.fill-later').forEach(btn => btn.addEventListener('click', fillLater));
 
   function finishShortcut() {
     state.usedShortcut = true;
@@ -1003,28 +1089,28 @@
     const key = outcome.complexity + '+' + outcome.urgency;
     const copy = {
       'single+no-rush': {
-        h: 'You’re all set — take it one step at a time',
-        s: 'Connect your platform when you’re ready. Your CSM is here if you need a hand.',
+        h: 'You’re all set.',
+        s: 'Explore freely — your Synder specialist will verify your setup before auto-sync goes live.',
       },
       'single+2-weeks': {
         h: 'Let’s get this wired in the next two weeks',
-        s: 'A focused setup path for your single platform — we’ll keep momentum with you.',
+        s: 'A focused setup path for your single platform — your Synder specialist will keep momentum with you.',
       },
       'single+urgent': {
-        h: 'Let’s get this live this week',
-        s: 'We’ll prioritize your onboarding so books can sync as soon as possible.',
+        h: 'Let’s get this live.',
+        s: 'Your Synder specialist will focus on the critical pieces first given your timeline.',
       },
       'multi+no-rush': {
-        h: 'Take your time — we’ve got you',
-        s: 'Multi-platform setups benefit from a paced approach. Explore at your pace; book help anytime.',
+        h: 'Take your time — we’ve got you.',
+        s: 'Multi-platform setups take a few sessions. Your Synder specialist will guide you through each step.',
       },
       'multi+2-weeks': {
-        h: 'Let’s get everything wired right',
-        s: 'We’ll help you connect and map each channel so summaries stay clean from day one.',
+        h: 'Let’s get everything wired right.',
+        s: 'Your Synder specialist will map each platform and define the right sequence. It’ll take more than one session — that’s normal.',
       },
       'multi+urgent': {
-        h: 'Let’s make this launch right',
-        s: 'Urgent multi-platform setups work best with a live session — we’ll move fast without skipping checks.',
+        h: 'Let’s make this launch right.',
+        s: 'Your Synder specialist will map your setup and define the critical path. We’ll work through it together, step by step.',
       },
     };
     return copy[key] || copy['multi+no-rush'];
@@ -1033,39 +1119,37 @@
   function renderContactBlock(pref) {
     const el = $('#contact-block');
     const windowLabel = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening' }[state.timeWindow] || 'Morning';
-    const phoneDisplay = state.phone.trim() ? ('+1 ' + state.phone.trim()) : '+1 (555) 000-0000';
+    const phoneDisplay = state.phone.trim() ? ('+1 ' + state.phone.trim()) : '+1 (415) 555-0192';
 
     if (pref === 'zoom') {
       el.innerHTML = `
         <h3>Zoom session confirmed</h3>
         <div class="contact-meta">
           <div class="row"><span class="material-icons-round">event</span> Tue 22 Apr · 10:30 AM · 45 min</div>
-          <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent</div>
-          <div class="row"><span class="material-icons-round">person</span> CSM Alex</div>
+          <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent to your email</div>
+          <div class="row"><span class="material-icons-round">person</span> Your Synder specialist: Alex</div>
           <div class="row"><a href="#">Book another slot</a></div>
         </div>`;
     } else if (pref === 'phone') {
       el.innerHTML = `
         <h3>We’ll call you</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">schedule</span> ${windowLabel} window</div>
-          <div class="row"><span class="material-icons-round">phone</span> ${phoneDisplay}</div>
-          <div class="row"><span class="material-icons-round">person</span> CSM Alex</div>
+          <div class="row"><span class="material-icons-round">schedule</span> ${windowLabel} window · ${phoneDisplay}</div>
+          <div class="row"><span class="material-icons-round">support_agent</span> We’ll do our best to reach you in your window · Your Synder specialist: Alex</div>
         </div>`;
     } else if (pref === 'email') {
       el.innerHTML = `
-        <h3>Your CSM will be in touch</h3>
+        <h3>Your Synder specialist will be in touch</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">schedule</span> Expect email within a few hours</div>
-          <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
-          <div class="row"><a href="#">Book a slot →</a></div>
+          <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
+          <div class="row"><span class="material-icons-round">mail</span> Via your account email · Can’t wait? <a href="#">Book a slot directly →</a></div>
         </div>`;
     } else {
       el.innerHTML = `
         <h3>Book your activation session</h3>
         <div class="contact-meta">
           <div class="row"><span class="material-icons-round">support_agent</span>
-            Tell your CSM about your stack live — they’ll configure with you.</div>
+            Tell your Synder specialist about your stack live — they’ll configure with you.</div>
           <div class="row" style="margin-top:8px">
             <button type="button" class="btn btn-outlined" id="btn-book-primary" style="height:32px">Book activation session</button>
           </div>
@@ -1083,10 +1167,18 @@
 
     const multi = outcome.complexity === 'multi';
     const items = multi
-      ? ['Connect all integrations', 'Run manual sync', 'Check chart of accounts']
-      : ['Connect your platform', 'Run a test sync', 'Check chart of accounts'];
-    $('#success-checklist').innerHTML = items.map(t =>
-      `<li><span class="dot"></span><span>${t}</span></li>`
+      ? [
+          { t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
+          { t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
+          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+        ]
+      : [
+          { t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
+          { t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
+          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+        ];
+    $('#success-checklist').innerHTML = items.map(it =>
+      `<li><span class="dot"></span><span><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
     ).join('');
 
     $('#outcome-chips').classList.add('show');
@@ -1103,7 +1195,7 @@
     if (prog === 'empty') count = 0;
     else if (prog === 'mid') count = (n === 6) ? 3 : 2;       // Mid: 2–3 done
     else if (prog === 'almost') count = (n === 6) ? 5 : 4;   // Almost: 4–5 done
-    else if (prog === 'complete') count = n;                 // all scored; CSM verify still gates unlocks
+    else if (prog === 'complete') count = n;                 // all scored; specialist verify still gates unlocks
     return list.slice(0, count).map(c => c.id);
   }
 
@@ -1137,7 +1229,7 @@
       nextEl.innerHTML = `<strong>Next</strong>${NEXT_ACTION[next.id] || next.label}`;
     } else {
       nextEl.style.display = 'block';
-      nextEl.innerHTML = `<strong>Next</strong>All scored steps complete — CSM verification may still be pending. Completing the score does not unlock Auto-sync, Historical import, or Smart Rules.`;
+      nextEl.innerHTML = `<strong>Next</strong>All scored steps complete — Synder specialist verification may still be pending. Completing the score does not unlock Auto-sync, Historical import, or Smart Rules.`;
     }
 
     // Smart Rules callout after test-sync complete (NOT scored)
@@ -1289,6 +1381,7 @@
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
     $('#outcome-chips').classList.remove('show');
+    clearAllStepErrors();
 
     setStep(1);
     setView('survey');
