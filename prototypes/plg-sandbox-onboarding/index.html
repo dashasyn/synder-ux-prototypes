@@ -8,7 +8,7 @@
     Logic improvements vs earlier mockups:
     - Continue/Done stay enabled; empty click shows inline validation (clears on select).
     - Activation-session shortcut from step 1 or 2 skips remaining questions →
-      success with booking emphasis + complexity=high.
+      success with result-only contact (“we’ll be in touch”) + complexity=high.
     - “I’ll fill this in later” on every survey step → success with surveyIncomplete=true, complexity=high.
     - Back preserves answers; survey state survives view switches until Reset.
     - Outcome/Contact chips in the dark bar are Success-view demo overrides only.
@@ -290,18 +290,32 @@
       color: #0053CC; text-decoration: underline; font-size: 14px;
       cursor: pointer;
     }
-    .checklist {
+    .meantime-tips {
       list-style: none; margin: 0 0 20px; padding: 0;
       display: flex; flex-direction: column; gap: 8px;
     }
-    .checklist li {
-      display: flex; align-items: flex-start; gap: 10px;
+    .meantime-tips li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px;
+      background: #F7F8FA;
+      border-radius: 8px;
       font-size: 14px; color: #1A1B24;
+      cursor: default;
+      pointer-events: none;
+      user-select: none;
     }
-    .checklist .dot {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 1.5px solid #B4BBCB; flex-shrink: 0; margin-top: 1px;
+    .meantime-tips .tip-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #E8EEF8; color: #0053CC;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
+    .meantime-tips .tip-icon .material-icons-round { font-size: 18px; }
+    .meantime-tips .tip-body { flex: 1; min-width: 0; }
+    .meantime-tips .tip-body strong {
+      display: block; font-weight: 500; line-height: 20px;
+    }
+    .meantime-tips .tip-body .opt-sub { margin-top: 2px; }
     .section-label {
       font-size: 13px; font-weight: 500; color: #6B778C;
       margin: 0 0 10px;
@@ -530,7 +544,7 @@
           <option value="zoom">Zoom</option>
           <option value="phone">Phone</option>
           <option value="email">Email</option>
-          <option value="book">Book session CTA</option>
+          <option value="book">We’ll be in touch</option>
         </select>
       </label>
     </div>
@@ -733,7 +747,7 @@
       </div>
 
       <p class="section-label">In the meantime, you can already</p>
-      <ul class="checklist" id="success-checklist"></ul>
+      <ul class="meantime-tips" id="success-checklist"></ul>
 
       <div class="success-actions">
         <button type="button" class="btn btn-primary" id="btn-enter-app">Enter Synder →</button>
@@ -1053,7 +1067,7 @@
   function finishShortcut() {
     state.usedShortcut = true;
     state.surveyIncomplete = false;
-    // Shortcut always → high complexity + booking-oriented success
+    // Shortcut always → high complexity + result-only contact success
     state.channels = 'shortcut';
     state.urgency = (state.urgency && state.urgency !== 'shortcut') ? state.urgency : 'no-rush';
     state.contact = null;
@@ -1128,7 +1142,6 @@
           <div class="row"><span class="material-icons-round">event</span> Tue 22 Apr · 10:30 AM · 45 min</div>
           <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent to your email</div>
           <div class="row"><span class="material-icons-round">person</span> Your Synder specialist: Alex</div>
-          <div class="row"><a href="#">Book another slot</a></div>
         </div>`;
     } else if (pref === 'phone') {
       el.innerHTML = `
@@ -1142,17 +1155,15 @@
         <h3>Your Synder specialist will be in touch</h3>
         <div class="contact-meta">
           <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
-          <div class="row"><span class="material-icons-round">mail</span> Via your account email · Can’t wait? <a href="#">Book a slot directly →</a></div>
+          <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
         </div>`;
     } else {
+      // fill-later / shortcut / no contact pref — result only, never a booking CTA
       el.innerHTML = `
-        <h3>Book your activation session</h3>
+        <h3>We’ll be in touch</h3>
         <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">support_agent</span>
-            Tell your Synder specialist about your stack live — they’ll configure with you.</div>
-          <div class="row" style="margin-top:8px">
-            <button type="button" class="btn btn-outlined" id="btn-book-primary" style="height:32px">Book activation session</button>
-          </div>
+          <div class="row"><span class="material-icons-round">support_agent</span> A Synder specialist will reach out to walk through your setup and activate your account.</div>
+          <div class="row"><span class="material-icons-round">schedule</span> Expect contact within one business day</div>
         </div>`;
     }
   }
@@ -1168,17 +1179,17 @@
     const multi = outcome.complexity === 'multi';
     const items = multi
       ? [
-          { t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
-          { t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
-          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+          { icon: 'hub', t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
+          { icon: 'sync', t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
+          { icon: 'account_tree', t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
         ]
       : [
-          { t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
-          { t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
-          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+          { icon: 'hub', t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
+          { icon: 'sync', t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
+          { icon: 'account_tree', t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
         ];
     $('#success-checklist').innerHTML = items.map(it =>
-      `<li><span class="dot"></span><span><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
+      `<li><span class="tip-icon" aria-hidden="true"><span class="material-icons-round">${it.icon}</span></span><span class="tip-body"><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
     ).join('');
 
     $('#outcome-chips').classList.add('show');
@@ -1390,7 +1401,7 @@
 
   // Book links — demo only
   document.addEventListener('click', e => {
-    if (e.target.closest('#hs-book') || e.target.closest('#banner-book') || e.target.closest('#btn-book-primary')) {
+    if (e.target.closest('#hs-book') || e.target.closest('#banner-book')) {
       e.preventDefault();
       // stay in prototype; subtle feedback
       const t = e.target.closest('a,button');
