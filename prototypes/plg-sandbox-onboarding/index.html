@@ -437,6 +437,13 @@
       margin: 12px 12px 8px;
       border: 1px solid #DFE4EC; border-radius: 8px;
       background: #F7F8FA; padding: 12px;
+      cursor: pointer;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    .sidebar-health:hover { border-color: #B4C3D9; }
+    .sidebar-health.is-active {
+      border-color: #0053CC;
+      box-shadow: inset 0 0 0 1px rgba(0,83,204,.2);
     }
     .sidebar-health h4 {
       margin: 0 0 6px; font-size: 13px; font-weight: 700;
@@ -706,16 +713,6 @@
       </div>
     </div>
 
-    <div class="proto-group proto-app-only">
-      <span class="proto-label">Progress</span>
-      <div class="seg" id="seg-score">
-        <button type="button" data-score="empty" class="active">Empty</button>
-        <button type="button" data-score="mid">Mid</button>
-        <button type="button" data-score="almost">Almost</button>
-        <button type="button" data-score="complete">Complete</button>
-      </div>
-    </div>
-
     <div class="proto-group proto-success-only proto-chip" id="contact-chips">
       <span class="proto-label">Demo</span>
       <label>Contact
@@ -940,9 +937,6 @@
           <button type="button" class="nav-item active" data-page="dashboard">
             <span class="material-icons">dashboard</span> Dashboard
           </button>
-          <button type="button" class="nav-item" data-page="setup-checklist">
-            <span class="material-icons">checklist</span> Setup checklist
-          </button>
           <button type="button" class="nav-item" data-page="transactions">
             <span class="material-icons">receipt_long</span> Transactions
           </button>
@@ -963,12 +957,12 @@
           </button>
 
           <!-- Compact progress chip — full checklist on Setup checklist page -->
-          <div class="sidebar-health" id="health-widget">
-            <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
+          <div class="sidebar-health" id="health-widget" role="button" tabindex="0" aria-label="Open Checklist">
+            <h4><span class="material-icons-round">checklist</span> Checklist</h4>
             <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
-              Open checklist <span class="material-icons-round">arrow_forward</span>
+            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Checklist">
+              View checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
 
@@ -1554,7 +1548,6 @@
     else if ((n === 6 && count >= 5) || (n === 5 && count >= 4)) prog = 'almost';
     else prog = 'mid';
     state.scoreProgress = prog;
-    $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === prog));
   }
 
   function healthModel() {
@@ -1735,6 +1728,8 @@
     $$('.nav-item').forEach(b => {
       b.classList.toggle('active', b.dataset.page === state.appPage);
     });
+    const chip = $('#health-widget');
+    if (chip) chip.classList.toggle('is-active', state.appPage === 'setup-checklist');
   }
 
   /* ── top bar / nav ───────────────────────────────────── */
@@ -1755,17 +1750,19 @@
     renderHealth();
   });
 
-  $('#seg-score').addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    presetDoneIds(btn.dataset.score);
-    $$('#seg-score button').forEach(b => b.classList.toggle('active', b === btn));
-    if (state.appPage === 'setup-checklist') renderAppPage();
-    renderHealth();
-  });
-
-  $('#hs-open-main').addEventListener('click', () => {
+  function openChecklistFromChip() {
     focusMainChecklist();
+  }
+  $('#hs-open-main').addEventListener('click', e => {
+    e.stopPropagation();
+    openChecklistFromChip();
+  });
+  $('#health-widget').addEventListener('click', () => openChecklistFromChip());
+  $('#health-widget').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openChecklistFromChip();
+    }
   });
 
   $('#demo-contact').addEventListener('change', e => {
@@ -1814,7 +1811,6 @@
     $('#phone-number').value = '';
     $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
-    $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
     $('#contact-chips').classList.remove('show');
     clearAllStepErrors();
 
