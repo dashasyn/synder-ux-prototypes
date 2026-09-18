@@ -7,15 +7,14 @@
   <!--
     Logic improvements vs earlier mockups:
     - Continue/Done stay enabled; empty click shows inline validation (clears on select).
-    - Activation-session shortcut from step 1 or 2 skips remaining questions →
-      success with result-only contact (“we’ll be in touch”) + complexity=high.
-    - “I’ll fill this in later” on every survey step → success with surveyIncomplete=true, complexity=high.
-    - Back preserves answers; survey state survives view switches until Reset.
-    - Outcome chips + Contact (Zoom/Phone/Email only) in the dark bar are Success-view demo overrides.
+    - Activation-session shortcut / fill-later → honest Success (“Your Synder specialist will
+      be in touch”); never false Zoom confirmation. Zoom + completed survey → HubSpot-style
+      booking calendar sketch; confirming a slot shows Zoom session confirmed.
+    - Outcome chips + Contact (Zoom/Phone/Email only) in the dark bar are Success demo overrides.
     - Health Score: Summary /6 vs Per-txn /5; Smart Rules callout after test sync
       (not scored); completing score does not unlock Auto-sync / Historical / Smart Rules.
-    - Health Layout: Sidebar (full widget) | Main (compact sidebar + full checklist on Dashboard).
-    - User-facing copy uses “Synder specialist” (not CSM).
+    - Soft-lock + Health Score restore Book free setup call (FDD); Layout defaults to Main.
+    - User-facing copy uses “Synder specialist” (unnamed, not CSM).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -345,13 +344,12 @@
     }
     .meantime-tips {
       list-style: none; margin: 0 0 20px; padding: 0;
-      display: flex; flex-direction: column; gap: 8px;
+      display: flex; flex-direction: column; gap: 0;
     }
     .meantime-tips li {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 14px;
-      background: var(--bg-page);
-      border-radius: var(--radius-md);
+      display: block;
+      padding: 10px 0 10px 12px;
+      border-left: 2px solid var(--border-default);
       font-size: var(--font-body2);
       line-height: var(--font-body2-line-height);
       letter-spacing: var(--font-body2-letter-spacing);
@@ -359,20 +357,20 @@
       cursor: default;
       pointer-events: none;
       user-select: none;
+      background: none;
     }
-    .meantime-tips .tip-icon {
-      width: 32px; height: 32px; border-radius: var(--radius-md);
-      background: var(--color-primary-5); color: var(--color-primary);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .meantime-tips .tip-icon .material-icons-round { font-size: 18px; }
-    .meantime-tips .tip-body { flex: 1; min-width: 0; }
+    .meantime-tips .tip-body { display: block; }
     .meantime-tips .tip-body strong {
       display: block; font-weight: 500;
       line-height: var(--font-body2-line-height);
     }
     .meantime-tips .tip-body .opt-sub { margin-top: 2px; }
+    .tips-label {
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .04em;
+      color: var(--text-secondary);
+      margin: 0 0 8px;
+    }
     .section-label {
       font-size: var(--font-body2); font-weight: 500;
       line-height: var(--font-body2-line-height);
@@ -495,9 +493,16 @@
     }
     .hs-next strong { display: block; font-size: 11px; color: #0053CC;
       text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+    .hs-book {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; color: #0053CC; text-decoration: underline; cursor: pointer;
+      margin-top: 4px;
+    }
+    .hs-book .material-icons-round { font-size: 14px; }
     .hs-help {
       display: flex; align-items: flex-start; gap: 4px;
       font-size: 12px; line-height: 16px; color: #6B778C;
+      margin-bottom: 4px;
     }
     .hs-help .material-icons-round { font-size: 14px; color: #0053CC; }
     .hs-rules {
@@ -541,6 +546,7 @@
     .main-health .hs-list li:nth-child(even) { background: #fff; }
     .main-health .hs-next { margin-bottom: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
     .main-health .hs-help { font-size: 13px; margin-bottom: 4px; }
+    .main-health .hs-book { font-size: 13px; margin-bottom: 4px; }
     .main-health .hs-rules { margin-top: 12px; padding: 12px; font-size: 13px; line-height: 18px; }
     .main-health-anchor { scroll-margin-top: 64px; }
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
@@ -567,9 +573,22 @@
     }
     .soft-lock-banner .banner-help {
       display: inline-flex; align-items: center; gap: 4px;
-      padding: 8px 0; font-weight: 500;
+      padding: 8px 12px; font-weight: 500;
+      color: #0053CC; text-decoration: none; cursor: pointer;
+      border-radius: 4px; border: none; background: transparent;
+      font: inherit; font-size: 14px;
     }
+    .soft-lock-banner .banner-help:hover { text-decoration: underline; }
     .soft-lock-banner .banner-help .material-icons-round { font-size: 18px; }
+    .soft-lock-banner .banner-book {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 32px; padding: 0 12px; border-radius: 4px;
+      background: var(--color-primary, #0053CC); color: #fff;
+      font: inherit; font-size: 14px; font-weight: 500;
+      text-decoration: none; cursor: pointer; border: none;
+    }
+    .soft-lock-banner .banner-book:hover { filter: brightness(1.05); }
+    .soft-lock-banner .banner-book .ext { font-size: 12px; opacity: .9; }
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
     .placeholder-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
@@ -587,6 +606,63 @@
     .toolbar-fake {
       display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
     }
+
+
+    /* HubSpot-style booking calendar sketch (Zoom path) */
+    .hs-cal {
+      margin-top: 12px; padding: 14px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface, #fff);
+    }
+    .hs-cal-title {
+      font-size: var(--font-body2); font-weight: 500;
+      color: var(--text-primary); margin: 0 0 10px;
+    }
+    .hs-cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .hs-cal-nav strong { font-size: 14px; font-weight: 500; }
+    .hs-cal-nav button {
+      appearance: none; border: 1px solid var(--border-default);
+      background: #fff; width: 28px; height: 28px; border-radius: 4px;
+      cursor: pointer; font-size: 16px; line-height: 1; color: var(--text-primary);
+    }
+    .hs-cal-nav button:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .hs-cal-weekdays, .hs-cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+      text-align: center;
+    }
+    .hs-cal-weekdays span {
+      font-size: 11px; color: var(--text-secondary); padding: 4px 0; font-weight: 500;
+    }
+    .hs-cal-grid button {
+      appearance: none; border: none; background: transparent;
+      height: 32px; border-radius: 4px; font: inherit; font-size: 13px;
+      color: var(--text-primary); cursor: pointer;
+    }
+    .hs-cal-grid button.muted { color: #B4BBCB; cursor: default; }
+    .hs-cal-grid button.avail:hover { background: var(--color-primary-10); color: var(--color-primary); }
+    .hs-cal-grid button.selected {
+      background: var(--color-primary); color: #fff;
+    }
+    .hs-cal-slots { margin-top: 12px; }
+    .hs-cal-slots .slot-row {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+    }
+    .hs-cal-slots .time-slot {
+      appearance: none; border: 1px solid var(--border-default); background: #fff;
+      height: 32px; padding: 0 12px; border-radius: 4px;
+      font: inherit; font-size: 13px; cursor: pointer; color: var(--text-primary);
+    }
+    .hs-cal-slots .time-slot:hover { border-color: var(--color-primary-50); }
+    .hs-cal-slots .time-slot.selected {
+      border-color: var(--color-primary); background: var(--color-primary-10);
+      color: var(--color-primary);
+    }
+    .hs-cal-confirm { margin-top: 12px; width: 100%; justify-content: center; }
+    .hs-cal-confirm:disabled { opacity: .45; cursor: not-allowed; }
 
     @media (max-width: 720px) {
       .survey-card, .success-card { padding: 24px 20px; }
@@ -632,8 +708,8 @@
     <div class="proto-group proto-app-only">
       <span class="proto-label">Layout</span>
       <div class="seg" id="seg-layout">
-        <button type="button" data-layout="sidebar" class="active">Sidebar</button>
-        <button type="button" data-layout="main">Main</button>
+        <button type="button" data-layout="sidebar">Sidebar</button>
+        <button type="button" data-layout="main" class="active">Main</button>
       </div>
     </div>
 
@@ -776,10 +852,6 @@
           <span class="material-icons-round">error_outline</span>
           <span id="err-3-text">Please select how you’d like us to reach you.</span>
         </div>
-        <div class="callout-beige">
-          <span class="material-icons-round">info</span>
-          <div>This isn’t just a setup call — your Synder specialist will review your business needs and show you everything Synder can automate for you, so you get full value for what you’re paying for.</div>
-        </div>
         <div class="opt-list" id="opts-contact">
           <div class="opt-card" data-value="zoom" role="radio" tabindex="0">
             <div class="radio-dot"></div>
@@ -788,14 +860,14 @@
                 Video call (Zoom)
                 <span class="badge-rec">Recommended</span>
               </span>
-              <span class="opt-sub">Fastest way to go live — your Synder specialist configures everything with you in real time and activates your account before the call ends.</span>
+              <span class="opt-sub">Fastest – your Synder specialist configures live with you.</span>
             </div>
           </div>
           <div class="opt-card" data-value="phone" role="radio" tabindex="0" id="opt-phone">
             <div class="radio-dot"></div>
             <div style="flex:1; min-width:0">
               <span class="opt-label">Phone call</span>
-              <span class="opt-sub">Your Synder specialist will call you within your preferred time window to walk through your setup and discuss what else Synder can automate for you.</span>
+              <span class="opt-sub">Your Synder specialist calls you in your preferred window.</span>
               <div class="phone-expand" id="phone-expand">
                 <div>
                   <label class="field-label">What’s the best number to call you on?</label>
@@ -820,7 +892,7 @@
             <div class="radio-dot"></div>
             <div>
               <span class="opt-label">Email first</span>
-              <span class="opt-sub">Your Synder specialist will email you to agree a time. Works if your schedule is unpredictable.</span>
+              <span class="opt-sub">Best if your schedule is unpredictable.</span>
             </div>
           </div>
         </div>
@@ -855,7 +927,7 @@
         <div>Your Synder specialist will review your setup, understand your needs, and make sure Synder is delivering full value for you — not just the basics.</div>
       </div>
 
-      <p class="section-label">In the meantime, you can already</p>
+      <p class="tips-label">Tips</p>
       <ul class="meantime-tips" id="success-checklist"></ul>
 
       <div class="success-actions">
@@ -901,7 +973,7 @@
           </button>
 
           <!-- Setup Health Score widget (sandbox only) -->
-          <div class="sidebar-health layout-full" id="health-widget">
+          <div class="sidebar-health layout-compact" id="health-widget">
             <h4><span class="material-icons-round">favorite</span> Setup health</h4>
             <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
@@ -911,10 +983,9 @@
               </button>
               <ul class="hs-list open" id="hs-list"></ul>
               <div class="hs-next" id="hs-next"></div>
-              <div class="hs-help" id="hs-help">
-                <span class="material-icons-round">support_agent</span>
-                <span>We’ll unlock this after your setup session with your Synder specialist.</span>
-              </div>
+              <a class="hs-book" id="hs-book" href="#">
+                <span class="material-icons-round">event</span> Book free setup call
+              </a>
               <div class="hs-rules" id="hs-rules">
                 Your sync looks active — any transaction exceptions? Smart Rules can help.
                 <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
@@ -940,8 +1011,9 @@
                 <strong>Available after your setup session</strong>
                 <div>We’ll verify your setup with your Synder specialist before unlocking this feature.</div>
                 <div class="actions">
-                  <span class="banner-help"><span class="material-icons-round">support_agent</span> Talk to your Synder specialist</span>
+                  <a href="#" class="banner-book" id="banner-book">Book free setup call <span class="ext" aria-hidden="true">↗</span></a>
                   <button type="button" class="btn btn-outlined" id="banner-learn">Learn what we verify</button>
+                  <a href="#" class="banner-help" id="banner-talk"><span class="material-icons-round">support_agent</span> Talk to your Synder specialist</a>
                 </div>
               </div>
             </div>
@@ -970,11 +1042,15 @@
     usedShortcut: false,
     syncMode: 'summary',  // 'summary' | 'per-txn'
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete'
-    healthLayout: 'sidebar', // 'sidebar' | 'main'
+    healthLayout: 'main', // 'sidebar' | 'main' — default Main per UX
     checklistOpen: true,
     appPage: 'dashboard',
     demoOutcome: 'auto',
     demoContact: 'zoom',
+    demoForced: false,    // true after user changes Success demo Contact select
+    zoomSlot: null,       // { dayLabel, time } after HubSpot calendar confirm
+    calDay: null,         // selected day index in calendar sketch
+    calTime: null,        // selected time string before confirm
   };
 
   const CHECKPOINTS = {
@@ -1002,7 +1078,7 @@
     clearing: 'Confirm your clearing account under Settings → Sales.',
     'test-sync': 'Run a test sync and confirm it completes with 0 errors.',
     historical: 'Scope historical import — or confirm it isn’t needed.',
-    csm: 'Your Synder specialist will verify onboarding in your setup session.',
+    csm: 'Book your free setup call so your Synder specialist can verify onboarding.',
   };
 
   /* ── helpers ─────────────────────────────────────────── */
@@ -1166,6 +1242,11 @@
     clearStepError(3);
     state.surveyIncomplete = false;
     state.usedShortcut = false;
+    state.demoForced = false;
+    state.demoContact = state.contact;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
     setView('success');
   });
 
@@ -1176,6 +1257,10 @@
     state.channels = 'not-sure';
     state.urgency = state.urgency && state.urgency !== 'shortcut' ? state.urgency : 'no-rush';
     state.contact = null;
+    state.demoForced = false;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
     clearAllStepErrors();
     setView('success');
   }
@@ -1184,10 +1269,14 @@
   function finishShortcut() {
     state.usedShortcut = true;
     state.surveyIncomplete = false;
-    // Shortcut always → high complexity + result-only contact success
+    // Shortcut always → high complexity + honest “in touch” Success (no Zoom confirm)
     state.channels = 'shortcut';
     state.urgency = (state.urgency && state.urgency !== 'shortcut') ? state.urgency : 'no-rush';
     state.contact = null;
+    state.demoForced = false;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
     setView('success');
   }
 
@@ -1210,12 +1299,21 @@
     return { complexity, urgency };
   }
 
+  function isHonestPending() {
+    // Fill-later / shortcut — never false Zoom confirmation.
+    // Demo Contact select (demoForced) can still explore Zoom/Phone/Email.
+    if (state.demoForced) return false;
+    return !!(state.surveyIncomplete || state.usedShortcut);
+  }
+
   function deriveContact() {
-    // Contact has only Zoom / Phone / Email (survey options). Demo bar forces one of these.
     const allowed = ['zoom', 'phone', 'email'];
-    if (allowed.includes(state.demoContact)) return state.demoContact;
+    if (state.demoForced && allowed.includes(state.demoContact)) return state.demoContact;
+    if (isHonestPending()) return 'pending';
     if (allowed.includes(state.contact)) return state.contact;
-    return 'email';
+    // Proto-bar / empty survey: honor demo select (defaults to Zoom for calendar demo)
+    if (allowed.includes(state.demoContact)) return state.demoContact;
+    return 'pending';
   }
 
   function headlineFor(outcome) {
@@ -1249,18 +1347,127 @@
     return copy[key] || copy['multi+no-rush'];
   }
 
+  function pendingContactHtml() {
+    return `
+      <h3>Your Synder specialist will be in touch</h3>
+      <div class="contact-meta">
+        <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
+        <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
+      </div>`;
+  }
+
+  function zoomConfirmedHtml(slot) {
+    const when = slot ? (slot.dayLabel + ' · ' + slot.time + ' · 45 min') : 'Tue 22 Apr · 10:30 AM · 45 min';
+    return `
+      <h3>Zoom session confirmed</h3>
+      <div class="contact-meta">
+        <div class="row"><span class="material-icons-round">event</span> ${when}</div>
+        <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent to your email</div>
+      </div>`;
+  }
+
+  function hubspotCalendarHtml() {
+    // Prototype sketch — April 2026 grid; available weekdays 21–24
+    const avail = new Set([21, 22, 23, 24]);
+    const selected = state.calDay;
+    // April 2026 starts on Wednesday → pad 3
+    const pad = 3;
+    const daysInMonth = 30;
+    let cells = '';
+    for (let i = 0; i < pad; i++) cells += '<button type="button" class="muted" tabindex="-1" disabled></button>';
+    for (let d = 1; d <= daysInMonth; d++) {
+      if (avail.has(d)) {
+        const sel = selected === d ? ' selected' : '';
+        cells += `<button type="button" class="avail${sel}" data-day="${d}">${d}</button>`;
+      } else {
+        cells += `<button type="button" class="muted" tabindex="-1" disabled>${d}</button>`;
+      }
+    }
+    const times = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM'];
+    const slots = times.map(t => {
+      const sel = state.calTime === t ? ' selected' : '';
+      return `<button type="button" class="time-slot${sel}" data-time="${t}">${t}</button>`;
+    }).join('');
+    const canConfirm = state.calDay && state.calTime;
+    return `
+      <h3>Book your Zoom session</h3>
+      <div class="contact-meta" style="margin-bottom:8px">
+        <div class="row"><span class="material-icons-round">videocam</span> Pick a time — your Synder specialist joins live</div>
+      </div>
+      <div class="hs-cal" id="hubspot-cal">
+        <p class="hs-cal-title">Synder setup call · 45 min</p>
+        <div class="hs-cal-nav">
+          <button type="button" disabled aria-label="Previous month">‹</button>
+          <strong>April 2026</strong>
+          <button type="button" disabled aria-label="Next month">›</button>
+        </div>
+        <div class="hs-cal-weekdays">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="hs-cal-grid" id="hs-cal-grid">${cells}</div>
+        <div class="hs-cal-slots">
+          <label class="field-label">Available times</label>
+          <div class="slot-row" id="hs-cal-slots">${slots}</div>
+        </div>
+        <button type="button" class="btn btn-primary hs-cal-confirm" id="cal-confirm" ${canConfirm ? '' : 'disabled'}>Confirm Zoom session</button>
+      </div>`;
+  }
+
+  function bindHubspotCalendar() {
+    const root = $('#hubspot-cal');
+    if (!root) return;
+    const grid = $('#hs-cal-grid');
+    const slots = $('#hs-cal-slots');
+    const confirm = $('#cal-confirm');
+    if (grid) {
+      grid.addEventListener('click', e => {
+        const btn = e.target.closest('button.avail');
+        if (!btn) return;
+        state.calDay = parseInt(btn.dataset.day, 10);
+        renderContactBlock('zoom');
+      });
+    }
+    if (slots) {
+      slots.addEventListener('click', e => {
+        const btn = e.target.closest('.time-slot');
+        if (!btn) return;
+        state.calTime = btn.dataset.time;
+        renderContactBlock('zoom');
+      });
+    }
+    if (confirm) {
+      confirm.addEventListener('click', () => {
+        if (!state.calDay || !state.calTime) return;
+        state.zoomSlot = {
+          dayLabel: 'Tue ' + state.calDay + ' Apr',
+          time: state.calTime,
+        };
+        // Fix weekday label roughly for available days
+        const wd = { 21: 'Tue', 22: 'Wed', 23: 'Thu', 24: 'Fri' };
+        state.zoomSlot.dayLabel = (wd[state.calDay] || 'Tue') + ' ' + state.calDay + ' Apr';
+        renderContactBlock('zoom');
+      });
+    }
+  }
+
   function renderContactBlock(pref) {
     const el = $('#contact-block');
     const windowLabel = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening' }[state.timeWindow] || 'Morning';
     const phoneDisplay = state.phone.trim() ? ('+1 ' + state.phone.trim()) : '+1 (415) 555-0192';
 
+    if (pref === 'pending' || (!pref && isHonestPending())) {
+      el.innerHTML = pendingContactHtml();
+      return;
+    }
+
     if (pref === 'zoom') {
-      el.innerHTML = `
-        <h3>Zoom session confirmed</h3>
-        <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">event</span> Tue 22 Apr · 10:30 AM · 45 min</div>
-          <div class="row"><span class="material-icons-round">mail</span> Calendar invite sent to your email</div>
-        </div>`;
+      // Only show confirmed / calendar when this is a real Zoom path (or demo-forced Zoom)
+      if (state.zoomSlot) {
+        el.innerHTML = zoomConfirmedHtml(state.zoomSlot);
+      } else {
+        el.innerHTML = hubspotCalendarHtml();
+        bindHubspotCalendar();
+      }
     } else if (pref === 'phone') {
       el.innerHTML = `
         <h3>We’ll call you</h3>
@@ -1269,20 +1476,9 @@
           <div class="row"><span class="material-icons-round">support_agent</span> We’ll do our best to reach you in your window</div>
         </div>`;
     } else if (pref === 'email') {
-      el.innerHTML = `
-        <h3>Your Synder specialist will be in touch</h3>
-        <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
-          <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
-        </div>`;
+      el.innerHTML = pendingContactHtml();
     } else {
-      // Fallback: treat as email result (only Zoom / Phone / Email exist)
-      el.innerHTML = `
-        <h3>Your Synder specialist will be in touch</h3>
-        <div class="contact-meta">
-          <div class="row"><span class="material-icons-round">schedule</span> Expect an email within a few hours</div>
-          <div class="row"><span class="material-icons-round">mail</span> Via your account email</div>
-        </div>`;
+      el.innerHTML = pendingContactHtml();
     }
   }
 
@@ -1292,24 +1488,34 @@
     const hl = headlineFor(outcome);
     $('#success-headline').textContent = hl.h;
     $('#success-sub').textContent = hl.s;
-    state.demoContact = contact;
-    $('#demo-contact').value = contact;
+
+    // Sync demo select; pending arrivals show Email in the demo select (not Zoom)
+    if (contact === 'pending') {
+      if (!state.demoForced) {
+        state.demoContact = 'email';
+        $('#demo-contact').value = 'email';
+      }
+    } else {
+      state.demoContact = contact;
+      $('#demo-contact').value = contact;
+    }
+
     renderContactBlock(contact);
 
     const multi = outcome.complexity === 'multi';
     const items = multi
       ? [
-          { icon: 'hub', t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
-          { icon: 'sync', t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
-          { icon: 'account_tree', t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+          { t: 'Connect all your integrations', s: 'Add all your platforms in Settings so your Synder specialist can see your full setup.' },
+          { t: 'Run a manual sync', s: 'Try a few transactions to see Synder in action.' },
+          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
         ]
       : [
-          { icon: 'hub', t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
-          { icon: 'sync', t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
-          { icon: 'account_tree', t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
+          { t: 'Connect your platform', s: 'Add your sales channel so your Synder specialist can see your setup.' },
+          { t: 'Run a test sync', s: 'Try a few transactions to see Synder in action.' },
+          { t: 'Check your chart of accounts', s: 'Make sure your accounts are ready for your Synder specialist to map.' },
         ];
     $('#success-checklist').innerHTML = items.map(it =>
-      `<li><span class="tip-icon" aria-hidden="true"><span class="material-icons-round">${it.icon}</span></span><span class="tip-body"><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
+      `<li><span class="tip-body"><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
     ).join('');
 
     $('#outcome-chips').classList.add('show');
@@ -1406,10 +1612,9 @@
         <div class="hs-bar${model.count === model.total ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
         <ul class="hs-list open" id="main-hs-list">${model.listHtml}</ul>
         <div class="hs-next" id="main-hs-next">${model.nextHtml}</div>
-        <div class="hs-help" id="main-hs-help">
-          <span class="material-icons-round">support_agent</span>
-          <span>We’ll unlock this after your setup session with your Synder specialist.</span>
-        </div>
+        <a class="hs-book" id="main-hs-book" href="#">
+          <span class="material-icons-round">event</span> Book free setup call
+        </a>
         <div class="hs-rules${model.showRules ? ' show' : ''}" id="main-hs-rules">
           Your sync looks active — any transaction exceptions? Smart Rules can help.
           <a href="#">Learn more</a> · <a href="#">Ask your Synder specialist</a>
@@ -1552,6 +1757,10 @@
   });
   $('#demo-contact').addEventListener('change', e => {
     state.demoContact = e.target.value;
+    state.demoForced = true;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
     renderSuccess();
   });
 
@@ -1584,11 +1793,15 @@
     state.usedShortcut = false;
     state.syncMode = 'summary';
     state.scoreProgress = 'empty';
-    state.healthLayout = 'sidebar';
+    state.healthLayout = 'main';
     state.checklistOpen = true;
     state.appPage = 'dashboard';
     state.demoOutcome = 'auto';
     state.demoContact = 'zoom';
+    state.demoForced = false;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
 
     $$('.opt-card').forEach(c => c.classList.remove('selected'));
     $$('#time-chips .time-chip').forEach(c => c.classList.toggle('active', c.dataset.time === 'morning'));
@@ -1597,7 +1810,7 @@
     $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
-    $$('#seg-layout button').forEach(b => b.classList.toggle('active', b.dataset.layout === 'sidebar'));
+    $$('#seg-layout button').forEach(b => b.classList.toggle('active', b.dataset.layout === 'main'));
     $('#outcome-chips').classList.remove('show');
     clearAllStepErrors();
 
@@ -1607,6 +1820,33 @@
   }
 
   document.addEventListener('click', e => {
+    const book = e.target.closest('#hs-book, #main-hs-book, #banner-book, #banner-talk');
+    if (book) {
+      e.preventDefault();
+      const t = book;
+      const prev = t.tagName === 'BUTTON' || t.classList.contains('banner-book')
+        ? t.textContent
+        : null;
+      if (t.tagName === 'BUTTON' || t.classList.contains('banner-book')) {
+        const label = t.classList.contains('banner-book') ? 'Book free setup call ↗' : (prev || '');
+        t.textContent = 'Opening…';
+        setTimeout(() => {
+          if (t.classList.contains('banner-book')) {
+            t.innerHTML = 'Book free setup call <span class="ext" aria-hidden="true">↗</span>';
+          } else {
+            t.textContent = label;
+          }
+        }, 800);
+      } else if (t.classList.contains('hs-book')) {
+        const html = t.innerHTML;
+        t.textContent = 'Opening…';
+        setTimeout(() => { t.innerHTML = html; }, 800);
+      } else if (t.id === 'banner-talk') {
+        const html = t.innerHTML;
+        t.textContent = 'Opening…';
+        setTimeout(() => { t.innerHTML = html; }, 800);
+      }
+    }
     if (e.target.closest('#banner-learn')) {
       e.preventDefault();
     }
