@@ -716,18 +716,8 @@
       </div>
     </div>
 
-    <div class="proto-group proto-success-only proto-chip" id="outcome-chips">
+    <div class="proto-group proto-success-only proto-chip" id="contact-chips">
       <span class="proto-label">Demo</span>
-      <label>Outcome
-        <select id="demo-outcome">
-          <option value="auto">From survey</option>
-          <option value="single-norush">Single · No rush</option>
-          <option value="single-urgent">Single · Urgent</option>
-          <option value="multi-norush">Multi · No rush</option>
-          <option value="multi-2weeks">Multi · 2 weeks</option>
-          <option value="multi-urgent">Multi · Urgent</option>
-        </select>
-      </label>
       <label>Contact
         <select id="demo-contact">
           <option value="zoom">Zoom</option>
@@ -1029,7 +1019,6 @@
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete' — presets doneIds
     doneIds: [],          // checkpoint ids marked Done (drives score)
     appPage: 'dashboard',
-    demoOutcome: 'auto',
     demoContact: 'zoom',
     demoForced: false,    // true after user changes Success demo Contact select
     zoomSlot: null,       // { dayLabel, time } after HubSpot calendar confirm
@@ -1329,16 +1318,6 @@
 
   /* ── outcome mapping ─────────────────────────────────── */
   function deriveOutcome() {
-    if (state.demoOutcome !== 'auto' && state.view === 'success') {
-      const map = {
-        'single-norush': { complexity: 'single', urgency: 'no-rush' },
-        'single-urgent': { complexity: 'single', urgency: 'urgent' },
-        'multi-norush': { complexity: 'multi', urgency: 'no-rush' },
-        'multi-2weeks': { complexity: 'multi', urgency: '2-weeks' },
-        'multi-urgent': { complexity: 'multi', urgency: 'urgent' },
-      };
-      return map[state.demoOutcome] || map['multi-norush'];
-    }
     const complexity = (state.channels === '1') ? 'single' : 'multi';
     // shortcut / fill-later / not-sure → multi (high)
     let urgency = state.urgency;
@@ -1548,7 +1527,7 @@
       `<li><span class="tip-body"><strong>${it.t}</strong><span class="opt-sub">${it.s}</span></span></li>`
     ).join('');
 
-    $('#outcome-chips').classList.add('show');
+    $('#contact-chips').classList.add('show');
   }
 
   $('#btn-enter-app').addEventListener('click', () => setView('app'));
@@ -1789,10 +1768,6 @@
     focusMainChecklist();
   });
 
-  $('#demo-outcome').addEventListener('change', e => {
-    state.demoOutcome = e.target.value;
-    renderSuccess();
-  });
   $('#demo-contact').addEventListener('change', e => {
     state.demoContact = e.target.value;
     state.demoForced = true;
@@ -1828,7 +1803,6 @@
     state.scoreProgress = 'empty';
     state.doneIds = [];
     state.appPage = 'dashboard';
-    state.demoOutcome = 'auto';
     state.demoContact = 'zoom';
     state.demoForced = false;
     state.zoomSlot = null;
@@ -1838,11 +1812,10 @@
     $$('.opt-card').forEach(c => c.classList.remove('selected'));
     $$('#time-chips .time-chip').forEach(c => c.classList.toggle('active', c.dataset.time === 'morning'));
     $('#phone-number').value = '';
-    $('#demo-outcome').value = 'auto';
     $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
     $$('#seg-score button').forEach(b => b.classList.toggle('active', b.dataset.score === 'empty'));
-    $('#outcome-chips').classList.remove('show');
+    $('#contact-chips').classList.remove('show');
     clearAllStepErrors();
 
     setStep(1);
