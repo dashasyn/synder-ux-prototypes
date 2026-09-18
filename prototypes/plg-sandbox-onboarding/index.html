@@ -283,7 +283,7 @@
 
     .field-error {
       display: none; align-items: flex-start; gap: 6px;
-      margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-md);
+      margin: 12px 0 14px; padding: 10px 12px; border-radius: var(--radius-md);
       background: #FDECEA; border: 1px solid #F5C6C2;
       color: #B42318;
       font-size: var(--font-body2);
@@ -677,6 +677,10 @@
       <div class="survey-step active" data-step="1" id="step-1">
         <h1 class="page-title q-title">How many sales channels or payment platforms are you connecting?</h1>
         <p class="q-helper">This helps us understand how involved your setup will be.</p>
+        <div class="field-error" id="err-1" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span>Please select an option to continue.</span>
+        </div>
         <div class="opt-list" id="opts-channels">
           <div class="opt-card" data-value="1" role="radio" tabindex="0">
             <div class="radio-dot"></div>
@@ -717,10 +721,6 @@
             </div>
           </div>
         </div>
-        <div class="field-error" id="err-1" role="alert">
-          <span class="material-icons-round">error_outline</span>
-          <span>Please select an option to continue.</span>
-        </div>
         <div class="survey-footer">
           <button type="button" class="fill-later">I’ll fill this in later</button>
           <div class="grow"></div>
@@ -732,6 +732,10 @@
       <div class="survey-step" data-step="2" id="step-2">
         <h1 class="page-title q-title">When do you need your books fully synced and reconciled?</h1>
         <p class="q-helper">We’ll prioritize your support based on your timeline.</p>
+        <div class="field-error" id="err-2" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span>Please select an option to continue.</span>
+        </div>
         <div class="opt-list" id="opts-urgency">
           <div class="opt-card" data-value="no-rush" role="radio" tabindex="0">
             <div class="radio-dot"></div>
@@ -756,10 +760,6 @@
             </div>
           </div>
         </div>
-        <div class="field-error" id="err-2" role="alert">
-          <span class="material-icons-round">error_outline</span>
-          <span>Please select an option to continue.</span>
-        </div>
         <div class="survey-footer">
           <button type="button" class="btn-back" id="btn-back-2">
             <span class="material-icons-round">arrow_back</span> Back
@@ -774,6 +774,10 @@
       <div class="survey-step" data-step="3" id="step-3">
         <h1 class="page-title q-title">How would you like us to reach you?</h1>
         <p class="q-helper">Pick what works — we’ll follow up accordingly.</p>
+        <div class="field-error" id="err-3" role="alert">
+          <span class="material-icons-round">error_outline</span>
+          <span id="err-3-text">Please select how you’d like us to reach you.</span>
+        </div>
         <div class="callout-beige">
           <span class="material-icons-round">info</span>
           <div>This isn’t just a setup call — your Synder specialist will review your business needs and show you everything Synder can automate for you, so you get full value for what you’re paying for.</div>
@@ -821,10 +825,6 @@
               <span class="opt-sub">Your Synder specialist will email you to agree a time. Works if your schedule is unpredictable.</span>
             </div>
           </div>
-        </div>
-        <div class="field-error" id="err-3" role="alert">
-          <span class="material-icons-round">error_outline</span>
-          <span id="err-3-text">Please select how you’d like us to reach you.</span>
         </div>
         <div class="survey-footer">
           <button type="button" class="btn-back" id="btn-back-3">
