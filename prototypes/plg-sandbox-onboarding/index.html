@@ -557,13 +557,14 @@
     }
     .hs-steps { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; }
     .hs-step-card {
-      border: none; border-radius: 8px;
+      border: 1px solid transparent; border-radius: 8px;
       background: #F7F8FA; padding: 14px 16px;
-      transition: background .15s;
+      transition: background .15s, border-color .15s;
     }
-    .hs-step-card.is-done {
-      background: #F3FAF0;
-    }
+    .hs-step-card.is-done { background: #F3FAF0; border-color: transparent; }
+    .hs-step-card.is-current { background: #EEF4FF; border-color: #B7D0FF; }
+    .hs-step-card.is-pending { background: #fff; border-color: #E6EAF0; }
+    .hs-step-card.is-locked { background: #F5F2EC; border-color: transparent; }
     .hs-step-top {
       display: flex; align-items: flex-start; gap: 12px;
     }
@@ -575,21 +576,55 @@
     .hs-step-card .ico.todo {
       border: 1.5px solid #B4BBCB; background: #fff;
     }
+    .hs-step-card .ico.current {
+      border: 1.5px solid #0053CC; background: #fff;
+    }
     .hs-step-card .ico.done {
-      background: #ECFDDC; color: #1F8940;
+      background: #ECFDDC; color: #1F8940; border: none;
+    }
+    .hs-step-card .ico.locked {
+      background: #EEF4FF; color: #0053CC; border: none;
     }
     .hs-step-card .ico .material-icons-round { font-size: 14px; }
     .hs-step-body { flex: 1; min-width: 0; }
+    .hs-step-title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 8px; margin: 0 0 4px;
+    }
     .hs-step-title {
       font-size: 14px; font-weight: 500; line-height: 20px;
-      color: #1A1B24; margin: 0 0 4px;
+      color: #1A1B24; margin: 0;
     }
     .hs-step-card.is-done .hs-step-title { color: #6B778C; }
-    .hs-step-desc {
-      font-size: 13px; line-height: 18px; color: #6B778C; margin: 0 0 10px;
+    .hs-step-card.is-locked .hs-step-title { color: #3D4A5C; }
+    .hs-badge {
+      flex-shrink: 0; font-size: 11px; font-weight: 600; line-height: 16px;
+      letter-spacing: .2px; color: #0053CC; background: #EEF4FF;
+      border-radius: 999px; padding: 2px 8px; white-space: nowrap;
     }
+    .hs-step-desc {
+      font-size: 13px; line-height: 18px; color: #6B778C; margin: 0;
+    }
+    .hs-step-card.is-current .hs-step-desc,
+    .hs-step-card.is-locked .hs-step-desc { margin-bottom: 10px; }
     .hs-step-actions {
       display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    }
+    .hs-call-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 4px 0 2px; color: #6B778C;
+      font-size: 12px; font-weight: 600; letter-spacing: .2px;
+    }
+    .hs-call-divider::before,
+    .hs-call-divider::after {
+      content: ''; flex: 1; height: 1px; background: #E6EAF0;
+    }
+    .hs-call-divider .material-icons-round {
+      font-size: 16px; color: #6B778C;
+    }
+    .hs-next-hint {
+      font-size: 12px; line-height: 16px; color: #6B778C;
+      margin: 0 0 8px;
     }
     .hs-where {
       appearance: none; border: none; background: none;
@@ -995,8 +1030,9 @@
           <!-- Compact progress chip — full checklist on Setup checklist page -->
           <div class="sidebar-health" id="health-widget" role="button" tabindex="0" aria-label="Open Setup checklist">
             <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
-            <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
+            <div class="hs-meta" id="hs-meta">0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
+            <p class="hs-next-hint" id="hs-next-hint">Next: Organization settings</p>
             <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
               View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
@@ -1071,6 +1107,7 @@
     summary: [
       {
         id: 'channel',
+        phase: 'self',
         title: 'Connect integrations',
         desc: 'Connect all integrations you get paid from (e.g. Shopify, Stripe, Amazon).',
         where: 'Go to Organization settings',
@@ -1078,6 +1115,7 @@
       },
       {
         id: 'mapping',
+        phase: 'self',
         title: 'Complete mapping',
         desc: 'Map all groups so summaries post to the right accounts.',
         where: 'Go to Mappings list',
@@ -1085,6 +1123,7 @@
       },
       {
         id: 'period',
+        phase: 'self',
         title: 'Choose Synchronization frequency',
         desc: 'Choose frequency: every day, fully fetched, or manual. Manual is the default; summaries become ready automatically once data is collected.',
         where: 'Go to Settings',
@@ -1092,6 +1131,7 @@
       },
       {
         id: 'test-sync',
+        phase: 'self',
         title: 'Sync a summary',
         desc: 'Click Sync to books on any summary and check the results in your books. If sync fails, Synder shows the reason — often a mapping issue.',
         where: 'Go to Summaries list',
@@ -1099,21 +1139,24 @@
       },
       {
         id: 'historical',
+        phase: 'call',
         title: 'Import historical data',
-        desc: 'From Summaries list, open Import historical data and start syncing the range you need — or confirm historical data isn’t needed.',
-        where: 'Go to Summaries list',
-        whereHint: 'Summaries list',
+        desc: 'Date range agreed with your Synder specialist so imports don’t create duplicates.',
+        badge: 'Ready to activate',
       },
       {
         id: 'csm',
-        title: 'Complete setup call',
-        desc: 'Attend your scheduled setup session so your Synder specialist can verify onboarding.',
+        phase: 'call',
+        title: 'Setup verified & auto-sync on',
+        desc: 'Your Synder specialist confirms mapping, payouts, and Smart Rules, then turns on auto-sync.',
+        badge: 'Ready to activate',
         contactInfo: true,
       },
     ],
     'per-txn': [
       {
         id: 'channel',
+        phase: 'self',
         title: 'Connect integrations',
         desc: 'Connect all integrations you get paid from (e.g. Shopify, Stripe, Amazon).',
         where: 'Go to Organization settings',
@@ -1121,6 +1164,7 @@
       },
       {
         id: 'clearing',
+        phase: 'self',
         title: 'Confirm clearing account',
         desc: 'Verify the clearing account Synder should use for per-transaction posts.',
         where: 'Go to Settings',
@@ -1128,6 +1172,7 @@
       },
       {
         id: 'test-sync',
+        phase: 'self',
         title: 'Sync transactions',
         desc: 'Sync a few transactions and check the results in your books. If sync fails, Synder shows the reason — often a mapping issue.',
         where: 'Go to Transactions',
@@ -1135,19 +1180,22 @@
       },
       {
         id: 'historical',
+        phase: 'call',
         title: 'Import historical data',
-        desc: 'Open Import historical data and start syncing the range you need — or confirm historical data isn’t needed.',
-        where: 'Go to Historical import',
-        whereHint: 'Historical import',
+        desc: 'Date range agreed with your Synder specialist so imports don’t create duplicates.',
+        badge: 'Ready to activate',
       },
       {
         id: 'csm',
-        title: 'Complete setup call',
-        desc: 'Attend your scheduled setup session so your Synder specialist can verify onboarding.',
+        phase: 'call',
+        title: 'Setup verified & auto-sync on',
+        desc: 'Your Synder specialist confirms mapping, payouts, and Smart Rules, then turns on auto-sync.',
+        badge: 'Ready to activate',
         contactInfo: true,
       },
     ],
   };
+
 
   /* ── helpers ─────────────────────────────────────────── */
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -1578,13 +1626,13 @@
   /* ── setup checklist ─────────────────────────────────── */
   function presetDoneIds(prog) {
     const list = CHECKPOINTS[state.syncMode];
-    const n = list.length;
-    let count = 0;
-    if (prog === 'empty') count = 0;
-    else if (prog === 'mid') count = (n === 6) ? 3 : 2;
-    else if (prog === 'almost') count = (n === 6) ? 5 : 4;
-    else if (prog === 'complete') count = n;
-    state.doneIds = list.slice(0, count).map(c => c.id);
+    const selfList = list.filter(c => c.phase !== 'call');
+    let ids = [];
+    if (prog === 'empty') ids = [];
+    else if (prog === 'mid') ids = selfList.slice(0, Math.max(1, Math.floor(selfList.length / 2))).map(c => c.id);
+    else if (prog === 'almost') ids = selfList.map(c => c.id); // all self-serve; call steps still locked
+    else if (prog === 'complete') ids = list.map(c => c.id); // demo: specialist finished
+    state.doneIds = ids;
     state.scoreProgress = prog;
   }
 
@@ -1633,42 +1681,90 @@
     const total = list.length;
     const count = list.filter(c => done.has(c.id)).length;
     const pct = Math.round((count / total) * 100);
-    const stepsHtml = list.map(c => {
-      const isDone = done.has(c.id);
-      let whereBtn = '';
-      let contactBlock = '';
-      if (c.contactInfo) {
-        contactBlock = checklistContactHtml();
-      } else if (c.where) {
-        whereBtn = `<button type="button" class="hs-where" data-where="${c.id}">${c.where}</button>`;
+    const selfList = list.filter(c => c.phase !== 'call');
+    const currentId = (selfList.find(c => !done.has(c.id)) || {}).id || null;
+    const selfAllDone = selfList.every(c => done.has(c.id));
+    let callDividerShown = false;
+    const parts = [];
+    list.forEach(c => {
+      if (c.phase === 'call' && !callDividerShown) {
+        parts.push('<div class="hs-call-divider" role="separator"><span class="material-icons-round">event</span> Activated on your setup call</div>');
+        callDividerShown = true;
       }
-      return `<article class="hs-step-card${isDone ? ' is-done' : ''}" data-step-id="${c.id}">
-        <div class="hs-step-top">
-          <span class="ico ${isDone ? 'done' : 'todo'}">
-            ${isDone ? '<span class="material-icons-round">check</span>' : ''}
-          </span>
-          <div class="hs-step-body">
-            <h3 class="hs-step-title">${c.title}</h3>
-            <p class="hs-step-desc">${c.desc}</p>
-            ${contactBlock}
-            <div class="hs-step-actions">
-              ${whereBtn}
-              <button type="button" class="hs-mark${isDone ? ' is-done' : ''}" data-mark="${c.id}">
-                ${isDone ? 'Done — undo' : 'Mark as done'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </article>`;
-    }).join('');
-    return { list, done, total, count, pct, stepsHtml };
+      const isDone = done.has(c.id);
+      const isCall = c.phase === 'call';
+      let status = 'pending';
+      if (isDone) status = 'done';
+      else if (isCall) status = 'locked';
+      else if (c.id === currentId) status = 'current';
+      else status = 'pending';
+
+      let icoClass = 'todo';
+      let icoInner = '';
+      if (status === 'done') {
+        icoClass = 'done';
+        icoInner = '<span class="material-icons-round">check</span>';
+      } else if (status === 'locked') {
+        icoClass = 'locked';
+        icoInner = '<span class="material-icons-round">lock</span>';
+      } else if (status === 'current') {
+        icoClass = 'current';
+      }
+
+      const badge = (status === 'locked' && c.badge)
+        ? '<span class="hs-badge">' + c.badge + '</span>'
+        : '';
+
+      let actions = '';
+      let contactBlock = '';
+      if (status === 'current') {
+        const whereBtn = c.where
+          ? '<button type="button" class="hs-where" data-where="' + c.id + '">' + c.where + '</button>'
+          : '';
+        actions = '<div class="hs-step-actions">' + whereBtn +
+          '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button></div>';
+      } else if (status === 'done' && !isCall) {
+        actions = '<div class="hs-step-actions">' +
+          '<button type="button" class="hs-mark is-done" data-mark="' + c.id + '">Done — undo</button></div>';
+      } else if (status === 'locked' && c.contactInfo) {
+        contactBlock = checklistContactHtml();
+      }
+
+      parts.push(
+        '<article class="hs-step-card is-' + status + '" data-step-id="' + c.id + '" data-status="' + status + '">' +
+        '<div class="hs-step-top">' +
+        '<span class="ico ' + icoClass + '">' + icoInner + '</span>' +
+        '<div class="hs-step-body">' +
+        '<div class="hs-step-title-row"><h3 class="hs-step-title">' + c.title + '</h3>' + badge + '</div>' +
+        '<p class="hs-step-desc">' + c.desc + '</p>' +
+        contactBlock + actions +
+        '</div></div></article>'
+      );
+    });
+    const currentStep = list.find(c => c.id === currentId) || null;
+    return {
+      list, done, total, count, pct, stepsHtml: parts.join(''),
+      currentId, currentStep, selfAllDone,
+    };
   }
 
   function paintScoreMeta(metaEl, barEl, model) {
     if (!metaEl || !barEl) return;
-    metaEl.textContent = 'Setup: ' + model.count + ' / ' + model.total + ' complete';
+    metaEl.textContent = model.count + ' / ' + model.total + ' complete';
     barEl.classList.toggle('complete', model.count === model.total);
     if (barEl.firstElementChild) barEl.firstElementChild.style.width = model.pct + '%';
+    const hint = $('#hs-next-hint');
+    if (hint) {
+      if (model.selfAllDone) {
+        hint.textContent = 'You’re ready for your setup call';
+      } else if (model.currentStep) {
+        hint.textContent = model.currentStep.whereHint
+          ? ('Next: ' + model.currentStep.whereHint)
+          : ('Next: ' + model.currentStep.title);
+      } else {
+        hint.textContent = '';
+      }
+    }
   }
 
   function renderHealth() {
@@ -1683,32 +1779,57 @@
     const stepsEl = $('#main-hs-steps', root);
     if (stepsEl) stepsEl.innerHTML = model.stepsHtml;
     const doneBanner = $('#hs-all-done', root);
-    if (doneBanner) doneBanner.classList.toggle('show', model.count === model.total && model.total > 0);
+    if (doneBanner) {
+      const allDone = model.count === model.total && model.total > 0;
+      doneBanner.classList.toggle('show', !!model.selfAllDone);
+      const strong = doneBanner.querySelector('strong');
+      const p = doneBanner.querySelector('p');
+      if (strong) strong.textContent = allDone
+        ? 'Nice work — setup is complete'
+        : 'Nice work — you’re ready for your setup call';
+      if (p) p.textContent = allDone
+        ? 'Your Synder specialist can take it from here and get you fully live.'
+        : 'Self-serve steps are done. Join your call so your specialist can activate historical import and auto-sync.';
+    }
   }
 
   function mainHealthPanelHtml(model) {
     const allDone = model.count === model.total && model.total > 0;
+    const showReady = model.selfAllDone;
+    const bannerTitle = allDone
+      ? 'Nice work — setup is complete'
+      : 'Nice work — you’re ready for your setup call';
+    const bannerBody = allDone
+      ? 'Your Synder specialist can take it from here and get you fully live.'
+      : 'Self-serve steps are done. Join your call so your specialist can activate historical import and auto-sync.';
     return `
       <section class="main-health main-health-anchor" id="main-health" aria-label="Setup checklist">
-        <div class="hs-all-done${allDone ? ' show' : ''}" id="hs-all-done" role="status">
+        <div class="hs-all-done${showReady ? ' show' : ''}" id="hs-all-done" role="status">
           <span class="material-icons-round">celebration</span>
           <div>
-            <strong>Nice work — you’re ready for your setup call</strong>
-            <p>Every checklist step is done. Your Synder specialist can take it from here and get you fully live.</p>
+            <strong>${bannerTitle}</strong>
+            <p>${bannerBody}</p>
           </div>
         </div>
-        <div class="hs-meta" id="main-hs-meta">Setup: ${model.count} / ${model.total} complete</div>
+        <div class="hs-meta" id="main-hs-meta">${model.count} / ${model.total} complete</div>
         <div class="hs-bar${allDone ? ' complete' : ''}" id="main-hs-bar"><span style="width:${model.pct}%"></span></div>
         <div class="hs-steps" id="main-hs-steps">${model.stepsHtml}</div>
       </section>`;
   }
 
   function toggleStepDone(id) {
+    const list = CHECKPOINTS[state.syncMode];
+    const step = list.find(c => c.id === id);
+    if (!step || step.phase === 'call') return; // call-phase stays locked / specialist-only
     const set = new Set(state.doneIds);
-    if (set.has(id)) set.delete(id);
-    else set.add(id);
-    // Keep order aligned with checkpoint list
-    const order = CHECKPOINTS[state.syncMode].map(c => c.id);
+    if (set.has(id)) {
+      set.delete(id);
+    } else {
+      const currentId = (list.filter(c => c.phase !== 'call').find(c => !set.has(c.id)) || {}).id;
+      if (id !== currentId) return; // only the current step can be marked done
+      set.add(id);
+    }
+    const order = list.map(c => c.id);
     state.doneIds = order.filter(x => set.has(x));
     syncScoreChipFromDone();
     renderApp();
@@ -1768,7 +1889,7 @@
     if (page === 'setup-checklist') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle" style="margin-bottom:12px">Check these off before your call — a little prep goes a long way, and you’re already doing great.</p>
+        <p class="page-subtitle" style="margin-bottom:12px">Finish the steps below, then join your setup call to activate the rest.</p>
         ${mainHealthPanelHtml(model)}`;
     } else if (page === 'dashboard') {
       body = `
