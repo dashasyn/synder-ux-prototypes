@@ -524,22 +524,37 @@
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
 
     .hs-all-done {
-      display: flex;
-      visibility: hidden;
-      pointer-events: none;
+      display: none;
       align-items: flex-start; gap: 12px;
       margin: 0 0 16px; padding: 14px 16px;
       border-radius: 8px; background: #ECFDDC;
       color: #1A1B24;
-      min-height: 64px;
       box-sizing: border-box;
     }
-    .hs-all-done.show { visibility: visible; pointer-events: auto; }
+    .hs-all-done.show { display: flex; }
     .hs-all-done .material-icons-round {
       font-size: 22px; color: #1F8940; flex-shrink: 0; margin-top: 1px;
     }
     .hs-all-done strong { display: block; font-size: 15px; font-weight: 500; margin-bottom: 2px; }
     .hs-all-done p { margin: 0; font-size: 13px; line-height: 18px; color: #3D4A5C; }
+    .hs-contact-info {
+      margin: 0 0 10px; padding: 10px 12px;
+      border-radius: 8px; background: #fff;
+      border: 1px solid #DFE4EC;
+      font-size: 13px; line-height: 18px; color: #1A1B24;
+    }
+    .hs-contact-info .label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: .3px; text-transform: uppercase;
+      color: #6B778C; margin-bottom: 4px;
+    }
+    .hs-contact-info .row {
+      display: flex; align-items: flex-start; gap: 6px;
+      margin-top: 2px;
+    }
+    .hs-contact-info .material-icons-round {
+      font-size: 16px; color: #0053CC; margin-top: 1px;
+    }
     .hs-steps { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; }
     .hs-step-card {
       border: none; border-radius: 8px;
@@ -978,12 +993,12 @@
           </button>
 
           <!-- Compact progress chip — full checklist on Setup checklist page -->
-          <div class="sidebar-health" id="health-widget" role="button" tabindex="0" aria-label="Open Checklist">
-            <h4><span class="material-icons-round">checklist</span> Checklist</h4>
+          <div class="sidebar-health" id="health-widget" role="button" tabindex="0" aria-label="Open Setup checklist">
+            <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
             <div class="hs-meta" id="hs-meta">Setup: 0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Checklist">
-              View checklist <span class="material-icons-round">arrow_forward</span>
+            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
+              View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
 
@@ -1056,84 +1071,80 @@
     summary: [
       {
         id: 'channel',
-        title: 'Connect a sales channel',
-        desc: 'Link your first payment platform or sales channel so Synder can pull transactions.',
-        where: 'Open Settings → Integrations',
-        whereHint: 'Settings → Integrations',
+        title: 'Connect integrations',
+        desc: 'Connect all integrations you get paid from (e.g. Shopify, Stripe, Amazon).',
+        where: 'Go to Organization settings',
+        whereHint: 'Organization settings',
       },
       {
         id: 'mapping',
-        title: 'Finish default mapping',
-        desc: 'Assign every default mapping group so summaries post to the right accounts.',
-        where: 'Open Settings → Mapping',
-        whereHint: 'Settings → Mapping',
+        title: 'Complete mapping',
+        desc: 'Map all groups so summaries post to the right accounts.',
+        where: 'Go to Mappings list',
+        whereHint: 'Mappings list',
       },
       {
         id: 'period',
-        title: 'Choose aggregation + ready a summary',
-        desc: 'Pick your aggregation period and mark at least one summary Ready to sync.',
-        where: 'Open Summaries',
-        whereHint: 'Summaries',
+        title: 'Choose Synchronization frequency',
+        desc: 'Choose frequency: every day, fully fetched, or manual. Manual is the default; summaries become ready automatically once data is collected.',
+        where: 'Go to Settings',
+        whereHint: 'Settings',
       },
       {
         id: 'test-sync',
-        title: 'Run a clean test sync',
-        desc: 'Sync ≥1 summary and confirm it completes with 0 errors.',
-        where: 'Open Sync',
-        whereHint: 'Sync / Summaries',
+        title: 'Sync a summary',
+        desc: 'Click Sync to books on any summary and check the results in your books. If sync fails, Synder shows the reason — often a mapping issue.',
+        where: 'Go to Summaries list',
+        whereHint: 'Summaries list',
       },
       {
         id: 'historical',
-        title: 'Scope historical import',
-        desc: 'Define the date range to import — or confirm historical data isn’t needed.',
-        where: 'Open Historical import',
-        whereHint: 'Historical import',
+        title: 'Import historical data',
+        desc: 'From Summaries list, open Import historical data and start syncing the range you need — or confirm historical data isn’t needed.',
+        where: 'Go to Summaries list',
+        whereHint: 'Summaries list',
       },
       {
         id: 'csm',
         title: 'Complete setup call',
-        desc: 'Attend your scheduled setup call so your Synder specialist can verify onboarding.',
-        where: 'Talk to your Synder specialist',
-        whereHint: 'Talk to specialist',
-        talk: true,
+        desc: 'Attend your scheduled setup session so your Synder specialist can verify onboarding.',
+        contactInfo: true,
       },
     ],
     'per-txn': [
       {
         id: 'channel',
-        title: 'Connect a sales channel',
-        desc: 'Link your first payment platform or sales channel so Synder can pull transactions.',
-        where: 'Open Settings → Integrations',
-        whereHint: 'Settings → Integrations',
+        title: 'Connect integrations',
+        desc: 'Connect all integrations you get paid from (e.g. Shopify, Stripe, Amazon).',
+        where: 'Go to Organization settings',
+        whereHint: 'Organization settings',
       },
       {
         id: 'clearing',
         title: 'Confirm clearing account',
         desc: 'Verify the clearing account Synder should use for per-transaction posts.',
-        where: 'Open Settings → Sales',
-        whereHint: 'Settings → Sales',
+        where: 'Go to Settings',
+        whereHint: 'Settings',
       },
       {
         id: 'test-sync',
-        title: 'Run a clean test sync',
-        desc: 'Sync ≥3 transactions and confirm the run completes with 0 errors.',
-        where: 'Open Sync',
-        whereHint: 'Sync / Transactions',
+        title: 'Sync transactions',
+        desc: 'Sync a few transactions and check the results in your books. If sync fails, Synder shows the reason — often a mapping issue.',
+        where: 'Go to Transactions',
+        whereHint: 'Transactions',
       },
       {
         id: 'historical',
-        title: 'Scope historical import',
-        desc: 'Define the date range to import — or confirm historical data isn’t needed.',
-        where: 'Open Historical import',
+        title: 'Import historical data',
+        desc: 'Open Import historical data and start syncing the range you need — or confirm historical data isn’t needed.',
+        where: 'Go to Historical import',
         whereHint: 'Historical import',
       },
       {
         id: 'csm',
         title: 'Complete setup call',
-        desc: 'Attend your scheduled setup call so your Synder specialist can verify onboarding.',
-        where: 'Talk to your Synder specialist',
-        whereHint: 'Talk to specialist',
-        talk: true,
+        desc: 'Attend your scheduled setup session so your Synder specialist can verify onboarding.',
+        contactInfo: true,
       },
     ],
   };
@@ -1588,6 +1599,34 @@
     state.scoreProgress = prog;
   }
 
+
+  function checklistContactHtml() {
+    const contact = deriveContact();
+    const email = state.accountEmail || 'jane@greenleafstore.com';
+    const phone = (state.phone && state.phone.trim())
+      ? state.phone.trim()
+      : '+1 (415) 555-0192';
+    const tz = state.phoneTimezone || 'Eastern Time (ET)';
+    if (contact === 'zoom') {
+      let when = 'Pick a time on Success, or we’ll confirm by email';
+      if (state.zoomSlot && state.zoomSlot.dayLabel && state.zoomSlot.time) {
+        when = state.zoomSlot.dayLabel + ' · ' + state.zoomSlot.time;
+      }
+      return `<div class="hs-contact-info"><span class="label">Your contact</span>
+        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}</span></div></div>`;
+    }
+    if (contact === 'phone') {
+      return `<div class="hs-contact-info"><span class="label">Your contact</span>
+        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>${phone}</span></div></div>`;
+    }
+    if (contact === 'email') {
+      return `<div class="hs-contact-info"><span class="label">Your contact</span>
+        <div class="row"><span class="material-icons-round">mail</span><span><strong>Email</strong> · ${email}</span></div></div>`;
+    }
+    return `<div class="hs-contact-info"><span class="label">Your contact</span>
+      <div class="row"><span class="material-icons-round">support_agent</span><span>Your Synder specialist will confirm how they’ll reach you.</span></div></div>`;
+  }
+
   function healthModel() {
     const list = CHECKPOINTS[state.syncMode];
     const done = new Set(state.doneIds);
@@ -1597,12 +1636,11 @@
     const stepsHtml = list.map(c => {
       const isDone = done.has(c.id);
       let whereBtn = '';
-      if (c.where) {
-        if (c.talk) {
-          whereBtn = `<button type="button" class="hs-where hs-talk-link" data-talk="1"><span class="material-icons-round">support_agent</span> ${c.where}</button>`;
-        } else {
-          whereBtn = `<button type="button" class="hs-where" data-where="${c.id}">${c.where}</button>`;
-        }
+      let contactBlock = '';
+      if (c.contactInfo) {
+        contactBlock = checklistContactHtml();
+      } else if (c.where) {
+        whereBtn = `<button type="button" class="hs-where" data-where="${c.id}">${c.where}</button>`;
       }
       return `<article class="hs-step-card${isDone ? ' is-done' : ''}" data-step-id="${c.id}">
         <div class="hs-step-top">
@@ -1612,6 +1650,7 @@
           <div class="hs-step-body">
             <h3 class="hs-step-title">${c.title}</h3>
             <p class="hs-step-desc">${c.desc}</p>
+            ${contactBlock}
             <div class="hs-step-actions">
               ${whereBtn}
               <button type="button" class="hs-mark${isDone ? ' is-done' : ''}" data-mark="${c.id}">
@@ -1679,10 +1718,10 @@
     const map = {
       channel: 'settings',
       mapping: 'settings',
-      period: 'summaries',
+      period: 'settings',
       clearing: 'settings',
       'test-sync': state.syncMode === 'summary' ? 'summaries' : 'transactions',
-      historical: 'historical',
+      historical: state.syncMode === 'summary' ? 'summaries' : 'historical',
     };
     const page = map[id];
     if (!page) return;
@@ -1729,7 +1768,7 @@
     if (page === 'setup-checklist') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle" style="margin-bottom:20px">Check these off before your call — a little prep goes a long way, and you’re already doing great.</p>
+        <p class="page-subtitle" style="margin-bottom:12px">Check these off before your call — a little prep goes a long way, and you’re already doing great.</p>
         ${mainHealthPanelHtml(model)}`;
     } else if (page === 'dashboard') {
       body = `
@@ -1753,6 +1792,19 @@
           <div class="placeholder-card"><div class="ph-title">Scope</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Status</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
+    } else if (page === 'summaries') {
+      body = `
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:16px">Ready summaries appear here. Use Sync to books on a row, or open Import historical data.</p>
+        <div class="toolbar-fake">
+          <button type="button" class="btn btn-primary">Sync to books</button>
+          <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
+        </div>
+        <div class="placeholder-grid">
+          <div class="placeholder-card"><div class="ph-title">Ready summary · Mar 1–7</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Ready summary · Mar 8–14</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Collecting…</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        </div>`;
     } else {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
@@ -1768,6 +1820,13 @@
         </div>`;
     }
     $('#page-content').innerHTML = body;
+    const importBtn = $('#btn-import-historical');
+    if (importBtn) {
+      importBtn.addEventListener('click', () => {
+        state.appPage = 'historical';
+        renderApp();
+      });
+    }
   }
 
   function renderApp() {
