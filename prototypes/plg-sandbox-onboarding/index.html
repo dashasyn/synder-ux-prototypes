@@ -611,6 +611,19 @@
       background: transparent; border: none; border-radius: 0; padding: 0;
       max-width: 720px;
     }
+    .snooze-banner {
+      display: none; align-items: flex-start; gap: 12px;
+      padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;
+      background: #EEF4FF; border: 1px solid #D6E4FF; color: #1A3A7A;
+      font-size: 14px; line-height: 20px;
+    }
+    .snooze-banner.show { display: flex; }
+    .snooze-banner .material-icons-round { color: #0053CC; font-size: 20px; flex-shrink: 0; }
+    .snooze-banner .snooze-dismiss {
+      margin-left: auto; appearance: none; border: none; background: none;
+      color: #0053CC; font: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; padding: 0; white-space: nowrap;
+    }
     .soft-lock-banner {
       display: none; align-items: flex-start; gap: 12px;
       padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;
@@ -900,6 +913,7 @@
           <button type="button" class="btn-back" id="btn-back-3">
             <span class="material-icons-round">arrow_back</span> Back
           </button>
+          <button type="button" class="fill-later" data-from-step="3">I’ll fill this in later</button>
           <div class="grow"></div>
           <button type="button" class="btn btn-primary" id="btn-done">Done</button>
         </div>
@@ -982,6 +996,14 @@
 
         <main class="app-main">
           <div class="page-panel" id="page-panel">
+            <div class="snooze-banner" id="snooze-banner" role="status">
+              <span class="material-icons-round">schedule</span>
+              <div>
+                <strong>Setup questions paused</strong>
+                <div>We’ll ask again in 24 hours. You can keep exploring Synder in the meantime.</div>
+              </div>
+              <button type="button" class="snooze-dismiss" id="snooze-dismiss">Dismiss</button>
+            </div>
             <div class="soft-lock-banner" id="lock-banner">
               <span class="material-icons-round">lock</span>
               <div>
@@ -1017,6 +1039,7 @@
     accountEmail: 'jane@greenleafstore.com',
     phoneTimezone: 'Eastern Time (ET)',
     surveyIncomplete: false,
+    surveySnoozed: false, // fill-later closed questionnaire; returns in 24h
     usedShortcut: false,
     syncMode: 'summary',  // 'summary' | 'per-txn'
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete' — presets doneIds
@@ -1286,23 +1309,23 @@
     setView('success');
   });
 
-  function fillLater(fromStep) {
-    // Advance to next survey step only — never jump to Success. No selection required.
+  function fillLater() {
+    // Close the whole questionnaire. It returns in 24 hours.
     clearAllStepErrors();
-    const step = Number(fromStep) || state.step;
-    if (step === 1) {
-      setStep(2);
-      return;
-    }
-    if (step === 2) {
-      setStep(3);
-      return;
-    }
-    // Step 3 has no fill-later control
+    state.surveyIncomplete = true;
+    state.surveySnoozed = true;
+    state.contact = null;
+    state.demoForced = false;
+    state.zoomSlot = null;
+    state.calDay = null;
+    state.calTime = null;
+    state.appPage = 'dashboard';
+    setView('app');
+    renderApp();
+    const banner = $('#snooze-banner');
+    if (banner) banner.classList.add('show');
   }
-  $$('.fill-later').forEach(btn => btn.addEventListener('click', () => {
-    fillLater(btn.dataset.fromStep || state.step);
-  }));
+  $$('.fill-later').forEach(btn => btn.addEventListener('click', () => fillLater()));
 
   function finishShortcut() {
     // Activation-session shortcut → step 3 (contact) only. Do not skip contact / Success.
@@ -1532,6 +1555,14 @@
   }
 
   $('#btn-enter-app').addEventListener('click', () => setView('app'));
+  const snoozeDismiss = $('#snooze-dismiss');
+  if (snoozeDismiss) {
+    snoozeDismiss.addEventListener('click', () => {
+      state.surveySnoozed = false;
+      const banner = $('#snooze-banner');
+      if (banner) banner.classList.remove('show');
+    });
+  }
 
   /* ── setup checklist ─────────────────────────────────── */
   function presetDoneIds(prog) {
@@ -1740,6 +1771,8 @@
   }
 
   function renderApp() {
+    const snoozeBanner = $('#snooze-banner');
+    if (snoozeBanner) snoozeBanner.classList.toggle('show', !!state.surveySnoozed);
     renderAppPage();
     renderHealth();
     $$('.nav-item').forEach(b => {
@@ -1831,6 +1864,8 @@
     $('#contact-chips').classList.remove('show');
     clearAllStepErrors();
 
+    const snoozeBanner = $('#snooze-banner');
+    if (snoozeBanner) snoozeBanner.classList.remove('show');
     setStep(1);
     setView('survey');
     updateContinueButtons();
