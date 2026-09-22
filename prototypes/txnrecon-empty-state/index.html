@@ -42,53 +42,47 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 
 /* —— Product page —— */
 .page{max-width:980px;margin:0 auto;padding:28px 24px 64px}
-
 .h1{font-size:26px;font-weight:400;letter-spacing:-.2px}
-.psub{color:var(--grey-50);margin-top:6px;font-size:16px;font-weight:400;max-width:52ch}
 
-/* Main card: form left + illustration right */
+/* Marketing card: copy left + illustration right */
 .card{
   background:var(--white);border:1px solid var(--grey-20);border-radius:8px;
   margin-top:22px;display:flex;align-items:stretch;overflow:hidden;
 }
-.form{flex:1 1 auto;padding:28px 32px 26px;min-width:0}
+.copy{flex:1 1 auto;padding:32px 36px 30px;min-width:0}
 .hero-illu{
   flex:0 0 340px;border-left:1px solid var(--grey-20);background:var(--primary-5);
   padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
 }
 
-.lead{color:var(--grey-50);margin-bottom:22px;max-width:48ch;font-size:14px}
+.card-h{font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.3;margin-bottom:12px;max-width:28ch}
+.lead{color:var(--grey-50);margin-bottom:20px;max-width:48ch;font-size:14px;line-height:1.5}
 
-.fld{margin-bottom:16px;max-width:360px}
-.fld label{display:block;font-weight:500;font-size:14px;margin-bottom:6px}
-.fld .req{color:var(--red)}
-.fld .q{
-  display:inline-flex;width:15px;height:15px;border-radius:50%;border:1px solid var(--grey-30);
-  color:var(--grey-50);font-size:10px;align-items:center;justify-content:center;
-  margin-left:5px;cursor:help;vertical-align:1px;
+.benefits{list-style:none;margin-bottom:22px}
+.benefits li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:14px;padding:5px 0;line-height:1.4;
 }
-.sel{position:relative}
-.sel select{
-  font-family:inherit;font-size:14px;width:100%;height:38px;padding:0 34px 0 12px;
-  border:1px solid var(--grey-20);border-radius:4px;background:#fff;color:var(--grey);
-  appearance:none;cursor:pointer;
-}
-.sel select:hover{border-color:var(--grey-30)}
-.sel select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-10)}
-.sel::after{
-  content:"";position:absolute;right:13px;top:50%;margin-top:-2px;
-  border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--grey-50);
-  pointer-events:none;
-}
-.hint{font-size:12px;color:var(--grey-50);margin-top:5px}
+.benefits .tick{flex-shrink:0;margin-top:1px}
 
-.cta{margin-top:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;padding:5px 10px;border-radius:999px;line-height:1.3;
+}
+.pill .q{
+  display:inline-flex;width:14px;height:14px;border-radius:50%;border:1px solid currentColor;
+  font-size:9px;align-items:center;justify-content:center;opacity:.7;cursor:help;flex-shrink:0;
+}
+.pill.green{background:var(--green-light);color:var(--green)}
+.pill.blue{background:var(--primary-10);color:var(--primary)}
+
+.cta-block{margin-top:4px}
 .btn{font-family:inherit;font-size:15px;font-weight:500;border:0;border-radius:4px;padding:12px 24px;cursor:pointer}
 .btn.pri{background:var(--primary);color:#fff}
 .btn.pri:hover{background:var(--primary-hover)}
-.safe{font-size:13px;color:var(--grey-50);display:flex;align-items:center;gap:7px}
-.safe svg{flex-shrink:0}
-.routine{margin-top:14px;font-size:13px;color:var(--grey-50)}
+.caption{margin-top:10px;font-size:13px;color:var(--grey-50)}
+.routine{margin-top:6px;font-size:12px;color:var(--grey-50)}
 
 /* Illustration labels */
 .illu-labels{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -120,41 +114,34 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 .compare .x{color:var(--grey-30)}
 .compare .check{color:var(--green)}
 
-/* What this will check */
-.checks{
-  margin-top:20px;background:var(--white);border:1px solid var(--grey-20);border-radius:8px;padding:18px 20px;
-}
-.checks h3{
-  font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.55px;color:var(--grey-50);margin-bottom:12px;
-}
-.checks ul{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.checks li{display:flex;gap:10px;font-size:14px;line-height:1.4;align-items:flex-start}
-.checks .tick{flex-shrink:0;margin-top:1px}
-
-/* FAQ */
+/* FAQ — live style: light grey rows, chevron on left */
 .faqwrap{margin-top:28px}
 .faqwrap h3{
   font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.55px;color:var(--grey-50);margin-bottom:12px;
 }
 .faq details{
-  border:1px solid var(--grey-20);border-radius:6px;background:var(--white);
+  border:1px solid var(--grey-20);border-radius:6px;background:var(--grey-5);
   margin-bottom:8px;overflow:hidden;
 }
+.faq details[open]{background:var(--white)}
 .faq summary{
-  list-style:none;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;
-  font-size:14px;color:var(--grey);cursor:pointer;user-select:none;
+  list-style:none;padding:14px 16px;display:flex;align-items:center;gap:12px;
+  font-size:14px;font-weight:500;color:var(--grey);cursor:pointer;user-select:none;
 }
 .faq summary::-webkit-details-marker{display:none}
-.faq summary:hover{background:var(--grey-5)}
-.faq summary .chev{color:var(--grey-30);font-size:12px;transition:transform .15s}
-.faq details[open] summary .chev{transform:rotate(180deg)}
-.faq .body{padding:0 16px 14px;font-size:14px;color:var(--grey-50);max-width:62ch}
+.faq summary:hover{background:var(--grey-10)}
+.faq details[open] summary:hover{background:transparent}
+.faq summary .chev{
+  color:var(--grey-50);font-size:11px;flex-shrink:0;width:16px;text-align:center;
+  transition:transform .15s;display:inline-block;
+}
+.faq details[open] summary .chev{transform:rotate(90deg)}
+.faq .body{padding:0 16px 14px 44px;font-size:14px;color:var(--grey-50);max-width:62ch;line-height:1.5}
 
 @media(max-width:900px){
   .card{flex-direction:column}
   .hero-illu{flex:1 1 auto;border-left:0;border-top:1px solid var(--grey-20)}
   .compare{grid-template-columns:1fr}
-  .checks ul{grid-template-columns:1fr}
   .role-pills{margin-left:0}
 }
 </style>
@@ -181,57 +168,37 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 <div class="page">
 
   <h1 class="h1">Transaction reconciliation</h1>
-  <p class="psub" id="phrase">Match transactions to your books</p>
 
   <div class="card">
-    <div class="form">
+    <div class="copy">
+      <h2 class="card-h" id="phrase">Match transactions to your books</h2>
       <p class="lead" id="lead">Row-by-row match of platform activity to the clearing account. Close the period when Missing and Amount off are empty.</p>
 
-      <div class="fld">
-        <label>Integration <span class="req">*</span><span class="q" title="The connected source Synder will compare against your books.">?</span></label>
-        <div class="sel">
-          <select aria-label="Integration">
-            <option selected>Stripe · mzkt.by</option>
-            <option>Shopify · Changolivia</option>
-            <option>Amazon · US marketplace</option>
-            <option>PayPal · mzkt.by</option>
-          </select>
-        </div>
-        <div class="hint">Your most active integration</div>
+      <ul class="benefits">
+        <li>
+          <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          Catch missing transactions
+        </li>
+        <li>
+          <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          Spot fee and amount mismatches
+        </li>
+        <li>
+          <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          Spot issues before they become problems
+        </li>
+      </ul>
+
+      <div class="pills">
+        <span class="pill green">Included in your plan <span class="q" title="Available on your current Synder plan at no extra cost.">?</span></span>
+        <span class="pill blue">Doesn't use your sync credits <span class="q" title="Running reconciliation does not consume sync credits.">?</span></span>
       </div>
 
-      <div class="fld">
-        <label>Account <span class="req">*</span><span class="q" title="The clearing account in your books that this integration posts to.">?</span></label>
-        <div class="sel">
-          <select aria-label="Account">
-            <option selected>Stripe mzkt.by (clearing)</option>
-            <option>Stripe mzkt.by (clearing) — EUR</option>
-          </select>
-        </div>
-        <div class="hint">The clearing account linked to this integration</div>
+      <div class="cta-block">
+        <button type="button" class="btn pri">Run reconciliation</button>
+        <p class="caption">Read-only comparison — no changes to your books</p>
+        <p class="routine">Most teams run this once per closed month</p>
       </div>
-
-      <div class="fld">
-        <label>Period <span class="req">*</span><span class="q" title="The date range Synder will reconcile.">?</span></label>
-        <div class="sel">
-          <select aria-label="Period">
-            <option selected>Last month (Aug 1 – 31)</option>
-            <option>This month (Sep 1 – 22)</option>
-            <option>Last quarter (Apr 1 – Jun 30)</option>
-            <option>Custom range…</option>
-          </select>
-        </div>
-        <div class="hint">Your last full month — the usual close period</div>
-      </div>
-
-      <div class="cta">
-        <button type="button" class="btn pri">Check this period</button>
-        <div class="safe">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5l5 2v4c0 3-2.1 5.4-5 6.5-2.9-1.1-5-3.5-5-6.5v-4l5-2z" stroke="#1F8940" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.6 8l1.7 1.7L10.6 6.4" stroke="#1F8940" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Read-only — nothing is changed in your books
-        </div>
-      </div>
-      <p class="routine">Most teams run this once per closed month</p>
     </div>
 
     <div class="hero-illu" aria-hidden="true">
@@ -308,43 +275,36 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
     </div>
   </div>
 
-  <!-- What this will check -->
-  <div class="checks">
-    <h3>What this will check</h3>
-    <ul>
-      <li>
-        <span class="tick"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        Transactions missing from your books
-      </li>
-      <li>
-        <span class="tick"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        Fee and amount mismatches
-      </li>
-      <li>
-        <span class="tick"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="#0053CC" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="#0053CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        Duplicates before they hit reports
-      </li>
-    </ul>
-  </div>
-
   <div class="faqwrap">
     <h3>Common questions</h3>
     <div class="faq">
       <details>
-        <summary>Is this the same as matching payouts? <span class="chev">⌄</span></summary>
+        <summary><span class="chev" aria-hidden="true">›</span> Why should I use it?</summary>
+        <div class="body">It catches missing sales, fee mismatches, and amount-off rows before you close the period — so your clearing account and reports stay accurate.</div>
+      </details>
+      <details>
+        <summary><span class="chev" aria-hidden="true">›</span> Automated reconciliation</summary>
+        <div class="body">Synder compares platform activity to your clearing account line by line and groups issues into Matched, Missing, and Amount off for you to review.</div>
+      </details>
+      <details>
+        <summary><span class="chev" aria-hidden="true">›</span> No sync balance changes</summary>
+        <div class="body">Reconciliation is a read-only comparison. It does not post, edit, or sync anything to your books or change sync balances.</div>
+      </details>
+      <details>
+        <summary><span class="chev" aria-hidden="true">›</span> Will it change anything in my books?</summary>
+        <div class="body">No. Running reconciliation is read-only — nothing is posted or changed in your books.</div>
+      </details>
+      <details>
+        <summary><span class="chev" aria-hidden="true">›</span> Can I undo and re-run a reconciliation?</summary>
+        <div class="body">Yes. Because nothing is written to your books, you can re-run any period anytime. Prior check results are replaced by the new run.</div>
+      </details>
+      <details>
+        <summary><span class="chev" aria-hidden="true">›</span> Is this the same as matching payouts?</summary>
         <div class="body">No. Payout matching ties deposits to bank transfers. Transaction reconciliation checks every platform row against your clearing account line by line.</div>
       </details>
       <details>
-        <summary>How is this different from balance reconciliation? <span class="chev">⌄</span></summary>
+        <summary><span class="chev" aria-hidden="true">›</span> How is this different from balance reconciliation?</summary>
         <div class="body">Balance reconciliation confirms ending balances agree. This finds the individual missing, amount-off, and duplicate rows that cause a gap.</div>
-      </details>
-      <details>
-        <summary>Will it change anything in my books? <span class="chev">⌄</span></summary>
-        <div class="body">No. Checking a period is read-only — nothing is posted or changed in your books.</div>
-      </details>
-      <details>
-        <summary>How long does a check take? <span class="chev">⌄</span></summary>
-        <div class="body">Usually a few minutes for a typical month. You can leave the page; status updates when it’s ready.</div>
       </details>
     </div>
   </div>
