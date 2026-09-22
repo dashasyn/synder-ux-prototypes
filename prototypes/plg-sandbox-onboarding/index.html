@@ -521,7 +521,10 @@
       color: #1A1B24; display: flex; align-items: center; gap: 8px;
     }
     .main-health h2 .material-icons-round { font-size: 20px; color: #0053CC; }
-    .main-health .hs-meta { font-size: 13px; margin-bottom: 8px; }
+    .main-health .hs-meta {
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); margin-bottom: 8px;
+    }
     .main-health .hs-bar { height: 8px; margin-bottom: 16px; }
     .main-health-anchor { scroll-margin-top: 64px; }
     .main-health.flash { box-shadow: 0 0 0 2px #0053CC55; transition: box-shadow .3s ease; }
@@ -538,17 +541,25 @@
     .hs-all-done .material-icons-round {
       font-size: 22px; color: #1F8940; flex-shrink: 0; margin-top: 1px;
     }
-    .hs-all-done strong { display: block; font-size: 15px; font-weight: 500; margin-bottom: 2px; }
-    .hs-all-done p { margin: 0; font-size: 13px; line-height: 18px; color: #3D4A5C; }
+    .hs-all-done strong {
+      display: block; font-size: var(--font-subtitle2); font-weight: var(--font-subtitle2-weight);
+      line-height: var(--font-subtitle2-line-height); letter-spacing: var(--font-subtitle2-letter-spacing);
+      margin-bottom: 2px;
+    }
+    .hs-all-done p {
+      margin: 0; font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #3D4A5C;
+    }
     .hs-contact-info {
       margin: 0 0 10px; padding: 10px 12px;
       border-radius: 8px; background: #fff;
       border: 1px solid #DFE4EC;
-      font-size: 13px; line-height: 18px; color: #1A1B24;
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #1A1B24;
     }
     .hs-contact-info .label {
-      display: block; font-size: 11px; font-weight: 600;
-      letter-spacing: .3px; text-transform: uppercase;
+      display: block; font-size: var(--font-body2); font-weight: 600;
+      letter-spacing: var(--font-body2-letter-spacing);
       color: #6B778C; margin-bottom: 4px;
     }
     .hs-contact-info .row {
@@ -595,7 +606,9 @@
       gap: 8px; margin: 0 0 4px;
     }
     .hs-step-title {
-      font-size: 14px; font-weight: 500; line-height: 20px;
+      font-size: var(--font-subtitle1); font-weight: var(--font-subtitle1-weight);
+      line-height: var(--font-subtitle1-line-height);
+      letter-spacing: var(--font-subtitle1-letter-spacing);
       color: #1A1B24; margin: 0;
     }
     .hs-step-card.is-done .hs-step-title { color: #6B778C; }
@@ -611,7 +624,8 @@
       display: inline-flex; align-items: center; white-space: nowrap;
     }
     .hs-step-desc {
-      font-size: 13px; line-height: 18px; color: #6B778C; margin: 0;
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C; margin: 0;
     }
     .hs-step-card.is-current .hs-step-desc,
     .hs-step-card.is-done .hs-step-desc,
@@ -622,7 +636,9 @@
     .hs-call-divider {
       display: flex; align-items: center; gap: 10px;
       margin: 4px 0 2px; color: #6B778C;
-      font-size: 12px; font-weight: 600; letter-spacing: .2px;
+      font-size: var(--font-body2); font-weight: 600;
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
     }
     .hs-call-divider::before,
     .hs-call-divider::after {
@@ -632,13 +648,17 @@
       font-size: 16px; color: #6B778C;
     }
     .hs-next-hint {
-      font-size: 12px; line-height: 16px; color: #6B778C;
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C;
       margin: 0 0 8px;
     }
     /* Deep link is primary; Mark as done stays quiet */
     .hs-where {
       appearance: none; border: none; background: #0053CC;
-      color: #fff; font: inherit; font-size: 13px; font-weight: 500;
+      color: #fff; font: inherit;
+      font-size: var(--font-button); font-weight: var(--font-button-weight);
+      line-height: var(--font-button-line-height);
+      letter-spacing: var(--font-button-letter-spacing);
       cursor: pointer; height: 32px; padding: 0 14px; border-radius: 4px;
       text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
     }
@@ -650,13 +670,19 @@
     .hs-where .material-icons-round { font-size: 16px; }
     .hs-mark {
       appearance: none; border: none; background: none;
-      color: #6B778C; font: inherit; font-size: 13px; font-weight: 500;
+      color: #6B778C; font: inherit;
+      font-size: var(--font-body2); font-weight: 500;
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
       cursor: pointer; padding: 6px 0; height: auto;
     }
     .hs-mark:hover { color: #0053CC; text-decoration: underline; }
     .hs-undo {
       appearance: none; border: none; background: none;
-      color: #6B778C; font: inherit; font-size: 13px; font-weight: 500;
+      color: #6B778C; font: inherit;
+      font-size: var(--font-body2); font-weight: 500;
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
       cursor: pointer; padding: 6px 0; height: auto;
     }
     .hs-undo:hover { color: #0053CC; text-decoration: underline; }
@@ -672,7 +698,11 @@
       margin: 0 0 6px;
     }
     .freq-section-head h2 {
-      margin: 0; font-size: 15px; font-weight: 500; color: #1A1B24;
+      margin: 0;
+      font-size: var(--font-subtitle1); font-weight: var(--font-subtitle1-weight);
+      line-height: var(--font-subtitle1-line-height);
+      letter-spacing: var(--font-subtitle1-letter-spacing);
+      color: #1A1B24;
     }
     .freq-pill {
       font-size: var(--font-body2); font-weight: 500; line-height: var(--font-body2-line-height);
@@ -681,7 +711,9 @@
       display: inline-flex; align-items: center;
     }
     .freq-intro {
-      margin: 0 0 14px; font-size: 13px; line-height: 18px; color: #6B778C;
+      margin: 0 0 14px;
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C;
     }
     .freq-options { display: flex; flex-direction: column; gap: 8px; }
     .freq-option {
@@ -701,11 +733,15 @@
       margin-top: 3px; flex-shrink: 0; accent-color: #0053CC;
     }
     .freq-option-title {
-      display: block; font-size: 14px; font-weight: 500; line-height: 20px; color: #1A1B24;
+      display: block;
+      font-size: var(--font-body2); font-weight: 500;
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #1A1B24;
     }
     .freq-option-help {
       display: block; margin-top: 2px;
-      font-size: 13px; line-height: 18px; color: #6B778C;
+      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C;
     }
 
     .sidebar-bottom { margin-top: auto; }
