@@ -324,6 +324,22 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   .card.c-preview .copy{flex:1 1 auto}
   .copy{padding:32px 28px 28px}
 }
+
+/* —— E headline phrase pills (proto-bar, E only) —— */
+.e-phrases{display:none;align-items:center;gap:4px;flex-wrap:wrap}
+html[data-concept="e"] .e-phrases{display:flex}
+html[data-concept="e"] .e-phrases-sep{display:block}
+.e-phrases-sep{display:none;width:1px;height:22px;background:rgba(255,255,255,.18);flex-shrink:0}
+.e-phrase{
+  background:transparent;border:1px solid rgba(255,255,255,.18);color:#9CA3AF;
+  padding:5px 10px;border-radius:999px;font:inherit;font-weight:500;font-size:12px;cursor:pointer;
+}
+.e-phrase:hover{color:#fff;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28)}
+.e-phrase.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.35)}
+
+/* E: shield at very top of copy */
+.concept[data-panel="e"] .shield{margin-bottom:14px;margin-top:0}
+.concept[data-panel="e"] .eyebrow{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -337,6 +353,13 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
     <button type="button" class="proto-tab" data-concept="b" role="tab" aria-selected="false">B · Gap job</button>
     <button type="button" class="proto-tab" data-concept="c" role="tab" aria-selected="false">C · Preview first</button>
     <button type="button" class="proto-tab" data-concept="d" role="tab" aria-selected="false">D · Clear the guess</button>
+    <button type="button" class="proto-tab" data-concept="e" role="tab" aria-selected="false">E · Merged</button>
+  </div>
+  <div class="sep e-phrases-sep" aria-hidden="true"></div>
+  <div class="e-phrases" role="group" aria-label="E headline options">
+    <button type="button" class="e-phrase active" data-e-copy="e1" aria-pressed="true">E1 · Gap</button>
+    <button type="button" class="e-phrase" data-e-copy="e2" aria-pressed="false">E2 · Rows</button>
+    <button type="button" class="e-phrase" data-e-copy="e3" aria-pressed="false">E3 · Close</button>
   </div>
 </div>
 
@@ -576,6 +599,67 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
     </div>
   </div>
 
+  <!-- ========== CONCEPT E · Merged ========== -->
+  <!-- Recipe: read-only shield TOP · eyebrow · switchable H/lead · 2 ticks · 1 blue chip · Run+View example · platforms→books · no dual cards · no inline preview -->
+  <div class="concept" data-panel="e" role="tabpanel">
+    <div class="card">
+      <div class="copy">
+        <div class="shield" role="note">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2.2l5.5 2.2v4.1c0 3.4-2.3 5.8-5.5 6.8-3.2-1-5.5-3.4-5.5-6.8V4.4L9 2.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 9.1l1.7 1.7 3.5-3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Read-only comparison — no changes to your books
+        </div>
+        <span class="eyebrow">Not payout matching</span>
+        <h2 class="card-h" id="e-headline">Find the rows that throw the clearing balance off</h2>
+        <p class="lead" id="e-lead">When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — not matching payouts to the bank.</p>
+        <ul class="benefits">
+          <li>
+            <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            See which lines are missing or the wrong amount
+          </li>
+          <li>
+            <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Compare platform activity to the clearing account, row by row
+          </li>
+        </ul>
+        <div class="chips">
+          <span class="chip-wrap">
+            <span class="chip combined">Included in your plan · no sync credits <button type="button" class="tip" aria-label="About plan and sync credits">?</button></span>
+            <span class="tooltip">Included on your Synder plan. Running reconciliation doesn’t use sync credits — it only compares data already synced.</span>
+          </span>
+        </div>
+        <div class="cta-row">
+          <button type="button" class="btn pri">Run reconciliation</button>
+          <button type="button" class="btn ghost js-view-example">View example</button>
+        </div>
+      </div>
+      <div class="hero" aria-hidden="true">
+        <div class="flow-illu">
+          <svg width="280" height="140" viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="48" width="88" height="44" rx="22" fill="#fff" stroke="#DFE4EC"/>
+            <circle cx="30" cy="70" r="9" fill="#635BFF"/>
+            <text x="30" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="10" font-weight="700">S</text>
+            <circle cx="52" cy="70" r="9" fill="#96BF48"/>
+            <text x="52" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="9" font-weight="700">Sh</text>
+            <circle cx="74" cy="70" r="9" fill="#FF9900"/>
+            <text x="74" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="10" font-weight="700">A</text>
+            <path d="M112 70 H168" stroke="#0053CC" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M160 62 L172 70 L160 78" stroke="#0053CC" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <rect x="118" y="38" width="44" height="18" rx="9" fill="#fff" stroke="#DFE4EC"/>
+            <text x="140" y="50" text-anchor="middle" fill="#6B778C" font-family="Roboto,Arial,sans-serif" font-size="9" font-weight="500">row by row</text>
+            <rect x="188" y="36" width="72" height="68" rx="8" fill="#0053CC"/>
+            <rect x="200" y="50" width="48" height="5" rx="1.5" fill="#fff" opacity=".95"/>
+            <rect x="200" y="62" width="36" height="4" rx="1.5" fill="#CCDDF5"/>
+            <rect x="200" y="72" width="42" height="4" rx="1.5" fill="#CCDDF5"/>
+            <rect x="200" y="82" width="28" height="4" rx="1.5" fill="#CCDDF5"/>
+            <text x="224" y="120" text-anchor="middle" fill="#6B778C" font-family="Roboto,Arial,sans-serif" font-size="11" font-weight="500">Books</text>
+          </svg>
+          <p class="illu-caption">Platforms → Books</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </div>
 
 <!-- Shared View example modal -->
@@ -624,6 +708,34 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   var root = document.documentElement;
   var modal = document.getElementById('example-modal');
 
+  var eCopy = {
+    e1: {
+      h: 'Find the rows that throw the clearing balance off',
+      lead: 'When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — not matching payouts to the bank.'
+    },
+    e2: {
+      h: 'Compare every platform row to the clearing account',
+      lead: 'Row-by-row check of sales and fees from your integrations against the clearing account so you can close the period with confidence.'
+    },
+    e3: {
+      h: 'Close the period knowing every row matches',
+      lead: 'Run a read-only row check against the clearing account before you sign off — catch missing and amount-off lines first.'
+    }
+  };
+
+  function setECopy(key) {
+    var copy = eCopy[key] || eCopy.e1;
+    var h = document.getElementById('e-headline');
+    var lead = document.getElementById('e-lead');
+    if (h) h.textContent = copy.h;
+    if (lead) lead.textContent = copy.lead;
+    document.querySelectorAll('.e-phrase').forEach(function (btn) {
+      var on = btn.getAttribute('data-e-copy') === key;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
   function setConcept(key) {
     root.setAttribute('data-concept', key);
     document.querySelectorAll('.proto-tab').forEach(function (btn) {
@@ -641,6 +753,14 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
       setConcept(btn.getAttribute('data-concept'));
     });
   });
+
+  document.querySelectorAll('.e-phrase').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setECopy(btn.getAttribute('data-e-copy'));
+    });
+  });
+
+  setECopy('e1');
 
   function openModal() {
     modal.hidden = false;
