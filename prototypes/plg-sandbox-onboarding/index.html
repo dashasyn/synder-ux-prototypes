@@ -601,9 +601,14 @@
     .hs-step-card.is-done .hs-step-title { color: #6B778C; }
     .hs-step-card.is-locked .hs-step-title { color: #3D4A5C; }
     .hs-badge {
-      flex-shrink: 0; font-size: 13px; font-weight: 600; line-height: 18px;
-      letter-spacing: .2px; color: #0053CC; background: #EEF4FF;
-      border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+      flex-shrink: 0;
+      font-size: var(--font-body2); font-weight: 500; line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
+      color: var(--color-blue);           /* #3C4EAC — UI kit Status blue */
+      background: var(--color-status-blue-bg); /* #D6EBFF */
+      border-radius: var(--radius-sm);
+      padding: 0 6px; height: 20px;
+      display: inline-flex; align-items: center; white-space: nowrap;
     }
     .hs-step-desc {
       font-size: 13px; line-height: 18px; color: #6B778C; margin: 0;
@@ -670,9 +675,10 @@
       margin: 0; font-size: 15px; font-weight: 500; color: #1A1B24;
     }
     .freq-pill {
-      font-size: 12px; font-weight: 600; line-height: 16px;
-      color: #0053CC; background: #EEF4FF;
-      border-radius: 999px; padding: 2px 8px;
+      font-size: var(--font-body2); font-weight: 500; line-height: var(--font-body2-line-height);
+      color: var(--color-blue); background: var(--color-status-blue-bg);
+      border-radius: var(--radius-sm); padding: 0 6px; height: 20px;
+      display: inline-flex; align-items: center;
     }
     .freq-intro {
       margin: 0 0 14px; font-size: 13px; line-height: 18px; color: #6B778C;
