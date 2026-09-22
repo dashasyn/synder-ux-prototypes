@@ -583,7 +583,7 @@
       background: #1F8940; color: #fff; border: none;
     }
     .hs-step-card .ico.locked {
-      background: #EEF4FF; color: #0053CC; border: none;
+      background: #EDE8E0; color: #6B778C; border: none;
     }
     .hs-step-card .ico .material-icons-round { font-size: 14px; }
     .hs-step-body { flex: 1; min-width: 0; }
@@ -599,7 +599,7 @@
     .hs-step-card.is-locked .hs-step-title { color: #3D4A5C; }
     .hs-badge {
       flex-shrink: 0; font-size: 13px; font-weight: 600; line-height: 18px;
-      letter-spacing: .2px; color: #0053CC; background: #EEF4FF;
+      letter-spacing: .2px; color: #5C5660; background: #E8E2D8;
       border-radius: 999px; padding: 2px 8px; white-space: nowrap;
     }
     .hs-step-desc {
@@ -646,9 +646,6 @@
       cursor: pointer; padding: 6px 0; height: auto;
     }
     .hs-mark:hover { color: #0053CC; text-decoration: underline; }
-    .hs-done-label {
-      font-size: 13px; font-weight: 500; color: #1F8940;
-    }
     .hs-undo {
       appearance: none; border: none; background: none;
       color: #6B778C; font: inherit; font-size: 13px; font-weight: 500;
@@ -1782,11 +1779,7 @@
         actions = '<div class="hs-step-actions">' + whereBtn +
           '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button></div>';
       } else if (status === 'done' && !isCall) {
-        const whereBtn = c.where
-          ? '<button type="button" class="hs-where is-secondary" data-where="' + c.id + '">' + c.where + '</button>'
-          : '';
-        actions = '<div class="hs-step-actions">' + whereBtn +
-          '<span class="hs-done-label">Done</span>' +
+        actions = '<div class="hs-step-actions">' +
           '<button type="button" class="hs-undo" data-mark="' + c.id + '">Undo</button></div>';
       } else if (status === 'locked' && c.contactInfo) {
         contactBlock = checklistContactHtml();
