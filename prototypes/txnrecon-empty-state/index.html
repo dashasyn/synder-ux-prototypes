@@ -73,6 +73,9 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 }
 .chip.green{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
 .chip.blue{background:var(--blue-bg);color:var(--blue-chip);border-color:var(--blue-border)}
+.chip.combined{
+  background:var(--green-bg);color:var(--green);border-color:var(--green-border);
+}
 .chip .tip{
   display:inline-flex;align-items:center;justify-content:center;
   width:15px;height:15px;border-radius:50%;
@@ -84,7 +87,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 .chip-wrap .tooltip{
   display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);
   background:var(--grey);color:#fff;font-size:12px;font-weight:400;line-height:1.4;
-  padding:8px 10px;border-radius:6px;width:220px;z-index:20;pointer-events:none;
+  padding:8px 10px;border-radius:6px;width:240px;z-index:20;pointer-events:none;
   box-shadow:0 4px 12px rgba(0,0,0,.18);
 }
 .chip-wrap .tooltip::after{
@@ -106,6 +109,64 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
 }
 .btn.ghost:hover{background:var(--primary-5)}
 .caption{margin-top:12px;font-size:13px;color:var(--grey-50)}
+.caption.muted{margin-top:10px;font-size:12px;color:var(--grey-30)}
+
+/* Quiet trust line (D) */
+.trust-line{
+  margin-top:12px;font-size:12px;color:var(--grey-50);letter-spacing:.01em;
+}
+
+/* —— Read-only treatments —— */
+/* B: prominent green shield above CTAs */
+.shield{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;padding:10px 12px;
+  background:var(--green-bg);border:1px solid var(--green-border);border-radius:6px;
+  font-size:13px;font-weight:500;color:var(--green);line-height:1.35;
+}
+.shield svg{flex-shrink:0}
+
+/* C: slim info bar between lead and CTAs */
+.info-bar{
+  display:flex;align-items:center;gap:8px;
+  margin:0 0 20px;padding:9px 12px;
+  background:linear-gradient(90deg,var(--green-bg) 0%,var(--primary-5) 100%);
+  border:1px solid var(--green-border);border-radius:6px;
+  font-size:13px;color:var(--grey);line-height:1.35;width:100%;
+}
+.info-bar svg{flex-shrink:0;color:var(--green)}
+
+/* D: left-border callout above CTAs */
+.callout{
+  display:flex;align-items:flex-start;gap:10px;
+  margin-bottom:18px;padding:12px 14px;
+  background:var(--green-bg);border-left:3px solid var(--green);border-radius:0 6px 6px 0;
+  font-size:13px;font-weight:500;color:var(--green);line-height:1.4;
+}
+.callout svg{flex-shrink:0;margin-top:1px}
+
+/* —— Concept A: FAQ accordion (live grey-bar) —— */
+.faq{
+  margin-top:20px;border:1px solid var(--grey-20);border-radius:8px;overflow:hidden;background:#fff;
+}
+.faq-item{border-bottom:1px solid var(--grey-20)}
+.faq-item:last-child{border-bottom:0}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--grey-5);border:0;padding:14px 16px;cursor:pointer;
+  font:inherit;font-size:14px;font-weight:500;color:var(--grey);text-align:left;
+}
+.faq-q:hover{background:var(--grey-10)}
+.faq-q .chev{
+  flex-shrink:0;width:18px;height:18px;color:var(--grey-50);
+  transition:transform .15s ease;
+}
+.faq-item.open .faq-q .chev{transform:rotate(180deg)}
+.faq-a{
+  display:none;padding:12px 16px 16px;font-size:13px;color:var(--grey-50);line-height:1.55;
+  background:#fff;border-top:1px solid var(--grey-20);
+}
+.faq-item.open .faq-a{display:block}
 
 /* —— Concept A: video chrome —— */
 .video-frame{
@@ -162,6 +223,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
   display:inline-block;margin-left:4px;font-size:11px;font-weight:500;
   background:var(--grey-10);color:var(--grey-50);border-radius:999px;padding:1px 6px;
 }
+
 .preview-tab.on .count{background:var(--primary-10);color:var(--primary)}
 .preview-tab.warn .count{background:var(--red-bg);color:var(--red)}
 .preview-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -268,6 +330,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
   <h1 class="h1">Transaction reconciliation</h1>
 
   <!-- ========== CONCEPT A · Live+ ========== -->
+  <!-- Recipe: 2 chips · caption read-only · FAQ accordion · video hero · 3 benefits -->
   <div class="concept active" data-panel="a" role="tabpanel">
     <div class="card">
       <div class="copy">
@@ -316,9 +379,48 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
         <p class="illu-caption">How transaction reconciliation works</p>
       </div>
     </div>
+
+    <div class="faq" role="list">
+      <div class="faq-item open" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="true">
+          Why should I run transaction reconciliation?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">It compares every platform row to your books so you catch missing sales, fees, and amount mismatches before they throw off your close.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Is reconciliation automated?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">You choose when to run it. Synder matches rows for that period and surfaces exceptions — you stay in control of when the check happens.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Does it use my sync credits?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">No. Reconciliation only compares data already synced to Synder — it doesn’t consume sync credits.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Will it change my books?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">No. The check is read-only. It never posts, edits, or deletes anything in your accounting system.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Can I undo a reconciliation?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">There’s nothing to undo — results are a report of matches and gaps. Re-run anytime with a different period or after you fix books.</div>
+      </div>
+    </div>
   </div>
 
   <!-- ========== CONCEPT B · Gap job ========== -->
+  <!-- Recipe: 1 combined chip · shield read-only above CTAs · no FAQ · platforms→books · 2 benefits · monthly cadence -->
   <div class="concept" data-panel="b" role="tabpanel">
     <div class="card">
       <div class="copy">
@@ -336,19 +438,19 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
         </ul>
         <div class="chips">
           <span class="chip-wrap">
-            <span class="chip green">Included in your plan <button type="button" class="tip" aria-label="About plan inclusion">?</button></span>
-            <span class="tooltip">Available on your current Synder plan — no add-on required.</span>
+            <span class="chip combined">Included in your plan · no sync credits <button type="button" class="tip" aria-label="About plan and sync credits">?</button></span>
+            <span class="tooltip">Included on your Synder plan. Running reconciliation doesn’t use sync credits — it only compares data already synced.</span>
           </span>
-          <span class="chip-wrap">
-            <span class="chip blue">Doesn't use your sync credits <button type="button" class="tip" aria-label="About sync credits">?</button></span>
-            <span class="tooltip">Running reconciliation is free of sync credits. It only compares data already synced.</span>
-          </span>
+        </div>
+        <div class="shield" role="note">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2.2l5.5 2.2v4.1c0 3.4-2.3 5.8-5.5 6.8-3.2-1-5.5-3.4-5.5-6.8V4.4L9 2.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 9.1l1.7 1.7 3.5-3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Read-only comparison — no changes to your books
         </div>
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
-        <p class="caption">Read-only — no changes to your books</p>
+        <p class="caption muted">Most teams run this once a month</p>
       </div>
       <div class="hero" aria-hidden="true">
         <div class="flow-illu">
@@ -378,26 +480,20 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
   </div>
 
   <!-- ========== CONCEPT C · Preview first ========== -->
+  <!-- Recipe: no chips · slim info-bar read-only · no FAQ · mini results preview hero · Run + View example -->
   <div class="concept" data-panel="c" role="tabpanel">
     <div class="card c-preview">
       <div class="copy">
         <h2 class="card-h">See what a check looks like</h2>
         <p class="lead">Row-by-row match of Stripe/Shopify/Amazon activity to your clearing account — not matching payouts to the bank.</p>
-        <div class="chips">
-          <span class="chip-wrap">
-            <span class="chip green">Included in your plan <button type="button" class="tip" aria-label="About plan inclusion">?</button></span>
-            <span class="tooltip">Available on your current Synder plan — no add-on required.</span>
-          </span>
-          <span class="chip-wrap">
-            <span class="chip blue">Doesn't use your sync credits <button type="button" class="tip" aria-label="About sync credits">?</button></span>
-            <span class="tooltip">Running reconciliation is free of sync credits. It only compares data already synced.</span>
-          </span>
+        <div class="info-bar" role="note">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.2v3.2M8 5.2h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Read-only — no changes to your books
         </div>
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
-        <p class="caption">Read-only — no changes to your books</p>
       </div>
       <div class="hero">
         <div class="preview-panel" aria-label="Example results preview">
@@ -432,6 +528,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
   </div>
 
   <!-- ========== CONCEPT D · Clear the guess ========== -->
+  <!-- Recipe: no chips · left-border callout read-only · quiet trust line under CTAs · no FAQ · eyebrow + contrast · row badge -->
   <div class="concept" data-panel="d" role="tabpanel">
     <div class="card">
       <div class="copy">
@@ -443,31 +540,15 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
           <span class="vs">vs</span>
           <span class="right"><em>Platform rows → books</em></span>
         </div>
-        <ul class="benefits">
-          <li>
-            <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            Catch missing and mismatched amounts
-          </li>
-          <li>
-            <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            Safe read-only check
-          </li>
-        </ul>
-        <div class="chips">
-          <span class="chip-wrap">
-            <span class="chip green">Included in your plan <button type="button" class="tip" aria-label="About plan inclusion">?</button></span>
-            <span class="tooltip">Available on your current Synder plan — no add-on required.</span>
-          </span>
-          <span class="chip-wrap">
-            <span class="chip blue">Doesn't use your sync credits <button type="button" class="tip" aria-label="About sync credits">?</button></span>
-            <span class="tooltip">Running reconciliation is free of sync credits. It only compares data already synced.</span>
-          </span>
+        <div class="callout" role="note">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2.2l5.5 2.2v4.1c0 3.4-2.3 5.8-5.5 6.8-3.2-1-5.5-3.4-5.5-6.8V4.4L9 2.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 9.1l1.7 1.7 3.5-3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Read-only — no changes to your books
         </div>
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
-        <p class="caption">Read-only — no changes to your books</p>
+        <p class="trust-line">Included in your plan · doesn’t use sync credits</p>
       </div>
       <div class="hero" aria-hidden="true">
         <div class="flow-illu">
@@ -564,6 +645,16 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:var(--grey
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+  /* A-only FAQ accordion */
+  document.querySelectorAll('.faq-q').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var item = btn.closest('.faq-item');
+      var open = item.classList.contains('open');
+      item.classList.toggle('open', !open);
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
   });
 })();
 </script>
