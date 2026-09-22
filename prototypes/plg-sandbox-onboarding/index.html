@@ -551,24 +551,24 @@
       letter-spacing: var(--font-body2-letter-spacing); color: #3D4A5C;
     }
     .hs-contact-info {
-      margin: 0 0 10px; padding: 10px 12px;
-      border-radius: 8px; background: #fff;
-      border: 1px solid #DFE4EC;
+      margin: 0 0 10px; padding: 0;
+      border: none; background: transparent;
       font-size: var(--font-body2); line-height: var(--font-body2-line-height);
-      letter-spacing: var(--font-body2-letter-spacing); color: #1A1B24;
+      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C;
     }
     .hs-contact-info .label {
-      display: block; font-size: var(--font-body2); font-weight: 600;
+      display: block; font-size: var(--font-body2); font-weight: 400;
       letter-spacing: var(--font-body2-letter-spacing);
-      color: #6B778C; margin-bottom: 4px;
+      color: #6B778C; margin-bottom: 2px;
     }
     .hs-contact-info .row {
       display: flex; align-items: flex-start; gap: 6px;
       margin-top: 2px;
     }
     .hs-contact-info .material-icons-round {
-      font-size: 16px; color: #0053CC; margin-top: 1px;
+      font-size: 16px; color: #6B778C; margin-top: 1px;
     }
+    .hs-contact-info strong { font-weight: 500; color: #3D4A5C; }
     .hs-steps { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; }
     .hs-step-card {
       border: 1px solid transparent; border-radius: 8px;
@@ -709,6 +709,12 @@
       color: var(--color-blue); background: var(--color-status-blue-bg);
       border-radius: var(--radius-sm); padding: 0 6px; height: 20px;
       display: inline-flex; align-items: center;
+    }
+    .freq-rec {
+      display: inline-flex; align-items: center; margin-left: 8px;
+      height: 20px; padding: 0 6px; border-radius: var(--radius-sm);
+      font-size: var(--font-body2); font-weight: 500;
+      color: #1F8940; background: #E8F6DC;
     }
     .freq-intro {
       margin: 0 0 14px;
@@ -1225,7 +1231,7 @@
         id: 'period',
         phase: 'self',
         title: 'Choose Synchronization frequency',
-        desc: 'In Settings, choose how often Synder prepares summaries. Leave Manual selected until your setup call.',
+        desc: 'Choose how Synder syncs summaries to your books. Leave Manual selected until your setup call.',
         where: 'Go to Settings',
         whereHint: 'Settings',
       },
@@ -1233,7 +1239,7 @@
         id: 'test-sync',
         phase: 'self',
         title: 'Sync a summary',
-        desc: 'Open a ready summary, click Sync to books, then confirm it landed in your books.',
+        desc: 'Open a summary that’s Ready to sync, click Sync, then confirm it landed in your books.',
         where: 'Go to Summaries list',
         whereHint: 'Summaries list',
       },
@@ -1241,7 +1247,7 @@
         id: 'historical',
         phase: 'call',
         title: 'Import historical data',
-        desc: 'Agree the date range with your Synder specialist so the import doesn’t create duplicates.',
+        desc: 'Agree the date range with your Synder specialist so the import completes and everything syncs correctly.',
         badge: 'Ready to activate',
       },
       {
@@ -1282,7 +1288,7 @@
         id: 'historical',
         phase: 'call',
         title: 'Import historical data',
-        desc: 'Agree the date range with your Synder specialist so the import doesn’t create duplicates.',
+        desc: 'Agree the date range with your Synder specialist so the import completes and everything syncs correctly.',
         badge: 'Ready to activate',
       },
       {
@@ -1761,18 +1767,18 @@
       const when = (slot && slot.dayLabel && slot.time)
         ? (slot.dayLabel + ' · ' + slot.time)
         : 'Tue 14 Apr · 10:00 AM';
-      return `<div class="hs-contact-info"><span class="label">Your contact</span>
-        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Your Synder specialist joins the call you booked.</span></div></div>`;
+      return `<div class="hs-contact-info"><span class="label">Setup call</span>
+        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Booked with your Synder specialist.</span></div></div>`;
     }
     if (contact === 'phone') {
-      return `<div class="hs-contact-info"><span class="label">Your contact</span>
-        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>We’ll call ${phone} in that window.</span></div></div>`;
+      return `<div class="hs-contact-info"><span class="label">Setup call</span>
+        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>${phone}</span></div></div>`;
     }
     if (contact === 'email') {
-      return `<div class="hs-contact-info"><span class="label">Your contact</span>
+      return `<div class="hs-contact-info"><span class="label">Setup call</span>
         <div class="row"><span class="material-icons-round">mail</span><span><strong>Email</strong> · ${email}<br>We’ll write to this address to finish setup.</span></div></div>`;
     }
-    return `<div class="hs-contact-info"><span class="label">Your contact</span>
+    return `<div class="hs-contact-info"><span class="label">Setup call</span>
       <div class="row"><span class="material-icons-round">support_agent</span><span>Your Synder specialist will reach out using the contact you chose.</span></div></div>`;
   }
 
@@ -2034,19 +2040,19 @@
           {
             id: 'daily',
             title: 'Every day auto-sync',
-            help: 'Synder prepares a summary each day. Summaries become ready automatically as data arrives.',
+            help: 'Synder will synchronize summaries automatically on the next day.',
             locked: true,
           },
           {
             id: 'fully',
             title: 'Fully fetched auto-sync',
-            help: 'Synder prepares a summary when the period is fully fetched. Summaries become ready automatically.',
+            help: 'Synder will synchronize summaries automatically when all data is collected.',
             locked: true,
           },
           {
             id: 'manual',
             title: 'Manual',
-            help: 'You Sync to books yourself. Data still collects in the background — Sync is a separate action.',
+            help: 'You will need to sync summaries manually to your books.',
             locked: false,
           },
         ];
@@ -2057,9 +2063,12 @@
             + (o.locked ? ' is-locked' : '');
           const disabled = o.locked ? ' disabled' : '';
           const checked = selected ? ' checked' : '';
+          const rec = o.id === 'fully'
+            ? ' <span class="freq-rec">Recommended</span>'
+            : '';
           return '<label class="' + cls + '">'
             + '<input type="radio" name="sync-frequency" value="' + o.id + '"' + checked + disabled + ' />'
-            + '<span><span class="freq-option-title">' + o.title + '</span>'
+            + '<span><span class="freq-option-title">' + o.title + rec + '</span>'
             + '<span class="freq-option-help">' + o.help + '</span></span></label>';
         }).join('');
         body = `
@@ -2070,7 +2079,7 @@
             <h2 id="freq-heading">Synchronization frequency</h2>
             <span class="freq-pill">Ready to activate</span>
           </div>
-          <p class="freq-intro">Choose how often Synder prepares summaries. Auto options unlock after your setup call.</p>
+          <p class="freq-intro">Select the way you want to synchronize transactions to your books. Auto options unlock after your setup call.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
         </section>`;
       } else {
