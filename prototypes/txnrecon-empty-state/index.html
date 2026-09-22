@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-concept="a">
+<html lang="en" data-concept="e">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -338,7 +338,15 @@ html[data-concept="e"] .e-phrases-sep{display:block}
 .e-phrase.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.35)}
 
 /* E: shield at very top of copy */
-.concept[data-panel="e"] .shield{margin-bottom:14px;margin-top:0}
+.concept[data-panel="e"] .readonly-line{
+  margin:0 0 16px;font-size:13px;font-weight:500;color:var(--green);line-height:1.4;
+}
+.concept[data-panel="e"] .card{display:block}
+.concept[data-panel="e"] .copy{flex:none;max-width:560px;padding:40px 44px 40px}
+.concept[data-panel="e"] .lead strong{font-weight:600;color:var(--grey)}
+.concept[data-panel="e"] .chips{margin-bottom:22px}
+.concept[data-panel="e"] .benefits{margin-bottom:22px}
+
 .concept[data-panel="e"] .eyebrow{margin-bottom:8px}
 </style>
 </head>
@@ -349,11 +357,11 @@ html[data-concept="e"] .e-phrases-sep{display:block}
   <div class="brand">TxnRecon · Empty state</div>
   <div class="sep" aria-hidden="true"></div>
   <div class="proto-tabs" role="tablist" aria-label="Concepts">
-    <button type="button" class="proto-tab active" data-concept="a" role="tab" aria-selected="true">A · Live+</button>
+    <button type="button" class="proto-tab" data-concept="a" role="tab" aria-selected="true">A · Live+</button>
     <button type="button" class="proto-tab" data-concept="b" role="tab" aria-selected="false">B · Gap job</button>
     <button type="button" class="proto-tab" data-concept="c" role="tab" aria-selected="false">C · Preview first</button>
     <button type="button" class="proto-tab" data-concept="d" role="tab" aria-selected="false">D · Clear the guess</button>
-    <button type="button" class="proto-tab" data-concept="e" role="tab" aria-selected="false">E · Merged</button>
+    <button type="button" class="proto-tab active" data-concept="e" role="tab" aria-selected="false">E · Merged</button>
   </div>
   <div class="sep e-phrases-sep" aria-hidden="true"></div>
   <div class="e-phrases" role="group" aria-label="E headline options">
@@ -368,7 +376,7 @@ html[data-concept="e"] .e-phrases-sep{display:block}
 
   <!-- ========== CONCEPT A · Live+ ========== -->
   <!-- Recipe: 2 chips · caption read-only · FAQ accordion · video hero · 3 benefits -->
-  <div class="concept active" data-panel="a" role="tabpanel">
+  <div class="concept" data-panel="a" role="tabpanel">
     <div class="card">
       <div class="copy">
         <h2 class="card-h">Match transactions to your books</h2>
@@ -599,18 +607,14 @@ html[data-concept="e"] .e-phrases-sep{display:block}
     </div>
   </div>
 
-  <!-- ========== CONCEPT E · Merged ========== -->
-  <!-- Recipe: read-only shield TOP · eyebrow · switchable H/lead · 2 ticks · 1 blue chip · Run+View example · platforms→books · no dual cards · no inline preview -->
-  <div class="concept" data-panel="e" role="tabpanel">
+  <!-- ========== CONCEPT E · Merged (Ignat cleaned screenshot) ========== -->
+  <!-- Recipe: plain green read-only line · no eyebrow · H · lead (bold anti-payout) · 2 ticks · 1 blue chip · Run+View example · single column, no hero -->
+  <div class="concept active" data-panel="e" role="tabpanel">
     <div class="card">
       <div class="copy">
-        <div class="shield" role="note">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2.2l5.5 2.2v4.1c0 3.4-2.3 5.8-5.5 6.8-3.2-1-5.5-3.4-5.5-6.8V4.4L9 2.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 9.1l1.7 1.7 3.5-3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Read-only comparison — no changes to your books
-        </div>
-        <span class="eyebrow">Not payout matching</span>
+        <p class="readonly-line" role="note">Read only comparison - no changes to your books</p>
         <h2 class="card-h" id="e-headline">Find the rows that throw the clearing balance off</h2>
-        <p class="lead" id="e-lead">When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — not matching payouts to the bank.</p>
+        <p class="lead" id="e-lead">When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — <strong>not matching payouts to the bank.</strong></p>
         <ul class="benefits">
           <li>
             <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -630,30 +634,6 @@ html[data-concept="e"] .e-phrases-sep{display:block}
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
-        </div>
-      </div>
-      <div class="hero" aria-hidden="true">
-        <div class="flow-illu">
-          <svg width="280" height="140" viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="8" y="48" width="88" height="44" rx="22" fill="#fff" stroke="#DFE4EC"/>
-            <circle cx="30" cy="70" r="9" fill="#635BFF"/>
-            <text x="30" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="10" font-weight="700">S</text>
-            <circle cx="52" cy="70" r="9" fill="#96BF48"/>
-            <text x="52" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="9" font-weight="700">Sh</text>
-            <circle cx="74" cy="70" r="9" fill="#FF9900"/>
-            <text x="74" y="74" text-anchor="middle" fill="#fff" font-family="Roboto,Arial,sans-serif" font-size="10" font-weight="700">A</text>
-            <path d="M112 70 H168" stroke="#0053CC" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M160 62 L172 70 L160 78" stroke="#0053CC" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <rect x="118" y="38" width="44" height="18" rx="9" fill="#fff" stroke="#DFE4EC"/>
-            <text x="140" y="50" text-anchor="middle" fill="#6B778C" font-family="Roboto,Arial,sans-serif" font-size="9" font-weight="500">row by row</text>
-            <rect x="188" y="36" width="72" height="68" rx="8" fill="#0053CC"/>
-            <rect x="200" y="50" width="48" height="5" rx="1.5" fill="#fff" opacity=".95"/>
-            <rect x="200" y="62" width="36" height="4" rx="1.5" fill="#CCDDF5"/>
-            <rect x="200" y="72" width="42" height="4" rx="1.5" fill="#CCDDF5"/>
-            <rect x="200" y="82" width="28" height="4" rx="1.5" fill="#CCDDF5"/>
-            <text x="224" y="120" text-anchor="middle" fill="#6B778C" font-family="Roboto,Arial,sans-serif" font-size="11" font-weight="500">Books</text>
-          </svg>
-          <p class="illu-caption">Platforms → Books</p>
         </div>
       </div>
     </div>
@@ -711,7 +691,8 @@ html[data-concept="e"] .e-phrases-sep{display:block}
   var eCopy = {
     e1: {
       h: 'Find the rows that throw the clearing balance off',
-      lead: 'When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — not matching payouts to the bank.'
+      lead: 'When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — <strong>not matching payouts to the bank.</strong>',
+      leadHtml: true
     },
     e2: {
       h: 'Compare every platform row to the clearing account',
