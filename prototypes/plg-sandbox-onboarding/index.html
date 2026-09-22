@@ -104,9 +104,12 @@
       padding: 0 6px; font-family: inherit;
     }
     .proto-bar .proto-app-only,
-    .proto-bar .proto-success-only { display: none; }
+    .proto-bar .proto-success-only,
+    .proto-bar .proto-contact-demo { display: none; }
     body[data-view="app"] .proto-bar .proto-app-only { display: inline-flex; }
     body[data-view="success"] .proto-bar .proto-success-only { display: inline-flex; }
+    body[data-view="app"] .proto-bar .proto-contact-demo,
+    body[data-view="success"] .proto-bar .proto-contact-demo { display: inline-flex; }
 
     /* ── Views ────────────────────────────────────────── */
     .view { display: none; min-height: calc(100vh - var(--proto-bar-h)); }
@@ -564,7 +567,7 @@
     .hs-step-card.is-done { background: #F3FAF0; border-color: transparent; }
     .hs-step-card.is-current { background: #EEF4FF; border-color: #B7D0FF; }
     .hs-step-card.is-pending { background: #fff; border-color: #E6EAF0; }
-    .hs-step-card.is-locked { background: #F5F2EC; border-color: transparent; }
+    .hs-step-card.is-locked { background: #F7F8FA; border-color: transparent; }
     .hs-step-top {
       display: flex; align-items: flex-start; gap: 12px;
     }
@@ -583,7 +586,7 @@
       background: #1F8940; color: #fff; border: none;
     }
     .hs-step-card .ico.locked {
-      background: #EDE8E0; color: #6B778C; border: none;
+      background: #EEF0F3; color: #6B778C; border: none;
     }
     .hs-step-card .ico .material-icons-round { font-size: 14px; }
     .hs-step-body { flex: 1; min-width: 0; }
@@ -599,7 +602,7 @@
     .hs-step-card.is-locked .hs-step-title { color: #3D4A5C; }
     .hs-badge {
       flex-shrink: 0; font-size: 13px; font-weight: 600; line-height: 18px;
-      letter-spacing: .2px; color: #5C5660; background: #E8E2D8;
+      letter-spacing: .2px; color: #0053CC; background: #EEF4FF;
       border-radius: 999px; padding: 2px 8px; white-space: nowrap;
     }
     .hs-step-desc {
@@ -855,9 +858,9 @@
       </div>
     </div>
 
-    <div class="proto-group proto-success-only proto-chip" id="contact-chips">
-      <span class="proto-label">Demo</span>
-      <label>Contact
+    <div class="proto-group proto-contact-demo proto-chip" id="contact-chips">
+      <span class="proto-label">Contact</span>
+      <label>
         <select id="demo-contact">
           <option value="zoom">Zoom</option>
           <option value="phone">Phone</option>
@@ -1202,8 +1205,8 @@
       {
         id: 'csm',
         phase: 'call',
-        title: 'Setup verified & auto-sync on',
-        desc: 'Your Synder specialist reviews mapping, payouts, and Smart Rules, then turns on auto-sync.',
+        title: 'Finish setup with your Synder specialist',
+        desc: 'Your Synder specialist will tailor Synder to your setup — review mapping, check settings, and turn on auto-sync.',
         badge: 'Ready to activate',
         contactInfo: true,
       },
@@ -1243,8 +1246,8 @@
       {
         id: 'csm',
         phase: 'call',
-        title: 'Setup verified & auto-sync on',
-        desc: 'Your Synder specialist reviews mapping, payouts, and Smart Rules, then turns on auto-sync.',
+        title: 'Finish setup with your Synder specialist',
+        desc: 'Your Synder specialist will tailor Synder to your setup — review mapping, check settings, and turn on auto-sync.',
         badge: 'Ready to activate',
         contactInfo: true,
       },
@@ -1704,6 +1707,7 @@
 
 
   function checklistContactHtml() {
+    // Checklist appears after the call is already agreed — show booked details, not "pick a time".
     const contact = deriveContact();
     const email = state.accountEmail || 'jane@greenleafstore.com';
     const phone = (state.phone && state.phone.trim())
@@ -1711,23 +1715,23 @@
       : '+1 (415) 555-0192';
     const tz = state.phoneTimezone || 'Eastern Time (ET)';
     if (contact === 'zoom') {
-      let when = 'Pick a time on Success, or we’ll confirm by email';
-      if (state.zoomSlot && state.zoomSlot.dayLabel && state.zoomSlot.time) {
-        when = state.zoomSlot.dayLabel + ' · ' + state.zoomSlot.time;
-      }
+      const slot = state.zoomSlot;
+      const when = (slot && slot.dayLabel && slot.time)
+        ? (slot.dayLabel + ' · ' + slot.time)
+        : 'Tue 14 Apr · 10:00 AM';
       return `<div class="hs-contact-info"><span class="label">Your contact</span>
-        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}</span></div></div>`;
+        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Your Synder specialist joins the call you booked.</span></div></div>`;
     }
     if (contact === 'phone') {
       return `<div class="hs-contact-info"><span class="label">Your contact</span>
-        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>${phone}</span></div></div>`;
+        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>We’ll call ${phone} in that window.</span></div></div>`;
     }
     if (contact === 'email') {
       return `<div class="hs-contact-info"><span class="label">Your contact</span>
-        <div class="row"><span class="material-icons-round">mail</span><span><strong>Email</strong> · ${email}</span></div></div>`;
+        <div class="row"><span class="material-icons-round">mail</span><span><strong>Email</strong> · ${email}<br>We’ll write to this address to finish setup.</span></div></div>`;
     }
     return `<div class="hs-contact-info"><span class="label">Your contact</span>
-      <div class="row"><span class="material-icons-round">support_agent</span><span>Your Synder specialist will confirm how they’ll reach you.</span></div></div>`;
+      <div class="row"><span class="material-icons-round">support_agent</span><span>Your Synder specialist will reach out using the contact you chose.</span></div></div>`;
   }
 
   function healthModel() {
@@ -2117,10 +2121,16 @@
   $('#demo-contact').addEventListener('change', e => {
     state.demoContact = e.target.value;
     state.demoForced = true;
-    state.zoomSlot = null;
-    state.calDay = null;
-    state.calTime = null;
+    // Checklist assumes the call is already agreed — keep a demo Zoom slot for Zoom.
+    if (state.demoContact === 'zoom') {
+      if (!state.zoomSlot) {
+        state.zoomSlot = { dayLabel: 'Tue 14 Apr', time: '10:00 AM' };
+      }
+    }
     renderSuccess();
+    if (state.appPage === 'setup-checklist' || document.body.dataset.view === 'app') {
+      renderApp();
+    }
   });
 
   $$('.nav-item').forEach(btn => {
