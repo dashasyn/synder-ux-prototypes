@@ -74,7 +74,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .chip.green{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
 .chip.blue{background:var(--blue-bg);color:var(--blue-chip);border-color:var(--blue-border)}
 .chip.combined{
-  background:var(--green-bg);color:var(--green);border-color:var(--green-border);
+  background:var(--blue-bg);color:var(--blue-chip);border-color:var(--blue-border);
 }
 .chip .tip{
   display:inline-flex;align-items:center;justify-content:center;
@@ -245,18 +245,32 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   border-top:1px solid var(--grey-20);background:#fff;
 }
 
-/* —— Concept D: contrast line —— */
+/* —— Concept D: contrast (two clear columns) —— */
 .contrast{
-  display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
-  margin-bottom:20px;padding:10px 12px;background:var(--grey-5);
-  border:1px solid var(--grey-20);border-radius:6px;font-size:13px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-bottom:22px;
 }
-.contrast .wrong{
-  color:var(--grey-30);text-decoration:line-through;text-decoration-color:var(--grey-30);
+.contrast-col{
+  border-radius:8px;padding:12px 14px;border:1px solid var(--grey-20);
 }
-.contrast .vs{color:var(--grey-30);font-size:11px;font-weight:500}
-.contrast .right{color:var(--grey);font-weight:500}
-.contrast .right em{font-style:normal;color:var(--primary)}
+.contrast-col.wrong{
+  background:#FAFBFC;border-color:var(--grey-20);
+}
+.contrast-col.right{
+  background:var(--primary-5);border-color:var(--primary-10,#CCDDF5);
+}
+.contrast-label{
+  display:block;font-size:11px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;margin-bottom:6px;
+}
+.contrast-col.wrong .contrast-label{color:var(--grey-30)}
+.contrast-col.right .contrast-label{color:var(--primary)}
+.contrast-body{display:block;font-size:15px;font-weight:500;line-height:1.35;color:var(--grey)}
+.contrast-col.wrong .contrast-body{
+  color:var(--grey-50);text-decoration:line-through;text-decoration-color:var(--grey-30);
+}
+.contrast-col.right .contrast-body{color:var(--grey)}
+@media(max-width:560px){.contrast{grid-template-columns:1fr}}
 
 .row-badge{
   display:inline-flex;align-items:center;justify-content:center;
@@ -420,7 +434,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   </div>
 
   <!-- ========== CONCEPT B · Gap job ========== -->
-  <!-- Recipe: 1 combined chip · shield read-only above CTAs · no FAQ · platforms→books · 2 benefits · monthly cadence -->
+  <!-- Recipe: 1 blue combined chip · green shield read-only · no FAQ · platforms→books · 2 benefits -->
   <div class="concept" data-panel="b" role="tabpanel">
     <div class="card">
       <div class="copy">
@@ -429,7 +443,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
         <ul class="benefits">
           <li>
             <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            Pinpoint the lines behind a balance gap
+            See which lines are missing or the wrong amount
           </li>
           <li>
             <span class="tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.2 8.2l1.9 1.9 3.7-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -450,7 +464,6 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
-        <p class="caption muted">Most teams run this once a month</p>
       </div>
       <div class="hero" aria-hidden="true">
         <div class="flow-illu">
@@ -480,7 +493,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   </div>
 
   <!-- ========== CONCEPT C · Preview first ========== -->
-  <!-- Recipe: no chips · slim info-bar read-only · no FAQ · mini results preview hero · Run + View example -->
+  <!-- Recipe: no chips · slim info-bar · no FAQ · mini results preview hero · Run only (preview is the example) -->
   <div class="concept" data-panel="c" role="tabpanel">
     <div class="card c-preview">
       <div class="copy">
@@ -492,7 +505,6 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
         </div>
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
-          <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
       </div>
       <div class="hero">
@@ -536,9 +548,14 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
         <h2 class="card-h">Every platform sale and fee ↔ your books</h2>
         <p class="lead">Clients often assume this matches transactions to payouts. It doesn’t. It checks each row from your sales channels against the clearing account so you can close the month.</p>
         <div class="contrast" aria-label="What this is vs isn’t">
-          <span class="wrong">Payouts → bank</span>
-          <span class="vs">vs</span>
-          <span class="right"><em>Platform rows → books</em></span>
+          <div class="contrast-col wrong">
+            <span class="contrast-label">Not this</span>
+            <span class="contrast-body">Payouts to the bank</span>
+          </div>
+          <div class="contrast-col right">
+            <span class="contrast-label">This</span>
+            <span class="contrast-body">Platform rows to your books</span>
+          </div>
         </div>
         <div class="callout" role="note">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2.2l5.5 2.2v4.1c0 3.4-2.3 5.8-5.5 6.8-3.2-1-5.5-3.4-5.5-6.8V4.4L9 2.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 9.1l1.7 1.7 3.5-3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
