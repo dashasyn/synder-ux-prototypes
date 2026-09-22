@@ -279,20 +279,22 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   box-shadow:0 4px 16px rgba(0,83,204,.25);
 }
 
-/* —— Modal —— */
+/* —— Modal (Synder-like results mock) —— */
 .modal-backdrop{
   display:none;position:fixed;inset:0;background:rgba(26,27,36,.45);
-  z-index:200;align-items:center;justify-content:center;padding:24px;
+  z-index:200;align-items:center;justify-content:center;padding:20px;
 }
 .modal-backdrop.open{display:flex}
 .modal{
   background:#fff;border-radius:10px;border:1px solid var(--grey-20);
-  width:100%;max-width:520px;max-height:90vh;overflow:auto;
+  width:100%;min-width:min(900px,96vw);max-width:min(96vw,1100px);
+  max-height:92vh;overflow:auto;
   box-shadow:0 16px 40px rgba(26,27,36,.2);
+  display:flex;flex-direction:column;
 }
 .modal-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;border-bottom:1px solid var(--grey-20);
+  padding:14px 20px;border-bottom:1px solid var(--grey-20);flex-shrink:0;
 }
 .modal-head h3{font-size:16px;font-weight:500}
 .modal-close{
@@ -301,22 +303,135 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:flex;align-items:center;justify-content:center;
 }
 .modal-close:hover{background:var(--grey-10);color:var(--grey)}
-.modal-body{padding:20px}
-.modal-period{font-size:13px;color:var(--grey-50);margin-bottom:14px}
-.modal-summary{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.modal-summary .sum{
-  font-size:12px;font-weight:500;padding:5px 10px;border-radius:999px;
-}
-.modal-summary .sum.m{background:var(--green-bg);color:var(--green)}
-.modal-summary .sum.x{background:#FFF4E5;color:#C47A00}
-.modal-summary .sum.o{background:var(--red-bg);color:var(--red)}
-.modal-note{margin-top:14px;font-size:12px;color:var(--grey-50)}
+.modal-body{padding:16px 20px 12px;flex:1;min-height:0;overflow:auto}
 .modal-foot{
   padding:12px 20px 16px;border-top:1px solid var(--grey-20);
-  display:flex;justify-content:flex-end;
+  display:flex;justify-content:flex-end;flex-shrink:0;
 }
 .btn.sec{background:var(--grey-10);color:var(--grey);border-color:var(--grey-20)}
 .btn.sec:hover{background:var(--grey-20)}
+.btn.sm{padding:7px 12px;font-size:13px}
+
+/* Results chrome inside modal — live-faithful Reconciliation results */
+.ex-title-row{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin-bottom:4px;
+}
+.ex-title-block{min-width:0}
+.ex-title{
+  font-size:17px;font-weight:500;letter-spacing:-.2px;color:var(--grey);line-height:1.3;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.ex-attn{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;
+  background:#FFF4E5;color:#C47A00;border:1px solid #F0D4A8;white-space:nowrap;
+}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.ex-period{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-size:13px;color:var(--grey-50);margin-bottom:12px;
+}
+.ex-sample{
+  display:inline-flex;align-items:center;
+  font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;
+  background:var(--grey-10);color:var(--grey-50);border:1px solid var(--grey-20);
+}
+
+/* Compact horizontal balance summary (preview of combined check) */
+.ex-bal{
+  border:1px solid #F0D4A8;border-radius:8px;background:#FFFBF5;
+  padding:10px 12px;margin-bottom:14px;
+}
+.ex-bal-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.ex-bal-label{
+  font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C47A00;
+}
+.ex-bal-delta{font-size:13px;font-weight:600;color:var(--red)}
+.ex-bal-strip{
+  display:flex;align-items:stretch;gap:0;flex-wrap:wrap;
+  border:1px solid var(--grey-20);border-radius:6px;background:#fff;overflow:hidden;
+}
+.ex-bal-cell{
+  flex:1 1 110px;min-width:100px;padding:8px 10px;
+  border-right:1px solid var(--grey-20);
+}
+.ex-bal-cell:last-child{border-right:0}
+.ex-bal-cell.delta{flex:0 0 auto;min-width:90px;background:var(--red-bg)}
+.ex-bal-k{display:block;font-size:10px;font-weight:500;color:var(--grey-50);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
+.ex-bal-v{display:block;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--grey)}
+.ex-bal-cell.delta .ex-bal-v{color:var(--red)}
+.ex-bal-s{display:block;font-size:10px;color:var(--grey-30);margin-top:2px;line-height:1.3}
+.ex-bal-op{
+  display:flex;align-items:center;justify-content:center;
+  width:18px;flex:0 0 18px;font-size:12px;font-weight:600;color:var(--grey-30);
+  background:var(--grey-5);border-right:1px solid var(--grey-20);
+}
+
+.ex-tabs{
+  display:flex;gap:0;border-bottom:1px solid var(--grey-20);
+  margin:0 -20px 12px;padding:0 12px;background:#fff;
+}
+.ex-tab{
+  font:inherit;font-size:13px;font-weight:500;color:var(--grey-50);
+  background:transparent;border:0;border-bottom:2px solid transparent;
+  padding:11px 14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.ex-tab:hover{color:var(--grey)}
+.ex-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.ex-tab .count{
+  display:inline-block;font-size:11px;font-weight:600;
+  border-radius:999px;padding:1px 7px;background:var(--grey-10);color:var(--grey-50);
+}
+.ex-tab .count.ok{background:var(--green-bg);color:var(--green)}
+.ex-tab .count.warn{background:#FFF4E5;color:#C47A00}
+.ex-tab .count.err{background:var(--red-bg);color:var(--red)}
+.ex-tab.active .count:not(.ok):not(.warn):not(.err){background:var(--primary-10);color:var(--primary)}
+
+.ex-panel{display:none}
+.ex-panel.active{display:block}
+
+.ex-mini{
+  background:#fff;border:1px solid var(--grey-20);border-radius:8px;overflow:hidden;
+}
+.ex-table{width:100%;border-collapse:collapse;font-size:12px}
+.ex-table th{
+  text-align:left;font-weight:500;color:var(--grey-50);font-size:11px;
+  padding:7px 10px;border-bottom:1px solid var(--grey-20);background:var(--grey-5);
+  white-space:nowrap;text-transform:uppercase;letter-spacing:.02em;
+}
+.ex-table td{
+  padding:8px 10px;border-bottom:1px solid var(--grey-10);color:var(--grey);
+  vertical-align:middle;white-space:nowrap;
+}
+.ex-table tr:last-child td{border-bottom:0}
+.ex-table tr:hover td{background:var(--grey-5)}
+.ex-id{color:var(--primary);font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
+.ex-amt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:12px}
+.ex-amt.neg{color:var(--grey)}
+.ex-check{
+  width:14px;height:14px;border:1.5px solid var(--grey-30);border-radius:3px;
+  display:inline-block;vertical-align:middle;background:#fff;
+}
+.ex-matchchip{
+  display:inline-block;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;
+  background:var(--primary-10);color:var(--primary);
+}
+.ex-empty{
+  padding:28px 16px;text-align:center;font-size:13px;color:var(--grey-50);
+}
+.ex-foot-meta{padding:8px 10px;font-size:12px;color:var(--grey-50);border-top:1px solid var(--grey-20);background:#fff}
+.ex-note{margin-top:12px;font-size:12px;color:var(--grey-50)}
+
+@media(max-width:920px){
+  .modal{min-width:0;max-width:96vw}
+  .ex-tabs{overflow-x:auto}
+  .ex-bal-op{display:none}
+}
 
 @media(max-width:860px){
   .card,.card.c-preview{flex-direction:column}
@@ -642,40 +757,242 @@ html[data-concept="e"] .e-phrases-sep{display:block}
 
 </div>
 
-<!-- Shared View example modal -->
+<!-- Shared View example modal — live-faithful Reconciliation results mock -->
 <div class="modal-backdrop" id="example-modal" role="dialog" aria-modal="true" aria-labelledby="example-title" hidden>
   <div class="modal">
     <div class="modal-head">
-      <h3 id="example-title">Example reconciliation</h3>
+      <h3 id="example-title">Example · Reconciliation results</h3>
       <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
     </div>
     <div class="modal-body">
-      <p class="modal-period">Stripe · Aug 2026</p>
-      <div class="modal-summary">
-        <span class="sum m">128 matched</span>
-        <span class="sum x">3 missing</span>
-        <span class="sum o">1 amount off</span>
+      <div class="ex-title-row">
+        <div class="ex-title-block">
+          <div class="ex-title">
+            Stripe Test (sandbox) (required for Synder)
+            <span class="ex-attn" aria-label="Attention required">⚠ Attention required</span>
+          </div>
+        </div>
+        <div class="ex-actions">
+          <button type="button" class="btn sec sm" disabled title="Sample only">Process log</button>
+          <button type="button" class="btn sec sm" disabled title="Sample only">Export</button>
+        </div>
       </div>
-      <table class="preview-table">
-        <thead>
-          <tr><th>Date</th><th>Description</th><th>Platform</th><th>Books</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Aug 14</td><td>ch_3Pq…91a</td><td>$248.00</td><td>$248.00</td><td><span class="badge ok">Matched</span></td>
-          </tr>
-          <tr>
-            <td>Aug 14</td><td>Fee · ch_3Pq…91a</td><td>−$7.49</td><td>−$7.49</td><td><span class="badge ok">Matched</span></td>
-          </tr>
-          <tr>
-            <td>Aug 15</td><td>#10482 · Shopify</td><td>$89.00</td><td>—</td><td><span class="badge miss">Missing</span></td>
-          </tr>
-          <tr>
-            <td>Aug 16</td><td>Order 112-…</td><td>$112.40</td><td class="amt-off">$102.40</td><td><span class="badge off">Amount off</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="modal-note">Sample data for preview only</p>
+      <div class="ex-period">
+        <span>Stripe Test (sandbox) / Mar 1–31, 2026</span>
+        <span class="ex-sample">Sample data</span>
+      </div>
+
+      <!-- Compact balance summary — previews combined check; sample only -->
+      <div class="ex-bal" aria-label="Balance summary sample">
+        <div class="ex-bal-head">
+          <span class="ex-bal-label">Balance summary · Mar 1–31, 2026</span>
+          <span class="ex-bal-delta">Delta −$50.00</span>
+        </div>
+        <div class="ex-bal-strip">
+          <div class="ex-bal-cell">
+            <span class="ex-bal-k">Beginning</span>
+            <span class="ex-bal-v">$10,000.00</span>
+            <span class="ex-bal-s">QBO clearing</span>
+          </div>
+          <div class="ex-bal-op" aria-hidden="true">+</div>
+          <div class="ex-bal-cell">
+            <span class="ex-bal-k">Increase</span>
+            <span class="ex-bal-v">$45,300.00</span>
+            <span class="ex-bal-s">Stripe increases</span>
+          </div>
+          <div class="ex-bal-op" aria-hidden="true">−</div>
+          <div class="ex-bal-cell">
+            <span class="ex-bal-k">Decrease</span>
+            <span class="ex-bal-v">$1,200.00</span>
+            <span class="ex-bal-s">Stripe decreases</span>
+          </div>
+          <div class="ex-bal-op" aria-hidden="true">=</div>
+          <div class="ex-bal-cell">
+            <span class="ex-bal-k">Computed</span>
+            <span class="ex-bal-v">$54,100.00</span>
+            <span class="ex-bal-s">Beg + Inc − Dec</span>
+          </div>
+          <div class="ex-bal-cell">
+            <span class="ex-bal-k">Reported</span>
+            <span class="ex-bal-v">$54,050.00</span>
+            <span class="ex-bal-s">QBO clearing</span>
+          </div>
+          <div class="ex-bal-cell delta">
+            <span class="ex-bal-k">Delta</span>
+            <span class="ex-bal-v">−$50.00</span>
+            <span class="ex-bal-s">Sample</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-tabs" role="tablist" aria-label="Result categories">
+        <button type="button" class="ex-tab" role="tab" aria-selected="false" data-ex-tab="matched">Matched <span class="count ok">56</span></button>
+        <button type="button" class="ex-tab active" role="tab" aria-selected="true" data-ex-tab="discrepancy">Discrepancy <span class="count warn">4</span></button>
+        <button type="button" class="ex-tab" role="tab" aria-selected="false" data-ex-tab="missing">Missing <span class="count err">3</span></button>
+        <button type="button" class="ex-tab" role="tab" aria-selected="false" data-ex-tab="ignored">Ignored <span class="count">0</span></button>
+      </div>
+
+      <!-- Discrepancy (default) — amount/type gaps -->
+      <div class="ex-panel active" id="ex-panel-discrepancy" role="tabpanel">
+        <div class="ex-mini">
+          <div style="overflow-x:auto">
+            <table class="ex-table">
+              <thead>
+                <tr>
+                  <th style="width:28px"><span class="ex-check" aria-hidden="true"></span></th>
+                  <th>Date</th>
+                  <th>Matching ID</th>
+                  <th>Total amount</th>
+                  <th>Types</th>
+                  <th>Issue</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 28, 2026</td>
+                  <td><span class="ex-id">ch_3TEx9A7QSll6…</span></td>
+                  <td class="ex-amt">112.40 USD</td>
+                  <td>Payment;charge</td>
+                  <td><span class="badge off">Amount off</span></td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 22, 2026</td>
+                  <td><span class="ex-id">ch_3TDqR17QSll6…</span></td>
+                  <td class="ex-amt">89.00 USD</td>
+                  <td>Sales Receipt;charge</td>
+                  <td><span class="badge off">Amount off</span></td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 15, 2026</td>
+                  <td><span class="ex-id">ch_3TCk2F7QSll6…</span></td>
+                  <td class="ex-amt neg">−7.49 USD</td>
+                  <td>Expense;fee</td>
+                  <td><span class="badge miss">Fee mismatch</span></td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 9, 2026</td>
+                  <td><span class="ex-id">po_1TF2mB7QSll6…</span></td>
+                  <td class="ex-amt neg">−520.74 USD</td>
+                  <td>Transfer;payout</td>
+                  <td><span class="badge off">Amount off</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ex-foot-meta">Showing 4 of 4 discrepancy rows</div>
+        </div>
+      </div>
+
+      <!-- Matched -->
+      <div class="ex-panel" id="ex-panel-matched" role="tabpanel" hidden>
+        <div class="ex-mini">
+          <div style="overflow-x:auto">
+            <table class="ex-table">
+              <thead>
+                <tr>
+                  <th style="width:28px"><span class="ex-check" aria-hidden="true"></span></th>
+                  <th>Date</th>
+                  <th>Matching ID</th>
+                  <th>Total amount</th>
+                  <th>Types</th>
+                  <th>Match type</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 31, 2026</td>
+                  <td><span class="ex-id">po_1TGqaE7QSll6…</span></td>
+                  <td class="ex-amt neg">−301.76 USD</td>
+                  <td>Transfer;payout</td>
+                  <td><span class="ex-matchchip">Auto (ID)</span></td>
+                  <td>2</td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 29, 2026</td>
+                  <td><span class="ex-id">ch_3TF9fT7QSll6…</span></td>
+                  <td class="ex-amt">142.30 USD</td>
+                  <td>Sales Receipt;Expense;charge</td>
+                  <td><span class="ex-matchchip">Auto (ID)</span></td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 26, 2026</td>
+                  <td><span class="ex-id">ch_3TES167QSll6…</span></td>
+                  <td class="ex-amt">579.30 USD</td>
+                  <td>Payment;Expense;charge</td>
+                  <td><span class="ex-matchchip">Auto (ID)</span></td>
+                  <td>3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ex-foot-meta">Showing 3 of 56 matched rows</div>
+        </div>
+      </div>
+
+      <!-- Missing -->
+      <div class="ex-panel" id="ex-panel-missing" role="tabpanel" hidden>
+        <div class="ex-mini">
+          <div style="overflow-x:auto">
+            <table class="ex-table">
+              <thead>
+                <tr>
+                  <th style="width:28px"><span class="ex-check" aria-hidden="true"></span></th>
+                  <th>Date</th>
+                  <th>Matching ID</th>
+                  <th>Total amount</th>
+                  <th>Types</th>
+                  <th>Side</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 18, 2026</td>
+                  <td><span class="ex-id">ch_3TDk8P7QSll6…</span></td>
+                  <td class="ex-amt">48.00 USD</td>
+                  <td>Payment;charge</td>
+                  <td><span class="badge miss">Missing in books</span></td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 12, 2026</td>
+                  <td><span class="ex-id">ch_3TC1nQ7QSll6…</span></td>
+                  <td class="ex-amt">19.84 USD</td>
+                  <td>Payment;charge</td>
+                  <td><span class="badge miss">Missing in books</span></td>
+                </tr>
+                <tr>
+                  <td><span class="ex-check" aria-hidden="true"></span></td>
+                  <td>Mar 5, 2026</td>
+                  <td><span class="ex-id">JE-48291</span></td>
+                  <td class="ex-amt">12.50 USD</td>
+                  <td>Journal</td>
+                  <td><span class="badge off">Missing in Stripe</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ex-foot-meta">Showing 3 of 3 missing rows</div>
+        </div>
+      </div>
+
+      <!-- Ignored -->
+      <div class="ex-panel" id="ex-panel-ignored" role="tabpanel" hidden>
+        <div class="ex-mini">
+          <div class="ex-empty">No ignored transactions</div>
+        </div>
+      </div>
+
+      <p class="ex-note">Sample data for preview only — not your books. Balance strip illustrates the combined check when balances are available.</p>
     </div>
     <div class="modal-foot">
       <button type="button" class="btn sec" id="modal-done">Close</button>
@@ -744,6 +1061,7 @@ html[data-concept="e"] .e-phrases-sep{display:block}
   setECopy('e1');
 
   function openModal() {
+    setExTab('discrepancy');
     modal.hidden = false;
     modal.classList.add('open');
     document.getElementById('modal-close').focus();
@@ -763,6 +1081,26 @@ html[data-concept="e"] .e-phrases-sep{display:block}
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+  /* Example modal tab switcher */
+  function setExTab(name) {
+    document.querySelectorAll('.ex-tab').forEach(function (btn) {
+      var on = btn.getAttribute('data-ex-tab') === name;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.ex-panel').forEach(function (panel) {
+      var on = panel.id === 'ex-panel-' + name;
+      panel.classList.toggle('active', on);
+      if (on) panel.removeAttribute('hidden');
+      else panel.setAttribute('hidden', '');
+    });
+  }
+  document.querySelectorAll('.ex-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setExTab(btn.getAttribute('data-ex-tab'));
+    });
   });
 
   /* A-only FAQ accordion */
