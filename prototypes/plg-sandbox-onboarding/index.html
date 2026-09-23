@@ -7,7 +7,8 @@
   <!--
     PLG Sandbox onboarding prototype (Ignat feedback):
     - Survey: white page, no card chrome; Continue/Done stay enabled with inline validation.
-    - “I’ll fill this in later” advances to the next survey step only (removed on step 3).
+    - “I’ll fill this in later” (steps 1–2) closes the survey and opens Dashboard (returns in 24h).
+    - Soft-lock stubs: Settings (freq / Auto-sync), Historical import entry+config, Smart Rules zero-state.
     - Activation-session shortcut on steps 1–2 jumps to step 3 (contact) — never Success.
     - Success: one neutral header for all outcomes; contact block kept; beige CSM callout removed.
     - Zoom + completed survey → HubSpot-style calendar; Phone / Email contact results as before.
@@ -800,6 +801,60 @@
     .soft-lock-banner .banner-help:hover { text-decoration: underline; }
     .soft-lock-banner .banner-help .material-icons-round { font-size: 18px; }
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
+    .soft-pill {
+      display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
+      border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 20px;
+      color: #0053CC; background: #EEF4FF; white-space: nowrap;
+    }
+    .title-with-pill {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .title-with-pill .page-title { margin: 0; }
+    .soft-row {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      padding: 16px 18px; border: 1px solid #DFE4EC; border-radius: 8px;
+      background: #fff; max-width: 640px;
+    }
+    .soft-row.is-dimmed { opacity: .55; }
+    .soft-row-meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .soft-row-label {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      font-size: 14px; font-weight: 500; color: #1A1B24;
+    }
+    .soft-row-help { font-size: 13px; line-height: 18px; color: #6B778C; }
+    .soft-toggle {
+      position: relative; width: 40px; height: 22px; flex-shrink: 0;
+      border-radius: 11px; background: #DFE4EC; border: none; cursor: not-allowed;
+    }
+    .soft-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%; background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    }
+    .soft-form {
+      max-width: 560px; border: 1px solid #DFE4EC; border-radius: 8px;
+      padding: 16px 18px; background: #fff;
+    }
+    .soft-form .field { margin-bottom: 14px; }
+    .soft-form label {
+      display: block; font-size: 13px; font-weight: 500; color: #1A1B24; margin-bottom: 6px;
+    }
+    .soft-form input, .soft-form select {
+      width: 100%; height: 36px; padding: 0 10px; border: 1px solid #DFE4EC;
+      border-radius: 4px; font: inherit; font-size: 14px; background: #F7F8FA; color: #6B778C;
+    }
+    .hist-entry {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 4px;
+    }
+    .zero-rules {
+      max-width: 480px; padding: 28px 24px; border: 1px dashed #DFE4EC;
+      border-radius: 8px; background: #F7F8FA; text-align: center;
+    }
+    .zero-rules h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
+    .zero-rules p { margin: 0 0 16px; font-size: 14px; line-height: 20px; color: #6B778C; }
+
     .placeholder-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
       margin-top: 16px;
@@ -1068,7 +1123,6 @@
           <button type="button" class="btn-back" id="btn-back-3">
             <span class="material-icons-round">arrow_back</span> Back
           </button>
-          <button type="button" class="fill-later" data-from-step="3">I’ll fill this in later</button>
           <div class="grow"></div>
           <button type="button" class="btn btn-primary" id="btn-done">Done</button>
         </div>
@@ -1972,12 +2026,15 @@
 
   function renderAppPage() {
     const page = state.appPage;
-    const locked = ['auto-sync', 'historical', 'smart-rules'].includes(page);
+    const lockedPages = ['auto-sync', 'historical', 'smart-rules'];
+    const locked = lockedPages.includes(page);
+    const settingsSoft = page === 'settings';
     const panel = $('#page-panel');
     const banner = $('#lock-banner');
     panel.classList.toggle('locked', locked);
     panel.classList.toggle('is-checklist', page === 'setup-checklist');
-    banner.classList.toggle('show', locked);
+    // Soft-lock banner on dedicated locked pages and on Settings (freq / Auto-sync soft-lock)
+    banner.classList.toggle('show', locked || settingsSoft);
 
     const titles = {
       dashboard: 'Dashboard',
@@ -1991,6 +2048,21 @@
     };
     const title = titles[page] || 'Dashboard';
     const model = healthModel();
+
+    function softPill(text) {
+      return '<span class="soft-pill">' + text + '</span>';
+    }
+
+    function autoSyncRowHtml() {
+      return `
+        <div class="soft-row is-dimmed" aria-disabled="true">
+          <div class="soft-row-meta">
+            <div class="soft-row-label">Auto-sync ${softPill('Ready to activate')}</div>
+            <div class="soft-row-help">Your Synder specialist turns Auto-sync on after a quick setup review. You can still sync manually until then.</div>
+          </div>
+          <button type="button" class="soft-toggle" disabled aria-label="Auto-sync off" title="Ready to activate"></button>
+        </div>`;
+    }
 
     let body = '';
     if (page === 'setup-checklist') {
@@ -2007,31 +2079,84 @@
           <div class="placeholder-card"><div class="ph-title">Recent activity</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Connected channels</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
-    } else if (locked) {
+    } else if (page === 'auto-sync') {
       body = `
-        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle lockable" style="margin-bottom:16px">Preview — controls unlock after your setup session.</p>
-        <div class="toolbar-fake lockable">
-          <button type="button" class="btn btn-primary" disabled>Enable ${title}</button>
-          <button type="button" class="btn btn-outlined" disabled>Configure</button>
+        <div class="title-with-pill">
+          <h1 class="page-title">${title}</h1>
+          ${softPill('Ready to activate')}
         </div>
-        <div class="placeholder-grid lockable">
-          <div class="placeholder-card"><div class="ph-title">Rule / schedule</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        <p class="page-subtitle" style="margin-bottom:16px">Configure how Synder posts new activity to your books. Auto-sync stays off until your setup call.</p>
+        ${autoSyncRowHtml()}
+        <div class="placeholder-grid lockable" style="margin-top:16px">
+          <div class="placeholder-card"><div class="ph-title">Schedule</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Scope</div><div class="ph-line"></div><div class="ph-line short"></div></div>
-          <div class="placeholder-card"><div class="ph-title">Status</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Last run</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        </div>`;
+    } else if (page === 'historical') {
+      body = `
+        <div class="title-with-pill">
+          <h1 class="page-title">${title}</h1>
+          ${softPill('Ready to activate')}
+        </div>
+        <p class="page-subtitle" style="margin-bottom:16px">Agree the date range with your Synder specialist so the import completes and everything syncs correctly.</p>
+        <div class="soft-form lockable">
+          <div class="field">
+            <label for="hist-from">Import from</label>
+            <input id="hist-from" type="text" value="Jan 1, 2025" disabled />
+          </div>
+          <div class="field">
+            <label for="hist-to">Import to</label>
+            <input id="hist-to" type="text" value="Today" disabled />
+          </div>
+          <div class="field">
+            <label for="hist-platform">Platform</label>
+            <select id="hist-platform" disabled><option>All connected platforms</option></select>
+          </div>
+          <button type="button" class="btn btn-primary" disabled>Start import</button>
+        </div>`;
+    } else if (page === 'smart-rules') {
+      body = `
+        <div class="title-with-pill">
+          <h1 class="page-title">${title}</h1>
+          ${softPill('Ready to activate')}
+        </div>
+        <p class="page-subtitle" style="margin-bottom:16px">Automations for exceptions and categorization. Configured with your Synder specialist after reviewing your flow.</p>
+        <div class="zero-rules lockable">
+          <h3>No Smart Rules yet</h3>
+          <p>Create your first rule after the setup call — or explore what rules can do on the call.</p>
+          <button type="button" class="btn btn-primary" disabled>Create first rule</button>
         </div>`;
     } else if (page === 'summaries') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
-        <p class="page-subtitle" style="margin-bottom:16px">Ready summaries appear here. Use Sync to books on a row, or open Import historical data.</p>
+        <p class="page-subtitle" style="margin-bottom:16px">Ready summaries appear here. Sync one to your books, or open Historical import.</p>
         <div class="toolbar-fake">
           <button type="button" class="btn btn-primary">Sync to books</button>
-          <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
+          <span class="hist-entry">
+            <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
+            ${softPill('Ready to activate')}
+          </span>
         </div>
         <div class="placeholder-grid">
           <div class="placeholder-card"><div class="ph-title">Ready summary · Mar 1–7</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Ready summary · Mar 8–14</div><div class="ph-line"></div><div class="ph-line short"></div></div>
           <div class="placeholder-card"><div class="ph-title">Collecting…</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        </div>`;
+    } else if (page === 'transactions') {
+      body = `
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:16px">Synced transactions land here. Open Historical import when you’re ready to bring past data in.</p>
+        <div class="toolbar-fake">
+          <button type="button" class="btn btn-primary">Sync transactions</button>
+          <span class="hist-entry">
+            <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
+            ${softPill('Ready to activate')}
+          </span>
+        </div>
+        <div class="placeholder-grid">
+          <div class="placeholder-card"><div class="ph-title">Shopify · Order #1042</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Stripe · Payout</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Amazon · Settlement</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
     } else if (page === 'settings') {
       if (state.syncMode === 'summary') {
@@ -2077,7 +2202,7 @@
         <section class="freq-section" aria-labelledby="freq-heading">
           <div class="freq-section-head">
             <h2 id="freq-heading">Synchronization frequency</h2>
-            <span class="freq-pill">Ready to activate</span>
+            ${softPill('Ready to activate')}
           </div>
           <p class="freq-intro">Select the way you want to synchronize transactions to your books. Auto options unlock after your setup call.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
@@ -2085,10 +2210,11 @@
       } else {
         body = `
         <h1 class="page-title" style="margin-bottom:4px">Settings</h1>
-        <p class="page-subtitle" style="margin-bottom:16px">Per-transaction sync uses Auto-sync instead of Synchronization frequency.</p>
-        <div class="placeholder-grid">
-          <div class="placeholder-card"><div class="ph-title">Auto-sync</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        <p class="page-subtitle" style="margin-bottom:16px">Per-transaction sync — Auto-sync is soft-locked until your setup call.</p>
+        ${autoSyncRowHtml()}
+        <div class="placeholder-grid" style="margin-top:16px">
           <div class="placeholder-card"><div class="ph-title">Clearing account</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Sales channels</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
       }
     } else {
@@ -2105,6 +2231,7 @@
           <div class="placeholder-card"><div class="ph-title">Row group C</div><div class="ph-line"></div><div class="ph-line short"></div></div>
         </div>`;
     }
+
     $('#page-content').innerHTML = body;
     const importBtn = $('#btn-import-historical');
     if (importBtn) {
