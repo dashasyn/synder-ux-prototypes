@@ -440,17 +440,39 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   .copy{padding:32px 28px 28px}
 }
 
-/* —— E headline phrase pills (proto-bar, E only) —— */
-.e-phrases{display:none;align-items:center;gap:4px;flex-wrap:wrap}
-html[data-concept="e"] .e-phrases{display:flex}
-html[data-concept="e"] .e-phrases-sep{display:block}
-.e-phrases-sep{display:none;width:1px;height:22px;background:rgba(255,255,255,.18);flex-shrink:0}
-.e-phrase{
+/* —— Main options (E1 / E2) + Outdated dropdown —— */
+.main-opts{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.main-opt{
   background:transparent;border:1px solid rgba(255,255,255,.18);color:#9CA3AF;
-  padding:5px 10px;border-radius:999px;font:inherit;font-weight:500;font-size:12px;cursor:pointer;
+  padding:6px 12px;border-radius:8px;font:inherit;font-weight:500;font-size:13px;cursor:pointer;
 }
-.e-phrase:hover{color:#fff;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28)}
-.e-phrase.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.35)}
+.main-opt:hover{color:#fff;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28)}
+.main-opt.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.outdated-wrap{position:relative;margin-left:2px}
+.outdated-btn{
+  background:transparent;border:1px solid rgba(255,255,255,.14);color:#9CA3AF;
+  padding:6px 10px;border-radius:8px;font:inherit;font-weight:500;font-size:12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.outdated-btn:hover,.outdated-btn[aria-expanded="true"]{color:#fff;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.28)}
+.outdated-btn .chev{opacity:.7;font-size:10px;line-height:1}
+.outdated-btn.is-active{color:#fff;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.08)}
+.outdated-menu{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:220px;z-index:120;
+  background:#1F2937;border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.35);
+}
+.outdated-wrap.open .outdated-menu{display:block}
+.outdated-label{
+  font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:#6B7280;padding:6px 8px 4px;
+}
+.outdated-item{
+  display:block;width:100%;text-align:left;background:transparent;border:0;
+  color:#D1D5DB;padding:8px 10px;border-radius:7px;font:inherit;font-size:13px;cursor:pointer;
+}
+.outdated-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.outdated-item.active{background:rgba(0,83,204,.35);color:#fff}
 
 /* E: shield at very top of copy */
 .concept[data-panel="e"] .readonly-line{
@@ -467,22 +489,28 @@ html[data-concept="e"] .e-phrases-sep{display:block}
 </head>
 <body>
 
-<!-- Dark prototype bar: brand + concept tabs (no audience pills) -->
+<!-- Dark prototype bar: E1/E2 main · Outdated holds A–D + E3 -->
 <div class="proto-bar" role="navigation" aria-label="Prototype variants">
   <div class="brand">TxnRecon · Empty state</div>
   <div class="sep" aria-hidden="true"></div>
-  <div class="proto-tabs" role="tablist" aria-label="Concepts">
-    <button type="button" class="proto-tab" data-concept="a" role="tab" aria-selected="true">A · Live+</button>
-    <button type="button" class="proto-tab" data-concept="b" role="tab" aria-selected="false">B · Gap job</button>
-    <button type="button" class="proto-tab" data-concept="c" role="tab" aria-selected="false">C · Preview first</button>
-    <button type="button" class="proto-tab" data-concept="d" role="tab" aria-selected="false">D · Clear the guess</button>
-    <button type="button" class="proto-tab active" data-concept="e" role="tab" aria-selected="true">E · Merged</button>
+  <div class="main-opts" role="group" aria-label="Options to present">
+    <button type="button" class="main-opt active" data-main="e1" aria-pressed="true">E1 · Gap</button>
+    <button type="button" class="main-opt" data-main="e2" aria-pressed="false">E2 · Rows</button>
   </div>
-  <div class="sep e-phrases-sep" aria-hidden="true"></div>
-  <div class="e-phrases" role="group" aria-label="E headline options">
-    <button type="button" class="e-phrase active" data-e-copy="e1" aria-pressed="true">E1 · Gap</button>
-    <button type="button" class="e-phrase" data-e-copy="e2" aria-pressed="false">E2 · Rows</button>
-    <button type="button" class="e-phrase" data-e-copy="e3" aria-pressed="false">E3 · Close</button>
+  <div class="sep" aria-hidden="true"></div>
+  <div class="outdated-wrap" id="outdated-wrap">
+    <button type="button" class="outdated-btn" id="outdated-btn" aria-haspopup="menu" aria-expanded="false">
+      Outdated <span class="chev" aria-hidden="true">▾</span>
+    </button>
+    <div class="outdated-menu" role="menu" aria-label="Outdated concepts">
+      <div class="outdated-label">Earlier concepts</div>
+      <button type="button" class="outdated-item" role="menuitem" data-outdated="a">A · Live+</button>
+      <button type="button" class="outdated-item" role="menuitem" data-outdated="b">B · Gap job</button>
+      <button type="button" class="outdated-item" role="menuitem" data-outdated="c">C · Preview first</button>
+      <button type="button" class="outdated-item" role="menuitem" data-outdated="d">D · Clear the guess</button>
+      <div class="outdated-label">Skipped copy</div>
+      <button type="button" class="outdated-item" role="menuitem" data-outdated="e3">E3 · Close</button>
+    </div>
   </div>
 </div>
 
@@ -727,7 +755,7 @@ html[data-concept="e"] .e-phrases-sep{display:block}
   <div class="concept active" data-panel="e" role="tabpanel">
     <div class="card">
       <div class="copy">
-        <p class="readonly-line" role="note">Read only comparison - no changes to your books</p>
+        <p class="readonly-line" role="note">Read-only comparison — no changes to your books</p>
         <h2 class="card-h" id="e-headline">Find the rows that throw the clearing balance off</h2>
         <p class="lead" id="e-lead">When the clearing account doesn’t match platform totals, compare every row to the books and see what’s missing or amount-off — <strong>not matching payouts to the bank.</strong></p>
         <ul class="benefits">
@@ -1021,6 +1049,11 @@ html[data-concept="e"] .e-phrases-sep{display:block}
     }
   };
 
+  var outdatedWrap = document.getElementById('outdated-wrap');
+  var outdatedBtn = document.getElementById('outdated-btn');
+  var currentMain = 'e1';
+  var currentOutdated = null;
+
   function setECopy(key) {
     var copy = eCopy[key] || eCopy.e1;
     var h = document.getElementById('e-headline');
@@ -1030,38 +1063,87 @@ html[data-concept="e"] .e-phrases-sep{display:block}
       if (copy.leadHtml) lead.innerHTML = copy.lead;
       else lead.textContent = copy.lead;
     }
-    document.querySelectorAll('.e-phrase').forEach(function (btn) {
-      var on = btn.getAttribute('data-e-copy') === key;
-      btn.classList.toggle('active', on);
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
   }
 
   function setConcept(key) {
     root.setAttribute('data-concept', key);
-    document.querySelectorAll('.proto-tab').forEach(function (btn) {
-      var on = btn.getAttribute('data-concept') === key;
-      btn.classList.toggle('active', on);
-      btn.setAttribute('aria-selected', on ? 'true' : 'false');
-    });
     document.querySelectorAll('.concept').forEach(function (panel) {
       panel.classList.toggle('active', panel.getAttribute('data-panel') === key);
     });
   }
 
-  document.querySelectorAll('.proto-tab').forEach(function (btn) {
+  function syncChrome() {
+    document.querySelectorAll('.main-opt').forEach(function (btn) {
+      var on = currentOutdated === null && btn.getAttribute('data-main') === currentMain;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.outdated-item').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-outdated') === currentOutdated);
+    });
+    var labels = {
+      a: 'Outdated · A',
+      b: 'Outdated · B',
+      c: 'Outdated · C',
+      d: 'Outdated · D',
+      e3: 'Outdated · E3'
+    };
+    if (currentOutdated) {
+      outdatedBtn.classList.add('is-active');
+      outdatedBtn.innerHTML = labels[currentOutdated] + ' <span class="chev" aria-hidden="true">▾</span>';
+    } else {
+      outdatedBtn.classList.remove('is-active');
+      outdatedBtn.innerHTML = 'Outdated <span class="chev" aria-hidden="true">▾</span>';
+    }
+  }
+
+  function showMain(key) {
+    currentMain = key;
+    currentOutdated = null;
+    setConcept('e');
+    setECopy(key);
+    syncChrome();
+    closeOutdated();
+  }
+
+  function showOutdated(key) {
+    currentOutdated = key;
+    if (key === 'e3') {
+      setConcept('e');
+      setECopy('e3');
+    } else {
+      setConcept(key);
+    }
+    syncChrome();
+    closeOutdated();
+  }
+
+  function closeOutdated() {
+    outdatedWrap.classList.remove('open');
+    outdatedBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  outdatedBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = !outdatedWrap.classList.contains('open');
+    outdatedWrap.classList.toggle('open', open);
+    outdatedBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function () { closeOutdated(); });
+  outdatedWrap.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  document.querySelectorAll('.main-opt').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      setConcept(btn.getAttribute('data-concept'));
+      showMain(btn.getAttribute('data-main'));
+    });
+  });
+  document.querySelectorAll('.outdated-item').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      showOutdated(btn.getAttribute('data-outdated'));
     });
   });
 
-  document.querySelectorAll('.e-phrase').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      setECopy(btn.getAttribute('data-e-copy'));
-    });
-  });
-
-  setECopy('e1');
+  showMain('e1');
 
   function openModal() {
     setExTab('discrepancy');
