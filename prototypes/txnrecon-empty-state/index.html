@@ -1026,7 +1026,10 @@ html[data-concept="e"] .e-phrases-sep{display:block}
     var h = document.getElementById('e-headline');
     var lead = document.getElementById('e-lead');
     if (h) h.textContent = copy.h;
-    if (lead) lead.textContent = copy.lead;
+    if (lead) {
+      if (copy.leadHtml) lead.innerHTML = copy.lead;
+      else lead.textContent = copy.lead;
+    }
     document.querySelectorAll('.e-phrase').forEach(function (btn) {
       var on = btn.getAttribute('data-e-copy') === key;
       btn.classList.toggle('active', on);
