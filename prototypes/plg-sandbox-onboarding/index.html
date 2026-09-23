@@ -11,7 +11,7 @@
     - Soft-lock stubs: Settings (freq / Auto-sync), Historical import entry+config, Smart Rules zero-state.
     - Activation-session shortcut on steps 1–2 jumps to step 3 (contact) — never Success.
     - Success: one neutral header for all outcomes; contact block kept; beige CSM callout removed.
-    - Zoom + completed survey → HubSpot-style calendar; Phone / Email contact results as before.
+    - Zoom → separate HubSpot booking page (calendar + Choose this time) → Success with slot; Phone / Email → Success directly.
     - App: Dashboard is a normal welcome/summary placeholder; Setup checklist is its own nav page.
     - Setup checklist: Main-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
     - Soft-lock: Learn + talk-to-specialist only (no Book CTAs — call booked on Success).
@@ -116,6 +116,7 @@
     .view { display: none; min-height: calc(100vh - var(--proto-bar-h)); }
     .view.active { display: block; }
     body[data-view="survey"] #view-survey,
+    body[data-view="hubspot"] #view-hubspot,
     body[data-view="success"] #view-success,
     body[data-view="app"] #view-app { display: block; }
 
@@ -873,61 +874,104 @@
     }
 
 
-    /* HubSpot-style booking calendar sketch (Zoom path) */
+    /* HubSpot booking page (Zoom path — separate from Success) */
+    #view-hubspot {
+      display: none;
+      background: #F5F8FA;
+      min-height: calc(100vh - var(--proto-bar-h));
+    }
+    .hs-page-top {
+      height: 56px; display: flex; align-items: center;
+      padding: 0 24px; background: #fff;
+      border-bottom: 1px solid #EAF0F6;
+    }
+    .hs-wordmark {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+      color: #FF7A59; font-family: Arial, Helvetica, sans-serif;
+    }
+    .hs-page-body {
+      max-width: 720px; margin: 0 auto; padding: 28px 20px 40px;
+    }
+    .hs-meeting-card {
+      background: #fff; border: 1px solid #EAF0F6; border-radius: 8px;
+      padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .hs-meeting-card h1 {
+      margin: 0 0 6px; font-size: 22px; font-weight: 600; color: #33475B;
+    }
+    .hs-meeting-card .hs-meeting-sub {
+      margin: 0 0 18px; font-size: 14px; color: #516F90; line-height: 1.45;
+    }
     .hs-cal {
-      margin-top: 12px; padding: 14px;
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      background: var(--bg-surface, #fff);
+      padding: 14px;
+      border: 1px solid #EAF0F6;
+      border-radius: 6px;
+      background: #fff;
     }
     .hs-cal-title {
-      font-size: var(--font-body2); font-weight: 500;
-      color: var(--text-primary); margin: 0 0 10px;
+      font-size: 14px; font-weight: 600;
+      color: #33475B; margin: 0 0 10px;
     }
     .hs-cal-nav {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 8px;
     }
-    .hs-cal-nav strong { font-size: 14px; font-weight: 500; }
+    .hs-cal-nav strong { font-size: 14px; font-weight: 600; color: #33475B; }
     .hs-cal-nav button {
-      appearance: none; border: 1px solid var(--border-default);
+      appearance: none; border: 1px solid #CBD6E2;
       background: #fff; width: 28px; height: 28px; border-radius: 4px;
-      cursor: pointer; font-size: 16px; line-height: 1; color: var(--text-primary);
+      cursor: pointer; font-size: 16px; line-height: 1; color: #33475B;
     }
-    .hs-cal-nav button:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .hs-cal-nav button:hover { border-color: #FF7A59; color: #FF7A59; }
     .hs-cal-weekdays, .hs-cal-grid {
       display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
       text-align: center;
     }
     .hs-cal-weekdays span {
-      font-size: 11px; color: var(--text-secondary); padding: 4px 0; font-weight: 500;
+      font-size: 11px; color: #7C98B6; padding: 4px 0; font-weight: 500;
     }
     .hs-cal-grid button {
       appearance: none; border: none; background: transparent;
-      height: 32px; border-radius: 4px; font: inherit; font-size: 13px;
-      color: var(--text-primary); cursor: pointer;
+      height: 36px; border-radius: 4px; font: inherit; font-size: 13px;
+      color: #33475B; cursor: pointer;
     }
-    .hs-cal-grid button.muted { color: #B4BBCB; cursor: default; }
-    .hs-cal-grid button.avail:hover { background: var(--color-primary-10); color: var(--color-primary); }
+    .hs-cal-grid button.muted { color: #CBD6E2; cursor: default; }
+    .hs-cal-grid button.avail:hover { background: #FFF1EC; color: #FF7A59; }
     .hs-cal-grid button.selected {
-      background: var(--color-primary); color: #fff;
+      background: #FF7A59; color: #fff;
     }
-    .hs-cal-slots { margin-top: 12px; }
+    .hs-cal-slots { margin-top: 14px; }
+    .hs-cal-slots .field-label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: #516F90; margin-bottom: 6px; text-transform: uppercase;
+      letter-spacing: .04em;
+    }
     .hs-cal-slots .slot-row {
       display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
     }
     .hs-cal-slots .time-slot {
-      appearance: none; border: 1px solid var(--border-default); background: #fff;
-      height: 32px; padding: 0 12px; border-radius: 4px;
-      font: inherit; font-size: 13px; cursor: pointer; color: var(--text-primary);
+      appearance: none; border: 1px solid #CBD6E2; background: #fff;
+      height: 34px; padding: 0 12px; border-radius: 4px;
+      font: inherit; font-size: 13px; cursor: pointer; color: #33475B;
     }
-    .hs-cal-slots .time-slot:hover { border-color: var(--color-primary-50); }
+    .hs-cal-slots .time-slot:hover { border-color: #FF7A59; }
     .hs-cal-slots .time-slot.selected {
-      border-color: var(--color-primary); background: var(--color-primary-10);
-      color: var(--color-primary);
+      border-color: #FF7A59; background: #FFF1EC;
+      color: #FF7A59; font-weight: 500;
     }
-    .hs-cal-confirm { margin-top: 12px; width: 100%; justify-content: center; }
+    .hs-cal-confirm {
+      margin-top: 16px; width: 100%; justify-content: center;
+      background: #FF7A59 !important; border-color: #FF7A59 !important;
+      color: #fff !important;
+    }
+    .hs-cal-confirm:hover:not(:disabled) { filter: brightness(.96); }
     .hs-cal-confirm:disabled { opacity: .45; cursor: not-allowed; }
+    .hs-back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-bottom: 14px; font-size: 13px; color: #516F90;
+      background: none; border: none; cursor: pointer; padding: 0; font-family: inherit;
+    }
+    .hs-back-link:hover { color: #FF7A59; text-decoration: underline; }
 
     @media (max-width: 720px) {
       .survey-card { padding: 8px 0 20px; }
@@ -948,6 +992,7 @@
       <span class="proto-label">View</span>
       <div class="seg" id="seg-view">
         <button type="button" data-view="survey" class="active">Survey</button>
+        <button type="button" data-view="hubspot">HubSpot</button>
         <button type="button" data-view="success">Success</button>
         <button type="button" data-view="app">App (Setup checklist)</button>
       </div>
@@ -1128,6 +1173,24 @@
         </div>
       </div>
     </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FLOW B — HubSpot booking (Zoom) ═══════════════ -->
+  <div class="view" id="view-hubspot">
+    <div class="hs-page-top">
+      <span class="hs-wordmark">HubSpot</span>
+    </div>
+    <div class="hs-page-body">
+      <button type="button" class="hs-back-link" id="hs-back-survey">
+        <span class="material-icons-round" style="font-size:16px">arrow_back</span>
+        Back to survey
+      </button>
+      <div class="hs-meeting-card">
+        <h1>Synder setup call</h1>
+        <p class="hs-meeting-sub">45 min · Video call (Zoom) with your Synder specialist. Pick a day and time, then choose this slot.</p>
+        <div id="hubspot-cal-root"><!-- filled by JS --></div>
+      </div>
     </div>
   </div>
 
@@ -1365,6 +1428,7 @@
     state.view = view;
     document.body.setAttribute('data-view', view);
     $$('#seg-view button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    if (view === 'hubspot') renderHubspotPage();
     if (view === 'success') renderSuccess();
     if (view === 'app') renderApp();
   }
@@ -1525,6 +1589,11 @@
     state.zoomSlot = null;
     state.calDay = null;
     state.calTime = null;
+    // Zoom books on a separate HubSpot page; Phone / Email go straight to Success.
+    if (state.contact === 'zoom') {
+      setView('hubspot');
+      return;
+    }
     setView('success');
   });
 
@@ -1621,7 +1690,7 @@
       </div>`;
   }
 
-  function hubspotCalendarHtml() {
+  function hubspotCalendarInnerHtml() {
     // Prototype sketch — April 2026 grid; available weekdays 21–24
     const avail = new Set([21, 22, 23, 24]);
     const selected = state.calDay;
@@ -1645,12 +1714,8 @@
     }).join('');
     const canConfirm = state.calDay && state.calTime;
     return `
-      <h3>Book your Zoom session</h3>
-      <div class="contact-meta" style="margin-bottom:8px">
-        <div class="row"><span class="material-icons-round">videocam</span> Pick a time — your Synder specialist joins live</div>
-      </div>
       <div class="hs-cal" id="hubspot-cal">
-        <p class="hs-cal-title">Synder setup call · 45 min</p>
+        <p class="hs-cal-title">Select a date &amp; time</p>
         <div class="hs-cal-nav">
           <button type="button" disabled aria-label="Previous month">‹</button>
           <strong>April 2026</strong>
@@ -1664,8 +1729,21 @@
           <label class="field-label">Available times</label>
           <div class="slot-row" id="hs-cal-slots">${slots}</div>
         </div>
-        <button type="button" class="btn btn-primary hs-cal-confirm" id="cal-confirm" ${canConfirm ? '' : 'disabled'}>Confirm Zoom session</button>
+        <button type="button" class="btn btn-primary hs-cal-confirm" id="cal-confirm" ${canConfirm ? '' : 'disabled'}>Choose this time</button>
       </div>`;
+  }
+
+  function confirmZoomSlot() {
+    if (!state.calDay || !state.calTime) return;
+    const wd = { 21: 'Tue', 22: 'Wed', 23: 'Thu', 24: 'Fri' };
+    state.zoomSlot = {
+      dayLabel: (wd[state.calDay] || 'Tue') + ' ' + state.calDay + ' Apr',
+      time: state.calTime,
+    };
+    state.contact = 'zoom';
+    state.demoContact = 'zoom';
+    state.demoForced = false;
+    setView('success');
   }
 
   function bindHubspotCalendar() {
@@ -1679,7 +1757,7 @@
         const btn = e.target.closest('button.avail');
         if (!btn) return;
         state.calDay = parseInt(btn.dataset.day, 10);
-        renderContactBlock('zoom');
+        renderHubspotPage();
       });
     }
     if (slots) {
@@ -1687,22 +1765,19 @@
         const btn = e.target.closest('.time-slot');
         if (!btn) return;
         state.calTime = btn.dataset.time;
-        renderContactBlock('zoom');
+        renderHubspotPage();
       });
     }
     if (confirm) {
-      confirm.addEventListener('click', () => {
-        if (!state.calDay || !state.calTime) return;
-        state.zoomSlot = {
-          dayLabel: 'Tue ' + state.calDay + ' Apr',
-          time: state.calTime,
-        };
-        // Fix weekday label roughly for available days
-        const wd = { 21: 'Tue', 22: 'Wed', 23: 'Thu', 24: 'Fri' };
-        state.zoomSlot.dayLabel = (wd[state.calDay] || 'Tue') + ' ' + state.calDay + ' Apr';
-        renderContactBlock('zoom');
-      });
+      confirm.addEventListener('click', () => confirmZoomSlot());
     }
+  }
+
+  function renderHubspotPage() {
+    const mount = $('#hubspot-cal-root');
+    if (!mount) return;
+    mount.innerHTML = hubspotCalendarInnerHtml();
+    bindHubspotCalendar();
   }
 
   function renderContactBlock(pref) {
@@ -1716,13 +1791,11 @@
     }
 
     if (pref === 'zoom') {
-      // Only show confirmed / calendar when this is a real Zoom path (or demo-forced Zoom)
-      if (state.zoomSlot) {
-        el.innerHTML = zoomConfirmedHtml(state.zoomSlot);
-      } else {
-        el.innerHTML = hubspotCalendarHtml();
-        bindHubspotCalendar();
+      // Calendar lives on the HubSpot page — Success only shows the booked slot (like Phone).
+      if (!state.zoomSlot) {
+        state.zoomSlot = { dayLabel: 'Tue 21 Apr', time: '10:30 AM' };
       }
+      el.innerHTML = zoomConfirmedHtml(state.zoomSlot);
     } else if (pref === 'phone') {
       const windowFull = {
         morning: 'Morning (9:00–12:00)',
@@ -1774,6 +1847,13 @@
   }
 
   $('#btn-enter-app').addEventListener('click', () => setView('app'));
+  const hsBack = $('#hs-back-survey');
+  if (hsBack) {
+    hsBack.addEventListener('click', () => {
+      setView('survey');
+      setStep(3);
+    });
+  }
   const snoozeDismiss = $('#snooze-dismiss');
   if (snoozeDismiss) {
     snoozeDismiss.addEventListener('click', () => {
