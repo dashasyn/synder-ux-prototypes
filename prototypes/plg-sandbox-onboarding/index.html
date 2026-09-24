@@ -13,9 +13,9 @@
     - Success: one neutral header for all outcomes; contact block kept; beige CSM callout removed.
     - Zoom → separate HubSpot booking page (calendar + Choose this time) → Success with slot; Phone / Email → Success directly.
     - App: Dashboard is a normal welcome/summary placeholder; Setup checklist is its own nav page.
-    - Setup checklist: Main-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
-    - Soft-lock: Learn + talk-to-specialist only (no Book CTAs — call booked on Success).
-    - Proto bar (App view): Checklist variants Current | Hybrid for comparing step copy & scoring.
+    - Setup checklist: Hybrid-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
+    - Soft-lock: Learn + talk-to-specialist only (no Book CTAs — call booked on Success). One lock story: “On your setup call”.
+    - Proto bar (App view): Sync mode Summary | Per transaction only (no Current/Hybrid switcher).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -1007,13 +1007,6 @@
       </div>
     </div>
 
-    <div class="proto-group proto-app-only">
-      <span class="proto-label">Checklist</span>
-      <div class="seg" id="seg-checklist">
-        <button type="button" data-checklist="current" class="active">Current</button>
-        <button type="button" data-checklist="hybrid">Hybrid</button>
-      </div>
-    </div>
 
     <div class="proto-group proto-contact-demo proto-chip" id="contact-chips">
       <span class="proto-label">Contact</span>
@@ -1324,7 +1317,6 @@
     surveySnoozed: false, // fill-later closed questionnaire; returns in 24h
     usedShortcut: false,
     syncMode: 'summary',  // 'summary' | 'per-txn'
-    checklistVariant: 'current', // 'current' | 'hybrid'
     syncFrequency: 'manual', // 'daily' | 'fully' | 'manual' — Summary Sync only
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete' — presets doneIds
     doneIds: [],          // checkpoint ids marked Done (drives score)
@@ -1337,202 +1329,104 @@
   };
 
   const CHECKPOINTS = {
-    current: {
-      summary: [
-        {
-          id: 'channel',
-          phase: 'self',
-          title: 'Connect integrations',
-          desc: 'Connect every integration you get paid from (Shopify, Stripe, Amazon, and the rest).',
-          where: 'Go to Organization settings',
-          whereHint: 'Organization settings',
-        },
-        {
-          id: 'mapping',
-          phase: 'self',
-          title: 'Complete mapping',
-          desc: 'Map every group so summaries post to the right accounts.',
-          where: 'Go to Mappings list',
-          whereHint: 'Mappings list',
-        },
-        {
-          id: 'period',
-          phase: 'self',
-          title: 'Choose Synchronization frequency',
-          desc: 'Choose how Synder syncs summaries to your books. Leave Manual selected until your setup call.',
-          where: 'Go to Settings',
-          whereHint: 'Settings',
-        },
-        {
-          id: 'test-sync',
-          phase: 'self',
-          title: 'Sync a summary',
-          desc: 'Sync a Ready to sync summary and check the results in your books.',
-          where: 'Go to Summaries list',
-          whereHint: 'Summaries list',
-        },
-        {
-          id: 'historical',
-          phase: 'call',
-          title: 'Import historical data',
-          desc: 'Agree the date range with your Synder specialist so the import completes and everything syncs correctly.',
-          badge: 'Ready to activate',
-        },
-        {
-          id: 'csm',
-          phase: 'call',
-          title: 'Finish setup with your Synder specialist',
-          desc: 'Your Synder specialist will tailor Synder to your setup — review mapping, check settings, and turn on auto-sync.',
-          badge: 'Ready to activate',
-          contactInfo: true,
-        },
-      ],
-      'per-txn': [
-        {
-          id: 'channel',
-          phase: 'self',
-          title: 'Connect integrations',
-          desc: 'Connect every integration you get paid from (Shopify, Stripe, Amazon, and the rest).',
-          where: 'Go to Organization settings',
-          whereHint: 'Organization settings',
-        },
-        {
-          id: 'clearing',
-          phase: 'self',
-          title: 'Confirm clearing account',
-          desc: 'Confirm the clearing account where Synder will post all transactions.',
-          where: 'Go to Settings',
-          whereHint: 'Settings',
-        },
-        {
-          id: 'test-sync',
-          phase: 'self',
-          title: 'Sync transactions',
-          desc: 'Sync a few transactions and check the results in your books.',
-          where: 'Go to Transactions',
-          whereHint: 'Transactions',
-        },
-        {
-          id: 'historical',
-          phase: 'call',
-          title: 'Import historical data',
-          desc: 'Agree the date range with your Synder specialist so the import completes and everything syncs correctly.',
-          badge: 'Ready to activate',
-        },
-        {
-          id: 'csm',
-          phase: 'call',
-          title: 'Finish setup with your Synder specialist',
-          desc: 'Your Synder specialist will tailor Synder to your setup — review mapping, check settings, and turn on auto-sync.',
-          badge: 'Ready to activate',
-          contactInfo: true,
-        },
-      ],
-    },
-    hybrid: {
-      summary: [
-        {
-          id: 'channel',
-          phase: 'self',
-          title: 'Connect sales channels',
-          desc: 'Connect all sales channels you get paid from.',
-          where: 'Go to Organization settings',
-          whereHint: 'Organization settings',
-        },
-        {
-          id: 'mapping',
-          phase: 'self',
-          title: 'Complete account mapping',
-          desc: 'Map all Sale, Refund, Expense, and Adjustment groups to the right accounts.',
-          where: 'Go to Mappings list',
-          whereHint: 'Mappings list',
-        },
-        {
-          id: 'period',
-          phase: 'self',
-          title: 'Choose Synchronization frequency',
-          desc: 'Choose how Synder syncs summaries to your books. Leave Manual selected until your setup call.',
-          where: 'Go to Settings',
-          whereHint: 'Settings',
-        },
-        {
-          id: 'test-sync',
-          phase: 'self',
-          title: 'Sync a summary to test',
-          desc: 'Sync one Ready to sync summary and check the results in your books.',
-          where: 'Go to Summaries list',
-          whereHint: 'Summaries list',
-        },
-        {
-          id: 'auto-historical',
-          phase: 'call',
-          title: 'Turn on auto-sync & import historical data',
-          desc: 'Your Synder specialist turns on auto-sync and agrees which historical data to import.',
-          badge: 'On your setup call',
-        },
-        {
-          id: 'csm',
-          phase: 'call',
-          title: 'Finish setup with your Synder specialist',
-          desc: 'Walk through reconciliation together so everything posts correctly.',
-          badge: 'On your setup call',
-          contactInfo: true,
-        },
-      ],
-      'per-txn': [
-        {
-          id: 'channel',
-          phase: 'self',
-          title: 'Connect sales channels',
-          desc: 'Connect all sales channels you get paid from.',
-          where: 'Go to Organization settings',
-          whereHint: 'Organization settings',
-        },
-        {
-          id: 'clearing',
-          phase: 'self',
-          title: 'Confirm clearing account',
-          desc: 'In Settings → Sales, confirm the clearing account where Synder will post all transactions.',
-          where: 'Go to Settings → Sales',
-          whereHint: 'Settings → Sales',
-        },
-        {
-          id: 'core-sales',
-          phase: 'self',
-          title: 'Confirm core sales settings',
-          desc: 'In Settings, check Products/Services, Taxes, and Fees so they match how you want sales to post.',
-          where: 'Go to Settings',
-          whereHint: 'Settings',
-        },
-        {
-          id: 'test-sync',
-          phase: 'self',
-          title: 'Sync 3 transactions and check them',
-          desc: 'Sync three transactions and check the results in your books.',
-          where: 'Go to Transactions',
-          whereHint: 'Transactions',
-        },
-        {
-          id: 'auto-historical',
-          phase: 'call',
-          title: 'Turn on auto-sync & import historical data',
-          desc: 'Your Synder specialist turns on auto-sync and agrees which historical data to import.',
-          badge: 'On your setup call',
-        },
-        {
-          id: 'csm',
-          phase: 'call',
-          title: 'Finish setup with your Synder specialist',
-          desc: 'Walk through posting together so everything looks right. Ask about Smart Rules if you have exceptions.',
-          badge: 'On your setup call',
-          contactInfo: true,
-        },
-      ]
-    },
+    summary: [
+      {
+        id: 'channel',
+        phase: 'self',
+        title: 'Connect sales channels',
+        desc: 'Connect all sales channels you get paid from.',
+        where: 'Go to Organization settings',
+        whereHint: 'Organization settings',
+      },
+      {
+        id: 'mapping',
+        phase: 'self',
+        title: 'Complete account mapping',
+        desc: 'Map all Sale, Refund, Expense, and Adjustment groups to the right accounts.',
+        where: 'Go to Mappings list',
+        whereHint: 'Mappings list',
+      },
+      {
+        id: 'period',
+        phase: 'self',
+        title: 'Choose Synchronization frequency',
+        desc: 'Choose how Synder syncs summaries to your books. Leave Manual selected until your setup call.',
+        where: 'Go to Settings',
+        whereHint: 'Settings',
+      },
+      {
+        id: 'test-sync',
+        phase: 'self',
+        title: 'Sync a summary to test',
+        desc: 'Sync one Ready to sync summary and check the results in your books.',
+        where: 'Go to Summaries list',
+        whereHint: 'Summaries list',
+      },
+      {
+        id: 'auto-historical',
+        phase: 'call',
+        title: 'Turn on auto-sync & import historical data',
+        desc: 'Your Synder specialist turns on auto-sync and agrees which historical data to import.',
+      },
+      {
+        id: 'csm',
+        phase: 'call',
+        title: 'Finish setup with your Synder specialist',
+        desc: 'Walk through posting together so what hit the books looks right.',
+        contactInfo: true,
+      },
+    ],
+    'per-txn': [
+      {
+        id: 'channel',
+        phase: 'self',
+        title: 'Connect sales channels',
+        desc: 'Connect all sales channels you get paid from.',
+        where: 'Go to Organization settings',
+        whereHint: 'Organization settings',
+      },
+      {
+        id: 'clearing',
+        phase: 'self',
+        title: 'Confirm clearing account',
+        desc: 'In Settings → Sales, confirm the clearing account — the holding account where Synder posts sales before payout.',
+        where: 'Go to Settings → Sales',
+        whereHint: 'Settings → Sales',
+      },
+      {
+        id: 'core-sales',
+        phase: 'self',
+        title: 'Confirm core sales settings',
+        desc: 'In Settings → Products/Services, Taxes, and Fees, check that they match how you want sales to post.',
+        where: 'Go to Settings → Products/Services',
+        whereHint: 'Settings → Products/Services',
+      },
+      {
+        id: 'test-sync',
+        phase: 'self',
+        title: 'Sync 3 transactions and check them',
+        desc: 'Sync three transactions and check the results in your books.',
+        where: 'Go to Transactions',
+        whereHint: 'Transactions',
+      },
+      {
+        id: 'auto-historical',
+        phase: 'call',
+        title: 'Turn on auto-sync & import historical data',
+        desc: 'Your Synder specialist turns on auto-sync and agrees which historical data to import.',
+      },
+      {
+        id: 'csm',
+        phase: 'call',
+        title: 'Finish setup with your Synder specialist',
+        desc: 'Walk through posting together so everything looks right. Ask about Smart Rules if you have exceptions.',
+        contactInfo: true,
+      },
+    ],
   };
 
   function activeCheckpoints() {
-    return CHECKPOINTS[state.checklistVariant][state.syncMode];
+    return CHECKPOINTS[state.syncMode];
   }
 
   /* ── helpers ─────────────────────────────────────────── */
@@ -2038,16 +1932,15 @@
     const list = activeCheckpoints();
     const done = new Set(state.doneIds);
     const selfList = list.filter(c => c.phase !== 'call');
-    const scoreList = state.checklistVariant === 'hybrid' ? selfList : list;
+    // Score is self-serve only (call-phase steps are specialist-activated)
+    const scoreList = selfList;
     const total = scoreList.length;
     const count = scoreList.filter(c => done.has(c.id)).length;
     const pct = total ? Math.round((count / total) * 100) : 0;
     const currentId = (selfList.find(c => !done.has(c.id)) || {}).id || null;
     const selfAllDone = selfList.length > 0 && selfList.every(c => done.has(c.id));
     const allDone = list.length > 0 && list.every(c => done.has(c.id));
-    const callDividerText = state.checklistVariant === 'hybrid'
-      ? 'On your setup call'
-      : 'Activated on your setup call';
+    const callDividerText = 'On your setup call';
     let callDividerShown = false;
     const parts = [];
     list.forEach(c => {
@@ -2075,9 +1968,8 @@
         icoClass = 'current';
       }
 
-      const badge = (status === 'locked' && c.badge)
-        ? '<span class="hs-badge">' + c.badge + '</span>'
-        : '';
+      // No per-step lock chips — call divider already says "On your setup call"
+      const badge = '';
 
       let actions = '';
       let contactBlock = '';
@@ -2263,10 +2155,10 @@
       return `
         <div class="soft-row is-dimmed" aria-disabled="true">
           <div class="soft-row-meta">
-            <div class="soft-row-label">Auto-sync ${softPill('Ready to activate')}</div>
+            <div class="soft-row-label">Auto-sync ${softPill('On your setup call')}</div>
             <div class="soft-row-help">Your Synder specialist turns Auto-sync on after a quick setup review. You can still sync manually until then.</div>
           </div>
-          <button type="button" class="soft-toggle" disabled aria-label="Auto-sync off" title="Ready to activate"></button>
+          <button type="button" class="soft-toggle" disabled aria-label="Auto-sync off" title="On your setup call"></button>
         </div>`;
     }
 
@@ -2289,7 +2181,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('Ready to activate')}
+          ${softPill('On your setup call')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Configure how Synder posts new activity to your books. Auto-sync stays off until your setup call.</p>
         ${autoSyncRowHtml()}
@@ -2302,7 +2194,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('Ready to activate')}
+          ${softPill('On your setup call')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Agree the date range with your Synder specialist so the import completes and everything syncs correctly.</p>
         <div class="soft-form lockable">
@@ -2324,7 +2216,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('Ready to activate')}
+          ${softPill('On your setup call')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Automations for exceptions and categorization. Configured with your Synder specialist after reviewing your flow.</p>
         <div class="zero-rules lockable">
@@ -2340,7 +2232,7 @@
           <button type="button" class="btn btn-primary">Sync to books</button>
           <span class="hist-entry">
             <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
-            ${softPill('Ready to activate')}
+            ${softPill('On your setup call')}
           </span>
         </div>
         <div class="placeholder-grid">
@@ -2356,7 +2248,7 @@
           <button type="button" class="btn btn-primary">Sync transactions</button>
           <span class="hist-entry">
             <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
-            ${softPill('Ready to activate')}
+            ${softPill('On your setup call')}
           </span>
         </div>
         <div class="placeholder-grid">
@@ -2408,7 +2300,7 @@
         <section class="freq-section" aria-labelledby="freq-heading">
           <div class="freq-section-head">
             <h2 id="freq-heading">Synchronization frequency</h2>
-            ${softPill('Ready to activate')}
+            ${softPill('On your setup call')}
           </div>
           <p class="freq-intro">Select the way you want to synchronize transactions to your books. Auto options unlock after your setup call.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
@@ -2486,15 +2378,6 @@
     renderApp();
   });
 
-  $('#seg-checklist').addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    state.checklistVariant = btn.dataset.checklist;
-    $$('#seg-checklist button').forEach(b => b.classList.toggle('active', b === btn));
-    presetDoneIds(state.scoreProgress);
-    renderApp();
-  });
-
   function openChecklistFromChip() {
     focusMainChecklist();
   }
@@ -2548,7 +2431,6 @@
     state.surveyIncomplete = false;
     state.usedShortcut = false;
     state.syncMode = 'summary';
-    state.checklistVariant = 'current';
     state.scoreProgress = 'empty';
     state.doneIds = [];
     state.appPage = 'dashboard';
@@ -2563,7 +2445,6 @@
     $('#phone-number').value = '';
     $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
-    $$('#seg-checklist button').forEach(b => b.classList.toggle('active', b.dataset.checklist === 'current'));
     $('#contact-chips').classList.remove('show');
     clearAllStepErrors();
 
