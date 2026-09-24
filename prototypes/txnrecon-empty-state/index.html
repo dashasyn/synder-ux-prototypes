@@ -392,12 +392,28 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .ex-tab .count.err{background:var(--red-bg);color:var(--red)}
 .ex-tab.active .count:not(.ok):not(.warn):not(.err){background:var(--primary-10);color:var(--primary)}
 
-.ex-panel{display:none}
-.ex-panel.active{display:block}
+.ex-panels{display:grid}
+.ex-panel{
+  grid-area:1/1;
+  visibility:hidden;
+  opacity:0;
+  pointer-events:none;
+  z-index:0;
+}
+.ex-panel.active{
+  visibility:visible;
+  opacity:1;
+  pointer-events:auto;
+  z-index:1;
+}
 
 .ex-mini{
   background:#fff;border:1px solid var(--grey-20);border-radius:8px;overflow:hidden;
+  min-height:280px;
+  display:flex;flex-direction:column;
 }
+.ex-mini > div[style]{flex:1 1 auto}
+
 .ex-table{width:100%;border-collapse:collapse;font-size:14px}
 .ex-table th{
   text-align:left;font-weight:500;color:var(--grey-50);font-size:14px;
@@ -422,6 +438,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   background:var(--primary-10);color:var(--primary);
 }
 .ex-empty{
+  flex:1 1 auto;display:flex;align-items:center;justify-content:center;
   padding:28px 16px;text-align:center;font-size:14px;color:var(--grey-50);
 }
 .ex-foot-meta{padding:8px 10px;font-size:14px;color:var(--grey-50);border-top:1px solid var(--grey-20);background:#fff}
@@ -1015,6 +1032,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
         <button type="button" class="ex-tab" role="tab" aria-selected="false" data-ex-tab="ignored">Ignored <span class="count">0</span></button>
       </div>
 
+      <div class="ex-panels">
       <!-- Discrepancy (default) — amount/type gaps -->
       <div class="ex-panel active" id="ex-panel-discrepancy" role="tabpanel">
         <div class="ex-mini">
@@ -1071,7 +1089,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       </div>
 
       <!-- Matched -->
-      <div class="ex-panel" id="ex-panel-matched" role="tabpanel" hidden>
+      <div class="ex-panel" id="ex-panel-matched" role="tabpanel">
         <div class="ex-mini">
           <div style="overflow-x:auto">
             <table class="ex-table">
@@ -1122,7 +1140,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       </div>
 
       <!-- Missing -->
-      <div class="ex-panel" id="ex-panel-missing" role="tabpanel" hidden>
+      <div class="ex-panel" id="ex-panel-missing" role="tabpanel">
         <div class="ex-mini">
           <div style="overflow-x:auto">
             <table class="ex-table">
@@ -1169,10 +1187,11 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       </div>
 
       <!-- Ignored -->
-      <div class="ex-panel" id="ex-panel-ignored" role="tabpanel" hidden>
+      <div class="ex-panel" id="ex-panel-ignored" role="tabpanel">
         <div class="ex-mini">
           <div class="ex-empty">No ignored transactions</div>
         </div>
+      </div>
       </div>
 
       <p class="ex-note">Example only — not your books. Balance strip shows the combined check when balances are available.</p>
@@ -1334,8 +1353,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
     document.querySelectorAll('.ex-panel').forEach(function (panel) {
       var on = panel.id === 'ex-panel-' + name;
       panel.classList.toggle('active', on);
-      if (on) panel.removeAttribute('hidden');
-      else panel.setAttribute('hidden', '');
+      panel.setAttribute('aria-hidden', on ? 'false' : 'true');
     });
   }
   document.querySelectorAll('.ex-tab').forEach(function (btn) {
