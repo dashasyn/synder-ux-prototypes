@@ -571,15 +571,12 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
-  column-gap:20px;row-gap:0;
+  column-gap:16px;row-gap:0;
   flex:none;max-width:none;width:100%;padding:32px 36px 28px;min-width:0;
+  align-items:center;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy .readonly-line{
-  grid-column:1;grid-row:1;align-self:center;margin:0 0 14px;
-}
-html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{
-  display:flex;grid-column:2;grid-row:1;align-self:start;justify-self:end;
-  margin:0 0 14px;flex-wrap:nowrap;
+  grid-column:1 / -1;grid-row:1;margin:0 0 14px;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{
   grid-column:1 / -1;grid-row:2;max-width:none;margin-bottom:10px;
@@ -591,7 +588,11 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .copy .benefits{
   grid-column:1 / -1;grid-row:4;margin-bottom:18px;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy .cta-row{
-  grid-column:1 / -1;grid-row:5;
+  grid-column:1;grid-row:5;margin:0;align-self:center;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{
+  display:flex;grid-column:2;grid-row:5;align-self:center;justify-self:start;
+  margin:0;flex-wrap:nowrap;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview{
   display:flex;flex:none;width:100%;max-width:none;min-width:0;
@@ -602,19 +603,31 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-panel{
   max-width:100%;border:1px dashed var(--grey-30);border-radius:8px;
   background:rgba(255,255,255,.72);overflow:hidden;
 }
+/* E3: static example categories — not live tabs */
+html[data-e-variant="e3"] .concept[data-panel="e"] .ex-cat-caption{display:block}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-tabs{
+  pointer-events:none;cursor:default;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-tab{
+  cursor:default;pointer-events:none;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-tab:hover{
+  color:inherit;
+}
 html[data-e-variant="e3"] .concept[data-panel="e"] .js-view-example{display:none}
 html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
+.ex-cat-caption{
+  display:none;margin:0 0 6px;padding:0 2px;
+  font-size:14px;font-weight:500;color:var(--grey-50);
+}
 @media(max-width:720px){
   html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
     grid-template-columns:1fr;
   }
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .cta-row{grid-column:1;grid-row:5}
   html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{
-    grid-column:1;grid-row:2;justify-self:start;margin:0 0 12px;
+    grid-column:1;grid-row:6;justify-self:start;margin:12px 0 0;
   }
-  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{grid-row:3}
-  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{grid-row:4}
-  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .benefits{grid-row:5}
-  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .cta-row{grid-row:6}
 }
 .ex-sample-banner{
   display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
@@ -967,7 +980,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
             Example · sample data — not your books
           </div>
           <div style="padding:12px 14px 0">
-            <div class="preview-head">Reconciliation results <span class="ex-badge">Sample</span></div>
+            <div class="preview-head">Sample reconciliation results</div>
             <div class="preview-period">Stripe Test (sandbox) / Mar 1–31, 2026</div>
             <div class="ex-bal" aria-label="Balance summary">
               <div class="ex-bal-head">
@@ -994,10 +1007,11 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
               </div>
             </div>
           </div>
+          <p class="ex-cat-caption">Example categories</p>
           <div class="preview-tabs" role="tablist" aria-label="Example result categories">
-            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="matched">Matched <span class="count">56</span></button>
-            <button type="button" class="preview-tab on warn" role="tab" aria-selected="true" data-e2-tab="discrepancy">Discrepancy <span class="count">4</span></button>
-            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="missing">Missing <span class="count">3</span></button>
+            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="matched" tabindex="0">Matched <span class="count">56</span></button>
+            <button type="button" class="preview-tab on warn" role="tab" aria-selected="true" data-e2-tab="discrepancy" tabindex="0">Discrepancy <span class="count">4</span></button>
+            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="missing" tabindex="0">Missing <span class="count">3</span></button>
           </div>
           <div class="e2-preview-panels">
             <div class="e2-preview-panel" id="e2-panel-matched" role="tabpanel" aria-hidden="true">
@@ -1456,6 +1470,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
     setConcept('e');
     setECopy(key);
     syncChrome();
+    syncE3PreviewChrome();
     closeOutdated();
   }
 
@@ -1551,10 +1566,37 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
     });
   }
   document.querySelectorAll('.e2-preview .preview-tab').forEach(function (btn) {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
+      if (root.getAttribute('data-e-variant') === 'e3') {
+        e.preventDefault();
+        return;
+      }
       setE2PreviewTab(btn.getAttribute('data-e2-tab'));
     });
   });
+
+  function syncE3PreviewChrome() {
+    var isE3 = root.getAttribute('data-e-variant') === 'e3';
+    var tabs = document.querySelectorAll('.e2-preview .preview-tabs');
+    tabs.forEach(function (list) {
+      list.setAttribute('role', isE3 ? 'group' : 'tablist');
+      list.setAttribute('aria-label', isE3 ? 'Example categories (sample)' : 'Example result categories');
+    });
+    document.querySelectorAll('.e2-preview .preview-tab').forEach(function (btn) {
+      if (isE3) {
+        btn.setAttribute('tabindex', '-1');
+        btn.setAttribute('aria-disabled', 'true');
+        btn.removeAttribute('role');
+      } else {
+        btn.setAttribute('tabindex', '0');
+        btn.removeAttribute('aria-disabled');
+        btn.setAttribute('role', 'tab');
+      }
+    });
+    if (isE3) setE2PreviewTab('discrepancy');
+  }
+
+  syncE3PreviewChrome();
 
   /* A-only FAQ accordion */
   document.querySelectorAll('.faq-q').forEach(function (btn) {
