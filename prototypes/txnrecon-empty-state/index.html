@@ -566,14 +566,33 @@ html[data-e-variant="e2"] .concept[data-panel="e"] .e2-preview{
 html[data-e-variant="e2"] .concept[data-panel="e"] .js-view-example{display:none}
 html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{
   display:flex;flex-direction:column;align-items:stretch;overflow:hidden;
-  max-width:720px;width:100%;
+  max-width:1040px;width:100%;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
-  flex:none;max-width:600px;width:100%;padding:36px 40px 28px;min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:20px;row-gap:0;
+  flex:none;max-width:none;width:100%;padding:32px 36px 28px;min-width:0;
 }
-html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{max-width:28ch}
-html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{max-width:52ch}
-html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .readonly-line{
+  grid-column:1;grid-row:1;align-self:center;margin:0 0 14px;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{
+  display:flex;grid-column:2;grid-row:1;align-self:start;justify-self:end;
+  margin:0 0 14px;flex-wrap:nowrap;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{
+  grid-column:1 / -1;grid-row:2;max-width:none;margin-bottom:10px;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{
+  grid-column:1 / -1;grid-row:3;max-width:none;margin-bottom:18px;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .benefits{
+  grid-column:1 / -1;grid-row:4;margin-bottom:18px;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .cta-row{
+  grid-column:1 / -1;grid-row:5;
+}
 html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview{
   display:flex;flex:none;width:100%;max-width:none;min-width:0;
   background:var(--grey-5);padding:16px 20px 20px;align-items:stretch;justify-content:flex-start;
@@ -584,7 +603,19 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-panel{
   background:rgba(255,255,255,.72);overflow:hidden;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .js-view-example{display:none}
-html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-width:720px}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-width:1040px}
+@media(max-width:720px){
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
+    grid-template-columns:1fr;
+  }
+  html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{
+    grid-column:1;grid-row:2;justify-self:start;margin:0 0 12px;
+  }
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{grid-row:3}
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{grid-row:4}
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .benefits{grid-row:5}
+  html[data-e-variant="e3"] .concept[data-panel="e"] .copy .cta-row{grid-row:6}
+}
 .ex-sample-banner{
   display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
   padding:10px 14px;margin:0;
@@ -883,7 +914,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-widt
   <!-- ========== CONCEPT E · E1 FAQ / E2 preview ========== -->
   <!-- E1: ~960 copy+video · combined chip · FAQ · View example -->
   <!-- E2: two chips · right recon preview -->
-  <!-- E3: stacked E1 copy → Run/chips → Example preview · FAQ -->
+  <!-- E3: wide stack · chip top-right · headline/lead full width → Run → Example preview · FAQ -->
   <div class="concept active" data-panel="e" role="tabpanel">
     <div class="card e-card">
       <div class="copy">
