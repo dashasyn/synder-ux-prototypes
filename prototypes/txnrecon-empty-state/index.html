@@ -470,7 +470,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   .copy{padding:32px 28px 28px}
 }
 
-/* —— Main options (E1 / E2) + Outdated dropdown —— */
+/* —— Main options (E1 / E2 / E3) + Outdated dropdown —— */
 .main-opts{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .main-opt{
   background:transparent;border:1px solid rgba(255,255,255,.18);color:#9CA3AF;
@@ -504,7 +504,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .outdated-item:hover{background:rgba(255,255,255,.06);color:#fff}
 .outdated-item.active{background:rgba(0,83,204,.35);color:#fff}
 
-/* E variants: E1 ~960 copy+video+FAQ · E2 copy+preview · fit ~1040 (1280−240 sidebar) */
+/* E variants: E1 copy+video · E2 side preview · E3 stacked copy→preview · ~960/1040 */
 .concept[data-panel="e"] .readonly-line{
   margin:0 0 16px;font-size:14px;font-weight:500;color:var(--green);line-height:1.4;
 }
@@ -564,11 +564,29 @@ html[data-e-variant="e2"] .concept[data-panel="e"] .e2-preview{
   border-left:1px solid var(--grey-20);
 }
 html[data-e-variant="e2"] .concept[data-panel="e"] .js-view-example{display:none}
-html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{display:block}
-html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
-  flex:none;max-width:560px;padding:40px 44px 40px;
+html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{
+  display:flex;flex-direction:column;align-items:stretch;overflow:hidden;
+  max-width:960px;width:100%;
 }
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
+  flex:none;max-width:none;width:100%;padding:36px 40px 28px;min-width:0;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{max-width:36ch}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{max-width:62ch}
 html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview{
+  display:flex;flex:none;width:100%;max-width:none;min-width:0;
+  background:var(--grey-5);padding:20px 24px 24px;align-items:stretch;justify-content:flex-start;
+  border-left:0;border-top:1px solid var(--grey-20);
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-panel{max-width:100%}
+html[data-e-variant="e3"] .concept[data-panel="e"] .js-view-example{display:none}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-width:960px}
+.ex-badge{
+  display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;
+  font-size:12px;font-weight:600;letter-spacing:.02em;vertical-align:middle;
+  background:var(--grey-10);color:var(--grey-50);border:1px solid var(--grey-20);
+}
 .e2-preview .preview-panel{width:100%;min-width:0}
 .e2-preview .ex-bal{margin-bottom:10px}
 .e2-preview .ex-bal-strip{flex-wrap:nowrap;overflow-x:auto}
@@ -591,13 +609,14 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
 </head>
 <body>
 
-<!-- Dark prototype bar: E1/E2 main · Outdated holds A–D + E3 -->
+<!-- Dark prototype bar: E1/E2/E3 main · Outdated holds A–D -->
 <div class="proto-bar" role="navigation" aria-label="Prototype variants">
   <div class="brand">TxnRecon · Empty state</div>
   <div class="sep" aria-hidden="true"></div>
   <div class="main-opts" role="group" aria-label="Options to present">
     <button type="button" class="main-opt active" data-main="e1" aria-pressed="true">E1 · Gap</button>
     <button type="button" class="main-opt" data-main="e2" aria-pressed="false">E2 · Rows</button>
+    <button type="button" class="main-opt" data-main="e3" aria-pressed="false">E3 · Stack</button>
   </div>
   <div class="sep" aria-hidden="true"></div>
   <div class="outdated-wrap" id="outdated-wrap">
@@ -611,7 +630,6 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       <button type="button" class="outdated-item" role="menuitem" data-outdated="c">C · Preview first</button>
       <button type="button" class="outdated-item" role="menuitem" data-outdated="d">D · Clear the guess</button>
       <div class="outdated-label">Skipped copy</div>
-      <button type="button" class="outdated-item" role="menuitem" data-outdated="e3">E3 · Close</button>
     </div>
   </div>
 </div>
@@ -853,8 +871,9 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
   </div>
 
   <!-- ========== CONCEPT E · E1 FAQ / E2 preview ========== -->
-  <!-- E1: ~960 copy+video · combined chip (no border) · collapsed FAQ · View example -->
-  <!-- E2: two chips · right recon preview · fits ~1040px (1280−240 sidebar) -->
+  <!-- E1: ~960 copy+video · combined chip · FAQ · View example -->
+  <!-- E2: two chips · right recon preview -->
+  <!-- E3: stacked E1 copy → Run/chips → Example preview · FAQ -->
   <div class="concept active" data-panel="e" role="tabpanel">
     <div class="card e-card">
       <div class="copy">
@@ -903,7 +922,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       <div class="hero e2-preview" aria-label="Reconciliation results example">
         <div class="preview-panel">
           <div style="padding:12px 14px 0">
-            <div class="preview-head">Reconciliation results (Example)</div>
+            <div class="preview-head">Reconciliation results <span class="ex-badge">Example</span></div>
             <div class="preview-period">Stripe Test (sandbox) / Mar 1–31, 2026</div>
             <div class="ex-bal" aria-label="Balance summary">
               <div class="ex-bal-head">
@@ -1333,8 +1352,8 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       lead: 'Row-by-row check of sales and fees from your integrations against the clearing account so you can close the period with confidence.'
     },
     e3: {
-      h: 'Close the period knowing every row matches',
-      lead: 'Run a read-only row check against the clearing account before you sign off — catch missing and amount-off lines first.'
+      h: 'Find the rows that throw the balance off',
+      lead: 'When platform totals don’t match the books, compare every row and see what’s missing or amount-off.'
     }
   };
 
@@ -1374,8 +1393,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
       a: 'Outdated · A',
       b: 'Outdated · B',
       c: 'Outdated · C',
-      d: 'Outdated · D',
-      e3: 'Outdated · E3'
+      d: 'Outdated · D'
     };
     if (currentOutdated) {
       outdatedBtn.classList.add('is-active');
@@ -1396,15 +1414,9 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
     closeOutdated();
   }
 
-  function showOutdated(key) {
+    function showOutdated(key) {
     currentOutdated = key;
-    if (key === 'e3') {
-      root.setAttribute('data-e-variant', 'e3');
-      setConcept('e');
-      setECopy('e3');
-    } else {
-      setConcept(key);
-    }
+    setConcept(key);
     syncChrome();
     closeOutdated();
   }
