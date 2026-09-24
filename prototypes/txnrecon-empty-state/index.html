@@ -504,7 +504,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .outdated-item:hover{background:rgba(255,255,255,.06);color:#fff}
 .outdated-item.active{background:rgba(0,83,204,.35);color:#fff}
 
-/* E variants: E1 single-col+FAQ · E2 copy+preview · fit ~1040 (1280−240 sidebar) */
+/* E variants: E1 ~960 copy+video+FAQ · E2 copy+preview · fit ~1040 (1280−240 sidebar) */
 .concept[data-panel="e"] .readonly-line{
   margin:0 0 16px;font-size:14px;font-weight:500;color:var(--green);line-height:1.4;
 }
@@ -515,14 +515,41 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .concept[data-panel="e"] .e-faq .faq-q{font-size:14px}
 .concept[data-panel="e"] .chips-e2,
 .concept[data-panel="e"] .e2-preview,
+.concept[data-panel="e"] .e1-video,
 .concept[data-panel="e"] .e-faq{display:none}
 .concept[data-panel="e"] .chips-e1{display:flex}
-html[data-e-variant="e1"] .concept[data-panel="e"] .card.e-card{display:block;max-width:560px}
+html[data-e-variant="e1"] .concept[data-panel="e"] .card.e-card{
+  display:flex;align-items:stretch;overflow:hidden;max-width:960px;width:100%;
+}
 html[data-e-variant="e1"] .concept[data-panel="e"] .copy{
-  flex:none;max-width:none;padding:40px 44px 40px;
+  flex:0 1 480px;max-width:520px;padding:40px 40px 40px;min-width:0;
+}
+html[data-e-variant="e1"] .concept[data-panel="e"] .e1-video{
+  display:flex;flex:1 1 auto;min-width:0;align-items:center;justify-content:center;
+  background:var(--grey-5);border-left:1px solid var(--grey-20);padding:24px;
 }
 html[data-e-variant="e1"] .concept[data-panel="e"] .e-faq{display:block}
 html[data-e-variant="e1"] .concept[data-panel="e"] .js-view-example{display:inline-flex}
+.e1-video-frame{
+  width:100%;max-width:420px;aspect-ratio:16/10;border-radius:10px;
+  background:linear-gradient(160deg,var(--grey-10),var(--grey-20));
+  border:1px solid var(--grey-20);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;color:var(--grey-50);
+  font-size:14px;line-height:1.4;text-align:center;padding:20px;
+}
+.e1-video-play{
+  width:48px;height:48px;border-radius:50%;background:var(--white);
+  border:1px solid var(--grey-20);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);color:var(--grey);
+}
+.e1-video-play svg{margin-left:2px}
+@media(max-width:900px){
+  html[data-e-variant="e1"] .concept[data-panel="e"] .card.e-card{flex-direction:column}
+  html[data-e-variant="e1"] .concept[data-panel="e"] .copy{flex:1 1 auto;max-width:none}
+  html[data-e-variant="e1"] .concept[data-panel="e"] .e1-video{
+    border-left:0;border-top:1px solid var(--grey-20);
+  }
+}
 html[data-e-variant="e2"] .concept[data-panel="e"] .chips-e1{display:none}
 html[data-e-variant="e2"] .concept[data-panel="e"] .chips-e2{display:flex}
 html[data-e-variant="e2"] .concept[data-panel="e"] .card.e-card{
@@ -826,7 +853,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
   </div>
 
   <!-- ========== CONCEPT E · E1 FAQ / E2 preview ========== -->
-  <!-- E1: single col · combined chip (no border) · collapsed FAQ · View example -->
+  <!-- E1: ~960 copy+video · combined chip (no border) · collapsed FAQ · View example -->
   <!-- E2: two chips · right recon preview · fits ~1040px (1280−240 sidebar) -->
   <div class="concept active" data-panel="e" role="tabpanel">
     <div class="card e-card">
@@ -863,6 +890,14 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
+        </div>
+      </div>
+      <div class="e1-video" aria-label="Product video placeholder">
+        <div class="e1-video-frame">
+          <span class="e1-video-play" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 3.5v9l8-4.5-8-4.5z"/></svg>
+          </span>
+          <span>Video placeholder<br>Drop a short walkthrough here</span>
         </div>
       </div>
       <div class="hero e2-preview" aria-label="Reconciliation results example">
