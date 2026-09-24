@@ -450,15 +450,6 @@
       background: #EEF3FA;
       border-color: #7AA3E0;
     }
-    .sidebar-health.is-active {
-      border-color: #0053CC;
-      background: #E8F0FC;
-      box-shadow: inset 0 0 0 1px rgba(0,83,204,.25);
-    }
-    .sidebar-health.is-active:hover {
-      background: #E8F0FC;
-      border-color: #0053CC;
-    }
     .sidebar-health h4 {
       margin: 0 0 6px;
       font-size: var(--font-subtitle1);
@@ -2363,8 +2354,6 @@
     $$('.nav-item').forEach(b => {
       b.classList.toggle('active', b.dataset.page === state.appPage);
     });
-    const chip = $('#health-widget');
-    if (chip) chip.classList.toggle('is-active', state.appPage === 'setup-checklist');
   }
 
   /* ── top bar / nav ───────────────────────────────────── */
