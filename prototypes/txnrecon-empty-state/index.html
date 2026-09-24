@@ -216,9 +216,22 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .preview-tab{
   font:inherit;font-size:14px;font-weight:500;color:var(--grey-50);
   background:transparent;border:0;border-bottom:2px solid transparent;
-  padding:12px 14px;cursor:default;
+  padding:12px 14px;cursor:pointer;
 }
+.preview-tab:hover{color:var(--grey)}
 .preview-tab.on{color:var(--primary);border-bottom-color:var(--primary)}
+.e2-preview-panels{display:grid}
+.e2-preview-panel{
+  grid-area:1/1;visibility:hidden;opacity:0;pointer-events:none;z-index:0;
+  min-height:168px;
+}
+.e2-preview-panel.active{
+  visibility:visible;opacity:1;pointer-events:auto;z-index:1;
+}
+.e2-preview-panel .preview-empty{
+  min-height:168px;display:flex;align-items:center;justify-content:center;
+  padding:20px 16px;font-size:14px;color:var(--grey-50);text-align:center;
+}
 .preview-tab .count{
   display:inline-block;margin-left:4px;font-size:14px;font-weight:500;
   background:var(--grey-10);color:var(--grey-50);border-radius:999px;padding:1px 6px;
@@ -882,41 +895,109 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
               </div>
             </div>
           </div>
-          <div class="preview-tabs" role="presentation">
-            <span class="preview-tab">Matched <span class="count">56</span></span>
-            <span class="preview-tab on warn">Discrepancy <span class="count">4</span></span>
-            <span class="preview-tab">Missing <span class="count">3</span></span>
+          <div class="preview-tabs" role="tablist" aria-label="Example result categories">
+            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="matched">Matched <span class="count">56</span></button>
+            <button type="button" class="preview-tab on warn" role="tab" aria-selected="true" data-e2-tab="discrepancy">Discrepancy <span class="count">4</span></button>
+            <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="missing">Missing <span class="count">3</span></button>
           </div>
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Matching ID</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Mar 12</td>
-                <td>ch_3Pq…91a</td>
-                <td class="amt-off">$248.00 vs $198.00</td>
-                <td><span class="badge off">Amount off</span></td>
-              </tr>
-              <tr>
-                <td>Mar 14</td>
-                <td>Fee · ch_3Pq…91a</td>
-                <td class="amt-off">−$7.49 vs −$5.99</td>
-                <td><span class="badge off">Amount off</span></td>
-              </tr>
-              <tr>
-                <td>Mar 18</td>
-                <td>py_1N…k2</td>
-                <td>$1,200.00</td>
-                <td><span class="badge miss">Type mismatch</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="e2-preview-panels">
+            <div class="e2-preview-panel" id="e2-panel-matched" role="tabpanel" aria-hidden="true">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Matching ID</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mar 31</td>
+                    <td>po_1TGqaE…</td>
+                    <td>−$301.76</td>
+                    <td><span class="badge ok">Matched</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 30</td>
+                    <td>ch_3TEx9A…</td>
+                    <td>$89.00</td>
+                    <td><span class="badge ok">Matched</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 29</td>
+                    <td>ch_3TDqR1…</td>
+                    <td>$112.40</td>
+                    <td><span class="badge ok">Matched</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="e2-preview-panel active" id="e2-panel-discrepancy" role="tabpanel" aria-hidden="false">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Matching ID</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mar 12</td>
+                    <td>ch_3Pq…91a</td>
+                    <td class="amt-off">$248.00 vs $198.00</td>
+                    <td><span class="badge off">Amount off</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 14</td>
+                    <td>Fee · ch_3Pq…91a</td>
+                    <td class="amt-off">−$7.49 vs −$5.99</td>
+                    <td><span class="badge off">Amount off</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 18</td>
+                    <td>py_1N…k2</td>
+                    <td>$1,200.00</td>
+                    <td><span class="badge miss">Type mismatch</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="e2-preview-panel" id="e2-panel-missing" role="tabpanel" aria-hidden="true">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Matching ID</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mar 15</td>
+                    <td>Shopify #10482</td>
+                    <td>$89.00</td>
+                    <td><span class="badge miss">Missing in books</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 16</td>
+                    <td>Amazon 112-…</td>
+                    <td>$112.40</td>
+                    <td><span class="badge miss">Missing in books</span></td>
+                  </tr>
+                  <tr>
+                    <td>Mar 20</td>
+                    <td>ch_3TFee…</td>
+                    <td>−$2.90</td>
+                    <td><span class="badge miss">Missing in books</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1359,6 +1440,27 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
   document.querySelectorAll('.ex-tab').forEach(function (btn) {
     btn.addEventListener('click', function () {
       setExTab(btn.getAttribute('data-ex-tab'));
+    });
+  });
+
+  /* E2 inline preview tabs */
+  function setE2PreviewTab(name) {
+    var rootPreview = document.querySelector('.e2-preview');
+    if (!rootPreview) return;
+    rootPreview.querySelectorAll('.preview-tab').forEach(function (btn) {
+      var on = btn.getAttribute('data-e2-tab') === name;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    rootPreview.querySelectorAll('.e2-preview-panel').forEach(function (panel) {
+      var on = panel.id === 'e2-panel-' + name;
+      panel.classList.toggle('active', on);
+      panel.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+  document.querySelectorAll('.e2-preview .preview-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setE2PreviewTab(btn.getAttribute('data-e2-tab'));
     });
   });
 
