@@ -566,26 +566,36 @@ html[data-e-variant="e2"] .concept[data-panel="e"] .e2-preview{
 html[data-e-variant="e2"] .concept[data-panel="e"] .js-view-example{display:none}
 html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{
   display:flex;flex-direction:column;align-items:stretch;overflow:hidden;
-  max-width:960px;width:100%;
+  max-width:720px;width:100%;
 }
 html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
-  flex:none;max-width:none;width:100%;padding:36px 40px 28px;min-width:0;
+  flex:none;max-width:600px;width:100%;padding:36px 40px 28px;min-width:0;
 }
-html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{max-width:36ch}
-html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{max-width:62ch}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .card-h{max-width:28ch}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy .lead{max-width:52ch}
 html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
 html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview{
   display:flex;flex:none;width:100%;max-width:none;min-width:0;
-  background:var(--grey-5);padding:20px 24px 24px;align-items:stretch;justify-content:flex-start;
+  background:var(--grey-5);padding:16px 20px 20px;align-items:stretch;justify-content:flex-start;
   border-left:0;border-top:1px solid var(--grey-20);
 }
-html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-panel{max-width:100%}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e2-preview .preview-panel{
+  max-width:100%;border:1px dashed var(--grey-30);border-radius:8px;
+  background:rgba(255,255,255,.72);overflow:hidden;
+}
 html[data-e-variant="e3"] .concept[data-panel="e"] .js-view-example{display:none}
-html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-width:960px}
+html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-width:720px}
+.ex-sample-banner{
+  display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
+  padding:10px 14px;margin:0;
+  font-size:14px;font-weight:600;line-height:1.35;letter-spacing:.01em;
+  color:#8A5B00;background:#FFF6E0;border-bottom:1px solid #F0D9A0;
+}
+.ex-sample-banner .ex-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#D97706}
 .ex-badge{
   display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;
   font-size:12px;font-weight:600;letter-spacing:.02em;vertical-align:middle;
-  background:var(--grey-10);color:var(--grey-50);border:1px solid var(--grey-20);
+  background:#FFF6E0;color:#8A5B00;border:1px solid #F0D9A0;
 }
 .e2-preview .preview-panel{width:100%;min-width:0}
 .e2-preview .ex-bal{margin-bottom:10px}
@@ -921,8 +931,12 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:block;max-widt
       </div>
       <div class="hero e2-preview" aria-label="Reconciliation results example">
         <div class="preview-panel">
+          <div class="ex-sample-banner" role="status">
+            <span class="ex-dot" aria-hidden="true"></span>
+            Example · sample data — not your books
+          </div>
           <div style="padding:12px 14px 0">
-            <div class="preview-head">Reconciliation results <span class="ex-badge">Example</span></div>
+            <div class="preview-head">Reconciliation results <span class="ex-badge">Sample</span></div>
             <div class="preview-period">Stripe Test (sandbox) / Mar 1–31, 2026</div>
             <div class="ex-bal" aria-label="Balance summary">
               <div class="ex-bal-head">
