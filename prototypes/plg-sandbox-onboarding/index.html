@@ -444,21 +444,36 @@
       border: 1px solid #DFE4EC; border-radius: 8px;
       background: #F7F8FA; padding: 12px;
       cursor: pointer;
-      transition: border-color .12s, box-shadow .12s;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
     }
-    .sidebar-health:hover { border-color: #B4C3D9; }
+    .sidebar-health:hover {
+      background: #EEF3FA;
+      border-color: #7AA3E0;
+    }
     .sidebar-health.is-active {
       border-color: #0053CC;
-      box-shadow: inset 0 0 0 1px rgba(0,83,204,.2);
+      background: #E8F0FC;
+      box-shadow: inset 0 0 0 1px rgba(0,83,204,.25);
+    }
+    .sidebar-health.is-active:hover {
+      background: #E8F0FC;
+      border-color: #0053CC;
     }
     .sidebar-health h4 {
-      margin: 0 0 6px; font-size: 13px; font-weight: 700;
-      letter-spacing: .15px; color: #1A1B24;
+      margin: 0 0 6px;
+      font-size: var(--font-subtitle1);
+      font-weight: var(--font-subtitle1-weight);
+      line-height: var(--font-subtitle1-line-height);
+      letter-spacing: var(--font-subtitle1-letter-spacing);
+      color: #1A1B24;
       display: flex; align-items: center; gap: 6px;
     }
     .sidebar-health h4 .material-icons-round { font-size: 16px; color: #0053CC; }
     .hs-meta {
-      font-size: 12px; color: #6B778C; margin-bottom: 6px;
+      font-size: var(--font-body2);
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
+      color: #6B778C; margin-bottom: 6px;
     }
     .hs-bar {
       height: 6px; background: #DFE4EC; border-radius: 3px;
@@ -505,11 +520,20 @@
     .hs-help .material-icons-round { font-size: 14px; color: #0053CC; }
     .hs-compact-cta {
       display: none; appearance: none; border: none; background: none;
-      color: #0053CC; font: inherit; font-size: 12px; font-weight: 500;
+      color: #0053CC; font: inherit;
+      font-size: var(--font-body2); font-weight: 500;
+      line-height: var(--font-body2-line-height);
+      letter-spacing: var(--font-body2-letter-spacing);
       cursor: pointer; padding: 0; margin-top: 2px;
       align-items: center; gap: 4px;
     }
-    .hs-compact-cta .material-icons-round { font-size: 14px; }
+    .hs-compact-cta .material-icons-round {
+      font-size: 16px;
+      transition: transform .15s ease;
+    }
+    .sidebar-health:hover .hs-compact-cta .material-icons-round {
+      transform: translateX(3px);
+    }
     /* Main-only: sidebar keeps a progress chip; full checklist lives on Setup checklist page */
     .sidebar-health .hs-full { display: none; }
     .sidebar-health .hs-compact-cta { display: inline-flex; }
@@ -649,11 +673,6 @@
     }
     .hs-call-divider .material-icons-round {
       font-size: 16px; color: #6B778C;
-    }
-    .hs-next-hint {
-      font-size: var(--font-body2); line-height: var(--font-body2-line-height);
-      letter-spacing: var(--font-body2-letter-spacing); color: #6B778C;
-      margin: 0 0 8px;
     }
     /* Deep link is primary; Mark as done stays quiet */
     .hs-where {
@@ -1256,7 +1275,6 @@
             <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
             <div class="hs-meta" id="hs-meta">0 / 6 complete</div>
             <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <p class="hs-next-hint" id="hs-next-hint">Next: Organization settings</p>
             <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
               View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
@@ -2009,18 +2027,6 @@
     metaEl.textContent = model.count + ' / ' + model.total + ' complete';
     barEl.classList.toggle('complete', model.count === model.total);
     if (barEl.firstElementChild) barEl.firstElementChild.style.width = model.pct + '%';
-    const hint = $('#hs-next-hint');
-    if (hint) {
-      if (model.selfAllDone) {
-        hint.textContent = 'You’re ready for your setup call';
-      } else if (model.currentStep) {
-        hint.textContent = model.currentStep.whereHint
-          ? ('Next: ' + model.currentStep.whereHint)
-          : ('Next: ' + model.currentStep.title);
-      } else {
-        hint.textContent = '';
-      }
-    }
   }
 
   function renderHealth() {
