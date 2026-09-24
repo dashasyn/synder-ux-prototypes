@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-concept="e">
+<html lang="en" data-concept="e" data-e-variant="e1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -33,7 +33,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .proto-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
 /* —— Product page —— */
-.page{max-width:980px;margin:0 auto;padding:32px 24px 72px}
+.page{max-width:1040px;margin:0 auto;padding:28px 24px 72px}
 .h1{font-size:22px;font-weight:400;letter-spacing:-.2px;color:var(--grey-50)}
 
 .concept{display:none}
@@ -51,7 +51,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 
 .eyebrow{
-  display:inline-block;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
+  display:inline-block;font-size:14px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
   color:var(--primary);margin-bottom:10px;
 }
 .card-h{font-size:26px;font-weight:500;letter-spacing:-.35px;line-height:1.25;margin-bottom:12px;max-width:24ch;color:var(--grey)}
@@ -68,25 +68,25 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:500;border-radius:999px;padding:5px 10px 5px 12px;
+  font-size:14px;font-weight:500;border-radius:999px;padding:5px 10px 5px 12px;
   border:1px solid transparent;
 }
 .chip.green{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
 .chip.blue{background:var(--blue-bg);color:var(--blue-chip);border-color:var(--blue-border)}
 .chip.combined{
-  background:var(--blue-bg);color:var(--blue-chip);border-color:var(--blue-border);
+  background:var(--blue-bg);color:var(--blue-chip);border:none;
 }
 .chip .tip{
   display:inline-flex;align-items:center;justify-content:center;
-  width:15px;height:15px;border-radius:50%;
-  font-size:10px;font-weight:700;line-height:1;cursor:help;
+  width:18px;height:18px;border-radius:50%;
+  font-size:14px;font-weight:700;line-height:1;cursor:help;
   border:1px solid currentColor;opacity:.7;background:transparent;color:inherit;padding:0;font-family:inherit;
 }
 .chip .tip:hover{opacity:1}
 .chip-wrap{position:relative;display:inline-flex}
 .chip-wrap .tooltip{
   display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);
-  background:var(--grey);color:#fff;font-size:12px;font-weight:400;line-height:1.4;
+  background:var(--grey);color:#fff;font-size:14px;font-weight:400;line-height:1.4;
   padding:8px 10px;border-radius:6px;width:240px;z-index:20;pointer-events:none;
   box-shadow:0 4px 12px rgba(0,0,0,.18);
 }
@@ -108,12 +108,12 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   background:transparent;color:var(--primary);border-color:var(--primary);
 }
 .btn.ghost:hover{background:var(--primary-5)}
-.caption{margin-top:12px;font-size:13px;color:var(--grey-50)}
-.caption.muted{margin-top:10px;font-size:12px;color:var(--grey-30)}
+.caption{margin-top:12px;font-size:14px;color:var(--grey-50)}
+.caption.muted{margin-top:10px;font-size:14px;color:var(--grey-30)}
 
 /* Quiet trust line (D) */
 .trust-line{
-  margin-top:12px;font-size:12px;color:var(--grey-50);letter-spacing:.01em;
+  margin-top:12px;font-size:14px;color:var(--grey-50);letter-spacing:.01em;
 }
 
 /* —— Read-only treatments —— */
@@ -122,7 +122,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:flex;align-items:center;gap:8px;
   margin-bottom:16px;padding:10px 12px;
   background:var(--green-bg);border:1px solid var(--green-border);border-radius:6px;
-  font-size:13px;font-weight:500;color:var(--green);line-height:1.35;
+  font-size:14px;font-weight:500;color:var(--green);line-height:1.35;
 }
 .shield svg{flex-shrink:0}
 
@@ -132,7 +132,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   margin:0 0 20px;padding:9px 12px;
   background:linear-gradient(90deg,var(--green-bg) 0%,var(--primary-5) 100%);
   border:1px solid var(--green-border);border-radius:6px;
-  font-size:13px;color:var(--grey);line-height:1.35;width:100%;
+  font-size:14px;color:var(--grey);line-height:1.35;width:100%;
 }
 .info-bar svg{flex-shrink:0;color:var(--green)}
 
@@ -141,7 +141,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:flex;align-items:flex-start;gap:10px;
   margin-bottom:18px;padding:12px 14px;
   background:var(--green-bg);border-left:3px solid var(--green);border-radius:0 6px 6px 0;
-  font-size:13px;font-weight:500;color:var(--green);line-height:1.4;
+  font-size:14px;font-weight:500;color:var(--green);line-height:1.4;
 }
 .callout svg{flex-shrink:0;margin-top:1px}
 
@@ -163,7 +163,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 .faq-item.open .faq-q .chev{transform:rotate(180deg)}
 .faq-a{
-  display:none;padding:12px 16px 16px;font-size:13px;color:var(--grey-50);line-height:1.55;
+  display:none;padding:12px 16px 16px;font-size:14px;color:var(--grey-50);line-height:1.55;
   background:#fff;border-top:1px solid var(--grey-20);
 }
 .faq-item.open .faq-a{display:block}
@@ -191,10 +191,10 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .play-btn svg{margin-left:3px}
 .video-label{
   position:absolute;bottom:10px;right:10px;
-  font-size:11px;font-weight:500;color:var(--grey-50);
+  font-size:14px;font-weight:500;color:var(--grey-50);
   background:rgba(255,255,255,.85);padding:3px 8px;border-radius:4px;
 }
-.illu-caption{font-size:12px;color:var(--grey-50);letter-spacing:.01em;text-align:center}
+.illu-caption{font-size:14px;color:var(--grey-50);letter-spacing:.01em;text-align:center}
 
 /* —— Concept B/D: platforms → books —— */
 .flow-illu{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
@@ -214,34 +214,34 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:flex;gap:0;border-bottom:1px solid var(--grey-20);background:#fff;padding:0 8px;
 }
 .preview-tab{
-  font:inherit;font-size:13px;font-weight:500;color:var(--grey-50);
+  font:inherit;font-size:14px;font-weight:500;color:var(--grey-50);
   background:transparent;border:0;border-bottom:2px solid transparent;
   padding:12px 14px;cursor:default;
 }
 .preview-tab.on{color:var(--primary);border-bottom-color:var(--primary)}
 .preview-tab .count{
-  display:inline-block;margin-left:4px;font-size:11px;font-weight:500;
+  display:inline-block;margin-left:4px;font-size:14px;font-weight:500;
   background:var(--grey-10);color:var(--grey-50);border-radius:999px;padding:1px 6px;
 }
 
 .preview-tab.on .count{background:var(--primary-10);color:var(--primary)}
 .preview-tab.warn .count{background:var(--red-bg);color:var(--red)}
-.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table{width:100%;border-collapse:collapse;font-size:14px}
 .preview-table th{
-  text-align:left;font-weight:500;color:var(--grey-50);font-size:11px;
+  text-align:left;font-weight:500;color:var(--grey-50);font-size:14px;
   padding:8px 12px;border-bottom:1px solid var(--grey-20);background:var(--grey-5);
 }
 .preview-table td{padding:9px 12px;border-bottom:1px solid var(--grey-10);color:var(--grey)}
 .preview-table tr:last-child td{border-bottom:0}
 .badge{
-  display:inline-block;font-size:11px;font-weight:500;border-radius:4px;padding:2px 7px;
+  display:inline-block;font-size:14px;font-weight:500;border-radius:4px;padding:2px 7px;
 }
 .badge.ok{background:var(--green-bg);color:var(--green)}
 .badge.miss{background:#FFF4E5;color:#C47A00}
 .badge.off{background:var(--red-bg);color:var(--red)}
 .amt-off{color:var(--red);font-weight:500}
 .preview-foot{
-  font-size:12px;color:var(--grey-50);padding:10px 12px;
+  font-size:14px;color:var(--grey-50);padding:10px 12px;
   border-top:1px solid var(--grey-20);background:#fff;
 }
 
@@ -260,7 +260,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   background:var(--primary-5);border-color:var(--primary-10,#CCDDF5);
 }
 .contrast-label{
-  display:block;font-size:11px;font-weight:600;letter-spacing:.04em;
+  display:block;font-size:14px;font-weight:600;letter-spacing:.04em;
   text-transform:uppercase;margin-bottom:6px;
 }
 .contrast-col.wrong .contrast-label{color:var(--grey-30)}
@@ -310,7 +310,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 .btn.sec{background:var(--grey-10);color:var(--grey);border-color:var(--grey-20)}
 .btn.sec:hover{background:var(--grey-20)}
-.btn.sm{padding:7px 12px;font-size:13px}
+.btn.sm{padding:7px 12px;font-size:14px}
 
 /* Results chrome inside modal — live-faithful Reconciliation results */
 .ex-title-row{
@@ -330,7 +330,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .ex-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .ex-period{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  font-size:13px;color:var(--grey-50);margin-bottom:12px;
+  font-size:14px;color:var(--grey-50);margin-bottom:12px;
 }
 .ex-sample{
   display:inline-flex;align-items:center;
@@ -348,9 +348,9 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   margin-bottom:8px;
 }
 .ex-bal-label{
-  font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C47A00;
+  font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C47A00;
 }
-.ex-bal-delta{font-size:13px;font-weight:600;color:var(--red)}
+.ex-bal-delta{font-size:14px;font-weight:600;color:var(--red)}
 .ex-bal-strip{
   display:flex;align-items:stretch;gap:0;flex-wrap:wrap;
   border:1px solid var(--grey-20);border-radius:6px;background:#fff;overflow:hidden;
@@ -361,13 +361,13 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 .ex-bal-cell:last-child{border-right:0}
 .ex-bal-cell.delta{flex:0 0 auto;min-width:90px;background:var(--red-bg)}
-.ex-bal-k{display:block;font-size:10px;font-weight:500;color:var(--grey-50);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
-.ex-bal-v{display:block;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--grey)}
+.ex-bal-k{display:block;font-size:14px;font-weight:500;color:var(--grey-50);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
+.ex-bal-v{display:block;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--grey)}
 .ex-bal-cell.delta .ex-bal-v{color:var(--red)}
-.ex-bal-s{display:block;font-size:10px;color:var(--grey-30);margin-top:2px;line-height:1.3}
+.ex-bal-s{display:block;font-size:14px;color:var(--grey-30);margin-top:2px;line-height:1.3}
 .ex-bal-op{
   display:flex;align-items:center;justify-content:center;
-  width:18px;flex:0 0 18px;font-size:12px;font-weight:600;color:var(--grey-30);
+  width:18px;flex:0 0 18px;font-size:14px;font-weight:600;color:var(--grey-30);
   background:var(--grey-5);border-right:1px solid var(--grey-20);
 }
 
@@ -376,7 +376,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   margin:0 -20px 12px;padding:0 12px;background:#fff;
 }
 .ex-tab{
-  font:inherit;font-size:13px;font-weight:500;color:var(--grey-50);
+  font:inherit;font-size:14px;font-weight:500;color:var(--grey-50);
   background:transparent;border:0;border-bottom:2px solid transparent;
   padding:11px 14px;cursor:pointer;
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
@@ -384,7 +384,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .ex-tab:hover{color:var(--grey)}
 .ex-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 .ex-tab .count{
-  display:inline-block;font-size:11px;font-weight:600;
+  display:inline-block;font-size:14px;font-weight:600;
   border-radius:999px;padding:1px 7px;background:var(--grey-10);color:var(--grey-50);
 }
 .ex-tab .count.ok{background:var(--green-bg);color:var(--green)}
@@ -398,9 +398,9 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .ex-mini{
   background:#fff;border:1px solid var(--grey-20);border-radius:8px;overflow:hidden;
 }
-.ex-table{width:100%;border-collapse:collapse;font-size:12px}
+.ex-table{width:100%;border-collapse:collapse;font-size:14px}
 .ex-table th{
-  text-align:left;font-weight:500;color:var(--grey-50);font-size:11px;
+  text-align:left;font-weight:500;color:var(--grey-50);font-size:14px;
   padding:7px 10px;border-bottom:1px solid var(--grey-20);background:var(--grey-5);
   white-space:nowrap;text-transform:uppercase;letter-spacing:.02em;
 }
@@ -410,22 +410,22 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 .ex-table tr:last-child td{border-bottom:0}
 .ex-table tr:hover td{background:var(--grey-5)}
-.ex-id{color:var(--primary);font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
-.ex-amt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:12px}
+.ex-id{color:var(--primary);font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+.ex-amt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:14px}
 .ex-amt.neg{color:var(--grey)}
 .ex-check{
   width:14px;height:14px;border:1.5px solid var(--grey-30);border-radius:3px;
   display:inline-block;vertical-align:middle;background:#fff;
 }
 .ex-matchchip{
-  display:inline-block;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;
+  display:inline-block;font-size:14px;font-weight:500;padding:2px 7px;border-radius:4px;
   background:var(--primary-10);color:var(--primary);
 }
 .ex-empty{
-  padding:28px 16px;text-align:center;font-size:13px;color:var(--grey-50);
+  padding:28px 16px;text-align:center;font-size:14px;color:var(--grey-50);
 }
-.ex-foot-meta{padding:8px 10px;font-size:12px;color:var(--grey-50);border-top:1px solid var(--grey-20);background:#fff}
-.ex-note{margin-top:12px;font-size:12px;color:var(--grey-50)}
+.ex-foot-meta{padding:8px 10px;font-size:14px;color:var(--grey-50);border-top:1px solid var(--grey-20);background:#fff}
+.ex-note{margin-top:12px;font-size:14px;color:var(--grey-50)}
 
 @media(max-width:920px){
   .modal{min-width:0;max-width:96vw}
@@ -474,17 +474,62 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .outdated-item:hover{background:rgba(255,255,255,.06);color:#fff}
 .outdated-item.active{background:rgba(0,83,204,.35);color:#fff}
 
-/* E: shield at very top of copy */
+/* E variants: E1 single-col+FAQ · E2 copy+preview · fit ~1040 (1280−240 sidebar) */
 .concept[data-panel="e"] .readonly-line{
-  margin:0 0 16px;font-size:13px;font-weight:500;color:var(--green);line-height:1.4;
+  margin:0 0 16px;font-size:14px;font-weight:500;color:var(--green);line-height:1.4;
 }
-.concept[data-panel="e"] .card{display:block}
-.concept[data-panel="e"] .copy{flex:none;max-width:560px;padding:40px 44px 40px}
 .concept[data-panel="e"] .lead strong{font-weight:600;color:var(--grey)}
 .concept[data-panel="e"] .chips{margin-bottom:22px}
 .concept[data-panel="e"] .benefits{margin-bottom:22px}
-
-.concept[data-panel="e"] .eyebrow{margin-bottom:8px}
+.concept[data-panel="e"] .e-faq{margin-top:20px;max-width:720px}
+.concept[data-panel="e"] .e-faq .faq-q{font-size:14px}
+.concept[data-panel="e"] .chips-e2,
+.concept[data-panel="e"] .e2-preview,
+.concept[data-panel="e"] .e-faq{display:none}
+.concept[data-panel="e"] .chips-e1{display:flex}
+html[data-e-variant="e1"] .concept[data-panel="e"] .card.e-card{display:block}
+html[data-e-variant="e1"] .concept[data-panel="e"] .copy{
+  flex:none;max-width:560px;padding:40px 44px 40px;
+}
+html[data-e-variant="e1"] .concept[data-panel="e"] .e-faq{display:block}
+html[data-e-variant="e1"] .concept[data-panel="e"] .js-view-example{display:inline-flex}
+html[data-e-variant="e2"] .concept[data-panel="e"] .chips-e1{display:none}
+html[data-e-variant="e2"] .concept[data-panel="e"] .chips-e2{display:flex}
+html[data-e-variant="e2"] .concept[data-panel="e"] .card.e-card{
+  display:flex;align-items:stretch;overflow:hidden;
+}
+html[data-e-variant="e2"] .concept[data-panel="e"] .copy{
+  flex:0 1 380px;max-width:400px;padding:32px 28px 28px;min-width:0;
+}
+html[data-e-variant="e2"] .concept[data-panel="e"] .e2-preview{
+  display:flex;flex:1 1 auto;min-width:0;max-width:none;
+  background:var(--grey-5);padding:20px;align-items:stretch;justify-content:flex-start;
+  border-left:1px solid var(--grey-20);
+}
+html[data-e-variant="e2"] .concept[data-panel="e"] .js-view-example{display:none}
+html[data-e-variant="e3"] .concept[data-panel="e"] .card.e-card{display:block}
+html[data-e-variant="e3"] .concept[data-panel="e"] .copy{
+  flex:none;max-width:560px;padding:40px 44px 40px;
+}
+html[data-e-variant="e3"] .concept[data-panel="e"] .chips-e1{display:flex}
+.e2-preview .preview-panel{width:100%;min-width:0}
+.e2-preview .ex-bal{margin-bottom:10px}
+.e2-preview .ex-bal-strip{flex-wrap:nowrap;overflow-x:auto}
+.e2-preview .ex-bal-cell{flex:1 1 72px;min-width:72px;padding:6px 8px}
+.e2-preview .ex-bal-op{display:none}
+.e2-preview .preview-head{
+  font-size:14px;font-weight:500;color:var(--grey);margin-bottom:4px;
+}
+.e2-preview .preview-period{
+  font-size:14px;color:var(--grey-50);margin-bottom:10px;
+}
+@media(max-width:900px){
+  html[data-e-variant="e2"] .concept[data-panel="e"] .card.e-card{flex-direction:column}
+  html[data-e-variant="e2"] .concept[data-panel="e"] .copy{flex:1 1 auto;max-width:none}
+  html[data-e-variant="e2"] .concept[data-panel="e"] .e2-preview{
+    border-left:0;border-top:1px solid var(--grey-20);
+  }
+}
 </style>
 </head>
 <body>
@@ -750,10 +795,11 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
     </div>
   </div>
 
-  <!-- ========== CONCEPT E · Merged (Ignat cleaned screenshot) ========== -->
-  <!-- Recipe: plain green read-only line · no eyebrow · H · lead (bold anti-payout) · 2 ticks · 1 blue chip · Run+View example · single column, no hero -->
+  <!-- ========== CONCEPT E · E1 FAQ / E2 preview ========== -->
+  <!-- E1: single col · combined chip (no border) · collapsed FAQ · View example -->
+  <!-- E2: two chips · right recon preview · fits ~1040px (1280−240 sidebar) -->
   <div class="concept active" data-panel="e" role="tabpanel">
-    <div class="card">
+    <div class="card e-card">
       <div class="copy">
         <p class="readonly-line" role="note">Read-only comparison — no changes to your books</p>
         <h2 class="card-h" id="e-headline">Find the rows that throw the balance off</h2>
@@ -768,16 +814,131 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
             Compare platform activity to the clearing account, row by row
           </li>
         </ul>
-        <div class="chips">
+        <div class="chips chips-e1">
           <span class="chip-wrap">
             <span class="chip combined">Included in your plan · no sync credits <button type="button" class="tip" aria-label="About plan and sync credits">?</button></span>
             <span class="tooltip">Transaction reconciliation is part of your plan — nothing extra to buy. It only reads and compares data, so your sync credit balance stays the same.</span>
+          </span>
+        </div>
+        <div class="chips chips-e2">
+          <span class="chip-wrap">
+            <span class="chip green">Included in your plan <button type="button" class="tip" aria-label="About plan inclusion">?</button></span>
+            <span class="tooltip">Transaction reconciliation is part of your plan. There's nothing extra to buy or switch on.</span>
+          </span>
+          <span class="chip-wrap">
+            <span class="chip blue">Doesn't use your sync credits <button type="button" class="tip" aria-label="About sync credits">?</button></span>
+            <span class="tooltip">Reconciliation only reads and compares data — it doesn't sync transactions, so your credit balance stays the same.</span>
           </span>
         </div>
         <div class="cta-row">
           <button type="button" class="btn pri">Run reconciliation</button>
           <button type="button" class="btn ghost js-view-example">View example</button>
         </div>
+      </div>
+      <div class="hero e2-preview" aria-label="Reconciliation results example">
+        <div class="preview-panel">
+          <div style="padding:12px 14px 0">
+            <div class="preview-head">Reconciliation results (Example)</div>
+            <div class="preview-period">Stripe Test (sandbox) / Mar 1–31, 2026</div>
+            <div class="ex-bal" aria-label="Balance summary">
+              <div class="ex-bal-head">
+                <span class="ex-bal-label">Balance summary</span>
+                <span class="ex-bal-delta">Delta −$50.00</span>
+              </div>
+              <div class="ex-bal-strip">
+                <div class="ex-bal-cell">
+                  <span class="ex-bal-k">Beginning</span>
+                  <span class="ex-bal-v">$10,000.00</span>
+                </div>
+                <div class="ex-bal-cell">
+                  <span class="ex-bal-k">Increase</span>
+                  <span class="ex-bal-v">$45,300.00</span>
+                </div>
+                <div class="ex-bal-cell">
+                  <span class="ex-bal-k">Decrease</span>
+                  <span class="ex-bal-v">$1,200.00</span>
+                </div>
+                <div class="ex-bal-cell delta">
+                  <span class="ex-bal-k">Delta</span>
+                  <span class="ex-bal-v">−$50.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="preview-tabs" role="presentation">
+            <span class="preview-tab">Matched <span class="count">56</span></span>
+            <span class="preview-tab on warn">Discrepancy <span class="count">4</span></span>
+            <span class="preview-tab">Missing <span class="count">3</span></span>
+          </div>
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Matching ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Mar 12</td>
+                <td>ch_3Pq…91a</td>
+                <td class="amt-off">$248.00 vs $198.00</td>
+                <td><span class="badge off">Amount off</span></td>
+              </tr>
+              <tr>
+                <td>Mar 14</td>
+                <td>Fee · ch_3Pq…91a</td>
+                <td class="amt-off">−$7.49 vs −$5.99</td>
+                <td><span class="badge off">Amount off</span></td>
+              </tr>
+              <tr>
+                <td>Mar 18</td>
+                <td>py_1N…k2</td>
+                <td>$1,200.00</td>
+                <td><span class="badge miss">Type mismatch</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq e-faq" role="list">
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Why should I run transaction reconciliation?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">It compares every platform row to your books so you catch missing sales, fees, and amount mismatches before they throw off your close.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Is reconciliation automated?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">You choose when to run it. Synder matches rows for that period and surfaces exceptions — you stay in control of when the check happens.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Does it use my sync credits?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">No. Reconciliation only compares data already synced to Synder — it doesn’t consume sync credits.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Will it change my books?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">No. The check is read-only. It never posts, edits, or deletes anything in your accounting system.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <button type="button" class="faq-q" aria-expanded="false">
+          Can I undo a reconciliation?
+          <svg class="chev" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-a">There’s nothing to undo — results are a report of matches and gaps. Re-run anytime with a different period or after you fix books.</div>
       </div>
     </div>
   </div>
@@ -789,7 +950,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 <div class="modal-backdrop" id="example-modal" role="dialog" aria-modal="true" aria-labelledby="example-title" hidden>
   <div class="modal">
     <div class="modal-head">
-      <h3 id="example-title">Example · Reconciliation results</h3>
+      <h3 id="example-title">Reconciliation results (Example)</h3>
       <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
     </div>
     <div class="modal-body">
@@ -797,17 +958,11 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
         <div class="ex-title-block">
           <div class="ex-title">
             Stripe Test (sandbox) (required for Synder)
-            <span class="ex-attn" aria-label="Attention required">⚠ Attention required</span>
           </div>
-        </div>
-        <div class="ex-actions">
-          <button type="button" class="btn sec sm" disabled title="Sample only">Process log</button>
-          <button type="button" class="btn sec sm" disabled title="Sample only">Export</button>
         </div>
       </div>
       <div class="ex-period">
         <span>Stripe Test (sandbox) / Mar 1–31, 2026</span>
-        <span class="ex-sample">Sample data</span>
       </div>
 
       <!-- Compact balance summary — previews combined check; sample only -->
@@ -848,7 +1003,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
           <div class="ex-bal-cell delta">
             <span class="ex-bal-k">Delta</span>
             <span class="ex-bal-v">−$50.00</span>
-            <span class="ex-bal-s">Sample</span>
+            <span class="ex-bal-s">Diff</span>
           </div>
         </div>
       </div>
@@ -1020,7 +1175,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
         </div>
       </div>
 
-      <p class="ex-note">Sample data for preview only — not your books. Balance strip illustrates the combined check when balances are available.</p>
+      <p class="ex-note">Example only — not your books. Balance strip shows the combined check when balances are available.</p>
     </div>
     <div class="modal-foot">
       <button type="button" class="btn sec" id="modal-done">Close</button>
@@ -1099,6 +1254,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   function showMain(key) {
     currentMain = key;
     currentOutdated = null;
+    root.setAttribute('data-e-variant', key);
     setConcept('e');
     setECopy(key);
     syncChrome();
@@ -1108,6 +1264,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   function showOutdated(key) {
     currentOutdated = key;
     if (key === 'e3') {
+      root.setAttribute('data-e-variant', 'e3');
       setConcept('e');
       setECopy('e3');
     } else {
