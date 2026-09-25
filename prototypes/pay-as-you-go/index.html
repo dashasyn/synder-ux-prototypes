@@ -24,11 +24,6 @@ h1{font-size:28px;font-weight:500;margin:0 0 8px;letter-spacing:-.02em}
 .lede{color:var(--muted);font-size:15px;max-width:62ch;margin:0 0 22px}
 .limit{display:inline-flex;align-items:flex-start;gap:10px;background:var(--blue-soft);color:var(--ink);border-radius:10px;padding:12px 14px;margin-bottom:22px;font-size:13.5px;line-height:1.45;max-width:720px}
 .limit b{color:var(--blue)}
-.how{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:22px}
-.how h2{font-size:15px;font-weight:500;margin:0 0 10px}
-.how ol{margin:0;padding-left:18px;color:var(--ink)}
-.how li{margin:0 0 6px}
-.how .ex{color:var(--muted);font-size:13px;margin:10px 0 0}
 .cols{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
 @media(max-width:920px){.cols{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px;margin-bottom:14px}
@@ -52,8 +47,7 @@ label.opt input{margin:2px 0 0;accent-color:var(--blue);flex-shrink:0}
 .opt .q b{display:block;font-size:14px;font-weight:500;margin-bottom:2px}
 .opt .q i{font-style:normal;color:var(--muted);font-size:12.5px;line-height:1.4}
 .opt .pr{text-align:right;flex-shrink:0}
-.opt .pr .usd{display:block;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink)}
-.opt .pr .cr{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.opt .pr .cr{display:block;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink)}
 .grp{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 8px;font-weight:500}
 .steppers{display:grid;gap:10px;margin-top:4px}
 .step{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
@@ -63,7 +57,7 @@ label.opt input{margin:2px 0 0;accent-color:var(--blue);flex-shrink:0}
 .step button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:18px;line-height:1;cursor:pointer;color:var(--ink)}
 .step button:hover{background:var(--bg)}
 .step .n{font-weight:700;min-width:1.2em;text-align:center;font-variant-numeric:tabular-nums}
-.step .fee{font-size:12.5px;color:var(--muted);text-align:right;min-width:72px;font-variant-numeric:tabular-nums}
+.step .fee{font-size:12.5px;color:var(--muted);text-align:right;min-width:88px;font-variant-numeric:tabular-nums}
 .side{position:sticky;top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
 .side h2{font-size:16px;font-weight:500;margin:0 0 12px}
 .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13.5px}
@@ -96,24 +90,14 @@ tr.win td{background:var(--ok-bg)}
 <div class="proto-bar">
   <div class="name">Pay as you go</div>
   <div class="variants">
-    <span class="on">Customer v1</span>
+    <span class="on">Customer v2</span>
   </div>
 </div>
 
 <div class="wrap">
   <h1>Pay as you go</h1>
-  <p class="lede">Pay only for the syncs and features you use. Estimate your monthly bill, then see when a fixed plan would cost less.</p>
-  <div class="limit"><span><b>Good to know:</b> Pay as you go includes <b>1 integration</b> and <b>no extra users</b>. Need more? A monthly plan may fit better.</span></div>
+  <p class="lede">1 integration · no extra users. Prices in credits; total converts to USD at $0.01 per credit.</p>
 
-  <div class="how">
-    <h2>How the price works</h2>
-    <ol>
-      <li><b>Credits</b> are the unit of billing. One credit costs <b>$0.01</b>.</li>
-      <li>Each <b>summary sync</b> uses <b>10 credits</b> ($0.10).</li>
-      <li><b>Add-ons</b> (inventory, taxes, multi-currency, and more) are a flat monthly credit fee. Turn them on only when you need them.</li>
-    </ol>
-    <p class="ex">Example: 300 syncs with Taxes on → 3,000 cr for syncs + 5,000 cr for Taxes = 8,000 cr → <b>$80.00</b> / month.</p>
-  </div>
 
   <div class="cols">
     <div>
@@ -121,12 +105,12 @@ tr.win td{background:var(--ok-bg)}
         <div class="vol"><b>Transactions per month</b><span class="big" id="volOut">300</span></div>
         <input id="vol" type="range" min="10" max="4000" step="10" value="300" aria-label="Transactions per month">
         <div class="marks" id="marks"></div>
-        <p class="hint" style="margin-top:8px;margin-bottom:0">Drag to match your typical monthly volume. Markers show where monthly plans unlock higher limits.</p>
+        
       </div>
 
       <div class="card">
         <h2>Add-ons</h2>
-        <p class="hint">Select the capabilities you need. Prices update the estimate on the right.</p>
+        <p class="hint">Select what you need. Estimate updates on the right.</p>
         <div class="grp">Capabilities</div>
         <div class="opts" id="opts"></div>
         <div class="grp" style="margin-top:16px">Extra capacity</div>
@@ -140,7 +124,7 @@ tr.win td{background:var(--ok-bg)}
               <button type="button" id="dm" aria-label="Fewer dimensions">−</button>
               <span class="n" id="dn">0</span>
               <button type="button" id="dp" aria-label="More dimensions">+</button>
-              <span class="fee" id="df">$0</span>
+              <span class="fee" id="df">0 cr</span>
             </div>
           </div>
           <div class="step">
@@ -152,7 +136,7 @@ tr.win td{background:var(--ok-bg)}
               <button type="button" id="gm" aria-label="Fewer group packs">−</button>
               <span class="n" id="gn">0</span>
               <button type="button" id="gp" aria-label="More group packs">+</button>
-              <span class="fee" id="gf">$0</span>
+              <span class="fee" id="gf">0 cr</span>
             </div>
           </div>
         </div>
@@ -163,8 +147,8 @@ tr.win td{background:var(--ok-bg)}
       <h2>Your monthly estimate</h2>
       <div id="lines"></div>
       <div class="total">
-        <div class="line"><span>Credits used</span><b id="totc">0 cr</b></div>
-        <div class="money"><span>Estimated total</span><b id="tot">$0.00</b></div>
+        <div class="line"><span>Total credits</span><b id="totc">0 cr</b></div>
+        <div class="money"><span>Total (USD)</span><b id="tot">$0.00</b></div>
       </div>
       <div id="verdict" class="verdict ok"></div>
       <div class="cmp">
@@ -213,7 +197,7 @@ function optsUI(){
   PACKS.slice().sort((a,b)=>b.c-a.c||a.n.localeCompare(b.n)).forEach(f=>{
     const l=document.createElement('label');
     l.className='opt'+(on[f.k]?' on':'');
-    l.innerHTML='<input type="checkbox"'+(on[f.k]?' checked':'')+'><span class="q"><b>'+f.n+'</b><i>'+f.d+'</i></span><span class="pr"><span class="usd">'+fmt(money(f.c))+'/mo</span><span class="cr">'+fmtCr(f.c)+'</span></span>';
+    l.innerHTML='<input type="checkbox"'+(on[f.k]?' checked':'')+'><span class="q"><b>'+f.n+'</b><i>'+f.d+'</i></span><span class="pr"><span class="cr">'+fmtCr(f.c)+'/mo</span></span>';
     l.querySelector('input').onchange=()=>{on[f.k]=!on[f.k];draw()};
     l.onclick=e=>{if(e.target.tagName==='INPUT')return;e.preventDefault();on[f.k]=!on[f.k];draw()};
     box.appendChild(l);
@@ -229,15 +213,14 @@ function draw(){
   $('volOut').textContent=v.toLocaleString('en-US');
   optsUI();
   $('dn').textContent=dims;$('gn').textContent=groups;
-  $('df').textContent=fmt(money(dims*DIM_C));
-  $('gf').textContent=fmt(money(groups*GRP_C));
+  $('df').textContent=fmtCr(dims*DIM_C);
+  $('gf').textContent=fmtCr(groups*GRP_C);
 
   const credits=SYNC*v+monthly(), total=money(credits);
   let h='<div class="row"><span>Summary syncs · '+v.toLocaleString('en-US')+' × '+SYNC+' cr</span><span>'+fmtCr(SYNC*v)+'</span></div>';
-  h+='<div class="row dim"><span>Syncs in USD</span><span>'+fmt(money(SYNC*v))+'</span></div>';
-  PACKS.forEach(f=>{if(on[f.k])h+='<div class="row"><span>'+f.n+'</span><span>'+fmt(money(f.c))+'</span></div>'});
-  if(dims)h+='<div class="row"><span>Dimensions × '+dims+'</span><span>'+fmt(money(dims*DIM_C))+'</span></div>';
-  if(groups)h+='<div class="row"><span>Group packs × '+groups+'</span><span>'+fmt(money(groups*GRP_C))+'</span></div>';
+  PACKS.forEach(f=>{if(on[f.k])h+='<div class="row"><span>'+f.n+'</span><span>'+fmtCr(f.c)+'</span></div>'});
+  if(dims)h+='<div class="row"><span>Dimensions × '+dims+'</span><span>'+fmtCr(dims*DIM_C)+'</span></div>';
+  if(groups)h+='<div class="row"><span>Group packs × '+groups+'</span><span>'+fmtCr(groups*GRP_C)+'</span></div>';
   $('lines').innerHTML=h;
   $('totc').textContent=fmtCr(credits);
   $('tot').textContent=fmt(total);
