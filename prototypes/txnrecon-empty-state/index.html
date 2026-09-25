@@ -4,15 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Transaction reconciliation — empty state</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --primary:#0053CC; --primary-hover:#1A43A2; --primary-5:#F2F6FC; --primary-10:#E6EEFA;
+  /* Synder UI kit (Figma UI_kit_product) */
+  --primary:#0053CC; --primary-hover:#1A43A2; --primary-5:#F2F6FC; --primary-10:#E0EBFD;
   --white:#fff; --grey-5:#F7F8FA; --grey-10:#EFF1F5; --grey-20:#DFE4EC;
   --grey-30:#B4BBCB; --grey-50:#6B778C; --grey:#1A1B24;
   --green:#1F8940; --green-bg:#ECFDDC; --green-border:#C7E9B0;
-  --blue-chip:#0053CC; --blue-bg:#E6EEFA; --blue-border:#B3C9EB;
-  --red:#D74A4A; --red-bg:#FDECEC;
+  --blue-chip:#0053CC; --blue-bg:#E0EBFD; --blue-border:#CCDDF5;
+  --red:#CC2929; --red-bg:#FFECE8;
+  --yellow:#CB7515; --yellow-bg:#FFF1DD;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-size:14px;line-height:1.45;min-height:100vh}
@@ -34,7 +36,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 
 /* —— Product page —— */
 .page{max-width:1040px;margin:0 auto;padding:28px 24px 72px}
-.h1{font-size:22px;font-weight:400;letter-spacing:-.2px;color:var(--grey-50)}
+.h1{font-size:28px;font-weight:400;line-height:36px;letter-spacing:0;color:var(--grey)}
 
 .concept{display:none}
 .concept.active{display:block}
@@ -54,8 +56,8 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:inline-block;font-size:14px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
   color:var(--primary);margin-bottom:10px;
 }
-.card-h{font-size:26px;font-weight:500;letter-spacing:-.35px;line-height:1.25;margin-bottom:12px;max-width:24ch;color:var(--grey)}
-.lead{color:var(--grey-50);margin-bottom:22px;max-width:44ch;font-size:14px;line-height:1.55}
+.card-h{font-size:28px;font-weight:400;letter-spacing:0;line-height:36px;margin-bottom:12px;max-width:24ch;color:var(--grey)}
+.lead{color:var(--grey-50);margin-bottom:22px;max-width:44ch;font-size:14px;line-height:20px;letter-spacing:.15px}
 
 .benefits{list-style:none;margin-bottom:24px}
 .benefits li{
@@ -68,7 +70,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
-  font-size:14px;font-weight:500;border-radius:999px;padding:5px 10px 5px 12px;
+  font-size:13px;font-weight:400;line-height:20px;letter-spacing:.1px;border-radius:999px;padding:2px 8px 2px 10px;
   border:1px solid transparent;
 }
 .chip.green{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
@@ -99,8 +101,9 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 /* CTAs */
 .cta-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .btn{
-  font-family:inherit;font-size:15px;font-weight:500;border-radius:4px;
-  padding:11px 22px;cursor:pointer;border:1px solid transparent;line-height:1.2;
+  font-family:inherit;font-size:16px;font-weight:400;letter-spacing:.5px;border-radius:4px;
+  height:36px;padding:6px 16px;cursor:pointer;border:1px solid transparent;line-height:24px;
+  display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;
 }
 .btn.pri{background:var(--primary);color:#fff}
 .btn.pri:hover{background:var(--primary-hover)}
@@ -241,7 +244,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .preview-tab.warn .count{background:var(--red-bg);color:var(--red)}
 .preview-table{width:100%;border-collapse:collapse;font-size:14px}
 .preview-table th{
-  text-align:left;font-weight:500;color:var(--grey-50);font-size:14px;
+  text-align:left;font-weight:700;color:var(--grey);font-size:14px;line-height:20px;letter-spacing:.25px;
   padding:8px 12px;border-bottom:1px solid var(--grey-20);background:var(--grey-5);
 }
 .preview-table td{padding:9px 12px;border-bottom:1px solid var(--grey-10);color:var(--grey)}
@@ -250,7 +253,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:inline-block;font-size:14px;font-weight:500;border-radius:4px;padding:2px 7px;
 }
 .badge.ok{background:var(--green-bg);color:var(--green)}
-.badge.miss{background:#FFF4E5;color:#C47A00}
+.badge.miss{background:var(--yellow-bg);color:var(--yellow)}
 .badge.off{background:var(--red-bg);color:var(--red)}
 .amt-off{color:var(--red);font-weight:500}
 .preview-foot{
@@ -309,7 +312,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 20px;border-bottom:1px solid var(--grey-20);flex-shrink:0;
 }
-.modal-head h3{font-size:16px;font-weight:500}
+.modal-head h3{font-size:16px;font-weight:600;line-height:24px;letter-spacing:.5px}
 .modal-close{
   width:32px;height:32px;border:0;background:transparent;border-radius:6px;
   cursor:pointer;color:var(--grey-50);font-size:20px;line-height:1;
@@ -323,7 +326,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 }
 .btn.sec{background:var(--grey-10);color:var(--grey);border-color:var(--grey-20)}
 .btn.sec:hover{background:var(--grey-20)}
-.btn.sm{padding:7px 12px;font-size:14px}
+.btn.sm{height:32px;padding:6px 16px;font-size:14px;font-weight:400;letter-spacing:.15px;line-height:20px}
 
 /* Results chrome inside modal — live-faithful Reconciliation results */
 .ex-title-row{
@@ -338,7 +341,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 .ex-attn{
   display:inline-flex;align-items:center;gap:4px;
   font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;
-  background:#FFF4E5;color:#C47A00;border:1px solid #F0D4A8;white-space:nowrap;
+  background:var(--yellow-bg);color:var(--yellow);border:1px solid #F0D4A8;white-space:nowrap;
 }
 .ex-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
 .ex-period{
@@ -353,7 +356,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 
 /* Compact horizontal balance summary (preview of combined check) */
 .ex-bal{
-  border:1px solid #F0D4A8;border-radius:8px;background:#FFFBF5;
+  border:1px solid #F0D4A8;border-radius:8px;background:var(--yellow-bg);
   padding:10px 12px;margin-bottom:14px;
 }
 .ex-bal-head{
@@ -361,7 +364,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   margin-bottom:8px;
 }
 .ex-bal-label{
-  font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C47A00;
+  font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--yellow);
 }
 .ex-bal-delta{font-size:14px;font-weight:600;color:var(--red)}
 .ex-bal-strip{
@@ -401,7 +404,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   border-radius:999px;padding:1px 7px;background:var(--grey-10);color:var(--grey-50);
 }
 .ex-tab .count.ok{background:var(--green-bg);color:var(--green)}
-.ex-tab .count.warn{background:#FFF4E5;color:#C47A00}
+.ex-tab .count.warn{background:var(--yellow-bg);color:var(--yellow)}
 .ex-tab .count.err{background:var(--red-bg);color:var(--red)}
 .ex-tab.active .count:not(.ok):not(.warn):not(.err){background:var(--primary-10);color:var(--primary)}
 
@@ -429,7 +432,7 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 
 .ex-table{width:100%;border-collapse:collapse;font-size:14px}
 .ex-table th{
-  text-align:left;font-weight:500;color:var(--grey-50);font-size:14px;
+  text-align:left;font-weight:700;color:var(--grey);font-size:14px;line-height:20px;letter-spacing:.25px;
   padding:7px 10px;border-bottom:1px solid var(--grey-20);background:var(--grey-5);
   white-space:nowrap;text-transform:uppercase;letter-spacing:.02em;
 }
@@ -618,22 +621,20 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
   display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
   padding:10px 14px;margin:0;
   font-size:14px;font-weight:600;line-height:1.35;letter-spacing:.01em;
-  color:#8A5B00;background:#FFF6E0;border-bottom:1px solid #F0D9A0;
+  color:#8A5B00;background:var(--yellow-bg);border-bottom:1px solid #F0D9A0;
 }
 .ex-sample-banner .ex-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#D97706}
 .ex-badge{
   display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;
   font-size:12px;font-weight:600;letter-spacing:.02em;vertical-align:middle;
-  background:#FFF6E0;color:#8A5B00;border:1px solid #F0D9A0;
+  background:var(--yellow-bg);color:#8A5B00;border:1px solid #F0D9A0;
 }
 .e2-preview .preview-panel{width:100%;min-width:0}
 .e2-preview .ex-bal{margin-bottom:10px}
 .e2-preview .ex-bal-strip{flex-wrap:nowrap;overflow-x:auto}
 .e2-preview .ex-bal-cell{flex:1 1 72px;min-width:72px;padding:6px 8px}
 .e2-preview .ex-bal-op{display:none}
-.e2-preview .preview-head{
-  font-size:14px;font-weight:500;color:var(--grey);margin-bottom:4px;
-}
+.e2-preview .preview-head{font-size:16px;font-weight:600;line-height:24px;letter-spacing:.5px;color:var(--grey);margin-bottom:8px;}
 .e2-preview .preview-period{
   font-size:14px;color:var(--grey-50);margin-bottom:10px;
 }
