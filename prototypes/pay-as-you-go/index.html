@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pay as you go — Synder</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1A1B24;--muted:#6B778C;--line:#E5E5E5;--blue:#0053CC;--blue-soft:#E8F0FE;
+  --ok-bg:#E6F5ED;--ok:#0D9D57;--warn-bg:#FEF3E0;--warn:#B06000;--bg:#FAFAFA;--card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Roboto,-apple-system,Segoe UI,sans-serif}
+.proto-bar{background:#1A1B24;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 20px;font-size:13px}
+.proto-bar .name{font-weight:500}
+.proto-bar .variants{display:flex;gap:6px;flex-wrap:wrap}
+.proto-bar .variants a,.proto-bar .variants span{
+  color:#fff;text-decoration:none;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.25);font-size:12px
+}
+.proto-bar .variants .on{background:#fff;color:#1A1B24;border-color:#fff;font-weight:500}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 22px 80px}
+h1{font-size:28px;font-weight:500;margin:0 0 8px;letter-spacing:-.02em}
+.lede{color:var(--muted);font-size:15px;max-width:62ch;margin:0 0 22px}
+.limit{display:inline-flex;align-items:flex-start;gap:10px;background:var(--blue-soft);color:var(--ink);border-radius:10px;padding:12px 14px;margin-bottom:22px;font-size:13.5px;line-height:1.45;max-width:720px}
+.limit b{color:var(--blue)}
+.how{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:22px}
+.how h2{font-size:15px;font-weight:500;margin:0 0 10px}
+.how ol{margin:0;padding-left:18px;color:var(--ink)}
+.how li{margin:0 0 6px}
+.how .ex{color:var(--muted);font-size:13px;margin:10px 0 0}
+.cols{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+@media(max-width:920px){.cols{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px;margin-bottom:14px}
+.card h2{font-size:16px;font-weight:500;margin:0 0 6px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+.vol{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.vol b{font-size:14px;font-weight:500}
+.vol .big{font-size:28px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:99px;background:var(--line);outline:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:5px solid var(--blue);cursor:grab;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.marks{position:relative;height:36px;margin-top:8px}
+.mark{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--muted);text-align:center;white-space:nowrap;line-height:1.25}
+.mark i{display:block;font-style:normal;color:#A0A8B4}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.opts{grid-template-columns:1fr}}
+label.opt{border:1.5px solid var(--line);border-radius:10px;padding:12px 12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;background:#fff;transition:border-color .12s,background .12s}
+label.opt:hover{border-color:#C5CDD8}
+label.opt.on{border-color:var(--blue);background:var(--blue-soft)}
+label.opt input{margin:2px 0 0;accent-color:var(--blue);flex-shrink:0}
+.opt .q{flex:1;min-width:0}
+.opt .q b{display:block;font-size:14px;font-weight:500;margin-bottom:2px}
+.opt .q i{font-style:normal;color:var(--muted);font-size:12.5px;line-height:1.4}
+.opt .pr{text-align:right;flex-shrink:0}
+.opt .pr .usd{display:block;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink)}
+.opt .pr .cr{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.grp{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 8px;font-weight:500}
+.steppers{display:grid;gap:10px;margin-top:4px}
+.step{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.step .meta b{display:block;font-size:14px;font-weight:500;margin-bottom:2px}
+.step .meta span{color:var(--muted);font-size:12.5px}
+.step .ctrl{display:flex;align-items:center;gap:10px}
+.step button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:18px;line-height:1;cursor:pointer;color:var(--ink)}
+.step button:hover{background:var(--bg)}
+.step .n{font-weight:700;min-width:1.2em;text-align:center;font-variant-numeric:tabular-nums}
+.step .fee{font-size:12.5px;color:var(--muted);text-align:right;min-width:72px;font-variant-numeric:tabular-nums}
+.side{position:sticky;top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.side h2{font-size:16px;font-weight:500;margin:0 0 12px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13.5px}
+.row.dim{color:var(--muted);font-size:12.5px}
+.total{border-top:1px solid var(--line);margin-top:10px;padding-top:12px}
+.total .line{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.total .line span{font-size:13.5px;color:var(--muted)}
+.total .line b{font-size:15px;font-variant-numeric:tabular-nums}
+.total .money{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
+.total .money span{font-size:14px;font-weight:500}
+.total .money b{font-size:26px;color:var(--blue);font-variant-numeric:tabular-nums}
+.verdict{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:13.5px;line-height:1.45}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)}
+.verdict.warn{background:var(--warn-bg);color:var(--warn)}
+.verdict strong{display:block;margin-bottom:4px;font-weight:700}
+.cmp{margin-top:14px}
+.cmp h3{font-size:13px;font-weight:500;margin:0 0 8px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{color:var(--muted);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right}
+tr.win td{background:var(--ok-bg)}
+.note{color:var(--muted);font-size:12px;margin-top:12px;line-height:1.45}
+.cta{margin-top:16px;display:grid;gap:8px}
+.cta .primary{display:block;text-align:center;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px 14px;font:500 14px Roboto,sans-serif;cursor:pointer;text-decoration:none}
+.cta .ghost{display:block;text-align:center;background:transparent;color:var(--blue);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font:500 13.5px Roboto,sans-serif;cursor:pointer;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="proto-bar">
+  <div class="name">Pay as you go</div>
+  <div class="variants">
+    <span class="on">Customer v1</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>Pay as you go</h1>
+  <p class="lede">Pay only for the syncs and features you use. Estimate your monthly bill, then see when a fixed plan would cost less.</p>
+  <div class="limit"><span><b>Good to know:</b> Pay as you go includes <b>1 integration</b> and <b>no extra users</b>. Need more? A monthly plan may fit better.</span></div>
+
+  <div class="how">
+    <h2>How the price works</h2>
+    <ol>
+      <li><b>Credits</b> are the unit of billing. One credit costs <b>$0.01</b>.</li>
+      <li>Each <b>summary sync</b> uses <b>10 credits</b> ($0.10).</li>
+      <li><b>Add-ons</b> (inventory, taxes, multi-currency, and more) are a flat monthly credit fee. Turn them on only when you need them.</li>
+    </ol>
+    <p class="ex">Example: 300 syncs with Taxes on → 3,000 cr for syncs + 5,000 cr for Taxes = 8,000 cr → <b>$80.00</b> / month.</p>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="card">
+        <div class="vol"><b>Transactions per month</b><span class="big" id="volOut">300</span></div>
+        <input id="vol" type="range" min="10" max="4000" step="10" value="300" aria-label="Transactions per month">
+        <div class="marks" id="marks"></div>
+        <p class="hint" style="margin-top:8px;margin-bottom:0">Drag to match your typical monthly volume. Markers show where monthly plans unlock higher limits.</p>
+      </div>
+
+      <div class="card">
+        <h2>Add-ons</h2>
+        <p class="hint">Select the capabilities you need. Prices update the estimate on the right.</p>
+        <div class="grp">Capabilities</div>
+        <div class="opts" id="opts"></div>
+        <div class="grp" style="margin-top:16px">Extra capacity</div>
+        <div class="steppers">
+          <div class="step">
+            <div class="meta">
+              <b>Dimensions</b>
+              <span>One class, tracking category, or location each</span>
+            </div>
+            <div class="ctrl">
+              <button type="button" id="dm" aria-label="Fewer dimensions">−</button>
+              <span class="n" id="dn">0</span>
+              <button type="button" id="dp" aria-label="More dimensions">+</button>
+              <span class="fee" id="df">$0</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="meta">
+              <b>Group packs</b>
+              <span>10 active groups each pack</span>
+            </div>
+            <div class="ctrl">
+              <button type="button" id="gm" aria-label="Fewer group packs">−</button>
+              <span class="n" id="gn">0</span>
+              <button type="button" id="gp" aria-label="More group packs">+</button>
+              <span class="fee" id="gf">$0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <h2>Your monthly estimate</h2>
+      <div id="lines"></div>
+      <div class="total">
+        <div class="line"><span>Credits used</span><b id="totc">0 cr</b></div>
+        <div class="money"><span>Estimated total</span><b id="tot">$0.00</b></div>
+      </div>
+      <div id="verdict" class="verdict ok"></div>
+      <div class="cmp">
+        <h3>Compared with monthly plans</h3>
+        <table id="cmp"></table>
+        <p class="note" id="cross"></p>
+      </div>
+      <div class="cta">
+        <a class="primary" href="#" onclick="return false">Continue with pay as you go</a>
+        <a class="ghost" href="#" onclick="return false" id="planCta">See monthly plans</a>
+      </div>
+      <p class="note">Plan prices from synder.com/pricing (monthly). Basic from $65 (up to 500 transactions), Essential from $129, Pro from $299. Overages on plans: $30 per extra 500 transactions.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYNC=10;
+const CREDIT_USD=0.01;
+const PACKS=[
+ {k:'stock', n:'Inventory', d:'Keep stock levels in sync across your sales channels', c:15000},
+ {k:'pv', n:'Product verification', d:'Match and verify products before they post', c:10000},
+ {k:'loc', n:'Locations', d:'Sync by location or warehouse', c:7500},
+ {k:'sage', n:'Sage Intacct journal', d:'Post journals to Sage Intacct', c:7500},
+ {k:'label', n:'Tracking labels & classes', d:'Classes and tracking categories on every summary', c:5000},
+ {k:'tax', n:'Taxes', d:'Tax lines mapped into your books', c:5000},
+ {k:'fx', n:'Multi-currency', d:'Handle sales and fees in more than one currency', c:3000},
+ {k:'acc', n:'Accounting method', d:'Accrual or cash basis for your summaries', c:2000}
+];
+const DIM_C=5000, GRP_C=3000;
+const PLANS=[
+ {n:'Basic',     m:65,  from:0,    to:500,   feats:[],                              groups:10},
+ {n:'Essential', m:129, from:500,  to:3000,  feats:['tax','fx','acc','label','pv'], groups:20},
+ {n:'Pro',       m:299, from:3000, to:50000, feats:PACKS.map(f=>f.k),               groups:30}
+];
+const MARKS=[{v:500,t:'Basic limit'},{v:3000,t:'Essential limit'}];
+const on={};PACKS.forEach(f=>on[f.k]=false);on.tax=true;
+let dims=0, groups=0;
+const $=id=>document.getElementById(id);
+const money=cr=>cr*CREDIT_USD;
+const fmt=m=>'$'+m.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtCr=c=>c.toLocaleString('en-US')+' cr';
+
+function optsUI(){
+  const box=$('opts');box.innerHTML='';
+  PACKS.slice().sort((a,b)=>b.c-a.c||a.n.localeCompare(b.n)).forEach(f=>{
+    const l=document.createElement('label');
+    l.className='opt'+(on[f.k]?' on':'');
+    l.innerHTML='<input type="checkbox"'+(on[f.k]?' checked':'')+'><span class="q"><b>'+f.n+'</b><i>'+f.d+'</i></span><span class="pr"><span class="usd">'+fmt(money(f.c))+'/mo</span><span class="cr">'+fmtCr(f.c)+'</span></span>';
+    l.querySelector('input').onchange=()=>{on[f.k]=!on[f.k];draw()};
+    l.onclick=e=>{if(e.target.tagName==='INPUT')return;e.preventDefault();on[f.k]=!on[f.k];draw()};
+    box.appendChild(l);
+  });
+}
+
+const monthly=()=>PACKS.reduce((s,f)=>s+(on[f.k]?f.c:0),0)+dims*DIM_C+groups*GRP_C;
+const planFits=p=>PACKS.every(f=>!on[f.k]||p.feats.includes(f.k))&&p.groups>=10*groups&&(dims===0||p.feats.includes('loc'));
+const planCost=(p,v)=>v<=p.to?p.m:p.m+Math.ceil((v-p.to)/500)*30;
+
+function draw(){
+  const v=+$('vol').value;
+  $('volOut').textContent=v.toLocaleString('en-US');
+  optsUI();
+  $('dn').textContent=dims;$('gn').textContent=groups;
+  $('df').textContent=fmt(money(dims*DIM_C));
+  $('gf').textContent=fmt(money(groups*GRP_C));
+
+  const credits=SYNC*v+monthly(), total=money(credits);
+  let h='<div class="row"><span>Summary syncs · '+v.toLocaleString('en-US')+' × '+SYNC+' cr</span><span>'+fmtCr(SYNC*v)+'</span></div>';
+  h+='<div class="row dim"><span>Syncs in USD</span><span>'+fmt(money(SYNC*v))+'</span></div>';
+  PACKS.forEach(f=>{if(on[f.k])h+='<div class="row"><span>'+f.n+'</span><span>'+fmt(money(f.c))+'</span></div>'});
+  if(dims)h+='<div class="row"><span>Dimensions × '+dims+'</span><span>'+fmt(money(dims*DIM_C))+'</span></div>';
+  if(groups)h+='<div class="row"><span>Group packs × '+groups+'</span><span>'+fmt(money(groups*GRP_C))+'</span></div>';
+  $('lines').innerHTML=h;
+  $('totc').textContent=fmtCr(credits);
+  $('tot').textContent=fmt(total);
+
+  const fits=PLANS.filter(planFits);
+  let t='<tr><th>Plan</th><th class="n">Plan</th><th class="n">Pay as you go</th><th class="n">Diff</th></tr>';
+  let best=null;
+  fits.forEach(p=>{const c=planCost(p,v);if(best===null||c<best.c)best={p:p,c:c}});
+  fits.forEach(p=>{
+    const c=planCost(p,v), win=(best&&p===best.p&&c<total);
+    const diff=total-c;
+    t+='<tr class="'+(win?'win':'')+'"><td>'+p.n+'</td><td class="n">'+fmt(c)+'</td><td class="n">'+fmt(total)+'</td><td class="n">'+(diff>=0?'+':'\u2212')+fmt(Math.abs(diff)).slice(1)+'</td></tr>';
+  });
+  if(!fits.length)t+='<tr><td colspan="4">No listed plan covers this set of add-ons. Pay as you go or talk to us.</td></tr>';
+  $('cmp').innerHTML=t;
+
+  const vd=$('verdict');
+  if(best){
+    const crossV=(best.c-money(monthly()))/money(SYNC);
+    $('cross').textContent='With these add-ons, pay as you go and '+best.p.n+' cost about the same near '+Math.round(crossV).toLocaleString('en-US')+' transactions / month.';
+    if(total<best.c){
+      vd.className='verdict ok';
+      vd.innerHTML='<strong>Pay as you go looks better here</strong>You save about '+fmt(best.c-total)+' vs '+best.p.n+' at this volume. Stay on credits unless you need more integrations or users.';
+      $('planCta').textContent='Compare monthly plans';
+    }else{
+      vd.className='verdict warn';
+      vd.innerHTML='<strong>A monthly plan would cost less</strong>'+best.p.n+' is about '+fmt(total-best.c)+' cheaper at this volume. Consider switching instead of pay as you go.';
+      $('planCta').textContent='Switch to '+best.p.n+' plan';
+    }
+  }else{
+    $('cross').textContent='';
+    vd.className='verdict ok';
+    vd.innerHTML='<strong>Pay as you go fits this setup</strong>No monthly plan on the public list covers every add-on you selected.';
+    $('planCta').textContent='See monthly plans';
+  }
+
+  const m=$('marks');m.innerHTML='';
+  MARKS.forEach(x=>{
+    if(x.v>4000)return;
+    const d=document.createElement('div');d.className='mark';
+    d.style.left=((x.v-10)/(4000-10)*100)+'%';
+    d.innerHTML='▲<br><i>'+x.t+'</i>';
+    m.appendChild(d);
+  });
+}
+
+$('vol').oninput=draw;
+$('dp').onclick=()=>{if(dims<5){dims++;draw()}};
+$('dm').onclick=()=>{if(dims>0){dims--;draw()}};
+$('gp').onclick=()=>{if(groups<3){groups++;draw()}};
+$('gm').onclick=()=>{if(groups>0){groups--;draw()}};
+draw();
+</script>
+</body>
+</html>
