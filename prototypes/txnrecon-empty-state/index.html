@@ -354,39 +354,6 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
   background:var(--grey-10);color:var(--grey-50);border:1px solid var(--grey-20);
 }
 
-/* Compact horizontal balance summary (preview of combined check) */
-.ex-bal{
-  border:1px solid #F0D4A8;border-radius:8px;background:var(--yellow-bg);
-  padding:10px 12px;margin-bottom:14px;
-}
-.ex-bal-head{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
-  margin-bottom:8px;
-}
-.ex-bal-label{
-  font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--yellow);
-}
-.ex-bal-delta{font-size:14px;font-weight:600;color:var(--red)}
-.ex-bal-strip{
-  display:flex;align-items:stretch;gap:0;flex-wrap:wrap;
-  border:1px solid var(--grey-20);border-radius:6px;background:#fff;overflow:hidden;
-}
-.ex-bal-cell{
-  flex:1 1 110px;min-width:100px;padding:8px 10px;
-  border-right:1px solid var(--grey-20);
-}
-.ex-bal-cell:last-child{border-right:0}
-.ex-bal-cell.delta{flex:0 0 auto;min-width:90px;background:var(--red-bg)}
-.ex-bal-k{display:block;font-size:14px;font-weight:500;color:var(--grey-50);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
-.ex-bal-v{display:block;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--grey)}
-.ex-bal-cell.delta .ex-bal-v{color:var(--red)}
-.ex-bal-s{display:block;font-size:14px;color:var(--grey-30);margin-top:2px;line-height:1.3}
-.ex-bal-op{
-  display:flex;align-items:center;justify-content:center;
-  width:18px;flex:0 0 18px;font-size:14px;font-weight:600;color:var(--grey-30);
-  background:var(--grey-5);border-right:1px solid var(--grey-20);
-}
-
 .ex-tabs{
   display:flex;gap:0;border-bottom:1px solid var(--grey-20);
   margin:0 -20px 12px;padding:0 12px;background:#fff;
@@ -463,7 +430,6 @@ body{font-family:Roboto,Arial,sans-serif;color:var(--grey);background:#fff;font-
 @media(max-width:920px){
   .modal{min-width:0;max-width:96vw}
   .ex-tabs{overflow-x:auto}
-  .ex-bal-op{display:none}
 }
 
 @media(max-width:860px){
@@ -630,10 +596,6 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
   background:var(--yellow-bg);color:#8A5B00;border:1px solid #F0D9A0;
 }
 .e2-preview .preview-panel{width:100%;min-width:0}
-.e2-preview .ex-bal{margin-bottom:10px}
-.e2-preview .ex-bal-strip{flex-wrap:nowrap;overflow-x:auto}
-.e2-preview .ex-bal-cell{flex:1 1 72px;min-width:72px;padding:6px 8px}
-.e2-preview .ex-bal-op{display:none}
 .e2-preview .preview-head{font-size:16px;font-weight:600;line-height:24px;letter-spacing:.5px;color:var(--grey);margin-bottom:8px;}
 .e2-preview .preview-period{
   font-size:14px;color:var(--grey-50);margin-bottom:10px;
@@ -968,30 +930,6 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
           <div style="padding:12px 14px 0">
             <div class="preview-head">Sample reconciliation results</div>
             <div class="preview-period">Stripe Test (sandbox) / Mar 1–31, 2026</div>
-            <div class="ex-bal" aria-label="Balance summary">
-              <div class="ex-bal-head">
-                <span class="ex-bal-label">Balance summary</span>
-                <span class="ex-bal-delta">Delta −$50.00</span>
-              </div>
-              <div class="ex-bal-strip">
-                <div class="ex-bal-cell">
-                  <span class="ex-bal-k">Beginning</span>
-                  <span class="ex-bal-v">$10,000.00</span>
-                </div>
-                <div class="ex-bal-cell">
-                  <span class="ex-bal-k">Increase</span>
-                  <span class="ex-bal-v">$45,300.00</span>
-                </div>
-                <div class="ex-bal-cell">
-                  <span class="ex-bal-k">Decrease</span>
-                  <span class="ex-bal-v">$1,200.00</span>
-                </div>
-                <div class="ex-bal-cell delta">
-                  <span class="ex-bal-k">Delta</span>
-                  <span class="ex-bal-v">−$50.00</span>
-                </div>
-              </div>
-            </div>
           </div>
           <div class="preview-tabs" role="tablist" aria-label="Example result categories">
             <button type="button" class="preview-tab" role="tab" aria-selected="false" data-e2-tab="matched" tabindex="0">Matched <span class="count">56</span></button>
@@ -1159,49 +1097,6 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
       </div>
       <div class="ex-period">
         <span>Stripe Test (sandbox) / Mar 1–31, 2026</span>
-      </div>
-
-      <!-- Compact balance summary — previews combined check; sample only -->
-      <div class="ex-bal" aria-label="Balance summary sample">
-        <div class="ex-bal-head">
-          <span class="ex-bal-label">Balance summary · Mar 1–31, 2026</span>
-          <span class="ex-bal-delta">Delta −$50.00</span>
-        </div>
-        <div class="ex-bal-strip">
-          <div class="ex-bal-cell">
-            <span class="ex-bal-k">Beginning</span>
-            <span class="ex-bal-v">$10,000.00</span>
-            <span class="ex-bal-s">QBO clearing</span>
-          </div>
-          <div class="ex-bal-op" aria-hidden="true">+</div>
-          <div class="ex-bal-cell">
-            <span class="ex-bal-k">Increase</span>
-            <span class="ex-bal-v">$45,300.00</span>
-            <span class="ex-bal-s">Stripe increases</span>
-          </div>
-          <div class="ex-bal-op" aria-hidden="true">−</div>
-          <div class="ex-bal-cell">
-            <span class="ex-bal-k">Decrease</span>
-            <span class="ex-bal-v">$1,200.00</span>
-            <span class="ex-bal-s">Stripe decreases</span>
-          </div>
-          <div class="ex-bal-op" aria-hidden="true">=</div>
-          <div class="ex-bal-cell">
-            <span class="ex-bal-k">Computed</span>
-            <span class="ex-bal-v">$54,100.00</span>
-            <span class="ex-bal-s">Beg + Inc − Dec</span>
-          </div>
-          <div class="ex-bal-cell">
-            <span class="ex-bal-k">Reported</span>
-            <span class="ex-bal-v">$54,050.00</span>
-            <span class="ex-bal-s">QBO clearing</span>
-          </div>
-          <div class="ex-bal-cell delta">
-            <span class="ex-bal-k">Delta</span>
-            <span class="ex-bal-v">−$50.00</span>
-            <span class="ex-bal-s">Diff</span>
-          </div>
-        </div>
       </div>
 
       <div class="ex-tabs" role="tablist" aria-label="Result categories">
@@ -1373,7 +1268,7 @@ html[data-e-variant="e3"] .concept[data-panel="e"] .e-faq{display:none}
       </div>
       </div>
 
-      <p class="ex-note">Example only — not your books. Balance strip shows the combined check when balances are available.</p>
+      <p class="ex-note">Example only — not your books.</p>
     </div>
     <div class="modal-foot">
       <button type="button" class="btn sec" id="modal-done">Close</button>
