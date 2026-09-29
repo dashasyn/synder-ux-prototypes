@@ -153,6 +153,27 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .plist .ok .mi { color: var(--c-green); }
 .plist .cur .mi { color: var(--c-primary); }
 
+/* Variant D: simple */
+.d-tabs .synder-tab { background: none; border-top: none; border-left: none; border-right: none; font-family: inherit; }
+.d-tabs .synder-tab.off { color: var(--c-grey-30); cursor: not-allowed; }
+.d-banner { margin: 0 0 16px; align-items: center; }
+.d-banner > div { flex: 1; }
+.d-panel { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 20px 24px; }
+.d-status { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.d-status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-grey-30); }
+.d-status .dot.on { background: var(--c-green); }
+.d-stores { margin-top: 16px; border-top: 1px solid var(--border-default); }
+.d-store { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-default); }
+.d-store .mi { color: #95BF47; }
+.d-store .s { color: var(--t-secondary); }
+.d-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.d-bar .reason { color: var(--t-secondary); }
+.d-search { position: relative; }
+.d-search .mi { position: absolute; left: 8px; top: 8px; color: #6B778C; font-size: 20px; }
+.d-search input { padding-left: 34px; width: 240px; }
+.d-empty-tab { text-align: center; padding: 40px 24px; color: var(--t-secondary); }
+.d-events td, .d-events th { padding: 10px; }
+
 /* Success */
 .success { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 40px; max-width: 680px; margin: 24px auto; text-align: center; }
 .success .icon { width: 64px; height: 64px; border-radius: 50%; background: var(--c-green-light); color: var(--c-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
@@ -170,6 +191,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     <button class="tab" data-variant="A">A · Checklist on page</button>
     <button class="tab" data-variant="B">B · Step-by-step wizard</button>
     <button class="tab" data-variant="C">C · Single guided card</button>
+    <button class="tab" data-variant="D">D · Simple</button>
   </div>
 </div>
 
@@ -199,7 +221,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
           <h1 class="page-title">Inventory sync</h1>
           <div class="page-sub">QuickBooks Online <span class="mi" style="font-size:18px">arrow_forward</span> Shopify stock quantities</div>
         </div>
-        <button class="btn-text restart" data-a="restart"><span class="mi" style="font-size:18px">restart_alt</span>Restart prototype</button>
+        <div class="row" style="flex-wrap:nowrap"><span id="headActions"></span><button class="btn-text restart" data-a="restart"><span class="mi" style="font-size:18px">restart_alt</span>Restart prototype</button></div>
       </div>
       <div id="view"></div>
     </div>
@@ -230,11 +252,14 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function prod(id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; }
 
   var variant = (location.hash || '#A').slice(1).toUpperCase();
-  if ('ABC'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
+  if ('ABCD'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
   var S;
   function fresh() {
     S = { started: false, store: false, connecting: false, qbo: false, match: 'todo', matchOpen: false,
-      filter: 'unmatched', visible: null, map: { p10: 'q12' }, align: false, on: false, bStep: 0, cFocus: null, modal: null, setType: 'Inventory' };
+      filter: 'unmatched', visible: null, map: { p10: 'q12' }, align: false, on: false, bStep: 0, cFocus: null, modal: null, setType: 'Inventory',
+      // Variant D
+      dStores: [], dTab: 'overview', dInv: false, dOn: false, dCur: null, dMaps: {}, dFilter: 'unmatched', dSearch: '', dVisible: null,
+      dSel: STORE, dNew: '', dLoc: LOC, dBusy: false };
   }
   fresh();
 
@@ -428,8 +453,122 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     return '<div class="guided"><div>' + left + '</div>' + right + '</div>';
   }
 
+  // ---------- variant D: simple ----------
+  var D_STORES = [{ id: STORE, locs: [LOC, 'Warehouse B'] }, { id: 'stone-outlet.myshopify.com', locs: ['Main warehouse'] }];
+  function dConnected(id) { return S.dStores.some(function (x) { return x.store === id; }); }
+  function dMap() { return S.dMaps[S.dCur] || {}; }
+  function dMatchedIn(m) { return PRODUCTS.filter(function (p) { return !p.service && m[p.id]; }).map(function (p) { return p.id; }); }
+  function dMatched() { return dMatchedIn(dMap()); }
+  function dAllMatched() { var n = 0; S.dStores.forEach(function (x) { n += dMatchedIn(S.dMaps[x.store] || {}).length; }); return n; }
+  function dUse() { var c = {}, m = dMap(); dMatched().forEach(function (id) { c[m[id]] = (c[m[id]] || 0) + 1; }); return c; }
+  function dCanOn() { return S.dInv && dAllMatched() > 0; }
+  function dReason() { return !S.dInv ? 'Fix the QuickBooks product type first' : dAllMatched() === 0 ? 'Match at least 1 product' : ''; }
+  function dComputeVisible() {
+    var m = dMap(), q = S.dSearch.trim().toLowerCase();
+    S.dVisible = PRODUCTS.filter(function (p) {
+      var ok = !p.service && m[p.id];
+      if (S.dFilter === 'matched' && !ok) return false;
+      if (S.dFilter === 'unmatched' && ok) return false;
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || (m[p.id] && item(m[p.id]).name.toLowerCase().indexOf(q) >= 0);
+    }).map(function (p) { return p.id; });
+  }
+  function dTable() {
+    if (!S.dVisible) dComputeVisible();
+    var m = dMap(), uc = dUse();
+    var rows = S.dVisible.map(function (id) {
+      var p = prod(id), q = m[id] ? item(m[id]) : null, dup = q && uc[q.id] > 1, cell;
+      if (p.service) cell = '<select disabled><option>Service · can\'t track stock</option></select>';
+      else cell = '<select data-dmap="' + id + '"><option value="">Not matched</option>' + ITEMS.map(function (it) {
+        var no = it.type !== 'Inventory';
+        return '<option value="' + it.id + '"' + (m[id] === it.id ? ' selected' : '') + (no ? ' disabled' : '') + '>' + esc(it.name) + (no ? ' · ' + it.type + ', no stock' : '') + '</option>';
+      }).join('') + '</select>' + (dup ? '<div class="note"><span class="mi">warning_amber</span>Also matched to another product. Both get the same stock.</div>' : '');
+      var st = p.service ? '<span class="chip chip-neutral">Not trackable</span>' : q ? (dup ? '<span class="chip chip-warning">Shared item</span>' : '<span class="chip chip-success">Matched</span>') : '<span class="chip chip-neutral">Not matched</span>';
+      return '<tr class="' + (dup ? 'dup' : '') + '"><td>' + esc(p.name) + '</td><td>' + cell + '</td><td class="num-cell">' + p.qty + '</td><td class="num-cell">' + (q ? q.qty : '—') + '</td><td>' + st + '</td></tr>';
+    }).join('');
+    return '<table class="mt"><thead><tr><th style="width:26%">Shopify product</th><th style="width:34%">QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="5" class="muted" style="padding:16px">No products here.</td></tr>') + '</tbody></table>';
+  }
+  function dSeg(k, label) { return '<button class="' + (S.dFilter === k ? 'on' : '') + '" data-a="dFilter" data-v="' + k + '">' + label + '</button>'; }
+  function dMappings() {
+    var n = dMatched().length, all = PRODUCTS.length, r = dReason();
+    var turn = S.dOn ? '<div class="row"><span class="chip chip-success">Sync is on</span><button class="btn-text" data-a="dOff">Turn off</button></div>'
+      : '<div class="row">' + (r ? '<span class="reason">' + r + '</span>' : '') + '<button class="btn btn-primary" data-a="dAskOn"' + (dCanOn() ? '' : ' disabled title="' + r + '"') + '>Turn on sync</button></div>';
+    return '<div class="d-bar"><div class="row"><b style="font-size:16px">' + n + ' of ' + all + ' matched</b>' +
+      (S.dStores.length > 1 ? '<select data-a="dStoreSel" style="width:auto">' + S.dStores.map(function (x) { return '<option' + (x.store === S.dCur ? ' selected' : '') + '>' + x.store + '</option>'; }).join('') + '</select>' : '') +
+      '</div>' + turn + '</div>' +
+      '<div class="mt-tools" style="margin-top:0"><div class="seg">' + dSeg('unmatched', 'Not matched (' + (all - n) + ')') + dSeg('matched', 'Matched (' + n + ')') + dSeg('all', 'All (' + all + ')') + '</div>' +
+      '<div class="d-search"><span class="mi">search</span><input type="text" id="dSearch" placeholder="Search products" value="' + esc(S.dSearch) + '"></div></div>' +
+      '<div id="dTable">' + dTable() + '</div>';
+  }
+  function dOverview() {
+    var n = dAllMatched(), tot = PRODUCTS.length * S.dStores.length;
+    return '<div class="d-panel"><div class="d-status"><span class="dot' + (S.dOn ? ' on' : '') + '"></span><span><b>' + n + ' of ' + tot + ' products matched</b> · Sync is ' + (S.dOn ? 'on' : 'off') + '</span>' +
+      (!S.dOn ? '<button class="link" data-a="dTab" data-v="mappings" style="margin-left:auto">Go to Mappings</button>' : '') + '</div>' +
+      '<div class="d-stores">' + S.dStores.map(function (x) { return '<div class="d-store"><span class="mi">storefront</span><b>' + x.store + '</b><span class="s">· ' + x.loc + '</span></div>'; }).join('') + '</div></div>';
+  }
+  function dActivity() {
+    if (!S.dOn) return '<div class="d-panel d-empty-tab">No events yet. They appear once sync is on.</div>';
+    var ev = [['Just now', 'Stone 10', '8 → 12', 'Updated']];
+    return '<div class="synder-table-wrap"><table class="mt d-events"><thead><tr><th>Time</th><th>Product</th><th>Shopify qty</th><th>Status</th></tr></thead><tbody>' +
+      ev.map(function (e) { return '<tr><td>' + e[0] + '</td><td>' + e[1] + '</td><td>' + e[2] + '</td><td><span class="chip chip-success">' + e[3] + '</span></td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  function dStock() {
+    var m = dMap(), ids = dMatched();
+    if (!ids.length) return '<div class="d-panel d-empty-tab">Match products to compare stock.</div>';
+    return '<table class="mt"><thead><tr><th>Shopify product</th><th>QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      ids.map(function (id) { var p = prod(id), q = item(m[id]), same = p.qty === q.qty;
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(q.name) + '</td><td>' + p.qty + '</td><td>' + q.qty + '</td><td>' + (same ? '<span class="chip chip-success">Same</span>' : '<span class="chip chip-warning">Differs</span>') + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+  function viewD() {
+    var con = S.dStores.length > 0;
+    var tabs = [['overview', 'Overview'], ['mappings', 'Mappings'], ['activity', 'Activity'], ['stock', 'Stock check']];
+    var h = '';
+    if (con && !S.dInv) h += '<div class="alert alert-warning d-banner" id="dInvAlert"><span class="mi">warning_amber</span><div>Products are created as Non-inventory in QuickBooks. Change to Inventory so stock can sync.</div><button class="link" data-a="dFixInv">Open Shopify sync settings</button></div>';
+    h += '<div class="synder-tabs d-tabs">' + tabs.map(function (t) {
+      var off = !con && t[0] !== 'overview';
+      return '<button class="synder-tab' + (S.dTab === t[0] ? ' active' : '') + (off ? ' off' : '') + '" data-a="dTab" data-v="' + t[0] + '"' + (off ? ' aria-disabled="true" title="Connect a store first"' : '') + '>' + t[1] + '</button>';
+    }).join('') + '</div>';
+    if (!con) {
+      h += '<div class="empty" style="margin-top:8px"><div class="icon"><span class="mi">inventory_2</span></div><h2>Sync stock from QuickBooks to Shopify</h2>' +
+        '<p>Quantity changes in QuickBooks update your Shopify store.</p><button class="btn btn-primary" data-a="dOpenConnect">Connect Shopify</button></div>';
+      return h;
+    }
+    return h + (S.dTab === 'mappings' ? dMappings() : S.dTab === 'activity' ? dActivity() : S.dTab === 'stock' ? dStock() : dOverview());
+  }
+  function dConnectModal() {
+    var opts = D_STORES.filter(function (x) { return !dConnected(x.id); });
+    var isNew = S.dSel === '__new', st = null;
+    D_STORES.forEach(function (x) { if (x.id === S.dSel) st = x; });
+    var locs = st ? st.locs : ['Default location'];
+    var ok = !S.dBusy && (!isNew || /\S+\.myshopify\.com$/.test(S.dNew.trim()));
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Connect Shopify">' +
+      '<div class="modal-h"><h2 class="h3">' + (S.dStores.length ? 'Add store' : 'Connect Shopify') + '</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><div class="field" style="margin-top:0;max-width:none"><label for="dStore">Store</label><select id="dStore" data-a="dSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.dSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="dNew" placeholder="your-store.myshopify.com" value="' + esc(S.dNew) + '" style="margin-top:8px;width:100%">' : '') + '</div>' +
+      '<div class="field" style="max-width:none"><label for="dLoc">Location</label><select id="dLoc" data-a="dLocSel">' +
+      locs.map(function (l) { return '<option' + (S.dLoc === l ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" id="dConnectBtn" data-a="dConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.dBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Connecting…' : 'Connect') + '</button></div></div></div>';
+  }
+  function dConfirmModal() {
+    var n = dAllMatched();
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Turn on sync" style="max-width:440px">' +
+      '<div class="modal-h"><h2 class="h3">Turn on inventory sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b">Quantity changes in QuickBooks will update Shopify for ' + pl(n, 'product', 'products') + '.</div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="dTurnOn">Turn on</button></div></div></div>';
+  }
+  function dOpenConnect() {
+    var first = D_STORES.filter(function (x) { return !dConnected(x.id); })[0];
+    S.dSel = first ? first.id : '__new'; S.dNew = ''; S.dLoc = first ? first.locs[0] : 'Default location'; S.dBusy = false; S.modal = 'dConnect';
+  }
+  function dRefreshTable() { var t = document.getElementById('dTable'); if (t) t.innerHTML = dTable(); }
+
   // ---------- modals ----------
   function modalHtml() {
+    if (S.modal === 'dConnect') return dConnectModal();
+    if (S.modal === 'dConfirm') return dConfirmModal();
     if (S.modal === 'match') {
       return '<div class="overlay" data-a="closeOverlay"><div class="modal" role="dialog" aria-label="Match products">' +
         '<div class="modal-h"><h2 class="h3">Match Shopify products to QuickBooks items</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
@@ -459,7 +598,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function render() {
     document.querySelectorAll('.vbar .tab').forEach(function (t) { t.classList.toggle('active', t.dataset.variant === variant); });
     var v = document.getElementById('view');
-    if (S.on) v.innerHTML = successView();
+    document.getElementById('headActions').innerHTML = variant === 'D' && S.dStores.length ? '<button class="btn btn-secondary" data-a="dOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button>' : '';
+    if (variant === 'D') v.innerHTML = viewD();
+    else if (S.on) v.innerHTML = successView();
     else if (!S.started) v.innerHTML = emptyState();
     else v.innerHTML = variant === 'A' ? viewA() : variant === 'B' ? viewB() : viewC();
     document.getElementById('modal').innerHTML = modalHtml();
@@ -490,6 +631,24 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     bNext: function () { S.bStep = Math.min(3, S.bStep + 1); },
     cNext: function () { S.cFocus = null; },
     turnOn: function () { S.aligned = S.align ? differs() : 0; S.on = true; S.modal = null; },
+    dOpenConnect: dOpenConnect,
+    dConnect: function () {
+      S.dBusy = true;
+      setTimeout(function () {
+        var id = S.dSel === '__new' ? S.dNew.trim() : S.dSel, first = !S.dStores.length;
+        S.dStores.push({ store: id, loc: S.dLoc });
+        S.dMaps[id] = id === STORE ? { p10: 'q12' } : {};
+        S.dBusy = false; S.modal = null; S.dCur = id; S.dTab = 'mappings'; S.dFilter = 'unmatched'; S.dSearch = ''; S.dVisible = null;
+        toast((first ? 'Shopify connected' : 'Store added') + ' · ' + id);
+        render();
+      }, 700);
+    },
+    dTab: function (el) { if (!S.dStores.length && el.dataset.v !== 'overview') { toast('Connect a store first'); return 'norender'; } S.dTab = el.dataset.v; S.dVisible = null; },
+    dFixInv: function () { S.dInv = true; toast('Products are now created as Inventory'); },
+    dFilter: function (el) { S.dFilter = el.dataset.v; S.dVisible = null; },
+    dAskOn: function () { if (!dCanOn()) return 'norender'; S.modal = 'dConfirm'; },
+    dTurnOn: function () { S.dOn = true; S.modal = null; toast('Inventory sync is on'); },
+    dOff: function () { S.dOn = false; toast('Inventory sync is off'); },
     closeOverlay: function (el, e) { if (e.target === el) actions.closeModal(); else return 'norender'; }
   };
 
@@ -507,9 +666,18 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     if (t.dataset.map) { if (t.value) S.map[t.dataset.map] = t.value; else delete S.map[t.dataset.map]; render(); }
     else if (t.dataset.a === 'align') { S.align = t.checked; }
     else if (t.dataset.a === 'ptype') { S.setType = t.value; render(); }
+    else if (t.dataset.dmap) { var m = S.dMaps[S.dCur]; if (t.value) m[t.dataset.dmap] = t.value; else delete m[t.dataset.dmap]; if (S.dOn) toast('Saved'); render(); }
+    else if (t.dataset.a === 'dSel') { S.dSel = t.value; var st = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.dLoc = st ? st.locs[0] : 'Default location'; render(); }
+    else if (t.dataset.a === 'dLocSel') { S.dLoc = t.value; }
+    else if (t.dataset.a === 'dStoreSel') { S.dCur = t.value; S.dVisible = null; render(); }
   });
-  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABC'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
-  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds } };
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.id === 'dSearch') { S.dSearch = t.value; S.dVisible = null; dRefreshTable(); }
+    else if (t.id === 'dNew') { S.dNew = t.value; var b = document.getElementById('dConnectBtn'); if (b) b.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()); }
+  });
+  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCD'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
+  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn } };
   render();
 })();
 </script>
