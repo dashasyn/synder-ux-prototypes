@@ -198,6 +198,51 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .e-status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-grey-30); }
 .e-status .dot.on { background: var(--c-green); }
 
+
+/* Variant F: overview home */
+.f-empty { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:20px 24px; margin-top:8px; }
+.f-empty p { margin:0 0 12px; font-size:15px; line-height:22px; }
+.f-panel { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:18px 20px; margin-bottom:12px; }
+.f-panel h3 { margin:0 0 10px; }
+.f-store { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--border-default); flex-wrap:wrap; }
+.f-store:last-child { border-bottom:none; }
+.f-store .mi.shop { color:#95BF47; }
+.f-store .meta { color:var(--t-secondary); }
+.f-store .grow { flex:1; min-width:140px; }
+.f-status-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-default); flex-wrap:wrap; }
+.f-status-row:last-child { border-bottom:none; }
+.f-status-row .lbl { font-weight:500; min-width:140px; }
+.f-status-row .val { flex:1; color:var(--t-secondary); }
+.f-on-banner { display:flex; align-items:center; gap:10px; background:var(--c-green-light); color:var(--c-green); border-radius:8px; padding:14px 18px; margin-bottom:12px; font-size:16px; font-weight:500; }
+.f-on-banner .mi { font-size:28px; }
+.f-enable { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:4px; }
+.f-path { background:var(--c-grey-5); border:1px solid var(--border-default); border-radius:6px; padding:10px 12px; margin-top:8px; line-height:22px; }
+
+/* Variant G: store cards */
+.g-empty { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:20px 24px; margin-top:8px; }
+.g-empty p { margin:0 0 12px; font-size:15px; line-height:22px; }
+.g-cards { display:flex; flex-direction:column; gap:12px; margin-top:8px; }
+.g-card { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:18px 20px; border:1px solid var(--border-default); }
+.g-card-h { display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.g-card-h .mi.shop { color:#95BF47; font-size:24px; }
+.g-card-h .t { font-weight:500; font-size:16px; }
+.g-card-h .s { color:var(--t-secondary); margin-top:2px; }
+.g-check { display:flex; flex-direction:column; gap:8px; }
+.g-item { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:6px; background:var(--c-grey-5); }
+.g-item.done { background:var(--c-green-light); }
+.g-item .ico { color:var(--c-grey-30); margin-top:2px; }
+.g-item.done .ico { color:var(--c-green); }
+.g-item .body { flex:1; min-width:0; }
+.g-item .ttl { font-weight:500; }
+.g-item .sub { color:var(--t-secondary); margin-top:2px; font-size:14px; line-height:20px; }
+.g-add { margin-top:12px; }
+.g-enable-bar { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:16px 20px; margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.g-syncing { display:inline-flex; align-items:center; gap:6px; color:var(--c-green); font-weight:500; }
+.g-syncing .dot { width:8px; height:8px; border-radius:50%; background:var(--c-green); }
+.g-on-banner { display:flex; align-items:center; gap:10px; background:var(--c-green-light); color:var(--c-green); border-radius:8px; padding:14px 18px; margin-bottom:4px; font-size:16px; font-weight:500; }
+.g-on-banner .mi { font-size:28px; }
+.g-path { background:#fff; border:1px solid var(--border-default); border-radius:6px; padding:8px 10px; margin-top:6px; line-height:20px; font-size:14px; }
+
 /* Success */
 .success { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 40px; max-width: 680px; margin: 24px auto; text-align: center; }
 .success .icon { width: 64px; height: 64px; border-radius: 50%; background: var(--c-green-light); color: var(--c-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
@@ -217,6 +262,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     <button class="tab" data-variant="C">C · Single guided card</button>
     <button class="tab" data-variant="D">D · Simple</button>
     <button class="tab" data-variant="E">E · Setup checklist</button>
+    <button class="tab" data-variant="F">F · Overview home</button>
+    <button class="tab" data-variant="G">G · Store cards</button>
   </div>
 </div>
 
@@ -277,7 +324,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function prod(id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; }
 
   var variant = (location.hash || '#A').slice(1).toUpperCase();
-  if ('ABCDE'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
+  if ('ABCDEFG'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
   var S;
   function fresh() {
     S = { started: false, store: false, connecting: false, qbo: false, match: 'todo', matchOpen: false,
@@ -287,7 +334,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       dSel: STORE, dNew: '', dLoc: LOC, dBusy: false,
       // Variant E
       eStores: [], eTab: 'overview', eInv: false, eOn: false, eCur: null, eMaps: {}, eFilter: 'unmatched', eSearch: '', eVisible: null,
-      eSel: STORE, eNew: '', eLoc: LOC, eBusy: false, eStep3Done: false };
+      eSel: STORE, eNew: '', eLoc: LOC, eBusy: false, eStep3Done: false,
+      // Variant F
+      fStores: [], fTab: 'overview', fInv: false, fOn: false, fCur: null, fMaps: {}, fFilter: 'unmatched', fSearch: '', fVisible: null,
+      fSel: STORE, fNew: '', fLoc: LOC, fBusy: false, fMatchDone: false,
+      // Variant G
+      gStores: [], gTab: 'overview', gInv: false, gOn: false, gCur: null, gMaps: {}, gFilter: 'unmatched', gSearch: '', gVisible: null,
+      gSel: STORE, gNew: '', gLoc: LOC, gBusy: false, gMatchDone: {} };
   }
   fresh();
 
@@ -775,12 +828,310 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     return false;
   }
 
+
+  // ---------- variant F: overview home ----------
+  function fConnected(id) { return S.fStores.some(function (x) { return x.store === id; }); }
+  function fMap() { return S.fMaps[S.fCur] || {}; }
+  function fMatchedIn(m) { return PRODUCTS.filter(function (p) { return !p.service && m[p.id]; }).map(function (p) { return p.id; }); }
+  function fMatched() { return fMatchedIn(fMap()); }
+  function fStoreMatched(store) { return fMatchedIn(S.fMaps[store] || {}).length; }
+  function fAllMatched() { var n = 0; S.fStores.forEach(function (x) { n += fStoreMatched(x.store); }); return n; }
+  function fUse() { var c = {}, m = fMap(); fMatched().forEach(function (id) { c[m[id]] = (c[m[id]] || 0) + 1; }); return c; }
+  function fCanOn() { return S.fInv && fAllMatched() > 0; }
+  function fComputeVisible() {
+    var m = fMap(), q = S.fSearch.trim().toLowerCase();
+    S.fVisible = PRODUCTS.filter(function (p) {
+      var ok = !p.service && m[p.id];
+      if (S.fFilter === 'matched' && !ok) return false;
+      if (S.fFilter === 'unmatched' && ok) return false;
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || (m[p.id] && item(m[p.id]).name.toLowerCase().indexOf(q) >= 0);
+    }).map(function (p) { return p.id; });
+  }
+  function fTable() {
+    if (!S.fVisible) fComputeVisible();
+    var m = fMap(), uc = fUse();
+    var rows = S.fVisible.map(function (id) {
+      var p = prod(id), q = m[id] ? item(m[id]) : null, dup = q && uc[q.id] > 1, cell;
+      if (p.service) cell = '<select disabled><option>Service · can\'t track stock</option></select>';
+      else cell = '<select data-fmap="' + id + '"><option value="">Not matched</option>' + ITEMS.map(function (it) {
+        var no = it.type !== 'Inventory';
+        return '<option value="' + it.id + '"' + (m[id] === it.id ? ' selected' : '') + (no ? ' disabled' : '') + '>' + esc(it.name) + (no ? ' · ' + it.type + ', no stock' : '') + '</option>';
+      }).join('') + '</select>' + (dup ? '<div class="note"><span class="mi">warning_amber</span>Also matched to another product. Both get the same stock.</div>' : '');
+      var st = p.service ? '<span class="chip chip-neutral">Not trackable</span>' : q ? (dup ? '<span class="chip chip-warning">Shared item</span>' : '<span class="chip chip-success">Matched</span>') : '<span class="chip chip-neutral">Not matched</span>';
+      return '<tr class="' + (dup ? 'dup' : '') + '"><td>' + esc(p.name) + '</td><td>' + cell + '</td><td class="num-cell">' + p.qty + '</td><td class="num-cell">' + (q ? q.qty : '—') + '</td><td>' + st + '</td></tr>';
+    }).join('');
+    return '<table class="mt"><thead><tr><th style="width:26%">Shopify product</th><th style="width:34%">QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="5" class="muted" style="padding:16px">No products here.</td></tr>') + '</tbody></table>';
+  }
+  function fSeg(k, label) { return '<button class="' + (S.fFilter === k ? 'on' : '') + '" data-a="fFilter" data-v="' + k + '">' + label + '</button>'; }
+  function fMappings() {
+    var n = fMatched().length, all = PRODUCTS.length;
+    var cont = '';
+    if (!S.fOn && fAllMatched() > 0) cont = '<button class="btn btn-primary" data-a="fContinueMatch">Done matching</button>';
+    else if (!S.fOn) cont = '<span class="muted">Match at least 1 product</span>';
+    return '<div class="d-bar"><div class="row"><b style="font-size:16px">' + n + ' of ' + all + ' matched</b>' +
+      (S.fStores.length > 1 ? '<select data-a="fStoreSel" style="width:auto">' + S.fStores.map(function (x) { return '<option' + (x.store === S.fCur ? ' selected' : '') + '>' + x.store + '</option>'; }).join('') + '</select>' : '') +
+      '</div><div class="row">' + cont + '</div></div>' +
+      '<p class="muted" style="margin:0 0 10px">Auto-matched by SKU, then name. Unmatched products won\'t sync.</p>' +
+      '<div class="mt-tools" style="margin-top:0"><div class="seg">' + fSeg('unmatched', 'Not matched (' + (all - n) + ')') + fSeg('matched', 'Matched (' + n + ')') + fSeg('all', 'All (' + all + ')') + '</div>' +
+      '<div class="d-search"><span class="mi">search</span><input type="text" id="fSearch" placeholder="Search products" value="' + esc(S.fSearch) + '"></div></div>' +
+      '<div id="fTable">' + fTable() + '</div>';
+  }
+  function fActivity() {
+    if (!S.fOn) return '<div class="d-panel d-empty-tab">No events yet. They appear once sync is on.</div>';
+    return '<div class="synder-table-wrap"><table class="mt d-events"><thead><tr><th>Time</th><th>Product</th><th>Shopify qty</th><th>Status</th></tr></thead><tbody>' +
+      '<tr><td>Just now</td><td>Stone 10</td><td>8 → 12</td><td><span class="chip chip-success">Updated</span></td></tr></tbody></table></div>';
+  }
+  function fStock() {
+    var m = fMap(), ids = fMatched();
+    if (!ids.length) return '<div class="d-panel d-empty-tab">Match products to compare stock.</div>';
+    return '<table class="mt"><thead><tr><th>Shopify product</th><th>QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      ids.map(function (id) { var p = prod(id), q = item(m[id]), same = p.qty === q.qty;
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(q.name) + '</td><td>' + p.qty + '</td><td>' + q.qty + '</td><td>' + (same ? '<span class="chip chip-success">Same</span>' : '<span class="chip chip-warning">Differs</span>') + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+  function fInvBlock() {
+    if (S.fInv) {
+      return '<div class="f-status-row"><span class="lbl">Inventory setting</span><span class="val"><span class="chip chip-success">Done</span> Created product = Inventory</span>' +
+        (!S.fOn ? '<button class="link" data-a="fRedoInv">Change</button>' : '') + '</div>';
+    }
+    return '<div class="f-status-row" style="align-items:flex-start"><span class="lbl">Inventory setting</span><div class="val" style="flex:1">' +
+      '<span class="chip chip-warning">Not done</span>' +
+      '<div class="f-path">Settings → Shopify sync settings → Products/Services → set <b>“Created product should be”</b> to <b>Inventory</b>.</div>' +
+      '<div class="actions" style="margin-top:8px"><button class="btn btn-secondary" data-a="fOpenInv">Open Shopify sync settings</button><button class="btn-text" data-a="fDoneInv">I\'ve done this</button></div>' +
+      '</div></div>';
+  }
+  function fMatchBlock() {
+    var n = fAllMatched(), tot = PRODUCTS.length * Math.max(1, S.fStores.length);
+    var label = n + ' of ' + tot + ' matched';
+    if (S.fMatchDone || n > 0) {
+      return '<div class="f-status-row"><span class="lbl">Match products</span><span class="val"><span class="chip chip-success">' + label + '</span></span>' +
+        '<button class="link" data-a="fGoMappings">Open Mappings</button></div>';
+    }
+    return '<div class="f-status-row"><span class="lbl">Match products</span><span class="val"><span class="chip chip-neutral">' + label + '</span> · Auto-match by SKU, then name</span>' +
+      '<button class="btn btn-secondary" data-a="fGoMappings">Go to Mappings</button></div>';
+  }
+  function fOverview() {
+    if (!S.fStores.length) {
+      return '<div class="f-empty"><p>Set up QuickBooks → Shopify stock sync. Channels are already connected.</p>' +
+        '<button class="btn btn-primary" data-a="fOpenConnect" style="font-size:15px;padding:10px 22px">Connect store</button></div>';
+    }
+    if (S.fOn) {
+      return '<div class="f-on-banner"><span class="mi">check_circle</span><span>Sync on · QuickBooks quantity changes update Shopify from now on</span></div>' +
+        '<div class="f-panel"><h3 class="h3">Stores</h3>' +
+        S.fStores.map(function (x) {
+          var nm = fStoreMatched(x.store);
+          return '<div class="f-store"><span class="mi shop">storefront</span><div class="grow"><b>' + esc(x.store) + '</b><div class="meta">' + esc(x.loc) + ' · ' + nm + ' of 17 matched</div></div>' +
+            '<button class="link" data-a="fGoMatchStore" data-v="' + esc(x.store) + '">Mappings</button></div>';
+        }).join('') +
+        '<div style="padding-top:12px"><button class="btn btn-secondary" data-a="fOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button></div></div>';
+    }
+    var reason = !S.fInv ? 'Finish the Inventory setting first' : fAllMatched() === 0 ? 'Match at least 1 product on Mappings' : '';
+    return '<div class="f-panel"><h3 class="h3">Stores</h3>' +
+      S.fStores.map(function (x) {
+        var nm = fStoreMatched(x.store);
+        return '<div class="f-store"><span class="mi shop">storefront</span><div class="grow"><b>' + esc(x.store) + '</b><div class="meta">' + esc(x.loc) + ' · ' + nm + ' of 17 matched</div></div>' +
+          '<button class="link" data-a="fGoMatchStore" data-v="' + esc(x.store) + '">Match</button></div>';
+      }).join('') +
+      '<div style="padding-top:12px"><button class="btn btn-secondary" data-a="fOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button></div></div>' +
+      '<div class="f-panel"><h3 class="h3">Setup status</h3>' + fInvBlock() + fMatchBlock() + '</div>' +
+      '<div class="f-panel"><div class="f-enable">' +
+      '<button class="btn btn-primary" data-a="fAskOn"' + (fCanOn() ? '' : ' disabled') + '>Turn on sync</button>' +
+      (reason ? '<span class="muted">' + reason + '</span>' : '<span class="muted">From now on, QBO changes update Shopify. Existing gaps → Reconcile.</span>') +
+      '</div></div>';
+  }
+  function viewF() {
+    var con = S.fStores.length > 0;
+    var tabs = [['overview', 'Overview'], ['mappings', 'Mappings'], ['activity', 'Activity'], ['stock', 'Stock check']];
+    var h = '<div class="synder-tabs d-tabs">' + tabs.map(function (t) {
+      var off = !con && t[0] !== 'overview';
+      return '<button class="synder-tab' + (S.fTab === t[0] ? ' active' : '') + (off ? ' off' : '') + '" data-a="fTab" data-v="' + t[0] + '"' + (off ? ' aria-disabled="true" title="Connect a store first"' : '') + '>' + t[1] + '</button>';
+    }).join('') + '</div>';
+    if (!con || S.fTab === 'overview') return h + fOverview();
+    return h + (S.fTab === 'mappings' ? fMappings() : S.fTab === 'activity' ? fActivity() : fStock());
+  }
+  function fConnectModal() {
+    var opts = D_STORES.filter(function (x) { return !fConnected(x.id); });
+    var isNew = S.fSel === '__new', st = null;
+    D_STORES.forEach(function (x) { if (x.id === S.fSel) st = x; });
+    var locs = st ? st.locs : ['Default location'];
+    var ok = !S.fBusy && S.fLoc && (!isNew || /\S+\.myshopify\.com$/.test(S.fNew.trim()));
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Connect store">' +
+      '<div class="modal-h"><h2 class="h3">' + (S.fStores.length ? 'Add store' : 'Connect store') + '</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><div class="field" style="margin-top:0;max-width:none"><label for="fStore">Store</label><select id="fStore" data-a="fSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.fSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="fNew" placeholder="your-store.myshopify.com" value="' + esc(S.fNew) + '" style="margin-top:8px;width:100%">' : '') +
+      '<div class="helper">Shopify may ask you to approve the Inventory Sync app (separate from your main Synder connection).</div></div>' +
+      '<div class="field" style="max-width:none"><label for="fLoc">Location <span class="muted">(required)</span></label><select id="fLoc" data-a="fLocSel">' +
+      locs.map(function (l) { return '<option' + (S.fLoc === l ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select>' +
+      '<div class="helper">Stock updates go to this location. Until a location is chosen, the store receives nothing.</div></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" id="fConnectBtn" data-a="fConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.fBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Connecting…' : 'Connect') + '</button></div></div></div>';
+  }
+  function fConfirmModal() {
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Turn on sync" style="max-width:440px">' +
+      '<div class="modal-h"><h2 class="h3">Turn on inventory sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b">From this moment, QuickBooks quantity changes update Shopify. Existing gaps aren\'t fixed here — use Reconcile later.</div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="fTurnOn">Turn on</button></div></div></div>';
+  }
+  function fOpenConnect() {
+    var first = D_STORES.filter(function (x) { return !fConnected(x.id); })[0];
+    S.fSel = first ? first.id : '__new'; S.fNew = ''; S.fLoc = first ? first.locs[0] : 'Default location'; S.fBusy = false; S.modal = 'fConnect';
+  }
+  function fRefreshTable() { var t = document.getElementById('fTable'); if (t) t.innerHTML = fTable(); }
+
+  // ---------- variant G: store cards ----------
+  function gConnected(id) { return S.gStores.some(function (x) { return x.store === id; }); }
+  function gMap() { return S.gMaps[S.gCur] || {}; }
+  function gMatchedIn(m) { return PRODUCTS.filter(function (p) { return !p.service && m[p.id]; }).map(function (p) { return p.id; }); }
+  function gMatched() { return gMatchedIn(gMap()); }
+  function gStoreMatched(store) { return gMatchedIn(S.gMaps[store] || {}).length; }
+  function gAllMatched() { var n = 0; S.gStores.forEach(function (x) { n += gStoreMatched(x.store); }); return n; }
+  function gUse() { var c = {}, m = gMap(); gMatched().forEach(function (id) { c[m[id]] = (c[m[id]] || 0) + 1; }); return c; }
+  function gStoreMatchDone(store) { return !!S.gMatchDone[store] || gStoreMatched(store) > 0; }
+  function gAllStoresMatched() { return S.gStores.length > 0 && S.gStores.every(function (x) { return gStoreMatchDone(x.store); }); }
+  function gCanOn() { return S.gInv && gAllMatched() > 0 && gAllStoresMatched(); }
+  function gComputeVisible() {
+    var m = gMap(), q = S.gSearch.trim().toLowerCase();
+    S.gVisible = PRODUCTS.filter(function (p) {
+      var ok = !p.service && m[p.id];
+      if (S.gFilter === 'matched' && !ok) return false;
+      if (S.gFilter === 'unmatched' && ok) return false;
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || (m[p.id] && item(m[p.id]).name.toLowerCase().indexOf(q) >= 0);
+    }).map(function (p) { return p.id; });
+  }
+  function gTable() {
+    if (!S.gVisible) gComputeVisible();
+    var m = gMap(), uc = gUse();
+    var rows = S.gVisible.map(function (id) {
+      var p = prod(id), q = m[id] ? item(m[id]) : null, dup = q && uc[q.id] > 1, cell;
+      if (p.service) cell = '<select disabled><option>Service · can\'t track stock</option></select>';
+      else cell = '<select data-gmap="' + id + '"><option value="">Not matched</option>' + ITEMS.map(function (it) {
+        var no = it.type !== 'Inventory';
+        return '<option value="' + it.id + '"' + (m[id] === it.id ? ' selected' : '') + (no ? ' disabled' : '') + '>' + esc(it.name) + (no ? ' · ' + it.type + ', no stock' : '') + '</option>';
+      }).join('') + '</select>' + (dup ? '<div class="note"><span class="mi">warning_amber</span>Also matched to another product. Both get the same stock.</div>' : '');
+      var st = p.service ? '<span class="chip chip-neutral">Not trackable</span>' : q ? (dup ? '<span class="chip chip-warning">Shared item</span>' : '<span class="chip chip-success">Matched</span>') : '<span class="chip chip-neutral">Not matched</span>';
+      return '<tr class="' + (dup ? 'dup' : '') + '"><td>' + esc(p.name) + '</td><td>' + cell + '</td><td class="num-cell">' + p.qty + '</td><td class="num-cell">' + (q ? q.qty : '—') + '</td><td>' + st + '</td></tr>';
+    }).join('');
+    return '<table class="mt"><thead><tr><th style="width:26%">Shopify product</th><th style="width:34%">QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="5" class="muted" style="padding:16px">No products here.</td></tr>') + '</tbody></table>';
+  }
+  function gSeg(k, label) { return '<button class="' + (S.gFilter === k ? 'on' : '') + '" data-a="gFilter" data-v="' + k + '">' + label + '</button>'; }
+  function gMappings() {
+    var n = gMatched().length, all = PRODUCTS.length;
+    var cont = '';
+    if (!S.gOn && gMatched().length > 0) cont = '<button class="btn btn-primary" data-a="gContinueMatch">Done matching</button>';
+    else if (!S.gOn) cont = '<span class="muted">Match at least 1 product for this store</span>';
+    return '<div class="d-bar"><div class="row"><b style="font-size:16px">' + n + ' of ' + all + ' matched</b>' +
+      (S.gStores.length > 1 ? '<select data-a="gStoreSel" style="width:auto">' + S.gStores.map(function (x) { return '<option' + (x.store === S.gCur ? ' selected' : '') + '>' + x.store + '</option>'; }).join('') + '</select>' : '') +
+      '</div><div class="row">' + cont + '</div></div>' +
+      '<p class="muted" style="margin:0 0 10px">Auto-matched by SKU, then name. Unmatched products won\'t sync.</p>' +
+      '<div class="mt-tools" style="margin-top:0"><div class="seg">' + gSeg('unmatched', 'Not matched (' + (all - n) + ')') + gSeg('matched', 'Matched (' + n + ')') + gSeg('all', 'All (' + all + ')') + '</div>' +
+      '<div class="d-search"><span class="mi">search</span><input type="text" id="gSearch" placeholder="Search products" value="' + esc(S.gSearch) + '"></div></div>' +
+      '<div id="gTable">' + gTable() + '</div>';
+  }
+  function gActivity() {
+    if (!S.gOn) return '<div class="d-panel d-empty-tab">No events yet. They appear once sync is on.</div>';
+    return '<div class="synder-table-wrap"><table class="mt d-events"><thead><tr><th>Time</th><th>Product</th><th>Shopify qty</th><th>Status</th></tr></thead><tbody>' +
+      '<tr><td>Just now</td><td>Stone 10</td><td>8 → 12</td><td><span class="chip chip-success">Updated</span></td></tr></tbody></table></div>';
+  }
+  function gStock() {
+    var m = gMap(), ids = gMatched();
+    if (!ids.length) return '<div class="d-panel d-empty-tab">Match products to compare stock.</div>';
+    return '<table class="mt"><thead><tr><th>Shopify product</th><th>QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      ids.map(function (id) { var p = prod(id), q = item(m[id]), same = p.qty === q.qty;
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(q.name) + '</td><td>' + p.qty + '</td><td>' + q.qty + '</td><td>' + (same ? '<span class="chip chip-success">Same</span>' : '<span class="chip chip-warning">Differs</span>') + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+  function gCard(x) {
+    var nm = gStoreMatched(x.store);
+    if (S.gOn) {
+      return '<div class="g-card"><div class="g-card-h"><span class="mi shop">storefront</span><div><div class="t">' + esc(x.store) + '</div><div class="s">' + esc(x.loc) + '</div></div>' +
+        '<span class="g-syncing" style="margin-left:auto"><span class="dot"></span> Syncing · ' + nm + ' matched</span></div></div>';
+    }
+    var invDone = S.gInv, matchDone = gStoreMatchDone(x.store);
+    var invBody = invDone
+      ? '<div class="ttl">Inventory setting</div><div class="sub">Created product = Inventory</div>'
+      : '<div class="ttl">Inventory setting</div><div class="sub">Settings → Shopify sync settings → Products/Services → <b>Created product should be = Inventory</b></div>' +
+        '<div class="g-path">Path only — no settings preview in this flow.</div>' +
+        '<div class="actions" style="margin-top:8px"><button class="btn btn-secondary" data-a="gOpenInv">Open Shopify sync settings</button><button class="btn-text" data-a="gDoneInv">I\'ve done this</button></div>';
+    var matchBody = matchDone
+      ? '<div class="ttl">Match products</div><div class="sub">' + nm + ' of 17 matched</div><div class="actions" style="margin-top:6px"><button class="link" data-a="gGoMatchStore" data-v="' + esc(x.store) + '">Open Mappings</button></div>'
+      : '<div class="ttl">Match products</div><div class="sub">' + nm + ' of 17 matched · Auto-match by SKU, then name</div>' +
+        '<div class="actions" style="margin-top:6px"><button class="btn btn-secondary" data-a="gGoMatchStore" data-v="' + esc(x.store) + '">Go to Mappings</button></div>';
+    return '<div class="g-card"><div class="g-card-h"><span class="mi shop">storefront</span><div><div class="t">' + esc(x.store) + '</div><div class="s">' + esc(x.loc) + '</div></div></div>' +
+      '<div class="g-check">' +
+      '<div class="g-item' + (invDone ? ' done' : '') + '"><span class="mi ico">' + (invDone ? 'check_circle' : 'radio_button_unchecked') + '</span><div class="body">' + invBody + '</div></div>' +
+      '<div class="g-item' + (matchDone ? ' done' : '') + '"><span class="mi ico">' + (matchDone ? 'check_circle' : 'radio_button_unchecked') + '</span><div class="body">' + matchBody + '</div></div>' +
+      '</div></div>';
+  }
+  function gOverview() {
+    if (!S.gStores.length) {
+      return '<div class="g-empty"><p>Set up QuickBooks → Shopify stock sync. Channels are already connected.</p>' +
+        '<button class="btn btn-primary" data-a="gOpenConnect" style="font-size:15px;padding:10px 22px">Connect store</button></div>';
+    }
+    var h = '';
+    if (S.gOn) h += '<div class="g-on-banner"><span class="mi">check_circle</span><span>Sync on · QBO changes update Shopify from now on. Existing gaps → Reconcile.</span></div>';
+    h += '<div class="g-cards">' + S.gStores.map(gCard).join('') + '</div>';
+    h += '<div class="g-add"><button class="btn btn-secondary" data-a="gOpenConnect"><span class="mi" style="font-size:18px">add</span> Add another store</button></div>';
+    if (!S.gOn) {
+      var reason = !S.gInv ? 'Finish Inventory setting on a store card' : !gAllStoresMatched() ? 'Match products for each store' : '';
+      h += '<div class="g-enable-bar"><div>' +
+        (reason ? '<span class="muted">' + reason + '</span>' : '<span class="muted">From now on, QBO changes update Shopify. Existing gaps → Reconcile.</span>') +
+        '</div><button class="btn btn-primary" data-a="gAskOn"' + (gCanOn() ? '' : ' disabled') + '>Turn on sync</button></div>';
+    }
+    return h;
+  }
+  function viewG() {
+    var con = S.gStores.length > 0;
+    var tabs = [['overview', 'Overview'], ['mappings', 'Mappings'], ['activity', 'Activity'], ['stock', 'Stock check']];
+    var h = '<div class="synder-tabs d-tabs">' + tabs.map(function (t) {
+      var off = !con && t[0] !== 'overview';
+      return '<button class="synder-tab' + (S.gTab === t[0] ? ' active' : '') + (off ? ' off' : '') + '" data-a="gTab" data-v="' + t[0] + '"' + (off ? ' aria-disabled="true" title="Connect a store first"' : '') + '>' + t[1] + '</button>';
+    }).join('') + '</div>';
+    if (!con || S.gTab === 'overview') return h + gOverview();
+    return h + (S.gTab === 'mappings' ? gMappings() : S.gTab === 'activity' ? gActivity() : gStock());
+  }
+  function gConnectModal() {
+    var opts = D_STORES.filter(function (x) { return !gConnected(x.id); });
+    var isNew = S.gSel === '__new', st = null;
+    D_STORES.forEach(function (x) { if (x.id === S.gSel) st = x; });
+    var locs = st ? st.locs : ['Default location'];
+    var ok = !S.gBusy && S.gLoc && (!isNew || /\S+\.myshopify\.com$/.test(S.gNew.trim()));
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Connect store">' +
+      '<div class="modal-h"><h2 class="h3">' + (S.gStores.length ? 'Add store' : 'Connect store') + '</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><div class="field" style="margin-top:0;max-width:none"><label for="gStore">Store</label><select id="gStore" data-a="gSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.gSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="gNew" placeholder="your-store.myshopify.com" value="' + esc(S.gNew) + '" style="margin-top:8px;width:100%">' : '') +
+      '<div class="helper">Shopify may ask you to approve the Inventory Sync app (separate from your main Synder connection).</div></div>' +
+      '<div class="field" style="max-width:none"><label for="gLoc">Location <span class="muted">(required)</span></label><select id="gLoc" data-a="gLocSel">' +
+      locs.map(function (l) { return '<option' + (S.gLoc === l ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select>' +
+      '<div class="helper">Stock updates go to this location. Until a location is chosen, the store receives nothing.</div></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" id="gConnectBtn" data-a="gConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.gBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Connecting…' : 'Connect') + '</button></div></div></div>';
+  }
+  function gConfirmModal() {
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Turn on sync" style="max-width:440px">' +
+      '<div class="modal-h"><h2 class="h3">Turn on inventory sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b">From this moment, QuickBooks quantity changes update Shopify. Existing gaps aren\'t fixed here — use Reconcile later.</div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="gTurnOn">Turn on</button></div></div></div>';
+  }
+  function gOpenConnect() {
+    var first = D_STORES.filter(function (x) { return !gConnected(x.id); })[0];
+    S.gSel = first ? first.id : '__new'; S.gNew = ''; S.gLoc = first ? first.locs[0] : 'Default location'; S.gBusy = false; S.modal = 'gConnect';
+  }
+  function gRefreshTable() { var t = document.getElementById('gTable'); if (t) t.innerHTML = gTable(); }
+
   // ---------- modals ----------
   function modalHtml() {
     if (S.modal === 'dConnect') return dConnectModal();
     if (S.modal === 'dConfirm') return dConfirmModal();
     if (S.modal === 'eConnect') return eConnectModal();
     if (S.modal === 'eConfirm') return eConfirmModal();
+    if (S.modal === 'fConnect') return fConnectModal();
+    if (S.modal === 'fConfirm') return fConfirmModal();
+    if (S.modal === 'gConnect') return gConnectModal();
+    if (S.modal === 'gConfirm') return gConfirmModal();
     if (S.modal === 'match') {
       return '<div class="overlay" data-a="closeOverlay"><div class="modal" role="dialog" aria-label="Match products">' +
         '<div class="modal-h"><h2 class="h3">Match Shopify products to QuickBooks items</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
@@ -816,6 +1167,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     document.getElementById('headActions').innerHTML = head;
     if (variant === 'D') v.innerHTML = viewD();
     else if (variant === 'E') v.innerHTML = viewE();
+    else if (variant === 'F') v.innerHTML = viewF();
+    else if (variant === 'G') v.innerHTML = viewG();
     else if (S.on) v.innerHTML = successView();
     else if (!S.started) v.innerHTML = emptyState();
     else v.innerHTML = variant === 'A' ? viewA() : variant === 'B' ? viewB() : viewC();
@@ -896,6 +1249,72 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     },
     eAskOn: function () { if (!eCanOn()) return 'norender'; S.modal = 'eConfirm'; },
     eTurnOn: function () { S.eOn = true; S.modal = null; S.eTab = 'overview'; toast('Inventory sync is on'); },
+    fOpenConnect: fOpenConnect,
+    fConnect: function () {
+      if (!S.fLoc) { toast('Choose a location'); return 'norender'; }
+      S.fBusy = true;
+      setTimeout(function () {
+        var id = S.fSel === '__new' ? S.fNew.trim() : S.fSel, first = !S.fStores.length;
+        S.fStores.push({ store: id, loc: S.fLoc });
+        S.fMaps[id] = id === STORE ? { p10: 'q12' } : {};
+        if (id === STORE) S.fMatchDone = true;
+        S.fBusy = false; S.modal = null; S.fCur = id; S.fFilter = 'unmatched'; S.fSearch = ''; S.fVisible = null;
+        S.fTab = 'overview';
+        toast((first ? 'Store connected' : 'Store added') + ' · ' + id);
+        render();
+        window.scrollTo(0, 0);
+      }, 700);
+    },
+    fTab: function (el) {
+      var tab = el.dataset.v;
+      if (!S.fStores.length && tab !== 'overview') { toast('Connect a store first'); return 'norender'; }
+      if (S.fTab === 'mappings' && tab === 'overview' && fAllMatched() > 0) S.fMatchDone = true;
+      S.fTab = tab; S.fVisible = null;
+    },
+    fGoMatchStore: function (el) { S.fCur = el.dataset.v; S.fTab = 'mappings'; S.fFilter = 'unmatched'; S.fVisible = null; },
+    fGoMappings: function () { S.fTab = 'mappings'; S.fFilter = 'unmatched'; S.fVisible = null; },
+    fOpenInv: function () { S.fInv = true; toast('Marked done · Created product should be Inventory'); },
+    fDoneInv: function () { S.fInv = true; toast('Step marked done'); },
+    fRedoInv: function () { S.fInv = false; },
+    fFilter: function (el) { S.fFilter = el.dataset.v; S.fVisible = null; },
+    fContinueMatch: function () {
+      if (fAllMatched() === 0) { toast('Match at least 1 product'); return 'norender'; }
+      S.fMatchDone = true; S.fTab = 'overview'; toast('Match step done · ' + fAllMatched() + ' matched');
+    },
+    fAskOn: function () { if (!fCanOn()) return 'norender'; S.modal = 'fConfirm'; },
+    fTurnOn: function () { S.fOn = true; S.modal = null; S.fTab = 'overview'; toast('Inventory sync is on'); },
+    gOpenConnect: gOpenConnect,
+    gConnect: function () {
+      if (!S.gLoc) { toast('Choose a location'); return 'norender'; }
+      S.gBusy = true;
+      setTimeout(function () {
+        var id = S.gSel === '__new' ? S.gNew.trim() : S.gSel, first = !S.gStores.length;
+        S.gStores.push({ store: id, loc: S.gLoc });
+        S.gMaps[id] = id === STORE ? { p10: 'q12' } : {};
+        if (id === STORE) S.gMatchDone[id] = true;
+        S.gBusy = false; S.modal = null; S.gCur = id; S.gFilter = 'unmatched'; S.gSearch = ''; S.gVisible = null;
+        S.gTab = 'overview';
+        toast((first ? 'Store connected' : 'Store added') + ' · ' + id);
+        render();
+        window.scrollTo(0, 0);
+      }, 700);
+    },
+    gTab: function (el) {
+      var tab = el.dataset.v;
+      if (!S.gStores.length && tab !== 'overview') { toast('Connect a store first'); return 'norender'; }
+      if (S.gTab === 'mappings' && tab === 'overview' && gMatched().length > 0) S.gMatchDone[S.gCur] = true;
+      S.gTab = tab; S.gVisible = null;
+    },
+    gGoMatchStore: function (el) { S.gCur = el.dataset.v; S.gTab = 'mappings'; S.gFilter = 'unmatched'; S.gVisible = null; },
+    gOpenInv: function () { S.gInv = true; toast('Marked done · Created product should be Inventory'); },
+    gDoneInv: function () { S.gInv = true; toast('Step marked done'); },
+    gFilter: function (el) { S.gFilter = el.dataset.v; S.gVisible = null; },
+    gContinueMatch: function () {
+      if (gMatched().length === 0) { toast('Match at least 1 product'); return 'norender'; }
+      S.gMatchDone[S.gCur] = true; S.gTab = 'overview'; toast('Match done for ' + S.gCur + ' · ' + gMatched().length + ' matched');
+    },
+    gAskOn: function () { if (!gCanOn()) return 'norender'; S.modal = 'gConfirm'; },
+    gTurnOn: function () { S.gOn = true; S.modal = null; S.gTab = 'overview'; toast('Inventory sync is on'); },
     closeOverlay: function (el, e) { if (e.target === el) actions.closeModal(); else return 'norender'; }
   };
 
@@ -921,6 +1340,14 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (t.dataset.a === 'eSel') { S.eSel = t.value; var est = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.eLoc = est ? est.locs[0] : 'Default location'; render(); }
     else if (t.dataset.a === 'eLocSel') { S.eLoc = t.value; }
     else if (t.dataset.a === 'eStoreSel') { S.eCur = t.value; S.eVisible = null; render(); }
+    else if (t.dataset.fmap) { var fm = S.fMaps[S.fCur]; if (t.value) fm[t.dataset.fmap] = t.value; else delete fm[t.dataset.fmap]; render(); }
+    else if (t.dataset.a === 'fSel') { S.fSel = t.value; var fst = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.fLoc = fst ? fst.locs[0] : 'Default location'; render(); }
+    else if (t.dataset.a === 'fLocSel') { S.fLoc = t.value; }
+    else if (t.dataset.a === 'fStoreSel') { S.fCur = t.value; S.fVisible = null; render(); }
+    else if (t.dataset.gmap) { var gm = S.gMaps[S.gCur]; if (t.value) gm[t.dataset.gmap] = t.value; else delete gm[t.dataset.gmap]; render(); }
+    else if (t.dataset.a === 'gSel') { S.gSel = t.value; var gst = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.gLoc = gst ? gst.locs[0] : 'Default location'; render(); }
+    else if (t.dataset.a === 'gLocSel') { S.gLoc = t.value; }
+    else if (t.dataset.a === 'gStoreSel') { S.gCur = t.value; S.gVisible = null; render(); }
   });
   document.addEventListener('input', function (e) {
     var t = e.target;
@@ -928,9 +1355,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (t.id === 'dNew') { S.dNew = t.value; var b = document.getElementById('dConnectBtn'); if (b) b.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()); }
     else if (t.id === 'eSearch') { S.eSearch = t.value; S.eVisible = null; eRefreshTable(); }
     else if (t.id === 'eNew') { S.eNew = t.value; var eb = document.getElementById('eConnectBtn'); if (eb) eb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.eLoc; }
+    else if (t.id === 'fSearch') { S.fSearch = t.value; S.fVisible = null; fRefreshTable(); }
+    else if (t.id === 'fNew') { S.fNew = t.value; var fb = document.getElementById('fConnectBtn'); if (fb) fb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.fLoc; }
+    else if (t.id === 'gSearch') { S.gSearch = t.value; S.gVisible = null; gRefreshTable(); }
+    else if (t.id === 'gNew') { S.gNew = t.value; var gb = document.getElementById('gConnectBtn'); if (gb) gb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.gLoc; }
   });
-  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCDE'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
-  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn, eAllMatched: eAllMatched, eCanOn: eCanOn, eCurStep: eCurStep } };
+  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCDEFG'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
+  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn, eAllMatched: eAllMatched, eCanOn: eCanOn, eCurStep: eCurStep, fAllMatched: fAllMatched, fCanOn: fCanOn, gAllMatched: gAllMatched, gCanOn: gCanOn } };
   render();
 })();
 </script>
