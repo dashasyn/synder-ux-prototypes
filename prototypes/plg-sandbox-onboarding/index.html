@@ -10,10 +10,10 @@
     - Choose plan: only the two Pro cards are clickable; Basic / Essential / Premium CTAs are inactive.
     - Survey: white page, no card chrome; sticky Subtitle1 welcome line (plan-aware) above the question on all steps; Continue/Done stay enabled with inline validation.
     - “I’ll fill this in later” (steps 1–2) closes the survey and opens Thank you (in-app shell).
-    - Soft-lock stubs: Settings (freq / Auto-sync), Historical import entry+config, Smart Rules zero-state.
+    - Soft-lock stubs still reachable via checklist deep-links: Settings (freq / Auto-sync), Historical import, Smart Rules.
     - Activation-session shortcut on steps 1–2 jumps to step 3 (contact) — never Success.
     - Success: booking confirmation only (“You’re all set.”); contact block kept; Continue → Thank you.
-    - Thank you: in-app shell (product sidebar + top bar) with subscription thank-you + auto-charge toggle (default ON). No check icon / ready list / Continue CTA. Sidebar Dashboard → App.
+    - Thank you + App share one product shell (org sidebar + Balance top bar). Thank you: subscription thank-you + auto-charge (default ON). Sidebar Dashboard/nav → App.
     - Zoom → separate HubSpot booking page (calendar + Choose this time) → Success with slot; Phone / Email → Success directly.
     - App: Dashboard is a normal welcome/summary placeholder; Setup checklist is its own nav page.
     - Setup checklist: Hybrid-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
@@ -56,7 +56,7 @@
       font-size: var(--font-subtitle1);
       line-height: var(--font-subtitle1-line-height);
       letter-spacing: var(--font-subtitle1-letter-spacing);
-      color: var(--color-primary);
+      color: var(--text-primary); /* #1A1B24 — survey chrome title, not brand blue */
     }
     .ob-content { padding: 40px 20px 48px; }
 
@@ -1003,7 +1003,7 @@
     @media (max-width: 720px) {
       .survey-card { padding: 8px 0 20px; }
       .success-card { padding: 24px 20px; }
-      .app-sidebar { width: 200px; min-width: 200px; }
+      .ty-sidebar { width: 200px; min-width: 200px; }
       .placeholder-grid { grid-template-columns: 1fr; }
     }
 
@@ -1195,8 +1195,14 @@
       background: transparent; width: 100%; text-align: left; font-family: inherit;
     }
     .ty-snav:hover { background: #EEF3FA; }
+    .ty-snav.active {
+      background: #3478F6; color: #fff; border-bottom-color: transparent;
+    }
+    .ty-snav.active:hover { background: #3478F6; }
     .ty-snav .material-icons { font-size: 18px; color: #4B5563; }
+    .ty-snav.active .material-icons { color: #fff; }
     .ty-snav .chev { margin-left: auto; font-size: 18px; color: #9AA3B2; }
+    .ty-snav.active .chev { color: rgba(255,255,255,.85); }
     .ty-sgap {
       height: 12px; border-bottom: 1px solid #C8C7CC; flex-shrink: 0;
     }
@@ -1403,7 +1409,7 @@
 
   <!-- ═══════════════ FLOW A — Survey ═══════════════ -->
   <div class="view" id="view-survey">
-    <div class="ob-top"><span class="ob-logo">Synder</span></div>
+    <div class="ob-top"><span class="ob-logo">Set up your account</span></div>
     <div class="ob-content">
     <div class="survey-card">
       <p class="survey-welcome-line" id="survey-welcome-line">Welcome to Pro plan – a few questions so your specialist can prepare.</p>
@@ -1613,19 +1619,27 @@
             <span class="ty-org-name">Dasha Test Com…</span>
             <span class="material-icons">expand_more</span>
           </div>
-          <button type="button" class="ty-snav" data-ty-nav="dashboard"><span class="material-icons">bar_chart</span> Dashboard</button>
-          <button type="button" class="ty-snav" data-ty-nav="mapping"><span class="material-icons">sync</span> Mapping<span class="material-icons chev">expand_more</span></button>
-          <button type="button" class="ty-snav" data-ty-nav="summaries"><span class="material-icons">swap_horiz</span> Summaries<span class="material-icons chev">expand_more</span></button>
-          <button type="button" class="ty-snav" data-ty-nav="reconciliation"><span class="material-icons">menu_book</span> Reconciliation<span class="material-icons chev">expand_more</span></button>
-          <button type="button" class="ty-snav" data-ty-nav="products"><span class="material-icons">shopping_cart</span> Products and services</button>
-          <button type="button" class="ty-snav" data-ty-nav="analytics"><span class="material-icons">show_chart</span> Analytics<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="dashboard"><span class="material-icons">bar_chart</span> Dashboard</button>
+          <button type="button" class="ty-snav" data-page="mapping"><span class="material-icons">sync</span> Mapping<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="summaries"><span class="material-icons">swap_horiz</span> Summaries<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="reconciliation"><span class="material-icons">menu_book</span> Reconciliation<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="products"><span class="material-icons">shopping_cart</span> Products and services</button>
+          <button type="button" class="ty-snav" data-page="analytics"><span class="material-icons">show_chart</span> Analytics<span class="material-icons chev">expand_more</span></button>
           <div class="ty-sgap"></div>
-          <button type="button" class="ty-snav" data-ty-nav="settings"><span class="material-icons">settings</span> Settings</button>
-          <button type="button" class="ty-snav" data-ty-nav="ai"><span class="material-icons">hub</span> AI Agents</button>
-          <button type="button" class="ty-snav" data-ty-nav="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
-          <button type="button" class="ty-snav" data-ty-nav="custom"><span class="material-icons">apps</span> Custom development</button>
-          <div class="ty-promo" id="ty-promo">
-            <button type="button" class="ty-promo-x" id="ty-promo-close" aria-label="Dismiss"><span class="material-icons">close</span></button>
+          <div class="sidebar-health" role="button" tabindex="0" aria-label="Open Setup checklist">
+            <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
+            <div class="hs-meta hs-meta-chip">0 / 6 complete</div>
+            <div class="hs-bar hs-bar-chip"><span style="width:0%"></span></div>
+            <button type="button" class="hs-compact-cta hs-open-main" aria-label="Open Setup checklist">
+              View Setup checklist <span class="material-icons-round">arrow_forward</span>
+            </button>
+          </div>
+          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
+          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
+          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
+          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
+          <div class="ty-promo">
+            <button type="button" class="ty-promo-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
             <div class="ty-promo-ico">
               <span class="material-icons">description</span>
               <span class="check"><span class="material-icons">check</span></span>
@@ -1657,56 +1671,51 @@
 
   <!-- ═══════════════ FLOW C — App + Setup checklist ═══════════════ -->
   <div class="view" id="view-app">
-    <div class="app-shell">
-      <div class="app-topbar">
-        <div class="app-topbar-brand">
-          <span class="mark">S</span>
-          Synder
-          <span class="sandbox-pill">Sandbox</span>
-        </div>
-        <div class="text-secondary" style="font-size:13px">Demo org · Pro Sandbox</div>
+    <div class="ty-shell">
+      <div class="ty-topbar">
+        <span class="ty-balance">Balance : <b>10000</b></span>
+        <button type="button" class="ty-how">How it works?</button>
+        <button type="button" class="ty-top-ico" aria-label="Notifications"><span class="material-icons">notifications_none</span></button>
+        <button type="button" class="ty-top-ico" aria-label="Help"><span class="material-icons-round">help_outline</span></button>
+        <button type="button" class="ty-user" aria-label="Account"><span class="material-icons">account_circle</span><span class="material-icons chev">expand_more</span></button>
       </div>
-      <div class="app-body">
-        <aside class="app-sidebar">
-          <button type="button" class="nav-item active" data-page="dashboard">
-            <span class="material-icons">dashboard</span> Dashboard
-          </button>
-          <button type="button" class="nav-item" data-page="transactions">
-            <span class="material-icons">receipt_long</span> Transactions
-          </button>
-          <button type="button" class="nav-item" data-page="summaries">
-            <span class="material-icons">summarize</span> Summaries
-          </button>
-          <button type="button" class="nav-item" data-page="auto-sync">
-            <span class="material-icons">sync</span> Auto-sync
-            <span class="material-icons lock">lock</span>
-          </button>
-          <button type="button" class="nav-item" data-page="historical">
-            <span class="material-icons">history</span> Historical import
-            <span class="material-icons lock">lock</span>
-          </button>
-          <button type="button" class="nav-item" data-page="smart-rules">
-            <span class="material-icons">rule</span> Smart Rules
-            <span class="material-icons lock">lock</span>
-          </button>
-
-          <!-- Compact progress chip — full checklist on Setup checklist page -->
-          <div class="sidebar-health" id="health-widget" role="button" tabindex="0" aria-label="Open Setup checklist">
+      <div class="ty-layout">
+        <aside class="ty-sidebar">
+          <div class="ty-org">
+            <span class="ty-org-av">DA</span>
+            <span class="ty-org-name">Dasha Test Com…</span>
+            <span class="material-icons">expand_more</span>
+          </div>
+          <button type="button" class="ty-snav" data-page="dashboard"><span class="material-icons">bar_chart</span> Dashboard</button>
+          <button type="button" class="ty-snav" data-page="mapping"><span class="material-icons">sync</span> Mapping<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="summaries"><span class="material-icons">swap_horiz</span> Summaries<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="reconciliation"><span class="material-icons">menu_book</span> Reconciliation<span class="material-icons chev">expand_more</span></button>
+          <button type="button" class="ty-snav" data-page="products"><span class="material-icons">shopping_cart</span> Products and services</button>
+          <button type="button" class="ty-snav" data-page="analytics"><span class="material-icons">show_chart</span> Analytics<span class="material-icons chev">expand_more</span></button>
+          <div class="ty-sgap"></div>
+          <div class="sidebar-health" role="button" tabindex="0" aria-label="Open Setup checklist">
             <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
-            <div class="hs-meta" id="hs-meta">0 / 6 complete</div>
-            <div class="hs-bar" id="hs-bar"><span style="width:0%"></span></div>
-            <button type="button" class="hs-compact-cta" id="hs-open-main" aria-label="Open Setup checklist">
+            <div class="hs-meta hs-meta-chip">0 / 6 complete</div>
+            <div class="hs-bar hs-bar-chip"><span style="width:0%"></span></div>
+            <button type="button" class="hs-compact-cta hs-open-main" aria-label="Open Setup checklist">
               View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
-
-          <div class="sidebar-bottom">
-            <button type="button" class="nav-item" data-page="settings">
-              <span class="material-icons">settings</span> Settings
-            </button>
+          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
+          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
+          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
+          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
+          <div class="ty-promo">
+            <button type="button" class="ty-promo-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
+            <div class="ty-promo-ico">
+              <span class="material-icons">description</span>
+              <span class="check"><span class="material-icons">check</span></span>
+            </div>
+            <strong>Missed any transactions?</strong>
+            <p>Confirm each one made it from your platform to Synder — before summaries get synced to your books.</p>
+            <button type="button" class="btn btn-primary">Check now</button>
           </div>
         </aside>
-
         <main class="app-main">
           <div class="page-panel" id="page-panel">
             <div class="snooze-banner" id="snooze-banner" role="status">
@@ -2426,24 +2435,24 @@
     });
   }
 
-  // Thank you sidebar: Dashboard opens App as usual; other items are chrome only.
-  $$('#view-thankyou [data-ty-nav]').forEach(btn => {
+  // Shared product sidebar: any nav item opens App on that page (Thank you ↔ App).
+  function goProductPage(page) {
+    if (!page) return;
+    state.appPage = page;
+    setView('app');
+    window.scrollTo(0, 0);
+  }
+  $$('.ty-snav[data-page]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const page = btn.dataset.tyNav;
-      if (page === 'dashboard') {
-        state.appPage = 'dashboard';
-        setView('app');
-        window.scrollTo(0, 0);
-      }
+      goProductPage(btn.dataset.page);
     });
   });
-  const tyPromoClose = $('#ty-promo-close');
-  if (tyPromoClose) {
-    tyPromoClose.addEventListener('click', () => {
-      const promo = $('#ty-promo');
+  $$('.ty-promo-x').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const promo = btn.closest('.ty-promo');
       if (promo) promo.style.display = 'none';
     });
-  }
+  });
 
   const hsBack = $('#hs-back-survey');
   if (hsBack) {
@@ -2602,7 +2611,10 @@
 
   function renderHealth() {
     const model = healthModel();
-    paintScoreMeta($('#hs-meta'), $('#hs-bar'), model);
+    $$('.hs-meta-chip').forEach((el, i) => {
+      const bar = $$('.hs-bar-chip')[i];
+      paintScoreMeta(el, bar, model);
+    });
     const main = $('#main-health');
     if (main) paintMainHealth(main, model);
   }
@@ -2716,6 +2728,13 @@
       'setup-checklist': 'Setup checklist',
       transactions: 'Transactions',
       summaries: 'Summaries',
+      mapping: 'Mapping',
+      reconciliation: 'Reconciliation',
+      products: 'Products and services',
+      analytics: 'Analytics',
+      ai: 'AI Agents',
+      'whats-new': 'What’s New',
+      custom: 'Custom development',
       'auto-sync': 'Auto-sync',
       historical: 'Historical import',
       'smart-rules': 'Smart Rules',
@@ -2931,7 +2950,7 @@
     if (snoozeBanner) snoozeBanner.classList.toggle('show', !!state.surveySnoozed);
     renderAppPage();
     renderHealth();
-    $$('.nav-item').forEach(b => {
+    $$('.ty-snav[data-page]').forEach(b => {
       b.classList.toggle('active', b.dataset.page === state.appPage);
     });
   }
@@ -2954,18 +2973,29 @@
   });
 
   function openChecklistFromChip() {
-    focusMainChecklist();
-  }
-  $('#hs-open-main').addEventListener('click', e => {
-    e.stopPropagation();
-    openChecklistFromChip();
-  });
-  $('#health-widget').addEventListener('click', () => openChecklistFromChip());
-  $('#health-widget').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openChecklistFromChip();
+    // Chip exists on Thank you + App; always land on App Setup checklist page.
+    if (document.body.dataset.view !== 'app') {
+      state.appPage = 'setup-checklist';
+      setView('app');
+      window.scrollTo(0, 0);
+    } else {
+      focusMainChecklist();
     }
+  }
+  $$('.hs-open-main').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openChecklistFromChip();
+    });
+  });
+  $$('.sidebar-health').forEach(widget => {
+    widget.addEventListener('click', () => openChecklistFromChip());
+    widget.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openChecklistFromChip();
+      }
+    });
   });
 
   $('#demo-contact').addEventListener('change', e => {
@@ -2983,12 +3013,7 @@
     }
   });
 
-  $$('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.appPage = btn.dataset.page;
-      renderApp();
-    });
-  });
+  // Product nav clicks: see goProductPage / .ty-snav handlers above.
 
   $('#btn-reset').addEventListener('click', e => {
     e.preventDefault();
