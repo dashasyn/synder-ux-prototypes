@@ -6,6 +6,8 @@
   <title>PLG Sandbox onboarding — Synder</title>
   <!--
     PLG Sandbox onboarding prototype (Ignat feedback):
+    - Full flow: Choose plan → Checkout (Stripe-style) → Survey (step 1 opens with Welcome header) → HubSpot (Zoom) → Success → App.
+    - Choose plan: only the two Pro cards are clickable; Basic / Essential / Premium CTAs are inactive.
     - Survey: white page, no card chrome; Continue/Done stay enabled with inline validation.
     - “I’ll fill this in later” (steps 1–2) closes the survey and opens Dashboard (returns in 24h).
     - Soft-lock stubs: Settings (freq / Auto-sync), Historical import entry+config, Smart Rules zero-state.
@@ -116,6 +118,8 @@
     /* ── Views ────────────────────────────────────────── */
     .view { display: none; min-height: calc(100vh - var(--proto-bar-h)); }
     .view.active { display: block; }
+    body[data-view="plan"] #view-plan,
+    body[data-view="checkout"] #view-checkout,
     body[data-view="survey"] #view-survey,
     body[data-view="hubspot"] #view-hubspot,
     body[data-view="success"] #view-success,
@@ -990,9 +994,132 @@
       .app-sidebar { width: 200px; min-width: 200px; }
       .placeholder-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Choose plan (new) ───────────────────────────── */
+    #view-plan { background: var(--bg-page); }
+    .plan-page { max-width: 1280px; margin: 0 auto; padding: 32px 24px 48px; }
+    .plan-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .plan-head .page-title { margin: 0 0 4px; }
+    .plan-head p { margin: 0; font-size: var(--font-body2); line-height: var(--font-body2-line-height); color: var(--text-secondary); }
+    .billing-toggle {
+      display: inline-flex; padding: 3px; gap: 2px; border-radius: 99px;
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+    }
+    .billing-toggle button {
+      appearance: none; border: none; background: transparent; cursor: pointer;
+      font: inherit; font-size: 14px; font-weight: 500; line-height: 20px;
+      color: var(--text-secondary); padding: 6px 16px; border-radius: 99px; white-space: nowrap;
+    }
+    .billing-toggle button.active { background: var(--color-primary); color: var(--text-on-primary); }
+    .billing-toggle .off { color: var(--color-green); font-weight: 700; }
+    .billing-toggle button.active .off { color: #DDF5C7; }
+    .plan-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+    @media (max-width: 1240px) { .plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 860px) { .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .plan-grid { grid-template-columns: 1fr; } }
+    .plan-card {
+      position: relative; display: flex; flex-direction: column;
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      border-radius: var(--radius-md, 8px); padding: 20px 16px 16px;
+      font-size: 14px; line-height: 20px;
+    }
+    .plan-card.popular { border: 2px solid var(--color-primary); padding: 19px 15px 15px; }
+    .plan-card.inactive { opacity: .72; }
+    .plan-badge {
+      position: absolute; top: -12px; left: 16px;
+      background: var(--color-primary); color: var(--text-on-primary);
+      font-size: 14px; font-weight: 700; line-height: 20px; letter-spacing: .02em;
+      padding: 2px 10px; border-radius: 99px;
+    }
+    .plan-name { font-size: var(--font-h6); font-weight: 500; line-height: 24px; color: var(--text-primary); margin: 0 0 4px; }
+    .plan-tag { color: var(--text-secondary); margin: 0 0 12px; min-height: 40px; }
+    .plan-price { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; min-height: 36px; }
+    .plan-price .from { font-size: 14px; color: var(--text-secondary); }
+    .plan-price .amt { font-size: 28px; font-weight: 500; line-height: 36px; color: var(--text-primary); }
+    .plan-price .per { font-size: 14px; color: var(--text-secondary); }
+    .plan-price .custom { font-size: 16px; font-weight: 500; line-height: 24px; color: var(--text-primary); }
+    .plan-billed { font-size: 14px; color: var(--text-secondary); min-height: 20px; margin: 2px 0 10px; }
+    .plan-limit {
+      font-size: 14px; color: var(--text-primary); background: var(--bg-subtle);
+      border-radius: var(--radius-sm, 4px); padding: 6px 8px; margin-bottom: 12px; min-height: 32px;
+    }
+    .plan-cta { width: 100%; justify-content: center; margin-bottom: 14px; font-size: 14px; }
+    .plan-cta[aria-disabled="true"] {
+      cursor: not-allowed; background: var(--color-grey-10); color: var(--text-disabled);
+      border-color: var(--color-grey-10); box-shadow: none;
+    }
+    .plan-cta[aria-disabled="true"]:hover { background: var(--color-grey-10); color: var(--text-disabled); }
+    .plan-feats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .plan-feats li { display: flex; gap: 6px; align-items: flex-start; font-size: 14px; line-height: 20px; color: var(--text-primary); }
+    .plan-feats li .material-icons-round { font-size: 16px; line-height: 20px; color: var(--color-green); flex-shrink: 0; }
+    .plan-feats li.lead { font-weight: 500; }
+    .plan-feats li.lead .material-icons-round { visibility: hidden; }
+    .plan-foot { margin: 20px 0 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--text-secondary); }
+    .plan-foot strong { color: var(--text-primary); font-weight: 500; }
+
+    /* ── Checkout (generic Stripe-hosted look, new) ─── */
+    #view-checkout { background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; color: #1A1A1A; }
+    .co-wrap { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - var(--proto-bar-h)); }
+    @media (max-width: 860px) { .co-wrap { grid-template-columns: 1fr; } }
+    .co-left { background: #F6F8FA; display: flex; justify-content: flex-end; padding: 48px 48px 32px; }
+    .co-right { display: flex; justify-content: flex-start; padding: 48px 48px 32px; box-shadow: -1px 0 0 #E6E6E6; }
+    .co-col { width: 100%; max-width: 400px; }
+    .co-back {
+      appearance: none; border: none; background: none; padding: 0; cursor: pointer;
+      font: inherit; font-size: 14px; color: #6B7280; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px;
+    }
+    .co-back:hover { color: #1A1A1A; }
+    .co-merchant { font-weight: 600; font-size: 16px; color: #1A1A1A; display: inline-flex; align-items: center; gap: 8px; }
+    .co-merchant .dot { width: 24px; height: 24px; border-radius: 6px; background: #0053CC; color: #fff; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .co-sub-title { margin: 28px 0 4px; font-size: 16px; color: #6B7280; font-weight: 500; }
+    .co-amount { display: flex; align-items: baseline; gap: 6px; margin: 0 0 28px; }
+    .co-amount .big { font-size: 36px; font-weight: 600; line-height: 44px; letter-spacing: -.02em; }
+    .co-amount .per { font-size: 14px; color: #6B7280; line-height: 18px; }
+    .co-line { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 12px 0; }
+    .co-line .muted { color: #6B7280; font-size: 14px; }
+    .co-line.item { align-items: flex-start; }
+    .co-line.item .name { font-weight: 500; }
+    .co-sep { height: 1px; background: #E6E6E6; }
+    .co-line.total { font-weight: 600; }
+    .co-h { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+    .co-section { margin-bottom: 28px; }
+    .co-label { display: block; font-size: 14px; color: #4B5563; margin: 0 0 6px; }
+    .co-input, .co-select {
+      width: 100%; height: 40px; padding: 0 12px; font: inherit; font-size: 14px; color: #1A1A1A;
+      border: 1px solid #E0E0E0; background: #fff; outline: none;
+    }
+    .co-input:focus, .co-select:focus { border-color: #635BFF; box-shadow: 0 0 0 3px rgba(99,91,255,.2); position: relative; z-index: 1; }
+    .co-group { border-radius: 6px; box-shadow: 0 1px 1px rgba(0,0,0,.03), 0 3px 6px rgba(0,0,0,.02); }
+    .co-group .co-input { border-radius: 0; margin-top: -1px; }
+    .co-group > :first-child, .co-group > :first-child .co-input { border-radius: 6px 6px 0 0; }
+    .co-row2 { display: grid; grid-template-columns: 1fr 1fr; }
+    .co-row2 .co-input:first-child { border-radius: 0 0 0 6px; }
+    .co-row2 .co-input:last-child { border-radius: 0 0 6px 0; margin-left: -1px; }
+    .co-single { border-radius: 6px; }
+    .co-field { margin-bottom: 14px; }
+    .co-pay {
+      width: 100%; height: 44px; border: none; border-radius: 6px; cursor: pointer;
+      background: #0074D4; color: #fff; font: inherit; font-size: 16px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
+    .co-pay:hover { background: #0063B6; }
+    .co-pay[disabled] { opacity: .8; cursor: progress; }
+    .co-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: co-spin .8s linear infinite; display: none; }
+    .co-pay.processing .co-spinner { display: inline-block; }
+    @keyframes co-spin { to { transform: rotate(360deg); } }
+    .co-terms { font-size: 14px; color: #6B7280; line-height: 20px; margin: 14px 0 0; text-align: center; }
+    .co-powered { margin-top: 32px; font-size: 14px; color: #9CA3AF; display: flex; gap: 12px; justify-content: center; }
+    .co-powered b { color: #6B7280; font-weight: 600; }
+
+    /* ── Survey welcome header (step 1 only, new) ───── */
+    .survey-welcome { margin: 0 0 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light); }
+    .survey-welcome .welcome-title { margin: 0 0 6px; }
+    .survey-welcome p { margin: 0; font-size: var(--font-body1); line-height: var(--font-body1-line-height); letter-spacing: var(--font-body1-letter-spacing); color: var(--text-secondary); }
+    .survey-welcome[hidden] { display: none; }
   </style>
 </head>
-<body data-view="survey">
+<body data-view="plan">
 
   <!-- Dark top variant bar -->
   <div class="proto-bar">
@@ -1002,7 +1129,9 @@
     <div class="proto-group">
       <span class="proto-label">View</span>
       <div class="seg" id="seg-view">
-        <button type="button" data-view="survey" class="active">Survey</button>
+        <button type="button" data-view="plan" class="active">Plan</button>
+        <button type="button" data-view="checkout">Checkout</button>
+        <button type="button" data-view="survey">Survey</button>
         <button type="button" data-view="hubspot">HubSpot</button>
         <button type="button" data-view="success">Success</button>
         <button type="button" data-view="app">App (Setup checklist)</button>
@@ -1032,11 +1161,96 @@
     <a class="proto-reset" id="btn-reset" href="#">Reset</a>
   </div>
 
+  <!-- ═══════════════ FLOW 0 — Choose plan ═══════════════ -->
+  <div class="view" id="view-plan">
+    <div class="ob-top"><span class="ob-logo">Synder</span></div>
+    <div class="plan-page">
+      <div class="plan-head">
+        <div>
+          <h1 class="page-title">Choose your plan</h1>
+          <p>Pick the plan that fits your sales volume. You can change it any time.</p>
+        </div>
+        <div class="billing-toggle" id="billing-toggle" role="tablist" aria-label="Billing period">
+          <button type="button" data-billing="monthly" class="active" role="tab">Pay monthly</button>
+          <button type="button" data-billing="yearly" role="tab">Pay yearly — <span class="off">20% OFF</span></button>
+        </div>
+      </div>
+      <div class="plan-grid" id="plan-grid"><!-- filled by JS --></div>
+      <p class="plan-foot"><strong>Have historical transactions? Get custom pricing!</strong> Synchronize each additional 500 transactions for $30.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FLOW 0 — Checkout (Stripe-hosted look) ═══════════════ -->
+  <div class="view" id="view-checkout">
+    <div class="co-wrap">
+      <div class="co-left">
+        <div class="co-col">
+          <button type="button" class="co-back" id="co-back"><span aria-hidden="true">←</span> Back</button>
+          <div class="co-merchant"><span class="dot">S</span>Synder</div>
+          <p class="co-sub-title" id="co-title">Subscribe to Synder Pro — Standard</p>
+          <div class="co-amount"><span class="big" id="co-amount">$299.00</span><span class="per" id="co-per">per<br>month</span></div>
+          <div class="co-line item">
+            <div><div class="name" id="co-item-name">Synder Pro — Standard</div><div class="muted" id="co-item-sub">Billed monthly · Qty 1</div></div>
+            <div id="co-item-price">$299.00</div>
+          </div>
+          <div class="co-sep"></div>
+          <div class="co-line"><span>Subtotal</span><span id="co-subtotal">$299.00</span></div>
+          <div class="co-line"><span class="muted">Tax</span><span class="muted">$0.00</span></div>
+          <div class="co-sep"></div>
+          <div class="co-line total"><span>Total due today</span><span id="co-total">$299.00</span></div>
+        </div>
+      </div>
+      <div class="co-right">
+        <div class="co-col">
+          <div class="co-section">
+            <h2 class="co-h">Contact information</h2>
+            <label class="co-label" for="co-email">Email</label>
+            <input class="co-input co-single" id="co-email" type="email" value="jane@greenleafstore.com" />
+          </div>
+          <div class="co-section">
+            <h2 class="co-h">Payment method</h2>
+            <div class="co-field">
+              <label class="co-label" for="co-card">Card information</label>
+              <div class="co-group">
+                <div><input class="co-input" id="co-card" type="text" inputmode="numeric" value="4242 4242 4242 4242" /></div>
+                <div class="co-row2">
+                  <input class="co-input" id="co-exp" type="text" placeholder="MM / YY" value="12 / 34" aria-label="Expiration (MM / YY)" />
+                  <input class="co-input" id="co-cvc" type="text" placeholder="CVC" value="123" aria-label="CVC" />
+                </div>
+              </div>
+            </div>
+            <div class="co-field">
+              <label class="co-label" for="co-name">Cardholder name</label>
+              <input class="co-input co-single" id="co-name" type="text" value="Jane Demo" />
+            </div>
+            <div class="co-field">
+              <label class="co-label" for="co-country">Country or region</label>
+              <select class="co-select co-single" id="co-country">
+                <option selected>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>Lithuania</option>
+                <option>Australia</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="co-pay" id="co-pay"><span class="co-spinner" aria-hidden="true"></span><span id="co-pay-label">Subscribe</span></button>
+          <p class="co-terms">By subscribing, you authorize Synder to charge you according to the terms until you cancel. Demo only: no real payment is made.</p>
+          <div class="co-powered"><span>Powered by <b>stripe</b></span><span>Terms</span><span>Privacy</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════ FLOW A — Survey ═══════════════ -->
   <div class="view" id="view-survey">
     <div class="ob-top"><span class="ob-logo">Synder</span></div>
     <div class="ob-content">
     <div class="survey-card">
+      <div class="survey-welcome" id="survey-welcome">
+        <h1 class="page-title welcome-title" id="welcome-title">Welcome to Synder Pro — Standard</h1>
+        <p>A few quick questions so your Synder specialist can prepare your setup.</p>
+      </div>
       <div class="step-meta">
         <span class="step-of" id="step-label">Step 1 of 3</span>
       </div>
@@ -1044,7 +1258,7 @@
 
       <!-- Step 1 -->
       <div class="survey-step active" data-step="1" id="step-1">
-        <h1 class="page-title q-title">How many sales channels or payment platforms are you connecting?</h1>
+        <h2 class="page-title q-title">How many sales channels or payment platforms are you connecting?</h2>
         <p class="q-helper">This helps us understand how complex your setup will be.</p>
         <div class="field-error" id="err-1" role="alert">
           <span class="material-icons-round">error_outline</span>
@@ -1313,7 +1527,9 @@
   'use strict';
 
   const state = {
-    view: 'survey',
+    view: 'plan',
+    plan: 'standard',     // 'standard' | 'max' — Pro tier chosen on Choose plan
+    billing: 'monthly',   // 'monthly' | 'yearly'
     step: 1,
     channels: null,       // '1' | '2-3' | '4+' | 'not-sure' | 'shortcut'
     urgency: null,        // 'no-rush' | '2-weeks' | 'urgent' | 'shortcut'
@@ -1439,6 +1655,7 @@
   }
 
   /* ── helpers ─────────────────────────────────────────── */
+  let payTimer = null; // Checkout processing timeout
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
@@ -1446,6 +1663,10 @@
     state.view = view;
     document.body.setAttribute('data-view', view);
     $$('#seg-view button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    if (view !== 'checkout' && payTimer) { clearTimeout(payTimer); payTimer = null; }
+    if (view === 'plan') renderPlans();
+    if (view === 'checkout') renderCheckout();
+    if (view === 'survey') renderWelcome();
     if (view === 'hubspot') renderHubspotPage();
     if (view === 'success') renderSuccess();
     if (view === 'app') renderApp();
@@ -1456,6 +1677,7 @@
     $$('.survey-step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === n));
     $('#step-label').textContent = 'Step ' + n + ' of 3';
     $('#step-bar').style.width = (n / 3 * 100) + '%';
+    renderWelcome();
     updateContinueButtons();
   }
 
@@ -1498,6 +1720,114 @@
     $('#btn-continue-2').disabled = false;
     $('#btn-done').disabled = false;
   }
+
+
+  /* ── Choose plan + Checkout ──────────────────────────── */
+  const PLANS = [
+    { id: 'basic', name: 'Basic', tag: 'Basic sync tools included.', from: false, monthly: 65, yearly: 52,
+      limit: 'Up to 500 sales transactions/mo', cta: 'Subscribe',
+      feats: ['10 custom groups', '2 integration slots', 'Paid unlimited history', 'Multicurrency', 'Items tracking', 'Balance reconciliation', 'Live chat support'] },
+    { id: 'essential', name: 'Essential', tag: 'Ideal for expanding businesses.', from: true, monthly: 129, yearly: 103,
+      limit: 'Up to 1,000 transactions/mo', cta: 'Subscribe', lead: 'Basic plan features plus',
+      feats: ['20 custom groups', 'Unlimited integration slots', 'Open invoices tracking', 'COGS tracking', 'QuickBooks classes and Xero tracking categories support', 'Live chat support'] },
+    { id: 'standard', pro: true, popular: true, name: 'Pro — Standard', tag: 'Perfect fit for thriving multi-channel businesses.', from: true, monthly: 299, yearly: 240,
+      limit: 'Up to 10,000 transactions/mo', cta: 'Subscribe', lead: 'Essential plan features plus',
+      feats: ['30 custom groups', '3 months of history for free, then paid unlimited history', 'Automated product verification', 'QuickBooks locations and Sage dimensions support', '2 premium integrations', 'Discount on other Synder products', 'Assisted setup', '1 custom data modification', 'Synder Specialist help on request', 'RevRec with up to 1k subscriptions'] },
+    { id: 'max', pro: true, name: 'Pro — Max', tag: 'Perfect fit for thriving multi-channel businesses.', from: true, monthly: 599, yearly: 479,
+      limit: 'Up to 20,000 transactions/mo', cta: 'Subscribe', lead: 'Essential plan features plus',
+      feats: ['40 custom groups', '3 months of history for free, then paid unlimited history', 'Automated product verification', 'QuickBooks locations and Sage dimensions support', 'Unlimited premium integrations', 'Discount on other Synder products', 'Assisted setup', '5 custom data modifications', 'Dedicated Synder Specialist', 'RevRec with up to 2k subscriptions'] },
+    { id: 'premium', name: 'Premium', tag: 'Advanced features for complex needs.', custom: true,
+      limit: '', cta: 'Talk to sales', lead: 'Pro plan features plus',
+      feats: ['Unlimited custom groups', 'Free unlimited history', 'RevRec with up to 5k subscriptions', 'Paid custom development', 'Assisted setup and ongoing support'] },
+  ];
+
+  function planById(id) { return PLANS.find(p => p.id === id) || PLANS[2]; }
+  function money(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function proLabel(id) { return planById(id === 'max' ? 'max' : 'standard').name; }
+
+  function renderPlans() {
+    const yearly = state.billing === 'yearly';
+    $$('#billing-toggle button').forEach(b => b.classList.toggle('active', b.dataset.billing === state.billing));
+    $('#plan-grid').innerHTML = PLANS.map(p => {
+      const price = p.custom
+        ? '<span class="custom">Custom pricing for your company</span>'
+        : (p.from ? '<span class="from">from</span>' : '') +
+          '<span class="amt">$' + (yearly ? p.yearly : p.monthly) + '</span><span class="per">/month</span>';
+      const billed = p.custom ? '' : (yearly ? 'billed yearly' : 'billed monthly');
+      const cta = p.pro
+        ? '<button type="button" class="btn btn-primary plan-cta" data-plan="' + p.id + '">' + p.cta + '</button>'
+        : '<button type="button" class="btn btn-outlined plan-cta" aria-disabled="true" title="Not part of this prototype">' + p.cta + '</button>';
+      const feats = (p.lead ? '<li class="lead"><span class="material-icons-round">check</span>' + p.lead + '</li>' : '') +
+        p.feats.map(f => '<li><span class="material-icons-round">check</span><span>' + f + '</span></li>').join('');
+      return '<div class="plan-card' + (p.popular ? ' popular' : '') + (p.pro ? '' : ' inactive') + '">' +
+        (p.popular ? '<span class="plan-badge">MOST POPULAR</span>' : '') +
+        '<h2 class="plan-name">' + p.name + '</h2>' +
+        '<p class="plan-tag">' + p.tag + '</p>' +
+        '<div class="plan-price">' + price + '</div>' +
+        '<div class="plan-billed">' + billed + '</div>' +
+        '<div class="plan-limit">' + (p.limit || 'Custom transaction volume') + '</div>' +
+        cta +
+        '<ul class="plan-feats">' + feats + '</ul>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderCheckout() {
+    const p = planById(state.plan);
+    const yearly = state.billing === 'yearly';
+    const total = yearly ? p.yearly * 12 : p.monthly;
+    $('#co-title').textContent = 'Subscribe to Synder ' + p.name;
+    $('#co-amount').textContent = money(total);
+    $('#co-per').innerHTML = yearly ? 'per<br>year' : 'per<br>month';
+    $('#co-item-name').textContent = 'Synder ' + p.name;
+    $('#co-item-sub').textContent = yearly
+      ? 'Billed yearly · $' + p.yearly + '/month · Qty 1'
+      : 'Billed monthly · Qty 1';
+    $('#co-item-price').textContent = money(total);
+    $('#co-subtotal').textContent = money(total);
+    $('#co-total').textContent = money(total);
+    const pay = $('#co-pay');
+    pay.disabled = false;
+    pay.classList.remove('processing');
+    $('#co-pay-label').textContent = 'Subscribe';
+  }
+
+  function renderWelcome() {
+    $('#welcome-title').textContent = 'Welcome to Synder ' + proLabel(state.plan);
+    $('#survey-welcome').hidden = state.step !== 1;
+  }
+
+  $('#billing-toggle').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    state.billing = btn.dataset.billing;
+    renderPlans();
+  });
+
+  $('#plan-grid').addEventListener('click', e => {
+    const btn = e.target.closest('.plan-cta');
+    if (!btn || btn.getAttribute('aria-disabled') === 'true' || !btn.dataset.plan) return;
+    state.plan = btn.dataset.plan;
+    setView('checkout');
+    window.scrollTo(0, 0);
+  });
+
+  $('#co-back').addEventListener('click', () => setView('plan'));
+
+  $('#co-pay').addEventListener('click', () => {
+    const pay = $('#co-pay');
+    if (pay.disabled) return;
+    pay.disabled = true;
+    pay.classList.add('processing');
+    $('#co-pay-label').textContent = 'Processing…';
+    clearTimeout(payTimer);
+    payTimer = setTimeout(() => {
+      clearAllStepErrors();
+      setStep(1);
+      setView('survey');
+      window.scrollTo(0, 0);
+    }, 1000);
+  });
 
   /* ── survey interactions ─────────────────────────────── */
   function bindOptList(listId, softId, key) {
@@ -2416,7 +2746,9 @@
   });
 
   function resetAll() {
-    state.view = 'survey';
+    state.view = 'plan';
+    state.plan = 'standard';
+    state.billing = 'monthly';
     state.step = 1;
     state.channels = null;
     state.urgency = null;
@@ -2446,7 +2778,8 @@
     const snoozeBanner = $('#snooze-banner');
     if (snoozeBanner) snoozeBanner.classList.remove('show');
     setStep(1);
-    setView('survey');
+    setView('plan');
+    window.scrollTo(0, 0);
     updateContinueButtons();
   }
 
@@ -2484,7 +2817,7 @@
   // init
   presetDoneIds('empty');
   setStep(1);
-  setView('survey');
+  setView('plan');
   updateContinueButtons();
 })();
 </script>
