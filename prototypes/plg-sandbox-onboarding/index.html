@@ -1700,7 +1700,10 @@
           <button type="button" class="ty-snav" data-page="reconciliation"><span class="material-icons">menu_book</span> Reconciliation<span class="material-icons chev">expand_more</span></button>
           <button type="button" class="ty-snav" data-page="products"><span class="material-icons">shopping_cart</span> Products and services</button>
           <button type="button" class="ty-snav" data-page="analytics"><span class="material-icons">show_chart</span> Analytics<span class="material-icons chev">expand_more</span></button>
-          <div class="ty-sgap"></div>
+          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
+          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
+          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
+          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
           <div class="sidebar-health" role="button" tabindex="0" aria-label="Open Setup checklist">
             <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
             <div class="hs-meta hs-meta-chip">0 / 6 complete</div>
@@ -1709,10 +1712,6 @@
               View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
-          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
-          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
-          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
-          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
           <div class="ty-promo">
             <button type="button" class="ty-promo-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
             <div class="ty-promo-ico">
@@ -1770,7 +1769,10 @@
           <button type="button" class="ty-snav" data-page="reconciliation"><span class="material-icons">menu_book</span> Reconciliation<span class="material-icons chev">expand_more</span></button>
           <button type="button" class="ty-snav" data-page="products"><span class="material-icons">shopping_cart</span> Products and services</button>
           <button type="button" class="ty-snav" data-page="analytics"><span class="material-icons">show_chart</span> Analytics<span class="material-icons chev">expand_more</span></button>
-          <div class="ty-sgap"></div>
+          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
+          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
+          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
+          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
           <div class="sidebar-health" role="button" tabindex="0" aria-label="Open Setup checklist">
             <h4><span class="material-icons-round">checklist</span> Setup checklist</h4>
             <div class="hs-meta hs-meta-chip">0 / 6 complete</div>
@@ -1779,10 +1781,6 @@
               View Setup checklist <span class="material-icons-round">arrow_forward</span>
             </button>
           </div>
-          <button type="button" class="ty-snav" data-page="settings"><span class="material-icons">settings</span> Settings</button>
-          <button type="button" class="ty-snav" data-page="ai"><span class="material-icons">hub</span> AI Agents</button>
-          <button type="button" class="ty-snav" data-page="whats-new"><span class="material-icons">new_releases</span> What’s New</button>
-          <button type="button" class="ty-snav" data-page="custom"><span class="material-icons">apps</span> Custom development</button>
           <div class="ty-promo">
             <button type="button" class="ty-promo-x" aria-label="Dismiss"><span class="material-icons">close</span></button>
             <div class="ty-promo-ico">
@@ -2480,12 +2478,11 @@
   }
 
   function zoomConfirmedHtml(slot) {
-    const when = slot ? (slot.dayLabel + ' · ' + slot.time + ' · 45 min') : 'Tue 22 Apr · 10:30 AM · 45 min';
     const email = state.accountEmail || 'your account email';
     return `
       <h3>Zoom session confirmed</h3>
       <div class="contact-meta">
-        <div class="row"><span class="material-icons-round">event</span> ${when}</div>
+        <div class="row"><span class="material-icons-round">videocam</span> Zoom call scheduled</div>
         <div class="row"><span class="material-icons-round">mail</span> Calendar invite → ${email}</div>
       </div>`;
   }
@@ -2771,17 +2768,15 @@
     if (contact === 'zoom') {
       const slot = state.zoomSlot;
       if (slot && slot.dayLabel && slot.time) {
-        const when = slot.dayLabel + ' · ' + slot.time;
         return `<div class="hs-contact-info"><span class="label">Setup call</span>
-          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Booked with your Synder specialist.</span></div></div>`;
+          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · scheduled<br>Booked with your Synder specialist.</span></div></div>`;
       }
       if (shouldShowBookCta()) {
         return `<div class="hs-contact-info"><span class="label">Setup call</span>
           <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · not booked yet<br><a href="${BOOKING_URL}" class="hs-book-inline" data-open-booking="1">Book free setup call ↗</a></span></div></div>`;
       }
-      const when = 'Tue 14 Apr · 10:00 AM';
       return `<div class="hs-contact-info"><span class="label">Setup call</span>
-        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Booked with your Synder specialist.</span></div></div>`;
+        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · scheduled<br>Booked with your Synder specialist.</span></div></div>`;
     }
     if (contact === 'phone') {
       return `<div class="hs-contact-info"><span class="label">Setup call</span>
