@@ -158,12 +158,8 @@
     }
     /* Sticky Subtitle1 welcome — same Y on every survey step (not H1) */
     .survey-welcome-line {
-      position: sticky;
-      top: calc(var(--proto-bar-h) + var(--topbar-height, 59px));
-      z-index: 2;
-      background: #fff;
-      margin: 0 0 10px;
-      padding: 2px 0 6px;
+      margin: 0 0 16px;
+      padding: 0;
       font-size: var(--font-subtitle1);
       font-weight: var(--font-subtitle1-weight);
       line-height: var(--font-subtitle1-line-height);
@@ -1410,12 +1406,11 @@
     <div class="ob-top"><span class="ob-logo">Synder</span></div>
     <div class="ob-content">
     <div class="survey-card">
+      <p class="survey-welcome-line" id="survey-welcome-line">Welcome to Pro plan – a few questions so your specialist can prepare.</p>
       <div class="step-meta">
         <span class="step-of" id="step-label">Step 1 of 3</span>
       </div>
       <div class="survey-progress"><span id="step-bar" style="width:33%"></span></div>
-
-      <p class="survey-welcome-line" id="survey-welcome-line">Welcome to Synder Pro — Standard — a few questions so your specialist can prepare.</p>
 
       <!-- Step 1 -->
       <div class="survey-step active" data-step="1" id="step-1">
@@ -2016,7 +2011,7 @@
   function renderSurveyWelcome() {
     const el = $('#survey-welcome-line');
     if (!el) return;
-    el.textContent = 'Welcome to Synder ' + proLabel(state.plan) + ' — a few questions so your specialist can prepare.';
+    el.textContent = 'Welcome to Pro plan – a few questions so your specialist can prepare.';
   }
 
   $('#billing-toggle').addEventListener('click', e => {
