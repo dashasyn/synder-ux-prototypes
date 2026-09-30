@@ -174,6 +174,30 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .d-empty-tab { text-align: center; padding: 40px 24px; color: var(--t-secondary); }
 .d-events td, .d-events th { padding: 10px; }
 
+
+/* Variant E: setup checklist */
+.e-check { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.e-step { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 16px 18px; display: flex; gap: 14px; border: 1px solid transparent; }
+.e-step.cur { border-color: var(--c-primary-20); }
+.e-step.locked { opacity: .55; }
+.e-step .num { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--c-grey-30); color: var(--t-secondary); display: flex; align-items: center; justify-content: center; font-weight: 500; flex-shrink: 0; }
+.e-step.is-done .num { border-color: var(--c-green); background: var(--c-green); color: #fff; }
+.e-step.is-done .num .mi { font-size: 18px; }
+.e-step.cur .num { border-color: var(--c-primary); color: var(--c-primary); }
+.e-step .body { flex: 1; min-width: 0; }
+.e-step .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.e-step .blurb { color: var(--t-secondary); margin: 4px 0 0; font-size: 14px; line-height: 20px; }
+.e-cta { margin-top: 12px; }
+.e-stores { margin: 0 0 12px; background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 4px 18px; }
+.e-store { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-default); }
+.e-store:last-child { border-bottom: none; }
+.e-store .mi { color: #95BF47; }
+.e-store .s { color: var(--t-secondary); }
+.e-path { background: var(--c-grey-5); border: 1px solid var(--border-default); border-radius: 6px; padding: 10px 12px; margin-top: 10px; line-height: 22px; }
+.e-status { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.e-status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-grey-30); }
+.e-status .dot.on { background: var(--c-green); }
+
 /* Success */
 .success { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 40px; max-width: 680px; margin: 24px auto; text-align: center; }
 .success .icon { width: 64px; height: 64px; border-radius: 50%; background: var(--c-green-light); color: var(--c-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
@@ -192,6 +216,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     <button class="tab" data-variant="B">B · Step-by-step wizard</button>
     <button class="tab" data-variant="C">C · Single guided card</button>
     <button class="tab" data-variant="D">D · Simple</button>
+    <button class="tab" data-variant="E">E · Setup checklist</button>
   </div>
 </div>
 
@@ -252,14 +277,17 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function prod(id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; }
 
   var variant = (location.hash || '#A').slice(1).toUpperCase();
-  if ('ABCD'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
+  if ('ABCDE'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
   var S;
   function fresh() {
     S = { started: false, store: false, connecting: false, qbo: false, match: 'todo', matchOpen: false,
       filter: 'unmatched', visible: null, map: { p10: 'q12' }, align: false, on: false, bStep: 0, cFocus: null, modal: null, setType: 'Inventory',
       // Variant D
       dStores: [], dTab: 'overview', dInv: false, dOn: false, dCur: null, dMaps: {}, dFilter: 'unmatched', dSearch: '', dVisible: null,
-      dSel: STORE, dNew: '', dLoc: LOC, dBusy: false };
+      dSel: STORE, dNew: '', dLoc: LOC, dBusy: false,
+      // Variant E
+      eStores: [], eTab: 'overview', eInv: false, eOn: false, eCur: null, eMaps: {}, eFilter: 'unmatched', eSearch: '', eVisible: null,
+      eSel: STORE, eNew: '', eLoc: LOC, eBusy: false, eStep3Done: false };
   }
   fresh();
 
@@ -565,10 +593,194 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   }
   function dRefreshTable() { var t = document.getElementById('dTable'); if (t) t.innerHTML = dTable(); }
 
+
+  // ---------- variant E: setup checklist ----------
+  function eConnected(id) { return S.eStores.some(function (x) { return x.store === id; }); }
+  function eMap() { return S.eMaps[S.eCur] || {}; }
+  function eMatchedIn(m) { return PRODUCTS.filter(function (p) { return !p.service && m[p.id]; }).map(function (p) { return p.id; }); }
+  function eMatched() { return eMatchedIn(eMap()); }
+  function eAllMatched() { var n = 0; S.eStores.forEach(function (x) { n += eMatchedIn(S.eMaps[x.store] || {}).length; }); return n; }
+  function eUse() { var c = {}, m = eMap(); eMatched().forEach(function (id) { c[m[id]] = (c[m[id]] || 0) + 1; }); return c; }
+  function eStep1() { return S.eStores.length > 0; }
+  function eStep2() { return S.eInv; }
+  function eStep3() { return S.eStep3Done && eAllMatched() > 0; }
+  function eCurStep() {
+    if (!eStep1()) return 0;
+    if (!eStep2()) return 1;
+    if (!eStep3()) return 2;
+    return 3;
+  }
+  function eCanOn() { return eStep1() && eStep2() && eStep3(); }
+  function eComputeVisible() {
+    var m = eMap(), q = S.eSearch.trim().toLowerCase();
+    S.eVisible = PRODUCTS.filter(function (p) {
+      var ok = !p.service && m[p.id];
+      if (S.eFilter === 'matched' && !ok) return false;
+      if (S.eFilter === 'unmatched' && ok) return false;
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || (m[p.id] && item(m[p.id]).name.toLowerCase().indexOf(q) >= 0);
+    }).map(function (p) { return p.id; });
+  }
+  function eTable() {
+    if (!S.eVisible) eComputeVisible();
+    var m = eMap(), uc = eUse();
+    var rows = S.eVisible.map(function (id) {
+      var p = prod(id), q = m[id] ? item(m[id]) : null, dup = q && uc[q.id] > 1, cell;
+      if (p.service) cell = '<select disabled><option>Service · can\'t track stock</option></select>';
+      else cell = '<select data-emap="' + id + '"><option value="">Not matched</option>' + ITEMS.map(function (it) {
+        var no = it.type !== 'Inventory';
+        return '<option value="' + it.id + '"' + (m[id] === it.id ? ' selected' : '') + (no ? ' disabled' : '') + '>' + esc(it.name) + (no ? ' · ' + it.type + ', no stock' : '') + '</option>';
+      }).join('') + '</select>' + (dup ? '<div class="note"><span class="mi">warning_amber</span>Also matched to another product. Both get the same stock.</div>' : '');
+      var st = p.service ? '<span class="chip chip-neutral">Not trackable</span>' : q ? (dup ? '<span class="chip chip-warning">Shared item</span>' : '<span class="chip chip-success">Matched</span>') : '<span class="chip chip-neutral">Not matched</span>';
+      return '<tr class="' + (dup ? 'dup' : '') + '"><td>' + esc(p.name) + '</td><td>' + cell + '</td><td class="num-cell">' + p.qty + '</td><td class="num-cell">' + (q ? q.qty : '—') + '</td><td>' + st + '</td></tr>';
+    }).join('');
+    return '<table class="mt"><thead><tr><th style="width:26%">Shopify product</th><th style="width:34%">QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="5" class="muted" style="padding:16px">No products here.</td></tr>') + '</tbody></table>';
+  }
+  function eSeg(k, label) { return '<button class="' + (S.eFilter === k ? 'on' : '') + '" data-a="eFilter" data-v="' + k + '">' + label + '</button>'; }
+  function eMappings() {
+    var n = eMatched().length, all = PRODUCTS.length;
+    var cont = '';
+    if (!S.eOn && eAllMatched() > 0) {
+      cont = '<button class="btn btn-primary" data-a="eContinueMatch">Continue</button>';
+    } else if (!S.eOn) {
+      cont = '<span class="muted">Match at least 1 product, then Continue</span>';
+    }
+    return '<div class="d-bar"><div class="row"><b style="font-size:16px">' + n + ' of ' + all + ' matched</b>' +
+      (S.eStores.length > 1 ? '<select data-a="eStoreSel" style="width:auto">' + S.eStores.map(function (x) { return '<option' + (x.store === S.eCur ? ' selected' : '') + '>' + x.store + '</option>'; }).join('') + '</select>' : '') +
+      '</div><div class="row">' + cont + '</div></div>' +
+      '<p class="muted" style="margin:0 0 10px">Auto-matched by SKU, then name. Unmatched products won\'t sync.</p>' +
+      '<div class="mt-tools" style="margin-top:0"><div class="seg">' + eSeg('unmatched', 'Not matched (' + (all - n) + ')') + eSeg('matched', 'Matched (' + n + ')') + eSeg('all', 'All (' + all + ')') + '</div>' +
+      '<div class="d-search"><span class="mi">search</span><input type="text" id="eSearch" placeholder="Search products" value="' + esc(S.eSearch) + '"></div></div>' +
+      '<div id="eTable">' + eTable() + '</div>';
+  }
+  function eActivity() {
+    if (!S.eOn) return '<div class="d-panel d-empty-tab">No events yet. They appear once sync is on.</div>';
+    return '<div class="synder-table-wrap"><table class="mt d-events"><thead><tr><th>Time</th><th>Product</th><th>Shopify qty</th><th>Status</th></tr></thead><tbody>' +
+      '<tr><td>Just now</td><td>Stone 10</td><td>8 → 12</td><td><span class="chip chip-success">Updated</span></td></tr></tbody></table></div>';
+  }
+  function eStock() {
+    var m = eMap(), ids = eMatched();
+    if (!ids.length) return '<div class="d-panel d-empty-tab">Match products to compare stock.</div>';
+    return '<table class="mt"><thead><tr><th>Shopify product</th><th>QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      ids.map(function (id) { var p = prod(id), q = item(m[id]), same = p.qty === q.qty;
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(q.name) + '</td><td>' + p.qty + '</td><td>' + q.qty + '</td><td>' + (same ? '<span class="chip chip-success">Same</span>' : '<span class="chip chip-warning">Differs</span>') + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+  function eStoresBlock() {
+    if (!S.eStores.length) return '';
+    return '<div class="e-stores">' + S.eStores.map(function (x) {
+      return '<div class="e-store"><span class="mi">storefront</span><b>' + esc(x.store) + '</b><span class="s">· ' + esc(x.loc) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function eStatusView() {
+    var n = eAllMatched(), tot = PRODUCTS.length * Math.max(1, S.eStores.length);
+    return '<div class="d-panel"><div class="e-status"><span class="dot on"></span><span><b>Sync on</b> · ' + n + ' of ' + tot + ' matched</span>' +
+      '<button class="link" data-a="eTab" data-v="mappings" style="margin-left:auto">Mappings</button></div>' +
+      '<div class="d-stores">' + S.eStores.map(function (x) {
+        return '<div class="d-store"><span class="mi">storefront</span><b>' + esc(x.store) + '</b><span class="s">· ' + esc(x.loc) + '</span></div>';
+      }).join('') + '</div></div>';
+  }
+  function eStepCard(i, title, shortLine, bodyHtml) {
+    var cur = eCurStep(), done = i === 0 ? eStep1() : i === 1 ? eStep2() : i === 2 ? eStep3() : S.eOn;
+    var locked = i > cur, isCur = i === cur && !S.eOn;
+    var cls = 'e-step' + (done && !isCur ? ' is-done' : '') + (isCur ? ' cur' : '') + (locked ? ' locked' : '');
+    var num = done && !isCur ? '<span class="mi">check</span>' : (i + 1);
+    var chip = done && !isCur ? '<span class="chip chip-success">Done</span>' : (isCur ? '<span class="chip chip-info">Current</span>' : '<span class="chip chip-neutral">Later</span>');
+    var change = '';
+    if (done && !isCur && !S.eOn && i < 3) {
+      if (i === 0) change = '<button class="link" data-a="eOpenConnect">Change</button>';
+      else if (i === 1) change = '<button class="link" data-a="eRedoInv">Change</button>';
+      else if (i === 2) change = '<button class="link" data-a="eTab" data-v="mappings">Change</button>';
+    }
+    var content;
+    if (locked) content = '<p class="blurb">' + shortLine + '</p>';
+    else if (done && !isCur) content = '<p class="blurb">' + shortLine + '</p>';
+    else content = bodyHtml;
+    return '<div class="' + cls + '"><div class="num">' + num + '</div><div class="body"><div class="top"><h3 class="h3">' + title + '</h3><div class="row">' + chip + change + '</div></div>' + content + '</div></div>';
+  }
+  function eChecklist() {
+    var cur = eCurStep();
+    var s1 = '<div class="e-cta" style="margin-top:8px"><button class="btn btn-primary" data-a="eOpenConnect" style="font-size:15px;padding:10px 22px">' + (S.eStores.length ? 'Add store' : 'Connect store') + '</button></div>' +
+      '<p class="blurb">Choose a Synder-connected Shopify store and a location. Until a location is set, the store receives nothing.</p>';
+    var s2 = '<p class="blurb">In Synder, set new Shopify products to Inventory so quantity can sync.</p>' +
+      '<div class="e-path">Settings → Shopify sync settings → Products/Services → set <b>“Created product should be”</b> to <b>Inventory</b>.</div>' +
+      '<div class="actions"><button class="btn btn-primary" data-a="eOpenInv">Open Shopify sync settings</button><button class="btn-text" data-a="eDoneInv">I\'ve done this</button></div>';
+    var n = eAllMatched();
+    var s3 = '<p class="blurb">Match Shopify products to QuickBooks items. We auto-match by SKU, then name. Finish matching on the Mappings tab.</p>' +
+      '<p style="margin:8px 0 0"><b>' + n + ' of 17 matched</b></p>' +
+      '<div class="actions"><button class="btn btn-primary" data-a="eTab" data-v="mappings">Go to Mappings</button>' +
+      (n > 0 ? '<button class="btn-text" data-a="eContinueMatch">Mark step done</button>' : '') + '</div>';
+    var s4 = eCanOn()
+      ? '<p class="blurb">From this moment, QuickBooks quantity changes update Shopify. Existing gaps aren\'t fixed here — use Reconcile later.</p>' +
+        '<div class="actions"><button class="btn btn-primary" data-a="eAskOn">Turn on sync</button></div>'
+      : '<p class="blurb">Enable sync after the steps above are done.</p>';
+    var h = '';
+    if (S.eStores.length) h += eStoresBlock();
+    h += '<div class="e-check">';
+    h += eStepCard(0, 'Connect store', S.eStores.length ? (S.eStores.length + ' store' + (S.eStores.length > 1 ? 's' : '') + ' connected') : 'Connect a Shopify store and location.', s1);
+    h += eStepCard(1, 'Track products as Inventory', 'Settings → Shopify sync settings → Created product = Inventory.', s2);
+    h += eStepCard(2, 'Match products', n + ' of 17 matched. Open Mappings to review.', s3);
+    h += eStepCard(3, 'Turn on sync', 'Enable after steps 1–3.', s4);
+    h += '</div>';
+    return h;
+  }
+  function viewE() {
+    var con = eStep1();
+    var tabs = [['overview', 'Overview'], ['mappings', 'Mappings'], ['activity', 'Activity'], ['stock', 'Stock check']];
+    var h = '<div class="synder-tabs d-tabs">' + tabs.map(function (t) {
+      var off = !con && t[0] !== 'overview';
+      return '<button class="synder-tab' + (S.eTab === t[0] ? ' active' : '') + (off ? ' off' : '') + '" data-a="eTab" data-v="' + t[0] + '"' + (off ? ' aria-disabled="true" title="Connect a store first"' : '') + '>' + t[1] + '</button>';
+    }).join('') + '</div>';
+    if (S.eOn && S.eTab === 'overview') return h + eStatusView();
+    if (!con || S.eTab === 'overview') {
+      if (!con) {
+        h += '<p style="margin:0 0 10px;font-size:15px">Set up QuickBooks → Shopify stock sync. Channels are already connected.</p>';
+      }
+      return h + (S.eOn ? eStatusView() : eChecklist());
+    }
+    return h + (S.eTab === 'mappings' ? eMappings() : S.eTab === 'activity' ? eActivity() : eStock());
+  }
+  function eConnectModal() {
+    var opts = D_STORES.filter(function (x) { return !eConnected(x.id); });
+    var isNew = S.eSel === '__new', st = null;
+    D_STORES.forEach(function (x) { if (x.id === S.eSel) st = x; });
+    var locs = st ? st.locs : ['Default location'];
+    var ok = !S.eBusy && S.eLoc && (!isNew || /\S+\.myshopify\.com$/.test(S.eNew.trim()));
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Connect store">' +
+      '<div class="modal-h"><h2 class="h3">' + (S.eStores.length ? 'Add store' : 'Connect store') + '</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><div class="field" style="margin-top:0;max-width:none"><label for="eStore">Store</label><select id="eStore" data-a="eSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.eSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      (opts.length ? '' : '') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="eNew" placeholder="your-store.myshopify.com" value="' + esc(S.eNew) + '" style="margin-top:8px;width:100%">' : '') +
+      '<div class="helper">Shopify may ask you to approve the Inventory Sync app (separate from your main Synder connection).</div></div>' +
+      '<div class="field" style="max-width:none"><label for="eLoc">Location <span class="muted">(required)</span></label><select id="eLoc" data-a="eLocSel">' +
+      locs.map(function (l) { return '<option' + (S.eLoc === l ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select>' +
+      '<div class="helper">Stock updates go to this location. Until a location is chosen, the store receives nothing.</div></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" id="eConnectBtn" data-a="eConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.eBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Connecting…' : 'Connect') + '</button></div></div></div>';
+  }
+  function eConfirmModal() {
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Turn on sync" style="max-width:440px">' +
+      '<div class="modal-h"><h2 class="h3">Turn on inventory sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b">From this moment, QuickBooks quantity changes update Shopify. Existing gaps aren\'t fixed here — use Reconcile later.</div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="eTurnOn">Turn on</button></div></div></div>';
+  }
+  function eOpenConnect() {
+    var first = D_STORES.filter(function (x) { return !eConnected(x.id); })[0];
+    S.eSel = first ? first.id : '__new'; S.eNew = ''; S.eLoc = first ? first.locs[0] : 'Default location'; S.eBusy = false; S.modal = 'eConnect';
+  }
+  function eRefreshTable() { var t = document.getElementById('eTable'); if (t) t.innerHTML = eTable(); }
+  function eTryCompleteStep3() {
+    if (eAllMatched() > 0) { S.eStep3Done = true; return true; }
+    return false;
+  }
+
   // ---------- modals ----------
   function modalHtml() {
     if (S.modal === 'dConnect') return dConnectModal();
     if (S.modal === 'dConfirm') return dConfirmModal();
+    if (S.modal === 'eConnect') return eConnectModal();
+    if (S.modal === 'eConfirm') return eConfirmModal();
     if (S.modal === 'match') {
       return '<div class="overlay" data-a="closeOverlay"><div class="modal" role="dialog" aria-label="Match products">' +
         '<div class="modal-h"><h2 class="h3">Match Shopify products to QuickBooks items</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
@@ -598,8 +810,12 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function render() {
     document.querySelectorAll('.vbar .tab').forEach(function (t) { t.classList.toggle('active', t.dataset.variant === variant); });
     var v = document.getElementById('view');
-    document.getElementById('headActions').innerHTML = variant === 'D' && S.dStores.length ? '<button class="btn btn-secondary" data-a="dOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button>' : '';
+    var head = '';
+    if (variant === 'D' && S.dStores.length) head = '<button class="btn btn-secondary" data-a="dOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button>';
+    if (variant === 'E' && S.eStores.length && !S.eOn) head = '<button class="btn btn-secondary" data-a="eOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button>';
+    document.getElementById('headActions').innerHTML = head;
     if (variant === 'D') v.innerHTML = viewD();
+    else if (variant === 'E') v.innerHTML = viewE();
     else if (S.on) v.innerHTML = successView();
     else if (!S.started) v.innerHTML = emptyState();
     else v.innerHTML = variant === 'A' ? viewA() : variant === 'B' ? viewB() : viewC();
@@ -649,6 +865,37 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     dAskOn: function () { if (!dCanOn()) return 'norender'; S.modal = 'dConfirm'; },
     dTurnOn: function () { S.dOn = true; S.modal = null; toast('Inventory sync is on'); },
     dOff: function () { S.dOn = false; toast('Inventory sync is off'); },
+    eOpenConnect: eOpenConnect,
+    eConnect: function () {
+      if (!S.eLoc) { toast('Choose a location'); return 'norender'; }
+      S.eBusy = true;
+      setTimeout(function () {
+        var id = S.eSel === '__new' ? S.eNew.trim() : S.eSel, first = !S.eStores.length;
+        S.eStores.push({ store: id, loc: S.eLoc });
+        S.eMaps[id] = id === STORE ? { p10: 'q12' } : {};
+        S.eBusy = false; S.modal = null; S.eCur = id; S.eFilter = 'unmatched'; S.eSearch = ''; S.eVisible = null;
+        S.eTab = 'overview';
+        toast((first ? 'Store connected' : 'Store added') + ' · ' + id);
+        render();
+        window.scrollTo(0, 0);
+      }, 700);
+    },
+    eTab: function (el) {
+      var tab = el.dataset.v;
+      if (!S.eStores.length && tab !== 'overview') { toast('Connect a store first'); return 'norender'; }
+      if (S.eTab === 'mappings' && tab === 'overview') eTryCompleteStep3();
+      S.eTab = tab; S.eVisible = null;
+    },
+    eOpenInv: function () { S.eInv = true; toast('Marked done · Created product should be Inventory'); },
+    eDoneInv: function () { S.eInv = true; toast('Step marked done'); },
+    eRedoInv: function () { S.eInv = false; },
+    eFilter: function (el) { S.eFilter = el.dataset.v; S.eVisible = null; },
+    eContinueMatch: function () {
+      if (!eTryCompleteStep3()) { toast('Match at least 1 product'); return 'norender'; }
+      S.eTab = 'overview'; toast('Match step done · ' + eAllMatched() + ' of 17 matched');
+    },
+    eAskOn: function () { if (!eCanOn()) return 'norender'; S.modal = 'eConfirm'; },
+    eTurnOn: function () { S.eOn = true; S.modal = null; S.eTab = 'overview'; toast('Inventory sync is on'); },
     closeOverlay: function (el, e) { if (e.target === el) actions.closeModal(); else return 'norender'; }
   };
 
@@ -670,14 +917,20 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (t.dataset.a === 'dSel') { S.dSel = t.value; var st = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.dLoc = st ? st.locs[0] : 'Default location'; render(); }
     else if (t.dataset.a === 'dLocSel') { S.dLoc = t.value; }
     else if (t.dataset.a === 'dStoreSel') { S.dCur = t.value; S.dVisible = null; render(); }
+    else if (t.dataset.emap) { var em = S.eMaps[S.eCur]; if (t.value) em[t.dataset.emap] = t.value; else delete em[t.dataset.emap]; render(); }
+    else if (t.dataset.a === 'eSel') { S.eSel = t.value; var est = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.eLoc = est ? est.locs[0] : 'Default location'; render(); }
+    else if (t.dataset.a === 'eLocSel') { S.eLoc = t.value; }
+    else if (t.dataset.a === 'eStoreSel') { S.eCur = t.value; S.eVisible = null; render(); }
   });
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.id === 'dSearch') { S.dSearch = t.value; S.dVisible = null; dRefreshTable(); }
     else if (t.id === 'dNew') { S.dNew = t.value; var b = document.getElementById('dConnectBtn'); if (b) b.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()); }
+    else if (t.id === 'eSearch') { S.eSearch = t.value; S.eVisible = null; eRefreshTable(); }
+    else if (t.id === 'eNew') { S.eNew = t.value; var eb = document.getElementById('eConnectBtn'); if (eb) eb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.eLoc; }
   });
-  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCD'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
-  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn } };
+  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCDE'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
+  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn, eAllMatched: eAllMatched, eCanOn: eCanOn, eCurStep: eCurStep } };
   render();
 })();
 </script>
