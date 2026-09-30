@@ -17,7 +17,10 @@
     - Zoom → separate HubSpot booking page (calendar + Choose this time) → Success with slot; Phone / Email → Success directly.
     - App: Dashboard is a normal welcome/summary placeholder; Setup checklist is its own nav page.
     - Setup checklist: Hybrid-only rich step cards (where-to-go + Mark as done); Summary /6, Per-txn /5.
-    - Soft-lock: Learn + talk-to-specialist only (no Book CTAs — call booked on Success). One lock story: “On your setup call”.
+    - Soft-lock pills: “Ready to activate”. Checklist call divider keeps “On your setup call”.
+    - Book free setup call CTA only when Zoom path opened HubSpot but left without a booked slot (hubspotVisitedWithoutBooking).
+    - Phone contact: timezone select (TIMEZONES list) required with phone window; default detected / changeable.
+    - Soft-lock Learn opens a simple verify modal (Book CTA inside when unbooked HubSpot visit).
     - Proto bar (App view): Sync mode Summary | Per transaction only (no Current/Hybrid switcher).
   -->
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
@@ -828,6 +831,60 @@
     }
     .soft-lock-banner .banner-help:hover { text-decoration: underline; }
     .soft-lock-banner .banner-help .material-icons-round { font-size: 18px; }
+
+    .field-select {
+      width: 100%; height: 32px; padding: 0 10px;
+      border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+      font: inherit; font-size: var(--font-body2); background: #FFFFFF; color: var(--text-primary);
+      outline: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B778C' d='M1.4 0.6L6 5.2 10.6 0.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+    }
+    .field-select:focus { border-color: var(--color-primary); }
+    .hs-fill-later {
+      appearance: none; border: none; background: none; cursor: pointer;
+      color: #0053CC; font: inherit; font-size: 14px; font-weight: 500;
+      margin-top: 16px; padding: 0;
+    }
+    .hs-fill-later:hover { text-decoration: underline; }
+    .soft-lock-banner .banner-book {
+      display: none; align-items: center; gap: 4px;
+      padding: 8px 12px; font-weight: 500;
+      color: #0053CC; text-decoration: none; cursor: pointer;
+      border-radius: 4px; border: 1px solid #B5D0FF; background: #EEF4FF;
+      font: inherit; font-size: 14px;
+    }
+    .soft-lock-banner .banner-book.show { display: inline-flex; }
+    .soft-lock-banner .banner-book:hover { background: #DCE9FF; }
+    .learn-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9000;
+      background: rgba(15, 25, 40, 0.45);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .learn-modal-overlay.show { display: flex; }
+    .learn-modal {
+      background: #fff; border-radius: 12px; max-width: 440px; width: 100%;
+      padding: 24px; box-shadow: 0 12px 40px rgba(15, 25, 40, 0.18);
+    }
+    .learn-modal h2 {
+      margin: 0 0 8px; font-size: 18px; font-weight: 500; color: #1A1B24;
+    }
+    .learn-modal p {
+      margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #6B778C;
+    }
+    .learn-modal ul {
+      margin: 0 0 20px; padding-left: 18px; font-size: 14px; line-height: 22px; color: #1A1B24;
+    }
+    .learn-modal .learn-actions {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .learn-modal .learn-book {
+      display: none; align-items: center;
+      padding: 8px 12px; font-weight: 500; font-size: 14px;
+      color: #0053CC; text-decoration: none; border-radius: 4px;
+      border: 1px solid #B5D0FF; background: #EEF4FF;
+    }
+    .learn-modal .learn-book.show { display: inline-flex; }
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
     .soft-pill {
       display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
@@ -1554,6 +1611,10 @@
                     <button type="button" class="time-chip" data-time="evening">Evening (5:00 pm – 8:00 pm)</button>
                   </div>
                 </div>
+                <div>
+                  <label class="field-label" for="phone-timezone">Timezone</label>
+                  <select class="field-select" id="phone-timezone" required></select>
+                </div>
               </div>
             </div>
           </div>
@@ -1591,6 +1652,7 @@
         <h1>Synder setup call</h1>
         <p class="hs-meeting-sub">45 min · Video call (Zoom) with your Synder specialist. Pick a day and time, then choose this slot.</p>
         <div id="hubspot-cal-root"><!-- filled by JS --></div>
+        <button type="button" class="hs-fill-later" id="hs-fill-later">I’ll fill this in later</button>
       </div>
     </div>
   </div>
@@ -1749,6 +1811,7 @@
                 <div>We’ll verify your setup with your Synder specialist before unlocking this feature.</div>
                 <div class="actions">
                   <button type="button" class="btn btn-outlined" id="banner-learn">Learn what we verify</button>
+                  <a href="https://meetings.hubspot.com/synder-meetings/call-with-your-csm?email=demo@example.com&amp;utm_medium=plg-sandbox" class="banner-book" id="banner-book" target="_blank" rel="noopener noreferrer">Book free setup call ↗</a>
                   <a href="#" class="banner-help" id="banner-talk"><span class="material-icons-round">support_agent</span> Talk to your Synder specialist</a>
                 </div>
               </div>
@@ -1758,6 +1821,25 @@
             </div>
           </div>
         </main>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Learn what we verify (soft-lock) -->
+  <div class="learn-modal-overlay" id="learn-modal" role="dialog" aria-modal="true" aria-labelledby="learn-modal-title" hidden>
+    <div class="learn-modal">
+      <h2 id="learn-modal-title">What we verify on your setup call</h2>
+      <p>Your Synder specialist reviews a few things before unlocking advanced controls — so sync stays accurate once you go live.</p>
+      <ul>
+        <li>Channel mapping and clearing accounts</li>
+        <li>Sync frequency / Auto-sync readiness</li>
+        <li>Historical import date range</li>
+        <li>Smart Rules for exceptions</li>
+      </ul>
+      <div class="learn-actions">
+        <button type="button" class="btn btn-primary" id="learn-modal-close">Got it</button>
+        <a href="https://meetings.hubspot.com/synder-meetings/call-with-your-csm?email=demo@example.com&amp;utm_medium=plg-sandbox" class="learn-book" id="learn-book" target="_blank" rel="noopener noreferrer">Book free setup call ↗</a>
       </div>
     </div>
   </div>
@@ -1777,7 +1859,7 @@
     phone: '',
     timeWindow: 'morning',
     accountEmail: 'jane@greenleafstore.com',
-    phoneTimezone: 'Eastern Time (ET)',
+    phoneTimezone: '',    // IANA id from TIMEZONES; set in buildPhoneTimezones()
     surveyIncomplete: false,
     surveySnoozed: false, // fill-later closed questionnaire; returns in 24h
     usedShortcut: false,
@@ -1791,8 +1873,40 @@
     zoomSlot: null,       // { dayLabel, time } after HubSpot calendar confirm
     calDay: null,         // selected day index in calendar sketch
     calTime: null,        // selected time string before confirm
+    hubspotVisitedWithoutBooking: false, // Zoom path opened HubSpot, left without a slot
     autocharge: true,     // Thank you page toggle (default ON)
   };
+
+  const BOOKING_URL = 'https://meetings.hubspot.com/synder-meetings/call-with-your-csm?email=demo@example.com&utm_medium=plg-sandbox';
+
+  const TIMEZONES = [
+    { v: 'Pacific/Honolulu',               l: 'Honolulu (HST)' },
+    { v: 'America/Anchorage',              l: 'Anchorage (AKST)' },
+    { v: 'America/Los_Angeles',            l: 'Los Angeles (PT)' },
+    { v: 'America/Denver',                 l: 'Denver (MT)' },
+    { v: 'America/Chicago',                l: 'Chicago (CT)' },
+    { v: 'America/New_York',               l: 'New York (ET)' },
+    { v: 'America/Toronto',                l: 'Toronto (ET)' },
+    { v: 'America/Vancouver',              l: 'Vancouver (PT)' },
+    { v: 'America/Sao_Paulo',              l: 'São Paulo (BRT)' },
+    { v: 'America/Argentina/Buenos_Aires', l: 'Buenos Aires (ART)' },
+    { v: 'Europe/London',                  l: 'London (GMT/BST)' },
+    { v: 'Europe/Lisbon',                  l: 'Lisbon (WET/WEST)' },
+    { v: 'Europe/Madrid',                  l: 'Madrid (CET/CEST)' },
+    { v: 'Europe/Paris',                   l: 'Paris (CET/CEST)' },
+    { v: 'Europe/Berlin',                  l: 'Berlin (CET/CEST)' },
+    { v: 'Europe/Warsaw',                  l: 'Warsaw (CET/CEST)' },
+    { v: 'Europe/Vilnius',                 l: 'Vilnius (EET/EEST)' },
+    { v: 'Europe/Helsinki',                l: 'Helsinki (EET/EEST)' },
+    { v: 'Europe/Moscow',                  l: 'Moscow (MSK)' },
+    { v: 'Asia/Dubai',                     l: 'Dubai (GST)' },
+    { v: 'Asia/Kolkata',                   l: 'Kolkata (IST)' },
+    { v: 'Asia/Bangkok',                   l: 'Bangkok (ICT)' },
+    { v: 'Asia/Singapore',                 l: 'Singapore (SGT)' },
+    { v: 'Asia/Tokyo',                     l: 'Tokyo (JST)' },
+    { v: 'Australia/Sydney',               l: 'Sydney (AEST/AEDT)' },
+    { v: 'Pacific/Auckland',               l: 'Auckland (NZST/NZDT)' },
+  ];
 
   const CHECKPOINTS = {
     summary: [
@@ -1900,6 +2014,85 @@
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
+  function timezoneLabel(v) {
+    const found = TIMEZONES.find(t => t.v === v);
+    if (found) return found.l;
+    if (!v) return 'New York (ET)';
+    return String(v).split('/').pop().replace(/_/g, ' ');
+  }
+
+  function hasBookedMeeting() {
+    return !!(state.zoomSlot && state.zoomSlot.dayLabel && state.zoomSlot.time);
+  }
+
+  function shouldShowBookCta() {
+    // Zoom path opened HubSpot but left without confirming a slot; hide once booked.
+    return !!(state.hubspotVisitedWithoutBooking && !hasBookedMeeting());
+  }
+
+  function markHubspotLeftWithoutBooking() {
+    if (hasBookedMeeting()) return;
+    state.hubspotVisitedWithoutBooking = true;
+  }
+
+  function clearHubspotWithoutBooking() {
+    state.hubspotVisitedWithoutBooking = false;
+  }
+
+  function openBookingFlow(e) {
+    if (e) e.preventDefault();
+    setView('hubspot');
+  }
+
+  function syncBookCtaVisibility() {
+    const show = shouldShowBookCta();
+    const bannerBook = $('#banner-book');
+    if (bannerBook) bannerBook.classList.toggle('show', show);
+    const learnBook = $('#learn-book');
+    if (learnBook) learnBook.classList.toggle('show', show);
+  }
+
+  function openLearnModal() {
+    const modal = $('#learn-modal');
+    if (!modal) return;
+    syncBookCtaVisibility();
+    modal.hidden = false;
+    modal.classList.add('show');
+  }
+
+  function closeLearnModal() {
+    const modal = $('#learn-modal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.hidden = true;
+  }
+
+  function buildPhoneTimezones() {
+    const sel = $('#phone-timezone');
+    if (!sel) return;
+    const detected = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'America/New_York';
+    const prefer = state.phoneTimezone || detected;
+    sel.innerHTML = '';
+    let found = false;
+    TIMEZONES.forEach(tz => {
+      const opt = document.createElement('option');
+      opt.value = tz.v;
+      opt.textContent = tz.l;
+      if (tz.v === prefer) { opt.selected = true; found = true; }
+      sel.appendChild(opt);
+    });
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = prefer;
+      opt.textContent = timezoneLabel(prefer);
+      opt.selected = true;
+      sel.prepend(opt);
+    }
+    // Default visible but changeable — fall back to New York (ET) if still empty
+    if (!sel.value) sel.value = 'America/New_York';
+    state.phoneTimezone = sel.value;
+  }
+
   function setView(view) {
     state.view = view;
     document.body.setAttribute('data-view', view);
@@ -1912,6 +2105,7 @@
     if (view === 'success') renderSuccess();
     if (view === 'thankyou') renderThankYou();
     if (view === 'app') renderApp();
+    syncBookCtaVisibility();
   }
 
   function setStep(n) {
@@ -2111,7 +2305,7 @@
   bindOptList('opts-urgency', 'shortcut-2', 'urgency');
 
   $('#opts-contact').addEventListener('click', e => {
-    if (e.target.closest('.time-chip') || e.target.closest('input')) return;
+    if (e.target.closest('.time-chip') || e.target.closest('input') || e.target.closest('select') || e.target.closest('label.field-label')) return;
     const card = e.target.closest('.opt-card');
     if (!card) return;
     state.contact = card.dataset.value;
@@ -2132,6 +2326,15 @@
     state.timeWindow = chip.dataset.time;
     $$('#time-chips .time-chip').forEach(c => c.classList.toggle('active', c === chip));
   });
+
+  const phoneTzSel = $('#phone-timezone');
+  if (phoneTzSel) {
+    phoneTzSel.addEventListener('change', e => {
+      state.phoneTimezone = e.target.value;
+      if (state.phoneTimezone) clearStepError(3);
+      updateContinueButtons();
+    });
+  }
 
   $('#btn-continue-1').addEventListener('click', () => {
     if (!state.channels) {
@@ -2171,6 +2374,14 @@
       showStepError(3, 'Please enter a phone number so we can reach you.');
       return;
     }
+    if (state.contact === 'phone') {
+      const tzEl = $('#phone-timezone');
+      state.phoneTimezone = (tzEl && tzEl.value) || state.phoneTimezone;
+      if (!state.phoneTimezone) {
+        showStepError(3, 'Please choose a timezone for your call window.');
+        return;
+      }
+    }
     clearStepError(3);
     state.surveyIncomplete = false;
     state.usedShortcut = false;
@@ -2181,6 +2392,7 @@
     state.calTime = null;
     // Zoom books on a separate HubSpot page; Phone / Email go straight to Success.
     if (state.contact === 'zoom') {
+      // Fresh HubSpot visit — booking status decided when they leave or confirm.
       setView('hubspot');
       return;
     }
@@ -2328,6 +2540,7 @@
       dayLabel: (wd[state.calDay] || 'Tue') + ' ' + state.calDay + ' Apr',
       time: state.calTime,
     };
+    clearHubspotWithoutBooking();
     state.contact = 'zoom';
     state.demoContact = 'zoom';
     state.demoForced = false;
@@ -2381,7 +2594,20 @@
     if (pref === 'zoom') {
       // Calendar lives on the HubSpot page — Success only shows the booked slot (like Phone).
       if (!state.zoomSlot) {
+        if (state.hubspotVisitedWithoutBooking) {
+          el.innerHTML = `
+            <h3>Book your Zoom call</h3>
+            <div class="contact-meta">
+              <div class="row"><span class="material-icons-round">videocam</span> You opened booking but didn’t pick a time yet</div>
+              <div class="row"><span class="material-icons-round">event</span> <a href="${BOOKING_URL}" id="success-book" target="_blank" rel="noopener noreferrer">Book free setup call ↗</a></div>
+            </div>`;
+          const sb = $('#success-book');
+          if (sb) sb.addEventListener('click', openBookingFlow);
+          return;
+        }
+        // Proto-bar / demo jump to Success without HubSpot: show a sample booked slot.
         state.zoomSlot = { dayLabel: 'Tue 21 Apr', time: '10:30 AM' };
+        clearHubspotWithoutBooking();
       }
       el.innerHTML = zoomConfirmedHtml(state.zoomSlot);
     } else if (pref === 'phone') {
@@ -2390,7 +2616,7 @@
         afternoon: 'Afternoon (12:00–17:00)',
         evening: 'Evening (17:00–20:00)',
       }[state.timeWindow] || 'Morning (9:00–12:00)';
-      const tz = state.phoneTimezone || 'Eastern Time (ET)';
+      const tz = timezoneLabel(state.phoneTimezone);
       el.innerHTML = `
         <h3>We’ll call you</h3>
         <div class="contact-meta">
@@ -2473,8 +2699,23 @@
   const hsBack = $('#hs-back-survey');
   if (hsBack) {
     hsBack.addEventListener('click', () => {
+      markHubspotLeftWithoutBooking();
       setView('survey');
       setStep(3);
+    });
+  }
+  const hsFillLater = $('#hs-fill-later');
+  if (hsFillLater) {
+    hsFillLater.addEventListener('click', () => {
+      // Left HubSpot without a booked slot → Book CTA surfaces on soft-locks.
+      markHubspotLeftWithoutBooking();
+      clearAllStepErrors();
+      state.surveyIncomplete = true;
+      state.surveySnoozed = true;
+      state.demoForced = false;
+      state.appPage = 'dashboard';
+      setView('thankyou');
+      window.scrollTo(0, 0);
     });
   }
   const snoozeDismiss = $('#snooze-dismiss');
@@ -2515,24 +2756,36 @@
 
 
   function checklistContactHtml() {
-    // Checklist appears after the call is already agreed — show booked details, not "pick a time".
+    // Checklist: show booked details when known; Book CTA when HubSpot was left without a slot.
     const contact = deriveContact();
     const email = state.accountEmail || 'jane@greenleafstore.com';
     const phone = (state.phone && state.phone.trim())
       ? state.phone.trim()
       : '+1 (415) 555-0192';
-    const tz = state.phoneTimezone || 'Eastern Time (ET)';
+    const tz = timezoneLabel(state.phoneTimezone);
+    const windowFull = {
+      morning: 'Morning (9:00–12:00)',
+      afternoon: 'Afternoon (12:00–17:00)',
+      evening: 'Evening (17:00–20:00)',
+    }[state.timeWindow] || 'Morning (9:00–12:00)';
     if (contact === 'zoom') {
       const slot = state.zoomSlot;
-      const when = (slot && slot.dayLabel && slot.time)
-        ? (slot.dayLabel + ' · ' + slot.time)
-        : 'Tue 14 Apr · 10:00 AM';
+      if (slot && slot.dayLabel && slot.time) {
+        const when = slot.dayLabel + ' · ' + slot.time;
+        return `<div class="hs-contact-info"><span class="label">Setup call</span>
+          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Booked with your Synder specialist.</span></div></div>`;
+      }
+      if (shouldShowBookCta()) {
+        return `<div class="hs-contact-info"><span class="label">Setup call</span>
+          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · not booked yet<br><a href="${BOOKING_URL}" class="hs-book-inline" data-open-booking="1">Book free setup call ↗</a></span></div></div>`;
+      }
+      const when = 'Tue 14 Apr · 10:00 AM';
       return `<div class="hs-contact-info"><span class="label">Setup call</span>
         <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · ${when}<br>Booked with your Synder specialist.</span></div></div>`;
     }
     if (contact === 'phone') {
       return `<div class="hs-contact-info"><span class="label">Setup call</span>
-        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · Morning (9:00–12:00) · ${tz}<br>${phone}</span></div></div>`;
+        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · ${windowFull} · ${tz}<br>${phone}</span></div></div>`;
     }
     if (contact === 'email') {
       return `<div class="hs-contact-info"><span class="label">Setup call</span>
@@ -2738,6 +2991,7 @@
     panel.classList.toggle('is-checklist', page === 'setup-checklist');
     // Soft-lock banner on dedicated locked pages and on Settings (freq / Auto-sync soft-lock)
     banner.classList.toggle('show', locked || settingsSoft);
+    syncBookCtaVisibility();
 
     const titles = {
       dashboard: 'Dashboard',
@@ -2767,10 +3021,10 @@
       return `
         <div class="soft-row is-dimmed" aria-disabled="true">
           <div class="soft-row-meta">
-            <div class="soft-row-label">Auto-sync ${softPill('On your setup call')}</div>
+            <div class="soft-row-label">Auto-sync ${softPill('Ready to activate')}</div>
             <div class="soft-row-help">Your Synder specialist turns Auto-sync on after a quick setup review. You can still sync manually until then.</div>
           </div>
-          <button type="button" class="soft-toggle" disabled aria-label="Auto-sync off" title="On your setup call"></button>
+          <button type="button" class="soft-toggle" disabled aria-label="Auto-sync off" title="Ready to activate"></button>
         </div>`;
     }
 
@@ -2793,7 +3047,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('On your setup call')}
+          ${softPill('Ready to activate')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Configure how Synder posts new activity to your books. Auto-sync stays off until your setup call.</p>
         ${autoSyncRowHtml()}
@@ -2806,7 +3060,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('On your setup call')}
+          ${softPill('Ready to activate')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Agree the date range with your Synder specialist so the import completes and everything syncs correctly.</p>
         <div class="soft-form lockable">
@@ -2828,7 +3082,7 @@
       body = `
         <div class="title-with-pill">
           <h1 class="page-title">${title}</h1>
-          ${softPill('On your setup call')}
+          ${softPill('Ready to activate')}
         </div>
         <p class="page-subtitle" style="margin-bottom:16px">Automations for exceptions and categorization. Configured with your Synder specialist after reviewing your flow.</p>
         <div class="zero-rules lockable">
@@ -2844,7 +3098,7 @@
           <button type="button" class="btn btn-primary">Sync to books</button>
           <span class="hist-entry">
             <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
-            ${softPill('On your setup call')}
+            ${softPill('Ready to activate')}
           </span>
         </div>
         <div class="placeholder-grid">
@@ -2860,7 +3114,7 @@
           <button type="button" class="btn btn-primary">Sync transactions</button>
           <span class="hist-entry">
             <button type="button" class="btn btn-outlined" id="btn-import-historical">Import historical data</button>
-            ${softPill('On your setup call')}
+            ${softPill('Ready to activate')}
           </span>
         </div>
         <div class="placeholder-grid">
@@ -2912,7 +3166,7 @@
         <section class="freq-section" aria-labelledby="freq-heading">
           <div class="freq-section-head">
             <h2 id="freq-heading">Synchronization frequency</h2>
-            ${softPill('On your setup call')}
+            ${softPill('Ready to activate')}
           </div>
           <p class="freq-intro">Select the way you want to synchronize transactions to your books. Auto options unlock after your setup call.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
@@ -3050,7 +3304,9 @@
     state.contact = null;
     state.phone = '';
     state.timeWindow = 'morning';
+    state.phoneTimezone = '';
     state.surveyIncomplete = false;
+    state.surveySnoozed = false;
     state.usedShortcut = false;
     state.syncMode = 'summary';
     state.scoreProgress = 'empty';
@@ -3061,11 +3317,14 @@
     state.zoomSlot = null;
     state.calDay = null;
     state.calTime = null;
+    state.hubspotVisitedWithoutBooking = false;
     state.autocharge = true;
 
     $$('.opt-card').forEach(c => c.classList.remove('selected'));
     $$('#time-chips .time-chip').forEach(c => c.classList.toggle('active', c.dataset.time === 'morning'));
     $('#phone-number').value = '';
+    buildPhoneTimezones();
+    closeLearnModal();
     const tyToggleReset = $('#ty-autocharge');
     if (tyToggleReset) tyToggleReset.checked = true;
     $('#demo-contact').value = 'zoom';
@@ -3106,17 +3365,36 @@
       const html = talk.innerHTML;
       talk.textContent = 'Opening…';
       setTimeout(() => { talk.innerHTML = html; }, 800);
+      return;
     }
     if (e.target.closest('#banner-learn')) {
       e.preventDefault();
+      openLearnModal();
+      return;
+    }
+    const bookEl = e.target.closest('#banner-book, #learn-book, [data-open-booking="1"]');
+    if (bookEl) {
+      openBookingFlow(e);
+      closeLearnModal();
+      return;
+    }
+    if (e.target.closest('#learn-modal-close')) {
+      e.preventDefault();
+      closeLearnModal();
+      return;
+    }
+    if (e.target === $('#learn-modal')) {
+      closeLearnModal();
     }
   });
 
   // init
+  buildPhoneTimezones();
   presetDoneIds('empty');
   setStep(1);
   setView('plan');
   updateContinueButtons();
+  syncBookCtaVisibility();
 })();
 </script>
 </body>
