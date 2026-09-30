@@ -1257,7 +1257,20 @@
       display: flex; align-items: flex-start;
       justify-content: space-between; gap: 24px;
       max-width: 640px;
+      margin-bottom: 28px;
     }
+    .ty-checklist-cta {
+      appearance: none; border: none; cursor: pointer;
+      background: #0053CC; color: #fff;
+      font: inherit;
+      font-size: var(--font-button); font-weight: var(--font-button-weight);
+      line-height: var(--font-button-line-height);
+      letter-spacing: var(--font-button-letter-spacing);
+      height: 40px; padding: 0 20px; border-radius: 4px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .ty-checklist-cta:hover { background: #0046B0; }
+    .ty-checklist-cta .material-icons-round { font-size: 18px; }
     .ty-autocharge-copy { flex: 1; min-width: 0; }
     .ty-autocharge-label {
       font-size: 14px; font-weight: 700; color: var(--text-primary);
@@ -1663,6 +1676,9 @@
                 <span class="ty-toggle-track"></span>
               </label>
             </div>
+            <button type="button" class="ty-checklist-cta" id="ty-goto-checklist">
+              Go to Setup checklist <span class="material-icons-round">arrow_forward</span>
+            </button>
           </div>
         </main>
       </div>
@@ -2981,6 +2997,10 @@
     } else {
       focusMainChecklist();
     }
+  }
+  const tyGotoChecklist = $('#ty-goto-checklist');
+  if (tyGotoChecklist) {
+    tyGotoChecklist.addEventListener('click', () => openChecklistFromChip());
   }
   $$('.hs-open-main').forEach(btn => {
     btn.addEventListener('click', e => {
