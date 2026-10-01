@@ -262,21 +262,20 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .h-sync-state { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:16px; }
 .h-sync-meta { color:var(--t-secondary); line-height:22px; margin-bottom:12px; }
 .h-sync-meta div { margin-top:2px; }
-.h-banners { display:flex; flex-direction:column; gap:8px; margin:0 0 12px; }
-.h-banner { cursor:pointer; }
-.h-banner:hover { filter:brightness(.98); }
 .h-store { padding:14px 0; border-bottom:1px solid var(--border-default); }
 .h-store:last-child { border-bottom:none; }
-.h-store.flash { outline:2px solid var(--c-red); outline-offset:2px; border-radius:6px; background:var(--c-red-light); }
+.h-store.flash { outline:2px solid var(--c-yellow); outline-offset:2px; border-radius:6px; background:var(--c-yellow-light); }
 .h-store-h { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; }
 .h-store-h .mi.shop { color:#95BF47; font-size:22px; }
 .h-store-h .grow { flex:1; min-width:160px; }
 .h-store-h .t { font-weight:500; font-size:15px; }
-.h-store-h .s { color:var(--t-secondary); margin-top:2px; font-size:14px; }
-.h-alerts { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-.h-alert { display:flex; align-items:flex-start; gap:8px; padding:10px 12px; background:var(--c-red-light); border-left:3px solid var(--c-red); border-radius:4px; font-size:14px; line-height:20px; }
-.h-alert .mi { color:var(--c-red); flex-shrink:0; }
-.h-alert .body { flex:1; min-width:0; }
+.h-rows { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.h-row { display:grid; grid-template-columns:92px minmax(0,1fr); gap:4px 12px; font-size:14px; line-height:20px; align-items:start; }
+.h-row .k { color:var(--t-secondary); padding-top:0; }
+.h-row .v { min-width:0; }
+.h-row-warn .k { color:var(--c-yellow); }
+.h-warn-hint { display:block; color:var(--c-yellow); font-size:14px; margin-top:2px; }
+.h-inv-copy { color:var(--t-primary); }
 .h-tip { display:flex; align-items:flex-start; gap:10px; background:var(--c-primary-5); border:1px solid var(--c-primary-20); border-radius:8px; padding:12px 14px; margin-bottom:12px; }
 .h-tip .grow { flex:1; }
 .h-tip .mi { color:var(--c-primary); }
@@ -1182,8 +1181,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     return n < tot;
   }
   function hStoreReady(x) { return !!x.loc && S.hInv && !hMappingIncomplete(x.store); }
-  function hNeedsLoc() { return S.hStores.some(function (x) { return !x.loc; }); }
-  function hNeedsMap() { return S.hStores.some(function (x) { return hMappingIncomplete(x.store); }); }
   function hComputeVisible() {
     var m = hMap(), q = S.hSearch.trim().toLowerCase();
     S.hVisible = PRODUCTS.filter(function (p) {
@@ -1284,48 +1281,39 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       (S.hSync === 'off' ? '<div class="helper" style="margin-top:10px">Enable is global. Incomplete stores stay allowed; stores without a location receive nothing.</div>' : '') +
       '</div>';
   }
-  function hStoreAlerts(x, idx) {
-    if (hStoreReady(x)) return '';
-    var parts = [];
-    if (!x.loc) {
-      parts.push('<div class="h-alert"><span class="mi">place</span><div class="body"><b>Location required</b><div class="muted" style="margin-top:2px">Until a location is chosen, this store receives nothing.</div>' +
-        '<div class="actions" style="margin-top:8px"><button class="btn btn-primary" data-a="hOpenLoc" data-v="' + idx + '">Choose location</button></div></div></div>');
+  function hStoreDetails(x, idx) {
+    var nm = hStoreMatched(x.store), tot = PRODUCTS.length, rows = [];
+    if (x.loc) {
+      rows.push('<div class="h-row"><span class="k">Location</span><span class="v">' + esc(x.loc) + '</span></div>');
+    } else {
+      rows.push('<div class="h-row h-row-warn"><span class="k">Location</span><span class="v"><button class="link" data-a="hOpenLoc" data-v="' + idx + '">Choose location</button><span class="h-warn-hint">Required to receive stock</span></span></div>');
     }
+    var mapLine = nm + ' of ' + tot + ' matched';
     if (hMappingIncomplete(x.store)) {
-      parts.push('<div class="h-alert"><span class="mi">link_off</span><div class="body"><b>Mapping incomplete</b><div class="muted" style="margin-top:2px">' + hStoreMatched(x.store) + ' of ' + PRODUCTS.length + ' matched</div>' +
-        '<div class="actions" style="margin-top:8px"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">Finish mapping</button></div></div></div>');
+      rows.push('<div class="h-row"><span class="k">Mappings</span><span class="v"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">' + mapLine + ' · Finish mapping</button></span></div>');
+    } else {
+      rows.push('<div class="h-row"><span class="k">Mappings</span><span class="v">' + mapLine + '</span></div>');
     }
-    if (!S.hInv) {
+    if (S.hInv) {
+      rows.push('<div class="h-row"><span class="k">Inventory</span><span class="v">Set to Inventory</span></div>');
+    } else {
       var invActs = '<button class="link" data-a="hOpenInv">Open settings</button>';
-      if (S.hInvOpened) invActs += '<button class="btn-text" data-a="hDoneInv">I\'ve done this</button>';
-      parts.push('<div class="h-alert"><span class="mi">inventory_2</span><div class="body"><b>Inventory</b><div style="margin-top:2px">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</div>' +
-        (S.hInvOpened ? '<div class="helper" style="margin-top:4px">Settings opened — switch the type, then confirm below.</div>' : '') +
-        '<div class="actions" style="margin-top:8px">' + invActs + '</div></div></div>');
+      if (S.hInvOpened) invActs += ' <button class="btn-text" data-a="hDoneInv">I\'ve done this</button>';
+      rows.push('<div class="h-row"><span class="k">Inventory</span><span class="v"><span class="h-inv-copy">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</span> ' + invActs + '</span></div>');
     }
-    return parts.length ? '<div class="h-alerts">' + parts.join('') + '</div>' : '';
+    return '<div class="h-rows">' + rows.join('') + '</div>';
   }
   function hStoreRow(x, idx) {
     var ready = hStoreReady(x);
-    var nm = hStoreMatched(x.store);
-    var loc = x.loc ? esc(x.loc) : '<span class="text-error">No location</span>';
-    var invFlag = S.hInv ? '<span class="chip chip-success">Inventory</span>' : '<span class="chip chip-warning">Non-inventory</span>';
     return '<div class="h-store" id="h-store-' + idx + '" data-store="' + esc(x.store) + '">' +
-      '<div class="h-store-h"><span class="mi shop">storefront</span><div class="grow"><div class="t">' + esc(x.store) + '</div>' +
-      '<div class="s">' + loc + ' · Mappings ' + nm + '/' + PRODUCTS.length + ' · ' + invFlag + '</div></div>' +
-      (ready ? '<span class="chip chip-success">Ready</span>' : '<span class="chip chip-error">Setup needed</span>') +
-      '</div>' + hStoreAlerts(x, idx) + '</div>';
+      '<div class="h-store-h"><span class="mi shop">storefront</span><div class="grow"><div class="t">' + esc(x.store) + '</div></div>' +
+      (ready ? '<span class="chip chip-success">Ready</span>' : '<span class="chip chip-warning">Setup needed</span>') +
+      '</div>' + hStoreDetails(x, idx) + '</div>';
   }
   function hStoresBlock() {
     return '<div class="h-panel"><h3>Stores</h3>' +
       S.hStores.map(hStoreRow).join('') +
       '<div class="h-connect-foot"><button class="btn btn-secondary" data-a="hOpenConnect"><span class="mi" style="font-size:18px">add</span> Connect store</button></div></div>';
-  }
-  function hBanners() {
-    var b = [];
-    if (hNeedsLoc()) b.push('<div class="alert alert-error h-banner" data-a="hFocusLoc"><span class="mi">error_outline</span><div><b>A store needs a location</b> — stock won\'t reach that store until you choose one.</div></div>');
-    if (hNeedsMap()) b.push('<div class="alert alert-error h-banner" data-a="hFocusMap"><span class="mi">error_outline</span><div><b>Mapping required</b> — finish product mapping so quantities can sync.</div></div>');
-    if (!S.hInv && S.hStores.length) b.push('<div class="alert alert-error h-banner" data-a="hFocusInv"><span class="mi">error_outline</span><div><b>Inventory setting required</b> — set Created product should be to Inventory in Settings → General.</div></div>');
-    return b.length ? '<div class="h-banners">' + b.join('') + '</div>' : '';
   }
   function hTip() {
     if (S.hSync === 'off' || S.hTipDismissed || !S.hEnabledOn) return '';
@@ -1349,7 +1337,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   }
   function hOverview() {
     if (!S.hStores.length) return hEmpty();
-    return hTip() + hBanners() + '<div class="h-cols">' + hActivityBlock() + hSyncBlock() + hStoresBlock() + '</div>';
+    return hTip() + '<div class="h-cols">' + hActivityBlock() + hSyncBlock() + hStoresBlock() + '</div>';
   }
   function viewH() {
     var con = S.hStores.length > 0;
