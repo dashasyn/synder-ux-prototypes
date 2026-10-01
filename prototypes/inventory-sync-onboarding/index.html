@@ -261,9 +261,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .h-count:hover { border-color:var(--c-primary-20); background:var(--c-primary-5); }
 .h-count .n { font-size:22px; font-weight:500; line-height:28px; color:var(--c-primary); }
 .h-count .l { color:var(--t-secondary); font-size:14px; }
-.h-sync-state { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:16px; }
+.h-sync-state { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:16px; font-weight:500; }
+.h-sync-state.is-off { color:var(--t-secondary); }
+.h-sync-state.is-on { color:var(--c-green); }
+.h-sync-state.is-paused { color:var(--c-yellow); }
 .h-sync-meta { color:var(--t-secondary); line-height:22px; margin-bottom:12px; }
 .h-sync-meta div { margin-top:2px; }
+.h-need { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:4px; background:var(--c-yellow-light); color:var(--c-yellow); font-size:14px; font-weight:500; line-height:20px; vertical-align:middle; }
+.h-row-need .k { color:var(--c-yellow); }
+.h-need-sub { display:block; color:var(--t-secondary); font-size:14px; margin-top:2px; }
 .h-store { padding:14px 0; border-bottom:1px solid var(--border-default); }
 .h-store:last-child { border-bottom:none; }
 .h-store.flash { outline:2px solid var(--c-yellow); outline-offset:2px; border-radius:6px; background:var(--c-yellow-light); }
@@ -1240,13 +1246,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
         : '<p class="muted" style="margin-top:14px">Near-zero activity — waiting for QuickBooks stock movements.</p>') +
       '</div>';
   }
-  function hSyncLabel() {
-    return S.hSync === 'enabled' ? 'Enabled' : S.hSync === 'paused' ? 'Paused' : 'Off';
-  }
-  function hSyncChip() {
-    if (S.hSync === 'enabled') return '<span class="chip chip-success">Enabled</span>';
-    if (S.hSync === 'paused') return '<span class="chip chip-warning">Paused</span>';
-    return '<span class="chip chip-neutral">Off</span>';
+  function hSyncState() {
+    if (S.hSync === 'enabled') return '<div class="h-sync-state is-on">Sync is on</div>';
+    if (S.hSync === 'paused') return '<div class="h-sync-state is-paused">Paused</div>';
+    return '<div class="h-sync-state is-off">Sync is off</div>';
   }
   function hFmt(ts) {
     if (!ts) return '—';
@@ -1266,21 +1269,23 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function hSyncBlock() {
     var btns = '';
     if (S.hSync === 'off') {
-      btns = '<button class="btn btn-primary" data-a="hAskEnable">Enable</button>';
+      btns = '<button class="btn btn-primary" data-a="hAskEnable">Turn on sync</button>';
     } else if (S.hSync === 'enabled') {
       btns = '<button class="btn btn-secondary" data-a="hAskPause">Pause</button>' +
         '<button class="btn btn-secondary" data-a="hRunNow">Run now</button>' +
         '<button class="btn-text" data-a="hAskDisable" style="color:var(--c-red)">Disable</button>';
     } else {
-      btns = '<button class="btn btn-primary" data-a="hAskEnable">Enable</button>' +
+      btns = '<button class="btn btn-primary" data-a="hAskEnable">Turn on sync</button>' +
         '<button class="btn-text" data-a="hAskDisable" style="color:var(--c-red)">Disable</button>';
     }
+    var meta = '';
+    if (S.hLastSync) meta += '<div>Last sync: <b>' + hFmt(S.hLastSync) + '</b></div>';
+    if (S.hEnabledOn) meta += '<div>Enabled on: <b>' + hFmt(S.hEnabledOn) + '</b></div>';
     return '<div class="h-panel"><h3>Sync</h3>' +
-      '<div class="h-sync-state">' + hSyncChip() + '<b>' + hSyncLabel() + '</b></div>' +
-      '<div class="h-sync-meta"><div>Last sync: <b>' + hFmt(S.hLastSync) + '</b></div>' +
-      '<div>Enabled on: <b>' + hFmt(S.hEnabledOn) + '</b></div></div>' +
-      '<div class="actions" style="margin-top:0">' + btns + '</div>' +
-      (S.hSync === 'off' ? '<div class="helper" style="margin-top:10px">Enable is global. Incomplete stores stay allowed; stores without a location receive nothing.</div>' : '') +
+      hSyncState() +
+      (meta ? '<div class="h-sync-meta">' + meta + '</div>' : '') +
+      '<div class="actions" style="margin-top:' + (meta ? '0' : '10px') + '">' + btns + '</div>' +
+      (S.hSync === 'off' ? '<div class="helper" style="margin-top:10px">Turn on is global. Incomplete stores stay allowed; stores without a location receive nothing.</div>' : '') +
       '</div>';
   }
   function hStoreDetails(x, idx) {
@@ -1292,16 +1297,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     }
     var mapLine = nm + ' of ' + tot + ' matched';
     if (hMappingIncomplete(x.store)) {
-      rows.push('<div class="h-row"><span class="k">Mappings</span><span class="v"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">' + mapLine + ' · Finish mapping</button></span></div>');
+      rows.push('<div class="h-row h-row-need"><span class="k">Mappings <span class="h-need">Required</span></span><span class="v"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">Finish mapping — required</button><span class="h-need-sub">' + mapLine + '</span></span></div>');
     } else {
       rows.push('<div class="h-row"><span class="k">Mappings</span><span class="v">' + mapLine + '</span></div>');
     }
     if (S.hInv) {
       rows.push('<div class="h-row"><span class="k">Inventory</span><span class="v">Set to Inventory</span></div>');
     } else {
-      var invActs = '<button class="link" data-a="hOpenInv">Open settings</button>';
+      var invActs = '<button class="link" data-a="hOpenInv">Set product type to Inventory — required</button>';
       if (S.hInvOpened) invActs += ' <button class="btn-text" data-a="hDoneInv">I\'ve done this</button>';
-      rows.push('<div class="h-row"><span class="k">Inventory</span><span class="v"><span class="h-inv-copy">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</span> ' + invActs + '</span></div>');
+      rows.push('<div class="h-row h-row-need"><span class="k">Inventory <span class="h-need">Required</span></span><span class="v"><span class="h-inv-copy">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</span> ' + invActs + '</span></div>');
     }
     return '<div class="h-rows">' + rows.join('') + '</div>';
   }
