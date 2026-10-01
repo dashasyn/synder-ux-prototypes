@@ -267,23 +267,27 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .h-sync-state.is-paused { color:var(--c-yellow); }
 .h-sync-meta { color:var(--t-secondary); line-height:22px; margin-bottom:12px; }
 .h-sync-meta div { margin-top:2px; }
-.h-need { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:4px; background:var(--c-yellow-light); color:var(--c-yellow); font-size:14px; font-weight:500; line-height:20px; vertical-align:middle; }
-.h-row-need .k { color:var(--c-yellow); }
-.h-need-sub { display:block; color:var(--t-secondary); font-size:14px; margin-top:2px; }
 .h-store { padding:14px 0; border-bottom:1px solid var(--border-default); }
-.h-store:last-child { border-bottom:none; }
+.h-store:last-of-type { border-bottom:none; }
 .h-store.flash { outline:2px solid var(--c-yellow); outline-offset:2px; border-radius:6px; background:var(--c-yellow-light); }
 .h-store-h { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; }
 .h-store-h .mi.shop { color:#95BF47; font-size:22px; }
-.h-store-h .grow { flex:1; min-width:160px; }
-.h-store-h .t { font-weight:500; font-size:15px; }
-.h-rows { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-.h-row { display:grid; grid-template-columns:92px minmax(0,1fr); gap:4px 12px; font-size:14px; line-height:20px; align-items:start; }
-.h-row .k { color:var(--t-secondary); padding-top:0; }
-.h-row .v { min-width:0; }
-.h-row-warn .k { color:var(--c-yellow); }
-.h-warn-hint { display:block; color:var(--c-yellow); font-size:14px; margin-top:2px; }
-.h-inv-copy { color:var(--t-primary); }
+.h-store-h .grow { flex:1; min-width:140px; }
+.h-store-h .t { font-weight:500; font-size:15px; line-height:22px; }
+.h-store-h .connected { color:var(--t-secondary); font-size:14px; line-height:20px; margin-top:2px; }
+.h-steps { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.h-step { display:flex; gap:10px; align-items:flex-start; }
+.h-step .num { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; flex-shrink:0; line-height:1; margin-top:1px; }
+.h-step.is-todo .num { background:var(--c-yellow-light); color:var(--c-yellow); border:1.5px solid var(--c-yellow); }
+.h-step.is-done .num { background:transparent; color:var(--t-secondary); border:1.5px solid var(--border-default); }
+.h-step.is-done .num .mi { font-size:16px; color:var(--c-green); }
+.h-step .body { flex:1; min-width:0; }
+.h-step .ttl { font-size:14px; font-weight:500; line-height:20px; }
+.h-step.is-todo .ttl { color:var(--c-yellow); }
+.h-step.is-done .ttl { color:var(--t-secondary); font-weight:400; }
+.h-step .blurb { color:var(--t-primary); font-size:14px; line-height:20px; margin-top:4px; }
+.h-step .actions { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.h-step.is-done .blurb, .h-step.is-done .actions { display:none; }
 .h-tip { display:flex; align-items:flex-start; gap:10px; background:var(--c-primary-5); border:1px solid var(--c-primary-20); border-radius:8px; padding:12px 14px; margin-bottom:12px; }
 .h-tip .grow { flex:1; }
 .h-tip .mi { color:var(--c-primary); }
@@ -1288,40 +1292,51 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       (S.hSync === 'off' ? '<div class="helper" style="margin-top:10px">Turn on is global. Incomplete stores stay allowed; stores without a location receive nothing.</div>' : '') +
       '</div>';
   }
-  function hStoreDetails(x, idx) {
-    var nm = hStoreMatched(x.store), tot = PRODUCTS.length, rows = [];
+  function hStepDone(n, title) {
+    return '<div class="h-step is-done"><span class="num" title="Step ' + n + '"><span class="mi">check</span></span><div class="body"><div class="ttl">' + title + '</div></div></div>';
+  }
+  function hStepTodo(n, title, blurb, actionsHtml) {
+    return '<div class="h-step is-todo"><span class="num">' + n + '</span><div class="body"><div class="ttl">' + title + '</div><div class="blurb">' + blurb + '</div><div class="actions">' + actionsHtml + '</div></div></div>';
+  }
+  function hStoreSteps(x, idx) {
+    var steps = [];
+    var tot = hTrackable(), nm = hStoreMatched(x.store), miss = Math.max(0, tot - nm);
     if (x.loc) {
-      rows.push('<div class="h-row"><span class="k">Location</span><span class="v">' + esc(x.loc) + '</span></div>');
+      steps.push(hStepDone(1, '1 · Location: ' + esc(x.loc)));
     } else {
-      rows.push('<div class="h-row h-row-warn"><span class="k">Location</span><span class="v"><button class="link" data-a="hOpenLoc" data-v="' + idx + '">Choose location</button><span class="h-warn-hint">Required to receive stock</span></span></div>');
-    }
-    var mapLine = nm + ' of ' + tot + ' matched';
-    if (hMappingIncomplete(x.store)) {
-      rows.push('<div class="h-row h-row-need"><span class="k">Mappings <span class="h-need">Required</span></span><span class="v"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">Finish mapping — required</button><span class="h-need-sub">' + mapLine + '</span></span></div>');
-    } else {
-      rows.push('<div class="h-row"><span class="k">Mappings</span><span class="v">' + mapLine + '</span></div>');
+      steps.push(hStepTodo(1, 'Location: not chosen',
+        'This store receives nothing until a location is chosen.',
+        '<button class="btn btn-secondary" data-a="hOpenLoc" data-v="' + idx + '">Choose location</button>'));
     }
     if (S.hInv) {
-      rows.push('<div class="h-row"><span class="k">Inventory</span><span class="v">Set to Inventory</span></div>');
+      steps.push(hStepDone(2, '2 · Created product should be: Inventory'));
     } else {
-      var invActs = '<button class="link" data-a="hOpenInv">Set product type to Inventory — required</button>';
-      if (S.hInvOpened) invActs += ' <button class="btn-text" data-a="hDoneInv">I\'ve done this</button>';
-      rows.push('<div class="h-row h-row-need"><span class="k">Inventory <span class="h-need">Required</span></span><span class="v"><span class="h-inv-copy">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</span> ' + invActs + '</span></div>');
+      steps.push(hStepTodo(2, 'Created product should be: Inventory',
+        'Now it is Non-inventory. Change it in Settings &gt; ' + esc(x.store) + ' &gt; Products/Services and click Update.',
+        '<button class="btn btn-secondary" data-a="hOpenInv">Open Settings</button>'));
     }
-    return '<div class="h-rows">' + rows.join('') + '</div>';
+    if (!hMappingIncomplete(x.store)) {
+      steps.push(hStepDone(3, '3 · Mappings: ' + nm + '/' + tot));
+    } else {
+      steps.push(hStepTodo(3, 'Mappings: ' + nm + '/' + tot,
+        miss + ' product' + (miss === 1 ? '' : 's') + ' have no QuickBooks item and won\'t sync.',
+        '<button class="btn btn-secondary" data-a="hFinishMap" data-v="' + esc(x.store) + '">Match products</button>'));
+    }
+    return '<div class="h-steps">' + steps.join('') + '</div>';
   }
   function hStoreRow(x, idx) {
     var ready = hStoreReady(x);
     return '<div class="h-store" id="h-store-' + idx + '" data-store="' + esc(x.store) + '">' +
-      '<div class="h-store-h"><span class="mi shop">storefront</span><div class="grow"><div class="t">' + esc(x.store) + '</div></div>' +
+      '<div class="h-store-h"><span class="mi shop">storefront</span><div class="grow"><div class="t">' + esc(x.store) + '</div><div class="connected">Connected</div></div>' +
       (ready ? '<span class="chip chip-success">Ready</span>' : '<span class="chip chip-warning">Setup needed</span>') +
-      '</div>' + hStoreDetails(x, idx) + '</div>';
+      '</div>' + hStoreSteps(x, idx) + '</div>';
   }
   function hStoresBlock() {
     return '<div class="h-panel"><h3>Stores</h3>' +
       S.hStores.map(hStoreRow).join('') +
-      '<div class="h-connect-foot"><button class="btn btn-secondary" data-a="hOpenConnect"><span class="mi" style="font-size:18px">add</span> Connect store</button></div></div>';
+      '<div class="h-connect-foot"><button class="btn btn-primary" data-a="hOpenConnect"><span class="mi" style="font-size:18px">add</span> Connect store</button></div></div>';
   }
+
   function hTip() {
     if (S.hSync === 'off' || S.hTipDismissed || !S.hEnabledOn) return '';
     return '<div class="h-tip"><span class="mi">lightbulb</span><div class="grow"><b>Tip</b><div class="muted" style="margin-top:2px">Existing quantity gaps aren\'t fixed by Enable. You can reconcile later from reports when you\'re ready.</div></div>' +
@@ -1663,7 +1678,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       st.loc = S.hLocPick; S.modal = null; S.hLocStore = null; toast('Location set · ' + st.loc);
     },
     hFinishMap: function (el) { S.hCur = el.dataset.v; S.hTab = 'mappings'; S.hFilter = 'unmatched'; S.hVisible = null; },
-    hOpenInv: function () { S.hInvOpened = true; toast('Opened Settings → General'); },
+    hOpenInv: function () { S.hInvOpened = true; S.hInv = true; toast('Opened Settings · marked Created product = Inventory'); },
     hDoneInv: function () { S.hInv = true; toast('Inventory setting marked done'); },
     hFilter: function (el) { S.hFilter = el.dataset.v; S.hVisible = null; },
     hContinueMatch: function () {
