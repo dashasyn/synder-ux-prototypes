@@ -243,6 +243,43 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .g-on-banner .mi { font-size:28px; }
 .g-path { background:#fff; border:1px solid var(--border-default); border-radius:6px; padding:8px 10px; margin-top:6px; line-height:20px; font-size:14px; }
 
+
+/* Variant H: overview setup */
+.h-empty { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:28px 28px 32px; margin-top:8px; max-width:560px; }
+.h-empty .sub { color:var(--t-secondary); margin:0 0 18px; font-size:15px; line-height:22px; }
+.h-empty .org-hint { color:var(--t-secondary); margin-top:8px; font-size:14px; line-height:20px; }
+.h-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.3fr); gap:12px; align-items:start; margin-top:8px; }
+@media (max-width:1100px) { .h-cols { grid-template-columns:1fr; } }
+.h-panel { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:16px 18px; border:1px solid var(--border-default); }
+.h-panel h3 { margin:0 0 12px; font-size:16px; font-weight:500; }
+.h-counts { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.h-count { display:flex; flex-direction:column; gap:2px; padding:10px 12px; background:var(--c-grey-5); border-radius:6px; border:1px solid transparent; text-align:left; cursor:pointer; font:inherit; color:inherit; }
+.h-count:hover { border-color:var(--c-primary-20); background:var(--c-primary-5); }
+.h-count .n { font-size:22px; font-weight:500; line-height:28px; color:var(--c-primary); }
+.h-count .l { color:var(--t-secondary); font-size:14px; }
+.h-sync-state { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:16px; }
+.h-sync-meta { color:var(--t-secondary); line-height:22px; margin-bottom:12px; }
+.h-sync-meta div { margin-top:2px; }
+.h-banners { display:flex; flex-direction:column; gap:8px; margin:0 0 12px; }
+.h-banner { cursor:pointer; }
+.h-banner:hover { filter:brightness(.98); }
+.h-store { padding:14px 0; border-bottom:1px solid var(--border-default); }
+.h-store:last-child { border-bottom:none; }
+.h-store.flash { outline:2px solid var(--c-red); outline-offset:2px; border-radius:6px; background:var(--c-red-light); }
+.h-store-h { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+.h-store-h .mi.shop { color:#95BF47; font-size:22px; }
+.h-store-h .grow { flex:1; min-width:160px; }
+.h-store-h .t { font-weight:500; font-size:15px; }
+.h-store-h .s { color:var(--t-secondary); margin-top:2px; font-size:14px; }
+.h-alerts { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+.h-alert { display:flex; align-items:flex-start; gap:8px; padding:10px 12px; background:var(--c-red-light); border-left:3px solid var(--c-red); border-radius:4px; font-size:14px; line-height:20px; }
+.h-alert .mi { color:var(--c-red); flex-shrink:0; }
+.h-alert .body { flex:1; min-width:0; }
+.h-tip { display:flex; align-items:flex-start; gap:10px; background:var(--c-primary-5); border:1px solid var(--c-primary-20); border-radius:8px; padding:12px 14px; margin-bottom:12px; }
+.h-tip .grow { flex:1; }
+.h-tip .mi { color:var(--c-primary); }
+.h-connect-foot { padding-top:12px; margin-top:4px; border-top:1px solid var(--border-default); }
+
 /* Success */
 .success { background: #fff; border-radius: 8px; box-shadow: var(--shadow-card); padding: 40px; max-width: 680px; margin: 24px auto; text-align: center; }
 .success .icon { width: 64px; height: 64px; border-radius: 50%; background: var(--c-green-light); color: var(--c-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
@@ -264,6 +301,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     <button class="tab" data-variant="E">E · Setup checklist</button>
     <button class="tab" data-variant="F">F · Overview home</button>
     <button class="tab" data-variant="G">G · Store cards</button>
+    <button class="tab" data-variant="H">H · Overview setup</button>
   </div>
 </div>
 
@@ -324,7 +362,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   function prod(id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; }
 
   var variant = (location.hash || '#A').slice(1).toUpperCase();
-  if ('ABCDEFG'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
+  if ('ABCDEFGH'.indexOf(variant) < 0 || variant.length !== 1) variant = 'A';
   var S;
   function fresh() {
     S = { started: false, store: false, connecting: false, qbo: false, match: 'todo', matchOpen: false,
@@ -340,7 +378,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       fSel: STORE, fNew: '', fLoc: LOC, fBusy: false, fMatchDone: false,
       // Variant G
       gStores: [], gTab: 'overview', gInv: false, gOn: false, gCur: null, gMaps: {}, gFilter: 'unmatched', gSearch: '', gVisible: null,
-      gSel: STORE, gNew: '', gLoc: LOC, gBusy: false, gMatchDone: {} };
+      gSel: STORE, gNew: '', gLoc: LOC, gBusy: false, gMatchDone: {},
+      // Variant H
+      hStores: [], hTab: 'overview', hInv: false, hInvOpened: false, hSync: 'off', hCur: null, hMaps: {}, hFilter: 'unmatched', hSearch: '', hVisible: null,
+      hSel: STORE, hNew: '', hLocPick: '', hBusy: false, hMatchDone: {}, hTipDismissed: false, hEnabledOn: null, hLastSync: null,
+      hActivity: { pending: 0, held: 0, failed: 0, applied: 0 }, hConfirm: null, hLocStore: null };
   }
   fresh();
 
@@ -1122,6 +1164,271 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   }
   function gRefreshTable() { var t = document.getElementById('gTable'); if (t) t.innerHTML = gTable(); }
 
+
+  // ---------- variant H: overview setup ----------
+  function hConnected(id) { return S.hStores.some(function (x) { return x.store === id; }); }
+  function hMap() { return S.hMaps[S.hCur] || {}; }
+  function hMatchedIn(m) { return PRODUCTS.filter(function (p) { return !p.service && m[p.id]; }).map(function (p) { return p.id; }); }
+  function hMatched() { return hMatchedIn(hMap()); }
+  function hStoreMatched(store) { return hMatchedIn(S.hMaps[store] || {}).length; }
+  function hAllMatched() { var n = 0; S.hStores.forEach(function (x) { n += hStoreMatched(x.store); }); return n; }
+  function hTrackable() { return PRODUCTS.filter(function (p) { return !p.service; }).length; }
+  function hUse() { var c = {}, m = hMap(); hMatched().forEach(function (id) { c[m[id]] = (c[m[id]] || 0) + 1; }); return c; }
+  function hMappingIncomplete(store) {
+    var n = hStoreMatched(store), tot = hTrackable();
+    if (S.hMatchDone[store]) return false;
+    return n < tot;
+  }
+  function hStoreReady(x) { return !!x.loc && S.hInv && !hMappingIncomplete(x.store); }
+  function hNeedsLoc() { return S.hStores.some(function (x) { return !x.loc; }); }
+  function hNeedsMap() { return S.hStores.some(function (x) { return hMappingIncomplete(x.store); }); }
+  function hComputeVisible() {
+    var m = hMap(), q = S.hSearch.trim().toLowerCase();
+    S.hVisible = PRODUCTS.filter(function (p) {
+      var ok = !p.service && m[p.id];
+      if (S.hFilter === 'matched' && !ok) return false;
+      if (S.hFilter === 'unmatched' && ok) return false;
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || (m[p.id] && item(m[p.id]).name.toLowerCase().indexOf(q) >= 0);
+    }).map(function (p) { return p.id; });
+  }
+  function hTable() {
+    if (!S.hVisible) hComputeVisible();
+    var m = hMap(), uc = hUse();
+    var rows = S.hVisible.map(function (id) {
+      var p = prod(id), q = m[id] ? item(m[id]) : null, dup = q && uc[q.id] > 1, cell;
+      if (p.service) cell = '<select disabled><option>Service · can\'t track stock</option></select>';
+      else cell = '<select data-hmap="' + id + '"><option value="">Not matched</option>' + ITEMS.map(function (it) {
+        var no = it.type !== 'Inventory';
+        return '<option value="' + it.id + '"' + (m[id] === it.id ? ' selected' : '') + (no ? ' disabled' : '') + '>' + esc(it.name) + (no ? ' · ' + it.type + ', no stock' : '') + '</option>';
+      }).join('') + '</select>' + (dup ? '<div class="note"><span class="mi">warning_amber</span>Also matched to another product. Both get the same stock.</div>' : '');
+      var st = p.service ? '<span class="chip chip-neutral">Not trackable</span>' : q ? (dup ? '<span class="chip chip-warning">Shared item</span>' : '<span class="chip chip-success">Matched</span>') : '<span class="chip chip-neutral">Not matched</span>';
+      return '<tr class="' + (dup ? 'dup' : '') + '"><td>' + esc(p.name) + '</td><td>' + cell + '</td><td class="num-cell">' + p.qty + '</td><td class="num-cell">' + (q ? q.qty : '—') + '</td><td>' + st + '</td></tr>';
+    }).join('');
+    return '<table class="mt"><thead><tr><th style="width:26%">Shopify product</th><th style="width:34%">QuickBooks item</th><th>Shopify qty</th><th>QuickBooks qty</th><th>Status</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="5" class="muted" style="padding:16px">No products here.</td></tr>') + '</tbody></table>';
+  }
+  function hSeg(k, label) { return '<button class="' + (S.hFilter === k ? 'on' : '') + '" data-a="hFilter" data-v="' + k + '">' + label + '</button>'; }
+  function hMappings() {
+    var n = hMatched().length, all = PRODUCTS.length;
+    var cont = '';
+    if (S.hSync === 'off' && n > 0) cont = '<button class="btn btn-primary" data-a="hContinueMatch">Done matching</button>';
+    else if (S.hSync === 'off') cont = '<span class="muted">Match products for this store</span>';
+    return '<div class="d-bar"><div class="row"><b style="font-size:16px">' + n + ' of ' + all + ' matched</b>' +
+      (S.hStores.length > 1 ? '<select data-a="hStoreSel" style="width:auto">' + S.hStores.map(function (x) { return '<option' + (x.store === S.hCur ? ' selected' : '') + '>' + x.store + '</option>'; }).join('') + '</select>' : '') +
+      '</div><div class="row">' + cont + '</div></div>' +
+      '<p class="muted" style="margin:0 0 10px">Auto-matched by SKU, then name. Unmatched products won\'t sync. Incomplete stores are still allowed when sync is enabled.</p>' +
+      '<div class="mt-tools" style="margin-top:0"><div class="seg">' + hSeg('unmatched', 'Not matched (' + (all - n) + ')') + hSeg('matched', 'Matched (' + n + ')') + hSeg('all', 'All (' + all + ')') + '</div>' +
+      '<div class="d-search"><span class="mi">search</span><input type="text" id="hSearch" placeholder="Search products" value="' + esc(S.hSearch) + '"></div></div>' +
+      '<div id="hTable">' + hTable() + '</div>';
+  }
+  function hActivityTab() {
+    var a = S.hActivity;
+    if (S.hSync === 'off') return '<div class="d-panel d-empty-tab">No activity yet. Counts appear across all stores once sync is enabled.</div>';
+    return '<div class="d-panel"><p style="margin:0 0 12px">Activity across all connected stores.</p>' +
+      '<div class="h-counts" style="max-width:420px">' +
+      '<button class="h-count" data-a="hActFilter" data-v="pending"><span class="n">' + a.pending + '</span><span class="l">Pending</span></button>' +
+      '<button class="h-count" data-a="hActFilter" data-v="held"><span class="n">' + a.held + '</span><span class="l">Held</span></button>' +
+      '<button class="h-count" data-a="hActFilter" data-v="failed"><span class="n">' + a.failed + '</span><span class="l">Failed</span></button>' +
+      '<button class="h-count" data-a="hActFilter" data-v="applied"><span class="n">' + a.applied + '</span><span class="l">Applied</span></button>' +
+      '</div>' +
+      (a.applied || a.pending || a.held || a.failed
+        ? '<div class="synder-table-wrap" style="margin-top:16px"><table class="mt d-events"><thead><tr><th>Time</th><th>Product</th><th>Store</th><th>Status</th></tr></thead><tbody>' +
+          '<tr><td>Just now</td><td>Stone 10</td><td>' + esc(S.hStores[0] ? S.hStores[0].store : '') + '</td><td><span class="chip chip-success">Applied</span></td></tr>' +
+          (a.pending ? '<tr><td>1 min ago</td><td>Coffee</td><td>' + esc(S.hStores[0] ? S.hStores[0].store : '') + '</td><td><span class="chip chip-info">Pending</span></td></tr>' : '') +
+          '</tbody></table></div>'
+        : '<p class="muted" style="margin-top:14px">Near-zero activity — waiting for QuickBooks stock movements.</p>') +
+      '</div>';
+  }
+  function hSyncLabel() {
+    return S.hSync === 'enabled' ? 'Enabled' : S.hSync === 'paused' ? 'Paused' : 'Off';
+  }
+  function hSyncChip() {
+    if (S.hSync === 'enabled') return '<span class="chip chip-success">Enabled</span>';
+    if (S.hSync === 'paused') return '<span class="chip chip-warning">Paused</span>';
+    return '<span class="chip chip-neutral">Off</span>';
+  }
+  function hFmt(ts) {
+    if (!ts) return '—';
+    try { return new Date(ts).toLocaleString(); } catch (e) { return '—'; }
+  }
+  function hActivityBlock() {
+    var a = S.hActivity;
+    return '<div class="h-panel"><h3>Activity</h3>' +
+      '<div class="h-counts">' +
+      '<button class="h-count" data-a="hGoActivity" data-v="pending"><span class="n">' + a.pending + '</span><span class="l">Pending</span></button>' +
+      '<button class="h-count" data-a="hGoActivity" data-v="held"><span class="n">' + a.held + '</span><span class="l">Held</span></button>' +
+      '<button class="h-count" data-a="hGoActivity" data-v="failed"><span class="n">' + a.failed + '</span><span class="l">Failed</span></button>' +
+      '<button class="h-count" data-a="hGoActivity" data-v="applied"><span class="n">' + a.applied + '</span><span class="l">Applied</span></button>' +
+      '</div>' +
+      '<div class="helper" style="margin-top:10px">All stores · counts are links to Activity</div></div>';
+  }
+  function hSyncBlock() {
+    var btns = '';
+    if (S.hSync === 'off') {
+      btns = '<button class="btn btn-primary" data-a="hAskEnable">Enable</button>';
+    } else if (S.hSync === 'enabled') {
+      btns = '<button class="btn btn-secondary" data-a="hAskPause">Pause</button>' +
+        '<button class="btn btn-secondary" data-a="hRunNow">Run now</button>' +
+        '<button class="btn-text" data-a="hAskDisable" style="color:var(--c-red)">Disable</button>';
+    } else {
+      btns = '<button class="btn btn-primary" data-a="hAskEnable">Enable</button>' +
+        '<button class="btn-text" data-a="hAskDisable" style="color:var(--c-red)">Disable</button>';
+    }
+    return '<div class="h-panel"><h3>Sync</h3>' +
+      '<div class="h-sync-state">' + hSyncChip() + '<b>' + hSyncLabel() + '</b></div>' +
+      '<div class="h-sync-meta"><div>Last sync: <b>' + hFmt(S.hLastSync) + '</b></div>' +
+      '<div>Enabled on: <b>' + hFmt(S.hEnabledOn) + '</b></div></div>' +
+      '<div class="actions" style="margin-top:0">' + btns + '</div>' +
+      (S.hSync === 'off' ? '<div class="helper" style="margin-top:10px">Enable is global. Incomplete stores stay allowed; stores without a location receive nothing.</div>' : '') +
+      '</div>';
+  }
+  function hStoreAlerts(x, idx) {
+    if (hStoreReady(x)) return '';
+    var parts = [];
+    if (!x.loc) {
+      parts.push('<div class="h-alert"><span class="mi">place</span><div class="body"><b>Location required</b><div class="muted" style="margin-top:2px">Until a location is chosen, this store receives nothing.</div>' +
+        '<div class="actions" style="margin-top:8px"><button class="btn btn-primary" data-a="hOpenLoc" data-v="' + idx + '">Choose location</button></div></div></div>');
+    }
+    if (hMappingIncomplete(x.store)) {
+      parts.push('<div class="h-alert"><span class="mi">link_off</span><div class="body"><b>Mapping incomplete</b><div class="muted" style="margin-top:2px">' + hStoreMatched(x.store) + ' of ' + PRODUCTS.length + ' matched</div>' +
+        '<div class="actions" style="margin-top:8px"><button class="link" data-a="hFinishMap" data-v="' + esc(x.store) + '">Finish mapping</button></div></div></div>');
+    }
+    if (!S.hInv) {
+      var invActs = '<button class="link" data-a="hOpenInv">Open settings</button>';
+      if (S.hInvOpened) invActs += '<button class="btn-text" data-a="hDoneInv">I\'ve done this</button>';
+      parts.push('<div class="h-alert"><span class="mi">inventory_2</span><div class="body"><b>Inventory</b><div style="margin-top:2px">Open Settings → General, then Products and services, set <b>Created product should be</b> to <b>Inventory</b>.</div>' +
+        (S.hInvOpened ? '<div class="helper" style="margin-top:4px">Settings opened — switch the type, then confirm below.</div>' : '') +
+        '<div class="actions" style="margin-top:8px">' + invActs + '</div></div></div>');
+    }
+    return parts.length ? '<div class="h-alerts">' + parts.join('') + '</div>' : '';
+  }
+  function hStoreRow(x, idx) {
+    var ready = hStoreReady(x);
+    var nm = hStoreMatched(x.store);
+    var loc = x.loc ? esc(x.loc) : '<span class="text-error">No location</span>';
+    var invFlag = S.hInv ? '<span class="chip chip-success">Inventory</span>' : '<span class="chip chip-warning">Non-inventory</span>';
+    return '<div class="h-store" id="h-store-' + idx + '" data-store="' + esc(x.store) + '">' +
+      '<div class="h-store-h"><span class="mi shop">storefront</span><div class="grow"><div class="t">' + esc(x.store) + '</div>' +
+      '<div class="s">' + loc + ' · Mappings ' + nm + '/' + PRODUCTS.length + ' · ' + invFlag + '</div></div>' +
+      (ready ? '<span class="chip chip-success">Ready</span>' : '<span class="chip chip-error">Setup needed</span>') +
+      '</div>' + hStoreAlerts(x, idx) + '</div>';
+  }
+  function hStoresBlock() {
+    return '<div class="h-panel"><h3>Stores</h3>' +
+      S.hStores.map(hStoreRow).join('') +
+      '<div class="h-connect-foot"><button class="btn btn-secondary" data-a="hOpenConnect"><span class="mi" style="font-size:18px">add</span> Connect store</button></div></div>';
+  }
+  function hBanners() {
+    var b = [];
+    if (hNeedsLoc()) b.push('<div class="alert alert-error h-banner" data-a="hFocusLoc"><span class="mi">error_outline</span><div><b>A store needs a location</b> — stock won\'t reach that store until you choose one.</div></div>');
+    if (hNeedsMap()) b.push('<div class="alert alert-error h-banner" data-a="hFocusMap"><span class="mi">error_outline</span><div><b>Mapping required</b> — finish product mapping so quantities can sync.</div></div>');
+    if (!S.hInv && S.hStores.length) b.push('<div class="alert alert-error h-banner" data-a="hFocusInv"><span class="mi">error_outline</span><div><b>Inventory setting required</b> — set Created product should be to Inventory in Settings → General.</div></div>');
+    return b.length ? '<div class="h-banners">' + b.join('') + '</div>' : '';
+  }
+  function hTip() {
+    if (S.hSync === 'off' || S.hTipDismissed || !S.hEnabledOn) return '';
+    return '<div class="h-tip"><span class="mi">lightbulb</span><div class="grow"><b>Tip</b><div class="muted" style="margin-top:2px">Existing quantity gaps aren\'t fixed by Enable. You can reconcile later from reports when you\'re ready.</div></div>' +
+      '<button class="btn-icon" data-a="hDismissTip" aria-label="Dismiss"><span class="mi">close</span></button></div>';
+  }
+  function hEmpty() {
+    var opts = D_STORES.filter(function (x) { return !hConnected(x.id); });
+    var isNew = S.hSel === '__new';
+    var ok = !S.hBusy && (!isNew || /\S+\.myshopify\.com$/.test(S.hNew.trim()));
+    return '<div class="h-empty"><h2 class="h2" style="margin-bottom:6px">Inventory sync</h2>' +
+      '<p class="sub">Pushes QuickBooks Online stock movements into your Shopify store.</p>' +
+      '<div class="field" style="margin-top:0;max-width:none"><label for="hStoreEmpty">Shopify store</label>' +
+      '<select id="hStoreEmpty" data-a="hSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.hSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="hNewEmpty" placeholder="your-store.myshopify.com" value="' + esc(S.hNew) + '" style="margin-top:8px;width:100%">' : '') +
+      '<div class="org-hint">Don\'t see your store? Connect it first in Organization settings</div></div>' +
+      '<div class="actions" style="margin-top:18px"><button class="btn btn-primary" id="hConnectEmptyBtn" data-a="hConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.hBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Waiting for Shopify…' : 'Connect store') + '</button></div></div>';
+  }
+  function hOverview() {
+    if (!S.hStores.length) return hEmpty();
+    return hTip() + hBanners() + '<div class="h-cols">' + hActivityBlock() + hSyncBlock() + hStoresBlock() + '</div>';
+  }
+  function viewH() {
+    var con = S.hStores.length > 0;
+    var tabs = [['overview', 'Overview'], ['mappings', 'Mappings'], ['activity', 'Activity']];
+    var h = '<div class="synder-tabs d-tabs">' + tabs.map(function (t) {
+      var off = !con && t[0] !== 'overview';
+      return '<button class="synder-tab' + (S.hTab === t[0] ? ' active' : '') + (off ? ' off' : '') + '" data-a="hTab" data-v="' + t[0] + '"' + (off ? ' aria-disabled="true" title="Connect a store first"' : '') + '>' + t[1] + '</button>';
+    }).join('') + '</div>';
+    if (!con || S.hTab === 'overview') return h + hOverview();
+    return h + (S.hTab === 'mappings' ? hMappings() : hActivityTab());
+  }
+  function hConnectModal() {
+    var opts = D_STORES.filter(function (x) { return !hConnected(x.id); });
+    var isNew = S.hSel === '__new';
+    var ok = !S.hBusy && (!isNew || /\S+\.myshopify\.com$/.test(S.hNew.trim()));
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Connect store">' +
+      '<div class="modal-h"><h2 class="h3">Connect store</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><div class="field" style="margin-top:0;max-width:none"><label for="hStore">Shopify store</label><select id="hStore" data-a="hSel">' +
+      opts.map(function (x) { return '<option value="' + x.id + '"' + (S.hSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
+      '<option value="__new"' + (isNew ? ' selected' : '') + '>+ Connect new store</option></select>' +
+      (isNew ? '<input type="text" id="hNew" placeholder="your-store.myshopify.com" value="' + esc(S.hNew) + '" style="margin-top:8px;width:100%">' : '') +
+      '<div class="org-hint" style="margin-top:8px">Don\'t see your store? Connect it first in Organization settings</div>' +
+      '<div class="helper">Shopify may ask you to approve inventory access (~1s in this prototype). Location is chosen after connecting.</div></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" id="hConnectBtn" data-a="hConnect"' + (ok ? '' : ' disabled') + '>' +
+      (S.hBusy ? '<span class="mi spin" style="font-size:18px">autorenew</span> Waiting for Shopify…' : 'Connect store') + '</button></div></div></div>';
+  }
+  function hLocModal() {
+    var st = S.hStores[S.hLocStore];
+    if (!st) return '';
+    var meta = null;
+    D_STORES.forEach(function (x) { if (x.id === st.store) meta = x; });
+    var locs = meta ? meta.locs : ['Default location', 'Warehouse B'];
+    if (!S.hLocPick) S.hLocPick = locs[0];
+    return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Choose location" style="max-width:440px">' +
+      '<div class="modal-h"><h2 class="h3">Choose location</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+      '<div class="modal-b"><p style="margin:0 0 10px" class="muted">' + esc(st.store) + '</p>' +
+      '<div class="field" style="margin-top:0;max-width:none"><label for="hLoc">Location</label><select id="hLoc" data-a="hLocSel">' +
+      locs.map(function (l) { return '<option' + (S.hLocPick === l ? ' selected' : '') + '>' + l + '</option>'; }).join('') + '</select>' +
+      '<div class="helper">Stock updates go to this location. Without one, the store receives nothing.</div></div></div>' +
+      '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="hSaveLoc">Save location</button></div></div></div>';
+  }
+  function hConfirmModal() {
+    var kind = S.hConfirm;
+    if (kind === 'enable') {
+      return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Enable sync" style="max-width:440px">' +
+        '<div class="modal-h"><h2 class="h3">Enable inventory sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+        '<div class="modal-b">QuickBooks stock movements will push to connected Shopify stores. Enable is global — incomplete stores stay allowed; stores without a location receive nothing.</div>' +
+        '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="hEnable">Enable</button></div></div></div>';
+    }
+    if (kind === 'pause') {
+      return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Pause sync" style="max-width:440px">' +
+        '<div class="modal-h"><h2 class="h3">Pause sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+        '<div class="modal-b">While paused, new stock movements are <b>queued</b> and applied when you enable again.</div>' +
+        '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-primary" data-a="hPause">Pause</button></div></div></div>';
+    }
+    if (kind === 'disable') {
+      return '<div class="overlay" data-a="closeOverlay"><div class="modal sm" role="dialog" aria-label="Disable sync" style="max-width:440px">' +
+        '<div class="modal-h"><h2 class="h3">Disable sync?</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
+        '<div class="modal-b">While off, stock movements are <b>dropped</b> — they won\'t queue or apply later.</div>' +
+        '<div class="modal-f"><button class="btn-text" data-a="closeModal">Cancel</button><button class="btn btn-danger" data-a="hDisable">Disable</button></div></div></div>';
+    }
+    return '';
+  }
+  function hOpenConnect() {
+    var first = D_STORES.filter(function (x) { return !hConnected(x.id); })[0];
+    S.hSel = first ? first.id : '__new'; S.hNew = ''; S.hBusy = false; S.modal = 'hConnect';
+  }
+  function hRefreshTable() { var t = document.getElementById('hTable'); if (t) t.innerHTML = hTable(); }
+  function hFlashStore(pred) {
+    var idx = -1;
+    S.hStores.forEach(function (x, i) { if (idx < 0 && pred(x)) idx = i; });
+    if (idx < 0) return 'norender';
+    S.hTab = 'overview';
+    render();
+    setTimeout(function () {
+      var el = document.getElementById('h-store-' + idx);
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600); }
+    }, 50);
+    return 'norender';
+  }
+
   // ---------- modals ----------
   function modalHtml() {
     if (S.modal === 'dConnect') return dConnectModal();
@@ -1132,6 +1439,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     if (S.modal === 'fConfirm') return fConfirmModal();
     if (S.modal === 'gConnect') return gConnectModal();
     if (S.modal === 'gConfirm') return gConfirmModal();
+    if (S.modal === 'hConnect') return hConnectModal();
+    if (S.modal === 'hLoc') return hLocModal();
+    if (S.modal === 'hConfirm') return hConfirmModal();
     if (S.modal === 'match') {
       return '<div class="overlay" data-a="closeOverlay"><div class="modal" role="dialog" aria-label="Match products">' +
         '<div class="modal-h"><h2 class="h3">Match Shopify products to QuickBooks items</h2><button class="btn-icon" data-a="closeModal" aria-label="Close"><span class="mi">close</span></button></div>' +
@@ -1169,6 +1479,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (variant === 'E') v.innerHTML = viewE();
     else if (variant === 'F') v.innerHTML = viewF();
     else if (variant === 'G') v.innerHTML = viewG();
+    else if (variant === 'H') v.innerHTML = viewH();
     else if (S.on) v.innerHTML = successView();
     else if (!S.started) v.innerHTML = emptyState();
     else v.innerHTML = variant === 'A' ? viewA() : variant === 'B' ? viewB() : viewC();
@@ -1190,7 +1501,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     switchInv: function () { S.qbo = true; afterStep(); toast('Created products will now be Inventory items'); },
     openSettings: function () { S.setType = S.qbo ? 'Inventory' : 'Non-inventory'; S.modal = 'settings'; },
     saveSettings: function () { var was = S.qbo; S.qbo = S.setType === 'Inventory'; S.modal = null; if (S.qbo && !was) afterStep(); toast('Settings saved'); },
-    closeModal: function () { if (S.modal === 'match' && S.snapshot) S.map = JSON.parse(S.snapshot); S.modal = null; },
+    closeModal: function () { if (S.modal === 'match' && S.snapshot) S.map = JSON.parse(S.snapshot); S.modal = null; S.hConfirm = null; S.hLocStore = null; },
     reviewMatches: openMatch,
     skipMatch: function () { if (S.matchOpen && S.snapshot) S.map = JSON.parse(S.snapshot); S.match = 'skipped'; S.matchOpen = false; S.modal = null; afterStep(); },
     doneMatch: function () { S.match = 'reviewed'; S.matchOpen = false; S.modal = null; afterStep(); toast(nMatched() + ' of 17 products matched'); },
@@ -1315,6 +1626,72 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     },
     gAskOn: function () { if (!gCanOn()) return 'norender'; S.modal = 'gConfirm'; },
     gTurnOn: function () { S.gOn = true; S.modal = null; S.gTab = 'overview'; toast('Inventory sync is on'); },
+    hOpenConnect: hOpenConnect,
+    hConnect: function () {
+      var id = S.hSel === '__new' ? S.hNew.trim() : S.hSel;
+      if (S.hSel === '__new' && !/\S+\.myshopify\.com$/.test(id)) { toast('Enter a myshopify.com store'); return 'norender'; }
+      S.hBusy = true; render();
+      setTimeout(function () {
+        var first = !S.hStores.length;
+        S.hStores.push({ store: id, loc: null });
+        S.hMaps[id] = id === STORE ? { p10: 'q12' } : {};
+        S.hBusy = false; S.modal = null; S.hCur = id; S.hFilter = 'unmatched'; S.hSearch = ''; S.hVisible = null;
+        S.hTab = 'overview';
+        toast((first ? 'Store connected' : 'Store added') + ' · ' + id + ' · choose a location');
+        render();
+        window.scrollTo(0, 0);
+      }, 1000);
+      return 'norender';
+    },
+    hTab: function (el) {
+      var tab = el.dataset.v;
+      if (!S.hStores.length && tab !== 'overview') { toast('Connect a store first'); return 'norender'; }
+      if (S.hTab === 'mappings' && tab === 'overview' && hMatched().length > 0) S.hMatchDone[S.hCur] = true;
+      S.hTab = tab; S.hVisible = null;
+    },
+    hOpenLoc: function (el) {
+      S.hLocStore = +el.dataset.v; S.hLocPick = ''; S.modal = 'hLoc';
+    },
+    hSaveLoc: function () {
+      var st = S.hStores[S.hLocStore];
+      if (!st || !S.hLocPick) { toast('Choose a location'); return 'norender'; }
+      st.loc = S.hLocPick; S.modal = null; S.hLocStore = null; toast('Location set · ' + st.loc);
+    },
+    hFinishMap: function (el) { S.hCur = el.dataset.v; S.hTab = 'mappings'; S.hFilter = 'unmatched'; S.hVisible = null; },
+    hOpenInv: function () { S.hInvOpened = true; toast('Opened Settings → General'); },
+    hDoneInv: function () { S.hInv = true; toast('Inventory setting marked done'); },
+    hFilter: function (el) { S.hFilter = el.dataset.v; S.hVisible = null; },
+    hContinueMatch: function () {
+      if (hMatched().length === 0) { toast('Match at least 1 product'); return 'norender'; }
+      S.hMatchDone[S.hCur] = true; S.hTab = 'overview'; toast('Matching done for ' + S.hCur);
+    },
+    hAskEnable: function () { S.hConfirm = 'enable'; S.modal = 'hConfirm'; },
+    hAskPause: function () { S.hConfirm = 'pause'; S.modal = 'hConfirm'; },
+    hAskDisable: function () { S.hConfirm = 'disable'; S.modal = 'hConfirm'; },
+    hEnable: function () {
+      var now = Date.now();
+      var wasOff = S.hSync === 'off';
+      S.hSync = 'enabled'; S.modal = null; S.hConfirm = null;
+      if (!S.hEnabledOn) S.hEnabledOn = now;
+      S.hLastSync = now;
+      if (wasOff) {
+        S.hActivity = { pending: 1, held: 0, failed: 0, applied: 3 };
+      }
+      toast('Inventory sync enabled');
+    },
+    hPause: function () { S.hSync = 'paused'; S.modal = null; S.hConfirm = null; toast('Sync paused · movements will queue'); },
+    hDisable: function () {
+      S.hSync = 'off'; S.modal = null; S.hConfirm = null; S.hLastSync = null;
+      S.hActivity = { pending: 0, held: 0, failed: 0, applied: 0 };
+      toast('Sync disabled · movements dropped while off');
+    },
+    hRunNow: function () { S.hLastSync = Date.now(); S.hActivity.applied += 1; toast('Sync run · Applied +1'); },
+    hGoActivity: function () { S.hTab = 'activity'; },
+    hActFilter: function () { toast('Filtered activity (prototype)'); return 'norender'; },
+    hDismissTip: function () { S.hTipDismissed = true; },
+    hFocusLoc: function () { return hFlashStore(function (x) { return !x.loc; }); },
+    hFocusMap: function () { return hFlashStore(function (x) { return hMappingIncomplete(x.store); }); },
+    hFocusInv: function () { return hFlashStore(function () { return !S.hInv; }); },
     closeOverlay: function (el, e) { if (e.target === el) actions.closeModal(); else return 'norender'; }
   };
 
@@ -1348,6 +1725,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (t.dataset.a === 'gSel') { S.gSel = t.value; var gst = D_STORES.filter(function (x) { return x.id === t.value; })[0]; S.gLoc = gst ? gst.locs[0] : 'Default location'; render(); }
     else if (t.dataset.a === 'gLocSel') { S.gLoc = t.value; }
     else if (t.dataset.a === 'gStoreSel') { S.gCur = t.value; S.gVisible = null; render(); }
+    else if (t.dataset.hmap) { var hm = S.hMaps[S.hCur]; if (t.value) hm[t.dataset.hmap] = t.value; else delete hm[t.dataset.hmap]; render(); }
+    else if (t.dataset.a === 'hSel') { S.hSel = t.value; render(); }
+    else if (t.dataset.a === 'hLocSel') { S.hLocPick = t.value; }
+    else if (t.dataset.a === 'hStoreSel') { S.hCur = t.value; S.hVisible = null; render(); }
   });
   document.addEventListener('input', function (e) {
     var t = e.target;
@@ -1359,9 +1740,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     else if (t.id === 'fNew') { S.fNew = t.value; var fb = document.getElementById('fConnectBtn'); if (fb) fb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.fLoc; }
     else if (t.id === 'gSearch') { S.gSearch = t.value; S.gVisible = null; gRefreshTable(); }
     else if (t.id === 'gNew') { S.gNew = t.value; var gb = document.getElementById('gConnectBtn'); if (gb) gb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim()) || !S.gLoc; }
+    else if (t.id === 'hSearch') { S.hSearch = t.value; S.hVisible = null; hRefreshTable(); }
+    else if (t.id === 'hNew' || t.id === 'hNewEmpty') {
+      S.hNew = t.value;
+      var hb = document.getElementById('hConnectBtn'); if (hb) hb.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim());
+      var he = document.getElementById('hConnectEmptyBtn'); if (he) he.disabled = !/\S+\.myshopify\.com$/.test(t.value.trim());
+    }
   });
-  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCDEFG'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
-  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn, eAllMatched: eAllMatched, eCanOn: eCanOn, eCurStep: eCurStep, fAllMatched: fAllMatched, fCanOn: fCanOn, gAllMatched: gAllMatched, gCanOn: gCanOn } };
+  window.addEventListener('hashchange', function () { var v = location.hash.slice(1).toUpperCase(); if ('ABCDEFGH'.indexOf(v) >= 0 && v.length === 1 && v !== variant) { variant = v; fresh(); render(); } });
+  window.__proto = { S: function () { return S; }, actions: actions, render: render, setVariant: function (v) { variant = v; fresh(); render(); }, derived: { nMatched: nMatched, differs: differs, dupIds: dupIds, dAllMatched: dAllMatched, dCanOn: dCanOn, eAllMatched: eAllMatched, eCanOn: eCanOn, eCurStep: eCurStep, fAllMatched: fAllMatched, fCanOn: fCanOn, gAllMatched: gAllMatched, gCanOn: gCanOn, hAllMatched: hAllMatched, hStoreReady: hStoreReady } };
   render();
 })();
 </script>
