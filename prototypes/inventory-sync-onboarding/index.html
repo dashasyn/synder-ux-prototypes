@@ -245,12 +245,14 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 
 /* Variant H: overview setup */
-.h-empty-wrap { display:flex; justify-content:center; align-items:flex-start; padding:40px 16px 24px; }
+.page.h-empty-mode { max-width:none; width:100%; flex:1; display:flex; flex-direction:column; box-sizing:border-box; }
+.page.h-empty-mode #view { flex:1; display:flex; flex-direction:column; min-height:0; }
+.page.h-full { max-width:none; width:100%; box-sizing:border-box; }
+.h-empty-wrap { display:flex; justify-content:center; align-items:center; flex:1; min-height:0; padding:24px 16px; width:100%; box-sizing:border-box; }
 .h-empty { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:28px 28px 32px; max-width:480px; width:100%; }
-.h-empty .sub { color:var(--t-secondary); margin:0 0 18px; font-size:15px; line-height:22px; }
 .h-empty .org-hint { color:var(--t-secondary); margin-top:8px; font-size:14px; line-height:20px; }
 .page-head.is-hidden { display:none; }
-.h-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.3fr); gap:12px; align-items:start; margin-top:8px; }
+.h-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.3fr); gap:12px; align-items:start; margin-top:8px; width:100%; }
 @media (max-width:1100px) { .h-cols { grid-template-columns:1fr; } }
 .h-panel { background:#fff; border-radius:8px; box-shadow:var(--shadow-card); padding:16px 18px; border:1px solid var(--border-default); }
 .h-panel h3 { margin:0 0 12px; font-size:16px; font-weight:500; }
@@ -1325,7 +1327,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     var isNew = S.hSel === '__new';
     var ok = !S.hBusy && (!isNew || /\S+\.myshopify\.com$/.test(S.hNew.trim()));
     return '<div class="h-empty-wrap"><div class="h-empty">' +
-      '<p class="sub">Pushes QuickBooks Online stock movements into your Shopify store.</p>' +
       '<div class="field" style="margin-top:0;max-width:none"><label for="hStoreEmpty">Shopify store</label>' +
       '<select id="hStoreEmpty" data-a="hSel">' +
       opts.map(function (x) { return '<option value="' + x.id + '"' + (S.hSel === x.id ? ' selected' : '') + '>' + x.id + '</option>'; }).join('') +
@@ -1466,7 +1467,14 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     if (variant === 'E' && S.eStores.length && !S.eOn) head = '<button class="btn btn-secondary" data-a="eOpenConnect"><span class="mi" style="font-size:18px">add</span> Add store</button>';
     document.getElementById('headActions').innerHTML = head;
     var pageHead = document.getElementById('pageHead');
-    if (pageHead) pageHead.classList.toggle('is-hidden', variant === 'H' && !S.hStores.length);
+    if (pageHead) pageHead.classList.remove('is-hidden');
+    var pageEl = document.querySelector('.page');
+    if (pageEl) {
+      var hEmpty = variant === 'H' && !S.hStores.length;
+      var hFull = variant === 'H' && S.hStores.length > 0;
+      pageEl.classList.toggle('h-empty-mode', hEmpty);
+      pageEl.classList.toggle('h-full', hFull);
+    }
     if (variant === 'D') v.innerHTML = viewD();
     else if (variant === 'E') v.innerHTML = viewE();
     else if (variant === 'F') v.innerHTML = viewF();
