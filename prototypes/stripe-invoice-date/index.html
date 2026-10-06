@@ -25,17 +25,33 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .vbar {
   position: sticky; top: 0; z-index: 50;
   background: #111827; color: #F9FAFB;
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: flex-start; gap: 16px;
   padding: 8px 20px;
+  flex-wrap: wrap;
 }
-.vbar .brand { font-weight: 600; font-size: 14px; white-space: nowrap; opacity: .9; }
-.vbar .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.vbar .brand { font-weight: 600; font-size: 14px; white-space: nowrap; opacity: .9; padding-top: 6px; }
+.vbar .tabs { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
 .vbar .tab {
   background: transparent; border: 1px solid transparent; color: #9CA3AF;
   padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
 }
 .vbar .tab:hover { color: #fff; background: rgba(255,255,255,.06); }
 .vbar .tab.active { background: #0053CC; color: #fff; }
+.vbar .org-chips {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  border-left: 1px solid #374151; padding-left: 12px; margin-left: 4px;
+}
+.vbar .org-label { font-size: 12px; color: #9CA3AF; margin-right: 4px; white-space: nowrap; }
+.vbar .chip {
+  background: transparent; border: 1px solid #4B5563; color: #9CA3AF;
+  padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.vbar .chip:hover { color: #fff; border-color: #6B7280; }
+.vbar .chip.active { background: #374151; color: #fff; border-color: #6B7280; }
+.vbar .vbar-note {
+  width: 100%; font-size: 12px; color: #9CA3AF; line-height: 16px;
+  padding-top: 2px;
+}
 
 /* ---- App shell ---- */
 .app { display: flex; min-height: calc(100vh - 48px); }
@@ -103,8 +119,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .mode-row .seg span:last-child { border-right: none; }
 .mode-row .seg span.on { background: #E0EBFD; color: #0053CC; font-weight: 500; }
 .mode-row .seg span.off { opacity: .45; }
-.mode-row a { color: #0053CC; text-decoration: none; font-weight: 500; }
-.mode-row a:hover { text-decoration: underline; }
 
 .set-tabs {
   display: flex; gap: 0; border-bottom: 1px solid #DFE4EC; margin-bottom: 0;
@@ -144,10 +158,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .setting-help { color: #6B778C; font-size: 14px; line-height: 20px; margin-top: 4px; max-width: 520px; }
-.setting-help a, .linkish {
+.setting-help a, .linkish, .text-link {
   color: #0053CC; text-decoration: none; font-weight: 500; cursor: pointer; background: none; border: none; padding: 0; font-size: inherit; font-family: inherit;
 }
-.setting-help a:hover, .linkish:hover { text-decoration: underline; }
+.setting-help a:hover, .linkish:hover, .text-link:hover { text-decoration: underline; }
+
 .setting-control { flex-shrink: 0; min-width: 200px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .setting-control select {
   width: 200px; height: 32px; border: 1px solid #DFE4EC; border-radius: 4px;
@@ -157,6 +172,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   background: #F7F8FA; color: #6B778C; cursor: not-allowed;
 }
 .setting-control select:focus { outline: none; border-color: #0053CC; }
+.setting-control select option:disabled { color: #B4BBCB; }
 
 .badge-upgrade {
   display: inline-flex; align-items: center;
@@ -168,23 +184,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   display: inline-flex; align-items: center;
   padding: 1px 6px; border-radius: 10px;
   background: #E7F6EC; color: #1B7A3D;
-  font-size: 11px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+  font-size: 12px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
 }
-.plan-msg { color: #C62828; font-size: 13px; line-height: 18px; text-align: right; max-width: 220px; }
-.plan-msg a { color: #C62828; font-weight: 500; text-decoration: underline; }
+.plan-msg { color: #C62828; font-size: 14px; line-height: 18px; text-align: right; max-width: 220px; }
 .lock-msg {
-  color: #C62828; font-size: 13px; line-height: 18px;
+  color: #C62828; font-size: 14px; line-height: 18px;
   text-align: right; max-width: 260px;
 }
 .lock-msg .linkish { color: #0053CC; display: inline; }
 
-.caption { font-size: 13px; color: #6B778C; margin-top: 8px; }
-.callout {
-  display: flex; gap: 10px; align-items: flex-start;
-  background: #E0EBFD; color: #0053CC;
-  padding: 12px 14px; border-radius: 4px; margin: 12px 0 4px; font-size: 14px; line-height: 20px;
-}
-.callout .mi { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.caption { font-size: 14px; color: #6B778C; margin-top: 8px; }
 
 .toggle-wrap { display: flex; align-items: center; gap: 8px; }
 .toggle {
@@ -198,42 +207,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   transition: left .15s;
 }
 .toggle.on::after { left: 18px; }
-.toggle.off-locked { opacity: .7; }
 
-.footer-actions {
-  display: flex; justify-content: flex-end; gap: 8px;
-  margin-top: 24px; padding-top: 16px; border-top: 1px solid #DFE4EC;
-}
-.btn {
-  height: 32px; padding: 0 16px; border-radius: 4px; border: none;
-  font-size: 14px; cursor: pointer; background: #0053CC; color: #fff;
-}
-.btn:hover { background: #1A43A2; }
-.btn-outlined {
-  background: #fff; color: #0053CC; border: 1px solid #0053CC;
-}
-.btn-outlined:hover { background: #F2F6FC; }
-.btn-ghost {
-  background: transparent; color: #6B778C; border: 1px solid #DFE4EC;
-}
-.btn-ghost:hover { background: #F7F8FA; }
-
-/* Summary / RevRec page variants */
+/* Summary / RevRec / Sync details */
 .panel {
   background: #fff; border: 1px solid #DFE4EC; border-radius: 6px; padding: 20px 24px;
 }
 .panel h2 { font-size: 16px; font-weight: 500; margin: 0 0 4px; }
 .panel .panel-sub { color: #6B778C; font-size: 14px; margin-bottom: 16px; }
-
-.micro-toggle {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13px; color: #6B778C; margin-bottom: 12px;
-}
-.micro-toggle button {
-  background: #EFF1F5; border: 1px solid #DFE4EC; border-radius: 4px;
-  padding: 3px 10px; font-size: 12px; cursor: pointer; color: #6B778C;
-}
-.micro-toggle button.on { background: #E0EBFD; color: #0053CC; border-color: #CCDDF5; font-weight: 500; }
 
 .sched-table {
   width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px;
@@ -246,10 +226,32 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 8px 10px; border-bottom: 1px solid #EFF1F5; color: #1A1B24;
 }
 .sched-table .blank { color: #B4BBCB; font-style: italic; }
-.hint-chip {
-  display: inline-block; font-size: 12px; background: #EFF1F5; color: #6B778C;
-  border-radius: 10px; padding: 1px 8px; margin-left: 6px;
+.sched-note {
+  font-size: 14px; color: #6B778C; margin-top: 10px; line-height: 20px;
 }
+
+/* Sync details */
+.details-back {
+  font-size: 14px; color: #6B778C; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.details-back .text-link { font-size: 14px; }
+.details-grid {
+  display: grid; grid-template-columns: 180px 1fr; gap: 10px 16px;
+  font-size: 14px; margin-top: 8px;
+}
+.details-grid .dk { color: #6B778C; }
+.details-grid .dv { color: #1A1B24; }
+.details-grid .dv.highlight {
+  background: #E0EBFD; color: #0053CC; font-weight: 500;
+  padding: 4px 8px; border-radius: 4px; display: inline-block;
+}
+.details-teach {
+  margin-top: 16px; padding: 12px 14px; background: #F7F8FA;
+  border: 1px solid #DFE4EC; border-radius: 4px;
+  font-size: 14px; line-height: 20px; color: #2F303A;
+}
+.details-teach b { color: #0053CC; }
 
 /* Modal */
 .overlay {
@@ -276,6 +278,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .modal-f {
   padding: 12px 24px 16px; display: flex; justify-content: flex-end; gap: 8px;
 }
+.btn {
+  height: 32px; padding: 0 16px; border-radius: 4px; border: none;
+  font-size: 14px; cursor: pointer; background: #0053CC; color: #fff;
+}
+.btn:hover { background: #1A43A2; }
+.btn-ghost {
+  background: transparent; color: #6B778C; border: 1px solid #DFE4EC;
+}
+.btn-ghost:hover { background: #F7F8FA; }
 
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -285,42 +296,46 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .toast.show { opacity: 1; }
 
 .hidden { display: none !important; }
-
-.revrec-note {
-  background: #F7F8FA; border: 1px dashed #DFE4EC; border-radius: 4px;
-  padding: 10px 12px; font-size: 13px; color: #6B778C; margin-top: 12px;
-}
 </style>
 </head>
 <body>
 
-<!-- Prototype chrome: dark variant bar only -->
+<!-- Prototype chrome: dark variant bar only — name + variants (+ org chips) -->
 <div class="vbar">
   <div class="brand">Stripe invoice date</div>
   <div class="tabs" role="tablist">
-    <button class="tab active" data-variant="pt-pro">PT · Invoice date (Pro)</button>
+    <button class="tab active" data-variant="pt-pro">PT · Invoices</button>
     <button class="tab" data-variant="pt-upgrade">PT · Upgrade to use</button>
     <button class="tab" data-variant="pt-revrec">PT · RevRec lock</button>
-    <button class="tab" data-variant="pt-sales">PT · Sales rename</button>
-    <button class="tab" data-variant="summary">Summary · Sales recording date</button>
+    <button class="tab" data-variant="pt-sales">PT · Sales</button>
+    <button class="tab" data-variant="summary">Summary · Sales recording</button>
     <button class="tab" data-variant="revrec">RevRec · Schedule start</button>
+    <button class="tab" data-variant="sync-details">Sync · Details</button>
   </div>
+  <div class="org-chips" id="org-chips" aria-label="Org / connection state">
+    <span class="org-label">Org:</span>
+    <button type="button" class="chip active" data-org="existing">Existing</button>
+    <button type="button" class="chip" data-org="new">New connection</button>
+    <button type="button" class="chip" data-org="trial">Trial</button>
+    <button type="button" class="chip" data-org="below-pro" id="chip-below-pro">Below Pro</button>
+  </div>
+  <div class="vbar-note" id="vbar-note">Org chips set Invoice date default (Existing→Created, New→Issued). Below Pro gates Summary Issued only. PT · RevRec lock starts Schedule start on an invoice date.</div>
 </div>
 
 <div class="app">
   <aside class="sidebar">
     <div class="org-switch">
       <div class="org-avatar">P</div>
-      <div class="org-name">Per transaction test</div>
+      <div class="org-name" id="org-display-name">Per transaction test</div>
       <span class="mi" style="color:#6B778C;font-size:18px">expand_more</span>
     </div>
     <nav class="nav">
       <div class="nav-item"><span class="mi">home</span> Home</div>
-      <div class="nav-item"><span class="mi">sync</span> Transactions</div>
+      <div class="nav-item" id="nav-transactions"><span class="mi">sync</span> Transactions</div>
       <div class="nav-item"><span class="mi">account_balance</span> Reconciliation</div>
       <div class="nav-item"><span class="mi">bar_chart</span> Reports</div>
       <div class="nav-divider"></div>
-      <div class="nav-item active"><span class="mi">settings</span> Settings</div>
+      <div class="nav-item active" id="nav-settings"><span class="mi">settings</span> Settings</div>
       <div class="nav-item"><span class="mi">extension</span> Integrations</div>
       <div class="nav-item"><span class="mi">people</span> Team</div>
     </nav>
@@ -335,7 +350,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
     <div class="page">
 
-      <!-- ========== PT SETTINGS SHELL (variants 1–4) ========== -->
+      <!-- ========== PT SETTINGS SHELL ========== -->
       <div id="view-pt">
         <div class="settings-head">
           <div>
@@ -346,7 +361,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
                 <span class="on">Per transaction</span>
                 <span class="off">Summary</span>
               </div>
-              <a href="#">How to change mode</a>
+              <button type="button" class="text-link proto-link" data-proto="docs">How to change mode</button>
             </div>
           </div>
         </div>
@@ -374,10 +389,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
           <div class="settings-body">
 
-            <!-- INVOICES TAB (variants pt-pro, pt-upgrade, pt-revrec) -->
+            <!-- INVOICES TAB -->
             <div id="panel-invoices">
 
-              <!-- Invoice date — Pro -->
               <div class="setting-row" id="row-invoice-date">
                 <div class="setting-main">
                   <div class="setting-label">
@@ -386,31 +400,23 @@ button:disabled { opacity: .45; cursor: not-allowed; }
                     <span class="badge-upgrade hidden" id="badge-upgrade">Upgrade to use</span>
                   </div>
                   <div class="setting-help" id="help-invoice-date">
-                    Select which date Synder posts Stripe invoices under in your books — Created date, when Stripe created the invoice, or Issued date, when the invoice was issued to the customer.
+                    Chooses which month the invoice (and its revenue) lands in your books. Created date = when Stripe created the invoice. Issued date (Date of issue on the Stripe PDF) = when the invoice was finalized for the customer.
                   </div>
-                  <p class="caption" id="caption-new-default">New Stripe connections default to Issued date. Existing connections stay on Created date until you change them. Already-synced invoices are not re-dated.</p>
-                  <div class="callout" id="callout-sync-info">
-                    <span class="mi">info</span>
-                    <div>The Synder transactions table always shows the invoice <b>created</b> date. The accounting entry date follows this setting. Sync info on a transaction shows the issued date when it differs from created.</div>
-                  </div>
+                  <p class="caption" id="caption-invoice-date">New connections default to Issued date. Existing connections stay on Created date until you change them. Already-synced invoices are not re-dated.</p>
                 </div>
                 <div class="setting-control">
                   <select id="sel-invoice-date" aria-label="Invoice date">
                     <option value="created">Created date</option>
-                    <option value="issued" selected>Issued date</option>
+                    <option value="issued">Issued date</option>
                   </select>
-                  <div class="plan-msg hidden" id="plan-msg">This feature is available on higher plans. <a href="#">Upgrade plan</a></div>
+                  <div class="plan-msg hidden" id="plan-msg">This feature is available on higher plans. <button type="button" class="text-link proto-link" data-proto="billing" style="color:#C62828;text-decoration:underline;font-weight:500">Upgrade plan</button></div>
                   <div class="lock-msg hidden" id="lock-msg">
                     You cannot change Invoice date while revenue recognition starts from an invoice date.
                     <button type="button" class="linkish" id="goto-revrec">Change Schedule start date instead →</button>
                   </div>
-                  <div class="caption hidden" id="lock-note" style="text-align:right;max-width:260px">
-                    When Schedule start is <b>Payment date</b>, this control can be changed.
-                  </div>
                 </div>
               </div>
 
-              <!-- Four existing toggles (context, Off) -->
               <div class="setting-row">
                 <div class="setting-main">
                   <div class="setting-label">Apply payments to unpaid Invoice transactions</div>
@@ -432,7 +438,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
               <div class="setting-row">
                 <div class="setting-main">
                   <div class="setting-label">Sync unpaid (open) invoices</div>
-                  <div class="setting-help">Synder syncs open invoices to your books. When the payment arrives, it is attached to the matching invoice and the invoice is marked as paid. <a href="#">Learn more →</a></div>
+                  <div class="setting-help">Synder syncs open invoices to your books. When the payment arrives, it is attached to the matching invoice and the invoice is marked as paid. <button type="button" class="text-link proto-link" data-proto="docs">Learn more →</button></div>
                 </div>
                 <div class="setting-control">
                   <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
@@ -441,24 +447,20 @@ button:disabled { opacity: .45; cursor: not-allowed; }
               <div class="setting-row">
                 <div class="setting-main">
                   <div class="setting-label">Sync zero invoices</div>
-                  <div class="setting-help">Synder imports and syncs invoices where every line and the total are 0. <a href="#">Learn more →</a></div>
+                  <div class="setting-help">Synder imports and syncs invoices where every line and the total are 0. <button type="button" class="text-link proto-link" data-proto="docs">Learn more →</button></div>
                 </div>
                 <div class="setting-control">
                   <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
                 </div>
               </div>
-
-              <div class="footer-actions">
-                <button type="button" class="btn" id="btn-update">Update</button>
-              </div>
             </div>
 
-            <!-- SALES TAB (variant pt-sales) -->
+            <!-- SALES TAB -->
             <div id="panel-sales" class="hidden">
               <div class="setting-row">
                 <div class="setting-main">
                   <div class="setting-label">Clearing account</div>
-                  <div class="setting-help">Select the account that represents Stripe in your books. Synced transactions are deposited here before payout. <a href="#">Learn more →</a></div>
+                  <div class="setting-help">Select the account that represents Stripe in your books. Synced transactions are deposited here before payout. <button type="button" class="text-link proto-link" data-proto="docs">Learn more →</button></div>
                 </div>
                 <div class="setting-control">
                   <select aria-label="Clearing account">
@@ -482,37 +484,31 @@ button:disabled { opacity: .45; cursor: not-allowed; }
               <div class="setting-row">
                 <div class="setting-main">
                   <div class="setting-label">
-                    Payment posting date
-                    <span class="badge-new-inline">Renamed</span>
+                    Cash transaction date
+                    <span class="badge-new-inline">New</span>
                   </div>
                   <div class="setting-help">
-                    Select which date Synder posts <b>cash-side</b> transactions under — Balance date (recommended), when the money reaches your Stripe balance, or Created date, when Stripe created the transaction. This is separate from Invoice date on the Invoices tab. <a href="#">Learn more →</a>
+                    Dates cash-side sync entries (sales receipts, refunds, expenses). Balance date (recommended) = when money reaches your Stripe balance. Created date = when Stripe created the transaction. Separate from Invoice date and from Summary Payment date. <button type="button" class="text-link proto-link" data-proto="docs">Learn more →</button>
                   </div>
-                  <p class="caption">Was “Posting date”. Renamed so it is not confused with the new Invoice date setting.</p>
                 </div>
                 <div class="setting-control">
-                  <select id="sel-payment-posting" aria-label="Payment posting date">
+                  <select id="sel-cash-txn" aria-label="Cash transaction date">
                     <option value="created">Created date</option>
                     <option value="balance" selected>Balance date (recommended)</option>
                   </select>
                 </div>
               </div>
-
-              <div class="footer-actions">
-                <button type="button" class="btn" id="btn-update-sales">Update</button>
-              </div>
             </div>
 
-            <!-- Placeholder other tabs -->
             <div id="panel-other" class="hidden">
-              <p style="color:#6B778C;padding:24px 0">This tab is unchanged in this prototype. Switch to Invoices or Sales via the variant bar, or use the left nav for Invoices / Sales.</p>
+              <p style="color:#6B778C;padding:24px 0;font-size:14px">This tab is unchanged in this prototype. Switch to Invoices or Sales via the variant bar, or use the left nav for Invoices / Sales.</p>
             </div>
 
           </div>
         </div>
       </div>
 
-      <!-- ========== SUMMARY SYNC (variant 5) ========== -->
+      <!-- ========== SUMMARY SYNC ========== -->
       <div id="view-summary" class="hidden">
         <div class="settings-head">
           <div>
@@ -523,7 +519,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
                 <span class="off">Per transaction</span>
                 <span class="on">Summary</span>
               </div>
-              <a href="#">How to change mode</a>
+              <button type="button" class="text-link proto-link" data-proto="docs">How to change mode</button>
             </div>
           </div>
         </div>
@@ -532,12 +528,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
           <h2>General</h2>
           <p class="panel-sub">Summary Sync settings for this Stripe connection.</p>
 
-          <div class="micro-toggle">
-            Plan state:
-            <button type="button" class="on" id="sum-plan-pro" data-plan="pro">Pro available</button>
-            <button type="button" id="sum-plan-gate" data-plan="gated">Upgrade to use</button>
-          </div>
-
           <div class="setting-row" style="border-top:1px solid #EFF1F5">
             <div class="setting-main">
               <div class="setting-label">
@@ -545,9 +535,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
                 <span class="badge-upgrade hidden" id="sum-badge">Upgrade to use</span>
               </div>
               <div class="setting-help">
-                Select which date Synder uses when recording Stripe invoice sales in summaries — Invoice created date, when Stripe created the invoice; Invoice issued date, when the invoice was issued to the customer; or Payment date, when the customer paid.
+                Chooses which date Synder uses when recording Stripe invoice sales in summaries. Invoice created date = when Stripe created the invoice. Invoice issued date (Date of issue on the Stripe PDF) = when the invoice was finalized. Payment date = when the customer paid.
               </div>
-              <p class="caption">Default for the issued option is Invoice issued date. Datasource dating matches Per Transaction rules.</p>
+              <p class="caption" id="sum-caption">Invoice created date and Payment date are available on all plans. Invoice issued date requires Pro or higher.</p>
             </div>
             <div class="setting-control">
               <select id="sel-sales-recording" aria-label="Sales recording date">
@@ -555,30 +545,23 @@ button:disabled { opacity: .45; cursor: not-allowed; }
                 <option value="issued" selected>Invoice issued date</option>
                 <option value="payment">Payment date</option>
               </select>
-              <div class="plan-msg hidden" id="sum-plan-msg">This feature is available on higher plans. <a href="#">Upgrade plan</a></div>
+              <div class="plan-msg hidden" id="sum-plan-msg">Invoice issued date requires a higher plan. <button type="button" class="text-link proto-link" data-proto="billing" style="color:#C62828;text-decoration:underline;font-weight:500">Upgrade plan</button></div>
             </div>
-          </div>
-
-          <div class="footer-actions">
-            <button type="button" class="btn" id="btn-update-summary">Update</button>
           </div>
         </div>
       </div>
 
-      <!-- ========== REVREC (variant 6) ========== -->
+      <!-- ========== REVREC ========== -->
       <div id="view-revrec" class="hidden">
         <div class="page-title" style="margin-bottom:4px">Revenue recognition</div>
-        <p class="page-sub">Configuration · mzkt.by (Stripe) · invented chrome (not live in demo)</p>
+        <p class="page-sub">Select when recognition schedules start for Stripe invoices. mzkt.by (Stripe)</p>
 
         <div class="panel">
-          <h2>Schedule start date</h2>
-          <p class="panel-sub">Select when recognition schedules start for Stripe invoices. Set by a success specialist during RevRec configuration; changeable afterwards.</p>
-
-          <div class="setting-row" style="border-top:1px solid #EFF1F5">
+          <div class="setting-row" style="border-top:none;padding-top:0">
             <div class="setting-main">
               <div class="setting-label">Schedule start date</div>
               <div class="setting-help">
-                Select the date Synder starts the recognition schedule from — Invoice created date, Invoice issued date, or Payment date. Changing this applies going forward only; existing schedules keep their dates until a success specialist rebuilds them.
+                Starts the recognition schedule from Invoice created date, Invoice issued date, or Payment date. Applies going forward only; existing schedules keep their dates until a success specialist rebuilds them.
               </div>
             </div>
             <div class="setting-control">
@@ -590,11 +573,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
             </div>
           </div>
 
-          <div class="revrec-note">
-            <b>Sync lock:</b> When Schedule start is Invoice created date or Invoice issued date, the Sync <b>Invoice date</b> setting cannot be changed (see PT · RevRec lock). When Schedule start is Payment date, Sync Invoice date can be changed.
-          </div>
-
-          <h2 style="margin-top:28px">Schedule details <span class="hint-chip">Issued date column</span></h2>
+          <h2 style="margin-top:28px">Schedule details</h2>
           <p class="panel-sub" style="margin-bottom:0">Issued date appears for all RevRec orgs. Pre-release rows stay blank; post-release rows are filled regardless of Schedule start.</p>
           <table class="sched-table">
             <thead>
@@ -623,6 +602,48 @@ button:disabled { opacity: .45; cursor: not-allowed; }
               </tr>
             </tbody>
           </table>
+          <p class="sched-note" id="sched-forward-note">New schedules after this change will use Invoice created date.</p>
+        </div>
+      </div>
+
+      <!-- ========== SYNC · DETAILS ========== -->
+      <div id="view-sync-details" class="hidden">
+        <div class="details-back">
+          <button type="button" class="text-link" id="details-back">← Transactions</button>
+          <span>· Invoice · in_1Qa8xK2eZv</span>
+        </div>
+        <div class="page-title" style="margin-bottom:4px">Invoice details</div>
+        <p class="page-sub">mzkt.by (Stripe) · Synced to QuickBooks</p>
+
+        <div class="panel">
+          <h2>Transaction</h2>
+          <div class="details-grid">
+            <div class="dk">Type</div>
+            <div class="dv">Invoice</div>
+            <div class="dk">Stripe ID</div>
+            <div class="dv">in_1Qa8xK2eZv</div>
+            <div class="dk">Customer</div>
+            <div class="dv">Acme Corp</div>
+            <div class="dk">Amount</div>
+            <div class="dv">$1,200.00</div>
+            <div class="dk">Status</div>
+            <div class="dv">Synced</div>
+          </div>
+
+          <h2 style="margin-top:24px">Dates</h2>
+          <div class="details-grid">
+            <div class="dk">Created date</div>
+            <div class="dv">28 Dec 2025</div>
+            <div class="dk">Issued date</div>
+            <div class="dv">6 Jan 2026 <span style="color:#6B778C">(Date of issue on Stripe PDF)</span></div>
+            <div class="dk">Books / accounting date</div>
+            <div class="dv highlight" id="details-books-date">6 Jan 2026</div>
+          </div>
+
+          <div class="details-teach">
+            The Synder transactions table always shows <b>Created date</b>. The <b>Books / accounting date</b> follows your Invoice date setting
+            (<span id="details-setting-label">Issued date</span>) — that is the date the invoice and its revenue land in your books.
+          </div>
         </div>
       </div>
 
@@ -654,18 +675,23 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 <script>
 (function () {
   var variant = 'pt-pro';
-  var invoiceDateValue = 'issued';
-  var paymentPostingValue = 'balance';
+  var orgState = 'existing'; // existing | new | trial | below-pro
+  var invoiceDateValue = 'created'; // existing org default
+  var cashTxnValue = 'balance';
   var salesRecordingValue = 'issued';
   var scheduleStartValue = 'created';
   var schedulePending = null;
-  var summaryGated = false;
   var toastTimer = null;
 
   var LABEL = {
     created: 'Invoice created date',
     issued: 'Invoice issued date',
     payment: 'Payment date'
+  };
+
+  var INVOICE_LABEL = {
+    created: 'Created date',
+    issued: 'Issued date'
   };
 
   function toast(msg) {
@@ -681,6 +707,18 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     el.classList.toggle('hidden', !on);
   }
 
+  function isRevRecLocked() {
+    return scheduleStartValue === 'created' || scheduleStartValue === 'issued';
+  }
+
+  function isBelowPro() {
+    return orgState === 'below-pro' || variant === 'pt-upgrade';
+  }
+
+  function isUpgradeVariant() {
+    return variant === 'pt-upgrade' || (variant.indexOf('pt-') === 0 && orgState === 'below-pro' && variant !== 'pt-sales' && variant !== 'pt-revrec');
+  }
+
   function setNavActive(tab) {
     document.querySelectorAll('#pt-nav button').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-tab') === tab);
@@ -690,44 +728,62 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     show(document.getElementById('panel-other'), tab !== 'invoices' && tab !== 'sales');
   }
 
+  function updateSchedForwardNote() {
+    var note = document.getElementById('sched-forward-note');
+    note.textContent = 'New schedules after this change will use ' + LABEL[scheduleStartValue] + '.';
+  }
+
+  function updateDetailsBooksDate() {
+    var books = document.getElementById('details-books-date');
+    var label = document.getElementById('details-setting-label');
+    // Demo: created = 28 Dec 2025, issued = 6 Jan 2026
+    if (invoiceDateValue === 'issued') {
+      books.textContent = '6 Jan 2026';
+    } else {
+      books.textContent = '28 Dec 2025';
+    }
+    label.textContent = INVOICE_LABEL[invoiceDateValue] || 'Created date';
+  }
+
   function applyPtInvoiceState() {
     var sel = document.getElementById('sel-invoice-date');
     var badge = document.getElementById('badge-upgrade');
     var planMsg = document.getElementById('plan-msg');
     var lockMsg = document.getElementById('lock-msg');
-    var lockNote = document.getElementById('lock-note');
-    var caption = document.getElementById('caption-new-default');
-    var callout = document.getElementById('callout-sync-info');
+    var caption = document.getElementById('caption-invoice-date');
 
+    var upgrade = variant === 'pt-upgrade';
+    var locked = isRevRecLocked() && !upgrade;
+
+    // Show actual invoiceDateValue when unlocked; when locked still show actual value (not forced Created)
     sel.value = invoiceDateValue;
 
-    if (variant === 'pt-upgrade') {
+    if (upgrade) {
       sel.disabled = true;
       show(badge, true);
       show(planMsg, true);
       show(lockMsg, false);
-      show(lockNote, false);
       show(caption, false);
-      show(callout, false);
-    } else if (variant === 'pt-revrec') {
+    } else if (locked) {
       sel.disabled = true;
       show(badge, false);
       show(planMsg, false);
       show(lockMsg, true);
-      show(lockNote, true);
       show(caption, false);
-      show(callout, false);
-      // Show as Created to reflect existing RevRec org default
-      sel.value = 'created';
     } else {
-      // pt-pro
       sel.disabled = false;
       show(badge, false);
       show(planMsg, false);
       show(lockMsg, false);
-      show(lockNote, false);
       show(caption, true);
-      show(callout, true);
+      // Caption nuance for org state
+      if (orgState === 'trial') {
+        caption.textContent = 'Available on Trial. New connections default to Issued date; existing stay on Created date until changed. Already-synced invoices are not re-dated.';
+      } else if (orgState === 'new') {
+        caption.textContent = 'New connections default to Issued date. Already-synced invoices are not re-dated.';
+      } else {
+        caption.textContent = 'New connections default to Issued date. Existing connections stay on Created date until you change them. Already-synced invoices are not re-dated.';
+      }
     }
   }
 
@@ -735,21 +791,61 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     var sel = document.getElementById('sel-sales-recording');
     var badge = document.getElementById('sum-badge');
     var planMsg = document.getElementById('sum-plan-msg');
-    sel.value = salesRecordingValue;
-    sel.disabled = summaryGated;
-    show(badge, summaryGated);
-    show(planMsg, summaryGated);
+    var issuedOpt = sel.querySelector('option[value="issued"]');
+    var gated = orgState === 'below-pro';
+
+    // Always keep select enabled; gate only Issued option when below Pro
+    sel.disabled = false;
+    if (issuedOpt) {
+      issuedOpt.disabled = gated;
+      issuedOpt.textContent = gated ? 'Invoice issued date (Upgrade to use)' : 'Invoice issued date';
+    }
+
+    // If currently on issued but now gated, fall back to created for display
+    if (gated && salesRecordingValue === 'issued') {
+      sel.value = 'created';
+    } else {
+      sel.value = salesRecordingValue;
+    }
+
+    show(badge, gated);
+    show(planMsg, gated);
+  }
+
+  function updateOrgChips() {
+    document.querySelectorAll('#org-chips .chip').forEach(function (c) {
+      c.classList.toggle('active', c.getAttribute('data-org') === orgState);
+    });
+    // Hide Below Pro chip relevance note for PT-upgrade (variant handles it)
+    var note = document.getElementById('vbar-note');
+    if (variant === 'summary') {
+      note.textContent = 'Org: Below Pro keeps Invoice created / Payment date pickable; only Issued is gated.';
+    } else if (variant === 'pt-revrec') {
+      note.textContent = 'Starter sets Schedule start to an invoice date so Invoice date is locked. Change Schedule start to Payment date, then return here to unlock.';
+    } else if (variant === 'sync-details') {
+      note.textContent = 'Books / accounting date follows the Invoice date setting; Created date is always shown in the Synder table.';
+    } else if (variant === 'revrec') {
+      note.textContent = 'Confirm updates the setting going forward only — existing schedule rows are not re-dated.';
+    } else {
+      note.textContent = 'Org chips set Invoice date default (Existing→Created, New→Issued). Below Pro gates Summary Issued only. PT · RevRec lock starts Schedule start on an invoice date.';
+    }
   }
 
   function render() {
     document.querySelectorAll('.vbar .tab').forEach(function (t) {
       t.classList.toggle('active', t.getAttribute('data-variant') === variant);
     });
+    updateOrgChips();
 
     var isPt = variant.indexOf('pt-') === 0;
     show(document.getElementById('view-pt'), isPt);
     show(document.getElementById('view-summary'), variant === 'summary');
     show(document.getElementById('view-revrec'), variant === 'revrec');
+    show(document.getElementById('view-sync-details'), variant === 'sync-details');
+
+    // Sidebar highlight
+    document.getElementById('nav-settings').classList.toggle('active', variant !== 'sync-details');
+    document.getElementById('nav-transactions').classList.toggle('active', variant === 'sync-details');
 
     if (isPt) {
       if (variant === 'pt-sales') {
@@ -762,13 +858,48 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     if (variant === 'summary') applySummaryState();
     if (variant === 'revrec') {
       document.getElementById('sel-schedule-start').value = scheduleStartValue;
+      updateSchedForwardNote();
     }
+    if (variant === 'sync-details') updateDetailsBooksDate();
   }
 
   // Variant tabs
   document.querySelectorAll('.vbar .tab').forEach(function (tab) {
     tab.addEventListener('click', function () {
-      variant = tab.getAttribute('data-variant');
+      var next = tab.getAttribute('data-variant');
+      // PT · RevRec lock starter: set schedule start to an invoice date so lock is visible
+      if (next === 'pt-revrec') {
+        if (scheduleStartValue === 'payment') {
+          scheduleStartValue = 'created';
+        }
+        // Prefer showing existing-org Created default when entering lock starter
+        if (invoiceDateValue !== 'created' && invoiceDateValue !== 'issued') {
+          invoiceDateValue = 'created';
+        }
+      }
+      variant = next;
+      render();
+    });
+  });
+
+  // Org chips
+  document.querySelectorAll('#org-chips .chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      orgState = chip.getAttribute('data-org');
+      // Apply defaults for connection org state without wiping user edits mid-session when switching to below-pro/trial
+      if (orgState === 'existing') {
+        invoiceDateValue = 'created';
+      } else if (orgState === 'new') {
+        invoiceDateValue = 'issued';
+      } else if (orgState === 'trial') {
+        // Trial: available/editable — keep current or default created for existing-like
+        if (!invoiceDateValue) invoiceDateValue = 'created';
+      }
+      // below-pro: leave invoiceDateValue; PT upgrade handled by variant or badge on Summary
+      if (orgState === 'below-pro' && variant.indexOf('pt-') === 0 && variant !== 'pt-sales' && variant !== 'pt-revrec') {
+        // Mirror upgrade pattern for the new Invoice date control
+        variant = 'pt-upgrade';
+      }
       render();
     });
   });
@@ -778,10 +909,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     btn.addEventListener('click', function () {
       var tab = btn.getAttribute('data-tab');
       if (tab === 'sales' || tab === 'invoices') {
-        // Stay within current PT variant but switch panel
-        if (tab === 'sales' && variant !== 'pt-sales') {
-          // Allow browsing Sales from any PT variant
-        }
         setNavActive(tab);
         if (tab === 'invoices') applyPtInvoiceState();
       } else {
@@ -790,36 +917,25 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     });
   });
 
-  // Invoice date select — autosave (no confirm)
+  // Invoice date select — autosave; respect live lock from scheduleStartValue
   document.getElementById('sel-invoice-date').addEventListener('change', function (e) {
-    if (variant === 'pt-upgrade' || variant === 'pt-revrec') {
-      e.target.value = variant === 'pt-revrec' ? 'created' : invoiceDateValue;
+    if (variant === 'pt-upgrade' || isRevRecLocked()) {
+      e.target.value = invoiceDateValue;
       return;
     }
     invoiceDateValue = e.target.value;
     toast('Saved');
   });
 
-  // Block interaction when gated (mousedown prevent)
   document.getElementById('sel-invoice-date').addEventListener('mousedown', function (e) {
-    if (variant === 'pt-upgrade' || variant === 'pt-revrec') {
+    if (variant === 'pt-upgrade' || isRevRecLocked()) {
       e.preventDefault();
     }
   });
 
-  document.getElementById('sel-payment-posting').addEventListener('change', function (e) {
-    paymentPostingValue = e.target.value;
+  document.getElementById('sel-cash-txn').addEventListener('change', function (e) {
+    cashTxnValue = e.target.value;
     toast('Saved');
-  });
-
-  document.getElementById('btn-update').addEventListener('click', function () {
-    toast('Settings updated');
-  });
-  document.getElementById('btn-update-sales').addEventListener('click', function () {
-    toast('Settings updated');
-  });
-  document.getElementById('btn-update-summary').addEventListener('click', function () {
-    toast('Settings updated');
   });
 
   // Jump to RevRec from lock message
@@ -828,30 +944,30 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     render();
   });
 
-  // Summary plan micro-toggle
-  document.getElementById('sum-plan-pro').addEventListener('click', function () {
-    summaryGated = false;
-    document.getElementById('sum-plan-pro').classList.add('on');
-    document.getElementById('sum-plan-gate').classList.remove('on');
-    applySummaryState();
-  });
-  document.getElementById('sum-plan-gate').addEventListener('click', function () {
-    summaryGated = true;
-    document.getElementById('sum-plan-gate').classList.add('on');
-    document.getElementById('sum-plan-pro').classList.remove('on');
-    applySummaryState();
+  document.getElementById('details-back').addEventListener('click', function () {
+    variant = 'pt-pro';
+    render();
   });
 
+  // Summary — gate only Issued when below Pro; created/payment stay pickable
   document.getElementById('sel-sales-recording').addEventListener('change', function (e) {
-    if (summaryGated) {
-      e.target.value = salesRecordingValue;
+    var next = e.target.value;
+    if (orgState === 'below-pro' && next === 'issued') {
+      e.target.value = salesRecordingValue === 'issued' ? 'created' : salesRecordingValue;
+      toast('Invoice issued date requires Pro or higher');
       return;
     }
-    salesRecordingValue = e.target.value;
+    salesRecordingValue = next;
     toast('Saved');
   });
-  document.getElementById('sel-sales-recording').addEventListener('mousedown', function (e) {
-    if (summaryGated) e.preventDefault();
+
+  // Dead links → toast
+  document.querySelectorAll('.proto-link').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var kind = el.getAttribute('data-proto');
+      if (kind === 'billing') toast('Opens billing (not wired in prototype)');
+      else toast('Opens docs (not wired in prototype)');
+    });
   });
 
   // RevRec schedule start — confirm modal
@@ -879,17 +995,21 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     if (e.target === overlay) closeModal();
   });
 
+  // Escape closes modal
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('show')) {
+      closeModal();
+    }
+  });
+
   document.getElementById('modal-confirm').addEventListener('click', function () {
     if (!schedulePending) return;
     scheduleStartValue = schedulePending;
     schedulePending = null;
     selSched.value = scheduleStartValue;
     overlay.classList.remove('show');
-    // Update demo table "after release" schedule start cell for illustration
-    var cell = document.getElementById('sched-start-cell');
-    if (scheduleStartValue === 'issued') cell.textContent = '6 Jan 2026';
-    else if (scheduleStartValue === 'payment') cell.textContent = 'Payment date';
-    else cell.textContent = '28 Dec 2025';
+    // Do NOT mutate existing schedule table rows — only update going-forward note
+    updateSchedForwardNote();
     toast('Schedule start date saved');
   });
 
