@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stripe invoice date — Synder prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css">
+<style>
+/* Min 14px overrides */
+.chip, .input-label, .form-hint { font-size: 14px; line-height: 20px; }
+.mi {
+  font-family: 'Material Icons Outlined';
+  font-weight: normal; font-style: normal; font-size: 20px; line-height: 1;
+  display: inline-block; vertical-align: middle;
+  -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+}
+body { background: #F7F8FA; color: #1A1B24; }
+button { font-family: inherit; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---- Prototype variant bar ---- */
+.vbar {
+  position: sticky; top: 0; z-index: 50;
+  background: #111827; color: #F9FAFB;
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 20px;
+}
+.vbar .brand { font-weight: 600; font-size: 14px; white-space: nowrap; opacity: .9; }
+.vbar .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.vbar .tab {
+  background: transparent; border: 1px solid transparent; color: #9CA3AF;
+  padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.vbar .tab:hover { color: #fff; background: rgba(255,255,255,.06); }
+.vbar .tab.active { background: #0053CC; color: #fff; }
+
+/* ---- App shell ---- */
+.app { display: flex; min-height: calc(100vh - 48px); }
+.sidebar {
+  width: 230px; background: #F6F6F6; border-right: 1px solid #DFE4EC;
+  flex-shrink: 0; display: flex; flex-direction: column;
+}
+.org-switch {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; border-bottom: 1px solid #DFE4EC;
+}
+.org-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #D64273; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 500; font-size: 14px; flex-shrink: 0;
+}
+.org-name { flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav { padding: 8px 0; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; font-size: 14px; color: #2F303A; cursor: default;
+}
+.nav-item .mi { font-size: 18px; color: #6B778C; }
+.nav-item.active {
+  background: #E3EEFF; color: #0053CC; font-weight: 500;
+  border-left: 3px solid #0053CC; padding-left: 13px;
+}
+.nav-item.active .mi { color: #0053CC; }
+.nav-divider { height: 1px; background: #DFE4EC; margin: 6px 16px; }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; }
+.topbar {
+  height: 56px; background: #fff; border-bottom: 1px solid #DFE4EC;
+  display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 0 24px;
+}
+.topbar .syncs { font-size: 14px; color: #6B778C; }
+.topbar .syncs b { color: #0053CC; font-weight: 700; }
+.avatar {
+  width: 30px; height: 30px; border-radius: 50%; background: #6B778C; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+
+.page { padding: 20px 28px 64px; max-width: 960px; }
+.page-title { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
+.page-sub { color: #6B778C; font-size: 14px; margin-bottom: 16px; }
+
+/* Settings chrome */
+.settings-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.integ-name { font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.integ-name .stripe-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #635BFF; flex-shrink: 0;
+}
+.mode-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; color: #6B778C; }
+.mode-row .seg {
+  display: inline-flex; border: 1px solid #DFE4EC; border-radius: 6px; overflow: hidden;
+}
+.mode-row .seg span {
+  padding: 4px 12px; font-size: 13px; background: #fff; color: #6B778C;
+  border-right: 1px solid #DFE4EC;
+}
+.mode-row .seg span:last-child { border-right: none; }
+.mode-row .seg span.on { background: #E0EBFD; color: #0053CC; font-weight: 500; }
+.mode-row .seg span.off { opacity: .45; }
+.mode-row a { color: #0053CC; text-decoration: none; font-weight: 500; }
+.mode-row a:hover { text-decoration: underline; }
+
+.set-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid #DFE4EC; margin-bottom: 0;
+}
+.set-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 10px 16px; font-size: 14px; color: #6B778C; cursor: pointer;
+  margin-bottom: -1px;
+}
+.set-tab:hover { color: #1A1B24; }
+.set-tab.active { color: #0053CC; border-bottom-color: #0053CC; font-weight: 500; }
+.set-tab .x { font-size: 12px; margin-left: 6px; opacity: .5; }
+.set-tab.muted { color: #999; }
+
+.settings-layout { display: flex; gap: 0; margin-top: 0; border: 1px solid #DFE4EC; border-top: none; border-radius: 0 0 6px 6px; min-height: 420px; }
+.settings-nav {
+  width: 180px; flex-shrink: 0; background: #F7F8FA; border-right: 1px solid #DFE4EC; padding: 8px 0;
+}
+.settings-nav button {
+  display: block; width: 100%; text-align: left; background: none; border: none;
+  padding: 8px 16px; font-size: 14px; color: #2F303A; cursor: pointer;
+}
+.settings-nav button:hover { background: #EFF1F5; }
+.settings-nav button.active {
+  background: #E0EBFD; color: #0053CC; font-weight: 500;
+  border-left: 3px solid #0053CC; padding-left: 13px;
+}
+.settings-body { flex: 1; padding: 20px 24px 28px; min-width: 0; }
+
+.setting-row {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 14px 0; border-bottom: 1px solid #EFF1F5;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-main { flex: 1; min-width: 0; }
+.setting-label {
+  font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.setting-help { color: #6B778C; font-size: 14px; line-height: 20px; margin-top: 4px; max-width: 520px; }
+.setting-help a, .linkish {
+  color: #0053CC; text-decoration: none; font-weight: 500; cursor: pointer; background: none; border: none; padding: 0; font-size: inherit; font-family: inherit;
+}
+.setting-help a:hover, .linkish:hover { text-decoration: underline; }
+.setting-control { flex-shrink: 0; min-width: 200px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.setting-control select {
+  width: 200px; height: 32px; border: 1px solid #DFE4EC; border-radius: 4px;
+  padding: 0 8px; font-size: 14px; color: #1A1B24; background: #fff;
+}
+.setting-control select:disabled {
+  background: #F7F8FA; color: #6B778C; cursor: not-allowed;
+}
+.setting-control select:focus { outline: none; border-color: #0053CC; }
+
+.badge-upgrade {
+  display: inline-flex; align-items: center;
+  padding: 1px 8px; border-radius: 10px;
+  background: #F3EAFB; color: #6B3FA0;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.badge-new-inline {
+  display: inline-flex; align-items: center;
+  padding: 1px 6px; border-radius: 10px;
+  background: #E7F6EC; color: #1B7A3D;
+  font-size: 11px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+}
+.plan-msg { color: #C62828; font-size: 13px; line-height: 18px; text-align: right; max-width: 220px; }
+.plan-msg a { color: #C62828; font-weight: 500; text-decoration: underline; }
+.lock-msg {
+  color: #C62828; font-size: 13px; line-height: 18px;
+  text-align: right; max-width: 260px;
+}
+.lock-msg .linkish { color: #0053CC; display: inline; }
+
+.caption { font-size: 13px; color: #6B778C; margin-top: 8px; }
+.callout {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #E0EBFD; color: #0053CC;
+  padding: 12px 14px; border-radius: 4px; margin: 12px 0 4px; font-size: 14px; line-height: 20px;
+}
+.callout .mi { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+.toggle-wrap { display: flex; align-items: center; gap: 8px; }
+.toggle {
+  width: 36px; height: 20px; border-radius: 10px; background: #B4BBCB;
+  position: relative; cursor: default; flex-shrink: 0;
+}
+.toggle.on { background: #0053CC; }
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  transition: left .15s;
+}
+.toggle.on::after { left: 18px; }
+.toggle.off-locked { opacity: .7; }
+
+.footer-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid #DFE4EC;
+}
+.btn {
+  height: 32px; padding: 0 16px; border-radius: 4px; border: none;
+  font-size: 14px; cursor: pointer; background: #0053CC; color: #fff;
+}
+.btn:hover { background: #1A43A2; }
+.btn-outlined {
+  background: #fff; color: #0053CC; border: 1px solid #0053CC;
+}
+.btn-outlined:hover { background: #F2F6FC; }
+.btn-ghost {
+  background: transparent; color: #6B778C; border: 1px solid #DFE4EC;
+}
+.btn-ghost:hover { background: #F7F8FA; }
+
+/* Summary / RevRec page variants */
+.panel {
+  background: #fff; border: 1px solid #DFE4EC; border-radius: 6px; padding: 20px 24px;
+}
+.panel h2 { font-size: 16px; font-weight: 500; margin: 0 0 4px; }
+.panel .panel-sub { color: #6B778C; font-size: 14px; margin-bottom: 16px; }
+
+.micro-toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #6B778C; margin-bottom: 12px;
+}
+.micro-toggle button {
+  background: #EFF1F5; border: 1px solid #DFE4EC; border-radius: 4px;
+  padding: 3px 10px; font-size: 12px; cursor: pointer; color: #6B778C;
+}
+.micro-toggle button.on { background: #E0EBFD; color: #0053CC; border-color: #CCDDF5; font-weight: 500; }
+
+.sched-table {
+  width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px;
+}
+.sched-table th {
+  text-align: left; font-weight: 500; color: #6B778C;
+  padding: 8px 10px; border-bottom: 2px solid #DFE4EC; background: #fff;
+}
+.sched-table td {
+  padding: 8px 10px; border-bottom: 1px solid #EFF1F5; color: #1A1B24;
+}
+.sched-table .blank { color: #B4BBCB; font-style: italic; }
+.hint-chip {
+  display: inline-block; font-size: 12px; background: #EFF1F5; color: #6B778C;
+  border-radius: 10px; padding: 1px 8px; margin-left: 6px;
+}
+
+/* Modal */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100;
+  display: none; align-items: flex-start; justify-content: center; padding: 80px 16px;
+}
+.overlay.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 8px; box-shadow: 0 7px 14px rgba(129,142,165,.25);
+  width: 100%; max-width: 480px;
+}
+.modal-h {
+  padding: 16px 24px; border-bottom: 1px solid #DFE4EC;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 16px; font-weight: 500;
+}
+.modal-h .close {
+  background: none; border: none; cursor: pointer; color: #6B778C; padding: 4px;
+  display: inline-flex;
+}
+.modal-b { padding: 16px 24px 8px; font-size: 14px; line-height: 20px; color: #1A1B24; }
+.modal-b p { margin: 0 0 10px; color: #2F303A; }
+.modal-b .note { color: #6B778C; }
+.modal-f {
+  padding: 12px 24px 16px; display: flex; justify-content: flex-end; gap: 8px;
+}
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1A1B24; color: #fff; padding: 10px 18px; border-radius: 6px;
+  font-size: 14px; z-index: 200; opacity: 0; transition: opacity .25s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+.hidden { display: none !important; }
+
+.revrec-note {
+  background: #F7F8FA; border: 1px dashed #DFE4EC; border-radius: 4px;
+  padding: 10px 12px; font-size: 13px; color: #6B778C; margin-top: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- Prototype chrome: dark variant bar only -->
+<div class="vbar">
+  <div class="brand">Stripe invoice date</div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-variant="pt-pro">PT · Invoice date (Pro)</button>
+    <button class="tab" data-variant="pt-upgrade">PT · Upgrade to use</button>
+    <button class="tab" data-variant="pt-revrec">PT · RevRec lock</button>
+    <button class="tab" data-variant="pt-sales">PT · Sales rename</button>
+    <button class="tab" data-variant="summary">Summary · Sales recording date</button>
+    <button class="tab" data-variant="revrec">RevRec · Schedule start</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="org-switch">
+      <div class="org-avatar">P</div>
+      <div class="org-name">Per transaction test</div>
+      <span class="mi" style="color:#6B778C;font-size:18px">expand_more</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-item"><span class="mi">home</span> Home</div>
+      <div class="nav-item"><span class="mi">sync</span> Transactions</div>
+      <div class="nav-item"><span class="mi">account_balance</span> Reconciliation</div>
+      <div class="nav-item"><span class="mi">bar_chart</span> Reports</div>
+      <div class="nav-divider"></div>
+      <div class="nav-item active"><span class="mi">settings</span> Settings</div>
+      <div class="nav-item"><span class="mi">extension</span> Integrations</div>
+      <div class="nav-item"><span class="mi">people</span> Team</div>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="syncs">Syncs left: <b>1,248</b></div>
+      <span class="mi" style="color:#6B778C">notifications</span>
+      <div class="avatar">IP</div>
+    </div>
+
+    <div class="page">
+
+      <!-- ========== PT SETTINGS SHELL (variants 1–4) ========== -->
+      <div id="view-pt">
+        <div class="settings-head">
+          <div>
+            <div class="integ-name"><span class="stripe-dot"></span> mzkt.by (Stripe)</div>
+            <div class="mode-row" style="margin-top:8px">
+              <span>Sync mode</span>
+              <div class="seg">
+                <span class="on">Per transaction</span>
+                <span class="off">Summary</span>
+              </div>
+              <a href="#">How to change mode</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-tabs">
+          <button class="set-tab active" type="button">Default</button>
+          <button class="set-tab muted" type="button">Invoice payment <span class="x">×</span></button>
+          <button class="set-tab" type="button" style="color:#0053CC">+ Create additional settings</button>
+        </div>
+
+        <div class="settings-layout">
+          <div class="settings-nav" id="pt-nav">
+            <button type="button" data-tab="general">General</button>
+            <button type="button" data-tab="sales" id="nav-sales">Sales</button>
+            <button type="button" data-tab="invoices" class="active" id="nav-invoices">Invoices</button>
+            <button type="button" data-tab="products">Products/Services</button>
+            <button type="button" data-tab="mapping">Product mapping</button>
+            <button type="button" data-tab="taxes">Taxes</button>
+            <button type="button" data-tab="fees">Fees</button>
+            <button type="button" data-tab="appfees">Application Fees</button>
+            <button type="button" data-tab="expenses">Expenses</button>
+            <button type="button" data-tab="payouts">Payouts</button>
+            <button type="button" data-tab="mc">Multicurrency</button>
+          </div>
+
+          <div class="settings-body">
+
+            <!-- INVOICES TAB (variants pt-pro, pt-upgrade, pt-revrec) -->
+            <div id="panel-invoices">
+
+              <!-- Invoice date — Pro -->
+              <div class="setting-row" id="row-invoice-date">
+                <div class="setting-main">
+                  <div class="setting-label">
+                    Invoice date
+                    <span class="badge-new-inline">New</span>
+                    <span class="badge-upgrade hidden" id="badge-upgrade">Upgrade to use</span>
+                  </div>
+                  <div class="setting-help" id="help-invoice-date">
+                    Select which date Synder posts Stripe invoices under in your books — Created date, when Stripe created the invoice, or Issued date, when the invoice was issued to the customer.
+                  </div>
+                  <p class="caption" id="caption-new-default">New Stripe connections default to Issued date. Existing connections stay on Created date until you change them. Already-synced invoices are not re-dated.</p>
+                  <div class="callout" id="callout-sync-info">
+                    <span class="mi">info</span>
+                    <div>The Synder transactions table always shows the invoice <b>created</b> date. The accounting entry date follows this setting. Sync info on a transaction shows the issued date when it differs from created.</div>
+                  </div>
+                </div>
+                <div class="setting-control">
+                  <select id="sel-invoice-date" aria-label="Invoice date">
+                    <option value="created">Created date</option>
+                    <option value="issued" selected>Issued date</option>
+                  </select>
+                  <div class="plan-msg hidden" id="plan-msg">This feature is available on higher plans. <a href="#">Upgrade plan</a></div>
+                  <div class="lock-msg hidden" id="lock-msg">
+                    You cannot change Invoice date while revenue recognition starts from an invoice date.
+                    <button type="button" class="linkish" id="goto-revrec">Change Schedule start date instead →</button>
+                  </div>
+                  <div class="caption hidden" id="lock-note" style="text-align:right;max-width:260px">
+                    When Schedule start is <b>Payment date</b>, this control can be changed.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Four existing toggles (context, Off) -->
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Apply payments to unpaid Invoice transactions</div>
+                  <div class="setting-help">Synder applies the payment to the matching unpaid invoice.</div>
+                </div>
+                <div class="setting-control">
+                  <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Cancel sync if there is no matching open invoice found for a payment</div>
+                  <div class="setting-help">If no matching open invoice is found, Synder cancels the payment sync.</div>
+                </div>
+                <div class="setting-control">
+                  <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Sync unpaid (open) invoices</div>
+                  <div class="setting-help">Synder syncs open invoices to your books. When the payment arrives, it is attached to the matching invoice and the invoice is marked as paid. <a href="#">Learn more →</a></div>
+                </div>
+                <div class="setting-control">
+                  <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Sync zero invoices</div>
+                  <div class="setting-help">Synder imports and syncs invoices where every line and the total are 0. <a href="#">Learn more →</a></div>
+                </div>
+                <div class="setting-control">
+                  <div class="toggle-wrap"><div class="toggle" title="Off"></div></div>
+                </div>
+              </div>
+
+              <div class="footer-actions">
+                <button type="button" class="btn" id="btn-update">Update</button>
+              </div>
+            </div>
+
+            <!-- SALES TAB (variant pt-sales) -->
+            <div id="panel-sales" class="hidden">
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Clearing account</div>
+                  <div class="setting-help">Select the account that represents Stripe in your books. Synced transactions are deposited here before payout. <a href="#">Learn more →</a></div>
+                </div>
+                <div class="setting-control">
+                  <select aria-label="Clearing account">
+                    <option selected>Stripe mzkt.by (required for Synder)</option>
+                    <option>Uncategorized Asset</option>
+                  </select>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">Payment Method</div>
+                  <div class="setting-help">Select the QuickBooks payment method used for sales receipts, refund receipts, payments and expenses.</div>
+                </div>
+                <div class="setting-control">
+                  <select aria-label="Payment Method">
+                    <option selected>Stripe</option>
+                    <option>Cash</option>
+                  </select>
+                </div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-main">
+                  <div class="setting-label">
+                    Payment posting date
+                    <span class="badge-new-inline">Renamed</span>
+                  </div>
+                  <div class="setting-help">
+                    Select which date Synder posts <b>cash-side</b> transactions under — Balance date (recommended), when the money reaches your Stripe balance, or Created date, when Stripe created the transaction. This is separate from Invoice date on the Invoices tab. <a href="#">Learn more →</a>
+                  </div>
+                  <p class="caption">Was “Posting date”. Renamed so it is not confused with the new Invoice date setting.</p>
+                </div>
+                <div class="setting-control">
+                  <select id="sel-payment-posting" aria-label="Payment posting date">
+                    <option value="created">Created date</option>
+                    <option value="balance" selected>Balance date (recommended)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="footer-actions">
+                <button type="button" class="btn" id="btn-update-sales">Update</button>
+              </div>
+            </div>
+
+            <!-- Placeholder other tabs -->
+            <div id="panel-other" class="hidden">
+              <p style="color:#6B778C;padding:24px 0">This tab is unchanged in this prototype. Switch to Invoices or Sales via the variant bar, or use the left nav for Invoices / Sales.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SUMMARY SYNC (variant 5) ========== -->
+      <div id="view-summary" class="hidden">
+        <div class="settings-head">
+          <div>
+            <div class="integ-name"><span class="stripe-dot"></span> mzkt.by (Stripe)</div>
+            <div class="mode-row" style="margin-top:8px">
+              <span>Sync mode</span>
+              <div class="seg">
+                <span class="off">Per transaction</span>
+                <span class="on">Summary</span>
+              </div>
+              <a href="#">How to change mode</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>General</h2>
+          <p class="panel-sub">Summary Sync settings for this Stripe connection.</p>
+
+          <div class="micro-toggle">
+            Plan state:
+            <button type="button" class="on" id="sum-plan-pro" data-plan="pro">Pro available</button>
+            <button type="button" id="sum-plan-gate" data-plan="gated">Upgrade to use</button>
+          </div>
+
+          <div class="setting-row" style="border-top:1px solid #EFF1F5">
+            <div class="setting-main">
+              <div class="setting-label">
+                Sales recording date
+                <span class="badge-upgrade hidden" id="sum-badge">Upgrade to use</span>
+              </div>
+              <div class="setting-help">
+                Select which date Synder uses when recording Stripe invoice sales in summaries — Invoice created date, when Stripe created the invoice; Invoice issued date, when the invoice was issued to the customer; or Payment date, when the customer paid.
+              </div>
+              <p class="caption">Default for the issued option is Invoice issued date. Datasource dating matches Per Transaction rules.</p>
+            </div>
+            <div class="setting-control">
+              <select id="sel-sales-recording" aria-label="Sales recording date">
+                <option value="created">Invoice created date</option>
+                <option value="issued" selected>Invoice issued date</option>
+                <option value="payment">Payment date</option>
+              </select>
+              <div class="plan-msg hidden" id="sum-plan-msg">This feature is available on higher plans. <a href="#">Upgrade plan</a></div>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <button type="button" class="btn" id="btn-update-summary">Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== REVREC (variant 6) ========== -->
+      <div id="view-revrec" class="hidden">
+        <div class="page-title" style="margin-bottom:4px">Revenue recognition</div>
+        <p class="page-sub">Configuration · mzkt.by (Stripe) · invented chrome (not live in demo)</p>
+
+        <div class="panel">
+          <h2>Schedule start date</h2>
+          <p class="panel-sub">Select when recognition schedules start for Stripe invoices. Set by a success specialist during RevRec configuration; changeable afterwards.</p>
+
+          <div class="setting-row" style="border-top:1px solid #EFF1F5">
+            <div class="setting-main">
+              <div class="setting-label">Schedule start date</div>
+              <div class="setting-help">
+                Select the date Synder starts the recognition schedule from — Invoice created date, Invoice issued date, or Payment date. Changing this applies going forward only; existing schedules keep their dates until a success specialist rebuilds them.
+              </div>
+            </div>
+            <div class="setting-control">
+              <select id="sel-schedule-start" aria-label="Schedule start date">
+                <option value="created" selected>Invoice created date</option>
+                <option value="issued">Invoice issued date</option>
+                <option value="payment">Payment date</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="revrec-note">
+            <b>Sync lock:</b> When Schedule start is Invoice created date or Invoice issued date, the Sync <b>Invoice date</b> setting cannot be changed (see PT · RevRec lock). When Schedule start is Payment date, Sync Invoice date can be changed.
+          </div>
+
+          <h2 style="margin-top:28px">Schedule details <span class="hint-chip">Issued date column</span></h2>
+          <p class="panel-sub" style="margin-bottom:0">Issued date appears for all RevRec orgs. Pre-release rows stay blank; post-release rows are filled regardless of Schedule start.</p>
+          <table class="sched-table">
+            <thead>
+              <tr>
+                <th>Subscription</th>
+                <th>Created date</th>
+                <th>Issued date</th>
+                <th>Schedule start</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>sub_pre_release_9f2a</td>
+                <td>28 Dec 2025</td>
+                <td class="blank">—</td>
+                <td>28 Dec 2025</td>
+                <td>$60,000.00</td>
+              </tr>
+              <tr>
+                <td>sub_after_release_3c1b</td>
+                <td>28 Dec 2025</td>
+                <td>6 Jan 2026</td>
+                <td id="sched-start-cell">28 Dec 2025</td>
+                <td>$60,000.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RevRec confirm modal -->
+<div class="overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-h">
+      <span id="modal-title">Change Schedule start date?</span>
+      <button type="button" class="close" id="modal-close" aria-label="Close"><span class="mi">close</span></button>
+    </div>
+    <div class="modal-b">
+      <p>The new Schedule start date applies <b>going forward only</b>. Existing recognition schedules keep their current dates.</p>
+      <p class="note">To update existing schedules, contact support so a success specialist can rebuild each subscription. Changing the setting alone does not rebuild or re-date schedules.</p>
+      <p>New value: <b id="modal-new-value">Invoice issued date</b></p>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button type="button" class="btn" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var variant = 'pt-pro';
+  var invoiceDateValue = 'issued';
+  var paymentPostingValue = 'balance';
+  var salesRecordingValue = 'issued';
+  var scheduleStartValue = 'created';
+  var schedulePending = null;
+  var summaryGated = false;
+  var toastTimer = null;
+
+  var LABEL = {
+    created: 'Invoice created date',
+    issued: 'Invoice issued date',
+    payment: 'Payment date'
+  };
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+
+  function show(el, on) {
+    if (!el) return;
+    el.classList.toggle('hidden', !on);
+  }
+
+  function setNavActive(tab) {
+    document.querySelectorAll('#pt-nav button').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+    });
+    show(document.getElementById('panel-invoices'), tab === 'invoices');
+    show(document.getElementById('panel-sales'), tab === 'sales');
+    show(document.getElementById('panel-other'), tab !== 'invoices' && tab !== 'sales');
+  }
+
+  function applyPtInvoiceState() {
+    var sel = document.getElementById('sel-invoice-date');
+    var badge = document.getElementById('badge-upgrade');
+    var planMsg = document.getElementById('plan-msg');
+    var lockMsg = document.getElementById('lock-msg');
+    var lockNote = document.getElementById('lock-note');
+    var caption = document.getElementById('caption-new-default');
+    var callout = document.getElementById('callout-sync-info');
+
+    sel.value = invoiceDateValue;
+
+    if (variant === 'pt-upgrade') {
+      sel.disabled = true;
+      show(badge, true);
+      show(planMsg, true);
+      show(lockMsg, false);
+      show(lockNote, false);
+      show(caption, false);
+      show(callout, false);
+    } else if (variant === 'pt-revrec') {
+      sel.disabled = true;
+      show(badge, false);
+      show(planMsg, false);
+      show(lockMsg, true);
+      show(lockNote, true);
+      show(caption, false);
+      show(callout, false);
+      // Show as Created to reflect existing RevRec org default
+      sel.value = 'created';
+    } else {
+      // pt-pro
+      sel.disabled = false;
+      show(badge, false);
+      show(planMsg, false);
+      show(lockMsg, false);
+      show(lockNote, false);
+      show(caption, true);
+      show(callout, true);
+    }
+  }
+
+  function applySummaryState() {
+    var sel = document.getElementById('sel-sales-recording');
+    var badge = document.getElementById('sum-badge');
+    var planMsg = document.getElementById('sum-plan-msg');
+    sel.value = salesRecordingValue;
+    sel.disabled = summaryGated;
+    show(badge, summaryGated);
+    show(planMsg, summaryGated);
+  }
+
+  function render() {
+    document.querySelectorAll('.vbar .tab').forEach(function (t) {
+      t.classList.toggle('active', t.getAttribute('data-variant') === variant);
+    });
+
+    var isPt = variant.indexOf('pt-') === 0;
+    show(document.getElementById('view-pt'), isPt);
+    show(document.getElementById('view-summary'), variant === 'summary');
+    show(document.getElementById('view-revrec'), variant === 'revrec');
+
+    if (isPt) {
+      if (variant === 'pt-sales') {
+        setNavActive('sales');
+      } else {
+        setNavActive('invoices');
+        applyPtInvoiceState();
+      }
+    }
+    if (variant === 'summary') applySummaryState();
+    if (variant === 'revrec') {
+      document.getElementById('sel-schedule-start').value = scheduleStartValue;
+    }
+  }
+
+  // Variant tabs
+  document.querySelectorAll('.vbar .tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      variant = tab.getAttribute('data-variant');
+      render();
+    });
+  });
+
+  // PT left nav
+  document.querySelectorAll('#pt-nav button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = btn.getAttribute('data-tab');
+      if (tab === 'sales' || tab === 'invoices') {
+        // Stay within current PT variant but switch panel
+        if (tab === 'sales' && variant !== 'pt-sales') {
+          // Allow browsing Sales from any PT variant
+        }
+        setNavActive(tab);
+        if (tab === 'invoices') applyPtInvoiceState();
+      } else {
+        setNavActive(tab);
+      }
+    });
+  });
+
+  // Invoice date select — autosave (no confirm)
+  document.getElementById('sel-invoice-date').addEventListener('change', function (e) {
+    if (variant === 'pt-upgrade' || variant === 'pt-revrec') {
+      e.target.value = variant === 'pt-revrec' ? 'created' : invoiceDateValue;
+      return;
+    }
+    invoiceDateValue = e.target.value;
+    toast('Saved');
+  });
+
+  // Block interaction when gated (mousedown prevent)
+  document.getElementById('sel-invoice-date').addEventListener('mousedown', function (e) {
+    if (variant === 'pt-upgrade' || variant === 'pt-revrec') {
+      e.preventDefault();
+    }
+  });
+
+  document.getElementById('sel-payment-posting').addEventListener('change', function (e) {
+    paymentPostingValue = e.target.value;
+    toast('Saved');
+  });
+
+  document.getElementById('btn-update').addEventListener('click', function () {
+    toast('Settings updated');
+  });
+  document.getElementById('btn-update-sales').addEventListener('click', function () {
+    toast('Settings updated');
+  });
+  document.getElementById('btn-update-summary').addEventListener('click', function () {
+    toast('Settings updated');
+  });
+
+  // Jump to RevRec from lock message
+  document.getElementById('goto-revrec').addEventListener('click', function () {
+    variant = 'revrec';
+    render();
+  });
+
+  // Summary plan micro-toggle
+  document.getElementById('sum-plan-pro').addEventListener('click', function () {
+    summaryGated = false;
+    document.getElementById('sum-plan-pro').classList.add('on');
+    document.getElementById('sum-plan-gate').classList.remove('on');
+    applySummaryState();
+  });
+  document.getElementById('sum-plan-gate').addEventListener('click', function () {
+    summaryGated = true;
+    document.getElementById('sum-plan-gate').classList.add('on');
+    document.getElementById('sum-plan-pro').classList.remove('on');
+    applySummaryState();
+  });
+
+  document.getElementById('sel-sales-recording').addEventListener('change', function (e) {
+    if (summaryGated) {
+      e.target.value = salesRecordingValue;
+      return;
+    }
+    salesRecordingValue = e.target.value;
+    toast('Saved');
+  });
+  document.getElementById('sel-sales-recording').addEventListener('mousedown', function (e) {
+    if (summaryGated) e.preventDefault();
+  });
+
+  // RevRec schedule start — confirm modal
+  var overlay = document.getElementById('modal-overlay');
+  var selSched = document.getElementById('sel-schedule-start');
+
+  selSched.addEventListener('change', function (e) {
+    var next = e.target.value;
+    if (next === scheduleStartValue) return;
+    schedulePending = next;
+    e.target.value = scheduleStartValue; // revert until confirm
+    document.getElementById('modal-new-value').textContent = LABEL[next];
+    overlay.classList.add('show');
+  });
+
+  function closeModal() {
+    overlay.classList.remove('show');
+    schedulePending = null;
+    selSched.value = scheduleStartValue;
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.getElementById('modal-confirm').addEventListener('click', function () {
+    if (!schedulePending) return;
+    scheduleStartValue = schedulePending;
+    schedulePending = null;
+    selSched.value = scheduleStartValue;
+    overlay.classList.remove('show');
+    // Update demo table "after release" schedule start cell for illustration
+    var cell = document.getElementById('sched-start-cell');
+    if (scheduleStartValue === 'issued') cell.textContent = '6 Jan 2026';
+    else if (scheduleStartValue === 'payment') cell.textContent = 'Payment date';
+    else cell.textContent = '28 Dec 2025';
+    toast('Schedule start date saved');
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
