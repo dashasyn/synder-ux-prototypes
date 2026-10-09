@@ -354,6 +354,57 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   .typing { display:none !important; } .ans { opacity:1 !important; }
   .check circle, .check path { stroke-dashoffset:0 !important; }
 }
+
+/* ===== v3: calmer layout ===== */
+.page { padding:36px 48px 80px; }
+.ph { align-items:center; margin-bottom:8px; }
+.ph h1 { font-size:20px; line-height:28px; font-weight:600; letter-spacing:-.015em; color:var(--ink2); }
+.es { max-width:1000px; margin:56px auto 0; }
+.es-c { text-align:center; max-width:680px; }
+.es h2 { font-size:36px; line-height:44px; font-weight:700; letter-spacing:-.03em; margin:0 0 12px; }
+.es h2 .g { background:var(--ai); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.es .lead { color:var(--mut); font-size:16px; line-height:25px; margin:0 0 28px; }
+.es .acts { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.es-c .acts { justify-content:center; }
+.es .tl { color:var(--mut); margin-top:16px; white-space:nowrap; }
+.a2 { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+.mini { background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:var(--sh2); padding:18px; display:flex; flex-direction:column; gap:12px; animation:fadeUp .5s ease .15s both; }
+.mini .ex { align-self:flex-start; color:var(--mut); }
+.mini .chips2 { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.tiles4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:8px 0 28px; }
+.tiles4 .tile { min-height:0; padding:24px 12px 20px; align-items:center; text-align:center; gap:12px; }
+.tiles4 .tile .t { font-size:15px; }
+.jobs3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:8px 0 28px; text-align:left; }
+.jcard { position:relative; background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; display:flex; flex-direction:column; gap:8px; box-shadow:var(--sh1); font-family:inherit; color:inherit; text-align:left; transition:transform .2s ease, box-shadow .2s ease, border-color .2s; }
+.jcard:hover { transform:translateY(-2px); box-shadow:var(--sh3); border-color:var(--line2); }
+.jcard .ic { width:40px; height:40px; border-radius:12px; background:var(--ai-soft); color:#5B47E0; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
+.jcard .t { font-weight:650; font-size:16px; letter-spacing:-.01em; }
+.jcard .d { color:var(--mut); }
+.jcard .badge { position:absolute; top:18px; right:18px; }
+.es-c.wide { max-width:900px; }
+.qlink { color:var(--mut); }
+.dr-h2 { display:flex; align-items:center; gap:6px; padding:18px 16px 16px 24px; border-bottom:1px solid var(--line); position:relative; }
+.dr-h2::after { content:''; position:absolute; left:0; right:0; top:0; height:2px; background:var(--ai); opacity:.7; }
+.dr-h2 h2 { flex:1; margin:0; font-size:18px; font-weight:650; letter-spacing:-.02em; }
+.iconlink { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 10px; border:none; background:none; border-radius:10px; color:var(--mut); cursor:pointer; font-family:inherit; font-weight:550; }
+.iconlink:hover { background:var(--soft2); color:var(--ink); }
+.iconlink .mi { font-size:18px; }
+.fline { padding:12px 24px; border-top:1px solid var(--line); color:var(--mut); background:var(--soft); }
+.lbl-sm { color:var(--mut); font-weight:550; margin:22px 0 8px; }
+.lbl-sm:first-child { margin-top:0; }
+.app-opt { padding:10px 12px; }
+.ctx2 { color:var(--mut); margin-bottom:16px; display:flex; align-items:center; gap:6px; }
+.ctx2 b { color:var(--ink); font-weight:600; }
+.acc { display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; }
+.acc .grow { flex:1; } .acc b { font-weight:600; }
+.disc { background:none; border:none; padding:0; color:#3B5BDB; cursor:pointer; font-family:inherit; font-weight:550; }
+.disc:hover { text-decoration:underline; }
+.steps li { padding-bottom:18px; }
+.details-t { display:inline-flex; align-items:center; gap:4px; background:none; border:none; padding:0; color:var(--ink2); font-family:inherit; font-weight:550; cursor:pointer; margin-bottom:16px; }
+.details-t:hover { color:var(--ink); }
+.nextline { display:flex; align-items:center; gap:8px; color:var(--mut); }
+.nextline .mi { font-size:18px; color:#5B47E0; }
+@media (max-width:1180px) { .a2 { grid-template-columns:1fr; } .tiles4 { grid-template-columns:repeat(2,1fr); } .jobs3 { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -395,13 +446,9 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     </div>
     <div class="page">
       <div class="ph">
-        <div>
-          <h1><span class="spark" id="h-spark"></span>AI Hub</h1>
-          <div class="sub">Use your AI assistant with your Synder data, or ask us to build an agent for you.</div>
-        </div>
-        <button class="bx bx-sec" data-act="open-list"><span class="mi">link</span><span id="conn-count">Your connections</span></button>
+        <h1>AI Hub</h1>
+        <button class="iconlink hidden" id="conn-link" data-act="open-list"><span class="mi">link</span><span id="conn-count">Your connections</span></button>
       </div>
-      <div id="banner"></div>
       <div id="view"></div>
     </div>
   </div>
@@ -409,19 +456,15 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
 
 <div class="scrim" id="scrim" data-act="close-drawer"></div>
 <aside class="drawer" id="drawer" aria-label="Connect your AI assistant">
-  <div class="dr-h">
-    <div class="dr-top">
-      <h2>Connect your AI assistant <span class="badge beta">Beta</span></h2>
-      <button class="xbtn" data-act="close-drawer" aria-label="Close"><span class="mi">close</span></button>
-    </div>
-    <div class="dr-tabs">
-      <button class="dr-tab" data-tab="connect">Connect</button>
-      <button class="dr-tab" data-tab="list" id="tab-list">Your connections</button>
-    </div>
+  <div class="dr-h2">
+    <button class="xbtn hidden" id="dr-back" data-act="go-connect" aria-label="Back to connect"><span class="mi">arrow_back</span></button>
+    <h2 id="dr-title">Connect your AI assistant</h2>
+    <button class="iconlink" id="dr-list" data-act="go-list" title="Your connections"><span class="mi">link</span><span id="dr-list-n">Your connections</span></button>
+    <button class="xbtn" data-act="close-drawer" aria-label="Close"><span class="mi">close</span></button>
   </div>
   <div class="dr-b" id="dr-body"></div>
   <div class="dr-f" id="dr-foot"></div>
-  <div class="beta"><b>Beta:</b> it works today, and the tools and steps may still change. <a href="https://synder.com/help" target="_blank" rel="noopener noreferrer">Read the help guide</a></div>
+  <div class="fline">Beta. It can act in every Synder organization you have access to, only with the access you choose. <a href="https://synder.com/help" target="_blank" rel="noopener noreferrer">Help</a></div>
 </aside>
 
 <div class="mbg" id="mbg">
@@ -437,11 +480,11 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
 (function () {
   var MCP = 'https://demo-mcp.synderapp.com/mcp';
   var APPS = {
-    claude:     { name: 'Claude',      kind: 'oauth', sub: 'Web, desktop or mobile app' },
-    chatgpt:    { name: 'ChatGPT',     kind: 'oauth', sub: 'Web' },
-    claudecode: { name: 'Claude Code', kind: 'token', sub: 'Terminal' },
-    cursor:     { name: 'Cursor',      kind: 'token', sub: 'Code editor' },
-    other:      { name: 'Other tool',  kind: 'token', sub: 'Any tool that supports MCP' }
+    claude:     { name: 'Claude',      kind: 'oauth' },
+    chatgpt:    { name: 'ChatGPT',     kind: 'oauth' },
+    claudecode: { name: 'Claude Code', kind: 'token' },
+    cursor:     { name: 'Cursor',      kind: 'token' },
+    other:      { name: 'Other tool',  kind: 'token' }
   };
   var PERMS = [
     ['settings', 'Settings', [['view', 'View'], ['change', 'Change', 'Changes integration settings', 1]]],
@@ -461,7 +504,6 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     recon:   { title: "Check this month's reconciliation", access: 'read' }
   };
 
-  /* ---------- marks & icons (inline SVG) ---------- */
   function spark(color, size) { size = size || 16; return '<svg class="spk" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (color || '#fff') + '" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.9 7 7.5 7.5-4.6.5-7 2.9-7.5 7.5-.5-4.6-2.9-7-7.5-7.5 4.6-.5 7-2.9 7.5-7.5z"/><path d="M19 15.5c.25 2 1.25 3 3.25 3.25-2 .25-3 1.25-3.25 3.25-.25-2-1.25-3-3.25-3.25 2-.25 3-1.25 3.25-3.25z" opacity=".75"/></svg>'; }
   function rays(color) {
     var s = '';
@@ -478,31 +520,13 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   };
   function mark(k, size) {
     size = size || 28; var inner = Math.round(size * 0.66);
-    var body = SVG[k] ? '<svg width="' + inner + '" height="' + inner + '" viewBox="0 0 24 24">' + SVG[k]() + '</svg>' : '<span class="mi" style="font-size:' + Math.round(size * .6) + 'px">extension</span>';
+    var body = SVG[k] ? '<svg width="' + inner + '" height="' + inner + '" viewBox="0 0 24 24">' + SVG[k]() + '</svg>' : '<span class="mi" style="font-size:' + Math.max(14, Math.round(size * .6)) + 'px">extension</span>';
     return '<span class="mark ' + k + '" style="width:' + size + 'px;height:' + size + 'px" aria-hidden="true">' + body + '</span>';
-  }
-
-  var SAMPLE_Q = 'Why did 3 Stripe payouts fail yesterday?';
-  function sampleAnswer() {
-    return '<p>3 Stripe payouts from Oct 8 didn\'t sync to QuickBooks Online:</p><div class="items">' +
-      '<div class="item"><span class="dchip">po_1Q8kZt</span><span class="dchip amt">$1,240.50</span><span class="dchip">po_1Q8mRa</span><span class="dchip amt">$612.00</span><span class="dchip err">Account inactive</span><span class="why">The deposit account "Stripe Clearing" is inactive in QuickBooks.</span></div>' +
-      '<div class="item"><span class="dchip">po_1Q8nWc</span><span class="dchip amt">$86.20</span><span class="dchip err">Missing mapping</span><span class="why">The fee line has no product mapped in your Stripe settings.</span></div>' +
-      '</div><p>Reactivate the account and map the fee product, and I can re-sync all three.</p>';
-  }
-  function chat(compact) {
-    return '<div class="chat' + (compact ? ' static' : '') + '">' +
-      '<div class="chat-h"><span class="av">' + spark() + '</span><span class="t">Your AI assistant</span><span class="chat-ex"><span class="mi" style="font-size:15px">visibility</span>Example</span></div>' +
-      '<div class="chat-b"><div class="bub-u">' + SAMPLE_Q + '</div>' +
-        '<div class="row-a"><span class="av">' + spark() + '</span><div class="bub-a bwrap"><span class="typing"><i></i><i></i><i></i></span><div class="ans">' + sampleAnswer() + '</div></div></div>' +
-      '</div>' +
-      (compact ? '' : '<div class="chat-in"><span class="sp">Ask about your syncs…</span><span class="send"><span class="mi" style="font-size:18px">arrow_upward</span></span></div>') +
-      '<div class="muted" style="padding:0 16px 14px">Example only. Answers depend on your data and the access you give.</div>' +
-      '</div>';
   }
 
   var S = { v: 'A', conns: [], seq: 1 };
   var D;
-  function freshDrawer() { return { tab: 'connect', step: 'app', app: null, job: null, preset: 'read', custom: {}, name: '', token: '', verify: 'idle', confirm: null }; }
+  function freshDrawer() { return { view: 'connect', step: 'app', app: null, job: null, preset: 'read', showAccess: false, custom: {}, name: '', token: '', verify: 'idle', confirm: null }; }
   D = freshDrawer();
 
   function $(id) { return document.getElementById(id); }
@@ -516,71 +540,54 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   var COPY = {}; var cid = 0;
   function ck(text) { var k = 'c' + (++cid); COPY[k] = text; return k; }
   function copyBtn(text, cls) { return '<button class="' + (cls || 'bx bx-sec bx-sm') + '" data-copy="' + ck(text) + '"><span class="mi">content_copy</span>Copy</button>'; }
-  function appsRow(label) {
-    return '<div class="apps-row">' + (label ? '<span>' + label + '</span>' : '') +
-      ['claude', 'chatgpt', 'cursor', 'claudecode'].map(function (k) { return '<span class="a">' + mark(k, 24) + APPS[k].name + '</span>'; }).join('') + '</div>';
-  }
-  var TRUST = '<div class="trust"><span><span class="mi">visibility</span>Read only by default</span><span><span class="mi">block</span>Revoke anytime</span><span><span class="mi">lock</span>You choose what it can change</span></div>';
-  var CTA = function (attrs, label, lg) { return '<button class="bx bx-ai' + (lg ? ' bx-lg' : '') + '" ' + attrs + '>' + spark('#fff', lg ? 18 : 16) + (label || 'Connect your AI assistant') + '</button>'; };
+  function CTA(attrs, label, lg) { return '<button class="bx bx-ai' + (lg ? ' bx-lg' : '') + '" ' + attrs + '>' + spark('#fff', lg ? 18 : 16) + (label || 'Connect your AI assistant') + '</button>'; }
   function active() { return S.conns.filter(function (c) { return c.status === 'Active'; }); }
+  var TL = '<div class="tl">Read only by default · Revoke anytime</div>';
 
-  /* ================= Page variants ================= */
+  /* ================= Empty states ================= */
   function renderPage() {
     document.querySelectorAll('.vbar .tab').forEach(function (b) { var on = b.dataset.v === S.v; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
     var n = active().length;
+    $('conn-link').classList.toggle('hidden', !S.conns.length);
     $('conn-count').textContent = 'Your connections' + (n ? ' (' + n + ')' : '');
-    $('banner').innerHTML = n ? '<div class="conn-banner"><span class="mi">check_circle</span><span class="sp">' + n + ' assistant' + (n > 1 ? 's' : '') + ' connected. Ask it about your syncs anytime.</span><button class="bx bx-ghost bx-sm" data-act="open-list">Manage</button></div>' : '';
-    var h = '';
+    var h;
     if (S.v === 'A') {
-      h = '<div class="card a-hero">' +
-        '<div class="a-cta">' +
-          '<div><h2>Ask your <span class="g">AI assistant</span> about your syncs</h2>' +
-          '<p>Connect Claude, ChatGPT or another assistant to Synder. It can check syncs, explain failures, and, if you allow it, change integration settings and re-sync transactions.</p>' +
-          CTA('data-act="connect"', null, true) + '</div>' +
-          appsRow('Works with') + TRUST +
+      h = '<div class="es a2"><div>' +
+          '<h2>Ask your <span class="g">AI assistant</span> about your syncs</h2>' +
+          '<p class="lead">Connect Claude, ChatGPT or another assistant to check syncs and explain failures.</p>' +
+          '<div class="acts">' + CTA('data-act="connect"', null, true) + '<button class="linkbtn" data-act="request">Request an agent</button></div>' + TL +
         '</div>' +
-        '<div>' + chat() + '</div>' +
-      '</div>' +
-      '<div class="a-foot">Need something it can\'t do? <button class="linkbtn" data-act="request">Request an agent</button></div>';
+        '<div class="mini"><span class="chat-ex">Example</span>' +
+          '<div class="bub-u">Why did 3 Stripe payouts fail yesterday?</div>' +
+          '<div class="row-a"><span class="av">' + spark() + '</span><div class="bub-a">Two failed because the deposit account "Stripe Clearing" is inactive in QuickBooks. One has no fee product mapped.' +
+            '<div class="chips2"><span class="dchip amt">$1,852.50</span><span class="dchip err">Account inactive</span></div></div></div>' +
+        '</div></div>';
     } else if (S.v === 'B') {
-      var tiles = [['claude', 'Claude', 'Web, desktop or mobile. Sign in, no token.'], ['chatgpt', 'ChatGPT', 'Web. Sign in, no token.'], ['cursor', 'Cursor / Claude Code', 'Uses an access token you create here.'], ['other', 'Other', 'Any tool that supports MCP.']];
-      h = '<div><h2 class="sec-h">Connect your AI assistant</h2><div class="muted" style="margin-top:4px;font-size:15px">Pick the app you use. You\'ll only see the steps for that app.</div><div style="margin-top:12px">' + TRUST + '</div>' +
-        '<div class="b-tiles">' + tiles.map(function (t) {
-          var lg = t[0] === 'cursor' ? mark('cursor', 48) + mark('claudecode', 48) : mark(t[0], 48);
-          return '<button class="tile" data-act="tile" data-app="' + t[0] + '"><div class="marks">' + lg + '</div><div class="t">' + t[1] + '</div><div class="d">' + t[2] + '</div><div class="go">Show steps<span class="mi">arrow_forward</span></div></button>';
-        }).join('') + '</div></div>' +
-        '<div class="b-grid">' +
-          '<div class="card b-ask"><h3>Once connected, try asking</h3><div class="prompts">' +
-            ['What synced yesterday?', SAMPLE_Q, 'Which transactions are waiting to sync?', 'Show my Stripe integration settings'].map(function (q) {
-              return '<button class="prompt" data-copy="' + ck(q) + '" title="Copy prompt">' + spark('#8B7CFF') + q + '<span class="mi cp">content_copy</span></button>';
-            }).join('') + '</div></div>' +
-          '<div class="b-prev"><h3 style="margin-left:2px">What an answer looks like</h3>' + chat(true) + '</div>' +
-        '</div>' +
-        '<div class="quiet"><span class="ic"><span class="mi">smart_toy</span></span><div class="txt"><b>Don\'t use an AI assistant?</b> Tell us what to automate and the Synder team will look into building an agent for you.</div><button class="bx bx-sec" data-act="request">Request an agent</button></div>';
+      h = '<div class="es es-c wide"><h2>Which AI assistant do you use?</h2>' +
+        '<p class="lead">Connect it to Synder to check syncs and explain failures.</p>' +
+        '<div class="tiles4">' + [['claude', 'Claude'], ['chatgpt', 'ChatGPT'], ['cursor', 'Cursor'], ['other', 'Other']].map(function (t) {
+          return '<button class="tile" data-act="' + (t[0] === 'other' ? 'connect' : 'tile') + '" data-app="' + t[0] + '">' + mark(t[0], 48) + '<div class="t">' + t[1] + '</div></button>';
+        }).join('') + '</div>' +
+        '<div class="qlink">Don\'t use an AI assistant? <button class="linkbtn" data-act="request">Request an agent</button></div></div>';
     } else {
-      var RO = '<span class="badge read"><span class="mi">visibility</span>Read only</span>', CH = '<span class="badge change"><span class="mi">edit</span>Changes books</span>';
-      var jobs = [
-        ['explain', 'error_outline', 'Explain failed syncs', 'Find out why transactions didn\'t sync and what to fix.', '"Why did 3 Stripe payouts fail yesterday?"', RO, ''],
-        ['fix', 'tune', 'Fix a setting and resync', 'Change an integration setting, then re-sync the affected transactions.', '"Map Stripe fees to Bank Charges and re-sync last week."', CH, ' amber'],
-        ['recon', 'fact_check', 'Check this month\'s reconciliation', 'See what matches and what doesn\'t before you close the month.', '"What\'s unmatched in October so far?"', RO, '']
-      ];
-      h = '<div class="c-lead">Pick a job. Your AI assistant does it with your Synder data.</div><div class="c-grid">' +
-        jobs.map(function (j) {
-          return '<div class="card job lift"><div class="top"><div class="ic' + j[6] + '"><span class="mi">' + j[1] + '</span></div>' + j[5] + '</div><h3>' + j[2] + '</h3><div class="d">' + j[3] + '</div><div class="ex">' + spark('#8B7CFF') + '<span>' + j[4] + '</span></div>' +
-            '<div class="act">' + CTA('data-act="job" data-job="' + j[0] + '"', 'Do it with your AI assistant') + '</div></div>';
-        }).join('') +
-        '<div class="card job other"><div class="top"><div class="ic"><span class="mi">add</span></div></div><h3>Something else?</h3><div class="d">Tell us what you want automated. The Synder team reviews every request.</div>' +
-          '<div class="act"><button class="bx bx-sec" data-act="request">Request an agent</button></div></div>' +
-        '</div><div class="c-foot">' + appsRow('Works with') + TRUST + '</div>';
+      var jobs = [['explain', 'error_outline', 'Explain failed syncs', 'Find out why something didn\'t sync.', ''],
+        ['fix', 'tune', 'Fix a setting and resync', 'Change a setting, then re-sync.', '<span class="badge change">Changes books</span>'],
+        ['recon', 'fact_check', 'Check this month\'s reconciliation', 'See what doesn\'t match yet.', '']];
+      h = '<div class="es es-c wide"><h2>What should your assistant do first?</h2>' +
+        '<p class="lead">Pick a job, then connect the AI assistant you already use.</p>' +
+        '<div class="jobs3">' + jobs.map(function (j) {
+          return '<button class="jcard" data-act="job" data-job="' + j[0] + '">' + j[4] + '<span class="ic"><span class="mi">' + j[1] + '</span></span><span class="t">' + j[2] + '</span><span class="d">' + j[3] + '</span></button>';
+        }).join('') + '</div>' +
+        '<div class="acts">' + CTA('data-act="connect"') + '<button class="linkbtn" data-act="request">Request an agent</button></div></div>';
     }
     $('view').innerHTML = h;
   }
 
-  /* ================= Connect drawer ================= */
+  /* ================= Connect panel ================= */
   function openDrawer(opts) {
     D = freshDrawer(); opts = opts || {};
-    if (opts.tab) D.tab = opts.tab;
-    if (opts.job) { D.job = opts.job; D.preset = JOBS[opts.job].access; if (JOBS[opts.job].custom) JOBS[opts.job].custom.forEach(function (k) { D.custom[k] = true; }); }
+    if (opts.view) D.view = opts.view;
+    if (opts.job) { D.job = opts.job; D.preset = JOBS[opts.job].access; if (D.preset !== 'read') D.showAccess = true; if (JOBS[opts.job].custom) JOBS[opts.job].custom.forEach(function (k) { D.custom[k] = true; }); }
     if (opts.app) pickApp(opts.app);
     $('scrim').classList.add('show'); $('drawer').classList.add('show');
     renderDrawer();
@@ -598,18 +605,18 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   function callout(kind, icon, html) { return '<div class="callout ' + kind + '"><span class="mi">' + icon + '</span><div>' + html + '</div></div>'; }
 
   function renderDrawer() {
-    document.querySelectorAll('.dr-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === D.tab); });
-    var n = S.conns.length;
-    $('tab-list').textContent = 'Your connections' + (n ? ' (' + n + ')' : '');
+    var list = D.view === 'list';
+    $('dr-title').textContent = list ? 'Your connections' : 'Connect your AI assistant';
+    $('dr-back').classList.toggle('hidden', !list);
+    $('dr-list').classList.toggle('hidden', list);
+    $('dr-list-n').textContent = S.conns.length ? 'Connections (' + S.conns.length + ')' : 'Connections';
     var r;
-    if (D.tab === 'list') r = renderList();
+    if (list) r = renderList();
     else {
-      var ctx = D.job ? '<div class="ctx"><span class="mi">flag</span><span>For: <b style="font-weight:600;color:#0F1222">' + JOBS[D.job].title + '</b>. ' +
-        (JOBS[D.job].access === 'read' ? 'Read only access is enough.' : 'This needs permission to change settings and run syncs.') + '</span></div>' : '';
-      if (D.step === 'app') r = [ctx + '<p class="q-title">Which app do you use?</p><div class="muted">You\'ll only see the steps for that app.</div>' +
-          '<div class="grp-label">Sign in with Synder, no token needed</div><div class="app-list">' + ['claude', 'chatgpt'].map(appOpt).join('') + '</div>' +
-          '<div class="grp-label">Uses an access token you create here</div><div class="app-list">' + ['claudecode', 'cursor', 'other'].map(appOpt).join('') + '</div>',
-          '<span class="muted">Not sure? Most people use Claude or ChatGPT.</span>'];
+      var ctx = D.job ? '<div class="ctx2"><span class="mi" style="font-size:18px">flag</span>For: <b>' + JOBS[D.job].title + '</b></div>' : '';
+      if (D.step === 'app') r = [ctx + '<p class="q-title" style="margin-bottom:18px">Which app do you use?</p>' +
+          '<div class="lbl-sm">Sign in, no token</div><div class="app-list">' + ['claude', 'chatgpt'].map(appOpt).join('') + '</div>' +
+          '<div class="lbl-sm">With an access token</div><div class="app-list">' + ['claudecode', 'cursor', 'other'].map(appOpt).join('') + '</div>', ''];
       else if (D.step === 'oauth') r = renderOauth(ctx);
       else if (D.step === 'token') r = renderToken(ctx);
       else if (D.step === 'token-done') r = renderTokenDone();
@@ -618,113 +625,103 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     $('dr-body').innerHTML = r[0]; $('dr-foot').innerHTML = r[1];
     $('dr-foot').classList.toggle('hidden', !r[1]);
   }
-  function appOpt(k) { var a = APPS[k]; return '<button class="app-opt" data-act="pick-app" data-app="' + k + '">' + mark(k, 40) + '<span class="grow"><span class="n">' + a.name + '</span><br><span class="d">' + a.sub + '</span></span><span class="mi chev">chevron_right</span></button>'; }
+  function appOpt(k) { return '<button class="app-opt" data-act="pick-app" data-app="' + k + '">' + mark(k, 32) + '<span class="grow n">' + APPS[k].name + '</span><span class="mi chev">chevron_right</span></button>'; }
   function backBtn() { return '<button class="back" data-act="back-app"><span class="mi" style="font-size:18px">chevron_left</span>Choose another app</button>'; }
   function addrRow() { return '<div class="copyrow"><span class="ro mono" title="Read only">' + MCP + '</span>' + copyBtn(MCP) + '</div>'; }
-  function hd(k, t, s) { return '<div class="hd">' + mark(k, 44) + '<div><div class="t">' + t + '</div><div class="s">' + s + '</div></div></div>'; }
+  function hd(k, t) { return '<div class="hd">' + mark(k, 40) + '<div class="t">' + t + '</div></div>'; }
 
   function renderOauth(ctx) {
     var a = D.app, steps;
     if (a === 'claude') steps = [
-      'In Claude, open <span class="kbd">Settings</span> → <span class="kbd">Connectors</span>.',
-      'Click <span class="kbd">Add custom connector</span>.',
+      'In Claude, open <span class="kbd">Settings</span> → <span class="kbd">Connectors</span> → <span class="kbd">Add custom connector</span>.',
       'Paste the Synder address:' + addrRow(),
-      'Click <span class="kbd">Add</span>.',
-      'Sign in to Synder and choose what Claude can access.'
+      'Click <span class="kbd">Add</span>, then sign in to Synder and choose access.'
     ]; else steps = [
-      'In ChatGPT, open <span class="kbd">Settings</span> → <span class="kbd">Apps &amp; Connectors</span>.',
-      'Turn on <span class="kbd">Developer mode</span>.',
-      'Click <span class="kbd">Create</span>.',
-      'Paste the Synder address:' + addrRow(),
-      'For authentication, choose <span class="kbd">OAuth</span>.',
-      'Click <span class="kbd">Create</span>, then sign in to Synder and choose what ChatGPT can access.'
+      'In ChatGPT, open <span class="kbd">Settings</span> → <span class="kbd">Apps &amp; Connectors</span>, turn on <span class="kbd">Developer mode</span> and click <span class="kbd">Create</span>.',
+      'Paste the Synder address and choose <span class="kbd">OAuth</span>:' + addrRow(),
+      'Click <span class="kbd">Create</span>, then sign in to Synder and choose access.'
     ];
-    var accessNote = D.job && JOBS[D.job].access !== 'read'
-      ? callout('warn', 'warning_amber', 'For this job, choose <b>Full access</b>, or <b>Custom</b> with Settings: Change and Syncs: Run, when Synder asks. Your assistant will then be able to change settings and send transactions to your books.') : '';
-    var b = ctx + backBtn() + hd(a, 'Connect ' + APPS[a].name, steps.length + ' steps, about a minute') +
+    var b = ctx + backBtn() + hd(a, 'Connect ' + APPS[a].name) +
       '<ol class="steps">' + steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' +
-      callout('note', 'info', 'No token needed. You choose access when you sign in to Synder. Read only is the default, and you can revoke it anytime in Your connections.') +
-      callout('note', 'domain', 'It can act in every Synder organization you have access to, only with the access you choose.') + accessNote;
-    return [b, '<span class="sp"></span><button class="bx bx-primary" data-act="to-verify">I\'ve added it, check it works<span class="mi">arrow_forward</span></button>'];
+      '<div class="muted">No token needed. Read only is the default.</div>' +
+      (D.job && JOBS[D.job].access !== 'read' ? callout('warn', 'warning_amber', 'For this job, choose <b>Full access</b> or <b>Custom</b> with Settings: Change and Syncs: Run. It will be able to change your books.') : '');
+    return [b, '<span class="sp"></span><button class="bx bx-primary" data-act="to-verify">I\'ve added it<span class="mi">arrow_forward</span></button>'];
   }
 
   function renderToken(ctx) {
     var a = D.app;
-    var seg = (a === 'cursor' || a === 'claudecode') ? '<div class="seg"><button data-act="set-tool" data-app="cursor" class="' + (a === 'cursor' ? 'on' : '') + '">Cursor</button><button data-act="set-tool" data-app="claudecode" class="' + (a === 'claudecode' ? 'on' : '') + '">Claude Code</button></div>' : '';
-    var presets = [['read', 'Read only', 'See syncs, transactions, settings, reports and billing. Can\'t change anything.'], ['full', 'Full access', 'Everything in Read only, plus change settings, sync, roll back, resync and import.'], ['custom', 'Custom', 'Pick exactly what it can do.']];
-    var b = ctx + backBtn() + seg + hd(a, 'Create an access token for ' + APPS[a].name, 'You\'ll get the token and a ready-to-paste setup.') +
+    var b = ctx + backBtn() + hd(a, 'Create an access token for ' + APPS[a].name) +
       '<div class="field"><label class="lbl req" for="tok-name">Token name</label><input class="fi' + (D.nameErr ? ' bad' : '') + '" id="tok-name" value="' + esc(D.name) + '" placeholder="e.g. Cursor on work laptop">' +
-        (D.nameErr ? '<div class="err"><span class="mi">error_outline</span>Give the token a name so you can recognise it later.</div>' : '<div class="hint">Helps you tell connections apart later.</div>') + '</div>' +
-      '<div class="field"><span class="lbl">Access</span><div class="presets">' + presets.map(function (p) {
-        return '<label class="preset' + (D.preset === p[0] ? ' on' : '') + '"><input type="radio" name="preset" value="' + p[0] + '"' + (D.preset === p[0] ? ' checked' : '') + '><span><span class="n">' + p[1] + (p[0] === 'read' ? ' <span class="badge grey">Default</span>' : '') + '</span><br><span class="d">' + p[2] + '</span></span></label>';
+        (D.nameErr ? '<div class="err"><span class="mi">error_outline</span>Give the token a name.</div>' : '') + '</div>' +
+      '<div class="field"><span class="lbl">Access</span>';
+    if (!D.showAccess) {
+      b += '<div class="acc"><span class="mi" style="color:#16A34A">visibility</span><span class="grow"><b>Read only</b><br><span class="muted">Can see syncs, transactions, settings, reports and billing.</span></span><button class="disc" data-act="show-access">Change</button></div>';
+    } else {
+      var presets = [['read', 'Read only', 'See syncs, transactions, settings, reports and billing.'], ['full', 'Full access', 'Also change settings, sync, roll back, resync and import.'], ['custom', 'Custom', 'Pick exactly what it can do.']];
+      b += '<div class="presets">' + presets.map(function (p) {
+        return '<label class="preset' + (D.preset === p[0] ? ' on' : '') + '"><input type="radio" name="preset" value="' + p[0] + '"' + (D.preset === p[0] ? ' checked' : '') + '><span><span class="n">' + p[1] + '</span><br><span class="d">' + p[2] + '</span></span></label>';
       }).join('') + '</div>';
-    if (D.preset === 'full') b += callout('warn', 'warning_amber', '<b>This lets your assistant change your books.</b> It can change integration settings, run and re-sync transactions, and roll back syncs. Rolling back removes entries from your books.');
-    if (D.preset === 'custom') {
-      b += '<div class="perm">' + PERMS.map(function (g) {
-        return '<div class="perm-g"><div class="gn">' + g[1] + '</div><div class="opts">' + g[2].map(function (o) {
-          var k = g[0] + '.' + o[0];
-          return '<label><input type="checkbox" data-perm="' + k + '"' + (D.custom[k] ? ' checked' : '') + '><span>' + o[1] + (o[2] ? ' <span class="sd' + (o[3] ? ' danger' : '') + '">· ' + o[2] + '</span>' : '') + '</span></label>';
-        }).join('') + '</div></div>';
-      }).join('') + '</div>';
-      if (D.permErr) b += '<div class="err"><span class="mi">error_outline</span>Pick at least one permission.</div>';
-      if (riskyCustom()) b += callout('warn', 'warning_amber', '<b>Some of these change your books.</b> Your assistant will be able to act without asking you first in Synder.');
+      if (D.preset === 'full') b += callout('warn', 'warning_amber', 'It can change settings, resync and roll back syncs. Rolling back removes entries from your books.');
+      if (D.preset === 'custom') {
+        b += '<div class="perm">' + PERMS.map(function (g) {
+          return '<div class="perm-g"><div class="gn">' + g[1] + '</div><div class="opts">' + g[2].map(function (o) {
+            var k = g[0] + '.' + o[0];
+            return '<label><input type="checkbox" data-perm="' + k + '"' + (D.custom[k] ? ' checked' : '') + '><span>' + o[1] + (o[2] ? ' <span class="sd' + (o[3] ? ' danger' : '') + '">· ' + o[2] + '</span>' : '') + '</span></label>';
+          }).join('') + '</div></div>';
+        }).join('') + '</div>';
+        if (D.permErr) b += '<div class="err"><span class="mi">error_outline</span>Pick at least one permission.</div>';
+        else if (riskyCustom()) b += callout('warn', 'warning_amber', 'Some of these let it change your books.');
+      }
     }
-    b += '</div>' + callout('note', 'info', 'The token doesn\'t expire on its own. You can revoke it anytime in Your connections.');
-    return [b, '<span class="muted">' + presetSummary() + '</span><span class="sp"></span><button class="bx bx-primary" data-act="gen"><span class="mi">key</span>Generate token</button>'];
+    b += '<div class="hint">The token doesn\'t expire on its own. Revoke it anytime.</div></div>';
+    return [b, '<span class="sp"></span><button class="bx bx-primary" data-act="gen">Generate token</button>'];
   }
 
-  function codeBlock(fname, raw, html) { return '<div class="code"><div class="code-h"><span class="dots"><i></i><i></i><i></i></span><span class="fn">' + fname + '</span>' + copyBtn(raw, 'cpd') + '</div><pre>' + html + '</pre></div>'; }
+  function codeBlock(fname, raw, html) { return '<div class="code"><div class="code-h"><span class="fn">' + fname + '</span>' + copyBtn(raw, 'cpd') + '</div><pre>' + html + '</pre></div>'; }
   function renderTokenDone() {
-    var a = D.app, t = D.token, setup = '';
+    var a = D.app, t = D.token, setup;
     if (a === 'claudecode') {
       var cmd = 'claude mcp add --transport http synder ' + MCP + ' \\\n  --header "Authorization: Bearer ' + t + '"';
-      setup = '<div class="h3"><span class="n">2</span>Add Synder to Claude Code</div><div class="muted">Run this in your terminal. The token is already filled in.</div>' +
-        codeBlock('Terminal', cmd, '<span class="k">claude</span> mcp add --transport http synder ' + MCP + ' \\\n  --header <span class="s">"Authorization: Bearer ' + t + '"</span>');
+      setup = '<div class="lbl" style="margin-top:24px">Run in your terminal</div>' + codeBlock('Terminal', cmd, '<span class="k">claude</span> mcp add --transport http synder ' + MCP + ' \\\n  --header <span class="s">"Authorization: Bearer ' + t + '"</span>');
     } else if (a === 'cursor') {
       var json = '{\n  "mcpServers": {\n    "synder": {\n      "url": "' + MCP + '",\n      "headers": {\n        "Authorization": "Bearer ' + t + '"\n      }\n    }\n  }\n}';
       var hj = esc(json).replace(/(&quot;[^&]*?&quot;)(\s*:)/g, '<span class="k">$1</span>$2').replace(/:\s(&quot;[^&]*?&quot;)/g, ': <span class="s">$1</span>');
-      setup = '<div class="h3"><span class="n">2</span>Add Synder to Cursor</div><div class="muted">Paste this into <span class="mono">~/.cursor/mcp.json</span>. If the file already has servers, add the "synder" entry next to them.</div>' + codeBlock('~/.cursor/mcp.json', json, hj);
+      setup = '<div class="lbl" style="margin-top:24px">Add to ~/.cursor/mcp.json</div>' + codeBlock('mcp.json', json, hj);
     } else {
-      setup = '<div class="h3"><span class="n">2</span>Add Synder to your tool</div><div class="muted">Use these values in your tool\'s MCP settings.</div>' +
-        '<div class="field" style="margin-top:12px"><span class="lbl">Server address</span>' + addrRow() + '</div>' +
-        '<div class="field"><span class="lbl">Header</span>' + codeBlock('Header', 'Authorization: Bearer ' + t, '<span class="k">Authorization:</span> Bearer ' + t) + '</div>';
+      var hv = 'Authorization: Bearer ' + t;
+      setup = '<div class="lbl" style="margin-top:24px">Add to your tool\'s MCP settings</div>' + codeBlock('Settings', 'URL: ' + MCP + '\n' + hv, '<span class="k">URL:</span> ' + MCP + '\n<span class="k">Authorization:</span> Bearer ' + t);
     }
-    var b = callout('okc', 'check_circle', '<b>Token created:</b> ' + esc(D.name) + ' · ' + presetSummary()).replace('callout okc', 'callout okc" style="margin-top:0') +
-      '<div class="h3"><span class="n">1</span>Copy your token</div>' +
-      '<div class="copyrow"><span class="ro mono">' + t + '</span>' + copyBtn(t) + '</div>' +
-      callout('warn', 'visibility_off', '<b>Shown only once.</b> Copy it now. After you leave this step you can\'t see it again, only revoke it and make a new one.') + setup;
-    return [b, '<span class="sp"></span><button class="bx bx-primary" data-act="to-verify">Next: check it works<span class="mi">arrow_forward</span></button>'];
+    var b = hd(a, 'Your token for ' + APPS[a].name) +
+      '<div class="copyrow" style="margin-top:0"><span class="ro mono">' + t + '</span>' + copyBtn(t) + '</div>' +
+      callout('warn', 'visibility_off', '<b>Shown only once.</b> Copy it now. You can\'t see it again later.') + setup;
+    return [b, '<span class="muted">' + esc(D.name) + ' · ' + presetSummary() + '</span><span class="sp"></span><button class="bx bx-primary" data-act="to-verify">Next<span class="mi">arrow_forward</span></button>'];
   }
 
   function renderVerify() {
     var a = APPS[D.app], b;
     if (D.verify === 'done') {
-      b = '<div class="done"><div class="check"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="33"/><path d="M23 37l9 9 17-19"/></svg></div>' +
-        '<h3>Connected ✓</h3><div class="meta"><span class="live"></span>' + a.name + ' · last used just now</div>' +
-        '<p class="muted" style="margin:14px auto 0;max-width:40ch">Your assistant can now answer questions about your syncs.</p></div>' +
-        '<div class="verify-q" style="margin-top:24px"><span class="av">' + spark() + '</span><span style="flex:1;font-size:14px">Next, try: "' + SAMPLE_Q + '"</span>' + copyBtn(SAMPLE_Q, 'bx bx-ghost bx-sm') + '</div>';
-      return [b, '<button class="bx bx-sec" data-act="go-list">See your connections</button><span class="sp"></span><button class="bx bx-primary" data-act="close-drawer">Done</button>'];
+      b = '<div class="done" style="padding-top:32px"><div class="check"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="33"/><path d="M23 37l9 9 17-19"/></svg></div>' +
+        '<h3>Connected ✓</h3><div class="meta"><span class="live"></span>' + a.name + ' · last used just now</div></div>';
+      return [b, '<button class="bx bx-ghost" data-act="go-list">See your connections</button><span class="sp"></span><button class="bx bx-primary" data-act="close-drawer">Done</button>'];
     }
-    b = hd(D.app, 'Last step: check it works', 'Make sure ' + a.name + ' can reach Synder.') + '<div class="muted">Ask your assistant:</div>' +
-      '<div class="verify-q"><span class="av">' + spark() + '</span><span style="flex:1">"What synced yesterday?"</span>' + copyBtn('What synced yesterday?', 'bx bx-ghost bx-sm') + '</div>' +
-      (D.verify === 'checking'
-        ? '<div style="display:flex;align-items:center;gap:10px" class="muted"><span class="spin"></span>Waiting for ' + a.name + ' to reach Synder…</div>'
-        : '<div class="muted">When it answers with your syncs, you\'re connected. We\'ll also show it in Your connections.</div>');
-    return [b, '<button class="bx bx-ghost" data-act="back-step"><span class="mi">chevron_left</span>Back</button><span class="sp"></span><button class="bx bx-primary" data-act="check"' + (D.verify === 'checking' ? ' disabled' : '') + '>I asked, check connection</button>'];
+    b = hd(D.app, 'Check it works') + '<div class="muted">Ask your assistant:</div>' +
+      '<div class="verify-q"><span style="flex:1">"What synced yesterday?"</span>' + copyBtn('What synced yesterday?', 'bx bx-ghost bx-sm') + '</div>' +
+      (D.verify === 'checking' ? '<div style="display:flex;align-items:center;gap:10px" class="muted"><span class="spin"></span>Waiting for ' + a.name + ' to reach Synder…</div>' : '');
+    return [b, '<button class="bx bx-ghost" data-act="back-step"><span class="mi">chevron_left</span>Back</button><span class="sp"></span><button class="bx bx-primary" data-act="check"' + (D.verify === 'checking' ? ' disabled' : '') + '>Check connection</button>'];
   }
 
   function renderList() {
     if (!S.conns.length) {
-      return ['<div class="empty"><div class="eic"><span class="mi">link_off</span></div><h3>No assistants connected yet</h3><p>Connect Claude, ChatGPT, Cursor or another tool, and it will show up here with its access and last use.</p>' + CTA('data-act="go-connect"') + '</div>', ''];
+      return ['<div class="empty"><h3>No assistants connected yet</h3><p>Connected apps and tokens show up here.</p>' + CTA('data-act="go-connect"') + '</div>', ''];
     }
     var rows = S.conns.map(function (c) {
       var st = c.status === 'Active' ? '<span class="badge active">Active</span>' : '<span class="badge revoked">Revoked</span>';
       var act = c.status === 'Active' ? '<button class="bx bx-ghost bx-sm" style="color:#DC2626" data-act="revoke" data-id="' + c.id + '">Revoke</button>' : '';
       var r = '<tr class="' + (c.status !== 'Active' ? 'revoked' : '') + '"><td><b style="font-weight:600;color:#0F1222">' + esc(c.name) + '</b></td><td>' + c.kind + '</td><td>' + c.created + '</td><td>' + c.last + '</td><td>' + c.access + '</td><td>' + st + '</td><td>' + act + '</td></tr>';
-      if (D.confirm === c.id) r += '<tr class="confirm-row"><td colspan="7"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="flex:1">Revoke <b style="font-weight:600">' + esc(c.name) + '</b>? It loses access to Synder right away.</span><button class="bx bx-danger bx-sm" data-act="revoke-yes" data-id="' + c.id + '">Revoke</button><button class="bx bx-sec bx-sm" data-act="revoke-no">Cancel</button></div></td></tr>';
+      if (D.confirm === c.id) r += '<tr class="confirm-row"><td colspan="7"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="flex:1">Revoke <b style="font-weight:600">' + esc(c.name) + '</b>? It loses access right away.</span><button class="bx bx-danger bx-sm" data-act="revoke-yes" data-id="' + c.id + '">Revoke</button><button class="bx bx-sec bx-sm" data-act="revoke-no">Cancel</button></div></td></tr>';
       return r;
     }).join('');
-    return ['<p class="muted" style="margin:0 0 14px">Everything connected to Synder for this organization. Revoking stops access right away.</p><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Name</th><th>Kind</th><th>Created</th><th>Last used</th><th>Access</th><th>Status</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>',
+    return ['<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Name</th><th>Kind</th><th>Created</th><th>Last used</th><th>Access</th><th>Status</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>',
       '<span class="sp"></span><button class="bx bx-sec" data-act="go-connect"><span class="mi">add</span>Connect another</button>'];
   }
 
@@ -739,55 +736,48 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   var QUICK = [
     ['Match payouts to deposits', 'Every week, compare Stripe payouts with bank deposits in QuickBooks and send me a list of anything that doesn\'t match.'],
     ['Weekly failed-sync summary', 'Every Monday, email me a summary of transactions that failed to sync last week and why.'],
-    ['Monthly sales by channel', 'At the start of each month, prepare a sales report split by Stripe, PayPal and Shopify for the previous month.'],
-    ['Flag unusual refunds', 'Flag refunds that are much bigger than usual or come from the same customer several times a week.']
+    ['Monthly sales by channel', 'At the start of each month, prepare a sales report split by Stripe, PayPal and Shopify for the previous month.']
   ];
-  function openReq() { R = { what: '', often: '', now: '', hours: '', ex: false, tried: false, sent: false }; $('mbg').classList.add('show'); renderReq(); }
+  function openReq() { R = { what: '', often: '', now: '', hours: '', more: false, tried: false, sent: false }; $('mbg').classList.add('show'); renderReq(); }
   function closeReq() { $('mbg').classList.remove('show'); }
-  function reqErrors() { return { what: !R.what.trim() }; }
   function renderReq() {
     if (R.sent) {
-      $('req-body').innerHTML = '<div class="m-b"><div class="done"><div class="check"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="33"/><path d="M23 37l9 9 17-19"/></svg></div><h3>Request sent</h3><div class="muted">Thanks. The Synder team will reply by email within 2 business days. Requesting is free.</div></div>' +
-        '<div class="meanwhile"><span class="av" style="width:40px;height:40px">' + spark('#fff', 20) + '</span><div class="txt"><b>In the meantime, connect your AI assistant.</b><br><span class="muted">It can already check syncs and explain failures.</span></div>' + CTA('data-act="req-connect"', 'Connect') + '</div></div>' +
-        '<div class="m-f"><span class="sp"></span><button class="bx bx-sec" data-act="close-req">Close</button></div>';
+      $('req-body').innerHTML = '<div class="m-b"><div class="done"><div class="check"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="33"/><path d="M23 37l9 9 17-19"/></svg></div><h3>Request sent</h3>' +
+        '<div class="muted">We\'ll reply by email within 2 business days. Meanwhile, your AI assistant can already check syncs.</div></div></div>' +
+        '<div class="m-f"><button class="bx bx-ghost" data-act="close-req">Close</button><span class="sp"></span>' + CTA('data-act="req-connect"') + '</div>';
       return;
     }
-    var e = reqErrors(), showE = R.tried;
+    var bad = R.tried && !R.what.trim();
     var oft = ['Real-time', 'Daily', 'Weekly', 'Monthly', 'On demand'];
     $('req-body').innerHTML = '<div class="m-b">' +
-      '<p style="margin:0 0 22px" class="muted">Tell us a task you\'d like automated. <span style="color:#DC2626">*</span> Required</p>' +
-      '<div class="field"><label class="lbl req" for="r-what">What should it do?</label>' +
-        '<div class="chips">' + QUICK.map(function (q, i) { return '<button class="chipq" data-act="quick" data-i="' + i + '"><span class="mi">add</span>' + q[0] + '</button>'; }).join('') + '</div>' +
-        '<textarea class="fi' + (showE && e.what ? ' bad' : '') + '" id="r-what" rows="4" placeholder="Describe the task in your own words">' + esc(R.what) + '</textarea>' +
-        (showE && e.what ? '<div class="err"><span class="mi">error_outline</span>Tell us what the agent should do.</div>' : '') +
-        '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:8px"><button class="linkbtn" data-act="toggle-ex">' + (R.ex ? 'Hide example' : 'See example') + '</button><span class="muted" id="r-count">' + R.what.length + ' characters</span></div>' +
-        (R.ex ? '<div class="exbox">"Every Monday, check last week\'s Stripe payouts against QuickBooks deposits and email me anything that doesn\'t match, with the amount and date."</div>' : '') +
-      '</div>' +
-      '<div class="field"><span class="lbl">How often? <span class="opt">(optional)</span></span><div class="radios">' + oft.map(function (o) {
-        return '<label class="' + (R.often === o ? 'on' : '') + '"><input type="radio" name="often" value="' + o + '"' + (R.often === o ? ' checked' : '') + '>' + o + '</label>';
-      }).join('') + '</div></div>' +
-      '<div class="field"><label class="lbl" for="r-now">How do you do it now? <span class="opt">(optional)</span></label><textarea class="fi" id="r-now" rows="2" style="min-height:72px" placeholder="e.g. I export a CSV and check it in a spreadsheet">' + esc(R.now) + '</textarea></div>' +
-      '<div class="field"><label class="lbl" for="r-hours">Hours a month this takes you <span class="opt">(optional)</span></label><input class="fi" id="r-hours" type="number" min="0" style="max-width:160px" value="' + esc(R.hours) + '" placeholder="e.g. 6"><div class="hint">Helps us see which requests save the most time.</div></div>' +
-      '<div class="next"><h4>What happens next</h4><ul><li><span class="mi">group</span>The Synder team reads every request.</li><li><span class="mi">schedule</span>We reply by email within 2 business days.</li><li><span class="mi">favorite_border</span>Requesting is free and doesn\'t commit you to anything.</li></ul></div>' +
-      '</div><div class="m-f"><span class="sp"></span><button class="bx bx-ghost" data-act="close-req">Cancel</button><button class="bx bx-primary" data-act="send-req">Send request</button></div>';
+      '<div class="field"><label class="lbl" for="r-what">What should it do?</label>' +
+        '<div class="chips">' + QUICK.map(function (q, i) { return '<button class="chipq" data-act="quick" data-i="' + i + '">' + q[0] + '</button>'; }).join('') + '</div>' +
+        '<textarea class="fi' + (bad ? ' bad' : '') + '" id="r-what" rows="4" placeholder="Describe the task in your own words">' + esc(R.what) + '</textarea>' +
+        (bad ? '<div class="err"><span class="mi">error_outline</span>Tell us what the agent should do.</div>' : '') + '</div>' +
+      '<button class="details-t" data-act="toggle-more"><span class="mi" style="font-size:18px">' + (R.more ? 'expand_less' : 'expand_more') + '</span>Add details (optional)</button>' +
+      (R.more ? '<div class="field"><span class="lbl">How often?</span><div class="radios">' + oft.map(function (o) {
+          return '<label class="' + (R.often === o ? 'on' : '') + '"><input type="radio" name="often" value="' + o + '"' + (R.often === o ? ' checked' : '') + '>' + o + '</label>';
+        }).join('') + '</div></div>' +
+        '<div class="field"><label class="lbl" for="r-now">How do you do it now?</label><textarea class="fi" id="r-now" rows="2" style="min-height:72px" placeholder="e.g. I export a CSV and check it in a spreadsheet">' + esc(R.now) + '</textarea></div>' +
+        '<div class="field"><label class="lbl" for="r-hours">Hours a month this takes you</label><input class="fi" id="r-hours" type="number" min="0" style="max-width:160px" value="' + esc(R.hours) + '" placeholder="e.g. 6"></div>' : '') +
+      '</div><div class="m-f"><span class="nextline"><span class="mi">schedule</span>The Synder team replies within 2 business days. It\'s free.</span><span class="sp"></span><button class="bx bx-primary" data-act="send-req">Submit</button></div>';
   }
 
   /* ================= Events ================= */
   document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('[data-act],[data-copy],.vbar .tab,.dr-tab');
+    var t = ev.target.closest('[data-act],[data-copy],.vbar .tab');
     if (!t) return;
     if (t.dataset.copy) { copy(COPY[t.dataset.copy]); return; }
     if (t.classList.contains('tab') && t.dataset.v) { S.v = t.dataset.v; history.replaceState(null, '', '#' + S.v); closeDrawer(); closeReq(); renderPage(); return; }
-    if (t.classList.contains('dr-tab')) { D.tab = t.dataset.tab; renderDrawer(); return; }
     switch (t.dataset.act) {
       case 'connect': openDrawer(); break;
       case 'tile': openDrawer({ app: t.dataset.app }); break;
       case 'job': openDrawer({ job: t.dataset.job }); break;
-      case 'open-list': openDrawer({ tab: 'list' }); break;
+      case 'open-list': openDrawer({ view: 'list' }); break;
       case 'close-drawer': closeDrawer(); renderPage(); break;
       case 'pick-app': pickApp(t.dataset.app); renderDrawer(); break;
-      case 'set-tool': D.app = t.dataset.app; D.name = APPS[D.app].name + ' on my laptop'; renderDrawer(); break;
       case 'back-app': D.step = 'app'; D.app = null; D.nameErr = D.permErr = false; renderDrawer(); break;
+      case 'show-access': D.name = $('tok-name').value; D.showAccess = true; renderDrawer(); break;
       case 'gen':
         D.name = $('tok-name').value; D.nameErr = !D.name.trim();
         D.permErr = D.preset === 'custom' && !Object.keys(D.custom).some(function (k) { return D.custom[k]; });
@@ -798,7 +788,7 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
       case 'check':
         D.verify = 'checking'; renderDrawer();
         setTimeout(function () { D.verify = 'done'; addConnection(); renderDrawer(); renderPage(); }, 1300); break;
-      case 'go-list': D.tab = 'list'; renderDrawer(); break;
+      case 'go-list': D.view = 'list'; renderDrawer(); break;
       case 'go-connect': D = freshDrawer(); renderDrawer(); break;
       case 'revoke': D.confirm = +t.dataset.id; renderDrawer(); break;
       case 'revoke-no': D.confirm = null; renderDrawer(); break;
@@ -808,10 +798,10 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
       case 'request': openReq(); break;
       case 'close-req': closeReq(); break;
       case 'quick': R.what = QUICK[+t.dataset.i][1]; renderReq(); break;
-      case 'toggle-ex': R.ex = !R.ex; renderReq(); break;
+      case 'toggle-more': R.more = !R.more; renderReq(); break;
       case 'send-req':
         R.tried = true;
-        if (reqErrors().what) { renderReq(); $('r-what').focus(); return; }
+        if (!R.what.trim()) { renderReq(); $('r-what').focus(); return; }
         R.sent = true; renderReq(); break;
       case 'req-connect': closeReq(); openDrawer(); break;
     }
@@ -820,10 +810,7 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     var el = ev.target;
     if (el.id === 'tok-name') { D.name = el.value; if (D.nameErr && el.value.trim()) { D.nameErr = false; renderDrawer(); var n = $('tok-name'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
     if (!R) return;
-    if (el.id === 'r-what') {
-      R.what = el.value; $('r-count').textContent = R.what.length + ' characters';
-      if (R.tried && el.value.trim() && el.classList.contains('bad')) { renderReq(); var w = $('r-what'); w.focus(); w.setSelectionRange(w.value.length, w.value.length); }
-    }
+    if (el.id === 'r-what') { R.what = el.value; if (R.tried && el.value.trim() && el.classList.contains('bad')) { renderReq(); var w = $('r-what'); w.focus(); w.setSelectionRange(w.value.length, w.value.length); } }
     if (el.id === 'r-now') R.now = el.value;
     if (el.id === 'r-hours') R.hours = el.value;
   });
@@ -836,7 +823,6 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { if ($('mbg').classList.contains('show')) closeReq(); else closeDrawer(); } });
   $('mbg').addEventListener('click', function (ev) { if (ev.target === $('mbg')) closeReq(); });
 
-  $('h-spark').innerHTML = spark('#fff', 16);
   var h = (location.hash || '#A').slice(1).toUpperCase();
   S.v = 'ABC'.indexOf(h) >= 0 && h.length === 1 ? h : 'A';
   renderPage();
