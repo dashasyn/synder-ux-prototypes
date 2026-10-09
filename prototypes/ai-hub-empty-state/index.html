@@ -374,13 +374,6 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
 .tiles4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:8px 0 28px; }
 .tiles4 .tile { min-height:0; padding:24px 12px 20px; align-items:center; text-align:center; gap:12px; }
 .tiles4 .tile .t { font-size:15px; }
-.jobs3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:8px 0 28px; text-align:left; }
-.jcard { position:relative; background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; cursor:pointer; display:flex; flex-direction:column; gap:8px; box-shadow:var(--sh1); font-family:inherit; color:inherit; text-align:left; transition:transform .2s ease, box-shadow .2s ease, border-color .2s; }
-.jcard:hover { transform:translateY(-2px); box-shadow:var(--sh3); border-color:var(--line2); }
-.jcard .ic { width:40px; height:40px; border-radius:12px; background:var(--ai-soft); color:#5B47E0; display:flex; align-items:center; justify-content:center; margin-bottom:6px; }
-.jcard .t { font-weight:650; font-size:16px; letter-spacing:-.01em; }
-.jcard .d { color:var(--mut); }
-.jcard .badge { position:absolute; top:18px; right:18px; }
 .es-c.wide { max-width:900px; }
 .qlink { color:var(--mut); }
 .dr-h2 { display:flex; align-items:center; gap:6px; padding:18px 16px 16px 24px; border-bottom:1px solid var(--line); position:relative; }
@@ -404,7 +397,17 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
 .details-t:hover { color:var(--ink); }
 .nextline { display:flex; align-items:center; gap:8px; color:var(--mut); }
 .nextline .mi { font-size:18px; color:#5B47E0; }
-@media (max-width:1180px) { .a2 { grid-template-columns:1fr; } .tiles4 { grid-template-columns:repeat(2,1fr); } .jobs3 { grid-template-columns:1fr; } }
+@media (max-width:1180px) { .a2 { grid-template-columns:1fr; } .tiles4 { grid-template-columns:repeat(2,1fr); } }
+.rot { display:grid; }
+.rot .ex1 { grid-area:1/1; display:flex; flex-direction:column; gap:12px; opacity:0; transition:opacity .9s ease; pointer-events:none; }
+.rot .ex1.on { opacity:1; pointer-events:auto; }
+.rot.static { gap:16px; }
+.rot.static .ex1 { grid-area:auto; opacity:1; }
+.rot.static .ex1 + .ex1 { padding-top:16px; border-top:1px solid var(--line); }
+.dchip.ok { background:#EEFBF2; border-color:#C9F0D6; color:#15803D; font-family:inherit; }
+.tiles4.t5 { grid-template-columns:repeat(5,1fr); }
+@media (max-width:1180px) { .tiles4.t5 { grid-template-columns:repeat(3,1fr); } }
+@media (prefers-reduced-motion: reduce) { .rot .ex1 { grid-area:auto; opacity:1; } .rot { gap:16px; } }
 </style>
 </head>
 <body>
@@ -414,7 +417,6 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   <div class="tabs" role="tablist">
     <button class="tab" data-v="A" role="tab">A · Show what it does</button>
     <button class="tab" data-v="B" role="tab">B · Pick your app</button>
-    <button class="tab" data-v="C" role="tab">C · Start from the job</button>
   </div>
 </div>
 
@@ -552,35 +554,39 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     $('conn-count').textContent = 'Your connections' + (n ? ' (' + n + ')' : '');
     var h;
     if (S.v === 'A') {
+      var EX = [
+        ['Map Stripe fees to the Bank Fees account.', 'Done. New Stripe fees will post to Bank Fees.', '<span class="dchip ok">Settings updated</span>'],
+        ['Create a smart rule: Shopify refunds go to Returns.', 'Rule created. Enable it to apply it to new transactions.', '<span class="dchip">Smart rule · Off</span>'],
+        ['Run a reconciliation for September.', 'Done. 1,284 matched, 3 need a look.', '<span class="dchip amt">3 unmatched</span>'],
+        ['Why did yesterday\'s Stripe payout fail?', 'The "Stripe Clearing" account is inactive in QuickBooks.', '<span class="dchip err">Account inactive</span>']
+      ];
       h = '<div class="es a2"><div>' +
-          '<h2>Ask your <span class="g">AI assistant</span> about your syncs</h2>' +
-          '<p class="lead">Connect Claude, ChatGPT or another assistant to check syncs and explain failures.</p>' +
+          '<h2>Let your <span class="g">AI assistant</span> work in your books</h2>' +
+          '<p class="lead">It can change settings, build Smart Rules, run syncs and reconciliations, and read reports.</p>' +
           '<div class="acts">' + CTA('data-act="connect"', null, true) + '<button class="linkbtn" data-act="request">Request an agent</button></div>' + TL +
         '</div>' +
-        '<div class="mini"><span class="chat-ex">Example</span>' +
-          '<div class="bub-u">Why did 3 Stripe payouts fail yesterday?</div>' +
-          '<div class="row-a"><span class="av">' + spark() + '</span><div class="bub-a">Two failed because the deposit account "Stripe Clearing" is inactive in QuickBooks. One has no fee product mapped.' +
-            '<div class="chips2"><span class="dchip amt">$1,852.50</span><span class="dchip err">Account inactive</span></div></div></div>' +
-        '</div></div>';
-    } else if (S.v === 'B') {
-      h = '<div class="es es-c wide"><h2>Which AI assistant do you use?</h2>' +
-        '<p class="lead">Connect it to Synder to check syncs and explain failures.</p>' +
-        '<div class="tiles4">' + [['claude', 'Claude'], ['chatgpt', 'ChatGPT'], ['cursor', 'Cursor'], ['other', 'Other']].map(function (t) {
+        '<div class="mini"><span class="chat-ex">Example</span><div class="rot" id="rot">' + EX.map(function (e, i) {
+          return '<div class="ex1' + (i === 0 ? ' on' : '') + '"><div class="bub-u">' + e[0] + '</div><div class="row-a"><span class="av">' + spark() + '</span><div class="bub-a">' + e[1] + '<div class="chips2">' + e[2] + '</div></div></div></div>';
+        }).join('') + '</div></div></div>';
+    } else {
+      var T = [['claude', 'Claude'], ['chatgpt', 'ChatGPT'], ['claudecode', 'Claude Code'], ['cursor', 'Cursor'], ['other', 'Other']];
+      h = '<div class="es es-c wide"><h2>Connect your AI assistant to handle settings, rules, syncs and reconciliation</h2>' +
+        '<p class="lead">Pick your app and we\'ll show you how to connect it.</p>' +
+        '<div class="tiles4 t5">' + T.map(function (t) {
           return '<button class="tile" data-act="' + (t[0] === 'other' ? 'connect' : 'tile') + '" data-app="' + t[0] + '">' + mark(t[0], 48) + '<div class="t">' + t[1] + '</div></button>';
         }).join('') + '</div>' +
         '<div class="qlink">Don\'t use an AI assistant? <button class="linkbtn" data-act="request">Request an agent</button></div></div>';
-    } else {
-      var jobs = [['explain', 'error_outline', 'Explain failed syncs', 'Find out why something didn\'t sync.', ''],
-        ['fix', 'tune', 'Fix a setting and resync', 'Change a setting, then re-sync.', '<span class="badge change">Changes books</span>'],
-        ['recon', 'fact_check', 'Check this month\'s reconciliation', 'See what doesn\'t match yet.', '']];
-      h = '<div class="es es-c wide"><h2>What should your assistant do first?</h2>' +
-        '<p class="lead">Pick a job, then connect the AI assistant you already use.</p>' +
-        '<div class="jobs3">' + jobs.map(function (j) {
-          return '<button class="jcard" data-act="job" data-job="' + j[0] + '">' + j[4] + '<span class="ic"><span class="mi">' + j[1] + '</span></span><span class="t">' + j[2] + '</span><span class="d">' + j[3] + '</span></button>';
-        }).join('') + '</div>' +
-        '<div class="acts">' + CTA('data-act="connect"') + '<button class="linkbtn" data-act="request">Request an agent</button></div></div>';
     }
     $('view').innerHTML = h;
+    startRot();
+  }
+  var rotT = null;
+  function startRot() {
+    clearInterval(rotT); rotT = null;
+    var r = $('rot'); if (!r) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { r.classList.add('static'); return; }
+    var i = 0, items = r.children;
+    rotT = setInterval(function () { if (!document.body.contains(r)) { clearInterval(rotT); return; } items[i].classList.remove('on'); i = (i + 1) % items.length; items[i].classList.add('on'); }, 4000);
   }
 
   /* ================= Connect panel ================= */
@@ -772,7 +778,6 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
     switch (t.dataset.act) {
       case 'connect': openDrawer(); break;
       case 'tile': openDrawer({ app: t.dataset.app }); break;
-      case 'job': openDrawer({ job: t.dataset.job }); break;
       case 'open-list': openDrawer({ view: 'list' }); break;
       case 'close-drawer': closeDrawer(); renderPage(); break;
       case 'pick-app': pickApp(t.dataset.app); renderDrawer(); break;
@@ -824,7 +829,7 @@ textarea.fi { height:auto; padding:12px 14px; line-height:22px; resize:vertical;
   $('mbg').addEventListener('click', function (ev) { if (ev.target === $('mbg')) closeReq(); });
 
   var h = (location.hash || '#A').slice(1).toUpperCase();
-  S.v = 'ABC'.indexOf(h) >= 0 && h.length === 1 ? h : 'A';
+  S.v = 'AB'.indexOf(h) >= 0 && h.length === 1 ? h : 'A';
   renderPage();
 })();
 </script>
