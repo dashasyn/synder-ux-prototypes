@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Hub empty state — Synder prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css">
+<style>
+:root { --p:#0053CC; --p10:#E0EBFD; --p5:#F2F6FC; --g5:#F7F8FA; --g10:#EFF1F5; --g20:#DFE4EC; --g50:#6B778C; --ink:#1A1B24;
+  --green:#1F8940; --green-l:#ECFDDC; --red:#CC2929; --red-l:#FFECE8; --yellow:#CB7515; --yellow-l:#FFF1DD; }
+* { box-sizing: border-box; }
+body { margin:0; background:#F7F8FA; color:var(--ink); font-family:'Roboto',-apple-system,sans-serif; font-size:14px; line-height:20px; }
+button { font-family:inherit; font-size:14px; }
+.mi { font-family:'Material Icons Outlined'; font-weight:normal; font-style:normal; font-size:20px; line-height:1; display:inline-block; vertical-align:middle; font-feature-settings:'liga'; -webkit-font-feature-settings:'liga'; }
+.hidden { display:none !important; }
+a { color:var(--p); }
+
+/* ---- Prototype variant bar ---- */
+.vbar { position:sticky; top:0; z-index:60; background:#111827; color:#F9FAFB; display:flex; align-items:center; gap:16px; padding:8px 20px; flex-wrap:wrap; }
+.vbar .brand { font-weight:600; font-size:14px; white-space:nowrap; opacity:.9; }
+.vbar .tabs { display:flex; gap:4px; flex-wrap:wrap; border:0; padding:0; margin:0; }
+.vbar .tab { background:transparent; border:1px solid transparent; color:#9CA3AF; padding:6px 12px; margin:0; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; }
+.vbar .tab:hover { color:#fff; background:rgba(255,255,255,.06); }
+.vbar .tab.active { background:#0053CC; color:#fff; border-color:#0053CC; }
+
+/* ---- Product chrome ---- */
+.app { display:flex; min-height:calc(100vh - 48px); }
+.sb { width:230px; flex-shrink:0; background:#fff; border-right:1px solid var(--g20); display:flex; flex-direction:column; }
+.sb-logo { height:56px; display:flex; align-items:center; gap:8px; padding:0 16px; font-weight:700; font-size:18px; color:var(--p); border-bottom:1px solid var(--g20); }
+.sb-logo .dot { width:26px; height:26px; border-radius:6px; background:var(--p); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; }
+.sb-nav { padding:8px 0; flex:1; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:14px; color:#2F303A; cursor:default; }
+.sb-item .mi { font-size:20px; color:var(--g50); }
+.sb-item.active { background:#3478F6; color:#fff; }
+.sb-item.active .mi { color:#fff; }
+.sb-badge { margin-left:auto; background:#D6EBFF; color:#3C4EAC; border-radius:4px; padding:0 6px; font-size:14px; }
+.sb-div { height:1px; background:var(--g20); margin:6px 16px; }
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.tb { height:56px; background:#fff; border-bottom:1px solid var(--g20); display:flex; align-items:center; gap:20px; padding:0 24px; }
+.tb .org { display:flex; align-items:center; gap:8px; font-weight:500; }
+.tb .org-av { width:28px; height:28px; border-radius:50%; background:#D64273; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.tb .sp { flex:1; }
+.tb .syncs { color:var(--g50); } .tb .syncs b { color:var(--p); }
+.tb .how { color:var(--p); display:flex; align-items:center; gap:4px; }
+.tb .mi { color:var(--g50); }
+.page { padding:24px 32px 64px; max-width:1080px; width:100%; }
+.ph { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.ph h1 { font-size:28px; line-height:36px; font-weight:400; margin:0; }
+.ph .sub { color:var(--g50); margin-top:2px; }
+
+/* ---- Shared bits ---- */
+.card { background:#fff; border:1px solid var(--g20); border-radius:8px; box-shadow:none; padding:0; }
+.muted { color:var(--g50); }
+.pill { display:inline-flex; align-items:center; gap:4px; border-radius:4px; padding:0 8px; height:24px; font-size:14px; white-space:nowrap; }
+.pill.blue { background:#D6EBFF; color:#3C4EAC; } .pill.green { background:#DDF5C7; color:var(--green); }
+.pill.yellow { background:#FFE8C7; color:#9A5A0E; } .pill.grey { background:var(--g10); color:var(--g50); } .pill.red { background:#FFDFD8; color:var(--red); }
+.logo { width:28px; height:28px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; flex-shrink:0; }
+.logo.claude { background:#D97757; } .logo.chatgpt { background:#10A37F; } .logo.cursor { background:#1A1B24; } .logo.claudecode { background:#B4532A; } .logo.other { background:var(--g50); }
+.apps-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; color:var(--g50); }
+.apps-row span.a { display:inline-flex; align-items:center; gap:6px; color:var(--ink); }
+.apps-row .logo { width:22px; height:22px; border-radius:5px; font-size:14px; }
+.trust { display:flex; gap:16px; flex-wrap:wrap; color:var(--g50); }
+.trust span { display:inline-flex; align-items:center; gap:4px; } .trust .mi { font-size:18px; color:var(--green); }
+.linkbtn { background:none; border:none; padding:0; color:var(--p); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+.linkbtn:hover { color:var(--ink); }
+.btn .mi, .btn-outlined .mi, .btn-text .mi { font-size:18px; }
+.btn-lg { height:40px; padding:8px 20px; font-size:15px; }
+
+/* chat sample */
+.chat { background:var(--g5); border:1px solid var(--g20); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.chat .ex { display:flex; align-items:center; gap:6px; color:var(--g50); }
+.msg { max-width:92%; padding:10px 14px; border-radius:12px; }
+.msg.u { align-self:flex-end; background:var(--p); color:#fff; border-bottom-right-radius:4px; }
+.msg.a { align-self:flex-start; background:#fff; border:1px solid var(--g20); border-bottom-left-radius:4px; }
+.msg.a ul { margin:6px 0; padding-left:18px; } .msg.a li { margin:4px 0; }
+.msg .who { font-weight:500; display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.mono { font-family:'Roboto Mono',monospace; font-size:14px; }
+
+/* Variant A */
+.a-hero { display:grid; grid-template-columns: 1fr 1.1fr; gap:32px; padding:32px; align-items:center; }
+.a-hero h2 { font-size:22px; line-height:30px; font-weight:500; margin:0 0 8px; }
+.a-hero p { margin:0 0 20px; color:#3D4450; }
+.a-cta { display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
+.a-foot { margin-top:16px; text-align:center; color:var(--g50); }
+
+/* Variant B */
+.b-sec h2 { font-size:18px; font-weight:500; margin:0 0 4px; }
+.b-tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+.tile { background:#fff; border:1px solid var(--g20); border-radius:8px; padding:16px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:10px; transition:border-color .15s, box-shadow .15s; }
+.tile:hover { border-color:var(--p); box-shadow:0 2px 8px rgba(0,83,204,.08); }
+.tile .t { font-weight:500; font-size:15px; } .tile .d { color:var(--g50); }
+.tile .go { color:var(--p); display:flex; align-items:center; gap:4px; margin-top:auto; }
+.b-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+.b-ask { padding:20px; } .b-ask h3, .b-prev h3 { font-size:15px; font-weight:500; margin:0 0 12px; }
+.ask-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--g20); border-radius:6px; margin-bottom:8px; background:#fff; }
+.ask-item .mi { color:var(--p); font-size:18px; } .ask-item .q { flex:1; }
+.b-prev { padding:20px; }
+.quiet { margin-top:24px; padding:16px 20px; background:var(--g5); border:1px dashed var(--g20); border-radius:8px; display:flex; align-items:center; gap:16px; }
+.quiet .txt { flex:1; } .quiet b { font-weight:500; }
+
+/* Variant C */
+.c-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+.job { padding:20px; display:flex; flex-direction:column; gap:10px; }
+.job .ic { width:40px; height:40px; border-radius:8px; background:var(--p10); color:var(--p); display:flex; align-items:center; justify-content:center; }
+.job h3 { font-size:16px; font-weight:500; margin:0; }
+.job .ex { color:var(--g50); font-style:italic; }
+.job .act { margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-top:6px; }
+.job.other { background:var(--g5); border-style:dashed; }
+.job.other .ic { background:#fff; color:var(--g50); border:1px solid var(--g20); }
+.c-foot { margin-top:16px; }
+
+.conn-banner { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:6px; background:var(--green-l); color:#14532D; margin-bottom:16px; }
+.conn-banner .mi { color:var(--green); } .conn-banner .sp { flex:1; }
+
+/* ---- Drawer (connect) ---- */
+.scrim { position:fixed; inset:0; background:rgba(26,27,36,.45); z-index:80; display:none; }
+.scrim.show { display:block; }
+.drawer { position:fixed; top:0; right:0; bottom:0; width:600px; max-width:100%; background:#fff; z-index:90; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s ease; box-shadow:-4px 0 16px rgba(0,0,0,.08); }
+.drawer.show { transform:none; }
+.dr-h { padding:16px 24px 0; border-bottom:1px solid var(--g20); }
+.dr-top { display:flex; align-items:center; gap:10px; }
+.dr-top h2 { font-size:20px; font-weight:500; margin:0; flex:1; display:flex; align-items:center; gap:8px; }
+.xbtn { width:36px; height:36px; border:none; background:none; border-radius:4px; cursor:pointer; color:var(--g50); }
+.xbtn:hover { background:var(--g10); }
+.dr-tabs { display:flex; gap:0; margin-top:10px; }
+.dr-tab { background:none; border:none; border-bottom:2px solid transparent; padding:10px 14px; color:var(--g50); cursor:pointer; margin-bottom:-1px; }
+.dr-tab.active { color:var(--p); border-bottom-color:var(--p); font-weight:500; }
+.dr-b { flex:1; overflow-y:auto; padding:20px 24px 24px; }
+.dr-f { padding:12px 24px; border-top:1px solid var(--g20); display:flex; align-items:center; gap:8px; }
+.dr-f .sp { flex:1; }
+.beta { padding:10px 24px; background:var(--g5); border-top:1px solid var(--g20); color:var(--g50); }
+.ctx { display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--p5); border:1px solid #CCDDF5; border-radius:6px; margin-bottom:16px; }
+.ctx .mi { color:var(--p); }
+.back { background:none; border:none; color:var(--p); padding:0; cursor:pointer; display:inline-flex; align-items:center; gap:2px; margin-bottom:12px; }
+.q-title { font-size:16px; font-weight:500; margin:0 0 12px; }
+.app-list { display:flex; flex-direction:column; gap:8px; }
+.app-opt { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--g20); border-radius:8px; background:#fff; cursor:pointer; text-align:left; }
+.app-opt:hover { border-color:var(--p); background:var(--p5); }
+.app-opt .n { font-weight:500; } .app-opt .d { color:var(--g50); } .app-opt .grow { flex:1; }
+.app-opt .mi.chev { color:var(--g50); }
+.grp-label { color:var(--g50); margin:12px 0 6px; }
+.steps { list-style:none; margin:0; padding:0; counter-reset:s; }
+.steps li { counter-increment:s; position:relative; padding:0 0 18px 40px; }
+.steps li::before { content:counter(s); position:absolute; left:0; top:-2px; width:26px; height:26px; border-radius:50%; background:var(--p10); color:var(--p); font-weight:500; display:flex; align-items:center; justify-content:center; }
+.steps li:not(:last-child)::after { content:''; position:absolute; left:12.5px; top:28px; bottom:4px; width:1px; background:var(--g20); }
+.kbd { background:var(--g10); border:1px solid var(--g20); border-radius:4px; padding:0 6px; font-weight:500; white-space:nowrap; }
+.copyrow { display:flex; gap:8px; margin-top:8px; }
+.ro { flex:1; height:36px; display:flex; align-items:center; padding:0 10px; background:var(--g5); border:1px solid var(--g20); border-radius:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; user-select:all; }
+.note { display:flex; gap:10px; padding:12px 14px; border-radius:6px; background:var(--p5); color:#1F2D4D; margin-top:8px; }
+.note .mi { color:var(--p); font-size:20px; }
+.warn { display:flex; gap:10px; padding:12px 14px; border-radius:6px; background:var(--yellow-l); color:#5C3608; margin-top:10px; }
+.warn .mi { color:var(--yellow); font-size:20px; }
+.ok { display:flex; gap:10px; padding:12px 14px; border-radius:6px; background:var(--green-l); color:#14532D; }
+.ok .mi { color:var(--green); }
+.field { margin-bottom:16px; }
+.lbl { display:block; font-weight:500; margin-bottom:6px; }
+.req::after { content:' *'; color:var(--red); }
+.opt { color:var(--g50); font-weight:400; }
+.hint { color:var(--g50); margin-top:4px; }
+.err { color:var(--red); margin-top:4px; display:flex; align-items:center; gap:4px; }
+.err .mi { font-size:16px; }
+.input.bad, .textarea.bad { border-color:var(--red) !important; }
+.input, .textarea { font-size:14px; }
+.input { height:36px; }
+.presets { display:flex; flex-direction:column; gap:8px; }
+.preset { display:flex; gap:10px; padding:12px 14px; border:1px solid var(--g20); border-radius:8px; cursor:pointer; }
+.preset.on { border-color:var(--p); background:var(--p5); }
+.preset input { margin-top:3px; accent-color:var(--p); }
+.preset .n { font-weight:500; } .preset .d { color:var(--g50); }
+.perm { border:1px solid var(--g20); border-radius:8px; margin-top:10px; }
+.perm-g { display:grid; grid-template-columns:150px 1fr; gap:8px; padding:10px 14px; border-bottom:1px solid var(--g10); }
+.perm-g:last-child { border-bottom:none; }
+.perm-g .gn { font-weight:500; padding-top:2px; }
+.perm-g .opts { display:flex; flex-direction:column; gap:6px; }
+.perm-g label { display:flex; gap:8px; align-items:flex-start; cursor:pointer; }
+.perm-g input { margin-top:3px; accent-color:var(--p); }
+.perm-g .sd { color:var(--g50); }
+.perm-g .sd.danger { color:var(--red); }
+.seg { display:inline-flex; border:1px solid var(--g20); border-radius:6px; overflow:hidden; margin-bottom:16px; }
+.seg button { border:none; background:#fff; padding:6px 14px; cursor:pointer; color:var(--g50); border-right:1px solid var(--g20); }
+.seg button:last-child { border-right:none; }
+.seg button.on { background:var(--p10); color:var(--p); font-weight:500; }
+.code { position:relative; background:#111827; color:#E5E7EB; border-radius:6px; padding:12px 14px; padding-right:84px; white-space:pre-wrap; word-break:break-all; margin-top:8px; }
+.code .cp { position:absolute; top:8px; right:8px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff; border-radius:4px; padding:3px 10px; cursor:pointer; }
+.code .cp:hover { background:rgba(255,255,255,.2); }
+.h3 { font-size:15px; font-weight:500; margin:20px 0 4px; }
+.verify-q { display:flex; align-items:center; gap:10px; padding:14px; border:1px solid var(--g20); border-radius:8px; margin:10px 0 16px; font-size:16px; }
+.verify-q .mi { color:var(--p); }
+.spin { width:18px; height:18px; border:2px solid var(--g20); border-top-color:var(--p); border-radius:50%; animation:sp 0.8s linear infinite; display:inline-block; }
+@keyframes sp { to { transform:rotate(360deg); } }
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th { text-align:left; font-weight:500; color:#707070; padding:8px; border-bottom:1px solid var(--g20); white-space:nowrap; }
+.tbl td { padding:10px 8px; border-bottom:1px solid var(--g20); vertical-align:top; }
+.tbl tr.revoked td { color:var(--g50); }
+.confirm-row td { background:var(--red-l); }
+.empty { text-align:center; padding:40px 16px; }
+.empty .mi.big { font-size:40px; color:#B4BBCB; }
+.empty h3 { font-size:16px; font-weight:500; margin:8px 0 4px; }
+.empty p { color:var(--g50); margin:0 0 16px; }
+
+/* ---- Modal (request) ---- */
+.mbg { position:fixed; inset:0; background:rgba(26,27,36,.45); z-index:100; display:none; align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; }
+.mbg.show { display:flex; }
+.mbox { background:#fff; border-radius:8px; width:640px; max-width:100%; box-shadow:0 4px 8px 3px rgba(60,64,67,.15); }
+.m-h { display:flex; align-items:center; padding:14px 16px 14px 24px; border-bottom:1px solid var(--g20); }
+.m-h h2 { flex:1; margin:0; font-size:20px; font-weight:500; }
+.m-b { padding:20px 24px; }
+.m-f { padding:12px 24px; border-top:1px solid var(--g20); display:flex; gap:8px; align-items:center; }
+.m-f .sp { flex:1; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.chipq { border:1px solid var(--g20); background:#fff; border-radius:16px; padding:4px 12px; cursor:pointer; color:#3D4450; }
+.chipq:hover { border-color:var(--p); color:var(--p); }
+.radios { display:flex; gap:8px; flex-wrap:wrap; }
+.radios label { border:1px solid var(--g20); border-radius:6px; padding:6px 12px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+.radios label.on { border-color:var(--p); background:var(--p5); color:var(--p); }
+.radios input { display:none; }
+.radios.bad label { border-color:var(--red); }
+.exbox { background:var(--g5); border-radius:6px; padding:10px 12px; margin-top:6px; color:#3D4450; }
+.next { background:var(--g5); border:1px solid var(--g20); border-radius:8px; padding:14px 16px; }
+.next h4 { margin:0 0 6px; font-size:14px; font-weight:500; }
+.next ul { margin:0; padding-left:18px; } .next li { margin:2px 0; }
+.success { text-align:center; padding:12px 8px 4px; }
+.success .big { font-size:48px; color:var(--green); }
+.success h3 { font-size:20px; font-weight:500; margin:8px 0 4px; }
+.meanwhile { margin-top:20px; text-align:left; display:flex; gap:14px; align-items:center; padding:16px; border:1px solid var(--g20); border-radius:8px; }
+.meanwhile .txt { flex:1; }
+.counter { color:var(--g50); text-align:right; margin-top:4px; }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1A1B24; color:#fff; padding:10px 16px; border-radius:6px; z-index:200; opacity:0; transition:opacity .2s; pointer-events:none; }
+.toast.show { opacity:1; }
+@media (max-width:1100px) { .b-tiles { grid-template-columns:repeat(2,1fr); } .a-hero { grid-template-columns:1fr; } .b-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="vbar">
+  <div class="brand">AI Hub empty state</div>
+  <div class="tabs" role="tablist">
+    <button class="tab" data-v="A" role="tab">A · Show what it does</button>
+    <button class="tab" data-v="B" role="tab">B · Pick your app</button>
+    <button class="tab" data-v="C" role="tab">C · Start from the job</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sb">
+    <div class="sb-logo"><span class="dot">S</span>Synder</div>
+    <nav class="sb-nav">
+      <div class="sb-item"><span class="mi">dashboard</span>Dashboard</div>
+      <div class="sb-item"><span class="mi">sync_alt</span>Transactions</div>
+      <div class="sb-item"><span class="mi">inventory_2</span>Inventory sync<span class="sb-badge">Beta</span></div>
+      <div class="sb-item"><span class="mi">rule</span>Smart rules</div>
+      <div class="sb-item"><span class="mi">request_quote</span>Invoicing</div>
+      <div class="sb-item"><span class="mi">bar_chart</span>Analytics</div>
+      <div class="sb-item"><span class="mi">event_repeat</span>Revenue recognition</div>
+      <div class="sb-item"><span class="mi">settings</span>Settings</div>
+      <div class="sb-item active"><span class="mi">auto_awesome</span>AI Hub</div>
+      <div class="sb-div"></div>
+      <div class="sb-item"><span class="mi">campaign</span>What's New</div>
+      <div class="sb-item"><span class="mi">code</span>Custom development</div>
+    </nav>
+  </aside>
+  <div class="main">
+    <div class="tb">
+      <div class="org"><span class="org-av">PT</span>Per transaction test dasha<span class="mi">expand_more</span></div>
+      <div class="sp"></div>
+      <div class="syncs">Syncs left: <b>1000</b></div>
+      <div class="how"><span class="mi" style="color:#0053CC;font-size:18px">help_outline</span>How it works?</div>
+      <span class="mi" aria-label="Notifications">notifications_none</span>
+    </div>
+    <div class="page">
+      <div class="ph">
+        <div>
+          <h1>AI Hub</h1>
+          <div class="sub">Use your AI assistant with your Synder data, or ask us to build an agent for you.</div>
+        </div>
+        <button class="btn-outlined" data-act="open-list"><span class="mi">link</span><span id="conn-count">Your connections</span></button>
+      </div>
+      <div id="banner"></div>
+      <div id="view"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Connect drawer -->
+<div class="scrim" id="scrim" data-act="close-drawer"></div>
+<aside class="drawer" id="drawer" aria-label="Connect your AI assistant">
+  <div class="dr-h">
+    <div class="dr-top">
+      <h2>Connect your AI assistant <span class="pill blue">Beta</span></h2>
+      <button class="xbtn" data-act="close-drawer" aria-label="Close"><span class="mi">close</span></button>
+    </div>
+    <div class="dr-tabs">
+      <button class="dr-tab" data-tab="connect">Connect</button>
+      <button class="dr-tab" data-tab="list" id="tab-list">Your connections</button>
+    </div>
+  </div>
+  <div class="dr-b" id="dr-body"></div>
+  <div class="dr-f" id="dr-foot"></div>
+  <div class="beta"><b style="font-weight:500">Beta:</b> it works today, and the tools and steps may still change. <a href="https://synder.com/help" target="_blank" rel="noopener noreferrer">Read the help guide</a></div>
+</aside>
+
+<!-- Request modal -->
+<div class="mbg" id="mbg">
+  <div class="mbox" role="dialog" aria-labelledby="req-title">
+    <div class="m-h"><h2 id="req-title">Request an agent</h2><button class="xbtn" data-act="close-req" aria-label="Close"><span class="mi">close</span></button></div>
+    <div id="req-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var MCP = 'https://demo-mcp.synderapp.com/mcp';
+  var APPS = {
+    claude:     { name: 'Claude',      kind: 'oauth', short: 'C',  sub: 'Web, desktop or mobile app' },
+    chatgpt:    { name: 'ChatGPT',     kind: 'oauth', short: 'G',  sub: 'Web' },
+    claudecode: { name: 'Claude Code', kind: 'token', short: 'CC', sub: 'Terminal' },
+    cursor:     { name: 'Cursor',      kind: 'token', short: 'Cu', sub: 'Code editor' },
+    other:      { name: 'Other tool',  kind: 'token', short: '…',  sub: 'Any tool that supports MCP' }
+  };
+  var PERMS = [
+    ['settings', 'Settings', [['view', 'View'], ['change', 'Change', 'Changes integration settings', 1]]],
+    ['transactions', 'Transactions', [['view', 'View']]],
+    ['syncs', 'Syncs', [['view', 'View'], ['run', 'Run', 'Sends transactions to your books', 1], ['rollback', 'Roll back', 'Remove what a sync created from the books', 1]]],
+    ['imports', 'Imports', [['view', 'View'], ['run', 'Run', 'Uses your plan syncs', 1]]],
+    ['reports', 'Reports', [['view', 'View']]],
+    ['billing', 'Billing', [['view', 'View']]],
+    ['recon', 'Reconciliation', [['view', 'View'], ['run', 'Run', '', 1]]],
+    ['rules', 'Smart Rules', [['view', 'View'], ['change', 'Change', '', 1], ['enable', 'Enable', 'From then on it changes the books', 1]]],
+    ['firm', 'Accounting firm', [['view', 'View']]],
+    ['access', 'Access', [['view', 'View tokens']]]
+  ];
+  var JOBS = {
+    explain: { title: 'Explain failed syncs', access: 'read' },
+    fix:     { title: 'Fix a setting and resync', access: 'custom', custom: ['settings.view', 'settings.change', 'transactions.view', 'syncs.view', 'syncs.run'] },
+    recon:   { title: "Check this month's reconciliation", access: 'read' }
+  };
+  var SAMPLE_Q = 'Why did 3 Stripe payouts fail yesterday?';
+  var SAMPLE_A = '<div class="who"><span class="mi" style="font-size:18px;color:#0053CC">auto_awesome</span>Assistant</div>' +
+    '3 Stripe payouts from Oct 8 didn\'t sync to QuickBooks Online:<ul>' +
+    '<li><b style="font-weight:500">$1,240.50</b> and <b style="font-weight:500">$612.00</b>: the deposit account "Stripe Clearing" is inactive in QuickBooks.</li>' +
+    '<li><b style="font-weight:500">$86.20</b>: the fee line has no product mapped in your Stripe settings.</li></ul>' +
+    'Reactivate the account and map the fee product, and I can re-sync all three.';
+  function chat(compact) {
+    return '<div class="chat">' +
+      '<div class="ex"><span class="mi" style="font-size:18px">visibility</span>Example conversation. Answers depend on your data and the access you give.</div>' +
+      '<div class="msg u">' + SAMPLE_Q + '</div>' +
+      '<div class="msg a">' + SAMPLE_A + '</div>' +
+      (compact ? '' : '') + '</div>';
+  }
+
+  var S = { v: 'A', conns: [], seq: 1 };
+  var D; // drawer state
+  function freshDrawer() { return { tab: 'connect', step: 'app', app: null, job: null, preset: 'read', custom: {}, name: '', token: '', verify: 'idle', confirm: null, fromCombined: false }; }
+  D = freshDrawer();
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(function () { el.classList.remove('show'); }, 1600); }
+  function copy(text) {
+    function done() { toast('Copied'); }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+    function fallback() { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); done(); }
+  }
+  var COPY = {}; var cid = 0;
+  function copyBtn(text, cls) { var k = 'c' + (++cid); COPY[k] = text; return '<button class="' + (cls || 'btn-outlined') + '" data-copy="' + k + '"><span class="mi">content_copy</span>Copy</button>'; }
+  function logo(k, size) { var a = APPS[k]; return '<span class="logo ' + k + '"' + (size ? ' style="width:' + size + 'px;height:' + size + 'px"' : '') + '>' + a.short + '</span>'; }
+  function appsRow(label) {
+    return '<div class="apps-row">' + (label ? '<span>' + label + '</span>' : '') +
+      ['claude', 'chatgpt', 'cursor', 'claudecode'].map(function (k) { return '<span class="a">' + logo(k) + APPS[k].name + '</span>'; }).join('') + '</div>';
+  }
+  var TRUST = '<div class="trust"><span><span class="mi">visibility</span>Read only by default</span><span><span class="mi">block</span>Revoke anytime</span><span><span class="mi">lock</span>You choose what it can change</span></div>';
+  function active() { return S.conns.filter(function (c) { return c.status === 'Active'; }); }
+
+  /* ================= Page variants ================= */
+  function renderPage() {
+    document.querySelectorAll('.vbar .tab').forEach(function (b) { var on = b.dataset.v === S.v; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+    var n = active().length;
+    $('conn-count').textContent = 'Your connections' + (n ? ' (' + n + ')' : '');
+    $('banner').innerHTML = n ? '<div class="conn-banner"><span class="mi">check_circle</span><span class="sp">' + n + ' assistant' + (n > 1 ? 's' : '') + ' connected. Ask it about your syncs anytime.</span><button class="btn-text" data-act="open-list">Manage</button></div>' : '';
+    var h = '';
+    if (S.v === 'A') {
+      h = '<div class="card a-hero">' +
+        '<div class="a-cta">' +
+          '<div><h2>Ask your AI assistant about your syncs</h2>' +
+          '<p>Connect Claude, ChatGPT or another assistant to Synder. It can check syncs, explain failures, and, if you allow it, change integration settings and re-sync transactions.</p></div>' +
+          '<button class="btn btn-lg" data-act="connect"><span class="mi">add_link</span>Connect your AI assistant</button>' +
+          appsRow('Works with') + TRUST +
+        '</div>' +
+        '<div>' + chat() + '</div>' +
+      '</div>' +
+      '<div class="a-foot">Need something it can\'t do? <button class="linkbtn" data-act="request">Request an agent</button></div>';
+    } else if (S.v === 'B') {
+      var tiles = [['claude', 'Claude', 'Web, desktop or mobile. Sign in, no token.'], ['chatgpt', 'ChatGPT', 'Web. Sign in, no token.'], ['cursor', 'Cursor / Claude Code', 'Uses an access token you create here.'], ['other', 'Other', 'Any tool that supports MCP.']];
+      h = '<div class="b-sec"><h2>Connect your AI assistant</h2><div class="muted">Pick the app you use. You\'ll only see the steps for that app. ' + TRUST.replace('class="trust"', 'class="trust" style="margin-top:6px"') + '</div>' +
+        '<div class="b-tiles">' + tiles.map(function (t) {
+          var lg = t[0] === 'cursor' ? '<span style="display:flex;gap:4px">' + logo('cursor') + logo('claudecode') + '</span>' : logo(t[0]);
+          return '<button class="tile" data-act="tile" data-app="' + t[0] + '">' + lg + '<div class="t">' + t[1] + '</div><div class="d">' + t[2] + '</div><div class="go">Show steps<span class="mi" style="font-size:18px">arrow_forward</span></div></button>';
+        }).join('') + '</div></div>' +
+        '<div class="b-grid">' +
+          '<div class="card b-ask"><h3>Once connected, try asking</h3>' +
+            ['What synced yesterday?', SAMPLE_Q, 'Which transactions are waiting to sync?', 'Show my Stripe integration settings'].map(function (q) {
+              return '<div class="ask-item"><span class="mi">chat_bubble_outline</span><span class="q">' + q + '</span>' + copyBtn(q, 'btn-text') + '</div>';
+            }).join('') + '</div>' +
+          '<div class="card b-prev"><h3>What an answer looks like</h3>' + chat(true) + '</div>' +
+        '</div>' +
+        '<div class="quiet"><span class="mi" style="color:#6B778C">smart_toy</span><div class="txt"><b>Don\'t use an AI assistant?</b> Tell us what to automate and the Synder team will look into building an agent for you.</div><button class="btn-outlined" data-act="request">Request an agent</button></div>';
+    } else {
+      var jobs = [
+        ['explain', 'error_outline', 'Explain failed syncs', 'Find out why transactions didn\'t sync and what to fix.', '"Why did 3 Stripe payouts fail yesterday?"', '<span class="pill green"><span class="mi" style="font-size:16px">visibility</span>Read only</span>'],
+        ['fix', 'tune', 'Fix a setting and resync', 'Change an integration setting, then re-sync the affected transactions.', '"Map Stripe fees to Bank Charges and re-sync last week."', '<span class="pill yellow"><span class="mi" style="font-size:16px">edit</span>Needs permission to change</span>'],
+        ['recon', 'fact_check', 'Check this month\'s reconciliation', 'See what matches and what doesn\'t before you close the month.', '"What\'s unmatched in October so far?"', '<span class="pill green"><span class="mi" style="font-size:16px">visibility</span>Read only</span>']
+      ];
+      h = '<div class="muted" style="margin:-8px 0 16px">Pick a job. Your AI assistant does it with your Synder data.</div><div class="c-grid">' +
+        jobs.map(function (j) {
+          return '<div class="card job"><div class="ic"><span class="mi">' + j[1] + '</span></div><h3>' + j[2] + '</h3><div>' + j[3] + '</div><div class="ex">' + j[4] + '</div>' +
+            '<div class="act">' + j[5] + '<button class="btn" data-act="job" data-job="' + j[0] + '">Do it with your AI assistant</button></div></div>';
+        }).join('') +
+        '<div class="card job other"><div class="ic"><span class="mi">add</span></div><h3>Something else?</h3><div>Tell us what you want automated. The Synder team reviews every request.</div>' +
+          '<div class="act"><span></span><button class="btn-outlined" data-act="request">Request an agent</button></div></div>' +
+        '</div><div class="c-foot">' + appsRow('Works with') + '<div style="margin-top:8px">' + TRUST + '</div></div>';
+    }
+    $('view').innerHTML = h;
+  }
+
+  /* ================= Connect drawer ================= */
+  function openDrawer(opts) {
+    D = freshDrawer();
+    opts = opts || {};
+    if (opts.tab) D.tab = opts.tab;
+    if (opts.job) { D.job = opts.job; D.preset = JOBS[opts.job].access; if (JOBS[opts.job].custom) JOBS[opts.job].custom.forEach(function (k) { D.custom[k] = true; }); }
+    if (opts.app) { pickApp(opts.app); if (opts.app === 'cursor') D.fromCombined = true; }
+    $('scrim').classList.add('show'); $('drawer').classList.add('show');
+    renderDrawer();
+  }
+  function closeDrawer() { $('scrim').classList.remove('show'); $('drawer').classList.remove('show'); }
+  function pickApp(k) {
+    D.app = k; D.step = APPS[k].kind === 'oauth' ? 'oauth' : 'token';
+    D.name = k === 'other' ? 'My MCP tool' : APPS[k].name + ' on my laptop';
+  }
+  function presetSummary() {
+    if (D.preset === 'read') return 'Read only';
+    if (D.preset === 'full') return 'Full access';
+    var n = Object.keys(D.custom).filter(function (k) { return D.custom[k]; }).length;
+    return 'Custom (' + n + ' permission' + (n === 1 ? '' : 's') + ')';
+  }
+  function riskyCustom() {
+    var r = false;
+    PERMS.forEach(function (g) { g[2].forEach(function (o) { if (o[3] && D.custom[g[0] + '.' + o[0]]) r = true; }); });
+    return r;
+  }
+  function genToken() { var c = 'abcdefghijkmnpqrstuvwxyz23456789', s = ''; for (var i = 0; i < 24; i++) s += c[Math.floor(Math.random() * c.length)]; return 'synd_pat_' + s; }
+
+  function renderDrawer() {
+    document.querySelectorAll('.dr-tab').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === D.tab); });
+    var n = S.conns.length;
+    $('tab-list').textContent = 'Your connections' + (n ? ' (' + n + ')' : '');
+    var b = '', f = '';
+    if (D.tab === 'list') { var r = renderList(); b = r[0]; f = r[1]; }
+    else {
+      var ctx = D.job ? '<div class="ctx"><span class="mi">flag</span><span>For: <b style="font-weight:500">' + JOBS[D.job].title + '</b>. ' +
+        (JOBS[D.job].access === 'read' ? 'Read only access is enough.' : 'This needs permission to change settings and run syncs.') + '</span></div>' : '';
+      if (D.step === 'app') {
+        b = ctx + '<p class="q-title">Which app do you use?</p>' +
+          '<div class="grp-label">Sign in with Synder, no token needed</div><div class="app-list">' + ['claude', 'chatgpt'].map(appOpt).join('') + '</div>' +
+          '<div class="grp-label">Uses an access token you create here</div><div class="app-list">' + ['claudecode', 'cursor', 'other'].map(appOpt).join('') + '</div>';
+        f = '<span class="muted">Not sure? Most people use Claude or ChatGPT.</span>';
+      } else if (D.step === 'oauth') { var o = renderOauth(ctx); b = o[0]; f = o[1]; }
+      else if (D.step === 'token') { var t = renderToken(ctx); b = t[0]; f = t[1]; }
+      else if (D.step === 'token-done') { var td = renderTokenDone(); b = td[0]; f = td[1]; }
+      else if (D.step === 'verify') { var v = renderVerify(); b = v[0]; f = v[1]; }
+    }
+    $('dr-body').innerHTML = b; $('dr-foot').innerHTML = f;
+    $('dr-foot').classList.toggle('hidden', !f);
+  }
+  function appOpt(k) { var a = APPS[k]; return '<button class="app-opt" data-act="pick-app" data-app="' + k + '">' + logo(k, 32) + '<span class="grow"><span class="n">' + a.name + '</span><br><span class="d">' + a.sub + '</span></span><span class="mi chev">chevron_right</span></button>'; }
+  function backBtn() { return '<button class="back" data-act="back-app"><span class="mi" style="font-size:18px">chevron_left</span>Choose another app</button>'; }
+  function addrRow() { return '<div class="copyrow"><div class="ro mono" title="Read only">' + MCP + '</div>' + copyBtn(MCP) + '</div>'; }
+
+  function renderOauth(ctx) {
+    var a = D.app, steps;
+    if (a === 'claude') steps = [
+      'In Claude, open <span class="kbd">Settings</span> → <span class="kbd">Connectors</span>.',
+      'Click <span class="kbd">Add custom connector</span>.',
+      'Paste the Synder address:' + addrRow(),
+      'Click <span class="kbd">Add</span>.',
+      'Sign in to Synder and choose what Claude can access.'
+    ]; else steps = [
+      'In ChatGPT, open <span class="kbd">Settings</span> → <span class="kbd">Apps &amp; Connectors</span>.',
+      'Turn on <span class="kbd">Developer mode</span>.',
+      'Click <span class="kbd">Create</span>.',
+      'Paste the Synder address:' + addrRow(),
+      'For authentication, choose <span class="kbd">OAuth</span>.',
+      'Click <span class="kbd">Create</span>, then sign in to Synder and choose what ChatGPT can access.'
+    ];
+    var accessNote = D.job && JOBS[D.job].access !== 'read'
+      ? '<div class="warn"><span class="mi">warning_amber</span><div>For this job, choose <b style="font-weight:500">Full access</b>, or <b style="font-weight:500">Custom</b> with Settings: Change and Syncs: Run, when Synder asks. Your assistant will then be able to change settings and send transactions to your books.</div></div>'
+      : '';
+    var b = ctx + backBtn() + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">' + logo(a, 32) + '<div><div style="font-weight:500;font-size:16px">Connect ' + APPS[a].name + '</div><div class="muted">' + steps.length + ' steps, about a minute</div></div></div>' +
+      '<ol class="steps">' + steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' +
+      '<div class="note"><span class="mi">info</span><div>No token needed. You choose access when you sign in to Synder. Read only is the default, and you can revoke it anytime in Your connections.</div></div>' + accessNote;
+    return [b, '<span class="sp"></span><button class="btn" data-act="to-verify">I\'ve added it, check it works</button>'];
+  }
+
+  function renderToken(ctx) {
+    var a = D.app;
+    var seg = (a === 'cursor' || a === 'claudecode') ? '<div class="seg"><button data-act="set-tool" data-app="cursor" class="' + (a === 'cursor' ? 'on' : '') + '">Cursor</button><button data-act="set-tool" data-app="claudecode" class="' + (a === 'claudecode' ? 'on' : '') + '">Claude Code</button></div>' : '';
+    var presets = [['read', 'Read only', 'See syncs, transactions, settings, reports and billing. Can\'t change anything.'], ['full', 'Full access', 'Everything in Read only, plus change settings, sync, roll back, resync and import.'], ['custom', 'Custom', 'Pick exactly what it can do.']];
+    var b = ctx + backBtn() + seg +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">' + logo(a, 32) + '<div><div style="font-weight:500;font-size:16px">Create an access token for ' + APPS[a].name + '</div><div class="muted">You\'ll get the token and a ready-to-paste setup.</div></div></div>' +
+      '<div class="field"><label class="lbl req" for="tok-name">Token name</label><input class="input' + (D.nameErr ? ' bad' : '') + '" id="tok-name" value="' + esc(D.name) + '" placeholder="e.g. Cursor on work laptop">' +
+        (D.nameErr ? '<div class="err"><span class="mi">error_outline</span>Give the token a name so you can recognise it later.</div>' : '<div class="hint">Helps you tell connections apart later.</div>') + '</div>' +
+      '<div class="field"><span class="lbl">Access</span><div class="presets">' + presets.map(function (p) {
+        return '<label class="preset' + (D.preset === p[0] ? ' on' : '') + '"><input type="radio" name="preset" value="' + p[0] + '"' + (D.preset === p[0] ? ' checked' : '') + '><span><span class="n">' + p[1] + (p[0] === 'read' ? ' <span class="pill grey">Default</span>' : '') + '</span><br><span class="d">' + p[2] + '</span></span></label>';
+      }).join('') + '</div>';
+    if (D.preset === 'full') b += '<div class="warn"><span class="mi">warning_amber</span><div><b style="font-weight:500">This lets your assistant change your books.</b> It can change integration settings, run and re-sync transactions, and roll back syncs. Rolling back removes entries from your books.</div></div>';
+    if (D.preset === 'custom') {
+      b += '<div class="perm">' + PERMS.map(function (g) {
+        return '<div class="perm-g"><div class="gn">' + g[1] + '</div><div class="opts">' + g[2].map(function (o) {
+          var k = g[0] + '.' + o[0];
+          return '<label><input type="checkbox" data-perm="' + k + '"' + (D.custom[k] ? ' checked' : '') + '><span>' + o[1] + (o[2] ? ' <span class="sd' + (o[3] ? ' danger' : '') + '">· ' + o[2] + '</span>' : '') + '</span></label>';
+        }).join('') + '</div></div>';
+      }).join('') + '</div>';
+      if (D.permErr) b += '<div class="err"><span class="mi">error_outline</span>Pick at least one permission.</div>';
+      if (riskyCustom()) b += '<div class="warn"><span class="mi">warning_amber</span><div><b style="font-weight:500">Some of these change your books.</b> Your assistant will be able to act without asking you first in Synder.</div></div>';
+    }
+    b += '</div><div class="note"><span class="mi">info</span><div>The token doesn\'t expire on its own. You can revoke it anytime in Your connections.</div></div>';
+    return [b, '<span class="muted">' + presetSummary() + '</span><span class="sp"></span><button class="btn" data-act="gen">Generate token</button>'];
+  }
+
+  function renderTokenDone() {
+    var a = D.app, t = D.token, setup = '';
+    if (a === 'claudecode') {
+      var cmd = 'claude mcp add --transport http synder ' + MCP + ' \\\n  --header "Authorization: Bearer ' + t + '"';
+      setup = '<div class="h3">2. Add Synder to Claude Code</div><div class="muted">Run this in your terminal. The token is already filled in.</div><div class="code mono">' + esc(cmd) + copyBtn(cmd, 'cp') + '</div>';
+    } else if (a === 'cursor') {
+      var json = '{\n  "mcpServers": {\n    "synder": {\n      "url": "' + MCP + '",\n      "headers": {\n        "Authorization": "Bearer ' + t + '"\n      }\n    }\n  }\n}';
+      setup = '<div class="h3">2. Add Synder to Cursor</div><div class="muted">Paste this into <span class="mono">~/.cursor/mcp.json</span>. If the file already has servers, add the "synder" entry next to them.</div><div class="code mono">' + esc(json) + copyBtn(json, 'cp') + '</div>';
+    } else {
+      setup = '<div class="h3">2. Add Synder to your tool</div><div class="muted">Use these values in your tool\'s MCP settings.</div>' +
+        '<div class="field" style="margin-top:10px"><span class="lbl">Server address</span>' + addrRow() + '</div>' +
+        '<div class="field"><span class="lbl">Header</span><div class="code mono">' + esc('Authorization: Bearer ' + t) + copyBtn('Authorization: Bearer ' + t, 'cp') + '</div></div>';
+    }
+    var b = '<div class="ok" style="margin-bottom:16px"><span class="mi">check_circle</span><div><b style="font-weight:500">Token created:</b> ' + esc(D.name) + ' · ' + presetSummary() + '</div></div>' +
+      '<div class="h3" style="margin-top:0">1. Copy your token</div>' +
+      '<div class="copyrow"><div class="ro mono">' + t + '</div>' + copyBtn(t) + '</div>' +
+      '<div class="warn"><span class="mi">visibility_off</span><div><b style="font-weight:500">Shown only once.</b> Copy it now. After you leave this step you can\'t see it again, only revoke it and make a new one.</div></div>' +
+      setup;
+    return [b, '<span class="sp"></span><button class="btn" data-act="to-verify">Next: check it works</button>'];
+  }
+
+  function renderVerify() {
+    var a = APPS[D.app], b;
+    var head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' + logo(D.app, 32) + '<div style="font-weight:500;font-size:16px">Last step: check it works</div></div>';
+    if (D.verify === 'done') {
+      b = head + '<div class="ok"><span class="mi">check_circle</span><div><b style="font-weight:500">Connected ✓</b> · ' + a.name + ' · last used just now<br>Your assistant can now answer questions about your syncs.</div></div>' +
+        '<div class="hint" style="margin-top:12px">Next, try: "' + SAMPLE_Q + '"</div>';
+      return [b, '<button class="btn-outlined" data-act="go-list">See your connections</button><span class="sp"></span><button class="btn" data-act="close-drawer">Done</button>'];
+    }
+    b = head + '<div>Ask your assistant:</div>' +
+      '<div class="verify-q"><span class="mi">chat_bubble_outline</span><span style="flex:1">"What synced yesterday?"</span>' + copyBtn('What synced yesterday?', 'btn-text') + '</div>' +
+      (D.verify === 'checking'
+        ? '<div style="display:flex;align-items:center;gap:10px" class="muted"><span class="spin"></span>Waiting for ' + a.name + ' to reach Synder…</div>'
+        : '<div class="muted">When it answers with your syncs, you\'re connected. We\'ll also show it in Your connections.</div>');
+    return [b, '<button class="btn-text" data-act="back-step"><span class="mi">chevron_left</span>Back</button><span class="sp"></span><button class="btn" data-act="check"' + (D.verify === 'checking' ? ' disabled' : '') + '>I asked, check connection</button>'];
+  }
+
+  function renderList() {
+    if (!S.conns.length) {
+      return ['<div class="empty"><span class="mi big">link_off</span><h3>No assistants connected yet</h3><p>Connect Claude, ChatGPT, Cursor or another tool, and it will show up here with its access and last use.</p><button class="btn" data-act="go-connect"><span class="mi">add_link</span>Connect your AI assistant</button></div>', ''];
+    }
+    var rows = S.conns.map(function (c) {
+      var st = c.status === 'Active' ? '<span class="pill green">Active</span>' : '<span class="pill grey">Revoked</span>';
+      var act = c.status === 'Active' ? '<button class="btn-text" style="color:#CC2929" data-act="revoke" data-id="' + c.id + '">Revoke</button>' : '';
+      var r = '<tr class="' + (c.status !== 'Active' ? 'revoked' : '') + '"><td><b style="font-weight:500">' + esc(c.name) + '</b></td><td>' + c.kind + '</td><td>' + c.created + '</td><td>' + c.last + '</td><td>' + c.access + '</td><td>' + st + '</td><td>' + act + '</td></tr>';
+      if (D.confirm === c.id) r += '<tr class="confirm-row"><td colspan="7"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="flex:1">Revoke <b style="font-weight:500">' + esc(c.name) + '</b>? It loses access to Synder right away.</span><button class="btn btn-error" data-act="revoke-yes" data-id="' + c.id + '">Revoke</button><button class="btn-outlined" data-act="revoke-no">Cancel</button></div></td></tr>';
+      return r;
+    }).join('');
+    return ['<p class="muted" style="margin:0 0 12px">Everything connected to Synder for this organization. Revoking stops access right away.</p><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Name</th><th>Kind</th><th>Created</th><th>Last used</th><th>Access</th><th>Status</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>',
+      '<span class="sp"></span><button class="btn-outlined" data-act="go-connect"><span class="mi">add</span>Connect another</button>'];
+  }
+
+  function addConnection() {
+    var a = APPS[D.app];
+    S.conns.unshift({ id: S.seq++, name: a.kind === 'oauth' ? a.name : D.name, kind: a.kind === 'oauth' ? 'App (sign-in)' : 'Access token', created: 'Today', last: 'Just now',
+      access: a.kind === 'oauth' ? (D.job && JOBS[D.job].access !== 'read' ? 'Custom' : 'Read only') : presetSummary(), status: 'Active' });
+  }
+
+  /* ================= Request modal ================= */
+  var R;
+  var QUICK = [
+    ['Match payouts to deposits', 'Every week, compare Stripe payouts with bank deposits in QuickBooks and send me a list of anything that doesn\'t match.'],
+    ['Weekly failed-sync summary', 'Every Monday, email me a summary of transactions that failed to sync last week and why.'],
+    ['Monthly sales by channel', 'At the start of each month, prepare a sales report split by Stripe, PayPal and Shopify for the previous month.'],
+    ['Flag unusual refunds', 'Flag refunds that are much bigger than usual or come from the same customer several times a week.']
+  ];
+  function openReq() { R = { what: '', often: '', now: '', hours: '', ex: false, tried: false, sent: false }; $('mbg').classList.add('show'); renderReq(); }
+  function closeReq() { $('mbg').classList.remove('show'); }
+  function reqErrors() { return { what: !R.what.trim(), often: !R.often }; }
+  function renderReq() {
+    if (R.sent) {
+      $('req-body').innerHTML = '<div class="m-b"><div class="success"><span class="mi big">check_circle</span><h3>Request sent</h3><div class="muted">Thanks. The Synder team will reply by email within 2 business days. Requesting is free.</div></div>' +
+        '<div class="meanwhile"><span class="mi" style="color:#0053CC;font-size:28px">add_link</span><div class="txt"><b style="font-weight:500">In the meantime, connect your AI assistant.</b><br><span class="muted">It can already check syncs and explain failures.</span></div><button class="btn" data-act="req-connect">Connect</button></div></div>' +
+        '<div class="m-f"><span class="sp"></span><button class="btn-outlined" data-act="close-req">Close</button></div>';
+      return;
+    }
+    var e = reqErrors(), showE = R.tried;
+    var oft = ['Real-time', 'Daily', 'Weekly', 'Monthly', 'On demand'];
+    $('req-body').innerHTML = '<div class="m-b">' +
+      '<p style="margin:0 0 16px" class="muted">Tell us a task you\'d like automated. <span style="color:#CC2929">*</span> Required</p>' +
+      '<div class="field"><label class="lbl req" for="r-what">What should it do?</label>' +
+        '<div class="chips">' + QUICK.map(function (q, i) { return '<button class="chipq" data-act="quick" data-i="' + i + '">' + q[0] + '</button>'; }).join('') + '</div>' +
+        '<textarea class="textarea' + (showE && e.what ? ' bad' : '') + '" id="r-what" rows="4" placeholder="Describe the task in your own words">' + esc(R.what) + '</textarea>' +
+        (showE && e.what ? '<div class="err"><span class="mi">error_outline</span>Tell us what the agent should do.</div>' : '') +
+        '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px"><button class="linkbtn" data-act="toggle-ex">' + (R.ex ? 'Hide example' : 'See example') + '</button><span class="muted" id="r-count">' + R.what.length + ' characters</span></div>' +
+        (R.ex ? '<div class="exbox">"Every Monday, check last week\'s Stripe payouts against QuickBooks deposits and email me anything that doesn\'t match, with the amount and date."</div>' : '') +
+      '</div>' +
+      '<div class="field"><span class="lbl req">How often?</span><div class="radios' + (showE && e.often ? ' bad' : '') + '">' + oft.map(function (o) {
+        return '<label class="' + (R.often === o ? 'on' : '') + '"><input type="radio" name="often" value="' + o + '"' + (R.often === o ? ' checked' : '') + '>' + o + '</label>';
+      }).join('') + '</div>' + (showE && e.often ? '<div class="err"><span class="mi">error_outline</span>Pick how often it should run.</div>' : '') + '</div>' +
+      '<div class="field"><label class="lbl" for="r-now">How do you do it now? <span class="opt">(optional)</span></label><textarea class="textarea" id="r-now" rows="2" placeholder="e.g. I export a CSV and check it in a spreadsheet">' + esc(R.now) + '</textarea></div>' +
+      '<div class="field"><label class="lbl" for="r-hours">Hours a month this takes you <span class="opt">(optional)</span></label><input class="input" id="r-hours" type="number" min="0" style="max-width:160px" value="' + esc(R.hours) + '" placeholder="e.g. 6"><div class="hint">Helps us see which requests save the most time.</div></div>' +
+      '<div class="next"><h4>What happens next</h4><ul><li>The Synder team reads every request.</li><li>We reply by email within 2 business days.</li><li>Requesting is free and doesn\'t commit you to anything.</li></ul></div>' +
+      '</div><div class="m-f"><span class="sp"></span><button class="btn-outlined" data-act="close-req">Cancel</button><button class="btn" data-act="send-req">Send request</button></div>';
+  }
+
+  /* ================= Events ================= */
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-act],[data-copy],.vbar .tab,.dr-tab');
+    if (!t) return;
+    if (t.dataset.copy) { copy(COPY[t.dataset.copy]); return; }
+    if (t.classList.contains('tab') && t.dataset.v) { S.v = t.dataset.v; history.replaceState(null, '', '#' + S.v); closeDrawer(); closeReq(); renderPage(); return; }
+    if (t.classList.contains('dr-tab')) { D.tab = t.dataset.tab; if (D.tab === 'connect' && D.step === 'token-done') {} renderDrawer(); return; }
+    var a = t.dataset.act;
+    switch (a) {
+      case 'connect': openDrawer(); break;
+      case 'tile': openDrawer({ app: t.dataset.app }); break;
+      case 'job': openDrawer({ job: t.dataset.job }); break;
+      case 'open-list': openDrawer({ tab: 'list' }); break;
+      case 'close-drawer': closeDrawer(); renderPage(); break;
+      case 'pick-app': pickApp(t.dataset.app); renderDrawer(); break;
+      case 'set-tool': D.app = t.dataset.app; D.name = APPS[D.app].name + ' on my laptop'; renderDrawer(); break;
+      case 'back-app': D.step = 'app'; D.app = null; D.nameErr = D.permErr = false; renderDrawer(); break;
+      case 'gen':
+        D.name = $('tok-name').value; D.nameErr = !D.name.trim();
+        D.permErr = D.preset === 'custom' && !Object.keys(D.custom).some(function (k) { return D.custom[k]; });
+        if (D.nameErr || D.permErr) { renderDrawer(); return; }
+        D.token = genToken(); D.step = 'token-done'; renderDrawer(); $('dr-body').scrollTop = 0; break;
+      case 'to-verify': D.prev = D.step; D.step = 'verify'; D.verify = 'idle'; renderDrawer(); break;
+      case 'back-step': D.step = D.prev || 'app'; renderDrawer(); break;
+      case 'check':
+        D.verify = 'checking'; renderDrawer();
+        setTimeout(function () { D.verify = 'done'; addConnection(); renderDrawer(); renderPage(); }, 1300); break;
+      case 'go-list': D.tab = 'list'; renderDrawer(); break;
+      case 'go-connect': D = Object.assign(freshDrawer(), { tab: 'connect' }); renderDrawer(); break;
+      case 'revoke': D.confirm = +t.dataset.id; renderDrawer(); break;
+      case 'revoke-no': D.confirm = null; renderDrawer(); break;
+      case 'revoke-yes':
+        S.conns.forEach(function (c) { if (c.id === +t.dataset.id) { c.status = 'Revoked'; c.last = '—'; } });
+        D.confirm = null; renderDrawer(); renderPage(); toast('Access revoked'); break;
+      case 'request': openReq(); break;
+      case 'close-req': closeReq(); break;
+      case 'quick': R.what = QUICK[+t.dataset.i][1]; renderReq(); break;
+      case 'toggle-ex': R.ex = !R.ex; renderReq(); break;
+      case 'send-req':
+        R.tried = true; var e = reqErrors();
+        if (e.what || e.often) { renderReq(); var f = $(e.what ? 'r-what' : 'r-now'); if (e.what) f.focus(); return; }
+        R.sent = true; renderReq(); break;
+      case 'req-connect': closeReq(); openDrawer(); break;
+    }
+  });
+  document.addEventListener('input', function (ev) {
+    var el = ev.target;
+    if (el.id === 'tok-name') { D.name = el.value; if (D.nameErr && el.value.trim()) { D.nameErr = false; renderDrawer(); var n = $('tok-name'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
+    if (!R) return;
+    if (el.id === 'r-what') {
+      R.what = el.value; $('r-count').textContent = R.what.length + ' characters';
+      if (R.tried && el.value.trim() && el.classList.contains('bad')) { renderReq(); var w = $('r-what'); w.focus(); w.setSelectionRange(w.value.length, w.value.length); }
+    }
+    if (el.id === 'r-now') R.now = el.value;
+    if (el.id === 'r-hours') R.hours = el.value;
+  });
+  document.addEventListener('change', function (ev) {
+    var el = ev.target;
+    if (el.name === 'preset') { D.name = ($('tok-name') || {}).value || D.name; D.preset = el.value; D.permErr = false; renderDrawer(); }
+    if (el.dataset && el.dataset.perm) { D.custom[el.dataset.perm] = el.checked; D.permErr = false; var st = $('dr-body').scrollTop; D.name = $('tok-name').value; renderDrawer(); $('dr-body').scrollTop = st; }
+    if (el.name === 'often') { R.often = el.value; renderReq(); }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { if ($('mbg').classList.contains('show')) closeReq(); else closeDrawer(); } });
+  $('mbg').addEventListener('click', function (ev) { if (ev.target === $('mbg')) closeReq(); });
+
+  var h = (location.hash || '#A').slice(1).toUpperCase();
+  S.v = 'ABC'.indexOf(h) >= 0 && h.length === 1 ? h : 'A';
+  renderPage();
+})();
+</script>
+</body>
+</html>
