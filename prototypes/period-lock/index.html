@@ -89,7 +89,8 @@ ol.as li{margin-bottom:10px}
 </style>
 </head>
 <body>
-<div class="vbar"><b>Period lock · Synder MVP</b>
+<div class="vbar"><b>Period lock</b>
+<label>Variant <select id="varSel"><option value="b">B · Close the month</option><option value="a">A · Per integration</option></select></label>
 <label>Screen <select id="routeSel"></select></label>
 <label>Role <select id="roleSel"><option value="admin">Admin</option><option value="member">Member (read-only)</option></select></label>
 <span class="sp"></span></div>
@@ -311,11 +312,122 @@ function vAssumptions(){const A=[
  return '<h1>Prototype assumptions</h1><p class="sub">Defaults chosen where the spec is open. Confirm with product and dev.</p><div class="card pad"><ol class="as">'+A.map(a=>'<li>'+a+'</li>').join('')+'</ol></div>'}
 
 /* ---------- render ---------- */
-function render(){const{r,q}=route();nav(r);const V={list:vList,settings:vSettings,transactions:vTxns,'sync-info':vSync,issues:vIssues,recon:vRecon,'recon-result':vReconResult,summaries:vSummaries,products:vProducts,activity:vActivity,assumptions:vAssumptions}[r]||vList;
+function renderA(){const{r,q}=route();nav(r);const V={list:vList,settings:vSettings,transactions:vTxns,'sync-info':vSync,issues:vIssues,recon:vRecon,'recon-result':vReconResult,summaries:vSummaries,products:vProducts,activity:vActivity,assumptions:vAssumptions}[r]||vList;
  if(r!=='settings'&&S.draft&&!$('#layer').innerHTML)S.draft=null;
  $('#app').innerHTML=V(q);const h=(location.hash||'#list').slice(1);const sel=$('#routeSel');sel.value=ROUTES.some(x=>x[0]===h)?h:'';}
-$('#routeSel').innerHTML='<option value="">— jump to —</option>'+ROUTES.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+
+</script>
+<script>
+/* ================= VARIANT B · Close the month ================= */
+const B={closed:'2026-08-31',outcome:'post',auto:'off',overrides:{shopify:'hold'},adv:false,digest:true,draft:null,
+ held:[
+  {id:'h1',integ:'shopify',info:'Order #2093',amount:186.40,date:'2026-08-30',arrived:'Sep 3'},
+  {id:'h2',integ:'shopify',info:'Order #2097 · refund',amount:-24.00,date:'2026-08-31',arrived:'Sep 6'},
+  {id:'h3',integ:'shopify',info:'Batch payout · 2 payments',amount:310.00,date:'2026-08-31',arrived:'Sep 2',part:{held:'Payment py_B · $120.00 · Aug 31',ok:'Payment py_A · $190.00 · Sep 1 — posted'}}],
+ moved:{'2026-08':{n:8,amt:1240},'2026-07':{n:5,amt:410}},
+ pendingSep:[{integ:'stripe',n:12,amt:980},{integ:'shopify',n:3,amt:212},{integ:'paypal',n:0,amt:0}],
+ activity:[
+  {ts:'Sep 2, 2026 11:20',who:'Viacheslav Tarabarov',act:'Books closed',before:'Closed through Jul 31, 2026',after:'Closed through Aug 31, 2026 · Late: post on first open day'},
+  {ts:'Sep 2, 2026 11:24',who:'Viacheslav Tarabarov',act:'Override added',before:'Changolivia (Shopify): company default',after:'Changolivia (Shopify): hold for review'},
+  {ts:'Aug 4, 2026 09:02',who:'Maya Chen',act:'Books closed',before:'Closed through Jun 30, 2026',after:'Closed through Jul 31, 2026'}]};
+const money=n=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const monthName=iso=>['January','February','March','April','May','June','July','August','September','October','November','December'][+iso.split('-')[1]-1];
+const endOf=iso=>{const[y,m]=iso.split('-').map(Number);return iso_(y,m,0)};function iso_(y,m,d){return new Date(Date.UTC(y,m,d)).toISOString().slice(0,10)}
+const firstOpen=()=>addDays(B.closed,1);
+const nextMonthEnd=()=>{const[y,m]=B.closed.split('-').map(Number);return iso_(y,m+1,0)};
+const outcomeOf=id=>B.overrides[id]||B.outcome;
+const OUT={post:'Post on first open day',hold:'Hold for review'};
+const BROUTES=[['b-home','Overview · timeline'],['b-recon','Reconciliation → Close September'],['b-preview?a=close','Impact preview · close'],['b-preview?a=reopen','Impact preview · reopen'],['b-held','Waiting for closed period'],['b-settings','Close settings'],['b-activity','Activity log'],['b-assumptions','Assumptions']];
+function bnav(r){const L=(h,t,k)=>'<a href="#'+h+'" class="'+(k.includes(r)?'on':'')+'">'+t+'</a>';
+ $('#side').innerHTML='<div class="org"><div class="av">PT</div><div>Buddy QA</div></div>'+L('b-home','Dashboard',['b-home'])+'<div class="grp">Transactions</div><a onclick="toast(\'Not part of this variant\')">Transactions list</a>'+L('b-recon','Transaction reconciliation',['b-recon'])+L('b-held','Waiting for closed period'+(B.held.length?' ('+B.held.length+')':''),['b-held'])+L('b-settings','Close the books',['b-settings','b-preview'])+'<div class="grp">Organization</div>'+L('b-activity','Activity log',['b-activity'])+L('b-assumptions','Prototype assumptions',['b-assumptions'])}
+
+/* ---------- overview ---------- */
+function bHome(){const months=['2026-06','2026-07','2026-08','2026-09','2026-10'];const cm=B.closed.slice(0,7);
+ const cell=m=>{const closed=m<=cm,cur=m==='2026-10',e=endOf(m+'-01');const nm=monthName(m+'-01');
+  let st=closed?'<span class="chip c-lock">'+LOCK+' Closed</span>':cur?'<span class="chip c-off">In progress</span>':'<span class="chip c-ok">Reconciled</span>';
+  let cta=(!closed&&!cur&&m===nextMonthEnd().slice(0,7)&&isAdmin())?'<div style="margin-top:10px"><a class="btn" href="#b-preview?a=close">Close '+nm+'</a></div>':'';
+  return '<div style="flex:1;padding:14px;border-right:1px solid var(--g20);background:'+(closed?'var(--g5)':'#fff')+'"><div style="font-weight:500">'+nm+'</div><div style="margin-top:6px">'+st+'</div>'+cta+'</div>'};
+ const late=B.moved[cm]||{n:0,amt:0};const held=B.held.length;
+ const boundary='<div style="width:150px;padding:14px 10px;border-right:1px solid var(--g20);background:var(--yelL);text-align:center"><div class="muted">Late for '+monthName(B.closed).slice(0,3)+'</div><div style="margin-top:6px"><span class="chip c-warn">'+late.n+' moved</span></div>'+(held?'<div style="margin-top:6px"><a href="#b-held" class="chip c-bad" style="text-decoration:none">'+held+' waiting</a></div>':'')+'</div>';
+ let strip='';months.forEach(m=>{strip+=cell(m);if(m===cm)strip+=boundary});
+ const digest=B.digest?'<div class="card pad" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:16px"><div><b style="font-weight:500">'+monthName(B.closed)+' stayed closed</b><div class="muted">'+late.n+' late transactions moved to '+monthName(firstOpen())+' ('+money(late.amt)+')'+(held?' · '+held+' waiting for review':'')+'.</div></div><div class="row">'+(held?'<a class="btn o" href="#b-held">Review '+held+'</a>':'')+'<button class="btn q" onclick="B.digest=false;render()">Dismiss</button></div></div>':'';
+ return '<h1>Books closed through '+fmt(B.closed)+'</h1><p class="sub">Applies to all integrations. Late transactions: '+OUT[B.outcome].toLowerCase()+'. '+(B.auto==='off'?'Closed manually.':'Closes automatically on '+(B.auto==='last'?'the last day':'day '+B.auto)+'.')+' <a href="#b-settings">Settings</a></p>'
+ +'<div class="card" style="display:flex;overflow:hidden">'+strip+'</div>'+digest}
+
+/* ---------- recon ---------- */
+function bRecon(){const m=nextMonthEnd();const done=B.closed>=m;
+ return '<h1>Reconciliation results</h1><p class="sub">All integrations · '+monthName(m)+' 1 – '+fmt(m)+'</p>'
+ +(done?'<div class="card empty"><b>'+monthName(m)+' is closed</b><p>Syncs can\'t post into it anymore.</p><a class="btn" href="#b-home">View overview</a><a class="sec" href="#b-preview?a=reopen">Reopen '+monthName(m)+'</a></div>'
+ :'<div class="card empty"><b>Difference: $0.00</b><p>'+monthName(m)+' matches your books. Closing it is the last month-end step.</p>'+(isAdmin()?'<a class="btn" href="#b-preview?a=close">Close '+monthName(m)+'</a>':'<span class="muted">Ask an admin to close '+monthName(m)+'.</span>')+'<a class="sec" onclick="toast(\'Matched 214 · Discrepancy 0 · Missing 0 (mock)\')">See matched rows</a></div>')}
+
+/* ---------- impact preview ---------- */
+function bPreview(q){const a=q.get('a')||'close';const exc='<details style="margin-top:12px"><summary>What closing doesn\'t block</summary><ul style="margin:8px 0 0;padding-left:20px"><li>Imports keep running for all dates.</li><li>Summary syncs and manual summary rollbacks still work.</li><li>Rollbacks and Shopify order edits are checked by webhook date only, so they can still change a closed month.</li></ul></details>';
+ if(!isAdmin())return '<div class="card empty"><b>Only admins can change closed periods</b><p>You can view what is closed on the overview.</p><a class="btn" href="#b-home">Back to overview</a></div>';
+ let title,lines=[],btn,extra='';
+ if(a==='close'&&nextMonthEnd()>=TODAY)return '<div class="card empty"><b>'+monthName(nextMonthEnd())+' isn\'t over yet</b><p>You can close it after '+fmt(nextMonthEnd())+'.</p><a class="btn" href="#b-home">Back to overview</a><a class="sec" href="#b-preview?a=reopen">Reopen '+monthName(B.closed)+'</a></div>';
+ if(a==='close'){const to=nextMonthEnd(),fo=addDays(to,1);const post=B.pendingSep.filter(p=>outcomeOf(p.integ)==='post').reduce((s,p)=>s+p.n,0),hold=B.pendingSep.filter(p=>outcomeOf(p.integ)==='hold').reduce((s,p)=>s+p.n,0);
+  title='Close '+monthName(to)+'?';lines=['<b style="font-weight:500">'+post+'</b> late transactions will move to '+fmt(fo),'<b style="font-weight:500">'+hold+'</b> will wait for review ('+Object.keys(B.overrides).filter(k=>B.overrides[k]==='hold').map(k=>S.integ[k].name).join(', ')+' set to hold)','<b style="font-weight:500">0</b> already synced transactions will change'];btn='<button class="btn" onclick="bClose(\''+to+'\','+post+','+hold+')">Close '+monthName(to)+'</button>'}
+ else if(a==='reopen'){const prev=endOf(addDays(B.closed.slice(0,8)+'01',-1));title='Reopen '+monthName(B.closed)+'?';
+  lines=[monthName(B.closed)+' will be open for syncs. Books stay closed through '+fmt(prev)+'.','Transactions already moved keep their new dates.',B.held.filter(h=>h.date>prev).length+' waiting transactions can post on their original dates.'];
+  extra=B.held.length?'<label class="row" style="margin-top:8px"><input type="checkbox" id="po" checked> Post waiting transactions on their original dates</label>':'';btn='<button class="btn" onclick="bReopen(\''+prev+'\')">Reopen '+monthName(B.closed)+'</button>'}
+ else{const to=q.get('to');title='Change late handling to "'+OUT[to]+'"?';
+  lines=to==='post'?['Future late transactions will post on '+fmt(firstOpen())+'.',B.held.length+' already waiting stay in the queue unless you post them.','0 synced transactions will change.']:['Future late transactions will wait for review instead of posting.','Transactions already moved keep their dates.','0 synced transactions will change.'];
+  btn='<button class="btn" onclick="bOutcome(\''+to+'\')">Change</button>'}
+ return '<a href="#b-home">← Overview</a><div class="card pad" style="max-width:560px;margin-top:12px"><h1 style="font-size:20px">'+title+'</h1><ul style="padding-left:20px;margin:12px 0">'+lines.map(l=>'<li style="margin-bottom:8px">'+l+'</li>').join('')+'</ul>'+extra+exc+'<div class="mfoot"><a class="btn o" href="#b-home">Cancel</a>'+btn+'</div></div>'}
+function bLog(act,before,after){B.activity.unshift({ts:fmt(TODAY)+' 18:55',who:'Viacheslav Tarabarov',act,before,after})}
+function bClose(to,post,hold){const b='Closed through '+fmt(B.closed);B.closed=to;B.moved[to.slice(0,7)]={n:post,amt:B.pendingSep.filter(p=>outcomeOf(p.integ)==='post').reduce((s,p)=>s+p.amt,0)};
+ B.pendingSep.filter(p=>outcomeOf(p.integ)==='hold'&&p.n).forEach((p,i)=>{for(let k=0;k<p.n;k++)B.held.push({id:'s'+i+k,integ:p.integ,info:'Order #22'+(10+k),amount:70.67,date:'2026-09-30',arrived:'Oct 14'})});
+ B.pendingSep.forEach(p=>{p.n=0;p.amt=0});B.digest=true;bLog('Books closed',b,'Closed through '+fmt(to));go('b-home');setTimeout(()=>toast(monthName(to)+' closed.'),30)}
+function bReopen(prev){const b='Closed through '+fmt(B.closed);const po=document.getElementById('po')?.checked;if(po)B.held=B.held.filter(h=>h.date<=prev);B.closed=prev;bLog('Books reopened',b,'Closed through '+fmt(prev)+(po?' · waiting posted on original dates':''));go('b-home');setTimeout(()=>toast('Reopened.'+(po?' Waiting transactions are posting.':'')),30)}
+function bOutcome(to){const b=OUT[B.outcome];B.outcome=to;bLog('Late handling changed',b,OUT[to]);go('b-settings');setTimeout(()=>toast('Saved.'),30)}
+
+/* ---------- held queue ---------- */
+function bHeld(){if(!B.held.length)return '<h1>Waiting for closed period</h1><div class="card empty" style="margin-top:16px"><b>Nothing is waiting</b><p>Late transactions for closed months show up here.</p><a class="btn" href="#b-home">View overview</a><a class="sec" href="#b-settings">Late handling settings</a></div>';
+ const fo=fmt(firstOpen());
+ return '<h1>Waiting for closed period</h1><p class="sub">These arrived after their month was closed. Nothing was posted.</p><div class="card" style="overflow:visible"><table><thead><tr><th>Transaction</th><th>Dated</th><th>Amount</th><th></th></tr></thead><tbody>'
+ +B.held.map(h=>'<tr><td>'+h.info+'<div class="muted">'+S.integ[h.integ].name+' · arrived '+h.arrived+'</div>'+(h.part?'<div style="margin-top:6px"><span class="chip c-warn">Waiting: '+h.part.held+'</span></div><div class="muted" style="margin-top:4px">'+h.part.ok+'</div>':'')+'</td><td>'+fmt(h.date)+'</td><td>'+money(h.amount)+'</td><td style="white-space:nowrap;text-align:right">'
+ +(isAdmin()?'<button class="btn o" onclick="bPost(\''+h.id+'\')">Post to '+fo.slice(0,-6)+'</button> <button class="btn q" onclick="bAnyway(\''+h.id+'\')">Post anyway</button> <button class="btn q" onclick="bDismiss(\''+h.id+'\')">Dismiss</button>':'<span class="muted">Admins can post</span>')+'</td></tr>').join('')+'</tbody></table></div>'}
+function bPost(id){const h=B.held.find(x=>x.id===id);B.held=B.held.filter(x=>x.id!==id);bLog('Waiting transaction posted',h.info+' · waiting','Posted on '+fmt(firstOpen())+' (dated '+fmt(h.date)+')');render();toast('Posting on '+fmt(firstOpen())+'.')}
+function bAnyway(id){const h=B.held.find(x=>x.id===id);modal('<h3>Post into closed '+monthName(h.date)+'?</h3><p>'+h.info+' will post on '+fmt(h.date)+'. This changes '+monthName(h.date)+' after it was closed. Reports you already sent won\'t match.</p><div class="mfoot"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn d" onclick="closeM();B.held=B.held.filter(x=>x.id!==\''+id+'\');bLog(\'Posted into closed period\',\''+h.info+' · waiting\',\'Posted on '+fmt(h.date)+'\');render();toast(\'Posted into '+monthName(h.date)+'.\')">Post into '+monthName(h.date)+'</button></div>')}
+function bDismiss(id){const h=B.held.find(x=>x.id===id);B.held=B.held.filter(x=>x.id!==id);bLog('Waiting transaction dismissed',h.info+' · waiting','Dismissed, not posted');render();toast('Dismissed. You can find it in Transactions with status Dismissed.')}
+
+/* ---------- settings ---------- */
+function bSettings(){const ro=!isAdmin();const o=(v,t,s)=>'<div class="opt '+(B.outcome===v?'on':'')+(ro?' ro':'')+'" '+(ro||B.outcome===v?'':'onclick="go(\'b-preview?a=outcome&to='+v+'\')"')+'><b>'+t+'</b><span>'+s+'</span></div>';
+ let days='<option value="off" '+(B.auto==='off'?'selected':'')+'>Off · I close manually</option>';for(let i=1;i<=28;i++)days+='<option value="'+i+'" '+(String(B.auto)===String(i)?'selected':'')+'>Day '+i+' of the next month</option>';days+='<option value="last" '+(B.auto==='last'?'selected':'')+'>Last day of the next month</option>';
+ const adv=B.adv?'<div class="card pad" style="margin-top:12px"><b style="font-weight:500">Per-integration overrides</b><p class="muted" style="margin:4px 0 12px">Use only if one integration needs different handling.</p><table><tbody>'+Object.values(S.integ).map(i=>'<tr><td>'+i.name+'</td><td><select class="in" '+(ro?'disabled':'')+' onchange="bOverride(\''+i.id+'\',this.value)"><option value="">Company default</option><option value="post" '+(B.overrides[i.id]==='post'?'selected':'')+'>Post on first open day</option><option value="hold" '+(B.overrides[i.id]==='hold'?'selected':'')+'>Hold for review</option></select></td></tr>').join('')+'</tbody></table></div>':'';
+ return '<h1>Close the books</h1><p class="sub">Books closed through '+fmt(B.closed)+' for all integrations.</p>'+(ro?'<div class="note n-plain">Only admins can change these settings.</div>':'')
+ +'<div class="card pad"><div class="muted" style="margin-bottom:8px">Late transactions for a closed month</div><div class="seg">'+o('post','Post on first open day','Recommended. Posts on '+fmt(firstOpen())+'; you see it in the monthly digest.')+o('hold','Hold for review','Waits in a queue until you post or dismiss it.')+'</div>'
+ +'<div class="field"><label class="l">Close each month automatically</label><select class="in" '+(ro?'disabled':'')+' onchange="bAuto(this.value)">'+days+'</select><div class="hint">Closes the previous month. Times use each integration\'s timezone.</div></div>'
+ +(ro?'':'<div class="row"><a class="btn o" href="#b-preview?a=reopen">Reopen '+monthName(B.closed)+'</a></div>')+'</div>'
+ +'<p style="margin-top:12px"><a onclick="B.adv=!B.adv;render()">'+(B.adv?'Hide advanced':'Advanced')+'</a></p>'+adv}
+function bOverride(id,v){const b=B.overrides[id]?OUT[B.overrides[id]]:'Company default';if(v)B.overrides[id]=v;else delete B.overrides[id];bLog('Override changed',S.integ[id].name+': '+b,S.integ[id].name+': '+(v?OUT[v]:'Company default'));toast('Saved.')}
+function bAuto(v){const lab=x=>x==='off'?'Manual':x==='last'?'Auto: last day':'Auto: day '+x;const b=lab(B.auto);B.auto=v;bLog('Auto-close changed',b,lab(v));render();toast(v==='off'?'Auto-close off.':'Next auto-close: '+(v==='last'?'Oct 31':'Nov '+v)+', 2026 (closes October). It will be logged and you\'ll get a digest.')}
+
+/* ---------- activity & assumptions ---------- */
+function bActivity(){return '<h1>Activity log</h1><p class="sub">Who changed what and when.</p><div class="card" style="overflow:hidden"><table><thead><tr><th>Timestamp</th><th>Initiator</th><th>Action</th><th>Before → After</th></tr></thead><tbody>'+B.activity.map(r=>'<tr><td style="white-space:nowrap">'+r.ts+'</td><td>'+r.who+'</td><td>'+r.act+'</td><td><div class="muted">'+r.before+'</div><div>→ '+r.after+'</div></td></tr>').join('')+'</tbody></table></div>'}
+function bAssumptions(){const A=['<b style="font-weight:500">Needs dev confirmation:</b> "Hold for review" (Waiting for closed period) is a new state. The spec only has soft (post on a new date) and hard (cancel). Held = hard lock that keeps the transaction queued instead of Canceled, with Post to first open day / Post anyway / Dismiss.',
+ 'One company-wide closed-through date for all integrations (the spec has one per integration). Per-integration overrides cover late handling only and sit under Advanced.',
+ '"Post on first open day" = spec soft lock with the move-to date fixed at the day after the close. "Hold for review" replaces the spec hard lock.',
+ 'Every lock change (close, reopen, change late handling) goes through an impact preview first. Counts come from transactions that are imported but not yet synced for the affected dates.',
+ 'Reopen moves the close back by one month. It can post waiting transactions on their original dates. Moved transactions keep their new dates.',
+ 'Post anyway is admin-only, always warns, and is logged as "Posted into closed period".',
+ 'Dismissed transactions are not posted and stay findable in Transactions with status Dismissed.',
+ 'Partial batches: the posted part stays posted. Only the held part waits, and posting it never duplicates the posted part.',
+ 'Auto-close on day N (1–28) or the last day closes the previous month. Each run is logged as System and triggers the monthly digest.',
+ 'Exceptions stay as in the spec: imports, summary sync and manual summary rollback are not blocked. Rollbacks and order edits are checked by webhook date only.',
+ 'Only admins can close, reopen, or change settings. Others see read-only views.',
+ 'All variant A assumptions still apply where relevant (FX rate on the original date, duplicate check before re-dating, timezone per integration).'];
+ return '<h1>Prototype assumptions · B</h1><p class="sub">Defaults chosen where the spec is open. Confirm with product and dev.</p><div class="card pad"><ol class="as">'+A.map(a=>'<li>'+a+'</li>').join('')+'</ol></div>'}
+
+/* ---------- dispatcher ---------- */
+function render(){const h=(location.hash||'').slice(1);const isB=!h||h.startsWith('b-');$('#varSel').value=isB?'b':'a';
+ const R=isB?BROUTES:ROUTES;const sel=$('#routeSel');sel.innerHTML='<option value="">— jump to —</option>'+R.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+ if(!isB)return renderA();
+ const[r,qs]=(h||'b-home').split('?');const q=new URLSearchParams(qs||'');bnav(r);
+ $('#app').innerHTML=({'b-home':bHome,'b-recon':bRecon,'b-preview':bPreview,'b-held':bHeld,'b-settings':bSettings,'b-activity':bActivity,'b-assumptions':bAssumptions}[r]||bHome)(q);
+ sel.value=R.some(x=>x[0]===h)?h:''}
 $('#routeSel').onchange=e=>{if(e.target.value)go(e.target.value)};
+$('#varSel').onchange=e=>go(e.target.value==='b'?'b-home':'list');
 $('#roleSel').onchange=e=>{S.role=e.target.value;S.draft=null;render()};
 document.addEventListener('click',e=>{if(S.menu&&!e.target.closest('td')){S.menu=null;render()}});
 window.addEventListener('hashchange',render);render();
