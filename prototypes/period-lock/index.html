@@ -118,7 +118,7 @@ code{font-family:'Roboto Mono',monospace;font-size:14px;background:var(--color-g
 .pl-field .form-error-msg,.pl-help{margin:0;color:var(--text-secondary)}
 .pl-field .form-error-msg{color:var(--color-red)}
 .pl-dt{width:200px}
-.pl-move{margin-top:24px}
+.pl-move{margin-top:0}
 .pl-example{margin-top:8px;background:var(--color-grey-5);border:1px solid var(--color-grey-20);border-radius:4px;padding:12px 16px;color:var(--text-primary)}
 .pl-example b{font-weight:500}
 .pl-note{margin:8px 0 0;color:var(--text-secondary)}
@@ -126,6 +126,7 @@ code{font-family:'Roboto Mono',monospace;font-size:14px;background:var(--color-g
 .pl-after{margin:24px 0 0}
 .pl-card .pl-foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:24px 0 0;padding-top:24px;border-top:1px solid var(--color-grey-20)}
 .pl-card input.pl-dt{width:200px;max-width:200px}.pl-card select.pl-day{width:72px}.pl-help{max-width:560px}
+.pl-card .pl-hdr+.alert.pl-after{margin-top:0}
 </style>
 </head>
 <body>
@@ -238,11 +239,11 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
  let f='';
  if(d.on){
   const ex=d.mode==='soft'?`A Sep 29 refund arrives Oct 3. It's posted on ${d.moveTo?fmt(d.moveTo):'the move-to date'}.`:'A Sep 29 refund arrives Oct 3. It isn\'t synced. Resync it after you move the lock.';
-  f+=`<section class="pl-sec"><h3 class="pl-st">Mode</h3><div class="pl-radios">${rad('mode','soft',d.mode,'Soft lock','Move late parts to an open date.',"setD('mode','soft')")}${rad('mode','hard',d.mode,'Hard lock','Don\'t sync transactions with a locked part.',"setD('mode','hard')")}</div><div class="pl-example" id="pl-example"><b>Example</b> ${ex}</div><p class="pl-note">Applies to all future syncs for ${d.short}, scheduled and manual. Imports keep running, summary sync isn't affected, and product cost updates always use hard lock.</p></section>`;
+  f+=`<section class="pl-sec"><h3 class="pl-st">Mode</h3><div class="pl-radios">${rad('mode','soft',d.mode,'Soft lock','Move late parts to an open date.',"setD('mode','soft')")}${d.mode==='soft'?`<div class="pl-nest pl-field pl-move"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${er.move?`<div class="form-error-msg">${er.move}</div>`:`<div class="pl-help">Must be after the lock date. Parts in the open period keep their own dates.${rec?' Moves forward one month each time the lock does.':''}</div>`}</div>`:''}${rad('mode','hard',d.mode,'Hard lock','Don\'t sync transactions with a locked part.',"setD('mode','hard')")}</div><div class="pl-example" id="pl-example"><b>Example</b> ${ex}</div><p class="pl-note">Applies to all future syncs for ${d.short}, scheduled and manual. Imports keep running, summary sync isn't affected, and product cost updates always use hard lock.</p></section>`;
   let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
   f+=`<section class="pl-sec"><h3 class="pl-st">Schedule</h3><div class="pl-radios">${rad('sch','recurring',d.schedule,'Every month','',"setD('schedule','recurring')")}${rec?`<div class="pl-nest pl-sentence">On day <select class="select pl-day" ${dis} onchange="setD('runDay',+this.value)">${o}</select> lock through the end of the previous month.</div>`:''}${rad('sch','fixed',d.schedule,'Fixed date','',"setD('schedule','fixed')")}${rec?'':`<div class="pl-nest pl-field"><label class="form-label" for="pl-date">Lock transactions dated on or before</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${er.date?`<div class="form-error-msg">${er.date}</div>`:''}</div>`}</div>`
-   +(d.mode==='soft'?`<div class="pl-field pl-move"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${er.move?`<div class="form-error-msg">${er.move}</div>`:`<div class="pl-help">Must be after the lock date. Parts in the open period keep their own dates.${rec?' Moves forward one month each time the lock does.':''}</div>`}</div>`:'')+`</section>`;
- }else f+=`<p class="pl-off">Turn on to set the mode and schedule.</p>`;
+   +`</section>`;
+ }else if(!dirty())f+=`<p class="pl-off">Turn on to set the mode and schedule.</p>`;
  if(dirty())f+=`<div class="alert alert-info pl-after"><span class="mi">visibility</span><div><span class="alert-title">After update</span>${afterLine(d)}</div></div>`;
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info pl-w"><span class="mi">info</span><div>Lock date prefilled from your reconciliation (through ${fmt(S.prefill.to)}). Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success pl-w"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const foot=`<div class="pl-foot">${ro?'':`<button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button>`}<span class="text-secondary">Last changed ${fmt(c.at)} by ${c.by}</span><a class="text-link" href="#activity?i=${c.id}">View activity log</a></div>`;
