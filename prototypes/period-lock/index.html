@@ -209,15 +209,12 @@ function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),
    f+=srow('Schedule','<div class="row" style="gap:6px">'+(d.runDay==='last'?'Every month on the '+ds:'Every month on day '+ds)+', lock through the end of the previous month.</div>'+(ro?'':'<div style="margin-top:8px"><a onclick="setD(\'schedule\',\'fixed\')">Set a specific date instead</a></div>'))}
   else f+=srow('Lock transactions dated on or before','<input type="date" value="'+(d.date||'')+'" max="'+addDays(TODAY,-1)+'" '+(ro?'disabled':'')+' onchange="setD(\'date\',this.value)">'+(er.date?'<div class="err">'+er.date+'</div>':'')+(ro?'':'<div style="margin-top:8px"><a onclick="setD(\'schedule\',\'recurring\')">Use a monthly schedule</a></div>'));
   if(d.mode==='soft'&&!rec&&(S.showMove||d.moveTo&&d.moveTo!==addDays(d.date,1)))f+=srow('Move late transactions to','<input type="date" value="'+dMove(d)+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(er.move?'<div class="err">'+er.move+'</div>':''));
-  f+='<div class="srow">Timezone: '+d.tz+'. <a onclick="toast(\'Integration settings (mock)\')">View in settings</a></div>';
-  f+=help('Not covered: rollbacks (checked by webhook date), Shopify order edits, and Summary sync.','learn()');
  }
  f+='<div class="pv"><div class="pv-t">Preview</div><div>'+preview(d)+'</div></div>';
  const sw='<select class="in" style="height:32px" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
  return '<div class="row" style="justify-content:space-between;margin-bottom:20px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a>'+sw+'</div>'
  +(ro?'<div class="note n-plain">Only admins can change period lock.</div>':'')
  +'<div class="scard pad">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
-function learn(){modal('<h3>What period lock doesn\'t cover</h3><ul><li><b style="font-weight:500">Rollbacks</b> are checked by the webhook date only. A transaction dated in the locked period with a later webhook date can still be rolled back.</li><li><b style="font-weight:500">Shopify order edits</b> roll back and resync when the webhook date is open, even if parts are dated in the locked period.</li><li><b style="font-weight:500">Summary sync</b> isn\'t locked. Summaries change only when their source records change.</li><li>Imports keep running for all dates.</li></ul><div class="mfoot"><button class="btn" onclick="closeM()">Got it</button></div>')}
 function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='schedule'&&v==='fixed'){if(!d.date||d.date>=TODAY)d.date=recur(d.runDay).lock;d.moveTo=null;S.showMove=0}
  if(k==='date'){d.moveTo=null}
