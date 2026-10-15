@@ -51,7 +51,10 @@ body{margin:0;display:flex;flex-direction:column;min-height:100vh;background:var
 .form-hint .mi{font-size:18px;color:var(--text-secondary)}
 .select,.input{width:auto}
 .daysel{min-width:72px}
-.tog{display:inline-flex;align-items:center;gap:12px}
+.pl-hdr{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:16px;margin-bottom:24px;border-bottom:1px solid #DFE4EC}
+.pl-hdr .text-subtitle1{font-size:16px;line-height:24px;font-weight:600;color:var(--text-primary)}
+.pl-hdr-r{display:flex;align-items:center;gap:16px}
+.pl-foot{display:flex;align-items:center;gap:16px;margin-top:16px}
 /* mode cards: kit radio inside card */
 .mcard{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--color-grey-20);border-radius:var(--radius-md);padding:15px 16px;cursor:pointer;background:var(--color-white)}
 .mcard.on{border:2px solid var(--color-primary);padding:14px 15px;background:var(--color-primary-5)}
@@ -155,7 +158,9 @@ function preview(d){if(!d.on)return 'Period lock is off. Syncs can post on any d
  if(d.schedule==='recurring')s+=' Next lock: '+fmt(recur(d.runDay).next)+'.';return s}
 function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),ro=!isAdmin(),n=d.short,er=validate(d),rec=d.schedule==='recurring';
  const card=(v,t,s)=>'<label class="mcard '+(d.mode===v?'on':'')+(ro?' ro':'')+'" '+(ro?'':'onclick="event.preventDefault();setD(\'mode\',\''+v+'\')"')+'><input type="radio" class="radio" name="mode" '+(d.mode===v?'checked ':'')+(ro?'disabled':'')+'><div><b>'+t+'</b><span class="text-secondary">'+s+'</span></div></label>';
- let f=srow('Period lock',tog(d.on,'setD(\'on\','+(!d.on)+')',ro),help('Last changed '+c.at+' by '+c.by+'.'));
+ const L0=dLock(d),stl=!d.on?'Off. New transactions sync on their real dates.':!L0?'Pick a lock date.':'Locked through '+fmt(L0)+' · '+(rec?'Next lock '+fmt(recur(d.runDay).next):'Fixed date');
+ const hdr='<div class="pl-hdr"><div><div class="text-subtitle1">Period lock</div><div class="text-secondary" id="pl-status">'+stl+'</div></div><div class="pl-hdr-r">'+(d.on?'<span class="status status-green">On</span>':'<span class="status status-grey">Off</span>')+'<input type="checkbox" class="switch" aria-label="Period lock" '+(d.on?'checked ':'')+(ro?'disabled ':'')+'onchange="setD(\'on\','+(!d.on)+')"></div></div>';
+ let f='';
  if(d.on){
   f+=srow('Mode','<div class="stack">'+card('soft','Soft lock — move late transactions to the open period','From now on, any transaction dated on or before the lock date is posted on the first open day instead of its real date. Your closed period stays untouched, but these transactions will show a different date in accounting than in '+n+'.')
    +card('hard','Hard lock — don\'t sync late transactions','From now on, any transaction dated on or before the lock date is canceled and not posted. You\'ll need to resync it manually after you move the lock.')+'</div>',help('Applies to all future syncs for '+n+', scheduled and manual.'));
@@ -169,7 +174,7 @@ function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),
  const sw='<select class="select" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
  return '<div style="margin:4px 0 8px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a></div><div class="row" style="justify-content:space-between;margin-bottom:16px"><h1 class="page-title" style="margin:0">'+c.name+'</h1>'+sw+'</div>'
  +(ro?'<div class="alert alert-warning">Only admins can change period lock.</div>':'')
- +'<div class="card" style="padding:24px">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
+ +'<div class="card" style="padding:24px">'+hdr+f+'</div><div class="pl-foot">'+(ro?'':'<button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button>')+'<span class="text-secondary">Last changed '+c.at+' by '+c.by+'</span></div>'}
 function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='schedule'&&v==='fixed'){if(!d.date||d.date>=TODAY)d.date=recur(d.runDay).lock;d.moveTo=null;S.showMove=0}
  if(k==='date'){d.moveTo=null}
