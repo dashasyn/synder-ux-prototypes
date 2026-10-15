@@ -5,133 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Period lock · Synder prototype</title>
 <style>
-:root{--p:#0053CC;--p10:#E0EBFD;--p5:#F2F6FC;--g5:#F7F8FA;--g10:#EFF1F5;--g20:#DFE4EC;--g30:#B4BBCB;--g50:#6B778C;--t:#1A1B24;
---green:#1F8940;--greenL:#ECFDDC;--red:#CC2929;--redL:#FFECE8;--yel:#CB7515;--yelL:#FFF1DD;--side:#007AFF}
+:root{--p:#0053CC;--p5:#E0EBFD;--g20:#DFE4EC;--g30:#B4BBCB;--g50:#555;--t:#000;--side:#007AFF}
 *{box-sizing:border-box}
-html,body{margin:0;font-family:Roboto,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:20px;color:var(--t);background:var(--g5)}
-a{color:var(--p);text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
-button{font:inherit}
-.vbar{position:sticky;top:0;z-index:50;height:44px;background:#1A1B24;color:#fff;display:flex;align-items:center;gap:16px;padding:0 16px}
-.vbar b{font-weight:500;font-size:14px}
-.vbar select{background:#2B2D3A;color:#fff;border:1px solid #444757;border-radius:4px;padding:4px 8px;font-size:14px}
-.vbar .sp{flex:1}
-.vbar label{font-size:14px;color:#C9CCD6;display:flex;gap:6px;align-items:center}
-.shell{display:flex;min-height:calc(100vh - 44px)}
-.side{width:230px;background:#fff;border-right:1px solid #C8C7CC;padding:12px 0;flex-shrink:0}
-.org{display:flex;gap:10px;align-items:center;padding:4px 16px 14px;border-bottom:1px solid var(--g20);margin-bottom:8px}
-.av{width:32px;height:32px;border-radius:50%;background:#F5A623;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
-.side a{display:block;padding:8px 16px;color:var(--t);font-size:14px}
-.side a:hover{background:var(--g5);text-decoration:none}
-.side a.on{color:var(--side);background:#EAF3FF;border-right:3px solid var(--side);font-weight:500}
-.side .grp{padding:12px 16px 4px;color:var(--g50);font-size:14px}
-main{flex:1;padding:24px 32px;max-width:1180px}
-h1{font-size:24px;line-height:32px;font-weight:500;margin:0 0 4px}
-h2{font-size:18px;line-height:24px;font-weight:500;margin:24px 0 8px}
-.sub{color:var(--g50);margin:0 0 20px}
-.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:6px 19px;border-radius:4px;border:1px solid var(--p);background:var(--p);color:#fff;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
-.btn:hover{background:#0045AA;text-decoration:none}
-.btn.o{background:#fff;color:var(--p)}.btn.o:hover{background:var(--p5)}
-.btn.q{background:transparent;border-color:transparent;color:var(--p);padding:6px 8px}
-.btn.d{background:var(--red);border-color:var(--red)}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-.card{background:#fff;border:1px solid var(--g20);border-radius:8px}
-.pad{padding:20px 24px}
-table{width:100%;border-collapse:collapse;background:#fff}
-th{text-align:left;font-weight:500;color:var(--g50);padding:10px 12px;border-bottom:1px solid #DDD;font-size:14px;white-space:nowrap}
-td{padding:12px;border-bottom:1px solid var(--g10);vertical-align:top}
-tr.click{cursor:pointer}tr.click:hover td{background:var(--g5)}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;font-size:14px;line-height:20px;white-space:nowrap}
-.c-ok{background:var(--greenL);color:var(--green)}.c-warn{background:var(--yelL);color:#8A4E0B}.c-bad{background:var(--redL);color:var(--red)}
-.c-lock{background:var(--g10);color:var(--t);border:1px solid var(--g20)}.c-off{background:#fff;color:var(--g50);border:1px solid var(--g20)}
-.muted{color:var(--g50)}
+html,body{margin:0;font-family:Roboto,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.43;color:#000;background:#f6f6f6}
+a{color:#0053CC;text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
+button,select,input{font-family:inherit}
+.vbar{height:36px;background:#1A1B24;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:500}
+.hdr{height:59px;background:#fff;border-top:1px solid #c8c7cc;border-bottom:1px solid #c8c7cc;display:flex;align-items:center;padding:0 15px;gap:15px}
+.orgsw{width:208px;height:32px;border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 6px;border:1px solid transparent;cursor:pointer}
+.orgsw:hover{border-color:#ddd}
+.av{width:29px;height:29px;border-radius:50%;background:#d86a8b;color:#fafafa;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hsp{flex:1}
+.syncs{display:flex;flex-direction:column;align-items:flex-start}
+.syncs b{font-size:18px;font-weight:700;color:#007aff}
+.bar{width:123px;height:5px;background:#9ebdeb;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;width:72%;background:#007aff;border-radius:4px}
+.hiw{font-size:16px;color:#0053cc}
+.hic{width:30px;height:30px;color:#007aff;display:inline-flex;align-items:center;justify-content:center;position:relative}
+.badge{position:absolute;top:0;right:-2px;background:#cc2929;color:#fff;font-size:14px;line-height:16px;min-width:16px;border-radius:8px;text-align:center;padding:0 3px}
+.chev{color:#555;font-size:14px}
+.shell{display:flex;min-height:calc(100vh - 95px)}
+.side{width:230px;background:#f6f6f6;border-right:1px solid #c8c7cc;flex-shrink:0;display:flex;flex-direction:column}
+.ni{height:42px;display:flex;align-items:center;gap:10px;padding:0 15px;border-bottom:1px solid #c8c7cc;color:#555;cursor:pointer}
+.ni:hover{background:#d9d9d9;text-decoration:none}
+.ni svg{width:24px;height:24px;color:#007aff;flex-shrink:0}
+.ni .cv{margin-left:auto;color:#555}
+.sub{height:42px;display:flex;align-items:center;gap:8px;padding:0 15px 0 45px;color:#555}
+.sub:hover{background:#d9d9d9;text-decoration:none}
+.ni.on,.sub.on{background:#007aff;color:#fff}.ni.on svg{color:#fff}
+.subs{border-bottom:1px solid #c8c7cc}
+.bdg{height:20px;border-radius:4px;padding:0 6px;font-size:14px;line-height:20px}
+.bdg.new{background:#ddf5c7;color:#1f8940}.bdg.beta{background:#d6ebff;color:#3c4eac}
+.gap{height:43px;border-bottom:1px solid #c8c7cc}
+.promo{margin:16px 12px;background:#e0ebfd;border:1px solid #dfe4ec;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.05);padding:16px 12px}
+.promo b{font-weight:500;display:block;margin-bottom:10px}
+.demo{margin:0 12px 16px;color:#555}
+main{flex:1;background:#fff;padding:16px;min-width:0}
+h1{font-size:28px;font-weight:500;line-height:36px;margin:8px 0 16px}
+h1+.subt{margin-top:-12px}
+.subt{color:rgba(0,0,0,.6);margin:0 0 16px}
+h2{font-size:18px;font-weight:500;margin:20px 0 8px}
+.h4{font-size:16px;font-weight:400;margin:0 0 8px}
+.muted{color:#555}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .between{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.field{margin-bottom:18px;max-width:360px}
-.field label.l{display:block;color:var(--g50);margin-bottom:6px}
-input[type=date],input[type=text],select.in{height:36px;border:1px solid var(--g30);border-radius:4px;padding:0 10px;font-size:14px;background:#fff;color:var(--t);font-family:inherit}
-.err{color:var(--red);margin-top:6px}.hint{color:var(--g50);margin-top:6px}.warnt{color:#8A4E0B;margin-top:6px}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;max-width:640px}
-.opt{border:1px solid var(--g20);border-radius:6px;padding:12px 14px;cursor:pointer;background:#fff}
-.opt.on{border-color:var(--p);background:var(--p5)}
-.opt b{font-weight:500;display:block}.opt span{color:var(--g50)}
-.opt.ro{cursor:default}
-.note{border-radius:6px;padding:12px 14px;margin-bottom:16px}
-.n-info{background:var(--p5);border:1px solid var(--p10)}
-.n-warn{background:var(--yelL);border:1px solid #F3D6AE}
-.n-plain{background:var(--g5);border:1px solid var(--g20)}
-.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle span{position:absolute;inset:0;background:var(--g30);border-radius:22px;cursor:pointer;transition:.15s}
-.toggle span:before{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.15s}
-.toggle input:checked+span{background:var(--p)}.toggle input:checked+span:before{transform:translateX(18px)}
-.toggle input:disabled+span{cursor:not-allowed;opacity:.6}
-.dim{opacity:.5;pointer-events:none}
-.savebar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--g20);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-radius:0 0 8px 8px}
-.modal-bg{position:fixed;inset:0;background:rgba(26,27,36,.45);z-index:80;display:flex;align-items:center;justify-content:center}
-.modal{background:#fff;border-radius:8px;width:520px;max-width:92vw;padding:24px}
-.modal h3{margin:0 0 8px;font-size:18px;font-weight:500}
-.modal ul{padding-left:20px;margin:8px 0 16px}.modal li{margin-bottom:6px}
-.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A1B24;color:#fff;padding:12px 18px;border-radius:6px;z-index:90;max-width:560px}
-.menu{position:absolute;right:12px;top:40px;background:#fff;border:1px solid var(--g20);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.1);z-index:20;min-width:200px}
-.menu a{display:block;padding:8px 14px;color:var(--t)}.menu a:hover{background:var(--g5);text-decoration:none}
-.kv{border-collapse:collapse;width:auto;background:transparent}.kv th{padding:6px 24px 6px 0;color:var(--g50);border:0;font-weight:400}.kv td{padding:6px 0;border:0}
-.empty{text-align:center;padding:48px 16px}
-.empty b{display:block;font-size:18px;font-weight:500;margin-bottom:6px}
-.empty p{color:var(--g50);margin:0 0 16px}
-.empty .sec{display:block;margin-top:10px}
-.tabs{display:flex;gap:20px;border-bottom:1px solid var(--g20);margin-bottom:16px}
-.tabs a{padding:8px 0;color:var(--g50)}.tabs a.on{color:var(--p);border-bottom:2px solid var(--p);font-weight:500}
-.hl{background:var(--yelL);padding:0 4px;border-radius:3px}
-details summary{cursor:pointer;color:var(--p)}
-ol.as li{margin-bottom:10px}
-.lockic{width:14px;height:14px;vertical-align:-2px}
-</style>
-<style>
-.stack{display:flex;flex-direction:column;gap:12px;margin-bottom:8px;max-width:720px}
-.mcard{display:flex;gap:12px;border:1px solid var(--g20);border-radius:6px;padding:16px;background:#fff;cursor:pointer}
-.mcard.on{border:2px solid var(--p);padding:15px}
-.mcard.ro{cursor:default}
-.radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--g30);flex-shrink:0;margin-top:1px;position:relative;background:#fff}
-.radio.on{border-color:var(--p)}.radio.on:after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--p)}
-.mcard b{font-weight:500;display:block;margin-bottom:4px}
-.rline{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;cursor:pointer}
-.sec-h{font-weight:500;margin:24px 0 10px}
-.stabs{display:flex;gap:0;border-bottom:1px solid #DDD;margin:16px 0 20px;overflow-x:auto}
-.stabs a{padding:10px 16px;color:#555;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
-.stabs a:hover{text-decoration:none;color:var(--t)}
-.stabs a.on{color:var(--p);border-bottom-color:var(--p);font-weight:500}
-.shead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.demo{margin:16px;padding-top:12px;border-top:1px solid var(--g20);color:var(--g50)}
-.h4{font-size:16px;font-weight:500;margin:0 0 10px}
-.srow{margin-bottom:24px}.slabel{font-weight:700;margin-bottom:8px}
-.shelp{display:flex;gap:6px;color:var(--g50);margin-top:8px;max-width:720px}
-.scard{background:#fff;border:1px solid #DDD;border-radius:4px}
-.rail-wrap{display:flex;min-height:420px}
-.rail{width:170px;border-right:1px solid #DDD;padding:8px 0;flex-shrink:0}
-.rail a{display:flex;align-items:center;height:38px;padding:0 16px;color:var(--t)}
-.rail a:hover{background:var(--g5);text-decoration:none}
-.rail a.on{color:var(--p);background:var(--p5);border-left:3px solid var(--p);padding-left:13px;font-weight:500}
-.rail-body{flex:1;padding:24px 28px}
-.pills{display:flex;gap:8px;align-items:center;margin-bottom:16px}
-.pill{border:1px solid var(--g30);border-radius:16px;padding:4px 14px;background:#fff}
-.pill.on{background:var(--p);color:#fff;border-color:var(--p)}
-.pill.add{border-style:dashed;color:var(--p)}
-.pills.greyed{opacity:.45;pointer-events:none}
-.fsd{position:fixed;inset:44px 0 0 0;background:#fff;z-index:40;display:flex;flex-direction:column}
-.fsd-top{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #DDD}
-.fsd-body{display:flex;flex:1;overflow:auto}
-.fsd-menu{width:240px;border-right:1px solid #DDD;padding:12px 0}
-.fsd-menu a{display:block;padding:10px 20px;color:var(--t)}.fsd-menu a.on{color:var(--p);background:var(--p5);font-weight:500}
-.fsd-main{flex:1;padding:24px 32px;max-width:900px}
-.r2{display:grid;grid-template-columns:1fr 280px;gap:24px;padding:16px 0;border-bottom:1px solid var(--g10)}
-.mcard b{font-weight:500}
-.pv{background:#E8F0FC;border:1px solid #D3E2FA;border-radius:6px;padding:12px 16px;margin-top:8px}.pv-t{color:var(--p);font-weight:500;margin-bottom:2px}
-.daysel{height:32px;min-width:56px;width:auto;padding:0 6px;text-align:center;text-align-last:center;font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:5px 18px;border-radius:4px;border:1px solid #0053cc;background:#0053cc;color:#fff;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{background:#0044a8;text-decoration:none}
+.btn.o{background:#fff;color:#0053cc}.btn.o:hover{background:#f2f6fc}
+.btn.g{background:#2ca01c;border-color:#2ca01c}.btn.g:hover{background:#248a17}
+.btn.q{background:transparent;border-color:transparent;color:#0053cc;padding:5px 8px}
+.btn.d{background:#cc2929;border-color:#cc2929}
+.btn[disabled]{opacity:.65;cursor:not-allowed}
+.dots{width:37px;height:28px;padding:0;justify-content:center}
+table{width:100%;border-collapse:collapse;background:#fff}
+table.sy{border:1px solid #ddd}
+table.sy th{background:#fff;text-align:left;font-weight:700;color:#707070;padding:8px;border:1px solid #ddd;border-bottom:2px solid #ddd;white-space:nowrap}
+table.sy td{padding:5px 8px;height:48px;border:1px solid #ddd;vertical-align:middle}
+table.sy tbody tr:nth-child(odd) td{background:#f9f9f9}
+table.sy a{color:#428bca}
+tr.click{cursor:pointer}tr.click:hover td{background:#eef4fb!important}
+.chip{display:inline-block;padding:1px 8px;border-radius:3px;font-size:14px;line-height:20px;white-space:nowrap}
+.c-soft{background:#eef0f3;color:#1a1b24;border:1px solid #dfe4ec}.c-hard{background:#3b3f4a;color:#fff}.c-off{background:#fff;color:#737373;border:1px solid #ddd}
+.c-ok{background:#ddf5c7;color:#1f8940}.c-warn{background:#fff1dd;color:#a85f0a}.c-bad{background:#ffece8;color:#cc2929}
+.panel{border:1px solid #ddd;padding:16px 12px;background:#fff}
+.srow{margin-bottom:22px}.slabel{font-weight:700;margin-bottom:6px}
+.shelp{display:flex;gap:6px;color:#737373;margin-top:6px;max-width:760px}
+.btog{width:59px;height:34px;border-radius:4px;font-size:14px;cursor:pointer;border:1px solid}
+.btog.on{background:#428bca;border-color:#357ebd;color:#fff}
+.btog.off{background:#ebebeb;border-color:#ccc;color:#333;box-shadow:inset 0 3px 5px rgba(0,0,0,.125)}
+.btog[disabled]{opacity:.65;cursor:not-allowed}
+select.in,input[type=date],input[type=text]{height:34px;border:1px solid #d5d5d5;border-radius:4px;box-shadow:inset 0 1px 1px rgba(0,0,0,.075);padding:0 10px;color:#858585;font-size:14px;background:#fff}
+input[type=date]{color:#333}
+.daysel{min-width:56px;padding:0 6px;text-align:center;text-align-last:center;color:#333!important}
+.stack{display:flex;flex-direction:column;gap:10px;max-width:760px}
+.mcard{display:flex;gap:12px;border:1px solid #ddd;border-radius:4px;padding:14px 16px;cursor:pointer;background:#fff}
+.mcard.on{border:2px solid #0053cc;padding:13px 15px}.mcard.ro{cursor:default}
+.mcard b{font-weight:500;display:block;margin-bottom:4px;color:#1a1b24}
+.radio{width:20px;height:20px;border-radius:50%;border:1px solid #858585;flex-shrink:0;position:relative;background:#fff}
+.radio.on{border-color:#0053cc}.radio.on:after{content:"";position:absolute;inset:4px;border-radius:50%;background:#0053cc}
+.pv{background:#e0ebfd;border-radius:4px;padding:10px 16px;margin-top:4px}.pv-t{color:#0053cc;font-weight:500;margin-bottom:2px}
+.note{border-radius:4px;padding:10px 16px;margin-bottom:16px}
+.n-warn{background:#fff1dd;color:#7a4508}.n-warn b{color:#e18013}
+.n-err{background:#ffece8;color:#cc2929}
+.n-plain{background:#f6f6f6}
+.err{color:#cc2929;margin-top:6px}.warnt{color:#e18013}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:4px;width:520px;max-width:92vw;padding:20px 24px;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+.modal h3{margin:0 0 10px;font-size:18px;font-weight:500}
+.modal ul{padding-left:20px;margin:8px 0 14px}.modal li{margin-bottom:6px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.field{margin-bottom:14px}.field .l{display:block;color:#555;margin-bottom:4px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 18px;border-radius:4px;z-index:90;max-width:560px}
+.menu{position:absolute;right:8px;top:40px;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 6px 12px rgba(0,0,0,.175);z-index:20;min-width:180px;padding:4px 0}
+.menu a{display:block;padding:7px 16px;color:#333}.menu a:hover{background:#f5f5f5;text-decoration:none}
+.kv{border-collapse:collapse;width:auto}.kv th{padding:5px 24px 5px 0;color:#555;font-weight:400;text-align:left}.kv td{padding:5px 0}
+.empty{text-align:center;padding:40px 16px}.empty b{display:block;font-size:18px;font-weight:500;margin-bottom:6px}.empty p{color:#555;margin:0 0 14px}
+.fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid #0053cc;color:#0053cc;border-radius:16px;padding:2px 12px;font-size:14px;background:#fff}
+.fchip.red{border-color:#cc2929;color:#cc2929;cursor:pointer}
 </style>
 </head>
 <body>
-<div class="vbar"><b>Period lock</b><span class="sp"></span></div>
+<div class="vbar">Period lock · prototype</div>
+<div class="hdr"><div class="orgsw"><span class="av">PT</span><span>Per transaction test</span><span class="chev" style="margin-left:auto">▾</span></div><span class="hsp"></span><div class="row" style="gap:8px"><span>Syncs left :</span><div class="syncs"><b>1000</b><div class="bar"><i></i></div></div></div><a class="hiw">How it works?</a><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge">3</span></span><span class="row" style="gap:2px"><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg></span><span class="chev">▾</span></span><span class="row" style="gap:2px"><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="chev">▾</span></span></div>
 <div class="shell"><nav class="side" id="side"></nav><main id="app"></main></div>
 <div id="layer"></div>
 <script>
@@ -169,21 +143,28 @@ function go(h){location.hash=h}
 let V='a';const P=r=>'#'+V+'/'+r;
 
 /* ---------- nav ---------- */
-function nav(r){const L=(h,t,k)=>'<a href="'+P(h)+'" class="'+(k.includes(r)?'on':'')+'">'+t+'</a>';
- $('#side').innerHTML='<div class="org"><div class="av">PT</div><div>Per transaction test</div></div><a onclick="toast(\'Not part of this demo\')">Dashboard</a><div class="grp">Transactions</div>'+L('transactions','Transactions list',['transactions','sync'])+L('lock','Period lock',['lock','edit'])
- +'<div class="demo">Demo: viewing as '+(isAdmin()?'Admin':'Member')+'.<br><a onclick="S.role=isAdmin()?\'member\':\'admin\';S.draft=null;render()">View as '+(isAdmin()?'Member':'Admin')+'</a></div>'}
+const IC={dash:'<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',inv:'<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/>',rules:'<path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/>',invc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',an:'<path d="M18 20V10M12 20V4M6 20v-6"/>',rev:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>',ai:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/>',news:'<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9h4M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'};
+const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+IC[k]+'</svg>';
+function nav(r){const mock="toast('Not part of this demo')";
+ const ni=(k,t,extra,on,href)=>'<a class="ni'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'>'+svg(k)+'<span>'+t+'</span>'+(extra||'')+'</a>';
+ const sub=(t,on,href,b)=>'<a class="sub'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'>'+t+(b||'')+'</a>';
+ const NEW=' <span class="bdg new">New</span>',cv='<span class="cv">▾</span>';
+ $('#side').innerHTML=ni('dash','Dashboard')+ni('list','Transactions',cv)+'<div class="subs">'+sub('Transactions list',['transactions','sync'].includes(r),'#a/transactions')+sub('Import activity log')+sub('Transaction reconciliation',0,0,NEW)+sub('Period lock',['lock','edit'].includes(r),'#a/lock',NEW)+'</div>'
+ +ni('inv','Inventory sync',' <span class="bdg beta">Beta</span>')+ni('rules','Smart rules',cv)+ni('invc','Invoicing',cv)+ni('an','Analytics',cv)+ni('rev','Revenue recognition',cv)+'<div class="gap"></div>'+ni('ai','AI Hub')+ni('news',"What's New")+ni('set','Settings')
+ +'<div style="flex:1"></div><div class="promo"><b>Missed any transactions?</b><button class="btn" style="width:100%;justify-content:center" onclick="'+mock+'">Check now</button></div>'
+ +'<div class="demo">Demo: viewing as '+(isAdmin()?'Admin':'Member')+'. <a onclick="S.role=isAdmin()?\'member\':\'admin\';S.draft=null;render()">View as '+(isAdmin()?'Member':'Admin')+'</a></div>'}
 
 /* ---------- primitives ---------- */
 const INFO='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
 function help(t,lm){return '<div class="shelp">'+INFO+'<span>'+t+(lm?' <a onclick="'+lm+'">Learn more &gt;&gt;</a>':'')+'</span></div>'}
 function srow(label,control,h){return '<div class="srow"><div class="slabel">'+label+'</div><div>'+control+'</div>'+(h||'')+'</div>'}
-function tog(on,onchange,ro){return '<label class="row" style="gap:8px"><span class="toggle"><input type="checkbox" '+(on?'checked':'')+' '+(ro?'disabled':'')+' onchange="'+onchange+'"><span></span></span><span>'+(on?'On':'Off')+'</span></label>'}
-const chipMode=c=>c.on?'<span class="chip c-lock">'+(c.mode==='soft'?'Soft':'Hard')+'</span>':'<span class="chip c-off">Off</span>';
+function tog(on,onchange,ro){return '<button class="btog '+(on?'on':'off')+'" '+(ro?'disabled':'')+' onclick="'+onchange+'">'+(on?'On':'Off')+'</button>'}
+const chipMode=c=>c.on?'<span class="chip c-'+c.mode+'">'+(c.mode==='soft'?'Soft':'Hard')+'</span>':'<span class="chip c-off">Off</span>';
 const nextLock=c=>c.on&&c.schedule==='recurring'?recur(c.runDay).next:null;
 
 /* ---------- list ---------- */
-function vList(){return '<h4 class="h4" style="font-size:20px;margin-bottom:16px">Period lock</h4><div class="scard" style="overflow:hidden"><table><thead><tr><th>Integration</th><th>Status</th><th>Locked through</th><th>Next lock</th><th>Last changed</th></tr></thead><tbody>'
- +Object.values(S.integ).map(c=>'<tr class="click" onclick="S.draft=null;go(\'a/edit?i='+c.id+'\')"><td><a>'+c.name+'</a></td><td>'+chipMode(c)+'</td><td>'+(c.on?fmt(lockOf(c)):'—')+'</td><td>'+(nextLock(c)?fmt(nextLock(c)):'—')+'</td><td>'+c.at+'<div class="muted">'+c.by+'</div></td></tr>').join('')+'</tbody></table></div>'}
+function vList(){return '<h1>Period lock</h1><p class="subt">Stop syncs from changing periods you have closed. Set per integration.</p><table class="sy"><thead><tr><th>Integration</th><th>Status</th><th>Locked through</th><th>Next lock</th><th>Last changed</th></tr></thead><tbody>'
+ +Object.values(S.integ).map(c=>'<tr class="click" onclick="S.draft=null;go(\'a/edit?i='+c.id+'\')"><td><a>'+c.name+'</a></td><td>'+chipMode(c)+'</td><td>'+(c.on?fmt(lockOf(c)):'—')+'</td><td>'+(nextLock(c)?fmt(nextLock(c)):'—')+'</td><td>'+c.at+' · '+c.by+'</td></tr>').join('')+'</tbody></table>'}
 
 /* ---------- edit ---------- */
 function validate(d){const e={};if(!d.on)return e;
@@ -200,7 +181,7 @@ function preview(d){if(!d.on)return 'Period lock is off. Syncs can post on any d
  if(d.schedule==='recurring')s+=' Next lock: '+fmt(recur(d.runDay).next)+'.';return s}
 function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),ro=!isAdmin(),n=d.short,er=validate(d),rec=d.schedule==='recurring';
  const card=(v,t,s)=>'<div class="mcard '+(d.mode===v?'on':'')+(ro?' ro':'')+'" '+(ro?'':'onclick="setD(\'mode\',\''+v+'\')"')+'><span class="radio '+(d.mode===v?'on':'')+'"></span><div><b>'+t+'</b><span class="muted">'+s+'</span></div></div>';
- let f=srow('Period lock',tog(d.on,'setD(\'on\',this.checked)',ro),help('Last changed '+c.at+' by '+c.by+'.'));
+ let f=srow('Period lock',tog(d.on,'setD(\'on\','+(!d.on)+')',ro),help('Last changed '+c.at+' by '+c.by+'.'));
  if(d.on){
   f+=srow('Mode','<div class="stack">'+card('soft','Soft lock — move late transactions to the open period','From now on, any transaction dated on or before the lock date is posted on the first open day instead of its real date. Your closed period stays untouched, but these transactions will show a different date in accounting than in '+n+'.')
    +card('hard','Hard lock — don\'t sync late transactions','From now on, any transaction dated on or before the lock date is canceled and not posted. You\'ll need to resync it manually after you move the lock.')+'</div>',help('Applies to all future syncs for '+n+', scheduled and manual.'));
@@ -211,10 +192,10 @@ function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),
   if(d.mode==='soft'&&!rec&&(S.showMove||d.moveTo&&d.moveTo!==addDays(d.date,1)))f+=srow('Move late transactions to','<input type="date" value="'+dMove(d)+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(er.move?'<div class="err">'+er.move+'</div>':''));
  }
  f+='<div class="pv"><div class="pv-t">Preview</div><div>'+preview(d)+'</div></div>';
- const sw='<select class="in" style="height:32px" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
- return '<div class="row" style="justify-content:space-between;margin-bottom:20px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a>'+sw+'</div>'
- +(ro?'<div class="note n-plain">Only admins can change period lock.</div>':'')
- +'<div class="scard pad">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
+ const sw='<select class="in" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
+ return '<div style="margin:4px 0 8px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a></div><div class="row" style="justify-content:space-between;margin-bottom:16px"><h1 style="margin:0">'+c.name+'</h1>'+sw+'</div>'
+ +(ro?'<div class="note n-warn">Only admins can change period lock.</div>':'')
+ +'<div class="panel">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
 function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='schedule'&&v==='fixed'){if(!d.date||d.date>=TODAY)d.date=recur(d.runDay).lock;d.moveTo=null;S.showMove=0}
  if(k==='date'){d.moveTo=null}
@@ -240,10 +221,14 @@ function guardLeave(h){if(lockDirty()){modal('<h3>Discard changes?</h3><p>You ha
 function chip(t){return{synced:'<span class="chip c-ok">Synced</span>',warn:'<span class="chip c-warn">Synced with warnings</span>',canceled:'<span class="chip c-bad">Canceled</span>',partial:'<span class="chip c-bad">Partly canceled</span>'}[t.status]}
 function reason(t){return t.reason==='moved'?'Date moved by period lock':t.reason==='canceled'?'Canceled by period lock':''}
 function vTxns(){const rows=S.txns.filter(t=>S.status==='all'||t.status===S.status||(S.status==='canceled'&&t.status==='partial'));
- const body=rows.map(t=>'<tr><td><a href="'+P('sync?id='+t.id)+'">'+t.info+'</a><div class="muted">'+S.integ[t.integ].name+'</div></td><td>'+t.amount+'</td><td>'+fmt(t.posted||t.date)+(t.posted?'<div class="muted">was '+short(t.date)+'</div>':'')+'</td><td>'+chip(t)+(t.reason?'<div class="muted" style="margin-top:4px">'+reason(t)+'</div>':'')+'</td><td style="position:relative"><button class="btn o" style="padding:6px 10px" onclick="S.menu=S.menu===\''+t.id+'\'?null:\''+t.id+'\';render()">⋯</button>'+(S.menu===t.id?'<div class="menu"><a href="'+P('sync?id='+t.id)+'">Show sync info</a><a onclick="rollback(\''+t.id+'\')">Roll back</a><a onclick="resync(\''+t.id+'\')">Resync</a></div>':'')+'</td></tr>').join('');
- return '<div class="between"><div><h1>Transactions list</h1><p class="sub">Transactions imported from your integrations and their sync status.</p></div><button class="btn o" onclick="bulk()">Roll back by date range</button></div>'
- +'<div style="margin-bottom:12px"><select class="in" onchange="S.status=this.value;render()">'+[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled']].map(([v,t])=>'<option value="'+v+'" '+(S.status===v?'selected':'')+'>'+t+'</option>').join('')+'</select></div>'
- +'<div class="card" style="overflow:visible">'+(rows.length?'<table><thead><tr><th>Transaction</th><th>Amount</th><th>Transaction date</th><th>Sync status</th><th></th></tr></thead><tbody>'+body+'</tbody></table>':'<div class="empty"><b>No transactions match</b><p>Try a different status.</p><button class="btn" onclick="S.status=\'all\';render()">Clear filter</button></div>')+'</div>'}
+ const body=rows.map(t=>'<tr><td><a href="'+P('sync?id='+t.id)+'">'+t.info+'</a><div class="muted">'+S.integ[t.integ].name+'</div></td><td>'+t.amount+'</td><td>'+fmt(t.posted||t.date)+(t.posted?'<div class="muted">was '+short(t.date)+'</div>':'')+'</td><td>'+chip(t)+(t.reason?'<div class="muted" style="margin-top:4px">'+reason(t)+'</div>':'')+'</td><td style="position:relative"><button class="btn o dots" onclick="S.menu=S.menu===\''+t.id+'\'?null:\''+t.id+'\';render()">⋯</button>'+(S.menu===t.id?'<div class="menu"><a href="'+P('sync?id='+t.id)+'">Show sync info</a><a onclick="rollback(\''+t.id+'\')">Roll back</a><a onclick="resync(\''+t.id+'\')">Resync</a></div>':'')+'</td></tr>').join('');
+ const st=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled']];
+ return '<h1>Transactions list</h1><p class="subt">Transactions imported from your integrations and their sync status.</p>'
+ +'<div class="between" style="margin-bottom:12px"><div class="row" style="gap:8px;position:relative"><button class="btn" onclick="S.menu=S.menu===\'act\'?null:\'act\';render()">Actions ▾</button>'+(S.menu==='act'?'<div class="menu" style="left:0;right:auto;top:36px"><a onclick="S.menu=null;bulk()">Roll back by date range</a><a onclick="S.menu=null;render();toast(\'Sync started (mock)\')">Sync</a></div>':'')+'<button class="btn o">Select all transactions</button></div>'
+ +'<div class="row" style="gap:8px"><button class="btn o">Import historical data</button><button class="btn g">See transactions in books ▾</button></div></div>'
+ +'<div class="row" style="gap:8px;margin-bottom:10px"><input type="text" placeholder="Search" style="width:280px"><select class="in" onchange="S.status=this.value;render()">'+st.map(([v,t])=>'<option value="'+v+'" '+(S.status===v?'selected':'')+'>'+t+'</option>').join('')+'</select><button class="btn">Apply</button></div>'
+ +(S.status!=='all'?'<div class="row" style="gap:8px;margin-bottom:12px"><span class="muted">Filters:</span><span class="fchip">Sync status: '+st.find(x=>x[0]===S.status)[1]+'</span><span class="fchip red" onclick="S.status=\'all\';render()">Reset all filters</span></div>':'')
+ +(rows.length?'<table class="sy"><thead><tr><th>Transaction</th><th>Amount</th><th>Transaction date</th><th>Sync status</th><th></th></tr></thead><tbody>'+body+'</tbody></table>':'<div class="empty"><b>No transactions match</b><p>Try a different status.</p><button class="btn" onclick="S.status=\'all\';render()">Clear filter</button></div>')}
 function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);render();
  if(t.status==='canceled')return toast('Nothing to roll back. No objects were created for this sync.');
  if(L&&t.webhook<=L)return modal('<h3>Can\'t roll back this transaction</h3><p>Its webhook date, '+fmt(t.webhook)+', is on or before the lock date ('+c.short+', '+fmt(L)+').</p><p class="muted">To roll it back, move the lock to before '+fmt(t.webhook)+'.</p><div class="mfoot"><button class="btn o" onclick="closeM()">Close</button>'+(isAdmin()?'<a class="btn" onclick="closeM()" href="'+lockLink(c.id)+'">Period lock settings</a>':'')+'</div>');
@@ -270,7 +255,7 @@ function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.inte
  else logs=[['Object','Created.']];
  return '<div class="row" style="margin-bottom:16px"><a class="btn o" href="'+P('transactions')+'">← Transactions list</a>'+(t.status==='canceled'?'':'<button class="btn o" onclick="rollback(\''+t.id+'\')">Roll back</button>')+'<button class="btn o" onclick="resync(\''+t.id+'\')">Resync</button></div><h1>Sync info</h1>'
  +'<table class="kv" style="margin:12px 0 8px"><tr><th>Integration</th><td>'+c.name+'</td></tr><tr><th>Status</th><td>'+chip(t)+'</td></tr><tr><th>Amount</th><td>'+t.amount+'</td></tr><tr><th>Transaction date</th><td>'+fmt(t.date)+(t.posted?' · posted '+fmt(t.posted):'')+'</td></tr><tr><th>Webhook date</th><td>'+fmt(t.webhook)+'</td></tr></table>'
- +'<h2>Sync log</h2>'+notice+(logs.length?'<div class="card" style="overflow:hidden"><table><thead><tr><th>Object type</th><th>Message</th></tr></thead><tbody>'+logs.map(l=>'<tr><td>'+l[0]+'</td><td>'+l[1]+'</td></tr>').join('')+'</tbody></table></div>':'<div class="card empty"><b>No objects were created</b><p>This sync was canceled before anything was posted.</p><a class="btn" href="'+P('transactions')+'">Back to transactions</a></div>')}
+ +'<h2>Sync log</h2>'+notice+(logs.length?'<div><table class="sy"><thead><tr><th>Object type</th><th>Message</th></tr></thead><tbody>'+logs.map(l=>'<tr><td>'+l[0]+'</td><td>'+l[1]+'</td></tr>').join('')+'</tbody></table></div>':'<div class="panel empty"><b>No objects were created</b><p>This sync was canceled before anything was posted.</p><a class="btn" href="'+P('transactions')+'">Back to transactions</a></div>')}
 
 /* ---------- render ---------- */
 function lockLink(id){return '#a/edit?i='+id}
