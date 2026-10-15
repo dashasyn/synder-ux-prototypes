@@ -133,20 +133,20 @@ ol.as li{margin-bottom:10px}
 <div class="shell"><nav class="side" id="side"></nav><main id="app"></main></div>
 <div id="layer"></div>
 <script>
-const TODAY='2026-10-14';
+const TODAY='2026-10-15';
 const S={role:'admin',menu:null,draft:null,status:'all',
  integ:{
-  stripe:{id:'stripe',name:'mzkt.by (Stripe)',short:'Stripe',tz:'Europe/Belgrade',on:true,mode:'soft',schedule:'fixed',date:'2026-09-30',moveTo:null,runDay:5,by:'Viacheslav Tarabarov',at:'Oct 6, 2026'},
-  shopify:{id:'shopify',name:'andrewshitsko (Shopify)',short:'Shopify',tz:'Europe/Belgrade',on:true,mode:'hard',schedule:'recurring',date:'2026-09-30',moveTo:null,runDay:5,by:'System (monthly move)',at:'Oct 5, 2026'},
-  paypal:{id:'paypal',name:'Synder test (Stripe)',short:'Stripe',tz:'Europe/Belgrade',on:false,mode:'soft',schedule:'fixed',date:'2026-08-31',moveTo:null,runDay:5,by:'Viacheslav Tarabarov',at:'Sep 30, 2026'}},
+  stripe:{id:'stripe',name:'mzkt.by (Stripe)',short:'Stripe',tz:'Europe/Belgrade',on:true,mode:'soft',schedule:'recurring',date:'2026-09-30',moveTo:null,runDay:5,by:'Viacheslav Tarabarov',at:'Oct 6, 2026'},
+  shopify:{id:'shopify',name:'andrewshitsko (Shopify)',short:'Shopify',tz:'Europe/Belgrade',on:true,mode:'hard',schedule:'recurring',date:'2026-09-30',moveTo:null,runDay:'last',by:'System (monthly move)',at:'Oct 5, 2026'},
+  paypal:{id:'paypal',name:'Synder test (Stripe)',short:'Stripe',tz:'Europe/Belgrade',on:true,mode:'soft',schedule:'fixed',date:'2026-09-30',moveTo:'2026-10-01',runDay:5,by:'Maya Chen',at:'Oct 2, 2026'}},
  txns:[
   {id:'ch_buddy',integ:'stripe',info:'Buddy QA Customer · ch_3Q9k',type:'Invoice payment',amount:'128.00 USD',date:'2026-10-03',webhook:'2026-10-03',status:'synced'},
   {id:'re_3P8',integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-01',webhook:'2026-10-01',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
   {id:'inv_eur',integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-01',webhook:'2026-10-02',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
   {id:'order_2120',integ:'shopify',info:'andrewshitsko · Order #2120',type:'Order',amount:'54.00 USD',date:'2026-10-06',webhook:'2026-10-06',status:'synced'},
-  {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-09-30',webhook:'2026-10-01',status:'partial',reason:'canceled',parts:[{t:'Payment py_A',d:'2026-10-01',a:'190.00 USD',ok:true},{t:'Payment py_B',d:'2026-09-30',a:'120.00 USD',ok:false}]},
-  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-30',webhook:'2026-10-02',status:'canceled',reason:'canceled',part:'fee'},
-  {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Oct 2)',type:'Order',amount:'72.00 USD',date:'2026-09-28',webhook:'2026-09-28',status:'synced',edit:'2026-10-02'}]};
+  {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-08-31',webhook:'2026-09-01',status:'partial',reason:'canceled',parts:[{t:'Payment py_A',d:'2026-09-01',a:'190.00 USD',ok:true},{t:'Payment py_B',d:'2026-08-31',a:'120.00 USD',ok:false}]},
+  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-08-31',webhook:'2026-09-02',status:'canceled',reason:'canceled',part:'fee'},
+  {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Sep 3)',type:'Order',amount:'72.00 USD',date:'2026-08-28',webhook:'2026-08-28',status:'synced',edit:'2026-09-03'}]};
 const $=s=>document.querySelector(s);
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmt(i){if(!i)return'';const[y,m,d]=i.split('-').map(Number);return MON[m-1]+' '+d+', '+y}
@@ -193,21 +193,22 @@ const lockDirty=()=>S.draft&&JSON.stringify(S.draft)!==JSON.stringify(S.integ[S.
 function lockRows(id){const c=S.integ[id],d=ensureDraft(id),ro=!isAdmin(),n=d.short,er=validate(d);
  const card=(v,t,s)=>'<div class="mcard '+(d.mode===v?'on':'')+(ro?' ro':'')+'" '+(ro?'':'onclick="setD(\'mode\',\''+v+'\')"')+'><span class="radio '+(d.mode===v?'on':'')+'"></span><div><b>'+t+'</b><span class="muted">'+s+'</span></div></div>';
  const rad=(k,v,t)=>'<div class="rline" '+(ro?'':'onclick="setD(\''+k+'\',\''+v+'\')"')+'><span class="radio '+(d[k]===v?'on':'')+'"></span><div>'+t+'</div></div>';
- const rec=d.schedule==='recurring',lockDate=rec?recur(d.runDay).lock:d.date,first=addDays(lockDate,1);
- let days='';for(let i=1;i<=28;i++)days+='<option value="'+i+'" '+(String(d.runDay)===String(i)?'selected':'')+'>day '+i+'</option>';days+='<option value="last" '+(d.runDay==='last'?'selected':'')+'>last day</option>';
+ const rec=d.schedule==='recurring';
  let h=srow('Period lock',tog(d.on,'setD(\'on\',this.checked)',ro),help('Stops syncs from changing a period you\'ve closed. Last changed '+c.at+' by '+c.by+'.'));
  if(!d.on)return h;
+ h+=srow('Lock type',rad('schedule','recurring','Recurring (recommended)')+rad('schedule','fixed','Fixed date'));
+ if(rec){const r=recur(d.runDay);let days='';for(let i=1;i<=28;i++)days+='<option value="'+i+'" '+(String(d.runDay)===String(i)?'selected':'')+'>'+i+'</option>';days+='<option value="last" '+(d.runDay==='last'?'selected':'')+'>Last day of month</option>';
+  h+=srow('Lock on day','<select class="in" style="min-width:220px" '+(ro?'disabled':'')+' onchange="setD(\'runDay\',this.value)">'+days+'</select><div style="margin-top:10px">Next lock: '+fmt(r.next)+' · locks through '+fmt(r.nextLock)+'</div><div class="muted" style="margin-top:4px">Locked now through '+fmt(r.lock)+'.</div>',help('On this day each month, Synder locks the previous month.'))}
+ else h+=srow('Lock transactions dated on or before','<input type="date" value="'+(d.date||'')+'" max="'+addDays(TODAY,-1)+'" '+(ro?'disabled':'')+' onchange="setD(\'date\',this.value)">'+(er.date?'<div class="err">'+er.date+'</div>':''),help('Must be before today. Includes the whole day in '+d.tz+' (integration timezone).'));
  h+=srow('Mode','<div class="stack">'+card('soft','Soft lock — move late transactions to the open period','From now on, any transaction dated on or before the lock date is posted on the first open day instead of its real date. Your closed period stays untouched, but these transactions will show a different date in accounting than in '+n+'.')
   +card('hard','Hard lock — don\'t sync late transactions','From now on, any transaction dated on or before the lock date is canceled and not posted. You\'ll need to resync it manually after you move the lock.')+'</div>',help('Applies to all future syncs for '+n+', scheduled and manual.'));
- h+=srow('Lock transactions dated on or before','<input type="date" value="'+lockDate+'" '+(ro||rec?'disabled':'')+' onchange="setD(\'date\',this.value)">'+(er.date?'<div class="err">'+er.date+'</div>':''),help(rec?'Set by the monthly schedule below.':'Includes the whole day in '+d.tz+' (integration timezone).'));
- if(d.mode==='soft')h+=srow('Post them on',(d.moveTo&&!rec?'<input type="date" value="'+d.moveTo+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(ro?'':' <a style="margin-left:8px" onclick="setD(\'moveTo\',null)">Use first day after the lock</a>')+(er.move?'<div class="err">'+er.move+'</div>':'')
-  :'First day after the lock ('+short(first)+')'+(ro||rec?'':' <a style="margin-left:8px" onclick="setD(\'moveTo\',\''+first+'\')">Change</a>')),help(rec?'Moves with the lock each month.':'Late transactions are posted on this date.'));
- h+=srow('Schedule',rad('schedule','fixed','Keep this date')+rad('schedule','recurring','Move the lock forward every month'+(rec?' <span class="muted">on</span> <select class="in" style="height:32px;margin:0 4px" '+(ro?'disabled':'')+' onclick="event.stopPropagation()" onchange="setD(\'runDay\',this.value)">'+days+'</select>':'')),
-  help(rec?'Locks through the end of the previous month. Next move: '+fmt(recur(d.runDay).next)+', to '+fmt(recur(d.runDay).nextLock)+'.':'The lock stays on this date until you change it.'));
+ if(d.mode==='soft'){if(rec){const r=recur(d.runDay),a=addDays(r.lock,1),b=addDays(r.nextLock,1);
+   h+=srow('Post them on','First day after the lock ('+short(a)+', then '+short(b)+'…)',help('Moves automatically with each monthly lock.'))}
+  else h+=srow('Post them on','<input type="date" value="'+(d.moveTo||addDays(d.date,1))+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(er.move?'<div class="err">'+er.move+'</div>':''),help('Late transactions are posted on this date. Must be after the lock date.'))}
  h+=help('Not covered: rollbacks (checked by webhook date), Shopify order edits, and Summary sync.','learn()');
  return h}
 function learn(){modal('<h3>What period lock doesn\'t cover</h3><ul><li><b style="font-weight:500">Rollbacks</b> are checked by the webhook date only. A transaction dated in the locked period with a later webhook date can still be rolled back.</li><li><b style="font-weight:500">Shopify order edits</b> roll back and resync when the webhook date is open, even if parts are dated in the locked period.</li><li><b style="font-weight:500">Summary sync</b> isn\'t locked. Summaries change only when their source records change.</li><li>Imports keep running for all dates.</li></ul><div class="mfoot"><button class="btn" onclick="closeM()">Got it</button></div>')}
-function setD(k,v){S.draft[k]=v;if(k==='date'&&S.draft.moveTo&&S.draft.moveTo<=v)S.draft.moveTo=null;render()}
+function setD(k,v){const d=S.draft;if(k==='on'&&v&&!S.integ[d.id].on){d.schedule='recurring'}d[k]=v;if(k==='schedule'&&v==='fixed'){if(!d.date||d.date>=TODAY)d.date=lockOf({...d,on:true,schedule:'recurring'});if(!d.moveTo||d.moveTo<=d.date)d.moveTo=addDays(d.date,1)}if(k==='date'&&(!d.moveTo||d.moveTo<=v))d.moveTo=addDays(v,1);render()}
 function trySave(){const d=S.draft,c=S.integ[d.id];const oldT=lockOf(c),newT=d.on?(d.schedule==='recurring'?recur(d.runDay).lock:d.date):null;
  if(!(c.on&&(!d.on||newT<oldT)))return doSave(false,0);
  const aff=S.txns.filter(t=>t.integ===d.id&&t.reason==='canceled'&&(!d.on||t.date>newT)&&t.date<=oldT);const part=aff.filter(t=>t.status==='partial').length;
@@ -284,7 +285,7 @@ function resync(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.in
  if(t.reason==='canceled'&&L&&c.mode==='hard'){const pd=t.parts?t.parts.find(p=>!p.ok).d:t.date;if(pd<=L)return toast('Still locked: dated '+fmt(pd)+', lock date '+fmt(L)+'. Move the lock first.')}
  if(t.status==='partial')return toast('Resyncing only the canceled part. The synced part isn\'t duplicated.');
  if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Resync started. It posts on '+fmt(postOn(c))+' again.');toast('Resync started.')}
-function bulk(st){st=st||{integ:'shopify',from:'2026-09-15',to:'2026-10-05'};S.bulk=st;const c=S.integ[st.integ],L=lockOf(c);let msg='',btn='';
+function bulk(st){st=st||{integ:'shopify',from:'2026-08-15',to:'2026-09-05'};S.bulk=st;const c=S.integ[st.integ],L=lockOf(c);let msg='',btn='';
  if(st.from>st.to)msg='<div class="err">From must be before To.</div>';
  else if(L&&st.to<=L)msg='<div class="note n-warn">The whole range is on or before the lock date ('+fmt(L)+'). Nothing can be rolled back.</div>';
  else if(L&&st.from<=L){const o=addDays(L,1);msg='<div class="note n-warn">'+short(st.from)+' – '+fmt(L)+' is locked. Only '+short(o)+' – '+fmt(st.to)+' can be rolled back.</div>';btn='<button class="btn" onclick="closeM();toast(\'Rollback started for '+short(o)+' – '+fmt(st.to)+'.\')">Roll back '+short(o)+' – '+short(st.to)+'</button>'}
