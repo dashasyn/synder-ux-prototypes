@@ -3,110 +3,84 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css">
 <title>Period lock · Synder prototype</title>
 <style>
-:root{--p:#0053CC;--p5:#E0EBFD;--g20:#DFE4EC;--g30:#B4BBCB;--g50:#555;--t:#000;--side:#007AFF}
-*{box-sizing:border-box}
-html,body{margin:0;font-family:Roboto,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.43;color:#000;background:#f6f6f6}
-a{color:#0053CC;text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
-button,select,input{font-family:inherit}
-.vbar{height:36px;background:#1A1B24;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:500}
-.hdr{height:59px;background:#fff;border-top:1px solid #c8c7cc;border-bottom:1px solid #c8c7cc;display:flex;align-items:center;padding:0 15px;gap:15px}
-.orgsw{width:208px;height:32px;border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 6px;border:1px solid transparent;cursor:pointer}
-.orgsw:hover{border-color:#ddd}
-.av{width:29px;height:29px;border-radius:50%;background:#d86a8b;color:#fafafa;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.hsp{flex:1}
-.syncs{display:flex;flex-direction:column;align-items:flex-start}
-.syncs b{font-size:18px;font-weight:700;color:#007aff}
-.bar{width:123px;height:5px;background:#9ebdeb;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;width:72%;background:#007aff;border-radius:4px}
-.hiw{font-size:16px;color:#0053cc}
-.hic{width:30px;height:30px;color:#007aff;display:inline-flex;align-items:center;justify-content:center;position:relative}
-.badge{position:absolute;top:0;right:-2px;background:#cc2929;color:#fff;font-size:14px;line-height:16px;min-width:16px;border-radius:8px;text-align:center;padding:0 3px}
-.chev{color:#555;font-size:14px}
-.shell{display:flex;min-height:calc(100vh - 95px)}
-.side{width:230px;background:#f6f6f6;border-right:1px solid #c8c7cc;flex-shrink:0;display:flex;flex-direction:column}
-.ni{height:42px;display:flex;align-items:center;gap:10px;padding:0 15px;border-bottom:1px solid #c8c7cc;color:#555;cursor:pointer}
-.ni:hover{background:#d9d9d9;text-decoration:none}
-.ni svg{width:24px;height:24px;color:#007aff;flex-shrink:0}
-.ni .cv{margin-left:auto;color:#555}
-.sub{height:42px;display:flex;align-items:center;gap:8px;padding:0 15px 0 45px;color:#555}
-.sub:hover{background:#d9d9d9;text-decoration:none}
-.ni.on,.sub.on{background:#007aff;color:#fff}.ni.on svg{color:#fff}
-.subs{border-bottom:1px solid #c8c7cc}
-.bdg{height:20px;border-radius:4px;padding:0 6px;font-size:14px;line-height:20px}
-.bdg.new{background:#ddf5c7;color:#1f8940}.bdg.beta{background:#d6ebff;color:#3c4eac}
-.gap{height:43px;border-bottom:1px solid #c8c7cc}
-.promo{margin:16px 12px;background:#e0ebfd;border:1px solid #dfe4ec;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.05);padding:16px 12px}
-.promo b{font-weight:500;display:block;margin-bottom:10px}
-.demo{margin:0 12px 16px;color:#555}
-main{flex:1;background:#fff;padding:16px;min-width:0}
-h1{font-size:28px;font-weight:500;line-height:36px;margin:8px 0 16px}
-h1+.subt{margin-top:-12px}
-.subt{color:rgba(0,0,0,.6);margin:0 0 16px}
-h2{font-size:18px;font-weight:500;margin:20px 0 8px}
-.h4{font-size:16px;font-weight:400;margin:0 0 8px}
-.muted{color:#555}
+body{margin:0;display:flex;flex-direction:column;min-height:100vh;background:var(--color-white);font-size:14px}
+.mi{font-family:'Material Icons Outlined';font-weight:normal;font-style:normal;font-size:20px;line-height:1;display:inline-block;vertical-align:middle;-webkit-font-smoothing:antialiased;font-feature-settings:'liga'}
+/* prototype bar (not product chrome) */
+.vbar{position:sticky;top:0;z-index:60;background:#111827;color:#F9FAFB;display:flex;align-items:center;padding:8px 20px}
+.vbar .brand{font-weight:600;font-size:14px;opacity:.9}
+/* production shell — from ai-hub-empty-state */
+.app{flex:1;display:flex;min-height:0;background:var(--color-white)}
+.sb{width:208px;flex-shrink:0;border-right:1px solid var(--border-default);background:var(--color-white);display:flex;flex-direction:column}
+.sb-org{display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-bottom:1px solid var(--border-default);font-weight:500}
+.sb-av{width:28px;height:28px;border-radius:50%;background:#F5C6CB;color:#B23B4B;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-org .on{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-org .mi{color:var(--text-secondary)}
+.sb-item{position:relative;display:flex;align-items:center;gap:10px;min-height:40px;padding:0 14px;color:var(--text-primary);border-bottom:1px solid var(--border-default);font-size:14px;cursor:pointer;text-decoration:none}
+.sb-item:hover{background:var(--color-primary-5);text-decoration:none}
+.sb-item .mi{color:var(--color-primary);font-size:20px}
+.sb-item .chev{margin-left:auto;color:var(--text-secondary)}
+.sb-sub{position:relative;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px 0 44px;color:var(--text-primary);font-size:14px;cursor:pointer;text-decoration:none}
+.sb-sub:hover{background:var(--color-primary-5);text-decoration:none}
+.sb-subs{border-bottom:1px solid var(--border-default)}
+.sb-item.on,.sb-sub.on{background:var(--color-primary);color:var(--color-white)}
+.sb-item.on .mi{color:var(--color-white)}
+.sb-item.on::after,.sb-sub.on::after{content:'';position:absolute;right:-9px;top:50%;margin-top:-8px;border:8px solid transparent;border-left-color:var(--color-primary);border-right:0}
+.sb-gap{height:40px;border-bottom:1px solid var(--border-default)}
+.sb-promo{margin:16px 8px;background:var(--color-primary-5);border-radius:6px;padding:14px 12px;text-align:center}
+.sb-promo b{display:block;margin-bottom:8px;font-weight:500}
+.sb-promo .btn{width:100%;justify-content:center}
+.sb-demo{margin:0 12px 16px;color:var(--text-secondary)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.top{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:24px;padding:0 24px;border-bottom:1px solid var(--border-default)}
+.syncs{color:var(--text-secondary);border-bottom:3px solid var(--color-primary);padding:6px 0}
+.syncs b{color:var(--color-primary);font-weight:500;font-size:16px}
+.top .mi{color:var(--color-primary);font-size:24px}
+.content{flex:1;padding:24px 32px 48px;overflow:auto}
+/* layout helpers */
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .between{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:5px 18px;border-radius:4px;border:1px solid #0053cc;background:#0053cc;color:#fff;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;text-decoration:none}
-.btn:hover{background:#0044a8;text-decoration:none}
-.btn.o{background:#fff;color:#0053cc}.btn.o:hover{background:#f2f6fc}
-.btn.g{background:#2ca01c;border-color:#2ca01c}.btn.g:hover{background:#248a17}
-.btn.q{background:transparent;border-color:transparent;color:#0053cc;padding:5px 8px}
-.btn.d{background:#cc2929;border-color:#cc2929}
-.btn[disabled]{opacity:.65;cursor:not-allowed}
-.dots{width:37px;height:28px;padding:0;justify-content:center}
-table{width:100%;border-collapse:collapse;background:#fff}
-table.sy{border:1px solid #ddd}
-table.sy th{background:#fff;text-align:left;font-weight:700;color:#707070;padding:8px;border:1px solid #ddd;border-bottom:2px solid #ddd;white-space:nowrap}
-table.sy td{padding:5px 8px;height:48px;border:1px solid #ddd;vertical-align:middle}
-table.sy tbody tr:nth-child(odd) td{background:#f9f9f9}
-table.sy a{color:#428bca}
-tr.click{cursor:pointer}tr.click:hover td{background:#eef4fb!important}
-.chip{display:inline-block;padding:1px 8px;border-radius:3px;font-size:14px;line-height:20px;white-space:nowrap}
-.c-soft{background:#eef0f3;color:#1a1b24;border:1px solid #dfe4ec}.c-hard{background:#3b3f4a;color:#fff}.c-off{background:#fff;color:#737373;border:1px solid #ddd}
-.c-ok{background:#ddf5c7;color:#1f8940}.c-warn{background:#fff1dd;color:#a85f0a}.c-bad{background:#ffece8;color:#cc2929}
-.panel{border:1px solid #ddd;padding:16px 12px;background:#fff}
-.srow{margin-bottom:22px}.slabel{font-weight:700;margin-bottom:6px}
-.shelp{display:flex;gap:6px;color:#737373;margin-top:6px;max-width:760px}
-.btog{width:59px;height:34px;border-radius:4px;font-size:14px;cursor:pointer;border:1px solid}
-.btog.on{background:#428bca;border-color:#357ebd;color:#fff}
-.btog.off{background:#ebebeb;border-color:#ccc;color:#333;box-shadow:inset 0 3px 5px rgba(0,0,0,.125)}
-.btog[disabled]{opacity:.65;cursor:not-allowed}
-select.in,input[type=date],input[type=text]{height:34px;border:1px solid #d5d5d5;border-radius:4px;box-shadow:inset 0 1px 1px rgba(0,0,0,.075);padding:0 10px;color:#858585;font-size:14px;background:#fff}
-input[type=date]{color:#333}
-.daysel{min-width:56px;padding:0 6px;text-align:center;text-align-last:center;color:#333!important}
-.stack{display:flex;flex-direction:column;gap:10px;max-width:760px}
-.mcard{display:flex;gap:12px;border:1px solid #ddd;border-radius:4px;padding:14px 16px;cursor:pointer;background:#fff}
-.mcard.on{border:2px solid #0053cc;padding:13px 15px}.mcard.ro{cursor:default}
-.mcard b{font-weight:500;display:block;margin-bottom:4px;color:#1a1b24}
-.radio{width:20px;height:20px;border-radius:50%;border:1px solid #858585;flex-shrink:0;position:relative;background:#fff}
-.radio.on{border-color:#0053cc}.radio.on:after{content:"";position:absolute;inset:4px;border-radius:50%;background:#0053cc}
-.pv{background:#e0ebfd;border-radius:4px;padding:10px 16px;margin-top:4px}.pv-t{color:#0053cc;font-weight:500;margin-bottom:2px}
-.note{border-radius:4px;padding:10px 16px;margin-bottom:16px}
-.n-warn{background:#fff1dd;color:#7a4508}.n-warn b{color:#e18013}
-.n-err{background:#ffece8;color:#cc2929}
-.n-plain{background:#f6f6f6}
-.err{color:#cc2929;margin-top:6px}.warnt{color:#e18013}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:80;display:flex;align-items:center;justify-content:center}
-.modal{background:#fff;border-radius:4px;width:520px;max-width:92vw;padding:20px 24px;box-shadow:0 5px 15px rgba(0,0,0,.3)}
-.modal h3{margin:0 0 10px;font-size:18px;font-weight:500}
-.modal ul{padding-left:20px;margin:8px 0 14px}.modal li{margin-bottom:6px}
-.mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-.field{margin-bottom:14px}.field .l{display:block;color:#555;margin-bottom:4px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 18px;border-radius:4px;z-index:90;max-width:560px}
-.menu{position:absolute;right:8px;top:40px;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 6px 12px rgba(0,0,0,.175);z-index:20;min-width:180px;padding:4px 0}
-.menu a{display:block;padding:7px 16px;color:#333}.menu a:hover{background:#f5f5f5;text-decoration:none}
-.kv{border-collapse:collapse;width:auto}.kv th{padding:5px 24px 5px 0;color:#555;font-weight:400;text-align:left}.kv td{padding:5px 0}
-.empty{text-align:center;padding:40px 16px}.empty b{display:block;font-size:18px;font-weight:500;margin-bottom:6px}.empty p{color:#555;margin:0 0 14px}
-.fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid #0053cc;color:#0053cc;border-radius:16px;padding:2px 12px;font-size:14px;background:#fff}
-.fchip.red{border-color:#cc2929;color:#cc2929;cursor:pointer}
+.stack{display:flex;flex-direction:column;gap:8px;max-width:760px}
+.form-field{margin-bottom:24px}
+.form-hint{display:flex;gap:6px;align-items:flex-start;max-width:760px;margin-top:6px}
+.form-hint .mi{font-size:18px;color:var(--text-secondary)}
+.select,.input{width:auto}
+.daysel{min-width:72px}
+.tog{display:inline-flex;align-items:center;gap:12px}
+/* mode cards: kit radio inside card */
+.mcard{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--color-grey-20);border-radius:var(--radius-md);padding:15px 16px;cursor:pointer;background:var(--color-white)}
+.mcard.on{border:2px solid var(--color-primary);padding:14px 15px;background:var(--color-primary-5)}
+.mcard.ro{cursor:default}
+.mcard b{display:block;font-weight:500;margin-bottom:4px;color:var(--text-primary)}
+.mcard input{margin-top:2px}
+.alert>div{flex:1}
+.alert .mi{font-size:20px}
+.kv{border-collapse:collapse}.kv th{padding:6px 24px 6px 0;color:var(--text-secondary);font-weight:400;text-align:left}.kv td{padding:6px 0}
+tr.click{cursor:pointer}
+.rel{position:relative}
+.dropdown-menu.pl{display:block;position:absolute;right:8px;top:44px;z-index:20;min-width:200px}
+.synder-modal ul{padding-left:20px;margin:8px 0 0}.synder-modal li{margin-bottom:6px}
+.synder-modal-body p{margin:0 0 12px}
+.synder-modal-body .form-field{margin-bottom:16px}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--text-primary);color:var(--color-white);padding:12px 16px;border-radius:4px;z-index:1100;max-width:560px;box-shadow:var(--shadow-modal)}
+/* only override: no text below 14px */
+.text-caption,.text-sm,.text-xs,.font-12,.chip-input,.text-chip,.cell-subtext,.badge-new,.form-hint,.form-error-msg,.dropdown-item,.status{font-size:14px}
 </style>
 </head>
 <body>
-<div class="vbar">Period lock · prototype</div>
-<div class="hdr"><div class="orgsw"><span class="av">PT</span><span>Per transaction test</span><span class="chev" style="margin-left:auto">▾</span></div><span class="hsp"></span><div class="row" style="gap:8px"><span>Syncs left :</span><div class="syncs"><b>1000</b><div class="bar"><i></i></div></div></div><a class="hiw">How it works?</a><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="badge">3</span></span><span class="row" style="gap:2px"><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg></span><span class="chev">▾</span></span><span class="row" style="gap:2px"><span class="hic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="chev">▾</span></span></div>
-<div class="shell"><nav class="side" id="side"></nav><main id="app"></main></div>
+<div class="vbar"><div class="brand">Period lock</div></div>
+<div class="app">
+ <nav class="sb" id="side" aria-label="Main"></nav>
+ <div class="main">
+  <div class="top"><span class="syncs">Syncs left: <b>1000</b></span><a class="text-link" style="text-decoration:none">How it works?</a><span class="mi">notifications</span><span class="mi">help_outline</span><span class="mi">person</span></div>
+  <main class="content" id="app"></main>
+ </div>
+</div>
 <div id="layer"></div>
 <script>
 const TODAY='2026-10-15';
@@ -136,35 +110,35 @@ const lockOf=c=>!c.on?null:(c.schedule==='recurring'?recur(c.runDay).lock:c.date
 const postOn=c=>(c.schedule==='fixed'&&c.moveTo)||addDays(lockOf(c)||c.date,1);
 const isAdmin=()=>S.role==='admin';
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),4500)}
-function modal(h){$('#layer').innerHTML='<div class="modal-bg" onclick="if(event.target===this)closeM()"><div class="modal">'+h+'</div></div>'}
+function modal(h){const m=h.match(/^<h3>([\s\S]*?)<\/h3>([\s\S]*?)(?:<div class="mfoot">([\s\S]*)<\/div>)?$/);
+ $('#layer').innerHTML='<div class="modal-bg show" onclick="if(event.target===this)closeM()"><div class="synder-modal" role="dialog"><div class="synder-modal-header">'+m[1]+'</div><div class="synder-modal-body">'+m[2]+'</div>'+(m[3]?'<div class="synder-modal-footer">'+m[3]+'</div>':'')+'</div></div>'}
 function closeM(){$('#layer').innerHTML=''}
 function parse(){const h=(location.hash||'#a/lock').slice(1);const[path,qs]=h.split('?');const[v,r]=path.split('/');return{v:v==='b'?'b':'a',r:r||(v==='b'?'settings':'lock'),q:new URLSearchParams(qs||'')}}
 function go(h){location.hash=h}
 let V='a';const P=r=>'#'+V+'/'+r;
 
-/* ---------- nav ---------- */
-const IC={dash:'<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',inv:'<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/>',rules:'<path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/>',invc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',an:'<path d="M18 20V10M12 20V4M6 20v-6"/>',rev:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>',ai:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/>',news:'<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9h4M18 14h-8M15 18h-5M10 6h8v4h-8z"/>',set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'};
-const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+IC[k]+'</svg>';
+/* ---------- nav (production shell) ---------- */
 function nav(r){const mock="toast('Not part of this demo')";
- const ni=(k,t,extra,on,href)=>'<a class="ni'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'>'+svg(k)+'<span>'+t+'</span>'+(extra||'')+'</a>';
- const sub=(t,on,href,b)=>'<a class="sub'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'>'+t+(b||'')+'</a>';
- const NEW=' <span class="bdg new">New</span>',cv='<span class="cv">▾</span>';
- $('#side').innerHTML=ni('dash','Dashboard')+ni('list','Transactions',cv)+'<div class="subs">'+sub('Transactions list',['transactions','sync'].includes(r),'#a/transactions')+sub('Import activity log')+sub('Transaction reconciliation',0,0,NEW)+sub('Period lock',['lock','edit'].includes(r),'#a/lock',NEW)+'</div>'
- +ni('inv','Inventory sync',' <span class="bdg beta">Beta</span>')+ni('rules','Smart rules',cv)+ni('invc','Invoicing',cv)+ni('an','Analytics',cv)+ni('rev','Revenue recognition',cv)+'<div class="gap"></div>'+ni('ai','AI Hub')+ni('news',"What's New")+ni('set','Settings')
- +'<div style="flex:1"></div><div class="promo"><b>Missed any transactions?</b><button class="btn" style="width:100%;justify-content:center" onclick="'+mock+'">Check now</button></div>'
- +'<div class="demo">Demo: viewing as '+(isAdmin()?'Admin':'Member')+'. <a onclick="S.role=isAdmin()?\'member\':\'admin\';S.draft=null;render()">View as '+(isAdmin()?'Member':'Admin')+'</a></div>'}
+ const it=(ic,t,extra,on,href)=>'<a class="sb-item'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'><span class="mi">'+ic+'</span><span>'+t+'</span>'+(extra||'')+'</a>';
+ const sub=(t,on,href,b)=>'<a class="sb-sub'+(on?' on':'')+'" '+(href?'href="'+href+'"':'onclick="'+mock+'"')+'><span>'+t+'</span>'+(b||'')+'</a>';
+ const NEW=' <span class="status status-green">New</span>',cv='<span class="mi chev">expand_more</span>',up='<span class="mi chev">expand_less</span>';
+ $('#side').innerHTML='<div class="sb-org"><span class="sb-av">PT</span><span class="on">Per transaction test</span><span class="mi">expand_more</span></div>'
+ +it('dashboard','Dashboard')+it('swap_horiz','Transactions',up)+'<div class="sb-subs">'+sub('Transactions list',['transactions','sync'].includes(r),'#a/transactions')+sub('Import activity log')+sub('Transaction reconciliation',0,0,NEW)+sub('Period lock',['lock','edit'].includes(r),'#a/lock',NEW)+'</div>'
+ +it('inventory_2','Inventory sync',' <span class="status status-blue">Beta</span>')+it('account_tree','Smart rules',cv)+it('shopping_cart','Invoicing',cv)+it('trending_up','Analytics',cv)+it('insights','Revenue recognition',cv)+'<div class="sb-gap"></div>'+it('settings','Settings')+it('hub','AI Hub')+it('stars',"What's New")
+ +'<div style="flex:1"></div><div class="sb-promo"><b>Missed any transactions?</b><button class="btn" onclick="'+mock+'">Check now</button></div>'
+ +'<div class="sb-demo">Demo: viewing as '+(isAdmin()?'Admin':'Member')+'. <a class="text-link" onclick="S.role=isAdmin()?\'member\':\'admin\';S.draft=null;render()">View as '+(isAdmin()?'Member':'Admin')+'</a></div>'}
 
 /* ---------- primitives ---------- */
-const INFO='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
-function help(t,lm){return '<div class="shelp">'+INFO+'<span>'+t+(lm?' <a onclick="'+lm+'">Learn more &gt;&gt;</a>':'')+'</span></div>'}
-function srow(label,control,h){return '<div class="srow"><div class="slabel">'+label+'</div><div>'+control+'</div>'+(h||'')+'</div>'}
-function tog(on,onchange,ro){return '<button class="btog '+(on?'on':'off')+'" '+(ro?'disabled':'')+' onclick="'+onchange+'">'+(on?'On':'Off')+'</button>'}
-const chipMode=c=>c.on?'<span class="chip c-'+c.mode+'">'+(c.mode==='soft'?'Soft':'Hard')+'</span>':'<span class="chip c-off">Off</span>';
+const INFO='<span class="mi">info</span>';
+function help(t,lm){return '<div class="form-hint">'+INFO+'<span>'+t+(lm?' <a onclick="'+lm+'">Learn more &gt;&gt;</a>':'')+'</span></div>'}
+function srow(label,control,h){return '<div class="form-field"><div class="form-label">'+label+'</div><div>'+control+'</div>'+(h||'')+'</div>'}
+function tog(on,onchange,ro){return '<label class="tog"><input type="checkbox" class="switch" '+(on?'checked ':'')+(ro?'disabled ':'')+'onchange="'+onchange+'"><span>'+(on?'On':'Off')+'</span></label>'}
+const chipMode=c=>c.on?'<span class="status '+(c.mode==='soft'?'status-grey">Soft':'status-black">Hard')+'</span>':'<span class="text-muted">Off</span>';
 const nextLock=c=>c.on&&c.schedule==='recurring'?recur(c.runDay).next:null;
 
 /* ---------- list ---------- */
-function vList(){return '<h1>Period lock</h1><p class="subt">Stop syncs from changing periods you have closed. Set per integration.</p><table class="sy"><thead><tr><th>Integration</th><th>Status</th><th>Locked through</th><th>Next lock</th><th>Last changed</th></tr></thead><tbody>'
- +Object.values(S.integ).map(c=>'<tr class="click" onclick="S.draft=null;go(\'a/edit?i='+c.id+'\')"><td><a>'+c.name+'</a></td><td>'+chipMode(c)+'</td><td>'+(c.on?fmt(lockOf(c)):'—')+'</td><td>'+(nextLock(c)?fmt(nextLock(c)):'—')+'</td><td>'+c.at+' · '+c.by+'</td></tr>').join('')+'</tbody></table>'}
+function vList(){return '<h1 class="page-title">Period lock</h1><p class="page-subtitle" style="margin:4px 0 16px">Stop syncs from changing periods you have closed. Set per integration.</p><div class="table-wrap"><table class="synder-table"><thead><tr><th>Integration</th><th>Status</th><th>Locked through</th><th>Next lock</th><th>Last changed</th></tr></thead><tbody>'
+ +Object.values(S.integ).map(c=>'<tr class="click" onclick="S.draft=null;go(\'a/edit?i='+c.id+'\')"><td><a>'+c.name+'</a></td><td>'+chipMode(c)+'</td><td>'+(c.on?fmt(lockOf(c)):'—')+'</td><td>'+(nextLock(c)?fmt(nextLock(c)):'—')+'</td><td>'+c.at+' · '+c.by+'</td></tr>').join('')+'</tbody></table></div>'}
 
 /* ---------- edit ---------- */
 function validate(d){const e={};if(!d.on)return e;
@@ -180,22 +154,22 @@ function preview(d){if(!d.on)return 'Period lock is off. Syncs can post on any d
  if(d.mode==='soft'&&d.schedule==='fixed'&&isAdmin()&&!S.showMove)s+=' <a onclick="S.showMove=1;render()">Change</a>';
  if(d.schedule==='recurring')s+=' Next lock: '+fmt(recur(d.runDay).next)+'.';return s}
 function vEdit(q){const id=q.get('i')||'stripe',c=S.integ[id],d=ensureDraft(id),ro=!isAdmin(),n=d.short,er=validate(d),rec=d.schedule==='recurring';
- const card=(v,t,s)=>'<div class="mcard '+(d.mode===v?'on':'')+(ro?' ro':'')+'" '+(ro?'':'onclick="setD(\'mode\',\''+v+'\')"')+'><span class="radio '+(d.mode===v?'on':'')+'"></span><div><b>'+t+'</b><span class="muted">'+s+'</span></div></div>';
+ const card=(v,t,s)=>'<label class="mcard '+(d.mode===v?'on':'')+(ro?' ro':'')+'" '+(ro?'':'onclick="event.preventDefault();setD(\'mode\',\''+v+'\')"')+'><input type="radio" class="radio" name="mode" '+(d.mode===v?'checked ':'')+(ro?'disabled':'')+'><div><b>'+t+'</b><span class="text-secondary">'+s+'</span></div></label>';
  let f=srow('Period lock',tog(d.on,'setD(\'on\','+(!d.on)+')',ro),help('Last changed '+c.at+' by '+c.by+'.'));
  if(d.on){
   f+=srow('Mode','<div class="stack">'+card('soft','Soft lock — move late transactions to the open period','From now on, any transaction dated on or before the lock date is posted on the first open day instead of its real date. Your closed period stays untouched, but these transactions will show a different date in accounting than in '+n+'.')
    +card('hard','Hard lock — don\'t sync late transactions','From now on, any transaction dated on or before the lock date is canceled and not posted. You\'ll need to resync it manually after you move the lock.')+'</div>',help('Applies to all future syncs for '+n+', scheduled and manual.'));
   if(rec){let days='';for(let i=1;i<=28;i++)days+='<option value="'+i+'" '+(String(d.runDay)===String(i)?'selected':'')+'>'+i+'</option>';days+='<option value="last" '+(d.runDay==='last'?'selected':'')+'>last day</option>';
-   const ds='<select class="in daysel" '+(ro?'disabled':'')+' onchange="setD(\'runDay\',this.value)">'+days+'</select>';
+   const ds='<select class="select daysel" '+(ro?'disabled':'')+' onchange="setD(\'runDay\',this.value)">'+days+'</select>';
    f+=srow('Schedule','<div class="row" style="gap:6px">'+(d.runDay==='last'?'Every month on the '+ds:'Every month on day '+ds)+', lock through the end of the previous month.</div>'+(ro?'':'<div style="margin-top:8px"><a onclick="setD(\'schedule\',\'fixed\')">Set a specific date instead</a></div>'))}
-  else f+=srow('Lock transactions dated on or before','<input type="date" value="'+(d.date||'')+'" max="'+addDays(TODAY,-1)+'" '+(ro?'disabled':'')+' onchange="setD(\'date\',this.value)">'+(er.date?'<div class="err">'+er.date+'</div>':'')+(ro?'':'<div style="margin-top:8px"><a onclick="setD(\'schedule\',\'recurring\')">Use a monthly schedule</a></div>'));
-  if(d.mode==='soft'&&!rec&&(S.showMove||d.moveTo&&d.moveTo!==addDays(d.date,1)))f+=srow('Move late transactions to','<input type="date" value="'+dMove(d)+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(er.move?'<div class="err">'+er.move+'</div>':''));
+  else f+=srow('Lock transactions dated on or before','<input class="input" type="date" value="'+(d.date||'')+'" max="'+addDays(TODAY,-1)+'" '+(ro?'disabled':'')+' onchange="setD(\'date\',this.value)">'+(er.date?'<div class="form-error-msg">'+er.date+'</div>':'')+(ro?'':'<div style="margin-top:8px"><a onclick="setD(\'schedule\',\'recurring\')">Use a monthly schedule</a></div>'));
+  if(d.mode==='soft'&&!rec&&(S.showMove||d.moveTo&&d.moveTo!==addDays(d.date,1)))f+=srow('Move late transactions to','<input class="input" type="date" value="'+dMove(d)+'" min="'+addDays(d.date,1)+'" '+(ro?'disabled':'')+' onchange="setD(\'moveTo\',this.value)">'+(er.move?'<div class="form-error-msg">'+er.move+'</div>':''));
  }
- f+='<div class="pv"><div class="pv-t">Preview</div><div>'+preview(d)+'</div></div>';
- const sw='<select class="in" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
- return '<div style="margin:4px 0 8px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a></div><div class="row" style="justify-content:space-between;margin-bottom:16px"><h1 style="margin:0">'+c.name+'</h1>'+sw+'</div>'
- +(ro?'<div class="note n-warn">Only admins can change period lock.</div>':'')
- +'<div class="panel">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
+ f+='<div class="alert alert-info" style="max-width:760px;margin:0"><span class="mi">visibility</span><div><span class="alert-title">Preview</span>'+preview(d)+'</div></div>';
+ const sw='<select class="select" onchange="guardLeave(\'a/edit?i=\'+this.value);this.value=\''+id+'\'">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===id?'selected':'')+'>'+i.name+'</option>').join('')+'</select>';
+ return '<div style="margin:4px 0 8px"><a onclick="guardLeave(\'a/lock\')">← Period lock</a></div><div class="row" style="justify-content:space-between;margin-bottom:16px"><h1 class="page-title" style="margin:0">'+c.name+'</h1>'+sw+'</div>'
+ +(ro?'<div class="alert alert-warning">Only admins can change period lock.</div>':'')
+ +'<div class="card" style="padding:24px">'+f+'</div>'+(ro?'':'<div style="margin-top:16px"><button class="btn" '+(lockDirty()&&!er.block?'':'disabled')+' onclick="confirmSave()">Update</button></div>')}
 function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='schedule'&&v==='fixed'){if(!d.date||d.date>=TODAY)d.date=recur(d.runDay).lock;d.moveTo=null;S.showMove=0}
  if(k==='date'){d.moveTo=null}
@@ -206,56 +180,56 @@ function confirmSave(){const d=S.draft,c=S.integ[d.id];const oldT=lockOf(c),newT
  if(weaker){const aff=S.txns.filter(t=>t.integ===d.id&&t.reason==='canceled'&&(!d.on||t.date>newT)&&t.date<=oldT);const part=aff.filter(t=>t.status==='partial').length;
   return modal('<h3>'+(d.on?'Move the lock back to '+fmt(newT)+'?':'Turn off period lock for '+d.name+'?')+'</h3><p>'+(d.on?short(addDays(newT,1))+' – '+fmt(oldT)+' will be open for syncs again.':'All dates will be open for syncs again.')+'</p><ul>'
   +(aff.length?'<li>'+aff.length+' transactions canceled by this lock stay Canceled unless you resync them.</li>':'<li>No transactions were canceled by this lock.</li>')+(part?'<li>'+part+' is partly canceled. Only the canceled part resyncs.</li>':'')+'<li>Transactions moved by a soft lock keep their new dates.</li><li>'+p.synced+' already synced transactions won\'t change.</li></ul>'
-  +(aff.length?'<label class="row"><input type="checkbox" id="rs" checked> Resync them after saving, on their original dates</label>':'')
-  +'<div class="mfoot"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(document.getElementById(\'rs\')?.checked,'+aff.length+')">'+(d.on?'Move lock':'Turn off')+'</button></div>')}
+  +(aff.length?'<label class="synder-checkbox" style="margin-top:12px;color:var(--text-primary)"><input type="checkbox" id="rs" checked> Resync them after saving, on their original dates</label>':'')
+  +'<div class="mfoot"><button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(document.getElementById(\'rs\')?.checked,'+aff.length+')">'+(d.on?'Move lock':'Turn off')+'</button></div>')}
  const line=d.mode==='soft'?'This will move '+p.late+' transactions waiting to sync to '+fmt(dMove(d))+' and won\'t change '+p.synced+' already synced.':'This will cancel '+p.late+' transactions waiting to sync and won\'t change '+p.synced+' already synced.';
- modal('<h3>Update period lock for '+d.name+'?</h3><p>'+line+'</p><p class="muted">'+preview({...d,_np:1}).replace(/ <a.*?<\/a>/,'')+'</p><div class="mfoot"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(false,0)">Update</button></div>')}
+ modal('<h3>Update period lock for '+d.name+'?</h3><p>'+line+'</p><p>'+preview({...d,_np:1}).replace(/ <a.*?<\/a>/,'')+'</p><div class="mfoot"><button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(false,0)">Update</button></div>')}
 function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];if(d.on&&d.schedule==='recurring'){d.date=recur(d.runDay).lock;d.moveTo=null}
  d.by='Viacheslav Tarabarov';d.at=fmt(TODAY);Object.assign(c,JSON.parse(JSON.stringify(d)));S.showMove=0;
  if(rs)S.txns.forEach(t=>{if(t.integ===c.id&&t.reason==='canceled'&&(!c.on||t.date>lockOf(c))){t.status='synced';t.reason=null}});
  S.draft=null;render();toast('Period lock updated.'+(rs?' Resyncing '+n+' transactions.':''))}
-function guardLeave(h){if(lockDirty()){modal('<h3>Discard changes?</h3><p>You have unsaved period lock changes.</p><div class="mfoot"><button class="btn o" onclick="closeM()">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;S.showMove=0;go(\''+h+'\')">Discard</button></div>');return false}S.draft=null;S.showMove=0;go(h);return false}
+function guardLeave(h){if(lockDirty()){modal('<h3>Discard changes?</h3><p>You have unsaved period lock changes.</p><div class="mfoot"><button class="btn btn-outlined" onclick="closeM()">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;S.showMove=0;go(\''+h+'\')">Discard</button></div>');return false}S.draft=null;S.showMove=0;go(h);return false}
 
 /* ---------- supporting: transactions ---------- */
 
-function chip(t){return{synced:'<span class="chip c-ok">Synced</span>',warn:'<span class="chip c-warn">Synced with warnings</span>',canceled:'<span class="chip c-bad">Canceled</span>',partial:'<span class="chip c-bad">Partly canceled</span>'}[t.status]}
+function chip(t){return{synced:'<span class="status status-green">Synced</span>',warn:'<span class="status status-yellow">Synced with warnings</span>',canceled:'<span class="status status-red">Canceled</span>',partial:'<span class="status status-red">Partly canceled</span>'}[t.status]}
 function reason(t){return t.reason==='moved'?'Date moved by period lock':t.reason==='canceled'?'Canceled by period lock':''}
 function vTxns(){const rows=S.txns.filter(t=>S.status==='all'||t.status===S.status||(S.status==='canceled'&&t.status==='partial'));
- const body=rows.map(t=>'<tr><td><a href="'+P('sync?id='+t.id)+'">'+t.info+'</a><div class="muted">'+S.integ[t.integ].name+'</div></td><td>'+t.amount+'</td><td>'+fmt(t.posted||t.date)+(t.posted?'<div class="muted">was '+short(t.date)+'</div>':'')+'</td><td>'+chip(t)+(t.reason?'<div class="muted" style="margin-top:4px">'+reason(t)+'</div>':'')+'</td><td style="position:relative"><button class="btn o dots" onclick="S.menu=S.menu===\''+t.id+'\'?null:\''+t.id+'\';render()">⋯</button>'+(S.menu===t.id?'<div class="menu"><a href="'+P('sync?id='+t.id)+'">Show sync info</a><a onclick="rollback(\''+t.id+'\')">Roll back</a><a onclick="resync(\''+t.id+'\')">Resync</a></div>':'')+'</td></tr>').join('');
+ const body=rows.map(t=>'<tr><td><a href="'+P('sync?id='+t.id)+'">'+t.info+'</a><div class="text-secondary">'+S.integ[t.integ].name+'</div></td><td>'+t.amount+'</td><td>'+fmt(t.posted||t.date)+(t.posted?'<div class="text-secondary">was '+short(t.date)+'</div>':'')+'</td><td>'+chip(t)+(t.reason?'<div class="text-secondary" style="margin-top:4px">'+reason(t)+'</div>':'')+'</td><td class="rel" style="text-align:right;width:1%"><button class="btn btn-text dots" onclick="S.menu=S.menu===\''+t.id+'\'?null:\''+t.id+'\';render()"><span class="mi">more_horiz</span></button>'+(S.menu===t.id?'<div class="dropdown-menu pl"><a class="dropdown-item" href="'+P('sync?id='+t.id)+'">Show sync info</a><a class="dropdown-item" onclick="rollback(\''+t.id+'\')">Roll back</a><a class="dropdown-item" onclick="resync(\''+t.id+'\')">Resync</a></div>':'')+'</td></tr>').join('');
  const st=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled']];
- return '<h1>Transactions list</h1><p class="subt">Transactions imported from your integrations and their sync status.</p>'
- +'<div class="between" style="margin-bottom:12px"><div class="row" style="gap:8px;position:relative"><button class="btn" onclick="S.menu=S.menu===\'act\'?null:\'act\';render()">Actions ▾</button>'+(S.menu==='act'?'<div class="menu" style="left:0;right:auto;top:36px"><a onclick="S.menu=null;bulk()">Roll back by date range</a><a onclick="S.menu=null;render();toast(\'Sync started (mock)\')">Sync</a></div>':'')+'<button class="btn o">Select all transactions</button></div>'
- +'<div class="row" style="gap:8px"><button class="btn o">Import historical data</button><button class="btn g">See transactions in books ▾</button></div></div>'
- +'<div class="row" style="gap:8px;margin-bottom:10px"><input type="text" placeholder="Search" style="width:280px"><select class="in" onchange="S.status=this.value;render()">'+st.map(([v,t])=>'<option value="'+v+'" '+(S.status===v?'selected':'')+'>'+t+'</option>').join('')+'</select><button class="btn">Apply</button></div>'
- +(S.status!=='all'?'<div class="row" style="gap:8px;margin-bottom:12px"><span class="muted">Filters:</span><span class="fchip">Sync status: '+st.find(x=>x[0]===S.status)[1]+'</span><span class="fchip red" onclick="S.status=\'all\';render()">Reset all filters</span></div>':'')
- +(rows.length?'<table class="sy"><thead><tr><th>Transaction</th><th>Amount</th><th>Transaction date</th><th>Sync status</th><th></th></tr></thead><tbody>'+body+'</tbody></table>':'<div class="empty"><b>No transactions match</b><p>Try a different status.</p><button class="btn" onclick="S.status=\'all\';render()">Clear filter</button></div>')}
+ return '<h1 class="page-title">Transactions list</h1><p class="page-subtitle" style="margin:4px 0 16px">Transactions imported from your integrations and their sync status.</p>'
+ +'<div class="between" style="margin-bottom:12px"><div class="row" style="gap:8px;position:relative"><button class="btn" onclick="S.menu=S.menu===\'act\'?null:\'act\';render()">Actions <span class="mi">expand_more</span></button>'+(S.menu==='act'?'<div class="dropdown-menu pl" style="left:0;right:auto;top:36px"><a class="dropdown-item" onclick="S.menu=null;bulk()">Roll back by date range</a><a class="dropdown-item" onclick="S.menu=null;render();toast(\'Sync started (mock)\')">Sync</a></div>':'')+'<button class="btn btn-outlined">Select all transactions</button></div>'
+ +'<div class="row" style="gap:8px"><button class="btn btn-outlined">Import historical data</button><button class="btn btn-success">See transactions in books <span class="mi">expand_more</span></button></div></div>'
+ +'<div class="row" style="gap:8px;margin-bottom:10px"><input class="input" type="text" placeholder="Search" style="width:280px"><select class="select" onchange="S.status=this.value;render()">'+st.map(([v,t])=>'<option value="'+v+'" '+(S.status===v?'selected':'')+'>'+t+'</option>').join('')+'</select><button class="btn">Apply</button></div>'
+ +(S.status!=='all'?'<div class="row" style="gap:8px;margin-bottom:12px"><span class="text-secondary">Filters:</span><span class="chip-input">Sync status: '+st.find(x=>x[0]===S.status)[1]+'</span><a class="text-link" onclick="S.status=\'all\';render()">Reset all filters</a></div>':'')
+ +(rows.length?'<div class="table-wrap"><table class="synder-table"><thead><tr><th>Transaction</th><th>Amount</th><th>Transaction date</th><th>Sync status</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>':'<div class="empty-state"><div class="empty-state-title">No transactions match</div><p class="empty-state-desc">Try a different status.</p><button class="btn" onclick="S.status=\'all\';render()">Clear filter</button></div>')}
 function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);render();
  if(t.status==='canceled')return toast('Nothing to roll back. No objects were created for this sync.');
- if(L&&t.webhook<=L)return modal('<h3>Can\'t roll back this transaction</h3><p>Its webhook date, '+fmt(t.webhook)+', is on or before the lock date ('+c.short+', '+fmt(L)+').</p><p class="muted">To roll it back, move the lock to before '+fmt(t.webhook)+'.</p><div class="mfoot"><button class="btn o" onclick="closeM()">Close</button>'+(isAdmin()?'<a class="btn" onclick="closeM()" href="'+lockLink(c.id)+'">Period lock settings</a>':'')+'</div>');
+ if(L&&t.webhook<=L)return modal('<h3>Can\'t roll back this transaction</h3><p>Its webhook date, '+fmt(t.webhook)+', is on or before the lock date ('+c.short+', '+fmt(L)+').</p><p class="text-secondary">To roll it back, move the lock to before '+fmt(t.webhook)+'.</p><div class="mfoot"><button class="btn btn-outlined" onclick="closeM()">Close</button>'+(isAdmin()?'<a class="btn" onclick="closeM()" href="'+lockLink(c.id)+'">Period lock settings</a>':'')+'</div>');
  toast('Rollback started. Webhook date '+fmt(t.webhook)+' is open.')}
 function resync(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);render();
  if(t.reason==='canceled'&&L&&c.mode==='hard'){const pd=t.parts?t.parts.find(p=>!p.ok).d:t.date;if(pd<=L)return toast('Still locked: dated '+fmt(pd)+', lock date '+fmt(L)+'. Move the lock first.')}
  if(t.status==='partial')return toast('Resyncing only the canceled part. The synced part isn\'t duplicated.');
  if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Resync started. It posts on '+fmt(postOn(c))+' again.');toast('Resync started.')}
 function bulk(st){st=st||{integ:'shopify',from:'2026-08-15',to:'2026-09-05'};S.bulk=st;const c=S.integ[st.integ],L=lockOf(c);let msg='',btn='';
- if(st.from>st.to)msg='<div class="err">From must be before To.</div>';
- else if(L&&st.to<=L)msg='<div class="note n-warn">The whole range is on or before the lock date ('+fmt(L)+'). Nothing can be rolled back.</div>';
- else if(L&&st.from<=L){const o=addDays(L,1);msg='<div class="note n-warn">'+short(st.from)+' – '+fmt(L)+' is locked. Only '+short(o)+' – '+fmt(st.to)+' can be rolled back.</div>';btn='<button class="btn" onclick="closeM();toast(\'Rollback started for '+short(o)+' – '+fmt(st.to)+'.\')">Roll back '+short(o)+' – '+short(st.to)+'</button>'}
+ if(st.from>st.to)msg='<div class="form-error-msg">From must be before To.</div>';
+ else if(L&&st.to<=L)msg='<div class="alert alert-warning">The whole range is on or before the lock date ('+fmt(L)+'). Nothing can be rolled back.</div>';
+ else if(L&&st.from<=L){const o=addDays(L,1);msg='<div class="alert alert-warning">'+short(st.from)+' – '+fmt(L)+' is locked. Only '+short(o)+' – '+fmt(st.to)+' can be rolled back.</div>';btn='<button class="btn" onclick="closeM();toast(\'Rollback started for '+short(o)+' – '+fmt(st.to)+'.\')">Roll back '+short(o)+' – '+short(st.to)+'</button>'}
  else btn='<button class="btn" onclick="closeM();toast(\'Rollback started.\')">Roll back</button>';
- modal('<h3>Roll back by date range</h3><p class="muted">Synder checks each sync\'s webhook date.</p><div class="field"><label class="l">Integration</label><select class="in" onchange="S.bulk.integ=this.value;bulk(S.bulk)">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===st.integ?'selected':'')+'>'+i.name+'</option>').join('')+'</select></div><div class="row" style="margin-bottom:16px"><div><div class="muted" style="margin-bottom:6px">From</div><input type="date" value="'+st.from+'" onchange="S.bulk.from=this.value;bulk(S.bulk)"></div><div><div class="muted" style="margin-bottom:6px">To</div><input type="date" value="'+st.to+'" onchange="S.bulk.to=this.value;bulk(S.bulk)"></div></div>'+msg+'<div class="mfoot"><button class="btn o" onclick="closeM()">Cancel</button>'+btn+'</div>')}
+ modal('<h3>Roll back by date range</h3><p class="text-secondary">Synder checks each sync\'s webhook date.</p><div class="form-field"><label class="form-label">Integration</label><select class="select" onchange="S.bulk.integ=this.value;bulk(S.bulk)">'+Object.values(S.integ).map(i=>'<option value="'+i.id+'" '+(i.id===st.integ?'selected':'')+'>'+i.name+'</option>').join('')+'</select></div><div class="row" style="margin-bottom:16px"><div><div class="form-label" style="margin-bottom:6px">From</div><input class="input" type="date" value="'+st.from+'" onchange="S.bulk.from=this.value;bulk(S.bulk)"></div><div><div class="form-label" style="margin-bottom:6px">To</div><input class="input" type="date" value="'+st.to+'" onchange="S.bulk.to=this.value;bulk(S.bulk)"></div></div>'+msg+'<div class="mfoot"><button class="btn btn-outlined" onclick="closeM()">Cancel</button>'+btn+'</div>')}
 
 /* ---------- supporting: sync info ---------- */
 function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.integ[t.integ],L=lockOf(c);let notice='',logs=[];
  const link=isAdmin()?' <a href="'+lockLink(c.id)+'">Period lock settings</a>':'';
- if(t.reason==='moved'){notice='<div class="note n-plain">'+t.objs.length+(t.objs.length>1?' objects were':' object was')+' posted on '+fmt(t.posted)+' instead of '+fmt(t.date)+' by soft lock.'+link+'</div>';
-  logs=t.objs.map(o=>[o,o+' was created on '+fmt(t.posted)+'. Original date '+fmt(t.date)+'.'+(t.fx?'<div class="muted" style="margin-top:6px">FX rate: '+t.fx+'</div>':'')])}
- else if(t.status==='partial'){const b=t.parts.find(p=>!p.ok),o=t.parts.find(p=>p.ok);notice='<div class="note n-warn"><b style="font-weight:500">1 of 2 payments synced.</b> '+b.t+' ('+b.a+') is dated '+fmt(b.d)+', on or before the lock date ('+fmt(L)+'), so it was canceled.'+link+'</div>';logs=[['Payment',o.t+' was created.']]}
- else if(t.reason==='canceled')notice='<div class="note n-warn"><b style="font-weight:500">Canceled by hard lock.</b> The '+t.part+' is dated '+fmt(t.date)+', on or before the lock date ('+fmt(L)+'). Nothing was posted. Move the lock, then resync.'+link+'</div>';
- else if(t.edit){notice='<div class="note n-warn">Order edit received '+fmt(t.edit)+'. Synder didn\'t roll back and resync: the webhook date, '+fmt(t.webhook)+', is on or before the lock date ('+fmt(L)+').</div>';logs=[['Sales receipt','Sales receipt was created.']]}
+ if(t.reason==='moved'){notice='<div class="alert alert-info">'+t.objs.length+(t.objs.length>1?' objects were':' object was')+' posted on '+fmt(t.posted)+' instead of '+fmt(t.date)+' by soft lock.'+link+'</div>';
+  logs=t.objs.map(o=>[o,o+' was created on '+fmt(t.posted)+'. Original date '+fmt(t.date)+'.'+(t.fx?'<div class="text-secondary" style="margin-top:6px">FX rate: '+t.fx+'</div>':'')])}
+ else if(t.status==='partial'){const b=t.parts.find(p=>!p.ok),o=t.parts.find(p=>p.ok);notice='<div class="alert alert-warning"><b style="font-weight:500">1 of 2 payments synced.</b> '+b.t+' ('+b.a+') is dated '+fmt(b.d)+', on or before the lock date ('+fmt(L)+'), so it was canceled.'+link+'</div>';logs=[['Payment',o.t+' was created.']]}
+ else if(t.reason==='canceled')notice='<div class="alert alert-warning"><b style="font-weight:500">Canceled by hard lock.</b> The '+t.part+' is dated '+fmt(t.date)+', on or before the lock date ('+fmt(L)+'). Nothing was posted. Move the lock, then resync.'+link+'</div>';
+ else if(t.edit){notice='<div class="alert alert-warning">Order edit received '+fmt(t.edit)+'. Synder didn\'t roll back and resync: the webhook date, '+fmt(t.webhook)+', is on or before the lock date ('+fmt(L)+').</div>';logs=[['Sales receipt','Sales receipt was created.']]}
  else logs=[['Object','Created.']];
- return '<div class="row" style="margin-bottom:16px"><a class="btn o" href="'+P('transactions')+'">← Transactions list</a>'+(t.status==='canceled'?'':'<button class="btn o" onclick="rollback(\''+t.id+'\')">Roll back</button>')+'<button class="btn o" onclick="resync(\''+t.id+'\')">Resync</button></div><h1>Sync info</h1>'
+ return '<div class="row" style="margin-bottom:16px"><a class="btn btn-outlined" href="'+P('transactions')+'">← Transactions list</a>'+(t.status==='canceled'?'':'<button class="btn btn-outlined" onclick="rollback(\''+t.id+'\')">Roll back</button>')+'<button class="btn btn-outlined" onclick="resync(\''+t.id+'\')">Resync</button></div><h1 class="page-title">Sync info</h1>'
  +'<table class="kv" style="margin:12px 0 8px"><tr><th>Integration</th><td>'+c.name+'</td></tr><tr><th>Status</th><td>'+chip(t)+'</td></tr><tr><th>Amount</th><td>'+t.amount+'</td></tr><tr><th>Transaction date</th><td>'+fmt(t.date)+(t.posted?' · posted '+fmt(t.posted):'')+'</td></tr><tr><th>Webhook date</th><td>'+fmt(t.webhook)+'</td></tr></table>'
- +'<h2>Sync log</h2>'+notice+(logs.length?'<div><table class="sy"><thead><tr><th>Object type</th><th>Message</th></tr></thead><tbody>'+logs.map(l=>'<tr><td>'+l[0]+'</td><td>'+l[1]+'</td></tr>').join('')+'</tbody></table></div>':'<div class="panel empty"><b>No objects were created</b><p>This sync was canceled before anything was posted.</p><a class="btn" href="'+P('transactions')+'">Back to transactions</a></div>')}
+ +'<h2 class="text-h2" style="margin:24px 0 12px">Sync log</h2>'+notice+(logs.length?'<div><div class="table-wrap"><table class="synder-table"><thead><tr><th>Object type</th><th>Message</th></tr></thead><tbody>'+logs.map(l=>'<tr><td>'+l[0]+'</td><td>'+l[1]+'</td></tr>').join('')+'</tbody></table></div>':'<div class="card empty-state"><div class="empty-state-title">No objects were created</div><p class="empty-state-desc">This sync was canceled before anything was posted.</p><a class="btn" href="'+P('transactions')+'">Back to transactions</a></div>')}
 
 /* ---------- render ---------- */
 function lockLink(id){return '#a/edit?i='+id}
