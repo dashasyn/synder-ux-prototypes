@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v27 -->
+<!-- period-lock v28 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v27" />
+<meta name="prototype-version" content="v28" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -358,7 +358,7 @@ function vEditC(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
  const recIn=`<div class="plc-sent" ${stop}>On day<select class="select" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>lock the previous month.</div>`;
  const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
  let lines;
- if(off)lines=['Period lock is off. Synder syncs all dates.'];
+ if(off)lines=['Period lock is off for this integration. Turn it on to set mode, schedule, and dates.'];
  else{const r=recur(d.runDay),mt=d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.';
   lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'. '+mt,'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'. Imports keep running.']:[(L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.')+' '+mt,'Imports keep running.']}
  const pvT='Preview';
@@ -405,7 +405,7 @@ function rsBlock(t){return lockedCx(t)?(t.batch?t.batch.bad.t+' is dated in the 
 function vTxns(q){const st=q.get('status')||'all',rs=q.get('reason');
  const rows=S.txns.filter(t=>(st==='all'||t.status===st)&&(!rs||t.reason==='canceled'));
  const opts=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled']];
- const body=rows.map(t=>{const rb=rbBlock(t);return`<tr class="row-clickable" onclick="go('#sync?id=${t.id}')"><td><a class="text-link" href="#sync?id=${t.id}" onclick="event.stopPropagation()">${t.info}</a>${t.revrec?' <span class="status status-blue">RevRec</span>':''}${sub(S.integ[t.integ].name)}</td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.posted||t.date)}${t.posted?sub('was '+short(t.date)):''}</td><td>${chip(t)}${t.reason?sub(reasonTxt(t)):''}</td>${rowAct('Sync info',`go('#sync?id=${t.id}')`,'t_'+t.id,`${rb?`<div class="dropdown-item dis" aria-disabled="true">Roll back${sub(rb)}</div>`:`<a class="dropdown-item" onclick="rollback('${t.id}')">Roll back</a>`}${rsBlock(t)?`<div class="dropdown-item dis" aria-disabled="true">Resync${sub(rsBlock(t))}</div>`:`<a class="dropdown-item" onclick="resync('${t.id}')">Resync</a>`}`)}</tr>`});
+ const body=rows.map(t=>{const rb=rbBlock(t);return`<tr class="row-clickable" onclick="go('#sync?id=${t.id}')"><td><a class="text-link" href="#sync?id=${t.id}" onclick="event.stopPropagation()">${t.info}</a>${t.revrec?' <span class="status status-blue">RevRec</span>':''}${sub(S.integ[t.integ].name)}</td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.posted||t.date)}</td><td>${chip(t)}${t.reason==='other'?sub(reasonTxt(t)):''}</td>${rowAct('Sync info',`go('#sync?id=${t.id}')`,'t_'+t.id,`${rb?`<div class="dropdown-item dis" aria-disabled="true">Roll back${sub(rb)}</div>`:`<a class="dropdown-item" onclick="rollback('${t.id}')">Roll back</a>`}${rsBlock(t)?`<div class="dropdown-item dis" aria-disabled="true">Resync${sub(rsBlock(t))}</div>`:`<a class="dropdown-item" onclick="resync('${t.id}')">Resync</a>`}`)}</tr>`});
  const chips=st!=='all'||rs?`<div class="chips"><span class="text-secondary">Filters:</span>${st!=='all'?`<span class="chip-input">Sync status: ${opts.find(x=>x[0]===st)[1]}</span>`:''}${rs?'<span class="chip-input">Reason: Canceled by period lock</span>':''}<a class="text-link" href="#transactions">Reset filters</a></div>`:'';
  const act=`<button class="btn btn-outlined" onclick="event.stopPropagation();S.menu=S.menu==='act'?null:'act';render()">Actions <span class="mi">expand_more</span></button>${S.menu==='act'?`<div class="dropdown-menu pl" style="top:36px;right:0" onclick="event.stopPropagation()"><a class="dropdown-item" onclick="S.menu=null;bulk()">Roll back by date range</a><a class="dropdown-item" onclick="S.menu=null;render();toast('Sync started.')">Sync</a></div>`:''}`;
  return pg(head('Transactions list','Transactions imported from your integrations and their sync status.',act),
@@ -513,6 +513,8 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log28=['C off-state Preview: "Period lock is off for this integration. Turn it on to set mode, schedule, and dates."',
+  'Transactions list (all variants): period-lock subtext removed from rows ("was Sep 29", "Date moved by period lock", "Canceled by period lock"). The lock reason shows only in Sync info. Statuses, filters (incl. the period-lock reason filter) and dashboard Sync issues unchanged.'];
  const log27=['C: toggle row spacing set to exactly 16px card top → title, 0 between title and description, 16px description → divider; switch centred. Root cause: the row reused the app top bar class .top (fixed 56px height and an extra bottom border), renamed to .plc-top.'];
  const log26=['C: compact Preview (padding 12/16, two lines in every combination).',
   'C: the unsaved-changes modal also fires on the org switcher and the variant switch; the browser warns on unload. Back link, sidebar and hash changes were already guarded.'];
@@ -536,8 +538,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v27','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v28','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v28',`<div class="card"><ul>${log28.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v27',`<div class="card"><ul>${log27.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v26',`<div class="card"><ul>${log26.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v25',`<div class="card"><ul>${log25.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
