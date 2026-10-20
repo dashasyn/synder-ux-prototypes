@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v22 -->
+<!-- period-lock v23 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v22" />
+<meta name="prototype-version" content="v23" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -359,12 +359,14 @@ function vEditC(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
  else{const r=recur(d.runDay);lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'.','Next lock: '+fmt(r.next)+', locks through '+fmt(r.nextLock)+'.']:[L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.'];
   lines.push(d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.')}
  const card=`<div class="card plc"><section class="plc-s top"><div><h3 id="plc-lbl">Period lock</h3><p class="plc-d">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="plc-lbl" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)"></section>`
-  +`<section class="plc-s sec${off?' plc-off':''}" aria-disabled="${off}"><h3>Mode</h3><div class="plc-grid">${rc('mode','soft','Soft lock','Sync late transactions on a date in the open period.',moveIn)}${rc('mode','hard','Hard lock',"Don't sync transactions dated in the locked period.")}</div></section>`
-  +`<section class="plc-s sec"><div class="${off?'plc-off':''}" aria-disabled="${off}"><h3>Schedule</h3><div class="plc-grid">${rc('schedule','recurring','Recurring','Move the lock forward each month.',recIn)}${rc('schedule','fixed','Fixed date','Lock everything up to a chosen date.',fixIn)}</div></div><div class="plc-pv" id="pl-preview"><b>Preview</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`;
+  +(off?`<section class="plc-s"><div class="plc-pv" id="pl-preview" style="margin-top:0"><b>Preview</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`
+  :`<section class="plc-s sec"><h3>Mode</h3><div class="plc-grid">${rc('mode','soft','Soft lock','Sync late transactions on a date in the open period.',moveIn)}${rc('mode','hard','Hard lock',"Don't sync transactions dated in the locked period.")}</div></section>`
+  +`<section class="plc-s sec"><h3>Schedule</h3><div class="plc-grid">${rc('schedule','recurring','Recurring','Move the lock forward each month.',recIn)}${rc('schedule','fixed','Fixed date','Lock everything up to a chosen date.',fixIn)}</div><div class="plc-pv" id="pl-preview"><b>Preview</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`);
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info"><span class="mi">info</span><div>Prefilled from your reconciliation: locked through ${fmt(S.prefill.to)}. Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const alerts=(ro?'<div class="alert alert-warning"><span class="mi">lock</span><div>Only admins can change period lock.</div></div>':'')+pre;
  return `<div class="plc-page"><a class="plc-back" href="#lock"><span class="mi">chevron_left</span>Back to Period lock</a><h1 class="page-title plc-h1">${c.name}</h1>${alerts?`<div class="pg" style="margin-bottom:24px">${alerts}</div>`:''}${card}${ro?'':`<div class="plc-foot"><button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button></div>`}</div>`}
 function setD(k,v){const d=S.draft,oldL=dL(d);d[k]=v;
+ if(k==='on'&&v){if(!d.mode)d.mode='soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5}
  if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>=TODAY))d.date=recur(d.runDay).lock;
  const L=dL(d);if(L&&L!==oldL&&(!d.moveTo||d.moveTo<=L||d.moveTo===addDays(oldL||L,1)))d.moveTo=addDays(L,1);
  if(L&&!d.moveTo)d.moveTo=addDays(L,1);
@@ -504,6 +506,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log23=['C off state (per Ignat\'s mock): Mode and Schedule are hidden, not dimmed. The card holds the Period lock row, a divider and the Preview "Period lock is off. Synder syncs all dates." Turning the switch on brings back the last values (defaults Soft, Recurring, day 5, move-to the day after the lock).'];
  const log22=['Variant C · Cards (new default, ?v=c): built from Ignat\'s mock. Back link, h1, one card with Period lock switch, Mode and Schedule as side-by-side radio cards with the field inside the selected card, light-blue Preview inside the card, Update below the card.',
   'Switcher: A · v20, B · Sections, C · Cards. No parameter opens C.'];
  const log21=['Variant switcher in the prototype bar: A · v20 and B · Sections (URL ?v=a|b, default B). Only Period lock settings differs.',
@@ -519,8 +522,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v22','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v23','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v23',`<div class="card"><ul>${log23.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v22',`<div class="card"><ul>${log22.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v21',`<div class="card"><ul>${log21.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v20',`<div class="card"><ul>${log20.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
