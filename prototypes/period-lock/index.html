@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v25 -->
+<!-- period-lock v26 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v25" />
+<meta name="prototype-version" content="v26" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -178,9 +178,9 @@ input.pl-dt{width:200px;max-width:200px}
 .plc-sent{margin-top:8px;line-height:32px;color:var(--text-primary);cursor:default;white-space:normal}
 .plc-sent select{display:inline-block;width:72px;margin:0 4px;vertical-align:middle}
 .plc-off{opacity:.5;pointer-events:none}
-.plc-pv{margin-top:16px;background:#F2F6FC;border-radius:4px;padding:16px;color:var(--text-primary)}
-.plc-pv b{display:block;font-size:14px;line-height:20px;font-weight:700}
-.plc-pv p{margin:0;line-height:20px}
+.plc-pv{margin-top:16px;background:#F2F6FC;border-radius:4px;padding:12px 16px;color:var(--text-primary)}
+.plc-pv b{display:block;font-size:14px;line-height:20px;font-weight:700;margin-bottom:4px}
+.plc-pv p{margin:0;font-size:14px;line-height:20px}
 .plc-foot{margin-top:24px}
 .pl-ex{margin-top:24px;background:#F7F8FA;border:1px solid #DFE4EC;border-radius:4px;padding:12px 16px;color:var(--text-primary)}
 </style>
@@ -271,7 +271,7 @@ function nav(r){
  h+='<div class="sb-gap"></div>'+it('settings','Settings',null,0,up)+'<div class="sb-subs">'+sb('Organization settings')+(pt?'':sb('Products and services','#products',['products','product'].includes(r)))+sb('Activity log','#activity',r==='activity')+'</div>'+it('hub','AI Hub')+it('stars',"What's New");
  h+=`<div style="flex:1"></div><div class="sb-demo">Demo: viewing as ${isAdmin()?'Admin':'Member'}. <a class="text-link" onclick="S.role=isAdmin()?'member':'admin';S.draft=null;render()">View as ${isAdmin()?'Member':'Admin'}</a></div>`;
  $('#side').innerHTML=h}
-function switchOrg(o){S.org=o;S.orgOpen=false;S.draft=null;go('#lock');render()}
+function switchOrg(o){if(leaveC(()=>switchOrg(o))){S.orgOpen=false;nav(parse().r);return}S.org=o;S.orgOpen=false;S.draft=null;go('#lock');render()}
 
 /* ---------- period lock list ---------- */
 const modeTxt=c=>!c.on?'<span class="muted">Off</span>':c.mode==='hard'?'<span class="lk"><span class="mi">lock</span>Hard</span>':'Soft';
@@ -356,8 +356,8 @@ function vEditC(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
  const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
  let lines;
  if(off)lines=['Period lock is off. Synder syncs all dates.'];
- else{const r=recur(d.runDay);lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'.','Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'.']:[L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.'];
-  lines.push(d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.');lines.push('Imports keep running.')}
+ else{const r=recur(d.runDay),mt=d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.';
+  lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'. '+mt,'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'. Imports keep running.']:[(L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.')+' '+mt,'Imports keep running.']}
  const pvT='Preview';
  const card=`<div class="card plc"><section class="plc-s top"><div><h3 id="plc-lbl">Period lock</h3><p class="plc-d">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="plc-lbl" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)"></section>`
   +(off?`<section class="plc-s"><div class="plc-pv" id="pl-preview" style="margin-top:0"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`
@@ -387,6 +387,9 @@ function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];
  if(c.on)track('PeriodLockSet',{lockMode:c.mode,lockSchedule:c.schedule,orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});else track('PeriodLockDisabled',{orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});
  if(rs)S.txns.forEach(t=>{if(t.integ===c.id&&t.reason==='canceled'){t.status='synced';t.reason=null}});
  S.draft=null;S.prefill=null;render();toast('Period lock updated.'+(rs?' Resyncing '+n+' transactions.':''))}
+/* C: confirm before leaving a dirty settings page by non-hash exits (org switch, variant switch). Returns true if the modal was shown. */
+function leaveC(fn){if(VAR!=='c'||parse().r!=='edit'||!dirty())return false;S._leave=fn;modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM();S._leave=null">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;const f=S._leave;S._leave=null;f&&f()">Discard</button>`);return true}
+window.addEventListener('beforeunload',e=>{if(VAR==='c'&&parse().r==='edit'&&dirty()){e.preventDefault();e.returnValue=''}});
 function guard(h){if(dirty()){modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM()">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;go('${h}')">Discard</button>`);return false}return true}
 
 /* ---------- transactions ---------- */
@@ -507,6 +510,8 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log26=['C: compact Preview (padding 12/16, two lines in every combination).',
+  'C: the unsaved-changes modal also fires on the org switcher and the variant switch; the browser warns on unload. Back link, sidebar and hash changes were already guarded.'];
  const log25=['C: h1 "Period lock for <integration>". Toggle row padding 20px with 4px between title and description. Card pairs stretch to the taller card (content top-aligned). Panel always titled "Preview". Recurring sentence wraps on narrow screens.'];
  const log24=['C: Hard lock description adds "They show as Canceled, even on a manual sync." Soft field label "Move late transactions to".',
   'C: panel titled "Current" (saved state) or "After update" (unsaved changes); adds "Imports keep running." when on; "Next auto-lock: Nov 5, 2026, through Oct 31, 2026." No timezone in C.',
@@ -527,8 +532,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v25','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v26','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v26',`<div class="card"><ul>${log26.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v25',`<div class="card"><ul>${log25.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v24',`<div class="card"><ul>${log24.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v23',`<div class="card"><ul>${log23.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
@@ -551,7 +557,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
 /* ---------- render ---------- */
 let VAR=(v=>['a','b','c'].includes(v)?v:'c')(new URLSearchParams(location.search).get('v'));
 function syncVar(){document.querySelectorAll('.vv').forEach(b=>{const on=b.dataset.v===VAR;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)})}
-function setVar(v){VAR=v;history.replaceState(null,'',location.pathname+'?v='+v+location.hash);render()}
+function setVar(v){if(v!==VAR&&leaveC(()=>setVar(v)))return;VAR=v;history.replaceState(null,'',location.pathname+'?v='+v+location.hash);render()}
 let lastR=null;
 function render(){const{r,q}=parse();
  if(['transactions','sync','recon','revrec'].includes(r)&&S.org!=='pt')S.org='pt';
