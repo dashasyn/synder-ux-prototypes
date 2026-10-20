@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v24 -->
+<!-- period-lock v25 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v24" />
+<meta name="prototype-version" content="v25" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -162,11 +162,11 @@ input.pl-dt{width:200px;max-width:200px}
 .plc{padding:0;border-radius:8px;border:1px solid #DFE4EC}
 .plc-s{padding:16px}
 .plc-s+.plc-s{border-top:1px solid #DFE4EC}
-.plc-s.top{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.plc-s.top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:20px;padding-bottom:20px}
 .plc-s h3{margin:0;font-size:16px;line-height:24px;font-weight:600;color:var(--text-primary)}
-.plc-d{margin:2px 0 0;font-size:14px;line-height:20px;color:#6B778C}
+.plc-d{margin:4px 0 0;font-size:14px;line-height:20px;color:#6B778C}
 .plc-s.sec h3{margin-bottom:16px}
-.plc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:flex-start}
+.plc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
 .plc-card{border:1px solid #DFE4EC;border-radius:4px;padding:16px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;background:#fff;min-width:0}
 .plc-card.on{border-color:#0053CC}
 .plc-card input.radio{margin:2px 0 0;flex-shrink:0}
@@ -175,7 +175,7 @@ input.pl-dt{width:200px;max-width:200px}
 .plc-in{margin-top:8px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;cursor:default}
 .plc-in label{font-size:14px;line-height:20px;font-weight:600;color:var(--text-primary);margin:0}
 .plc-in input.pl-dt{width:175px;max-width:175px}
-.plc-sent{margin-top:8px;line-height:32px;color:var(--text-primary);cursor:default;white-space:nowrap}
+.plc-sent{margin-top:8px;line-height:32px;color:var(--text-primary);cursor:default;white-space:normal}
 .plc-sent select{display:inline-block;width:72px;margin:0 4px;vertical-align:middle}
 .plc-off{opacity:.5;pointer-events:none}
 .plc-pv{margin-top:16px;background:#F2F6FC;border-radius:4px;padding:16px;color:var(--text-primary)}
@@ -358,14 +358,14 @@ function vEditC(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
  if(off)lines=['Period lock is off. Synder syncs all dates.'];
  else{const r=recur(d.runDay);lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'.','Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'.']:[L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.'];
   lines.push(d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.');lines.push('Imports keep running.')}
- const pvT=dirty()?'After update':'Current';
+ const pvT='Preview';
  const card=`<div class="card plc"><section class="plc-s top"><div><h3 id="plc-lbl">Period lock</h3><p class="plc-d">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="plc-lbl" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)"></section>`
   +(off?`<section class="plc-s"><div class="plc-pv" id="pl-preview" style="margin-top:0"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`
   :`<section class="plc-s sec"><h3>Mode</h3><div class="plc-grid">${rc('mode','soft','Soft lock','Sync late transactions on a date in the open period.',moveIn)}${rc('mode','hard','Hard lock',"Don't sync transactions dated in the locked period.<br>They show as Canceled, even on a manual sync.")}</div></section>`
   +`<section class="plc-s sec"><h3>Schedule</h3><div class="plc-grid">${rc('schedule','recurring','Recurring','Move the lock forward each month.',recIn)}${rc('schedule','fixed','Fixed date','Lock everything up to a chosen date.',fixIn)}</div><div class="plc-pv" id="pl-preview"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`);
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info"><span class="mi">info</span><div>Prefilled from your reconciliation: locked through ${fmt(S.prefill.to)}. Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const alerts=(ro?'<div class="alert alert-warning"><span class="mi">lock</span><div>Only admins can change period lock.</div></div>':'')+pre;
- return `<div class="plc-page"><a class="plc-back" href="#lock"><span class="mi">chevron_left</span>Back to Period lock</a><h1 class="page-title plc-h1">${c.name}</h1>${alerts?`<div class="pg" style="margin-bottom:24px">${alerts}</div>`:''}${card}${ro?'':`<div class="plc-foot"><button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button></div>`}</div>`}
+ return `<div class="plc-page"><a class="plc-back" href="#lock"><span class="mi">chevron_left</span>Back to Period lock</a><h1 class="page-title plc-h1">Period lock for ${c.name}</h1>${alerts?`<div class="pg" style="margin-bottom:24px">${alerts}</div>`:''}${card}${ro?'':`<div class="plc-foot"><button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button></div>`}</div>`}
 function setD(k,v){const d=S.draft,oldL=dL(d);d[k]=v;
  if(k==='on'&&v){if(!d.mode)d.mode='soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5}
  if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>=TODAY))d.date=recur(d.runDay).lock;
@@ -507,6 +507,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log25=['C: h1 "Period lock for <integration>". Toggle row padding 20px with 4px between title and description. Card pairs stretch to the taller card (content top-aligned). Panel always titled "Preview". Recurring sentence wraps on narrow screens.'];
  const log24=['C: Hard lock description adds "They show as Canceled, even on a manual sync." Soft field label "Move late transactions to".',
   'C: panel titled "Current" (saved state) or "After update" (unsaved changes); adds "Imports keep running." when on; "Next auto-lock: Nov 5, 2026, through Oct 31, 2026." No timezone in C.',
   'C: radio cards align to the top and size to their content; recurring sentence shortened to "On day [5] lock the previous month."'];
@@ -526,8 +527,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v24','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v25','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v25',`<div class="card"><ul>${log25.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v24',`<div class="card"><ul>${log24.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v23',`<div class="card"><ul>${log23.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v22',`<div class="card"><ul>${log22.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
