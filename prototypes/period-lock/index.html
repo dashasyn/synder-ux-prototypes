@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v34 -->
+<!-- period-lock v35 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v34" />
+<meta name="prototype-version" content="v35" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -566,11 +566,21 @@ function vImports(){const f=S.imf||{};
   rows.length?table(['Request date','Import from','Import to','Integration','>Imported','Initiated by','Type','Import status'],rows.map(r=>`<tr><td>${dt(r.req)}</td><td>${dt(r.from)}</td><td>${dt(r.to)}</td><td>${r.integ}</td><td class="r">${r.n.toLocaleString('en-US')}</td><td>${r.by}</td><td>${r.type}</td><td>${impChip(r.st)}</td></tr>`)):'<div class="card empty-state"><div class="empty-state-title">No imports match</div><p class="empty-state-desc" style="margin-bottom:0">Try different filters.</p></div>')}
 
 /* ---------- reconciliation ---------- */
-function vRecon(){const c=S.integ.stripe,L=lockOf(c);
- const runs=[['sep','2026-09-01','2026-09-30',412,2],['oct','2026-10-01','2026-10-14',187,0]];
- const act=end=>!c.on||end>L?(isAdmin()?`<button class="btn btn-outlined" onclick="promote('${end}')">Lock period</button>`:'<span class="text-secondary">Not locked</span>'):`<span class="lk text-secondary"><span class="mi">lock</span>Locked through ${fmt(L)}</span>`;
+function vRecon(q){const id=q&&q.get('id');if(id)return vReconRes(id,q.get('tab')||'matched');
  return pg(head('Transaction reconciliation','mzkt.by (Stripe) vs QuickBooks Online'),
-  table(['Period','>Matched','>Differences','Status',''],runs.map(r=>`<tr><td>${short(r[1])} – ${fmt(r[2])}</td><td class="r">${r[3]}</td><td class="r">${r[4]}</td><td><span class="status status-green">Reconciled</span></td><td class="act">${act(r[2])}</td></tr>`)))}
+  table(['Period','>Matched','>Differences','Status',''],RECON.map(r=>`<tr class="row-clickable" onclick="go('#recon?id=${r.id}')"><td><a class="text-link" href="#recon?id=${r.id}" onclick="event.stopPropagation()">${short(r.from)} – ${fmt(r.to)}</a></td><td class="r">${r.m}</td><td class="r">${r.d.length}</td><td><span class="status status-green">Reconciled</span></td><td class="act"><a class="btn-text" href="#recon?id=${r.id}" onclick="event.stopPropagation()">Open result</a></td></tr>`)))}
+/* every reconciliation stays openable; period lock never blocks or hides one. The promote shows only while the period isn't covered by the lock yet */
+const RECON=[
+ {id:'oct',from:'2026-10-01',to:'2026-10-14',m:187,d:[],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
+ {id:'sep',from:'2026-09-01',to:'2026-09-30',m:412,d:[['2026-09-18','ch_3Q7h…','59.00 USD','58.50 USD'],['2026-09-09','ch_3Q6c…','24.00 USD','—']],rows:[['2026-09-28','ch_3Q8k…','128.00 USD','Payment;Expense;charge','Auto',3],['2026-09-15','po_1U8V…','161.26 USD','Transfer;payout','Auto',2]]},
+ {id:'aug',from:'2026-08-01',to:'2026-08-31',m:398,d:[],rows:[['2026-08-27','ch_3Q5m…','96.00 USD','Payment;Expense;charge','Auto',3],['2026-08-14','po_1U7K…','212.40 USD','Transfer;payout','Auto',2]]}];
+function vReconRes(id,tab){const r=RECON.find(x=>x.id===id)||RECON[1],c=S.integ.stripe,L=lockOf(c);
+ const promo=isAdmin()&&(!c.on||!L||r.to>L)?`<div class="alert alert-info" style="align-items:center"><span class="mi">info</span><div style="flex:1"><b>Reconciliation complete.</b> Lock this period in Synder so it can't be modified.</div><button class="btn" onclick="promote('${r.to}')">Lock period</button></div>`:'';
+ const tabs=[['matched','Matched',r.m],['diff','Differences',r.d.length]];
+ const tb=`<div class="rr-tabs" role="tablist">${tabs.map(([k,l,n])=>`<a role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" href="#recon?id=${r.id}&tab=${k}">${l} (${n})</a>`).join('')}</div>`;
+ const body=tab==='diff'?(r.d.length?table(['Date','Matching ID','>Stripe','>QuickBooks Online'],r.d.map(x=>`<tr><td>${fmt(x[0])}</td><td><a class="text-link" onclick="${mock}">${x[1]}</a></td><td class="r">${x[2]}</td><td class="r">${x[3]}</td></tr>`)):table(['Date','Matching ID','>Stripe','>QuickBooks Online'],['<tr><td colspan="4" class="si-empty">No data</td></tr>'])):table(['Date','Matching ID','>Total amount','Types','Match type','>Count'],r.rows.map(x=>`<tr><td>${fmt(x[0])}</td><td><a class="text-link" onclick="${mock}">${x[1]}</a></td><td class="r">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td class="r">${x[5]}</td></tr>`));
+ return dlg('Reconciliation results','#recon',`<button class="btn btn-outlined" onclick="${mock}">Copy share link</button><button class="btn btn-outlined" onclick="${mock}">Refresh data</button><button class="btn btn-outlined" onclick="${mock}">Export</button>`,
+  pg(head(titleRow(short(r.from)+' – '+fmt(r.to),'<span class="status status-green">Reconciled</span>'),'mzkt.by (Stripe) vs QuickBooks Online'),promo,tb,body))}
 function promote(end){S.draft=null;S.prefill={i:'stripe',to:end};track('PeriodLockVisited',{});S._noVisit=1;go('#edit?i=stripe&from=recon')}
 
 /* ---------- revenue recognition (production screens: Subscriptions list, Subscription details dialog) ---------- */
@@ -733,6 +743,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log35=['Transaction reconciliation: no row looks locked any more. v34 replaced the action with "Locked through Sep 30, 2026" (lock icon, grey) once the lock covered a period, showed grey "Not locked" to members, and rows could not be opened. Now every row (Oct 1 – 14, Sep 1 – 30, Aug 1 – 31) opens its result with the Period link, a row click or "Open result", as in the original.',
+  'Reconciliation results (full-screen, as in the original): period + Reconciled, Copy share link / Refresh data / Export, tabs Matched / Differences. The original promote "Reconciliation complete. Lock this period in Synder so it can\'t be modified." + Lock period (prefills the end date) shows on the result while the lock doesn\'t cover the period yet; once covered, it is simply not shown.',
+  'Dev notes: stale "After soft period lock subtext needs approval" assumption removed (that subtext was removed in v31).'];
+ const new35=['Aug 1 – 31 reconciliation row added so the list matches the original\'s three reconciliations; a period lock never blocks or hides a reconciliation.'];
  const log34=['Mode copy from the original prototype (C cards, A radios, B option text): Soft "Sync late transactions on a date in the open period." / "Anything dated in the open period keeps its date."; Hard "Don\'t sync a transaction if any part is dated in the locked period." / "A manual sync won\'t bypass the lock.". A: Move-to help trimmed to "Must be after the Locked through date." (the open-period line now sits in the Soft description).',
   'Sync info lock notices trimmed to 1–2 sentences, each still naming the part and its date: hard "Canceled by period lock. The <part> is dated <date>, in the locked period, so the whole order / it wasn\'t synced."; batch "<payment> is dated <date>, in the locked period, so it wasn\'t synced. <payment> is in the open period and was synced."; soft "Soft lock moved N object(s) to <date>: its date is in the locked period (through <lock>)." (+ "Other objects kept their dates." for mixed transactions).'];
  const new34=['Shorter Sync info lock notices (the "won\'t sync even on a manual sync / move the lock date" guidance now lives only in the Hard lock description and Period lock settings link).'];
@@ -810,8 +824,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v34','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v35','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v35',`<div class="card"><ul>${log35.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
+ sec('New in v35 (not in production)',`<div class="card"><ul>${new35.map(l=>`<li><span class="status status-green">New</span> ${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v34',`<div class="card"><ul>${log34.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('New in v34 (not in production)',`<div class="card"><ul>${new34.map(l=>`<li><span class="status status-green">New</span> ${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v33',`<div class="card"><ul>${log33.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
@@ -842,7 +858,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
  <li>"Move late transactions to" is always user-set (FDD), default the day after the lock. Assumption: with a monthly schedule it shifts forward one month each time the lock auto-advances.</li>
  <li>Hard lock, batch with two internal transactions (FDD edge case 4): one payment syncs, the other is canceled, sync status is Canceled.</li>
  <li>Activity log shows only "Period lock set" and "Period lock disabled" with the state after the update (FDD). Monthly auto-advance has no entry.</li>
- <li>Recon "Lock period" prefills the recon end date and never moves an existing lock earlier. FDD edge case 2 says recon shows no callout for re-dated rows; the "After soft period lock" subtext needs approval.</li>
+ <li>Recon "Lock period" prefills the recon end date and never moves an existing lock earlier. FDD edge case 2: recon shows no callout for re-dated rows.</li>
  <li>Permissions are an open FDD question. Demo: admins edit, members read only.</li>
  <li>"Today (demo)" in the top bar changes the date so you can see the monthly lock move forward.</li></ul></div>`))+`</div>`}
 
