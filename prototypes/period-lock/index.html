@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v32 -->
+<!-- period-lock v33 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v32" />
+<meta name="prototype-version" content="v33" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -29,7 +29,7 @@ body{margin:0;display:flex;flex-direction:column;min-height:100vh;background:var
 .app{flex:1;display:flex;min-height:0;background:var(--color-white)}
 .sb{width:229px;flex-shrink:0;border-right:1px solid var(--border-default);background:var(--color-white);display:flex;flex-direction:column}
 .sb-org{display:flex;align-items:center;gap:10px;height:56px;padding:0 14px;border-bottom:1px solid var(--border-default);font-weight:500;cursor:pointer;position:relative}
-.sb-av{width:28px;height:28px;border-radius:50%;background:#F5C6CB;color:#B23B4B;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-av{width:28px;height:28px;border-radius:50%;background:var(--color-primary-10);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .sb-org .on{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb-org .mi{color:var(--text-secondary)}
 .sb-item{position:relative;display:flex;align-items:center;gap:10px;min-height:40px;padding:0 14px;color:var(--text-primary);border-bottom:1px solid var(--border-default);font-size:14px;cursor:pointer;text-decoration:none}
@@ -210,6 +210,7 @@ th.grp{text-align:center!important;border-bottom:1px solid var(--border-default)
 tr.rr-inv td,tr.rr-line td{background:#F7F8FA}.rr-dr{margin-left:8px}
 td.rr-older{text-align:center}.rr-older .mi{font-size:18px;vertical-align:-4px}
 td.rr-nodata{height:120px!important}
+.pl-warn{margin:4px 0 0;display:flex;gap:6px;align-items:flex-start;color:var(--color-yellow)}.pl-warn .mi{font-size:18px;line-height:20px}
 .pl-int{display:inline-flex;align-items:center;gap:12px;color:var(--text-primary)}.pl-int svg{flex:none;display:block}
 .pl-ex{margin-top:24px;background:#F7F8FA;border:1px solid #DFE4EC;border-radius:4px;padding:12px 16px;color:var(--text-primary)}
 </style>
@@ -250,16 +251,17 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   {id:'ch_buddy',integ:'stripe',info:'Buddy QA Customer · ch_3Q9k',type:'Invoice payment',amount:'128.00 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 09:14',status:'synced'},
   {id:'re_3P8',integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
   {id:'inv_eur',integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-01',webhook:'2026-10-02',syncedAt:'2026-10-02 11:40',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
+  {id:'po_mix',integ:'stripe',info:'Payout · po_1UAmix',type:'Payout',amount:'247.50 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 06:30',status:'warn',reason:'moved',parts:[{t:'Payment',i:'ch_3QmPay',d:'2026-10-03'},{t:'Refund receipt',i:'re_3QmRef',d:'2026-09-29',mv:'2026-10-01'},{t:'Transfer',i:'po_1UAmix',d:'2026-10-03'}]},
   {id:'order_2120',integ:'shopify',info:'andrewshitsko · Order #2120',type:'Order',amount:'54.00 USD',date:'2026-10-06',webhook:'2026-10-06',syncedAt:'2026-10-06 15:02',status:'synced'},
   {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 08:30',status:'canceled',reason:'canceled',batch:{ok:{t:'Payment py_A',d:'2026-10-01',a:'190.00 USD'},bad:{t:'Payment py_B',d:'2026-09-30',a:'120.00 USD'}}},
-  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-28',webhook:'2026-10-02',syncedAt:'2026-10-02 10:21',status:'canceled',reason:'canceled',part:'shipping fee'},
+  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-28',webhook:'2026-10-02',syncedAt:'2026-10-02 10:21',status:'canceled',reason:'canceled',part:'shipping fee',openPart:{t:'order payment',d:'2026-10-02'}},
   {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Oct 3)',type:'Order',amount:'72.00 USD',date:'2026-09-26',webhook:'2026-09-26',syncedAt:'2026-09-26 12:05',status:'synced',edit:'2026-10-03'},
   {id:'ch_other',integ:'stripe',info:'Acme Ltd · ch_3QaB',type:'Invoice payment',amount:'60.00 USD',date:'2026-10-08',webhook:'2026-10-08',syncedAt:'2026-10-08 10:00',status:'canceled',reason:'other'},
   {id:'je_rr_sep',integ:'stripe',info:'Revenue recognition · JE-1067',type:'Journal entry',amount:'98.63 USD',date:'2026-09-30',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 06:10',status:'warn',reason:'moved',revrec:1},
   {id:'je_rr_shop_sep',integ:'shopify',info:'Revenue recognition · JE-2006',type:'Journal entry',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 06:12',status:'canceled',reason:'canceled',part:'journal entry',revrec:1},
   {id:'in_sub_jan',integ:'stripe',info:'Buddy QA Customer · Invoice 1040',type:'Invoice',amount:'1,200.00 USD',date:'2026-01-01',webhook:'2026-01-01',syncedAt:'2026-01-01 00:05',status:'synced'}],
  activity:[
-  {at:'2026-10-06 14:20',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'mzkt.by (Stripe): Soft lock, every month on day 5, locked through Sep 30, 2026, late transactions post on Oct 1, 2026'},
+  {at:'2026-10-06 14:20',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'mzkt.by (Stripe): Soft lock, every month on day 5, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
   {at:'2026-10-05 14:10',org:'pt',who:'Support',it:'Support',action:'Entered',type:'User management',details:'Entered organization Per transaction test'},
   {at:'2026-10-05 09:02',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'andrewshitsko (Shopify): Hard lock, every month on day 5, locked through Sep 30, 2026'},
   {at:'2026-10-04 10:22',org:'pt',who:'System',it:'System',action:'Reconnected',type:'Integration',details:'Reconnected mzkt.by (Stripe)'},
@@ -269,7 +271,7 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   {at:'2026-09-12 11:03',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Connected',type:'Integration',details:'Connected andrewshitsko (Shopify)'},
   {at:'2026-08-30 08:15',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Updated timezone',type:'Integration',details:'mzkt.by (Stripe): timezone Europe/Vilnius'},
   {at:'2026-08-02 16:40',org:'pt',who:'ignat@synder.com',it:'User',action:'Added',type:'User management',details:'Added user anna@synder.com'},
-  {at:'2026-10-02 12:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Soft lock, fixed date, locked through Sep 30, 2026, late transactions post on Oct 1, 2026'},
+  {at:'2026-10-02 12:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Soft lock, fixed date, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
   {at:'2026-09-15 10:30',org:'sm',who:'Support',it:'Support',action:'Entered',type:'User management',details:'Entered organization Green Leaf (Summary)'},
   {at:'2026-09-01 09:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Connected',type:'Integration',details:'Connected Green Leaf (Square)'}],
  products:[{id:'bread',name:'Bread',sku:'BR-01',cost:'1.20',price:'2.50'},{id:'croissant',name:'Croissant',sku:'CR-02',cost:'0.80',price:'1.90'},{id:'baguette',name:'Baguette',sku:'BG-03',cost:'0.95',price:'2.10'}]};
@@ -326,9 +328,10 @@ const LOGO={stripe:'<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden=
  paypal:'<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#003087"/><path fill="#fff" d="M9.6 18.5H7.2c-.2 0-.3-.2-.3-.3L8.8 5.9c0-.2.2-.4.4-.4h4.4c2.6 0 4 1.3 3.7 3.4-.4 2.6-2.2 3.9-4.7 3.9h-1.6c-.2 0-.4.2-.4.4l-.6 4.9c0 .2-.2.4-.4.4z"/><path fill="#009CDE" d="M17.9 9.4c-.4 2.6-2.3 3.9-4.8 3.9h-1.3l-.8 5.2h1.9c.2 0 .3-.1.4-.3l.5-3.2h1.2c2.2 0 3.5-1.1 3.8-3.2.1-1-.2-1.8-.9-2.4z"/></svg>',
  greenleaf:'<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1A1A1A"/><rect x="5.5" y="5.5" width="13" height="13" rx="2.5" fill="none" stroke="#fff" stroke-width="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="#fff"/></svg>'};
 /* Affected: one count per row since the current lock took effect */
-function affected(c){if(!c.on)return'—';if(c.org==='sm')return'0 moved';
+const AFF_TIP={moved:'Synced on a date in the open period.',canceled:'Not synced because of the period lock.'};
+function affected(c){if(!c.on)return'—';if(c.org==='sm')return`<span title="${AFF_TIP.moved}">0 moved</span>`;
  const hard=c.mode==='hard',n=hard?canceledBy(c.id):movedBy(c.id),w=hard?'canceled':'moved';
- return n?`<a class="text-link" href="#transactions?reason=${hard?'canceled':'moved'}&i=${c.id}" onclick="event.stopPropagation()">${n} ${w}</a>`:'0 '+w}
+ return n?`<a class="text-link" href="#transactions?reason=${w}&i=${c.id}" title="${AFF_TIP[w]}" onclick="event.stopPropagation()">${n} ${w}</a>`:`<span title="${AFF_TIP[w]}">0 ${w}</span>`}
 function vList(){
  const rows=integs().map(c=>`<tr class="row-clickable" onclick="openEdit('${c.id}')"><td><span class="pl-int">${LOGO[c.id]||''}<span>${c.name}</span></span></td><td>${modeTxt(c)}</td><td>${affected(c)}</td><td>${c.on?fmt(lockOf(c)):'—'}</td><td>${nextAuto(c)}</td><td>${fmt(c.at)}${sub(c.by)}</td><td class="act"><button class="btn-text" onclick="event.stopPropagation();openEdit('${c.id}')">See details</button></td></tr>`);
  return pg(head('Period lock',"Protect periods you've closed or reconciled from changes by syncs. Set a lock per integration.",`<a class="btn btn-outlined" href="#activity?type=Period%20lock">View activity log</a>`),
@@ -342,15 +345,20 @@ function addMonths(s,n){const[y,m,d]=s.split('-').map(Number);const dm=new Date(
 function monthsBetween(a,b){const[y1,m1]=a.split('-').map(Number),[y2,m2]=b.split('-').map(Number);return(y2-y1)*12+(m2-m1)}
 function effMove(c){const L=lockOf(c);if(!L)return null;if(!c.moveTo)return addDays(L,1);if(c.schedule==='recurring'&&c.baseLock)return addMonths(c.moveTo,monthsBetween(c.baseLock,L));return c.moveTo}
 function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.draft=JSON.parse(JSON.stringify(c));S.draft.moveTo=effMove(c);
-  if(S.prefill&&S.prefill.i===id){const cur=lockOf(c);if(!cur||S.prefill.to>cur){Object.assign(S.draft,{on:true,schedule:'fixed',date:S.prefill.to,moveTo:addDays(S.prefill.to,1)});S.prefill.applied=1}else S.prefill.covered=cur}}
+  if(S.prefill&&S.prefill.i===id){const cur=lockOf(c);if(!cur||S.prefill.to>cur){Object.assign(S.draft,{on:true,schedule:'fixed',date:S.prefill.to,moveTo:addDays(S.prefill.to,1)});S.prefill.applied=1}else S.prefill.covered=cur}
+  const d=S.draft,L=dL(d);d._lv=L&&!lockErr(d)?L:null;d._mvU=!!(d.moveTo&&L&&d.moveTo!==addDays(L,1))}
  return S.draft}
-const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;return JSON.stringify(x)};
+/* draft-only keys start with "_": _lv = last valid lock, _mvU = user edited Move-to */
+const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
 const dirty=()=>{if(!S.draft)return false;const c=S.integ[S.draft.id],cur={...c,moveTo:effMove(c)};return norm(S.draft)!==norm(cur)};
 const dL=d=>!d.on?null:d.schedule==='recurring'?recur(d.runDay).lock:d.date;
-function validate(d){const e={};if(!d.on)return e;const L=dL(d);
- if(d.schedule==='fixed'){if(!d.date)e.date='Pick a date.';else if(d.date>=TODAY)e.date='Pick a date before today ('+fmt(TODAY)+').'}
- if(d.mode==='soft'){if(!d.moveTo)e.move='Pick a date.';else if(L&&d.moveTo<=L)e.move='Pick a date after '+fmt(L)+'.'}
+function lockErr(d){if(!d.on||d.schedule!=='fixed')return'';if(!d.date)return'Pick a date.';if(d.date>=TODAY)return'Pick a date before today ('+fmt(TODAY)+').';return''}
+function validate(d){const e={};if(!d.on)return e;const L=dL(d),le=lockErr(d);if(le)e.date=le;
+ if(d.mode==='soft'){if(!d.moveTo)e.move='Pick a date.';else if(!le&&L&&d.moveTo<=L)e.move='Pick a date after '+fmt(L)+'.'}
  return e}
+/* non-blocking: Move-to later than the end of the first open month */
+function moveWarn(d,er){const L=dL(d);if(!d.on||d.mode!=='soft'||!d.moveTo||!L||er.date||er.move)return'';const o=addDays(L,1),end=iso(+o.slice(0,4),+o.slice(5,7),0);return d.moveTo>end?'This is more than a month after the lock. Late transactions will sync far from their real dates.':''}
+const warnEl=t=>t?`<p class="pl-warn" role="status"><span class="mi">warning_amber</span><span>${t}</span></p>`:'';
 /* one line for the saved state (header) and the same shape for the draft (preview) */
 function lockLine(x,L){if(!x.on)return'Off';if(!L)return'';return'Locked through '+fmt(L)+'.'+(x.schedule==='recurring'?' '+autoLine(x.runDay):'')}
 function autoLine(rd){const r=recur(rd);return'On '+short(r.next)+', Synder locks '+MONF[+r.nextLock.slice(5,7)-1]+' automatically.'}
@@ -359,7 +367,8 @@ function preview(d,c){
  if(!d.on)return dirty()?'Period lock will be off. New transactions sync on their real dates.':'';
  const L=dL(d);if(!L)return'';
  const ex=short(addDays(L,-1)),ar=short(addDays(L,3)),A=/^[AEIOU]/.test(ex)?'An':'A';
- const s=d.mode==='soft'?`${A} ${ex} refund arriving ${ar} posts on ${d.moveTo?fmt(d.moveTo):'the date above'}.`:`${A} ${ex} refund arriving ${ar} won't sync. It shows as Canceled.`;
+ const er=validate(d);if(er.date)return d.mode==='soft'&&d.moveTo&&!er.move?`Late transactions sync on ${fmt(d.moveTo)}.`:'';
+ const s=d.mode==='soft'?`${A} ${ex} refund arriving ${ar} syncs on ${d.moveTo&&!er.move?fmt(d.moveTo):'the date above'}.`:`${A} ${ex} refund arriving ${ar} won't sync. It shows as Canceled.`;
  const dl=lockLine(d,L);return(dirty()&&dl!==savedLine(c)?`<b style="font-weight:500">${dl}</b> `:'')+s}
 const scopeNote=c=>'Applies to all future syncs, scheduled and manual. Imports keep running.'+(c.org==='sm'?" Summary sync isn't affected. Product cost updates always use hard lock.":'');
 function vEdit(q){if(VAR==='b')return vEditB(q);if(VAR==='c')return vEditC(q);const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.integ[id];if(c.org!==S.org){S.org=c.org;nav('edit')}
@@ -367,7 +376,7 @@ function vEdit(q){if(VAR==='b')return vEditB(q);if(VAR==='c')return vEditC(q);co
  const rad=(name,v,cur,label,help,onch)=>`<label class="pl-radio"><input type="radio" class="radio" name="${name}" ${cur===v?'checked':''} ${dis} onchange="${onch}"><span><span class="pl-rn">${label}</span>${help?`<span class="pl-rh">${help}</span>`:''}</span></label>`;
  let f=`<div class="pl-row1"><div><span class="pl-lbl" id="pl-lbl">Period lock</span><p class="pl-desc" id="pl-desc">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="pl-lbl" aria-describedby="pl-desc" ${d.on?'checked':''} ${dis} onchange="setD('on',this.checked)"></div>`;
  if(d.on){
-  f+=`<section class="pl-sec"><h3 class="pl-st">Mode</h3><p class="pl-scope"><span class="mi">info</span><span>${scopeNote(c)}</span></p><div class="pl-radios">${rad('mode','soft',d.mode,'Soft lock','Post transactions dated in the locked period on the date below.',"setD('mode','soft')")}${d.mode==='soft'?`<div class="pl-nest pl-field pl-move" id="pl-movewrap"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${er.move?`<div class="form-error-msg">${er.move}</div>`:'<p class="pl-help">Must be after the Locked through date. Transactions in the open period keep their own dates.</p>'}${rec?`<p class="pl-help">Moves forward one month each time Synder locks a month.</p>`:''}</div>`:''}${rad('mode','hard',d.mode,'Hard lock',"Synder won't post transactions dated in the locked period, even on a manual sync. To post them, move the lock date or switch to Soft lock.","setD('mode','hard')")}</div>`+`</section>`;
+  f+=`<section class="pl-sec"><h3 class="pl-st">Mode</h3><p class="pl-scope"><span class="mi">info</span><span>${scopeNote(c)}</span></p><div class="pl-radios">${rad('mode','soft',d.mode,'Soft lock','Sync transactions dated in the locked period on the date below.',"setD('mode','soft')")}${d.mode==='soft'?`<div class="pl-nest pl-field pl-move" id="pl-movewrap"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${er.move?`<div class="form-error-msg">${er.move}</div>`:'<p class="pl-help">Must be after the Locked through date. Transactions in the open period keep their own dates.</p>'}${warnEl(moveWarn(d,er))}${rec?`<p class="pl-help">Moves forward one month each time Synder locks a month.</p>`:''}</div>`:''}${rad('mode','hard',d.mode,'Hard lock',"Synder won't sync transactions dated in the locked period, even on a manual sync. To sync them, move the lock date or switch to Soft lock.","setD('mode','hard')")}</div>`+`</section>`;
   let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
   f+=`<div class="pl-div"></div><section class="pl-sec"><h3 class="pl-st">Schedule</h3><div class="pl-radios">${rad('sch','recurring',d.schedule,'Every month','',"setD('schedule','recurring')")}${rec?`<div class="pl-nest pl-sentence">On day <select class="select pl-day" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select> lock through the end of the previous month.</div>`:''}${rad('sch','fixed',d.schedule,'Fixed date','',"setD('schedule','fixed')")}${rec?'':`<div class="pl-nest pl-field"><label class="form-label" for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${er.date?`<div class="form-error-msg">${er.date}</div>`:''}</div>`}</div><p class="pl-help pl-tz">Dates use the integration timezone, ${c.tz}.</p></section>`;
  }else if(!dirty())f+=`<p class="pl-off">Turn on to set the mode and schedule.</p>`;
@@ -383,15 +392,15 @@ function vEditB(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
  const err=m=>m?`<div class="form-error-msg">${m}</div>`:'';
  let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
  const mode=seg('mode',[['soft','Soft lock'],['hard','Hard lock']])+(d.mode==='soft'
-  ?`<p class="plb-t">Synder still syncs it, but posts it on the date below. Your closed months stay unchanged.</p><div class="pl-field"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}</div>`
-  :`<p class="plb-t">Synder won't post it, even on a manual sync. It shows as Canceled. To post it, move the lock date or switch to Soft lock.</p>`);
+  ?`<p class="plb-t">Synder still syncs it, but on the date below. Your closed months stay unchanged.</p><div class="pl-field"><label class="form-label" for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}${warnEl(moveWarn(d,er))}</div>`
+  :`<p class="plb-t">Synder won't sync it, even on a manual sync. It shows as Canceled. To sync it, move the lock date or switch to Soft lock.</p>`);
  const sched=seg('schedule',[['recurring','Every month'],['fixed','Fixed date']])+(rec
   ?`<div class="pl-sentence">On day <select class="select pl-day" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>, lock through the end of the previous month.</div>`
   :`<div class="pl-field"><label class="form-label" for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`);
  const card=`<div class="card plb">`+secB('Period lock',"Stop Synder from changing your books for dates you've already closed.",`<input type="checkbox" class="switch" aria-label="Period lock" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)">`,'sw')
   +secB('Mode','Choose what happens when a transaction dated in the locked period arrives.',mode,off?'off':'')
   +secB('Schedule','Lock a single date, or move the lock forward every month.',sched,off?'off':'')+`</div>`;
- const lines=off?['Period lock is off. Synder syncs all dates.']:[L?'Locked through '+fmt(L)+'.':'Pick a date.',d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date for late transactions.'):'Late transactions are canceled.'].concat(rec?[autoLine(d.runDay)]:[]);
+ const lines=off?['Period lock is off. Synder syncs all dates.']:[er.date?'':L?'Locked through '+fmt(L)+'.':'Pick a date.',d.mode==='soft'?(er.move?'':d.moveTo?'Late transactions sync on '+fmt(d.moveTo)+'.':'Pick a date for late transactions.'):'Late transactions are canceled.'].concat(rec?[autoLine(d.runDay)]:[]).filter(Boolean);
  const sum=`<div class="plb-sum" id="pl-summary"><b>${dirty()?'After update':'Summary'}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info"><span class="mi">info</span><div>Prefilled from your reconciliation: locked through ${fmt(S.prefill.to)}. Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const upd=ro?'':`<button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button>`;
@@ -403,37 +412,44 @@ function vEditC(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.in
   return`<div class="plc-card${on?' on':''}" data-k="${k}" data-v="${v}" onclick="${set}"><input type="radio" class="radio" name="c-${k}" aria-label="${title}" ${on?'checked':''} ${dis} onchange="${set}"><div style="min-width:0;flex:1"><b>${title}</b><p class="plc-cd">${desc}</p>${on&&inner?inner:''}</div></div>`};
  let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
  const stop='onclick="event.stopPropagation()"';
- const moveIn=`<div class="plc-in" ${stop}><label for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}</div>`;
+ const moveIn=`<div class="plc-in" ${stop}><label for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}${warnEl(moveWarn(d,er))}</div>`;
  const recIn=`<div class="plc-sent" ${stop}>On day<select class="select" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>lock the previous month.</div>`;
  const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
  let lines;
  if(off)lines=['Period lock is off for this integration. Turn it on to set mode, schedule, and dates.'];
- else{const r=recur(d.runDay),mt=d.mode==='soft'?(d.moveTo?'Late transactions post on '+fmt(d.moveTo)+'.':'Pick a date to move late transactions to.'):'Late transactions are canceled.';
-  lines=rec?['When you save, Synder locks through '+fmt(r.lock)+'. '+mt,'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'. Imports keep running.']:[(L?'Locked through '+fmt(L)+'.':'Pick a Locked through date.')+' '+mt,'Imports keep running.']}
+ else{/* no edits: current state; edits: "When you save…"; a field with an error hides its part */
+  const r=recur(d.runDay),ed=dirty(),lp=er.date||!L?'':(ed?'When you save, Synder locks through ':'Locked through ')+fmt(L)+'.',mt=d.mode==='soft'?(er.move||!d.moveTo?'':'Late transactions sync on '+fmt(d.moveTo)+'.'):'Late transactions are canceled.';
+  lines=[[lp,mt].filter(Boolean).join(' '),rec?'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'. Imports keep running.':'Imports keep running.'].filter(Boolean)}
  const pvT='Preview';
  const card=`<div class="card plc"><section class="plc-s plc-top"><div><h3 id="plc-lbl">Period lock</h3><p class="plc-d">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="plc-lbl" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)"></section>`
   +(off?`<section class="plc-s"><div class="plc-pv" id="pl-preview" style="margin-top:0"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`
-  :`<section class="plc-s sec"><h3>Mode</h3><div class="plc-grid">${rc('mode','soft','Soft lock','Sync late transactions on a date in the open period.',moveIn)}${rc('mode','hard','Hard lock',"Don't sync transactions dated in the locked period.<br>They show as Canceled, even on a manual sync.")}</div></section>`
+  :`<section class="plc-s sec"><h3>Mode</h3><div class="plc-grid">${rc('mode','soft','Soft lock','Only parts dated in the locked period move to the date below. Other parts keep their dates.',moveIn)}${rc('mode','hard','Hard lock',"If any part of a transaction is dated in the locked period, the whole transaction is canceled.<br>It shows as Canceled, even on a manual sync.")}</div></section>`
   +`<section class="plc-s sec"><h3>Schedule</h3><div class="plc-grid">${rc('schedule','recurring','Recurring','Move the lock forward each month.',recIn)}${rc('schedule','fixed','Fixed date','Lock everything up to a chosen date.',fixIn)}</div><div class="plc-pv" id="pl-preview"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`);
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info"><span class="mi">info</span><div>Prefilled from your reconciliation: locked through ${fmt(S.prefill.to)}. Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const alerts=(ro?'<div class="alert alert-warning"><span class="mi">lock</span><div>Only admins can change period lock.</div></div>':'')+pre;
  return `<div class="plc-page"><a class="plc-back" href="#lock"><span class="mi">chevron_left</span>Back to Period lock</a><h1 class="page-title plc-h1">Period lock for ${c.name}</h1>${alerts?`<div class="pg" style="margin-bottom:24px">${alerts}</div>`:''}${card}${ro?'':`<div class="plc-foot"><button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button></div>`}</div>`}
-function setD(k,v){const d=S.draft,oldL=dL(d);d[k]=v;
+/* Move-to = day after the last VALID lock, until the user edits Move-to. An invalid Locked through never changes it. */
+function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='on'&&v){if(!d.mode)d.mode='soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5}
  if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>=TODAY))d.date=recur(d.runDay).lock;
- const L=dL(d);if(L&&L!==oldL&&(!d.moveTo||d.moveTo<=L||d.moveTo===addDays(oldL||L,1)))d.moveTo=addDays(L,1);
- if(L&&!d.moveTo)d.moveTo=addDays(L,1);
+ if(k==='moveTo')d._mvU=!!v;
+ const L=dL(d);if(L&&!lockErr(d)){d._lv=L;if(!d._mvU||!d.moveTo)d.moveTo=addDays(L,1)}
  render()}
 function confirmSave(){const d=S.draft,c=S.integ[d.id],oldT=lockOf(c),newT=dL(d);
  const off=c.on&&!d.on,earlier=c.on&&d.on&&newT<oldT,soft=c.on&&d.on&&c.mode==='hard'&&d.mode==='soft';
  if(!(off||earlier||soft))return doSave(false,0);
  const aff=c.mode==='hard'?S.txns.filter(t=>t.integ===d.id&&t.reason==='canceled'&&(off||t.date>newT||soft)&&t.date<=oldT):[];
  const title=off?'Turn off period lock for '+d.name+'?':earlier?'Change to locked through '+fmt(newT)+'?':'Switch '+d.name+' to soft lock?';
- const lead=off?'Now locked through '+fmt(oldT)+'. All dates will be open for syncs again.':earlier?'Now locked through '+fmt(oldT)+'. '+short(addDays(newT,1))+' – '+fmt(oldT)+' will be open for syncs again.':'Late transactions will post on '+fmt(d.moveTo)+' instead of being canceled. Now Synder won\'t post them, even on a manual sync.';
- modal(title,`<p>${lead}</p><ul>${aff.length?`<li>${aff.length} transactions canceled by this lock stay Canceled. Synder won't post them until you resync them.</li>`:c.mode==='hard'?'<li>No transactions were canceled by this lock.</li>':''}<li>Transactions moved by a soft lock keep their new dates.</li><li>Already synced transactions won't change.</li></ul>${aff.length?'<label class="synder-checkbox" style="margin-top:12px;color:var(--text-primary)"><input type="checkbox" id="rs"> Resync them after saving</label>':''}`,
-  `<button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(document.getElementById('rs')?.checked,${aff.length})">${off?'Turn off':earlier?'Change lock':'Switch to soft'}</button>`)}
+ /* Now vs After, so the two states never read as one */
+ let now,after;
+ if(off){now='Now: locked through '+fmt(oldT)+'.';after='After turning off: all dates are open for syncs.'}
+ else if(earlier){now='Now: locked through '+fmt(oldT)+'.';after='After the change: locked through '+fmt(newT)+'. '+short(addDays(newT,1))+' – '+fmt(oldT)+' is open for syncs again.'+(soft?' Transactions dated in the locked period sync on '+fmt(d.moveTo)+'.':'')}
+ else{now='Now: transactions dated in the locked period are canceled.';after='After switching: they sync on '+fmt(d.moveTo)+'.'}
+ const n=aff.length,li=[n?`${n} transaction${n>1?'s':''} canceled by this lock stay${n>1?'':'s'} Canceled. Synder won't sync ${n>1?'them':'it'} until you resync.`:c.mode==='hard'?'No transactions were canceled by this lock.':'',c.mode==='soft'?'Transactions moved by the soft lock keep their new dates.':'','Already synced transactions won\'t change.'].filter(Boolean);
+ modal(title,`<p style="margin:0">${now}</p><p>${after}</p><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul>${n?`<label class="synder-checkbox" style="margin-top:12px;color:var(--text-primary)"><input type="checkbox" id="rs"> Resync ${n>1?'them':'it'} after saving</label>`:''}`,
+  `<button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(document.getElementById('rs')?.checked,${n})">${off?'Turn off':earlier?'Change lock':'Switch to soft'}</button>`)}
 function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];
- d.by=S.org==='pt'?'Viacheslav Tarabarov':'Ignat Plot';d.at=TODAY;Object.assign(c,JSON.parse(JSON.stringify(d)));c.baseLock=lockOf(c);
+ d.by=S.org==='pt'?'Viacheslav Tarabarov':'Ignat Plot';d.at=TODAY;Object.assign(c,JSON.parse(norm(d)));c.baseLock=lockOf(c);
  const det=!c.on?'Off':(c.mode==='soft'?'Soft lock':'Hard lock')+' · '+(c.schedule==='recurring'?'Monthly on day '+c.runDay:'Fixed date')+' · Locked through '+fmt(lockOf(c))+(c.mode==='soft'?' · Move late transactions to '+fmt(c.moveTo):'');
  S.activity.unshift({at:TODAY+' '+new Date().toTimeString().slice(0,5),org:c.org,who:c.org==='pt'?'viacheslav@synder.com':'ignat@synder.com',it:'User',action:c.on?'Period lock set':'Period lock disabled',type:'Period lock',details:actDet(c)});
  if(c.on)track('PeriodLockSet',{lockMode:c.mode,lockSchedule:c.schedule,orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});else track('PeriodLockDisabled',{orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});
@@ -443,7 +459,7 @@ function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];
 function leaveC(fn){if(VAR!=='c'||parse().r!=='edit'||!dirty())return false;S._leave=fn;modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM();S._leave=null">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;const f=S._leave;S._leave=null;f&&f()">Discard</button>`);return true}
 window.addEventListener('beforeunload',e=>{if(VAR==='c'&&parse().r==='edit'&&dirty()){e.preventDefault();e.returnValue=''}});
 /* Activity log details: only the state after the update (FDD) */
-function actDet(c){if(!c.on)return c.name+': Off';const L=lockOf(c);return c.name+': '+(c.mode==='soft'?'Soft lock':'Hard lock')+', '+(c.schedule==='recurring'?'every month on day '+c.runDay:'fixed date')+', locked through '+fmt(L)+(c.mode==='soft'?', late transactions post on '+fmt(c.moveTo):'')}
+function actDet(c){if(!c.on)return c.name+': Off';const L=lockOf(c);return c.name+': '+(c.mode==='soft'?'Soft lock':'Hard lock')+', '+(c.schedule==='recurring'?'every month on day '+c.runDay:'fixed date')+', locked through '+fmt(L)+(c.mode==='soft'?', late transactions sync on '+fmt(c.moveTo):'')}
 function guard(h){if(dirty()){modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM()">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;go('${h}')">Discard</button>`);return false}return true}
 
 /* ---------- transactions ---------- */
@@ -451,7 +467,7 @@ function chip(t){return{synced:'<span class="status status-green">Synced</span>'
 const reasonTxt=t=>t.reason==='moved'?'Date moved by period lock':t.reason==='canceled'?'Canceled by period lock':t.reason==='other'?'No matching open invoice found':'';
 /* rollback is checked by webhook date (FDD); blocked = disabled with an inline reason, no error dialog */
 function lockedCx(t){const c=S.integ[t.integ],L=lockOf(c);if(t.reason!=='canceled'||!L||c.mode!=='hard')return false;return(t.batch?t.batch.bad.d:t.date)<=L}
-function rbBlock(t){const c=S.integ[t.integ],L=lockOf(c);if(t.status==='canceled'&&!t.batch)return lockedCx(t)?'Dated in the locked period':'Nothing was posted for this sync';if(L&&t.webhook<=L)return'The date Synder received it is in the locked period';return''}
+function rbBlock(t){const c=S.integ[t.integ],L=lockOf(c);if(t.status==='canceled'&&!t.batch)return lockedCx(t)?'Dated in the locked period':'Nothing was synced';if(L&&t.webhook<=L)return'The date Synder received it is in the locked period';return''}
 function rsBlock(t){return lockedCx(t)?(t.batch?t.batch.bad.t+' is dated in the locked period':'Dated in the locked period'):''}
 const disItem=(l,why)=>`<div class="dropdown-item dis" aria-disabled="true">${l}${why?sub(why):''}</div>`;
 function vTxns(q){const st=q.get('status')||'all',rs0=q.get('reason'),rs=rs0==='lock'?'canceled':rs0,fi=q.get('i');
@@ -473,7 +489,7 @@ function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id);render();con
  toast('Rollback started. Synder received it on '+fmt(t.webhook)+', which is open.')}
 function resync(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);render();
  if(t.reason==='canceled'&&L&&c.mode==='hard'){const pd=t.batch?t.batch.bad.d:t.date;if(pd<=L)return toast('Still locked: dated '+fmt(pd)+', locked through '+fmt(L)+'. Change the lock first.','warning')}
- if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Sync started. It posts on '+fmt(moveOf(c))+' again.');toast('Sync started.')}
+ if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Sync started. It syncs on '+fmt(moveOf(c))+' again.');toast('Sync started.')}
 function bulk(st){st=st||{integ:'shopify',from:'2026-09-15',to:'2026-10-05'};S.bulk=st;const c=S.integ[st.integ],L=lockOf(c);let msg='',btn='';
  if(st.from>st.to)msg='<div class="form-error-msg">From must be before To.</div>';
  else if(L&&st.to<=L)msg=`<div class="alert alert-warning"><span class="mi">warning_amber</span><div>The whole range is in the locked period (locked through ${fmt(L)}). Nothing can be rolled back.</div></div>`;
@@ -485,6 +501,7 @@ function bulk(st){st=st||{integ:'shopify',from:'2026-09-15',to:'2026-10-05'};S.b
 const SX={ch_buddy:{sid:'812680',tid:'ch_3Q9kBuddy',time:'14:22',logs:[['Invoice','1052','Invoice was created.'],['Payment','ch_3Q9k…','Payment was created.'],['Expense','fee_3Q9k…','Expense was created.']]},
  re_3P8:{sid:'812441',tid:'re_3P8mXy9kL2',time:'00:00',objs:[['Refund receipt','re_3P8mXy9kL2'],['Expense','fee_re_3P8m…']]},
  inv_eur:{sid:'812455',tid:'in_EU5521',time:'09:00',objs:[['Invoice','in_EU5521']]},
+ po_mix:{sid:'812720',tid:'po_1UAmixPayout',time:'06:00'},
  order_2120:{sid:'812590',tid:'shopify_order_2120',time:'15:01',logs:[['Sales receipt','#2120','Sales receipt was created.']]},
  batch_77:{sid:'812520',tid:'po_77Batch',time:'18:05',logs:[['Payment','py_A','Payment was created.']]},
  order_2108:{sid:'812502',tid:'shopify_order_2108',time:'18:05'},
@@ -499,11 +516,14 @@ const qbLink='<a class="text-link" onclick="'+mock+'">Show in QuickBooks</a>';
 function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.integ[t.integ],L=lockOf(c),x=SX[t.id]||{},adm=isAdmin();
  const link=adm?` <a class="text-link" href="#edit?i=${c.id}">Period lock settings</a>`:'',thr=L?` (through ${fmt(L)})`:'';
  let notice='',logs=(x.logs||[]).slice();
- if(t.reason==='moved'){const o=x.objs||[[t.type,x.tid]],n=o.length;
+ if(t.reason==='moved'&&t.parts){const n=t.parts.filter(p=>p.mv).length,mv=t.parts.find(p=>p.mv).mv;
+  notice=al('info','info',`Period lock moved ${n} object${n>1?'s':''} to ${fmt(mv)} because ${n>1?'their dates are':'its date is'} in the locked period${thr}. Other objects kept their dates. Soft lock · ${c.name}.${link}`);
+  logs=t.parts.map(p=>[p.t,p.i,`${p.t} was created.`+(p.mv?` Date changed from ${short(p.d)} to ${short(p.mv)} by period lock.`:'')])}
+ else if(t.reason==='moved'){const o=x.objs||[[t.type,x.tid]],n=o.length;
   notice=al('info','info',`Period lock moved ${n} object${n>1?'s':''} to ${fmt(t.posted)} because ${n>1?'their dates are':'its date is'} in the locked period${thr}. Soft lock · ${c.name}.${link}`);
   logs=o.map(([ty,inf])=>[ty,inf,`${ty} was created. Date changed from ${short(t.date)} to ${short(t.posted)} by period lock.${t.fx?' The exchange rate for '+fmt(t.date)+' (original date) was used.':''}`])}
- else if(t.batch){const b=t.batch.bad,o=t.batch.ok;notice=al('warning','warning_amber',`<span class="alert-title">Partly canceled: ${b.a} not posted (${b.t}).</span>Canceled by period lock. ${b.t} is dated ${fmt(b.d)}, in the locked period${thr}. Synder won't post it, even on a manual sync. To post it, move the lock date or switch to Soft lock. ${o.t} is in the open period and was synced.${link}`)}
- else if(t.reason==='canceled')notice=al('warning','warning_amber',`Canceled by period lock. The ${t.part} is dated ${fmt(t.date)}, in the locked period${thr}. Synder won't post it, even on a manual sync. To post it, move the lock date or switch to Soft lock.${link}`);
+ else if(t.batch){const b=t.batch.bad,o=t.batch.ok;notice=al('warning','warning_amber',`<span class="alert-title">Partly canceled: ${b.a} not synced (${b.t}).</span>Canceled by period lock. ${b.t} is dated ${fmt(b.d)}, in the locked period${thr}. Synder won't sync it, even on a manual sync. To sync it, move the lock date or switch to Soft lock. ${o.t} is in the open period and was synced.${link}`)}
+ else if(t.reason==='canceled')notice=al('warning','warning_amber',`Canceled by period lock. The ${t.part} is dated ${fmt(t.date)}, in the locked period${thr}.${t.openPart?` The ${t.openPart.t}, dated ${fmt(t.openPart.d)}, is in the open period, but the whole transaction is canceled.`:''} Synder won't sync it, even on a manual sync. To sync it, move the lock date or switch to Soft lock.${link}`);
  else if(t.reason==='other')notice=al('error','error_outline','No matching open invoice found.');
  else if(t.edit)notice=al('warning','warning_amber',`Order edit received ${fmt(t.edit)}. Synder didn't roll back and resync: the date Synder received it, ${fmt(t.webhook)}, is in the locked period${thr}.`);
  const rb=rbBlock(t),tm=x.time||'00:00',st=t.syncedAt;
@@ -713,6 +733,17 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log33=['C Mode copy: Soft "Only parts dated in the locked period move to the date below. Other parts keep their dates."; Hard "If any part of a transaction is dated in the locked period, the whole transaction is canceled." + "It shows as Canceled, even on a manual sync."',
+  'Move late transactions to = day after the last valid lock and follows the lock until the user edits it. An invalid Locked through never changes it. New non-blocking warning when it is later than the end of the first open month: "This is more than a month after the lock. Late transactions will sync far from their real dates." (A/B/C)',
+  'Preview (C): no edits = current state ("Locked through … Late transactions sync on …" / "Next auto-lock: …, through … Imports keep running."). Edits = "When you save, Synder locks through …". A field with an error hides its part. A and B also hide parts with errors.',
+  'Confirmations use Now / After: hard to soft "Now: transactions dated in the locked period are canceled." / "After switching: they sync on <date>."; turn off and earlier lock use the same shape. "Moved by the soft lock" bullet only when the saved mode is soft.',
+  'Copy: "post" replaced by "sync" in period lock copy (settings A/B/C, Preview, confirmations, Sync info notices, Activity log details, toasts).',
+  'Escape closes any modal like its outlined button (Cancel / Keep editing).',
+  'Period lock list: Affected tooltips "Synced on a date in the open period." / "Not synced because of the period lock."',
+  'Unsaved guard: when a navigation away from a dirty settings page is stopped, the page is restored with pushState, so a later Back + Discard lands on the Period lock list instead of the page before it.',
+  'Org avatar uses UI kit primary-10 / primary.',
+  'Demo data: Stripe payout po_1UAmix with a Sep 29 refund part (moved to Oct 1) and Oct 3 payment/transfer parts (kept). Shopify order #2108 now has an open-period payment (Oct 2) and stays fully Canceled. Stripe Affected: 4 moved.'];
+ const new33=['Move-to warning for dates more than a month after the lock.','Sync info for mixed transactions: "Other objects kept their dates." (soft) and "The <part>, dated <date>, is in the open period, but the whole transaction is canceled." (hard).','Affected tooltips.'];
  const log32=['Revenue recognition rebuilt from the four production screens. Sidebar: Subscriptions / One-time invoices (stub) / Reports / Configuration.',
   'Subscriptions: "RevRec balance: 1000/1000" + Import data; grey filter panel (Search, Start date range, Cancelation date range, Source, Integration, Period, Status, Apply / Reset filters); columns Customer / Subscription ID | Start date | Cancelation date | Source | Integration | Period | Status | Actions. US dates (MM/DD/YYYY). 5 demo subscriptions (Stripe, Shopify, Excel; External / Internal / Excel; Ready / Generating Entries). The transient "Updating data..." banner is skipped.',
   'Subscription details is a full-screen dialog: "Subscription <ID>" + copy, grey strip (Organization name, Status, Customer, Canceled at, Transactions imported), tabs Revenue schedule / Transaction timeline / Revenue recognition transactions. Revenue schedule: month groups (newest first, expandable) with Invoice rows and "1 × <product> (at <price>)" lines, "Show older billing periods". Transaction timeline: expandable Invoice payment rows with Invoice (Paid) children. RR transactions: info line, table, rows-per-page footer, "No data" when empty.',
@@ -776,8 +807,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v32','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v33','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v33',`<div class="card"><ul>${log33.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
+ sec('New in v33 (not in production)',`<div class="card"><ul>${new33.map(l=>`<li><span class="status status-green">New</span> ${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v32',`<div class="card"><ul>${log32.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('New in v32 (not in production)',`<div class="card"><ul>${new32.map(l=>`<li><span class="status status-green">New</span> ${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v31',`<div class="card"><ul>${log31.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
@@ -828,9 +861,9 @@ function render(){const{r,q}=parse();
 function setToday(v){if(!v)return;TODAY=v;S.draft=null;render();toast('Demo date set to '+fmt(v)+'.','info')}
 function resetDemo(){Object.assign(S,JSON.parse(INIT));TODAY='2026-10-15';$('#today').value=TODAY;closeM();go('#lock');render()}
 document.addEventListener('click',e=>{if(!e.target.closest('.vmw'))$('#vmenu').classList.remove('show');if(!e.target.closest('.acw'))$('#acm').classList.remove('show');if((S.menu||S.orgOpen)&&!e.target.closest('.dropdown-menu')&&!e.target.closest('.sb-org')){S.menu=null;S.orgOpen=false;render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#layer').innerHTML&&!$('#fs').hidden){const b=$('#fs .dx');if(b)b.click()}});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#layer').innerHTML){e.preventDefault();const b=$('#layer .synder-modal-footer .btn-outlined');b?b.click():closeM();return}if(!$('#fs').hidden){const b=$('#fs .dx');if(b)b.click()}});
 let prevHash=location.hash;
-window.addEventListener('hashchange',()=>{const p=prevHash;prevHash=location.hash;S.menu=null;if(p.startsWith('#edit')&&S.draft&&dirty()){const want=location.hash;history.replaceState(null,'',p);prevHash=p;if(!guard(want))return;go(want);return}if(!location.hash.startsWith('#edit'))S.draft=null;render()});
+window.addEventListener('hashchange',()=>{const p=prevHash;prevHash=location.hash;S.menu=null;if(p.startsWith('#edit')&&S.draft&&dirty()){const want=location.hash;history.pushState(null,'',p);prevHash=p;if(!guard(want))return;go(want);return}if(!location.hash.startsWith('#edit'))S.draft=null;render()});
 render();
 </script>
 </body>
