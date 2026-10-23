@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v36 -->
+<!-- period-lock v37 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v36" />
+<meta name="prototype-version" content="v37" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -40,12 +40,43 @@ body{margin:0;display:flex;flex-direction:column;min-height:100vh;background:var
 .sb-item.on .mi{color:var(--color-white)}
 .sb-item.on::after,.sb-sub.on::after{content:'';position:absolute;right:-9px;top:50%;margin-top:-8px;border:8px solid transparent;border-left-color:var(--color-primary);border-right:0}
 .sb-gap{height:40px;border-bottom:1px solid var(--border-default)}
-.sb-demo{margin:0 12px 16px;color:var(--text-secondary)}
 .orgmenu{display:block;position:absolute;left:8px;top:52px;z-index:30;min-width:220px}
 .main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
 .top{height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:24px;padding:0 32px;border-bottom:1px solid var(--border-default)}
-.syncs{color:var(--text-secondary);border-bottom:3px solid var(--color-primary);padding:6px 0}
-.syncs b{color:var(--color-primary);font-weight:500;font-size:16px}
+.syncs{color:var(--color-primary);border:1px solid var(--color-primary);border-radius:4px;padding:4px 10px;font-weight:500}
+.acb{width:32px;height:32px;border-radius:50%;background:var(--color-primary)!important;align-items:center;justify-content:center}.top .acb .mi{color:var(--color-white);font-size:20px}
+.orgmenu .dropdown-item{display:flex;align-items:center;gap:10px}.orgmenu .oi{display:flex;flex-direction:column}
+/* ---- v37 production layout helpers (visual only) ---- */
+.fbar{background:#F3F4F7;border-radius:8px;padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.fbar .ff{display:flex;flex-direction:column;gap:4px;min-width:180px}.fbar .ff .form-label{margin:0}
+.fbar .pl-help{margin:0}
+.fbar-b{display:flex;gap:16px}
+.rr-tabs.flush{margin-bottom:0}
+.tx-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.tx-bar .input{width:200px}.tx-bar .select{width:auto}
+.tx-adv{display:inline-flex;align-items:center;gap:2px;margin-top:8px!important}
+.tx-st{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.tx-filt{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+td.cb,th.cb{width:40px}
+.si-x{color:var(--color-primary);font-size:20px}
+.si-none{text-align:center;color:var(--text-secondary);padding:32px 16px}
+.sd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.sd-range{margin:4px 0 0;font-size:16px;font-weight:500}
+.sd-chips{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:8px}
+.sd-note{margin:8px 0 0;color:var(--text-secondary);max-width:640px}
+.sd-amt{text-align:right}
+.pr-info{display:flex;align-items:center;gap:6px;margin:0;color:var(--text-secondary)}.pr-info .mi{font-size:18px}
+.pe{max-width:440px;margin:0 auto}
+.pe-h{font-size:18px;font-weight:400;margin:8px 0 16px}
+.pe-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 16px}
+.pe-f{display:flex;flex-direction:column;gap:4px}.pe-f .form-label{margin:0}.pe-f .input,.pe-f .select{width:100%;box-sizing:border-box}
+.pe-vs{display:flex;align-items:center;justify-content:space-between}
+.pe-track{display:inline-flex;align-items:center;gap:8px;font-weight:500}
+.pe-prices{display:flex;gap:16px;margin-top:16px}.pe-prices .pe-f{width:150px}
+.rc-t{display:flex;align-items:center;gap:8px}.rc-t .page-title{margin:0}
+.rc-acc{display:flex;align-items:center;gap:8px;margin:4px 0 0 40px;font-weight:500}
+.rc-sub{margin:2px 0 0 40px;color:var(--text-secondary)}
+.rc-chips{display:flex;gap:8px;margin-top:8px}
 .top .mi{color:var(--color-primary);font-size:24px}
 .content{flex:1;padding:24px 32px 48px;overflow:auto}
 /* ---- full-screen dialog view (Summary detail pattern) ---- */
@@ -172,11 +203,11 @@ td.rr-nodata{height:120px!important}
 </style>
 </head>
 <body>
-<div class="vbar"><div class="brand">Period lock</div><span class="sp"></span><label>Today (demo) <input type="date" id="today" value="2026-10-15" onchange="setToday(this.value)"></label><div class="vmw"><button class="vl" id="vmb" aria-label="Prototype menu" aria-haspopup="true" onclick="event.stopPropagation();$('#vmenu').classList.toggle('show')"><span class="mi">more_horiz</span></button><div class="dropdown-menu" id="vmenu"><a class="dropdown-item" href="#dev" onclick="$('#vmenu').classList.remove('show')">Dev notes</a><a class="dropdown-item" onclick="$('#vmenu').classList.remove('show');resetDemo()">Reset demo</a></div></div></div>
+<div class="vbar"><div class="brand">Period lock</div><span class="sp"></span><label>Today (demo) <input type="date" id="today" value="2026-10-15" onchange="setToday(this.value)"></label><div class="vmw"><button class="vl" id="vmb" aria-label="Prototype menu" aria-haspopup="true" onclick="event.stopPropagation();$('#vmenu').classList.toggle('show')"><span class="mi">more_horiz</span></button><div class="dropdown-menu" id="vmenu"><a class="dropdown-item" href="#dev" onclick="$('#vmenu').classList.remove('show')">Dev notes</a><a class="dropdown-item" onclick="$('#vmenu').classList.remove('show');toggleRole()">Switch Admin / Member</a><a class="dropdown-item" onclick="$('#vmenu').classList.remove('show');resetDemo()">Reset demo</a></div></div></div>
 <div class="app" id="shell">
  <nav class="sb" id="side" aria-label="Main"></nav>
  <div class="main">
-  <div class="top"><span class="syncs">Syncs left: <b>1000</b></span><a class="text-link" style="text-decoration:none">How it works?</a><span class="mi">notifications</span><span class="mi">help_outline</span><span class="acw"><button class="acb" id="acb" aria-label="Account menu" aria-haspopup="true" onclick="event.stopPropagation();$('#acm').classList.toggle('show')"><span class="mi">person</span></button><div class="dropdown-menu" id="acm"><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">Profile</a><a class="dropdown-item" href="#activity" onclick="$('#acm').classList.remove('show')">Activity log</a><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">Log out</a></div></span></div>
+  <div class="top"><span class="syncs" id="syncs">Syncs left : 1000</span><a class="text-link" style="text-decoration:none">How it works?</a><span class="mi">notifications</span><span class="mi">help_outline</span><span class="acw"><button class="acb" id="acb" aria-label="Account menu" aria-haspopup="true" onclick="event.stopPropagation();$('#acm').classList.toggle('show')"><span class="mi">person</span></button><div class="dropdown-menu" id="acm"><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">Organization settings</a><a class="dropdown-item" href="#activity" onclick="$('#acm').classList.remove('show')">Activity log</a><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">User profile</a><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">List of organizations</a><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">Firm</a><div style="border-top:1px solid var(--border-default);margin:4px 0"></div><a class="dropdown-item" onclick="$('#acm').classList.remove('show');toast('Not part of this demo.','info')">Log out</a></div></span></div>
   <main class="content" id="app"></main>
  </div>
 </div>
@@ -262,15 +293,20 @@ function nav(r){
  const sb=(t,href,on,b)=>`<a class="sb-sub${on?' on':''}" ${href?`href="${href}"`:`onclick="${mock}"`}><span>${t}</span>${b||''}</a>`;
  const NEW=' <span class="status status-green">New</span>',cv='<span class="mi chev">expand_more</span>',up='<span class="mi chev">expand_less</span>';
  const pt=S.org==='pt',org=pt?'Per transaction test':'Green Leaf (Summary)';
- let h=`<div class="sb-org" onclick="S.orgOpen=!S.orgOpen;render()"><span class="sb-av">${pt?'PT':'GL'}</span><span class="on">${org}</span><span class="mi">expand_more</span>${S.orgOpen?`<div class="dropdown-menu orgmenu"><a class="dropdown-item" onclick="event.stopPropagation();switchOrg('pt')">Per transaction test</a><a class="dropdown-item" onclick="event.stopPropagation();switchOrg('sm')">Green Leaf (Summary)</a></div>`:''}</div>`;
+ const oi=(o,av,n,t)=>`<a class="dropdown-item" onclick="event.stopPropagation();switchOrg('${o}')"><span class="sb-av">${av}</span><span class="oi"><span>${n}</span><span class="cell-subtext">${t}</span></span></a>`;
+ let h=`<div class="sb-org" onclick="S.orgOpen=!S.orgOpen;render()"><span class="sb-av">${pt?'PT':'GL'}</span><span class="on">${org}</span><span class="mi">expand_more</span>${S.orgOpen?`<div class="dropdown-menu orgmenu">${oi('pt','PT','Per transaction test','Per Transaction')}${oi('sm','GL','Green Leaf (Summary)','Summary mode')}</div>`:''}</div>`;
  h+=it('dashboard','Dashboard','#dashboard',r==='dashboard');
- if(pt){h+=it('swap_horiz','Transactions',null,0,up)+'<div class="sb-subs">'+sb('Transactions list','#transactions',['transactions','sync'].includes(r))+sb('Import activity log','#imports',r==='imports')+sb('Transaction reconciliation','#recon',r==='recon',NEW)+sb('Period lock','#lock',['lock','edit'].includes(r),NEW)+'</div>'}
- else{h+=it('summarize','Summaries',null,0,up)+'<div class="sb-subs">'+sb('Summaries list','#summaries',['summaries','summary'].includes(r))+sb('Import activity log','#imports',r==='imports')+sb('Period lock','#lock',['lock','edit'].includes(r),NEW)+'</div>'}
- h+=it('account_tree','Smart rules',null,0,cv)+it('shopping_cart','Invoicing',null,0,cv)+it('trending_up','Analytics',null,0,cv);
- if(pt)h+=it('insights','Revenue recognition',null,0,up)+'<div class="sb-subs">'+sb('Subscriptions','#subs',['subs','sub'].includes(r))+sb('One-time invoices','#rrinv',r==='rrinv')+sb('Reports','#reports',['reports','balances'].includes(r))+sb('Configuration','#rrconfig',r==='rrconfig')+'</div>';
- h+='<div class="sb-gap"></div>'+it('settings','Settings',null,0,up)+'<div class="sb-subs">'+sb('Organization settings')+(pt?'':sb('Products and services','#products',['products','product'].includes(r)))+'</div>'+it('hub','AI Hub')+it('stars',"What's New");
- h+=`<div style="flex:1"></div><div class="sb-demo">Demo: viewing as ${isAdmin()?'Admin':'Member'}. <a class="text-link" onclick="S.role=isAdmin()?'member':'admin';S.draft=null;render()">View as ${isAdmin()?'Member':'Admin'}</a></div>`;
+ if(pt){h+=it('swap_horiz','Transactions',null,0,NEW+up)+'<div class="sb-subs">'+sb('Transactions list','#transactions',['transactions','sync'].includes(r))+sb('Import activity log','#imports',r==='imports')+sb('Transaction reconciliation','#recon',r==='recon',NEW)+sb('Period lock','#lock',['lock','edit'].includes(r))+'</div>'
+  h+=it('account_tree','Smart rules',null,0,cv)+it('description','Invoicing',null,0,cv)}
+ else{h+=it('map','Mapping',null,0,cv)+it('summarize','Summaries',null,0,up)+'<div class="sb-subs">'+sb('Summaries list','#summaries',['summaries','summary'].includes(r))+sb('Register')+sb('Transactions list')+sb('Import activity log','#imports',r==='imports')+'</div>'
+  h+=it('balance','Reconciliation')+it('lock','Period lock','#lock',['lock','edit'].includes(r))+it('shopping_cart','Products and services','#products',['products','product'].includes(r))}
+ h+=it('bar_chart','Analytics',null,0,cv);
+ if(pt)h+=it('trending_up','Revenue recognition',null,0,up)+'<div class="sb-subs">'+sb('Subscriptions','#subs',['subs','sub'].includes(r))+sb('One-time invoices','#rrinv',r==='rrinv')+sb('Reports','#reports',['reports','balances'].includes(r))+sb('Configuration','#rrconfig',r==='rrconfig')+'</div>';
+ else h+=it('trending_up','Revenue recognition');
+ h+='<div class="sb-gap"></div>'+it('settings','Settings')+it('hub','AI Hub')+it('campaign',"What's New")+it('code','Custom development');
+ $('#syncs').textContent=pt?'Syncs left : 1000':'Balance : 20000';
  $('#side').innerHTML=h}
+function toggleRole(){S.role=isAdmin()?'member':'admin';S.draft=null;render();toast('Viewing as '+(isAdmin()?'Admin':'Member')+'.','info')}
 function switchOrg(o){if(leaveC(()=>switchOrg(o))){S.orgOpen=false;nav(parse().r);return}S.org=o;S.orgOpen=false;S.draft=null;go('#lock');render()}
 
 /* ---------- period lock list ---------- */
@@ -372,21 +408,29 @@ const reasonTxt=t=>t.reason==='moved'?'Date moved by period lock':t.reason==='ca
 function lockedCx(t){const c=S.integ[t.integ],L=lockOf(c);if(t.reason!=='canceled'||!L||c.mode!=='hard')return false;return(t.batch?t.batch.bad.d:t.date)<=L}
 function rbBlock(t){const c=S.integ[t.integ],L=lockOf(c);if(t.status==='canceled'&&!t.batch)return lockedCx(t)?'Dated in the locked period':'Nothing was synced';if(L&&t.webhook<=L)return'The date Synder received it is in the locked period';return''}
 function rsBlock(t){return lockedCx(t)?(t.batch?t.batch.bad.t+' is dated in the locked period':'Dated in the locked period'):''}
+/* v37 visual-only filter controls (production look, no behaviour) */
+const fF=(l,ctl)=>`<div class="ff"><span class="form-label">${l}</span>${ctl}</div>`;
+const fSel=(o)=>`<select class="select">${(o||['All']).map(x=>`<option>${x}</option>`).join('')}</select>`;
+const fInp=(ph)=>`<input class="input" type="search" placeholder="${ph||''}">`;
+const fDate=v=>`<input class="input" type="date" value="${v||''}" style="width:160px">`;
+const fBar=f=>`<div class="fbar">${f}<div class="fbar-b"><button class="btn">Apply</button><button class="btn btn-outlined">Reset filters</button></div></div>`;
+const vTabs=(ls,on)=>`<div class="rr-tabs flush" role="tablist">${ls.map((l,i)=>`<a role="tab" aria-selected="${i===on}" class="${i===on?'on':''}">${l}</a>`).join('')}</div>`;
+const cbx='<input type="checkbox" class="checkbox" aria-label="Select">';
 const disItem=(l,why)=>`<div class="dropdown-item dis" aria-disabled="true">${l}${why?sub(why):''}</div>`;
 function vTxns(q){const st=q.get('status')||'all',rs=q.get('reason');
  const rows=S.txns.filter(t=>(st==='all'||t.status===st)&&(!rs||t.reason===rs));
- const opts=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled']];
- const body=rows.map(t=>{const rb=rbBlock(t),rsb=rsBlock(t);
+ const opts=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled'],['skipped','Skipped']];
+ const body=rows.map(t=>{const rsb=rsBlock(t);
   const items=(t.status==='synced'?disItem('Sync'):rsb?disItem('Sync',rsb):`<a class="dropdown-item" onclick="resync('${t.id}')">Sync</a>`)
    +`<a class="dropdown-item" href="#sync?id=${t.id}">Show sync info</a>`
-   +(rb?disItem('Rollback sync',rb):`<a class="dropdown-item" onclick="rollback('${t.id}')">Rollback sync</a>`)
+   +`<a class="dropdown-item" onclick="rollback('${t.id}')">Rollback sync</a>`
    +`<a class="dropdown-item" onclick="S.menu=null;render();${mock}">Archive</a>`;
-  return`<tr><td><a class="text-link" href="#sync?id=${t.id}">${t.info}</a>${t.revrec?' <span class="status status-blue">RevRec</span>':''}${sub(S.integ[t.integ].name)}</td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.posted||t.date)}</td><td>${chip(t)}${t.reason==='other'?sub(reasonTxt(t)):''}</td><td class="act rel">${kebab('t_'+t.id,items)}</td></tr>`});
- const chips=st!=='all'||rs?`<div class="chips"><span class="text-secondary">Filters:</span>${st!=='all'?`<span class="chip-input">Sync status: ${opts.find(x=>x[0]===st)[1]}</span>`:''}${rs?`<span class="chip-input">Reason: ${rs==='other'?'No matching open invoice found.':LOCK_MSG}</span>`:''}<a class="text-link" href="#transactions">Reset filters</a></div>`:'';
- const act=`<button class="btn btn-outlined" onclick="event.stopPropagation();S.menu=S.menu==='act'?null:'act';render()">Actions <span class="mi">expand_more</span></button>${S.menu==='act'?`<div class="dropdown-menu pl" style="top:36px;right:0" onclick="event.stopPropagation()"><a class="dropdown-item" onclick="S.menu=null;bulk()">Roll back by date range</a><a class="dropdown-item" onclick="S.menu=null;render();toast('Sync started.')">Sync</a></div>`:''}`;
- return pg(head('Transactions list','Transactions imported from your integrations and their sync status.',act),
-  `<div class="card fcard"><div class="fgrid"><div class="ff"><label class="form-label" for="f-s">Search</label><input id="f-s" class="input" type="search" placeholder="Search transactions" oninput="filterRows(this.value)"></div><div class="ff"><label class="form-label" for="f-st">Sync status</label><select id="f-st" class="select" onchange="go('#transactions?status='+this.value)">${opts.map(([v,t])=>`<option value="${v}" ${st===v?'selected':''}>${t}</option>`).join('')}</select></div></div>${chips}</div>`,
-  rows.length?table(['Transaction','Type','>Amount','Transaction date','Sync status',''],body)+'<div id="noMatch" class="card empty-state" style="display:none;margin-top:24px"><div class="empty-state-title">No transactions match</div><p class="empty-state-desc" style="margin-bottom:0">Try a different search.</p></div>':'<div class="card empty-state"><div class="empty-state-title">No transactions match</div><p class="empty-state-desc">Try a different status.</p><a class="btn" href="#transactions">Clear filters</a></div>')}
+  return`<tr><td class="cb">${cbx}</td><td><a class="text-link" href="#sync?id=${t.id}">${t.info}</a>${t.revrec?' <span class="status status-blue">RevRec</span>':''}</td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.posted||t.date)} ${(SX[t.id]||{}).time||'00:00'}</td><td><div class="tx-st">${chip(t)}<a class="text-link" href="#sync?id=${t.id}">Explain</a></div></td><td class="act rel">${kebab('t_'+t.id,items)}</td></tr>`});
+ const filt=st!=='all'||rs?`<div class="tx-filt">${st!=='all'?`<span class="chip-input">Sync status: ${opts.find(x=>x[0]===st)[1]}</span>`:''}${rs?`<span class="chip-input">Reason: ${rs==='other'?'No matching open invoice found.':LOCK_MSG}</span>`:''}<a class="text-link" href="#transactions">Clear</a></div>`:'';
+ const am=S.menu==='act'?`<div class="dropdown-menu pl" style="top:44px;left:0;right:auto" onclick="event.stopPropagation()"><a class="dropdown-item" onclick="S.menu=null;render();toast('Sync started.')">Sync</a><a class="dropdown-item" onclick="S.menu=null;bulk()">Rollback</a><a class="dropdown-item" onclick="S.menu=null;render();${mock}">Cancel</a><a class="dropdown-item" onclick="S.menu=null;render();${mock}">Archive</a></div>`:'';
+ const bar=`<div><div class="tx-bar"><span class="rel"><button class="btn" onclick="event.stopPropagation();S.menu=S.menu==='act'?null:'act';render()">Actions <span class="mi">expand_more</span></button>${am}</span><button class="btn btn-outlined">Select all transactions</button><button class="btn btn-outlined">Reset all filters</button><input class="input" type="search" placeholder="Search" aria-label="Search"><select class="select" aria-label="Sync status">${opts.map(([v,l])=>`<option ${st===v?'selected':''}>${l}</option>`).join('')}</select><button class="btn btn-outlined" onclick="${mock}">Import historical data</button><button class="btn btn-success" onclick="${mock}">See transactions in books</button><span style="flex:1"></span><button class="btn" onclick="go('#recon')">Run reconciliation</button></div><a class="text-link tx-adv"><span class="mi">chevron_right</span>Advanced search</a></div>`;
+ return pg(head('Transactions list','Transactions imported from connected integrations and their sync status to your books.'),filt,bar,
+  rows.length?table(['<input type="checkbox" class="checkbox" aria-label="Select all">','Transaction info','Transaction type','>Amount','Transaction date','Sync status','Action'],body):'<div class="card empty-state"><div class="empty-state-title">No transactions match</div><p class="empty-state-desc" style="margin-bottom:0">Try a different status.</p></div>')}
 function filterRows(v){v=v.toLowerCase();let n=0;document.querySelectorAll('#app tbody tr').forEach(tr=>{const m=tr.cells[0].textContent.toLowerCase().includes(v);tr.style.display=m?'':'none';n+=m});const e=document.getElementById('noMatch');if(e)e.style.display=n?'none':''}
 function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id);render();const rb=rbBlock(t);if(rb)return toast(rb+'.','info');
  toast('Rollback started. Synder received it on '+fmt(t.webhook)+', which is open.')}
@@ -429,19 +473,14 @@ function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.inte
  else if(t.reason==='canceled')notice=al('warning','warning_amber',`Canceled by period lock. The ${t.part} is dated ${fmt(t.date)}, in the locked period, so ${t.openPart?'the whole '+t.type.toLowerCase():'it'} wasn't synced.${link}`);
  else if(t.reason==='other')notice=al('error','error_outline','No matching open invoice found.');
  else if(t.edit)notice=al('warning','warning_amber',`Order edit received ${fmt(t.edit)}. Synder didn't roll back and resync: the date Synder received it, ${fmt(t.webhook)}, is in the locked period${thr}.`);
- const rb=rbBlock(t),tm=x.time||'00:00',st=t.syncedAt;
- const bar=`<div class="si-bar"><a class="btn btn-outlined" href="#transactions">← Transactions list</a><button class="btn btn-outlined" onclick="${mock}">Syncs history</button><button class="btn btn-outlined" ${rb?'disabled':''} onclick="rollback('${t.id}')">Rollback sync</button>${rb?`<span class="text-secondary">${rb}</span>`:''}<span style="flex:1"></span><button class="btn btn-outlined" onclick="${mock}">How to reconcile</button></div>`;
+ const tm=x.time||'00:00',st=t.syncedAt;
+ const bar=`<div class="si-bar"><a class="btn btn-outlined" href="#transactions">← Transactions list</a><button class="btn btn-outlined" onclick="${mock}">Syncs history</button><button class="btn btn-outlined" onclick="rollback('${t.id}')">Rollback sync</button><span style="flex:1"></span><button class="btn btn-outlined" onclick="${mock}">How to reconcile</button></div>`;
  const kv=[['Sync ID',x.sid||'—'],[c.pp+' company',c.name],['QuickBooks Online company',`${orgName()} <a class="text-link" style="margin-left:8px" onclick="${mock}">View connected Bank Register in QuickBooks</a>`],['Status',chip(t)],['Sync Start Date',fmt(st.slice(0,10))+' '+st.slice(11)],['Sync Date Finished',fmt(st.slice(0,10))+' '+st.slice(11)],['Amount',t.amount],['Transaction date',`${fmt(t.date)} ${tm} (${c.tz})`],['Transaction ID',`<a class="text-link" onclick="${mock}">${x.tid||t.id}</a>`],['Date Synder received it',fmt(t.webhook)]];
  const kvT=`<div class="card tcard"><table class="synder-table si-kv"><tbody>${kv.map(([k,v])=>`<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`;
- const logT=table(['Object type','Object info','Object','Message'],logs.length?logs.map(l=>`<tr><td>${l[0]}</td><td>${l[1]}</td><td>${qbLink}</td><td>${l[2]}</td></tr>`):['<tr><td colspan="4" class="si-empty">No objects were created.</td></tr>']);
- const posting=logs.length?1.1:0;
- const steps=[['Fetching data from '+c.pp,'—',0.42,[['Get transaction',0.31],['Get customer',0.11]]],['Applying settings and rules','—',0.18,[['Settings',0.12],['Smart Rules',0.06]]],['Posting to QuickBooks Online',logs.length?'Available':'—',posting,logs.map((l,i)=>[l[0],+(posting/logs.length).toFixed(2)])]];
- const tot=steps.reduce((a,s)=>a+s[2],0)||1;S.stOpen=S.stOpen||{};
- const stRows=steps.map((s,i)=>{const p=Math.round(s[2]/tot*100),open=S.stOpen[t.id+i];return`<tr class="row-clickable" onclick="S.stOpen['${t.id+i}']=!S.stOpen['${t.id+i}'];render()"><td><span class="mi" style="font-size:18px">${open?'expand_more':'chevron_right'}</span> ${s[0]}</td><td>${s[1]==='Available'?`<a class="text-link" onclick="event.stopPropagation();${mock}">Available</a>`:s[1]}</td><td class="r">${s[2].toFixed(2)} s</td><td><span class="si-pct"><span class="si-barbg"><span style="width:${p}%"></span></span>${p}%</span></td></tr>`+(open?s[3].map(d=>`<tr class="si-sub"><td style="padding-left:40px">${d[0]}</td><td>—</td><td class="r">${d[1].toFixed(2)} s</td><td></td></tr>`).join(''):'')});
- const rules=`<div class="card si-rule"><div><div class="sec-t" style="margin:0">Create a rule</div><p class="text-secondary" style="margin:4px 0 0">Use Smart Rules to change how Synder syncs transactions like this one. <a class="text-link" onclick="${mock}">Read our guides</a></p></div><button class="btn btn-outlined" onclick="${mock}">Create a rule</button></div>`;
- return pg(bar,sec('Sync info',(notice?`<div style="margin-bottom:16px">${notice}</div>`:'')+kvT),
-  sec('Sync log',`<p class="text-secondary" style="margin:0 0 12px">If the sync results are not as expected, review your <a class="text-link" onclick="${mock}">Settings</a> to adjust the configuration. You can also use <a class="text-link" onclick="${mock}">Smart Rules Recipes</a> to automatically modify transactions based on custom conditions.</p>`+logT),
-  sec('Sync time',table(['Process','Accelerate Sync','>Duration','% of total'],stRows)),sec('Rules',rules))}
+ const logT=logs.length?table(['','Object type','Object info','Object','Message'],logs.map(l=>`<tr><td class="cb"><span class="mi si-x">chevron_right</span></td><td>${l[0]}</td><td>${l[1]}</td><td>${qbLink}</td><td>${l[2]}</td></tr>`)):'<div class="card si-none">No accounting objects were created for this sync.</div>';
+ /* v37: layout as the original prototype: h1 Sync info + key/value table, then Sync log with the lock notice under its heading */
+ return pg(bar,`<div><h1 class="page-title" style="margin:0 0 16px">Sync info</h1>${kvT}</div>`,
+  sec('Sync log',`<p class="text-secondary" style="margin:0 0 12px">If the sync results are not as expected, review your <a class="text-link" onclick="${mock}">Settings</a> to adjust the configuration. You can also use <a class="text-link" onclick="${mock}">Smart Rules Recipes</a> to automatically modify transactions based on custom conditions.</p>`+(notice?`<div style="margin-bottom:16px">${notice}</div>`:'')+logT))}
 
 /* ---------- import activity log (production /imports/history; no period lock changes) ---------- */
 const IMPORTS=[
@@ -470,20 +509,24 @@ function vImports(){const f=S.imf||{};
 
 /* ---------- reconciliation ---------- */
 function vRecon(q){const id=q&&q.get('id');if(id)return vReconRes(id,q.get('tab')||'matched');
- return pg(head('Transaction reconciliation','mzkt.by (Stripe) vs QuickBooks Online'),
-  table(['Period','>Matched','>Differences','Status',''],RECON.map(r=>`<tr class="row-clickable" onclick="go('#recon?id=${r.id}')"><td><a class="text-link" href="#recon?id=${r.id}" onclick="event.stopPropagation()">${short(r.from)} – ${fmt(r.to)}</a></td><td class="r">${r.m}</td><td class="r">${r.d.length}</td><td><span class="status status-green">Reconciled</span></td><td class="act"><a class="btn-text" href="#recon?id=${r.id}" onclick="event.stopPropagation()">Open result</a></td></tr>`)))}
+ const hd=`<div class="ph"><div><h1 class="page-title">Transaction reconciliation</h1><p class="page-subtitle" style="margin:4px 0 0">Compare data from your integrations and accounting to spot discrepancies and keep your books accurate.</p><div class="rc-chips"><span class="status status-green">Included in your plan</span><span class="status status-blue">Doesn't use your sync credits</span></div></div><div class="page-header-actions"><button class="btn" onclick="${mock}">Run reconciliation</button></div></div>`;
+ const filt=fBar(fF('Integration',fSel())+fF('Account',fSel())+fF('Date range',`<div style="display:flex;gap:8px">${fDate()}${fDate()}</div>`)+fF('Status',fSel()));
+ return pg(hd,filt,`<div>${vTabs(['Active','Deleted'],0)}${table(['Date range','Integration','Account','Date created','Status',''],RECON.map(r=>`<tr><td><a class="text-link" href="#recon?id=${r.id}">${short(r.from)} - ${fmt(r.to)}</a></td><td><span class="pl-int">${LOGO.stripe}<span>mzkt.by (Stripe)</span></span></td><td>Stripe mzkt.by (required for Synder)</td><td>${fmt(r.created)}</td><td><span class="status status-green">Reconciled</span></td><td class="act"><a class="btn btn-outlined" href="#recon?id=${r.id}">Open result</a></td></tr>`))}</div>`)}
 /* every reconciliation stays openable; period lock never blocks or hides one. The promote shows only while the period isn't covered by the lock yet */
 const RECON=[
- {id:'oct',from:'2026-10-01',to:'2026-10-14',m:187,d:[],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
- {id:'sep',from:'2026-09-01',to:'2026-09-30',m:412,d:[['2026-09-18','ch_3Q7h…','59.00 USD','58.50 USD'],['2026-09-09','ch_3Q6c…','24.00 USD','—']],rows:[['2026-09-28','ch_3Q8k…','128.00 USD','Payment;Expense;charge','Auto',3],['2026-09-15','po_1U8V…','161.26 USD','Transfer;payout','Auto',2]]},
- {id:'aug',from:'2026-08-01',to:'2026-08-31',m:398,d:[],rows:[['2026-08-27','ch_3Q5m…','96.00 USD','Payment;Expense;charge','Auto',3],['2026-08-14','po_1U7K…','212.40 USD','Transfer;payout','Auto',2]]}];
+ {id:'oct',from:'2026-10-01',to:'2026-10-14',created:'2026-10-15',m:187,d:[],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
+ {id:'sep',from:'2026-09-01',to:'2026-09-30',created:'2026-10-02',m:412,d:[['2026-09-18','ch_3Q7h…','59.00 USD','58.50 USD'],['2026-09-09','ch_3Q6c…','24.00 USD','—']],rows:[['2026-09-28','ch_3Q8k…','128.00 USD','Payment;Expense;charge','Auto',3],['2026-09-15','po_1U8V…','161.26 USD','Transfer;payout','Auto',2]]},
+ {id:'aug',from:'2026-08-01',to:'2026-08-31',created:'2026-09-05',m:398,d:[],rows:[['2026-08-27','ch_3Q5m…','96.00 USD','Payment;Expense;charge','Auto',3],['2026-08-14','po_1U7K…','212.40 USD','Transfer;payout','Auto',2]]}];
 function vReconRes(id,tab){const r=RECON.find(x=>x.id===id)||RECON[1],c=S.integ.stripe,L=lockOf(c);
  const promo=isAdmin()&&(!c.on||!L||r.to>L)?`<div class="alert alert-info" style="align-items:center"><span class="mi">info</span><div style="flex:1"><b>Reconciliation complete.</b> Lock this period in Synder so it can't be modified.</div><button class="btn" onclick="promote('${r.to}')">Lock period</button></div>`:'';
- const tabs=[['matched','Matched',r.m],['diff','Differences',r.d.length]];
- const tb=`<div class="rr-tabs" role="tablist">${tabs.map(([k,l,n])=>`<a role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" href="#recon?id=${r.id}&tab=${k}">${l} (${n})</a>`).join('')}</div>`;
- const body=tab==='diff'?(r.d.length?table(['Date','Matching ID','>Stripe','>QuickBooks Online'],r.d.map(x=>`<tr><td>${fmt(x[0])}</td><td><a class="text-link" onclick="${mock}">${x[1]}</a></td><td class="r">${x[2]}</td><td class="r">${x[3]}</td></tr>`)):table(['Date','Matching ID','>Stripe','>QuickBooks Online'],['<tr><td colspan="4" class="si-empty">No data</td></tr>'])):table(['Date','Matching ID','>Total amount','Types','Match type','>Count'],r.rows.map(x=>`<tr><td>${fmt(x[0])}</td><td><a class="text-link" onclick="${mock}">${x[1]}</a></td><td class="r">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td class="r">${x[5]}</td></tr>`));
- return dlg('Reconciliation results','#recon',`<button class="btn btn-outlined" onclick="${mock}">Copy share link</button><button class="btn btn-outlined" onclick="${mock}">Refresh data</button><button class="btn btn-outlined" onclick="${mock}">Export</button>`,
-  pg(head(titleRow(short(r.from)+' – '+fmt(r.to),'<span class="status status-green">Reconciled</span>'),'mzkt.by (Stripe) vs QuickBooks Online'),promo,tb,body))}
+ const tabs=[['matched','Matched',r.m],['diff','Discrepancy',r.d.length],['missing','Missing source',0],['ignored','Ignored',0]];
+ const tb=`<div class="rr-tabs flush" role="tablist">${tabs.map(([k,l,n])=>`<a role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" href="#recon?id=${r.id}&tab=${k}">${l} (${n})</a>`).join('')}</div>`;
+ const cols=['','Date','Matching ID','>Total amount','Types','Match type','>Count'],ex='<td class="cb"><span class="mi si-x">expand_more</span></td>';
+ const data=tab==='matched'?r.rows:tab==='diff'?r.d.map(x=>[x[0],x[1],x[2],'Payment;Expense;charge','Auto',2]):[];
+ const body=data.length?table(cols,data.map(x=>`<tr>${ex}<td>${fmt(x[0])}</td><td><a class="text-link" onclick="${mock}">${x[1]}</a></td><td class="r">${x[2]}</td><td>${x[3]}</td><td>${x[4]}</td><td class="r">${x[5]}</td></tr>`)):'<div class="card si-none">No rows in this tab.</div>';
+ /* v37: normal page as in the original (X back to the list, actions on the right) */
+ return pg(`<div class="ph"><div><div class="rc-t"><a class="btn-icon" href="#recon" aria-label="Close"><span class="mi">close</span></a><h1 class="page-title">Reconciliation results</h1></div><div class="rc-acc">Stripe mzkt.by (required for Synder) <span class="status status-green">Reconciled</span></div><p class="rc-sub">mzkt.by (Stripe) / ${short(r.from)} - ${fmt(r.to)}</p></div><div class="page-header-actions"><button class="btn btn-outlined" onclick="${mock}">Copy share link</button><button class="btn btn-outlined" onclick="${mock}">Refresh data</button><button class="btn btn-outlined" onclick="${mock}">Process log</button><button class="btn btn-outlined" onclick="${mock}">Export <span class="mi">expand_more</span></button></div></div>`,
+  promo,`<div>${tb}<div style="margin-top:16px">${fBar(fF('Search',fInp('Search'))+fF('From',fDate())+fF('To',fDate()))}</div><div style="margin-top:16px">${body}</div></div>`)}
 function promote(end){S.draft=null;S.prefill={i:'stripe',to:end};track('PeriodLockVisited',{});S._noVisit=1;go('#edit?i=stripe&from=recon')}
 
 /* ---------- revenue recognition (production screens: Subscriptions list, Subscription details dialog) ---------- */
@@ -597,38 +640,52 @@ function dashIssues(){if(S.org!=='pt')return[];const lk=S.txns.filter(t=>t.reaso
   {qty:1,st:'rbfailed',msg:'Invoice has not been deleted. Business Validation Error: The action could not be completed because another user was creating, editing or deleting a transaction.',last:'2026-09-24'}].filter(Boolean).sort((x,y)=>y.qty-x.qty)}
 const ISS_ST={canceled:'Canceled',failed:'Failed',rbfailed:'Rollback failed'};
 const issChip=s=>`<span class="status status-${s==='canceled'?'yellow':'red'}">${ISS_ST[s]}</span>`;
-function applyIss(){S.isf={q:val('d-q'),st:val('d-st'),from:val('d-from'),to:val('d-to')};render()}
 function vDash(q){const pt=S.org==='pt',tab=q&&q.get('tab')||'issues';
  const tabs=[['overview','Overview'],['issues','Synchronization Issues'],['speed','Sync speed']];
  const tb=`<div class="rr-tabs" role="tablist">${tabs.map(([k,l])=>`<a role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" href="#dashboard?tab=${k}">${l}</a>`).join('')}</div>`;
  let body;
  if(tab==='overview')body=`<div class="grid2"><div class="card"><div class="card-title">Syncs this month</div><div class="big">${pt?'1,284':'31'}</div><div class="text-secondary">${pt?'transactions':'summaries'}</div></div></div>`;
  else if(tab==='speed')body='<div class="card empty-state"><div class="empty-state-title">Not part of this demo</div><p class="empty-state-desc" style="margin-bottom:0">Open Synchronization Issues.</p></div>';
- else{const f=S.isf||{},qq=(f.q||'').trim().toLowerCase();
-  const rows=dashIssues().filter(r=>(qq.length<3||r.msg.toLowerCase().includes(qq)||String(r.qty)===qq)&&(!f.st||ISS_ST[r.st]===f.st)&&(!f.from||r.last>=f.from)&&(!f.to||r.last<=f.to));
-  const filt=`<div class="card fcard"><div class="fgrid"><div class="ff"><label class="form-label" for="d-q">Search</label><input id="d-q" class="input" type="search" placeholder="Search by any word" value="${f.q||''}"><p class="pl-help">Enter at least 3 characters</p></div>${sel('d-st','Status',['Canceled','Failed','Rollback failed'],f.st)}<div class="ff" style="width:auto"><span class="form-label">Date range</span><div style="display:flex;gap:8px"><input id="d-from" class="input" type="date" aria-label="From" value="${f.from||''}" style="width:150px"><input id="d-to" class="input" type="date" aria-label="To" value="${f.to||''}" style="width:150px"></div></div></div>${fbtns('applyIss()','S.isf={};render()')}</div>`;
-  body=pg(filt,rows.length?table(['Quantity','Status','Error message','Actions'],rows.map(r=>`<tr><td>${r.qty}</td><td>${issChip(r.st)}</td><td>${r.msg}</td><td>${r.href?`<a class="btn-text" href="${r.href}">See related transactions</a>`:`<button class="btn-text" onclick="${mock}">See related transactions</button>`}</td></tr>`))+`<div class="pager"><span class="text-secondary">Rows per page: 25</span><span class="text-secondary">1–${rows.length} of ${rows.length}</span></div>`:`<div class="card empty-state"><div class="empty-state-title">${dashIssues().length?'No issues match':'No synchronization issues'}</div><p class="empty-state-desc" style="margin-bottom:0">${dashIssues().length?'Try different filters.':'All syncs completed.'}</p></div>`)}
+ else{const rows=dashIssues();
+  const filt=`<div class="fbar">${fF('Search',fInp('Search by any word')+'<p class="pl-help">Enter at least 3 characters</p>')}${fF('Status',fSel(['All','Canceled','Failed','Rollback failed']))}${fF('Date range',fSel(['Custom']))}${fF('From / To',`<div style="display:flex;gap:8px">${fDate('2026-09-01')}${fDate('2026-10-15')}</div>`)}<div class="fbar-b"><button class="btn">Apply</button><button class="btn btn-outlined">Reset filters</button></div></div>`;
+  body=pg(filt,rows.length?table(['Quantity <span class="mi" style="font-size:16px">arrow_downward</span>','Status','Error message','Actions <span class="mi" style="font-size:16px;color:var(--text-secondary)" title="Only the first 500 related transactions are shown at a time.">help_outline</span>'],rows.map(r=>`<tr><td>${r.qty}</td><td>${issChip(r.st)}</td><td>${r.msg}</td><td>${r.href?`<a class="btn-text" href="${r.href}">See related transactions</a>`:`<button class="btn-text" onclick="${mock}">See related transactions</button>`}</td></tr>`))+`<div class="pager"><span class="text-secondary">Rows per page:</span><select class="select" style="width:auto"><option>25</option><option>10</option><option>50</option></select><span class="text-secondary">1–${rows.length} of ${rows.length}</span></div>`:`<div class="card empty-state"><div class="empty-state-title">No synchronization issues</div><p class="empty-state-desc" style="margin-bottom:0">All syncs completed.</p></div>`)}
  return pg(head('Dashboard'),`<div>${tb}${body}</div>`)}
 
 /* ---------- summaries (SM) ---------- */
 const SUMS=[{id:'s1015',date:'2026-10-14',amt:'2,904.10 USD',st:'synced'},{id:'s1001',date:'2026-10-01',amt:'3,412.75 USD',st:'adj',moved:37},{id:'s0915',date:'2026-09-15',amt:'2,118.40 USD',st:'synced',locked:1}];
 const sumChip=s=>s.st==='adj'?'<span class="status status-yellow">Synced adjustment</span>':'<span class="status status-green">Synced</span>';
-function vSums(){return pg(head('Summaries list','Daily summaries from Green Leaf (Square).',`<button class="btn btn-outlined" onclick="${mock}">Import historical data</button><button class="btn" onclick="${mock}">Generate summary</button>`),
- table(['Summary','Integration','>Amount','Status',''],SUMS.map(s=>`<tr class="row-clickable" onclick="go('#summary?id=${s.id}')"><td><a class="text-link">Summary · ${fmt(s.date)}</a></td><td>Green Leaf (Square)</td><td class="r">${s.amt}</td><td>${sumChip(s)}</td>${rowAct('See details',`go('#summary?id=${s.id}')`,'s_'+s.id,`<a class="dropdown-item" onclick="S.menu=null;render();toast('Resync started.')">Resync</a>`)}</tr>`)))}
+const sRng=d=>short(d)+' - '+fmt(d);
+const glCell=()=>`<span class="pl-int">${LOGO.greenleaf}<span>Green Leaf (Square)</span></span>`;
+function vSums(){
+ const hd=`<div class="ph"><div><h1 class="page-title">Summaries list</h1><p class="ph-meta" style="margin:2px 0 0">Last updated today at 16:03</p><p class="page-subtitle" style="margin:4px 0 0">View the list of summarized entries along with their sync status to your books.</p></div><div class="page-header-actions"><button class="btn btn-outlined" onclick="${mock}">Import historical data</button><button class="btn" onclick="${mock}">Generate summary</button></div></div>`;
+ const filt=fBar(fF('Search',fInp('Search by amount or IDs'))+fF('Date range',fSel(['Custom']))+fF('Integration',fSel())+fF('Completeness',fSel())+fF('Sync status',fSel()));
+ const tabs=vTabs(['All','Synced to your books','Partially synced','Failed','Rollback failed','Ready to sync','Rolled back'],1);
+ const rows=SUMS.map(s=>{const items=`<a class="dropdown-item" href="#summary?id=${s.id}">Open summary</a>${s.st==='adj'?`<a class="dropdown-item" onclick="S.menu=null;render();${mock}">Show sync info</a>`:''}<a class="dropdown-item" onclick="S.menu=null;render();toast('Rollback started.')">Rollback</a><a class="dropdown-item" onclick="S.menu=null;render();toast('Resync started.')">Resync</a><a class="dropdown-item" onclick="S.menu=null;render();${mock}">Archive</a>`;
+  return`<tr><td class="cb">${cbx}</td><td><a class="text-link" href="#summary?id=${s.id}">${sRng(s.date)}</a></td><td>${glCell()}</td><td class="r">${s.amt}</td><td><span class="status status-green">Fully fetched</span></td><td>${sumChip(s)}</td><td class="act rel"><a class="text-link" style="margin-right:8px" onclick="${mock}">See in books <span class="mi" style="font-size:16px">open_in_new</span></a>${kebab('s_'+s.id,items)}</td></tr>`});
+ return pg(hd,filt,`<div>${tabs}${table(['<input type="checkbox" class="checkbox" aria-label="Select all">','Date / Payout ID','Integration','>Amount','Completeness status','Sync status','Actions'],rows)}</div>`)}
 function vSum(q){const s=SUMS.find(x=>x.id===q.get('id'))||SUMS[2],c=S.integ.greenleaf,L=lockOf(c);
  const inLock=L&&s.date<=L;
- const note=inLock?`<div class="alert alert-info"><span class="mi">info</span><div>Dated in the locked period (locked through ${fmt(L)}). Period lock doesn't block summary sync, rollback or resync.</div></div>`:s.moved?`<div class="alert alert-info"><span class="mi">info</span><div>${s.moved} datasource records dated Sep 28–30, 2026 were moved to ${fmt(s.date)} by soft lock and included in this summary.</div></div>`:'';
- const lines=[['Sales','Bread · 412 units','1,030.00 USD'],['Sales','Croissant · 380 units','722.00 USD'],['Fees','Square fees','-48.30 USD'],['COGS','Product cost','-610.00 USD']];
- return dlg('Summary preview','#summaries',`<button class="btn btn-outlined" onclick="toast('Rollback started.')">Roll back</button><button class="btn" onclick="toast('Resync started.')">Resync</button>`,
-  pg(head(titleRow('Summary · '+fmt(s.date),sumChip(s)),'Green Leaf (Square) · '+s.amt),note,sec('Summary lines',table(['Line type','Description','>Amount'],lines.map(l=>`<tr><td>${l[0]}</td><td>${l[1]}</td><td class="r">${l[2]}</td></tr>`)))))}
+ const note=inLock?`Dated in the locked period (locked through ${fmt(L)}). Period lock doesn't block summary sync, rollback or resync.`:s.moved?`${s.moved} datasource records dated Sep 28–30, 2026 were moved to ${fmt(s.date)} by soft lock and included in this summary.`:'';
+ const lines=[['Sales · Bread (412 units)','','1,030.00'],['Sales · Croissant (380 units)','','722.00'],['Square fees','48.30',''],['COGS · Product cost','610.00','']];
+ /* v37: normal page as in the original (no full-screen dialog) */
+ return pg(`<div><a class="btn btn-outlined" href="#summaries">← Summaries list</a></div>`,
+  `<div class="sd-head"><div><h1 class="page-title" style="margin:0">Summary</h1><p class="sd-range">${sRng(s.date)}</p><div class="sd-chips">${glCell()}<span class="status status-green">Fully fetched</span>${sumChip(s)}</div>${note?`<p class="sd-note">${note}</p>`:''}</div><div class="sd-amt"><div class="text-secondary">Amount</div><div class="big">${s.amt}</div></div></div>`,
+  `<div class="btn-group"><button class="btn btn-outlined" onclick="toast('Rollback started.')">Rollback</button><button class="btn btn-outlined" onclick="toast('Resync started.')">Resync</button>${s.st==='adj'?`<button class="btn btn-outlined" onclick="${mock}">Show sync info</button>`:''}<button class="btn btn-outlined" onclick="${mock}">See in books <span class="mi" style="font-size:16px">open_in_new</span></button></div>`,
+  sec('Summary lines',table(['Line','>Debit','>Credit'],lines.map(l=>`<tr><td>${l[0]}</td><td class="r">${l[1]||'—'}</td><td class="r">${l[2]||'—'}</td></tr>`))))}
 
 /* ---------- products (SM) ---------- */
-function vProducts(){return pg(head('Products and services','Product costs used for COGS in summaries.'),
- table(['Product','SKU','>Purchase cost','>Sales price'],S.products.map(p=>`<tr class="row-clickable" onclick="go('#product?id=${p.id}')"><td><a class="text-link">${p.name}</a></td><td>${p.sku}</td><td class="r">${p.cost} USD</td><td class="r">${p.price} USD</td></tr>`)))}
+function vProducts(){
+ const hd=`<div class="ph"><h1 class="page-title">Products and services</h1><div class="page-header-actions"><button class="btn btn-outlined" onclick="${mock}">Export CSV</button><button class="btn" onclick="${mock}">Import <span class="mi">expand_more</span></button><button class="btn" onclick="${mock}">Add product</button></div></div>`;
+ const info=`<p class="pr-info"><span class="mi">info</span><span>COGS for summaries will be calculated according to the costs of the products specified in the list below. If you want to apply costs to existing summaries use the Import option. <a class="text-link" onclick="${mock}">Learn more</a></span></p>`;
+ const filt=fBar(fF('Search',fInp('Search by name or SKU'))+fF('Product category',fSel())+fF('Imported from',fSel())+fF('Verification status',fSel()));
+ return pg(hd,info,filt,table(['<input type="checkbox" class="checkbox" aria-label="Select all">','Name','SKU','Product category','Imported from','>Sales price','>Cost','Verification status',''],S.products.map(p=>`<tr class="row-clickable" onclick="go('#product?id=${p.id}')"><td class="cb" onclick="event.stopPropagation()">${cbx}</td><td>${p.name}</td><td>${p.sku}</td><td>Bakery</td><td>${glCell()}</td><td class="r">$${p.price} USD</td><td class="r">$${p.cost} USD</td><td><span class="status status-yellow">Unverified</span></td><td class="act"><button class="btn-icon" aria-label="Edit" onclick="event.stopPropagation();go('#product?id=${p.id}')"><span class="mi">more_horiz</span></button></td></tr>`)))}
 function vProduct(q){const p=S.products.find(x=>x.id===q.get('id'))||S.products[0],c=S.integ.greenleaf,L=lockOf(c);
- const fld=(l,id,v,hint)=>`<div class="pl-field" style="margin-bottom:16px"><label class="form-label" for="${id}">${l}</label><input class="input" id="${id}" style="width:360px" value="${v}">${hint||''}</div>`;
- return dlg('Product','#products',`<button class="btn" onclick="saveProduct('${p.id}')">Save</button>`,
-  pg(head(p.name,'SKU '+p.sku),`<div class="card">${fld('Name','p-name',p.name)}${fld('SKU','p-sku',p.sku)}${fld('Purchase cost (USD)','cost',p.cost,L?`<p class="pl-help">Locked through ${fmt(L)}: records in the locked period keep the old cost. Cost updates always use hard lock.</p>`:'')}${fld('Sales price (USD)','p-price',p.price).replace('margin-bottom:16px','margin-bottom:0')}</div>`))}
+ const f=(l,ctl,extra)=>`<div class="pe-f"><label class="form-label">${l}</label>${ctl}${extra||''}</div>`;
+ /* v37: full-screen "Update product or service" as in the original */
+ return dlg('Update product or service','#products',`<button class="btn" onclick="saveProduct('${p.id}')">Save changes</button>`,
+  `<div class="pe"><h2 class="pe-h">Product/service details</h2><div class="pe-grid">${f('Name <span style="color:var(--color-red)">*</span>',`<input class="input" value="${p.name}">`)}${f('SKU',`<input class="input" value="${p.sku}" placeholder="Enter SKU">`)}${f('Product category','<select class="select"><option>Select category</option></select>')}${f('Verification status','<div class="select pe-vs"><span class="status status-yellow">Unverified</span></div>')}</div>
+  <h2 class="pe-h" style="margin-top:40px">Prices and storage</h2><label class="pe-track"><input type="checkbox" class="switch" checked aria-label="I track this item"> I track this item <span class="mi" style="font-size:18px;color:var(--text-secondary)">help_outline</span></label>
+  <div class="pe-prices">${f('Sales price',`<input class="input" value="${p.price}">`)}${f('Purchase cost',`<input class="input" id="cost" value="${p.cost}">`)}</div>${L?`<p class="pl-help" style="margin-top:8px">Locked through ${fmt(L)}: records in the locked period keep the old cost. Cost updates always use hard lock.</p>`:''}</div>`)}
 function saveProduct(id){const v=$('#cost').value.trim()||'0';const p=S.products.find(x=>x.id===id);const n=x=>(parseFloat(String(x).replace(/[^0-9.]/g,''))||0).toFixed(2),changed=n(p.cost)!==n(v);p.cost=v;const L=lockOf(S.integ.greenleaf);go('#products');toast(changed&&L?`Success! Product has been updated. Records through ${fmt(L)} were not updated because the period is locked.`:'Success! Product has been updated successfully!')}
 
 /* ---------- dev notes ---------- */
@@ -646,6 +703,16 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log37=['Layouts follow the original prototype and production; controls that are not part of the lock demo (filters, date pickers, search, extra tabs, bulk buttons) are visual only.',
+  'Sync info: h1 "Sync info" + key/value table, then Sync log with the lock notice under its heading and above the log table (as in the original). Log rows have a chevron column. Rollback sync is always enabled; when the lock blocks it, a toast gives the reason. Sync time and Rules sections removed. "Date Synder received it" kept (FDD: rollback uses the webhook date).',
+  'Transactions list: original toolbar (Actions: Sync / Rollback / Cancel / Archive, Select all transactions, Reset all filters, Search, status dropdown, Import historical data, See transactions in books, Run reconciliation), Advanced search link, checkbox column, columns Transaction info / Transaction type / Amount / Transaction date (with time) / Sync status / Action, "Explain" link under the status chip. No hint text in rows. Row menu kept from v29 (production): Sync, Show sync info, Rollback sync, Archive. Filter from Synchronization Issues shows chips + Clear above the toolbar.',
+  'Summaries list: Last updated line, header actions, filter panel, status tabs, checkbox, Date / Payout ID, Integration, Amount, Completeness status, Sync status, Actions (See in books + menu). Summary detail is a normal page again (← Summaries list, chips row, Amount on the right, Rollback / Resync / See in books, lines with Debit / Credit).',
+  'Products and services: header actions, COGS info line, filter panel, original columns with Verification status. Edit is the full-screen "Update product or service" with Save changes, Product/service details and Prices and storage; the lock note sits under the prices.',
+  'Transaction reconciliation: header chips + Run reconciliation, filter panel, Active / Deleted tabs, columns Date range / Integration / Account / Date created / Status / Open result. Result is a normal page: X + "Reconciliation results", account + status, Copy share link / Refresh data / Process log / Export, Lock period prompt, tabs Matched / Discrepancy / Missing source / Ignored, filter panel, expandable rows.',
+  'Dashboard: tabs and columns unchanged (production); filters as the original (Search, Status, Date range, From / To), sort arrow and help icon in the header, Rows per page.',
+  'Shell: sidebar items as the original (PT: Transactions group with New, Smart rules, Invoicing; SM: Mapping, Summaries group with Register and Transactions list, Reconciliation, Period lock, Products and services; footer Settings, AI Hub, What\'s New, Custom development). Org menu shows the org type. Header counter boxed ("Syncs left : 1000" / "Balance : 20000"), account menu: Organization settings, Activity log, User profile, List of organizations, Firm, Log out. Admin / Member switch moved to the prototype ⋯ menu.',
+  'Kept from v36 (production rebuilds): Revenue recognition screens, Dashboard tabs and columns, Activity log, Import activity log, Transactions row menu. Kept: UI kit styling, modals and toasts.'];
+ const new37=[];
  const log36=['Variants A (v20) and B (Sections) removed with their code, CSS and switcher; the card layout (formerly C) is the only Period lock settings page. Old ?v=a / ?v=b links open the page as usual. Changelog entries below v36 that mention A, B or C describe the removed variants.',
   'Period lock list: Affected column removed, with its tooltips, counts and the Transactions deep links (reason + integration). The Transactions reason filter stays for Synchronization Issues → See related transactions.',
   'Status chips (UI kit Status): Canceled = yellow (Transactions, Sync info, Dashboard Synchronization Issues, RevRec Revenue recognition transactions, Import activity log). Failed and Rollback failed = red, as in the original prototype. Mode keeps Off.'];
@@ -729,8 +796,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v36','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v37','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
+ sec('Changelog v37',`<div class="card"><ul>${log37.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v36',`<div class="card"><ul>${log36.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
  sec('New in v36 (not in production)',`<div class="card"><ul>${new36.map(l=>`<li><span class="status status-green">New</span> ${l}</li>`).join('')}</ul></div>`),
  sec('Changelog v35',`<div class="card"><ul>${log35.map(l=>`<li>${l}</li>`).join('')}</ul></div>`),
