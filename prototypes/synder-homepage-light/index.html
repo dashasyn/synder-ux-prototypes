@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Synder.com homepage, light (prototype)</title>
+<style>
+  :root{
+    --blue:#0053CC; --blue-hover:#1A43A2; --blue-10:#E0EBFD; --blue-5:#F2F6FC;
+    --ink:#0F1729; --text:#2B3445; --muted:#5B6478; --faint:#8A93A6;
+    --line:#E4E8EF; --band:#F6F8FB; --white:#fff; --ok:#16794C; --ok-bg:#E8F5EE; --warn:#9A5B00; --warn-bg:#FFF4E0;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--text);background:var(--white);-webkit-font-smoothing:antialiased}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  h1,h2,h3{color:var(--ink);margin:0;letter-spacing:-0.02em}
+  p{margin:0}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  .ph{display:inline-block;background:var(--warn-bg);color:var(--warn);border:1px dashed #E0A84A;border-radius:6px;padding:0 6px;font-size:14px;font-weight:600}
+
+  /* ===== Prototype variant bar (not part of the page) ===== */
+  .vbar{background:#14161C;color:#E7E9EE;font-size:14px;display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:relative;z-index:60}
+  .vbar .vname{font-weight:600}
+  .vbar .vswitch{display:flex;gap:4px;background:#23262F;border-radius:8px;padding:3px}
+  .vbar .vswitch button{all:unset;cursor:pointer;font-size:14px;padding:3px 12px;border-radius:6px;color:#AEB4C2}
+  .vbar .vswitch button[aria-pressed="true"]{background:#fff;color:#14161C;font-weight:600}
+
+  /* ===== Buttons: two styles only ===== */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:10px;font-size:15px;font-weight:600;border:1.5px solid transparent;cursor:pointer;white-space:nowrap;text-decoration:none!important;transition:background .15s,border-color .15s,color .15s}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:var(--blue-hover)}
+  .btn-secondary{background:#fff;color:var(--ink);border-color:#CBD2DE}
+  .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+  .btn-sm{height:38px;padding:0 14px;font-size:14px}
+  .link-arrow{font-weight:600;font-size:15px}
+  .link-arrow::after{content:" →"}
+
+  /* ===== Header (one row) ===== */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
+  .nav-row{display:flex;align-items:center;height:68px;gap:28px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;color:var(--ink);letter-spacing:-0.02em}
+  .logo:hover{text-decoration:none}
+  .logo-mark{width:28px;height:28px;border-radius:8px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:15px;font-weight:800}
+  .menu{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+  .menu>li{position:relative}
+  .menu>li>a,.menu>li>button{all:unset;cursor:pointer;display:block;padding:8px 12px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text)}
+  .menu>li>button::after{content:"";display:inline-block;margin-left:6px;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-3px);opacity:.6}
+  .menu>li:hover>a,.menu>li:hover>button,.menu>li:focus-within>button{background:var(--band);color:var(--ink);text-decoration:none}
+  .dd{display:none;position:absolute;left:0;top:100%;padding-top:8px}
+  .menu>li:hover .dd,.menu>li:focus-within .dd{display:block}
+  .dd-inner{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(15,23,41,.10);padding:20px;display:grid;gap:24px;grid-auto-flow:column;min-width:260px}
+  .dd h4{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .dd ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+  .dd a{display:block;padding:6px 8px;margin:0 -8px;border-radius:8px;color:var(--ink);font-size:15px;white-space:nowrap}
+  .dd a small{display:block;color:var(--muted);font-size:14px}
+  .dd a:hover{background:var(--band);text-decoration:none}
+  .nav-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .nav-actions .login{font-size:15px;font-weight:500;color:var(--text);padding:8px 10px}
+
+  /* ===== Hero ===== */
+  .hero{padding:88px 0 72px}
+  .hero-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:56px;align-items:center}
+  .eyebrow{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:16px}
+  .hero h1{font-size:54px;line-height:1.08;font-weight:700;letter-spacing:-0.035em}
+  .hero .sub{font-size:19px;color:var(--muted);margin-top:22px;max-width:34em}
+  .hero .ctas{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}
+  .hero .caption{margin-top:14px;font-size:14px;color:var(--faint)}
+
+  /* hero visual: sync flow */
+  .flow{background:var(--band);border:1px solid var(--line);border-radius:20px;padding:28px;position:relative}
+  .sample-tag{position:absolute;top:14px;right:14px;font-size:14px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .flow-cols{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;gap:8px;margin-top:18px}
+  .src{display:grid;gap:10px}
+  .chip{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px;font-weight:600;color:var(--ink)}
+  .chip .dot{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700;flex:none}
+  .chip .amt{margin-left:auto;font-weight:500;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+  .arrow{height:2px;background:repeating-linear-gradient(90deg,#9AA6BD 0 6px,transparent 6px 11px);position:relative}
+  .arrow::after{content:"";position:absolute;right:-2px;top:-4px;border-left:7px solid #9AA6BD;border-top:5px solid transparent;border-bottom:5px solid transparent}
+  .ledger-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(15,23,41,.06)}
+  .ledger-card .lc-title{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:10px}
+  .lc-row{display:flex;justify-content:space-between;font-size:15px;padding:7px 0;border-bottom:1px solid var(--line);color:var(--ink)}
+  .lc-row:last-of-type{border-bottom:0}
+  .lc-row span:last-child{font-variant-numeric:tabular-nums;color:var(--text)}
+  .status{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;border-radius:999px;padding:3px 10px}
+  .pill.ok{background:var(--ok-bg);color:var(--ok)}
+  .pill.warn{background:var(--warn-bg);color:var(--warn)}
+  .flow-foot{margin-top:18px;font-size:14px;color:var(--muted);text-align:center}
+
+  /* ===== Proof strip ===== */
+  .proof{padding:8px 0 56px}
+  .proof-row{display:flex;align-items:center;gap:40px;border-top:1px solid var(--line);padding-top:32px}
+  .rating{display:flex;align-items:center;gap:12px;flex:none;padding-right:40px;border-right:1px solid var(--line)}
+  .rating .score{font-size:32px;font-weight:700;color:var(--ink);letter-spacing:-0.02em}
+  .stars{color:#F2A900;font-size:16px;letter-spacing:2px}
+  .rating small{display:block;font-size:14px;color:var(--muted)}
+  .logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 36px;flex:1;justify-content:space-between}
+  .logo-w{color:#9AA2B2;font-size:20px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;filter:grayscale(1)}
+  .logo-w.serif{font-family:Georgia,serif;font-weight:600;font-style:italic}
+  .logo-w.lower{text-transform:lowercase;letter-spacing:.02em}
+  .logo-w.thin{font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:16px}
+
+  /* ===== Sections ===== */
+  section.s{padding:96px 0}
+  .band{background:var(--band)}
+  .s-head{max-width:720px;margin-bottom:48px}
+  .s-head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .kicker{font-size:14px;font-weight:600;color:var(--blue);margin-bottom:12px}
+  .s-head h2{font-size:40px;line-height:1.15;font-weight:700}
+  .s-head p{font-size:18px;color:var(--muted);margin-top:16px}
+
+  /* Works with */
+  .works{padding:56px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .works-grid{display:grid;grid-template-columns:auto 1fr 40px 1fr auto;align-items:center;gap:20px}
+  .works h3{font-size:18px;font-weight:600}
+  .works .group-label{font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:8px}
+  .tag{font-size:15px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+  .works .arrow{width:100%}
+
+  /* Feature tabs */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow-x:auto}
+  .tab{all:unset;cursor:pointer;padding:12px 16px;font-size:16px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+  .tab:hover{color:var(--ink)}
+  .panel{display:none;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+  .panel.on{display:grid}
+  .panel h3{font-size:30px;line-height:1.2;font-weight:700}
+  .panel .lead{font-size:18px;color:var(--muted);margin-top:16px}
+  .panel ul.plain{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+  .panel ul.plain li{padding-left:28px;position:relative;font-size:16px}
+  .panel ul.plain li::before{content:"";position:absolute;left:4px;top:8px;width:10px;height:10px;border-radius:3px;background:var(--blue-10);border:1.5px solid var(--blue)}
+  details.tech{margin-top:24px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  details.tech summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between}
+  details.tech summary::-webkit-details-marker{display:none}
+  details.tech summary::after{content:"+";color:var(--muted);font-weight:500}
+  details.tech[open] summary::after{content:"–"}
+  details.tech div{padding:0 16px 14px;font-size:15px;color:var(--muted)}
+
+  /* Mock UI window */
+  .win{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(15,23,41,.08);overflow:hidden}
+  .win-top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:#FBFCFD}
+  .win-top i{width:10px;height:10px;border-radius:50%;background:#DDE2EA;display:block}
+  .win-top b{margin-left:8px;font-size:14px;font-weight:600;color:var(--muted)}
+  .win-top .sample-inline{margin-left:auto;font-size:14px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 8px}
+  .win-body{padding:18px}
+  table.t{width:100%;border-collapse:collapse;font-size:15px}
+  table.t th{text-align:left;font-size:14px;font-weight:600;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+  table.t td{padding:11px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t .num{text-align:right;font-variant-numeric:tabular-nums}
+  .acct{color:var(--muted);font-size:14px}
+  .rule{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-bottom:10px}
+  .rule .k{font-weight:600;color:var(--muted)}
+  .rule .v{background:var(--blue-5);border:1px solid var(--blue-10);color:var(--blue);border-radius:6px;padding:1px 8px;font-weight:600}
+  .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:6px}
+  .bar span{display:block;height:100%;background:var(--blue)}
+  .sched{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
+  .sched div{background:var(--blue-5);border:1px solid var(--blue-10);border-radius:8px;padding:8px 6px;text-align:center;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .sched div span{display:block;color:var(--muted);font-size:14px}
+
+  /* Ledger section */
+  .ledger-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-top:28px}
+  .seg button{all:unset;cursor:pointer;padding:8px 14px;border-radius:7px;font-size:15px;font-weight:600;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+  .mode-note{margin-top:14px;font-size:15px;color:var(--muted)}
+  .je + .je{margin-top:16px}
+  .je-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .je-head b{font-size:15px;color:var(--ink)}
+  .je-head span{font-size:14px;color:var(--muted)}
+  .total td{font-weight:700}
+  .balance{margin-top:16px;display:flex;justify-content:space-between;align-items:center;background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:600}
+
+  /* Control row */
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .ctrl{border:1px solid var(--line);border-radius:var(--r);padding:24px;background:#fff}
+  .ico{width:40px;height:40px;border-radius:10px;background:var(--blue-5);border:1px solid var(--blue-10);display:grid;place-items:center;margin-bottom:16px}
+  .ico svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .ctrl h3{font-size:18px;font-weight:600}
+  .ctrl p{margin-top:8px;font-size:15px;color:var(--muted)}
+
+  /* Products */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .prod{border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;background:#fff}
+  .prod .ptag{font-size:14px;font-weight:600;color:var(--muted)}
+  .prod h3{font-size:24px;font-weight:700;margin-top:6px}
+  .prod p{margin-top:12px;font-size:16px;color:var(--muted);flex:1}
+  .prod ul{margin:20px 0 24px;padding:0;list-style:none;display:grid;gap:8px;font-size:15px}
+  .prod ul li::before{content:"✓";color:var(--blue);font-weight:700;margin-right:10px}
+  .prod .mini{height:96px;border-radius:12px;background:var(--band);border:1px solid var(--line);margin-bottom:22px;padding:14px;display:flex;align-items:flex-end;gap:8px}
+
+  /* Custom + security */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .box{border:1px solid var(--line);border-radius:16px;padding:32px;background:#fff}
+  .box h3{font-size:24px;font-weight:700}
+  .box p{margin-top:12px;color:var(--muted);font-size:16px}
+  .box .acts{margin-top:24px}
+  .soc{display:flex;gap:20px;align-items:center}
+  .soc-badge{flex:none;width:84px;height:84px;border-radius:50%;border:2px solid #9AA2B2;display:grid;place-items:center;text-align:center;color:#5B6478;font-weight:700;font-size:14px;line-height:1.15}
+
+  /* Trust */
+  .trust-top{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;margin-bottom:48px}
+  .big-rating .score{font-size:64px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-0.03em}
+  .big-rating p{font-size:15px;color:var(--muted);margin-top:8px;max-width:18em}
+  .badges{display:flex;flex-wrap:wrap;gap:10px}
+  .badge{height:44px;display:inline-flex;align-items:center;padding:0 16px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#5B6478;font-size:14px;font-weight:600;white-space:nowrap}
+  .quote{border:1px solid var(--line);border-radius:16px;padding:28px;background:#fff}
+  .quote blockquote{margin:0;font-size:17px;color:var(--ink);line-height:1.6}
+  .who{display:flex;align-items:center;gap:12px;margin-top:20px}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--blue-10);color:var(--blue);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+  .who b{display:block;color:var(--ink);font-size:15px}
+  .who span{font-size:14px;color:var(--muted)}
+
+  /* Stories */
+  .story{display:none;grid-template-columns:1.2fr 1fr;gap:48px;align-items:start}
+  .story.on{display:grid}
+  .story blockquote{margin:0;font-size:22px;line-height:1.5;color:var(--ink);font-weight:500;letter-spacing:-0.01em}
+  .stats{display:grid;gap:12px}
+  .stat{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fff}
+  .stat b{display:block;font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;line-height:1.15}
+  .stat span{font-size:15px;color:var(--muted)}
+  .unit-note{font-size:14px;color:var(--faint);margin-top:28px}
+
+  /* Closing CTA */
+  .closing{padding:104px 0;text-align:center;background:var(--blue-5);border-top:1px solid var(--blue-10)}
+  .closing h2{font-size:44px;font-weight:700;line-height:1.12}
+  .closing p{font-size:18px;color:var(--muted);margin-top:16px}
+  .closing .ctas{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap}
+
+  /* Footer */
+  footer{padding:72px 0 40px;background:#fff;border-top:1px solid var(--line);font-size:15px}
+  .f-grid{display:grid;grid-template-columns:1.3fr repeat(5,1fr);gap:32px}
+  footer h4{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink)}
+  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--blue)}
+  .f-brand p{color:var(--muted);margin-top:14px;font-size:15px}
+  .f-contact{margin-top:20px;display:grid;gap:6px;color:var(--muted);font-size:15px}
+  .f-more{margin-top:40px;padding-top:28px;border-top:1px solid var(--line);display:grid;grid-template-columns:1.3fr 5fr;gap:32px}
+  .f-more ul{grid-template-columns:repeat(4,1fr);gap:9px 32px}
+  .f-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;color:var(--muted);font-size:14px}
+  .f-bottom .legal{display:flex;gap:20px;flex-wrap:wrap}
+  .social{display:flex;gap:14px}
+
+  @media (max-width:1020px){
+    .menu{display:none}
+    .hero-grid,.panel.on,.ledger-wrap,.story.on,.trust-top,.grid2{grid-template-columns:1fr}
+    .hero h1{font-size:42px}
+    .grid4{grid-template-columns:1fr 1fr}
+    .grid3{grid-template-columns:1fr}
+    .proof-row{flex-direction:column;align-items:flex-start}
+    .rating{border-right:0;padding-right:0}
+    .works-grid{grid-template-columns:1fr}
+    .works .arrow{display:none}
+    .f-grid{grid-template-columns:1fr 1fr 1fr}
+    .f-more{grid-template-columns:1fr}
+    .f-more ul{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:640px){
+    .nav-actions .login,.nav-actions .btn-secondary{display:none}
+    .grid4{grid-template-columns:1fr}
+    .s-head h2,.closing h2{font-size:32px}
+    .f-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- Prototype variant bar: name + variant switcher only. Not part of the page. -->
+<div class="vbar" role="banner" aria-label="Prototype controls">
+  <span class="vname">Synder.com homepage, light</span>
+  <div class="vswitch" role="group" aria-label="Variant">
+    <button type="button" aria-pressed="true" data-variant="v1">v1</button>
+  </div>
+</div>
+
+<!-- ================= HEADER: one row ================= -->
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="logo" href="#top" aria-label="Synder home"><span class="logo-mark">S</span>Synder</a>
+    <nav aria-label="Main">
+      <ul class="menu">
+        <li><button type="button" aria-haspopup="true">Products</button>
+          <div class="dd"><div class="dd-inner">
+            <div><h4>Products</h4><ul>
+              <li><a href="#products">Synder Sync<small>Sales from every channel in your books</small></a></li>
+              <li><a href="#products">Synder RevRec<small>Revenue recognition for subscriptions</small></a></li>
+              <li><a href="#products">Synder Insights<small>Sales and KPI reports on one dashboard</small></a></li>
+            </ul></div>
+            <div><h4>Features</h4><ul>
+              <li><a href="#features">Multi-channel data sync</a></li>
+              <li><a href="#features">Historical data import</a></li>
+              <li><a href="#features">Sales tax automation</a></li>
+              <li><a href="#features">Invoice matching</a></li>
+              <li><a href="#features">Journal entry creation</a></li>
+              <li><a href="#features">Multi-currency accounting</a></li>
+            </ul></div>
+            <div><h4>&nbsp;</h4><ul>
+              <li><a href="#features">Product matching</a></li>
+              <li><a href="#features">Auto reconciliation</a></li>
+              <li><a href="#features">Transaction categorization</a></li>
+              <li><a href="#features">Inventory tracking</a></li>
+              <li><a href="#features">Financial reporting</a></li>
+              <li><a href="#features">MCP Server</a></li>
+            </ul></div>
+          </div></div>
+        </li>
+        <li><button type="button" aria-haspopup="true">Solutions</button>
+          <div class="dd"><div class="dd-inner">
+            <div><h4>By industry</h4><ul>
+              <li><a href="#stories">Ecommerce</a></li>
+              <li><a href="#stories">Retail &amp; consumer goods</a></li>
+              <li><a href="#stories">Technology &amp; SaaS</a></li>
+              <li><a href="#stories">Accounting firms</a></li>
+              <li><a href="#stories">Health &amp; wellness</a></li>
+              <li><a href="#stories">Professional services</a></li>
+            </ul></div>
+            <div><h4>By role</h4><ul>
+              <li><a href="#stories">Business owner</a></li>
+              <li><a href="#stories">Executive management</a></li>
+              <li><a href="#stories">CFO</a></li>
+              <li><a href="#stories">Controller</a></li>
+              <li><a href="#stories">Accountant</a></li>
+            </ul></div>
+            <div><h4>By size</h4><ul>
+              <li><a href="#stories">Mid-size business</a></li>
+            </ul></div>
+          </div></div>
+        </li>
+        <li><button type="button" aria-haspopup="true">Integrations</button>
+          <div class="dd"><div class="dd-inner">
+            <div><h4>Popular</h4><ul>
+              <li><a href="#works">Shopify + QuickBooks</a></li>
+              <li><a href="#works">Stripe + QuickBooks</a></li>
+              <li><a href="#works">Amazon + QuickBooks</a></li>
+              <li><a href="#works">Square + QuickBooks</a></li>
+              <li><a href="#works">PayPal + QuickBooks</a></li>
+              <li><a href="#works">Clover + QuickBooks</a></li>
+            </ul></div>
+            <div><h4>Accounting platforms</h4><ul>
+              <li><a href="#works">QuickBooks Online</a></li>
+              <li><a href="#works">QuickBooks Desktop</a></li>
+              <li><a href="#works">Xero</a></li>
+              <li><a href="#works">Sage Intacct</a></li>
+              <li><a href="#works">NetSuite</a></li>
+              <li><a href="#works">Intuit Enterprise Suite</a></li>
+              <li><a href="#works"><b>See all integrations</b></a></li>
+            </ul></div>
+          </div></div>
+        </li>
+        <li><a href="https://synder.com/pricing/" target="_blank" rel="noopener noreferrer">Pricing</a></li>
+        <li><button type="button" aria-haspopup="true">Resources</button>
+          <div class="dd"><div class="dd-inner">
+            <div><h4>Learn</h4><ul>
+              <li><a href="#">Webinars</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Synder vs. alternatives</a></li>
+              <li><a href="#stories">Success stories</a></li>
+              <li><a href="#">Events</a></li>
+              <li><a href="#">Downloadables</a></li>
+              <li><a href="#">Tools</a></li>
+            </ul></div>
+            <div><h4>About Synder</h4><ul>
+              <li><a href="#">About us</a></li>
+              <li><a href="#">Synder news</a></li>
+              <li><a href="#">Synder in press</a></li>
+              <li><a href="#">Partner program</a></li>
+            </ul></div>
+          </div></div>
+        </li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <a class="login" href="#">Log in</a>
+      <a class="btn btn-secondary btn-sm" href="#trial">Start free trial</a>
+      <a class="btn btn-primary btn-sm" href="#demo">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Accounting automation for online sales</p>
+      <h1>Every sale, fee, refund and tax lands in your books automatically</h1>
+      <p class="sub">Synder connects Shopify, Stripe, Amazon and 30+ other platforms to QuickBooks, Xero or NetSuite. It posts every transaction and flags only what needs your review.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#demo">Book a demo</a>
+        <a class="btn btn-secondary" href="#trial">Start free trial</a>
+      </div>
+      <p class="caption">Free for 15 days · Plans from <span class="ph">$XX/month (placeholder)</span></p>
+    </div>
+
+    <div class="flow" aria-label="Sample: sales flowing from platforms into the ledger">
+      <span class="sample-tag">Sample</span>
+      <div class="flow-cols">
+        <div class="src">
+          <div class="chip"><span class="dot" style="background:#5E8E3E">S</span>Shopify<span class="amt">42 orders</span></div>
+          <div class="chip"><span class="dot" style="background:#635BFF">S</span>Stripe<span class="amt">118 charges</span></div>
+          <div class="chip"><span class="dot" style="background:#232F3E">a</span>Amazon<span class="amt">67 orders</span></div>
+        </div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="ledger-card">
+          <div class="lc-title">Posted to QuickBooks today</div>
+          <div class="lc-row"><span>Sales</span><span>$18,420.00</span></div>
+          <div class="lc-row"><span>Platform fees</span><span>−$612.35</span></div>
+          <div class="lc-row"><span>Refunds</span><span>−$389.00</span></div>
+          <div class="lc-row"><span>Sales tax</span><span>$1,204.10</span></div>
+          <div class="status">
+            <span class="pill ok">224 posted</span>
+            <span class="pill warn">3 to review</span>
+          </div>
+        </div>
+      </div>
+      <p class="flow-foot">Synder posts everything and sets aside only what needs a second look.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROOF: logos + rating ================= -->
+<section class="proof" aria-label="Customers and rating">
+  <div class="wrap proof-row">
+    <div class="rating">
+      <span class="score">4.7</span>
+      <div><span class="stars" aria-label="4.7 out of 5">★★★★★</span><small>from 3,400+ reviews</small></div>
+    </div>
+    <div class="logos" aria-label="Customers">
+      <span class="logo-w lower">aarke</span>
+      <span class="logo-w">Kittl</span>
+      <span class="logo-w serif">Healthy Meals Direct</span>
+      <span class="logo-w">RevenueCat</span>
+      <span class="logo-w thin">Decimal</span>
+      <span class="logo-w serif">Insogna CPA</span>
+      <span class="logo-w lower">dot</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORKS WITH ================= -->
+<section class="works" id="works" aria-label="Integrations">
+  <div class="wrap works-grid">
+    <h3>Works with</h3>
+    <div>
+      <div class="group-label">Where you sell and get paid</div>
+      <div class="tags"><span class="tag">Shopify</span><span class="tag">Amazon</span><span class="tag">Stripe</span><span class="tag">PayPal</span><span class="tag">Square</span></div>
+    </div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div>
+      <div class="group-label">Where your books live</div>
+      <div class="tags"><span class="tag">QuickBooks</span><span class="tag">Xero</span><span class="tag">NetSuite</span><span class="tag">Sage Intacct</span></div>
+    </div>
+    <a class="link-arrow" href="#">30+ more integrations</a>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="s" id="features">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="kicker">What Synder does</p>
+      <h2>The bookkeeping work you no longer do by hand</h2>
+      <p>Four jobs Synder takes over. Each one starts with the result. The accounting detail is one click away.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Features">
+      <button class="tab" role="tab" aria-selected="true" data-tab="f1">Sync your sales</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="f2">Reconcile</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="f3">Categorize</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="f4">Recognize revenue</button>
+    </div>
+
+    <!-- F1 sync -->
+    <div class="panel on" id="f1" role="tabpanel">
+      <div>
+        <h3>Your sales show up in your books on their own</h3>
+        <p class="lead">Sales, fees, refunds and taxes from 30+ platforms post to your accounting software automatically. Pick how much detail you want to see.</p>
+        <ul class="plain">
+          <li>Every sale, fee, refund and tax, from every channel</li>
+          <li>Past sales can be imported too</li>
+          <li>Multiple currencies handled</li>
+        </ul>
+        <details class="tech"><summary>For accountants: sync modes</summary>
+          <div><b>Per transaction</b> (each sale with SKU and customer) or <b>Summary</b> (one journal entry per day, month or payout).</div>
+        </details>
+      </div>
+      <div class="win">
+        <div class="win-top"><i></i><i></i><i></i><b>Synced transactions</b><span class="sample-inline">Sample</span></div>
+        <div class="win-body">
+          <table class="t">
+            <thead><tr><th>Source</th><th>Type</th><th>Customer</th><th class="num">Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Shopify</td><td>Sale</td><td>J. Rivera</td><td class="num">$84.00</td><td><span class="pill ok">Posted</span></td></tr>
+              <tr><td>Stripe</td><td>Fee</td><td>—</td><td class="num">−$2.74</td><td><span class="pill ok">Posted</span></td></tr>
+              <tr><td>Amazon</td><td>Refund</td><td>M. Chen</td><td class="num">−$29.99</td><td><span class="pill ok">Posted</span></td></tr>
+              <tr><td>PayPal</td><td>Sale</td><td>A. Novak</td><td class="num">$140.00</td><td><span class="pill ok">Posted</span></td></tr>
+              <tr><td>Square</td><td>Sales tax</td><td>—</td><td class="num">$6.72</td><td><span class="pill ok">Posted</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- F2 reconcile -->
+    <div class="panel" id="f2" role="tabpanel">
+      <div>
+        <h3>Know your books match what you were paid</h3>
+        <p class="lead">Synder checks what your platforms recorded against what is in your books, and flags anything that doesn't line up before month end.</p>
+        <ul class="plain">
+          <li>Mismatches flagged early, not found at close</li>
+          <li>Every reconciled period is logged for audit</li>
+        </ul>
+        <details class="tech"><summary>For accountants: how it works</summary>
+          <div>Each sale, fee, refund and tax syncs to a clearing account. Synder then reconciles both sides inside the app, and its matching engine flags discrepancies.</div>
+        </details>
+      </div>
+      <div class="win">
+        <div class="win-top"><i></i><i></i><i></i><b>Reconciliation · October</b><span class="sample-inline">Sample</span></div>
+        <div class="win-body">
+          <table class="t">
+            <thead><tr><th>Payout</th><th class="num">Platform</th><th class="num">In your books</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>Stripe · Oct 21</td><td class="num">$3,412.80</td><td class="num">$3,412.80</td><td><span class="pill ok">Matched</span></td></tr>
+              <tr><td>Shopify · Oct 22</td><td class="num">$1,980.15</td><td class="num">$1,980.15</td><td><span class="pill ok">Matched</span></td></tr>
+              <tr><td>PayPal · Oct 23</td><td class="num">$742.00</td><td class="num">$712.00</td><td><span class="pill warn">$30.00 off</span></td></tr>
+              <tr><td>Amazon · Oct 24</td><td class="num">$5,106.44</td><td class="num">$5,106.44</td><td><span class="pill ok">Matched</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- F3 categorize -->
+    <div class="panel" id="f3" role="tabpanel">
+      <div>
+        <h3>Every transaction goes to the right account</h3>
+        <p class="lead">Set simple if-then rules once. Synder applies them to every transaction as it syncs, across all your platforms.</p>
+        <ul class="plain">
+          <li>Rules by amount, vendor, description or location</li>
+          <li>No more sorting transactions one by one</li>
+        </ul>
+        <details class="tech"><summary>For accountants: what rules can set</summary>
+          <div>Rules assign accounts, classes and tax codes to each transaction during sync.</div>
+        </details>
+      </div>
+      <div class="win">
+        <div class="win-top"><i></i><i></i><i></i><b>Rules</b><span class="sample-inline">Sample</span></div>
+        <div class="win-body">
+          <div class="rule"><span class="k">If</span> vendor <span class="v">is Facebook Ads</span><span class="k">then</span> account <span class="v">Advertising</span></div>
+          <div class="rule"><span class="k">If</span> location <span class="v">is Austin store</span><span class="k">then</span> class <span class="v">Retail · Austin</span></div>
+          <div class="rule"><span class="k">If</span> description <span class="v">contains "wholesale"</span><span class="k">then</span> account <span class="v">Wholesale sales</span></div>
+          <div class="rule"><span class="k">If</span> amount <span class="v">is over $5,000</span><span class="k">then</span> tax code <span class="v">Exempt</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F4 revrec -->
+    <div class="panel" id="f4" role="tabpanel">
+      <div>
+        <h3>Subscription revenue counted in the right month</h3>
+        <p class="lead">For subscription businesses: Synder spreads each payment over the months it was earned, and keeps up with upgrades, cancellations and prorations.</p>
+        <ul class="plain">
+          <li>Works from Stripe data or an Excel upload</li>
+          <li>Revenue recognized monthly on your P&amp;L</li>
+        </ul>
+        <details class="tech"><summary>For accountants: standard</summary>
+          <div>Synder RevRec builds ASC 606 recognition schedules and tracks upgrades, cancellations and prorations across the subscription lifecycle.</div>
+        </details>
+      </div>
+      <div class="win">
+        <div class="win-top"><i></i><i></i><i></i><b>Recognition schedule · Annual plan $1,200</b><span class="sample-inline">Sample</span></div>
+        <div class="win-body">
+          <div style="display:flex;justify-content:space-between;font-size:15px"><span>Recognized so far</span><b style="color:var(--ink)">$600 of $1,200</b></div>
+          <div class="bar"><span style="width:50%"></span></div>
+          <div class="sched">
+            <div><span>Jul</span>$100</div><div><span>Aug</span>$100</div><div><span>Sep</span>$100</div>
+            <div><span>Oct</span>$100</div><div><span>Nov</span>$100</div><div><span>Dec</span>$100</div>
+          </div>
+          <p style="margin-top:14px;font-size:15px;color:var(--muted)">Upgrade on Nov 12: remaining schedule recalculated automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHAT LANDS IN YOUR LEDGER ================= -->
+<section class="s band" id="ledger">
+  <div class="wrap ledger-wrap">
+    <div>
+      <p class="kicker">See the result</p>
+      <h2 style="font-size:40px;line-height:1.15;font-weight:700">What actually lands in your books</h2>
+      <p style="font-size:18px;color:var(--muted);margin-top:16px">One $108 Stripe sale, from charge to bank deposit. The fee goes to an expense account, the net amount waits in a clearing account, and the payout clears it to zero.</p>
+      <div class="seg" role="group" aria-label="Sync mode">
+        <button type="button" aria-pressed="true" data-mode="pt">Per transaction</button>
+        <button type="button" aria-pressed="false" data-mode="sum">Summary</button>
+      </div>
+      <p class="mode-note" id="modeNote">Per transaction: each sale with SKU and customer.</p>
+    </div>
+
+    <div class="win">
+      <div class="win-top"><i></i><i></i><i></i><b>Journal entries · QuickBooks</b><span class="sample-inline">Sample</span></div>
+      <div class="win-body">
+        <div id="je-pt">
+          <div class="je">
+            <div class="je-head"><b>1 · Stripe sale, Oct 24</b><span>Customer: J. Rivera · SKU TEE-BLK-M</span></div>
+            <table class="t">
+              <thead><tr><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+              <tbody>
+                <tr><td>Sales <span class="acct">· income</span></td><td class="num"></td><td class="num">$100.00</td></tr>
+                <tr><td>Sales tax payable <span class="acct">· liability</span></td><td class="num"></td><td class="num">$8.00</td></tr>
+                <tr><td>Stripe fees <span class="acct">· expense</span></td><td class="num">$3.43</td><td class="num"></td></tr>
+                <tr><td>Stripe clearing <span class="acct">· net amount</span></td><td class="num">$104.57</td><td class="num"></td></tr>
+                <tr class="total"><td>Total</td><td class="num">$108.00</td><td class="num">$108.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="je">
+            <div class="je-head"><b>2 · Stripe payout, Oct 26</b><span>Deposit to checking</span></div>
+            <table class="t">
+              <thead><tr><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+              <tbody>
+                <tr><td>Business checking <span class="acct">· bank</span></td><td class="num">$104.57</td><td class="num"></td></tr>
+                <tr><td>Stripe clearing</td><td class="num"></td><td class="num">$104.57</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="je-sum" hidden>
+          <div class="je">
+            <div class="je-head"><b>Stripe daily summary, Oct 24</b><span>One journal entry for the day's sales</span></div>
+            <table class="t">
+              <thead><tr><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+              <tbody>
+                <tr><td>Sales <span class="acct">· income</span></td><td class="num"></td><td class="num">$3,200.00</td></tr>
+                <tr><td>Sales tax payable <span class="acct">· liability</span></td><td class="num"></td><td class="num">$256.00</td></tr>
+                <tr><td>Refunds <span class="acct">· contra income</span></td><td class="num">$100.00</td><td class="num"></td></tr>
+                <tr><td>Stripe fees <span class="acct">· expense</span></td><td class="num">$109.76</td><td class="num"></td></tr>
+                <tr><td>Stripe clearing <span class="acct">· net amount</span></td><td class="num">$3,246.24</td><td class="num"></td></tr>
+                <tr class="total"><td>Total</td><td class="num">$3,456.00</td><td class="num">$3,456.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="je">
+            <div class="je-head"><b>Stripe payout, Oct 26</b><span>Deposit to checking</span></div>
+            <table class="t">
+              <thead><tr><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+              <tbody>
+                <tr><td>Business checking <span class="acct">· bank</span></td><td class="num">$3,246.24</td><td class="num"></td></tr>
+                <tr><td>Stripe clearing</td><td class="num"></td><td class="num">$3,246.24</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="balance"><span>Stripe clearing balance after payout</span><span>$0.00 ✓</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= YOU STAY IN CONTROL ================= -->
+<section class="s" id="control">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="kicker">You stay in control</p>
+      <h2>Automatic, but never a black box</h2>
+    </div>
+    <div class="grid4">
+      <div class="ctrl">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+        <h3>Problems are flagged</h3>
+        <p>Anything that doesn't match is set aside for you to review, before month end.</p>
+      </div>
+      <div class="ctrl">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></div>
+        <h3>A record of every period</h3>
+        <p>Every reconciled period is logged, so you can show what was checked and when.</p>
+      </div>
+      <div class="ctrl">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/></svg></div>
+        <h3>Your rules, your accounts</h3>
+        <p>You decide which accounts, classes and tax codes are used, and how much detail is posted.</p>
+      </div>
+      <div class="ctrl">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Your data is protected</h3>
+        <p>SOC 2 Type 2 certified security and end-to-end encryption.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTS ================= -->
+<section class="s band" id="products">
+  <div class="wrap">
+    <div class="s-head center">
+      <p class="kicker">Products</p>
+      <h2>Three tools. Use one or all of them.</h2>
+    </div>
+    <div class="grid3">
+      <article class="prod">
+        <div class="mini" aria-hidden="true">
+          <div style="flex:1;height:40%;background:var(--blue-10);border-radius:6px"></div>
+          <div style="flex:1;height:65%;background:var(--blue-10);border-radius:6px"></div>
+          <div style="flex:1;height:85%;background:var(--blue);border-radius:6px"></div>
+        </div>
+        <span class="ptag">For sales across channels</span>
+        <h3>Synder Sync</h3>
+        <p>Your sales, fees and taxes from every channel go into your books automatically.</p>
+        <ul><li>30+ platforms at no extra cost</li><li>Per transaction or Summary</li><li>Reconciliation built in</li></ul>
+        <a class="link-arrow" href="#">Explore Synder Sync</a>
+      </article>
+      <article class="prod">
+        <div class="mini" aria-hidden="true">
+          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
+          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
+          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
+          <div style="flex:1;height:50%;background:var(--blue);border-radius:6px"></div>
+        </div>
+        <span class="ptag">For subscription businesses</span>
+        <h3>Synder RevRec</h3>
+        <p>Subscription revenue recognized in the right month, through upgrades, cancellations and prorations.</p>
+        <ul><li>ASC 606 recognition schedules</li><li>From Stripe or an Excel upload</li><li>Books ready for audit</li></ul>
+        <a class="link-arrow" href="#">Explore Synder RevRec</a>
+      </article>
+      <article class="prod">
+        <div class="mini" aria-hidden="true">
+          <svg viewBox="0 0 200 60" width="100%" height="100%" preserveAspectRatio="none"><polyline points="0,50 30,42 60,45 90,30 120,34 150,18 200,10" fill="none" stroke="#0053CC" stroke-width="3"/></svg>
+        </div>
+        <span class="ptag">For decisions</span>
+        <h3>Synder Insights</h3>
+        <p>Your key sales, product and customer numbers on one dashboard, for every connected platform.</p>
+        <ul><li>Major KPI reports, every day</li><li>Metrics per platform</li><li>Sales, product and customer reports</li></ul>
+        <a class="link-arrow" href="#">Explore Synder Insights</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CUSTOMIZATION + SECURITY ================= -->
+<section class="s" id="security">
+  <div class="wrap grid2">
+    <div class="box">
+      <p class="kicker">Customization</p>
+      <h3>Set it up the way your books work</h3>
+      <p>Rename line items, pull in metadata, remove taxes, or set up custom transaction mapping. Busy, high-volume setups are welcome.</p>
+      <div class="acts"><a class="link-arrow" href="#demo">Talk to us about a custom setup</a></div>
+    </div>
+    <div class="box">
+      <p class="kicker">Security</p>
+      <div class="soc">
+        <div class="soc-badge" aria-label="AICPA SOC 2 Type 2">AICPA<br>SOC 2<br>Type 2</div>
+        <div>
+          <h3>SOC 2 Type 2 certified</h3>
+          <p>End-to-end encryption, plus GDPR and HIPAA readiness.</p>
+        </div>
+      </div>
+      <div class="acts"><a class="link-arrow" href="https://trust.synder.com/" target="_blank" rel="noopener noreferrer">View the Trust Report</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRUST (merged) ================= -->
+<section class="s band" id="trust">
+  <div class="wrap">
+    <div class="trust-top">
+      <div class="big-rating">
+        <div class="score">4.7 <span class="stars" style="font-size:24px;vertical-align:middle">★★★★★</span></div>
+        <p>Average rating from 3,400+ reviews on the QuickBooks App Store, Xero Marketplace and Capterra</p>
+      </div>
+      <div>
+        <h2 style="font-size:32px;font-weight:700;line-height:1.2;margin-bottom:20px">Trusted by accountants and partners</h2>
+        <div class="badges" aria-label="Partner badges">
+          <span class="badge">QuickBooks Solution Provider</span>
+          <span class="badge">QuickBooks Accountant Approved</span>
+          <span class="badge">Xero Growth App 2025</span>
+          <span class="badge">Stripe Verified Partner</span>
+          <span class="badge">Square Certified Partner</span>
+          <span class="badge">BDO Alliance USA</span>
+          <span class="badge">AICPA &amp; CPA.com Startup Accelerator</span>
+          <span class="badge">Backed by Y Combinator</span>
+          <span class="badge">G2</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <figure class="quote" style="margin:0">
+        <blockquote>"As a Synder Sync partner the service we receive is second-to-none with resources that make it so much easier to gain immediate insights into all of our clients' online transactions and how they impact their overall financial picture."</blockquote>
+        <figcaption class="who"><span class="avatar">GW</span><div><b>Geni Whitehouse</b><span>ITA President, BDCoCPA, Founder of the Impactful Advisor</span></div></figcaption>
+      </figure>
+      <figure class="quote" style="margin:0">
+        <blockquote>"Ecommerce is everywhere and Synder makes it easy to serve everyone! From growing retailers to professional service providers, Synder simplifies serving these types of clients and sweetens the deal with their personalized partner perks!"</blockquote>
+        <figcaption class="who"><span class="avatar">KG</span><div><b>Kelly Gonsalves</b><span>QuickBooks Advanced Certified ProAdvisor, Founder of TotallyBooked</span></div></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CUSTOMER STORIES ================= -->
+<section class="s" id="stories">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="kicker">Customer stories</p>
+      <h2>What changed for our customers</h2>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Customer stories">
+      <button class="tab" role="tab" aria-selected="true" data-story="s1">Ecommerce</button>
+      <button class="tab" role="tab" aria-selected="false" data-story="s2">SaaS</button>
+      <button class="tab" role="tab" aria-selected="false" data-story="s3">Accounting firm</button>
+    </div>
+
+    <div class="story on" id="s1">
+      <div>
+        <blockquote>"Instead of a bookkeeper spending 40 hours a month manually reviewing thousands of transactions each month—clicking into each one, checking metadata, and categorizing it—Synder does it all automatically, the moment the charge happens. Which means we save 480 hours and almost $24K yearly."</blockquote>
+        <div class="who"><span class="avatar">JM</span><div><b>Justin McKelvey</b><span>Head of Product at PlayYourCourt</span></div></div>
+        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>40 hours a month</b><span>saved on transaction categorization (480+ a year)</span></div>
+        <div class="stat"><b>$24K+ a year</b><span>saved on bookkeeping services</span></div>
+        <div class="stat"><b>Stripe → QuickBooks</b><span>connected with no manual entry</span></div>
+      </div>
+    </div>
+
+    <div class="story" id="s2">
+      <div>
+        <blockquote>"Synder drastically speeds up the process of reconciliation and eliminates the need to manually check massive transaction files. It now takes me about 40 minutes to finish and review a month's data, whereas manually, it would have taken at least two days."</blockquote>
+        <div class="who"><span class="avatar">OS</span><div><b>Olena Svoiak</b><span>Financial Manager at Stape</span></div></div>
+        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>15 hours a month</b><span>saved reviewing month-end data (180 a year)</span></div>
+        <div class="stat"><b>95% less time</b><span>spent on manual reconciliation</span></div>
+        <div class="stat"><b>40 minutes</b><span>to review a month's data, down from at least two days</span></div>
+      </div>
+    </div>
+
+    <div class="story" id="s3">
+      <div>
+        <blockquote>"Since integrating Synder, Decimal has streamlined workflows, reduced reconciliation time by over 50%, and saved 6-8 hours per client each month, enabling the team to focus on strategic advisory services and client growth."</blockquote>
+        <div class="who"><span class="avatar">KM</span><div><b>Kristin Miller</b><span>Team Lead at Decimal</span></div></div>
+        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>140 hours a month</b><span>saved on month-end close, across 20 clients</span></div>
+        <div class="stat"><b>50%+ less time</b><span>spent on reconciliation</span></div>
+        <div class="stat"><b>9 platforms</b><span>synced, including Stripe, PayPal, Shopify, Amazon and QuickBooks</span></div>
+      </div>
+    </div>
+    <p class="unit-note">Hours are shown per month for every story, converted from the yearly figures where needed.</p>
+  </div>
+</section>
+
+<!-- ================= CLOSING CTA ================= -->
+<section class="closing" id="demo">
+  <div class="wrap">
+    <h2>Stop typing sales into your books</h2>
+    <p>See Synder with your own platforms in a short demo, or connect them yourself and try it free for 15 days.</p>
+    <div class="ctas" id="trial">
+      <a class="btn btn-primary" href="#demo">Book a demo</a>
+      <a class="btn btn-secondary" href="#trial">Start free trial</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div class="f-brand">
+        <a class="logo" href="#top"><span class="logo-mark">S</span>Synder</a>
+        <p>Machine accuracy. Human approach.</p>
+        <div class="f-contact">
+          <a href="tel:+14155392507">(415) 539-2507</a>
+          <a href="mailto:help@synder.com">help@synder.com</a>
+          <span>1390 Market Street, Suite 200<br>San Francisco, CA 94102</span>
+        </div>
+      </div>
+      <div><h4>Products</h4><ul>
+        <li><a href="#products">Synder Sync</a></li><li><a href="#products">Synder RevRec</a></li><li><a href="#products">Synder Insights</a></li>
+        <li><a href="#works">Integrations</a></li><li><a href="https://synder.com/pricing/" target="_blank" rel="noopener noreferrer">Pricing</a></li><li><a href="#demo">Demo</a></li>
+      </ul></div>
+      <div><h4>Industries</h4><ul>
+        <li><a href="#">Ecommerce</a></li><li><a href="#">Retail &amp; consumer goods</a></li><li><a href="#">Technology &amp; SaaS</a></li><li><a href="#">Accounting firms</a></li>
+      </ul></div>
+      <div><h4>Resources</h4><ul>
+        <li><a href="#">Blog</a></li><li><a href="#">Help Center</a></li><li><a href="#stories">Success stories</a></li><li><a href="#">Webinars</a></li><li><a href="#">Events</a></li><li><a href="#">Platform fees</a></li><li><a href="#">Accounting glossary</a></li><li><a href="#">Tools</a></li><li><a href="#">Downloadables</a></li>
+      </ul></div>
+      <div><h4>Partners</h4><ul>
+        <li><a href="#">Find an accountant</a></li><li><a href="#">Partner program</a></li><li><a href="#">Affiliate program</a></li>
+      </ul></div>
+      <div><h4>Company</h4><ul>
+        <li><a href="#">About us</a></li><li><a href="#">Press</a></li><li><a href="#">Careers</a></li><li><a href="#">Locations</a></li><li><a href="#">Contact us</a></li>
+        <li><a href="https://status.synder.com/" target="_blank" rel="noopener noreferrer">Status</a></li><li><a href="https://trust.synder.com/" target="_blank" rel="noopener noreferrer">Trust Report</a></li>
+      </ul></div>
+    </div>
+
+    <div class="f-more">
+      <h4 style="margin:0">Features</h4>
+      <ul>
+        <li><a href="#">Multi-channel data sync</a></li><li><a href="#">Historical data import</a></li><li><a href="#">Sales tax automation</a></li><li><a href="#">Invoice matching</a></li>
+        <li><a href="#">Journal entry creation</a></li><li><a href="#">Multi-currency accounting</a></li><li><a href="#">Product matching</a></li><li><a href="#">Auto reconciliation</a></li>
+        <li><a href="#">Transaction categorization</a></li><li><a href="#">Inventory tracking</a></li><li><a href="#">Financial reporting</a></li><li><a href="#">MCP Server</a></li>
+      </ul>
+    </div>
+
+    <div class="f-bottom">
+      <span>Synder by CloudBusiness Inc. © 2026. All rights reserved. · SOC 2 Type 2 certified</span>
+      <div class="legal"><a href="#">Privacy</a><a href="#">Terms and Conditions</a><a href="#">Sitemap</a></div>
+      <div class="social" aria-label="Follow us"><a href="#">LinkedIn</a><a href="#">YouTube</a><a href="#">Facebook</a><a href="#">Instagram</a><a href="#">X</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Feature tabs
+  document.querySelectorAll('[data-tab]').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected','false')});
+      document.querySelectorAll('#features .panel').forEach(function(p){p.classList.remove('on')});
+      t.setAttribute('aria-selected','true');
+      document.getElementById(t.dataset.tab).classList.add('on');
+    });
+  });
+  // Story tabs
+  document.querySelectorAll('[data-story]').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('[data-story]').forEach(function(x){x.setAttribute('aria-selected','false')});
+      document.querySelectorAll('.story').forEach(function(p){p.classList.remove('on')});
+      t.setAttribute('aria-selected','true');
+      document.getElementById(t.dataset.story).classList.add('on');
+    });
+  });
+  // Ledger sync mode
+  var notes={pt:'Per transaction: each sale with SKU and customer.',sum:'Summary: one journal entry per day, month or payout.'};
+  document.querySelectorAll('[data-mode]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-mode]').forEach(function(x){x.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true');
+      document.getElementById('je-pt').hidden=b.dataset.mode!=='pt';
+      document.getElementById('je-sum').hidden=b.dataset.mode!=='sum';
+      document.getElementById('modeNote').textContent=notes[b.dataset.mode];
+    });
+  });
+</script>
+</body>
+</html>
