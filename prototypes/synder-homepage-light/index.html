@@ -3,267 +3,292 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Synder.com homepage, light (prototype)</title>
+<title>Synder.com homepage, light · v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --blue:#0053CC; --blue-hover:#1A43A2; --blue-10:#E0EBFD; --blue-5:#F2F6FC;
-    --ink:#0F1729; --text:#2B3445; --muted:#5B6478; --faint:#8A93A6;
-    --line:#E4E8EF; --band:#F6F8FB; --white:#fff; --ok:#16794C; --ok-bg:#E8F5EE; --warn:#9A5B00; --warn-bg:#FFF4E0;
-    --r:12px;
+    --blue:#0053CC; --blue-600:#0047B3; --blue-hover:#1A43A2; --blue-10:#E6EEFC; --blue-5:#F4F7FD;
+    --tint:#7C5CFF; /* soft secondary tint (violet) used only in glows/gradient */
+    --ink:#0B1220; --text:#344054; --muted:#667085; --faint:#98A2B3;
+    --line:#EAECF0; --line-2:#F2F4F7; --band:#FAFBFC;
+    --ok:#067647; --ok-bg:#ECFDF3; --warn:#B54708; --warn-bg:#FFFAEB;
+    --r-lg:20px; --r-md:14px;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.05);
+    --shadow-lg:0 40px 80px -24px rgba(16,24,40,.18),0 16px 32px -16px rgba(16,24,40,.10);
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--text);background:var(--white);-webkit-font-smoothing:antialiased}
-  a{color:var(--blue);text-decoration:none}
-  a:hover{text-decoration:underline}
-  h1,h2,h3{color:var(--ink);margin:0;letter-spacing:-0.02em}
+  body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.6;color:var(--text);background:#fff;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4{color:var(--ink);margin:0}
   p{margin:0}
-  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
-  .ph{display:inline-block;background:var(--warn-bg);color:var(--warn);border:1px dashed #E0A84A;border-radius:6px;padding:0 6px;font-size:14px;font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .ph{display:inline-block;background:var(--warn-bg);color:var(--warn);border:1px dashed #F7B27A;border-radius:6px;padding:0 6px;font-weight:600}
+  svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
   /* ===== Prototype variant bar (not part of the page) ===== */
   .vbar{background:#14161C;color:#E7E9EE;font-size:14px;display:flex;align-items:center;justify-content:space-between;padding:8px 20px;position:relative;z-index:60}
   .vbar .vname{font-weight:600}
   .vbar .vswitch{display:flex;gap:4px;background:#23262F;border-radius:8px;padding:3px}
-  .vbar .vswitch button{all:unset;cursor:pointer;font-size:14px;padding:3px 12px;border-radius:6px;color:#AEB4C2}
-  .vbar .vswitch button[aria-pressed="true"]{background:#fff;color:#14161C;font-weight:600}
+  .vbar .vswitch a{font-size:14px;padding:3px 12px;border-radius:6px;color:#AEB4C2}
+  .vbar .vswitch a[aria-pressed="true"]{background:#fff;color:#14161C;font-weight:600}
 
-  /* ===== Buttons: two styles only ===== */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:10px;font-size:15px;font-weight:600;border:1.5px solid transparent;cursor:pointer;white-space:nowrap;text-decoration:none!important;transition:background .15s,border-color .15s,color .15s}
-  .btn-primary{background:var(--blue);color:#fff}
-  .btn-primary:hover{background:var(--blue-hover)}
-  .btn-secondary{background:#fff;color:var(--ink);border-color:#CBD2DE}
-  .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
-  .btn-sm{height:38px;padding:0 14px;font-size:14px}
-  .link-arrow{font-weight:600;font-size:15px}
-  .link-arrow::after{content:" →"}
+  /* ===== Buttons: two styles ===== */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 22px;border-radius:999px;font-size:15px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .15s,background .15s,box-shadow .15s,border-color .15s}
+  .btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(16,24,40,.1),inset 0 1px 0 rgba(255,255,255,.15),0 8px 20px -8px rgba(0,83,204,.55)}
+  .btn-primary:hover{background:var(--blue-hover);transform:translateY(-1px)}
+  .btn-secondary{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:var(--shadow-sm)}
+  .btn-secondary:hover{border-color:#D0D5DD;transform:translateY(-1px)}
+  .btn-sm{height:36px;padding:0 16px;font-size:14px}
+  .link{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--blue)}
+  .link svg{width:16px;height:16px;transition:transform .15s}
+  .link:hover svg{transform:translateX(3px)}
 
-  /* ===== Header (one row) ===== */
-  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
-  .nav-row{display:flex;align-items:center;height:68px;gap:28px}
-  .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;color:var(--ink);letter-spacing:-0.02em}
-  .logo:hover{text-decoration:none}
-  .logo-mark{width:28px;height:28px;border-radius:8px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:15px;font-weight:800}
-  .menu{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+  /* ===== Header ===== */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid rgba(16,24,40,.06)}
+  .nav-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:60px}
+  .logo{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:17px;color:var(--ink);letter-spacing:-0.02em}
+  .logo-mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#2E7BFF,var(--blue));display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700}
+  .menu{display:flex;gap:2px;list-style:none;margin:0;padding:0}
   .menu>li{position:relative}
-  .menu>li>a,.menu>li>button{all:unset;cursor:pointer;display:block;padding:8px 12px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text)}
-  .menu>li>button::after{content:"";display:inline-block;margin-left:6px;width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-3px);opacity:.6}
-  .menu>li:hover>a,.menu>li:hover>button,.menu>li:focus-within>button{background:var(--band);color:var(--ink);text-decoration:none}
-  .dd{display:none;position:absolute;left:0;top:100%;padding-top:8px}
+  .menu>li>a,.menu>li>button{all:unset;cursor:pointer;display:block;padding:6px 12px;border-radius:999px;font-size:14px;font-weight:500;color:var(--text);transition:color .15s,background .15s}
+  .menu>li:hover>a,.menu>li:hover>button,.menu>li:focus-within>button{color:var(--ink);background:rgba(16,24,40,.04)}
+  .dd{display:none;position:absolute;left:50%;transform:translateX(-50%);top:100%;padding-top:10px}
   .menu>li:hover .dd,.menu>li:focus-within .dd{display:block}
-  .dd-inner{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(15,23,41,.10);padding:20px;display:grid;gap:24px;grid-auto-flow:column;min-width:260px}
-  .dd h4{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
-  .dd ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-  .dd a{display:block;padding:6px 8px;margin:0 -8px;border-radius:8px;color:var(--ink);font-size:15px;white-space:nowrap}
+  .dd-inner{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);padding:18px 20px;display:grid;gap:28px;grid-auto-flow:column;min-width:240px}
+  .dd h4{margin:0 0 8px;font-size:14px;font-weight:500;color:var(--faint)}
+  .dd ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+  .dd a{display:block;padding:6px 10px;margin:0 -10px;border-radius:8px;color:var(--ink);font-size:14px;white-space:nowrap}
   .dd a small{display:block;color:var(--muted);font-size:14px}
-  .dd a:hover{background:var(--band);text-decoration:none}
-  .nav-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .nav-actions .login{font-size:15px;font-weight:500;color:var(--text);padding:8px 10px}
+  .dd a:hover{background:var(--band)}
+  .nav-actions{justify-self:end;display:flex;align-items:center;gap:8px}
+  .nav-actions .login{font-size:14px;font-weight:500;color:var(--text);padding:6px 10px}
+  .nav-actions .login:hover{color:var(--ink)}
 
   /* ===== Hero ===== */
-  .hero{padding:88px 0 72px}
-  .hero-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:56px;align-items:center}
-  .eyebrow{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:16px}
-  .hero h1{font-size:54px;line-height:1.08;font-weight:700;letter-spacing:-0.035em}
-  .hero .sub{font-size:19px;color:var(--muted);margin-top:22px;max-width:34em}
-  .hero .ctas{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}
-  .hero .caption{margin-top:14px;font-size:14px;color:var(--faint)}
+  .hero{position:relative;padding:96px 0 0;text-align:center;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;z-index:-2;
+    background:
+      radial-gradient(600px 340px at 50% 10%,rgba(46,123,255,.16),transparent 70%),
+      radial-gradient(520px 300px at 72% 28%,rgba(124,92,255,.10),transparent 70%),
+      radial-gradient(520px 300px at 28% 30%,rgba(0,83,204,.08),transparent 70%)}
+  .hero::after{content:"";position:absolute;inset:0;z-index:-1;
+    background-image:linear-gradient(rgba(16,24,40,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(16,24,40,.045) 1px,transparent 1px);
+    background-size:56px 56px;
+    -webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 20%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 60% 50% at 50% 20%,#000 30%,transparent 75%)}
+  .eyebrow-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 6px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--line);box-shadow:var(--shadow-sm);font-size:14px;font-weight:500;color:var(--text)}
+  .eyebrow-pill b{background:var(--blue-10);color:var(--blue);border-radius:999px;padding:1px 9px;font-weight:600}
+  .eyebrow-pill .stars{color:#F5A524;letter-spacing:1px}
+  .hero h1{margin:26px auto 0;max-width:880px;font-size:68px;line-height:1.04;font-weight:600;letter-spacing:-0.045em}
+  .grad{background:linear-gradient(92deg,#0053CC 10%,#3B82F6 50%,#7C5CFF 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{margin:22px auto 0;max-width:600px;font-size:19px;line-height:1.55;color:var(--muted)}
+  .hero .ctas{display:flex;gap:12px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+  .hero .caption{margin-top:16px;font-size:14px;color:var(--faint)}
 
-  /* hero visual: sync flow */
-  .flow{background:var(--band);border:1px solid var(--line);border-radius:20px;padding:28px;position:relative}
-  .sample-tag{position:absolute;top:14px;right:14px;font-size:14px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px}
-  .flow-cols{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;gap:8px;margin-top:18px}
-  .src{display:grid;gap:10px}
-  .chip{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px;font-weight:600;color:var(--ink)}
-  .chip .dot{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700;flex:none}
-  .chip .amt{margin-left:auto;font-weight:500;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
-  .arrow{height:2px;background:repeating-linear-gradient(90deg,#9AA6BD 0 6px,transparent 6px 11px);position:relative}
-  .arrow::after{content:"";position:absolute;right:-2px;top:-4px;border-left:7px solid #9AA6BD;border-top:5px solid transparent;border-bottom:5px solid transparent}
-  .ledger-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 10px 30px rgba(15,23,41,.06)}
-  .ledger-card .lc-title{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:10px}
-  .lc-row{display:flex;justify-content:space-between;font-size:15px;padding:7px 0;border-bottom:1px solid var(--line);color:var(--ink)}
-  .lc-row:last-of-type{border-bottom:0}
-  .lc-row span:last-child{font-variant-numeric:tabular-nums;color:var(--text)}
-  .status{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .pill{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;border-radius:999px;padding:3px 10px}
+  /* Hero product frame */
+  .frame-wrap{position:relative;margin:64px auto 0;max-width:1040px;padding:0 24px}
+  .frame{background:#fff;border:1px solid rgba(16,24,40,.08);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;text-align:left}
+  .frame-top{display:flex;align-items:center;gap:7px;height:42px;padding:0 16px;border-bottom:1px solid var(--line-2);background:#FCFCFD}
+  .frame-top i{width:10px;height:10px;border-radius:50%;background:#E4E7EC;display:block}
+  .frame-top .url{margin:0 auto;font-size:14px;color:var(--faint);background:var(--band);border:1px solid var(--line-2);border-radius:8px;padding:2px 14px}
+  .frame-top .sample{font-size:14px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 10px}
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:420px}
+  .side{border-right:1px solid var(--line-2);padding:18px 12px;background:#FCFCFD}
+  .side .s-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:14px;color:var(--muted);font-weight:500}
+  .side .s-item.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+  .side .s-item svg{width:18px;height:18px}
+  .main{padding:22px 24px}
+  .main-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .main-head h4{font-size:17px;font-weight:600;letter-spacing:-0.01em}
+  .main-head span{font-size:14px;color:var(--muted)}
+  .flowline{display:grid;grid-template-columns:1fr 56px 1.25fr;align-items:center;gap:0}
+  .srcs{display:grid;gap:10px}
+  .src{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;color:var(--ink);background:#fff}
+  .src .lg{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700;flex:none}
+  .src .n{margin-left:auto;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pipe{position:relative;height:2px;margin:0 8px;background:linear-gradient(90deg,var(--line),#B7CBF3)}
+  .pipe::after{content:"";position:absolute;top:-4px;left:0;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(0,83,204,.15);animation:travel 2.6s ease-in-out infinite}
+  @keyframes travel{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 10px);opacity:0}}
+  .ledger{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .ledger-h{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line-2);font-size:14px;font-weight:600;color:var(--ink)}
+  .ledger-h span{font-weight:500;color:var(--muted)}
+  .lrow{display:flex;justify-content:space-between;padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line-2);color:var(--text)}
+  .lrow:last-of-type{border-bottom:0}
+  .lrow b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .ledger-f{display:flex;gap:8px;padding:12px 14px;background:var(--band);border-top:1px solid var(--line-2)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;border-radius:999px;padding:2px 10px;white-space:nowrap}
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
   .pill.ok{background:var(--ok-bg);color:var(--ok)}
   .pill.warn{background:var(--warn-bg);color:var(--warn)}
-  .flow-foot{margin-top:18px;font-size:14px;color:var(--muted);text-align:center}
 
-  /* ===== Proof strip ===== */
-  .proof{padding:8px 0 56px}
-  .proof-row{display:flex;align-items:center;gap:40px;border-top:1px solid var(--line);padding-top:32px}
-  .rating{display:flex;align-items:center;gap:12px;flex:none;padding-right:40px;border-right:1px solid var(--line)}
-  .rating .score{font-size:32px;font-weight:700;color:var(--ink);letter-spacing:-0.02em}
-  .stars{color:#F2A900;font-size:16px;letter-spacing:2px}
-  .rating small{display:block;font-size:14px;color:var(--muted)}
-  .logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 36px;flex:1;justify-content:space-between}
-  .logo-w{color:#9AA2B2;font-size:20px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;filter:grayscale(1)}
-  .logo-w.serif{font-family:Georgia,serif;font-weight:600;font-style:italic}
-  .logo-w.lower{text-transform:lowercase;letter-spacing:.02em}
-  .logo-w.thin{font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:16px}
+  /* Proof strip */
+  .proof{padding:72px 0 0;text-align:center}
+  .proof p{font-size:14px;color:var(--muted)}
+  .proof p b{color:var(--ink);font-weight:600}
+  .logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:18px 52px;margin-top:26px}
+  .logo-w{color:#A3AAB8;font-size:21px;font-weight:600;letter-spacing:-0.02em;white-space:nowrap;transition:color .2s}
+  .logo-w:hover{color:#667085}
+  .logo-w.serif{font-family:Georgia,serif;font-style:italic;font-weight:500}
+  .logo-w.lower{text-transform:lowercase}
+  .logo-w.caps{text-transform:uppercase;letter-spacing:.12em;font-size:16px;font-weight:600}
 
-  /* ===== Sections ===== */
-  section.s{padding:96px 0}
-  .band{background:var(--band)}
-  .s-head{max-width:720px;margin-bottom:48px}
-  .s-head.center{margin-left:auto;margin-right:auto;text-align:center}
-  .kicker{font-size:14px;font-weight:600;color:var(--blue);margin-bottom:12px}
-  .s-head h2{font-size:40px;line-height:1.15;font-weight:700}
-  .s-head p{font-size:18px;color:var(--muted);margin-top:16px}
+  /* Sections */
+  section.s{padding:120px 0}
+  .s-band{background:var(--band);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+  .s-head{text-align:center;max-width:680px;margin:0 auto 56px}
+  .label{display:inline-block;font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .s-head h2{margin-top:14px;font-size:44px;line-height:1.1;font-weight:600;letter-spacing:-0.035em}
+  .s-head p{margin-top:16px;font-size:18px;color:var(--muted)}
 
   /* Works with */
-  .works{padding:56px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .works-grid{display:grid;grid-template-columns:auto 1fr 40px 1fr auto;align-items:center;gap:20px}
-  .works h3{font-size:18px;font-weight:600}
-  .works .group-label{font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:600}
-  .tags{display:flex;flex-wrap:wrap;gap:8px}
-  .tag{font-size:15px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px}
-  .works .arrow{width:100%}
+  .works{padding:96px 0 0;text-align:center}
+  .works-row{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:22px}
+  .chip{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;color:var(--ink);box-shadow:var(--shadow-sm)}
+  .works-arrow{color:var(--faint)}
+  .works-arrow svg{width:22px;height:22px}
+  .works .more{margin-top:22px}
 
-  /* Feature tabs */
-  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:40px;overflow-x:auto}
-  .tab{all:unset;cursor:pointer;padding:12px 16px;font-size:16px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
-  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
-  .tab:hover{color:var(--ink)}
-  .panel{display:none;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
-  .panel.on{display:grid}
-  .panel h3{font-size:30px;line-height:1.2;font-weight:700}
-  .panel .lead{font-size:18px;color:var(--muted);margin-top:16px}
-  .panel ul.plain{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:10px}
-  .panel ul.plain li{padding-left:28px;position:relative;font-size:16px}
-  .panel ul.plain li::before{content:"";position:absolute;left:4px;top:8px;width:10px;height:10px;border-radius:3px;background:var(--blue-10);border:1.5px solid var(--blue)}
-  details.tech{margin-top:24px;border:1px solid var(--line);border-radius:10px;background:#fff}
-  details.tech summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:600;color:var(--ink);list-style:none;display:flex;justify-content:space-between}
+  /* Cards + bento */
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;transition:transform .25s ease,box-shadow .25s ease,border-color .25s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -20px rgba(16,24,40,.18);border-color:#E0E3E8}
+  .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .span2{grid-column:span 2}
+  .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--blue-5);color:var(--blue);border:1px solid var(--blue-10);margin-bottom:18px}
+  .card h3{font-size:20px;font-weight:600;letter-spacing:-0.02em;line-height:1.3}
+  .card p.d{margin-top:8px;font-size:15px;color:var(--muted)}
+  details.tech{margin-top:16px}
+  details.tech summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--blue)}
   details.tech summary::-webkit-details-marker{display:none}
-  details.tech summary::after{content:"+";color:var(--muted);font-weight:500}
-  details.tech[open] summary::after{content:"–"}
-  details.tech div{padding:0 16px 14px;font-size:15px;color:var(--muted)}
-
-  /* Mock UI window */
-  .win{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(15,23,41,.08);overflow:hidden}
-  .win-top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:#FBFCFD}
-  .win-top i{width:10px;height:10px;border-radius:50%;background:#DDE2EA;display:block}
-  .win-top b{margin-left:8px;font-size:14px;font-weight:600;color:var(--muted)}
-  .win-top .sample-inline{margin-left:auto;font-size:14px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 8px}
-  .win-body{padding:18px}
-  table.t{width:100%;border-collapse:collapse;font-size:15px}
-  table.t th{text-align:left;font-size:14px;font-weight:600;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
-  table.t td{padding:11px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
+  details.tech summary::after{content:"+";font-weight:500}
+  details.tech[open] summary::after{content:"−"}
+  details.tech div{margin-top:10px;font-size:14px;color:var(--muted);padding:12px 14px;background:var(--band);border:1px solid var(--line-2);border-radius:10px}
+  .viz{margin-top:22px;border:1px solid var(--line-2);border-radius:14px;background:var(--band);padding:14px}
+  table.t{width:100%;border-collapse:collapse;font-size:14px}
+  table.t th{text-align:left;font-weight:500;color:var(--faint);padding:8px 10px;border-bottom:1px solid var(--line)}
+  table.t td{padding:10px;border-bottom:1px solid var(--line-2);color:var(--ink)}
   table.t tr:last-child td{border-bottom:0}
   table.t .num{text-align:right;font-variant-numeric:tabular-nums}
-  .acct{color:var(--muted);font-size:14px}
-  .rule{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-bottom:10px}
-  .rule .k{font-weight:600;color:var(--muted)}
-  .rule .v{background:var(--blue-5);border:1px solid var(--blue-10);color:var(--blue);border-radius:6px;padding:1px 8px;font-weight:600}
-  .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:6px}
-  .bar span{display:block;height:100%;background:var(--blue)}
-  .sched{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
-  .sched div{background:var(--blue-5);border:1px solid var(--blue-10);border-radius:8px;padding:8px 6px;text-align:center;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
-  .sched div span{display:block;color:var(--muted);font-size:14px}
+  .viz table.t{background:#fff;border-radius:10px;overflow:hidden}
+  .rule{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px;color:var(--text)}
+  .rule + .rule{margin-top:8px}
+  .rule .k{font-weight:600;color:var(--faint)}
+  .rule .v{background:var(--blue-5);color:var(--blue);border-radius:6px;padding:0 8px;font-weight:500}
+  .match{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--ink)}
+  .match + .match{margin-top:8px}
+  .sched{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .sched div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 4px;text-align:center;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .sched div.done{background:var(--blue-5);border-color:var(--blue-10);color:var(--blue);font-weight:600}
+  .sched div span{display:block;color:var(--faint);font-size:14px;font-weight:400}
+  .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:8px 0 12px}
+  .bar span{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--blue),#3B82F6)}
 
   /* Ledger section */
-  .ledger-wrap{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start}
-  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px;gap:4px;margin-top:28px}
-  .seg button{all:unset;cursor:pointer;padding:8px 14px;border-radius:7px;font-size:15px;font-weight:600;color:var(--muted)}
-  .seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
-  .mode-note{margin-top:14px;font-size:15px;color:var(--muted)}
-  .je + .je{margin-top:16px}
-  .je-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-  .je-head b{font-size:15px;color:var(--ink)}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;box-shadow:var(--shadow-sm)}
+  .seg button{all:unset;cursor:pointer;padding:7px 16px;border-radius:999px;font-size:14px;font-weight:600;color:var(--muted)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .mode-note{margin-top:12px;font-size:14px;color:var(--muted)}
+  .ledger-card{max-width:820px;margin:36px auto 0;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden}
+  .ledger-card .frame-top .url{margin:0 auto}
+  .ledger-card .body{padding:22px 24px}
+  .je + .je{margin-top:20px}
+  .je-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:12px;flex-wrap:wrap}
+  .je-head b{font-size:15px;color:var(--ink);font-weight:600}
   .je-head span{font-size:14px;color:var(--muted)}
-  .total td{font-weight:700}
-  .balance{margin-top:16px;display:flex;justify-content:space-between;align-items:center;background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:600}
-
-  /* Control row */
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
-  .ctrl{border:1px solid var(--line);border-radius:var(--r);padding:24px;background:#fff}
-  .ico{width:40px;height:40px;border-radius:10px;background:var(--blue-5);border:1px solid var(--blue-10);display:grid;place-items:center;margin-bottom:16px}
-  .ico svg{width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .ctrl h3{font-size:18px;font-weight:600}
-  .ctrl p{margin-top:8px;font-size:15px;color:var(--muted)}
+  .acct{color:var(--faint)}
+  .total td{font-weight:600}
+  .balance{margin-top:18px;display:flex;justify-content:space-between;align-items:center;background:var(--ok-bg);color:var(--ok);border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600}
 
   /* Products */
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-  .prod{border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;background:#fff}
-  .prod .ptag{font-size:14px;font-weight:600;color:var(--muted)}
-  .prod h3{font-size:24px;font-weight:700;margin-top:6px}
-  .prod p{margin-top:12px;font-size:16px;color:var(--muted);flex:1}
-  .prod ul{margin:20px 0 24px;padding:0;list-style:none;display:grid;gap:8px;font-size:15px}
-  .prod ul li::before{content:"✓";color:var(--blue);font-weight:700;margin-right:10px}
-  .prod .mini{height:96px;border-radius:12px;background:var(--band);border:1px solid var(--line);margin-bottom:22px;padding:14px;display:flex;align-items:flex-end;gap:8px}
-
-  /* Custom + security */
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  .box{border:1px solid var(--line);border-radius:16px;padding:32px;background:#fff}
-  .box h3{font-size:24px;font-weight:700}
-  .box p{margin-top:12px;color:var(--muted);font-size:16px}
-  .box .acts{margin-top:24px}
-  .soc{display:flex;gap:20px;align-items:center}
-  .soc-badge{flex:none;width:84px;height:84px;border-radius:50%;border:2px solid #9AA2B2;display:grid;place-items:center;text-align:center;color:#5B6478;font-weight:700;font-size:14px;line-height:1.15}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .prod{display:flex;flex-direction:column}
+  .prod .tagline{font-size:14px;font-weight:500;color:var(--muted)}
+  .prod h3{font-size:22px;margin-top:4px}
+  .prod p.d{flex:1}
+  .prod ul{margin:18px 0 22px;padding:0;list-style:none;display:grid;gap:8px;font-size:14px;color:var(--text)}
+  .prod ul li{display:flex;gap:10px;align-items:center}
+  .prod ul li svg{width:16px;height:16px;color:var(--blue)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .soc{display:flex;gap:18px;align-items:center}
+  .soc-badge{flex:none;width:72px;height:72px;border-radius:50%;border:1.5px solid #C4CAD4;display:grid;place-items:center;text-align:center;color:var(--muted);font-weight:600;font-size:14px;line-height:1.15}
 
   /* Trust */
-  .trust-top{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:center;margin-bottom:48px}
-  .big-rating .score{font-size:64px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-0.03em}
-  .big-rating p{font-size:15px;color:var(--muted);margin-top:8px;max-width:18em}
-  .badges{display:flex;flex-wrap:wrap;gap:10px}
-  .badge{height:44px;display:inline-flex;align-items:center;padding:0 16px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#5B6478;font-size:14px;font-weight:600;white-space:nowrap}
-  .quote{border:1px solid var(--line);border-radius:16px;padding:28px;background:#fff}
-  .quote blockquote{margin:0;font-size:17px;color:var(--ink);line-height:1.6}
-  .who{display:flex;align-items:center;gap:12px;margin-top:20px}
-  .avatar{width:44px;height:44px;border-radius:50%;background:var(--blue-10);color:var(--blue);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
-  .who b{display:block;color:var(--ink);font-size:15px}
+  .rating-big{text-align:center}
+  .rating-big .score{font-size:72px;font-weight:600;letter-spacing:-0.04em;color:var(--ink);line-height:1}
+  .rating-big .stars{color:#F5A524;font-size:22px;letter-spacing:3px;margin-top:10px}
+  .rating-big p{margin-top:8px;font-size:15px;color:var(--muted)}
+  .badges{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:40px auto 56px;max-width:900px}
+  .badge{height:40px;display:inline-flex;align-items:center;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);font-size:14px;font-weight:500;white-space:nowrap}
+  .quote blockquote{margin:0;font-size:17px;line-height:1.65;color:var(--ink);letter-spacing:-0.005em}
+  .who{display:flex;align-items:center;gap:12px;margin-top:22px}
+  .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue-10),#EEE9FF);color:var(--blue);display:grid;place-items:center;font-weight:600;font-size:14px;flex:none}
+  .who b{display:block;color:var(--ink);font-size:15px;font-weight:600}
   .who span{font-size:14px;color:var(--muted)}
 
   /* Stories */
-  .story{display:none;grid-template-columns:1.2fr 1fr;gap:48px;align-items:start}
+  .tabs{display:flex;justify-content:center;margin:0 auto 40px}
+  .tabs .seg button{padding:8px 18px}
+  .story{display:none;grid-template-columns:1.25fr 1fr;gap:16px}
   .story.on{display:grid}
-  .story blockquote{margin:0;font-size:22px;line-height:1.5;color:var(--ink);font-weight:500;letter-spacing:-0.01em}
-  .stats{display:grid;gap:12px}
-  .stat{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fff}
-  .stat b{display:block;font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;line-height:1.15}
-  .stat span{font-size:15px;color:var(--muted)}
-  .unit-note{font-size:14px;color:var(--faint);margin-top:28px}
+  .story .card.q blockquote{margin:0;font-size:21px;line-height:1.55;color:var(--ink);font-weight:500;letter-spacing:-0.015em}
+  .stats{display:grid;gap:16px}
+  .stat b{display:block;font-size:30px;font-weight:600;color:var(--ink);letter-spacing:-0.03em;line-height:1.15}
+  .stat span{font-size:14px;color:var(--muted)}
+  .stat.card{padding:22px 24px}
+  .unit-note{text-align:center;font-size:14px;color:var(--faint);margin-top:28px}
 
-  /* Closing CTA */
-  .closing{padding:104px 0;text-align:center;background:var(--blue-5);border-top:1px solid var(--blue-10)}
-  .closing h2{font-size:44px;font-weight:700;line-height:1.12}
-  .closing p{font-size:18px;color:var(--muted);margin-top:16px}
-  .closing .ctas{display:flex;gap:12px;justify-content:center;margin-top:32px;flex-wrap:wrap}
+  /* Closing (only dark band) */
+  .closing{position:relative;overflow:hidden;background:#0B1220;color:#C9D1E0;text-align:center;padding:120px 0}
+  .closing::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 50% 0%,rgba(46,123,255,.35),transparent 70%),radial-gradient(500px 260px at 80% 100%,rgba(124,92,255,.18),transparent 70%)}
+  .closing .wrap{position:relative}
+  .closing .label{color:#8FB4FF}
+  .closing h2{margin-top:14px;color:#fff;font-size:52px;line-height:1.08;font-weight:600;letter-spacing:-0.04em}
+  .closing p{margin:18px auto 0;max-width:560px;font-size:18px;color:#A9B4C7}
+  .closing .ctas{display:flex;gap:12px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+  .closing .btn-secondary{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.18);box-shadow:none}
+  .closing .btn-secondary:hover{border-color:rgba(255,255,255,.35)}
 
   /* Footer */
-  footer{padding:72px 0 40px;background:#fff;border-top:1px solid var(--line);font-size:15px}
-  .f-grid{display:grid;grid-template-columns:1.3fr repeat(5,1fr);gap:32px}
+  footer{padding:80px 0 40px;font-size:14px}
+  .f-grid{display:grid;grid-template-columns:1.4fr repeat(5,1fr);gap:32px}
   footer h4{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink)}
-  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
-  footer a{color:var(--muted)}
-  footer a:hover{color:var(--blue)}
-  .f-brand p{color:var(--muted);margin-top:14px;font-size:15px}
-  .f-contact{margin-top:20px;display:grid;gap:6px;color:var(--muted);font-size:15px}
-  .f-more{margin-top:40px;padding-top:28px;border-top:1px solid var(--line);display:grid;grid-template-columns:1.3fr 5fr;gap:32px}
-  .f-more ul{grid-template-columns:repeat(4,1fr);gap:9px 32px}
-  .f-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;color:var(--muted);font-size:14px}
-  .f-bottom .legal{display:flex;gap:20px;flex-wrap:wrap}
-  .social{display:flex;gap:14px}
+  footer ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  footer a{color:var(--muted);transition:color .15s}
+  footer a:hover{color:var(--ink)}
+  .f-brand p{color:var(--muted);margin-top:14px}
+  .f-contact{margin-top:18px;display:grid;gap:6px;color:var(--muted)}
+  .f-more{margin-top:48px;padding-top:28px;border-top:1px solid var(--line-2);display:grid;grid-template-columns:1.4fr 5fr;gap:32px}
+  .f-more ul{grid-template-columns:repeat(4,1fr);gap:10px 32px}
+  .f-bottom{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;color:var(--muted)}
+  .f-bottom .legal,.social{display:flex;gap:20px;flex-wrap:wrap}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .pipe::after{animation:none;left:calc(50% - 5px)}
+    .card,.btn{transition:none}
+    html{scroll-behavior:auto}
+  }
 
   @media (max-width:1020px){
     .menu{display:none}
-    .hero-grid,.panel.on,.ledger-wrap,.story.on,.trust-top,.grid2{grid-template-columns:1fr}
-    .hero h1{font-size:42px}
-    .grid4{grid-template-columns:1fr 1fr}
-    .grid3{grid-template-columns:1fr}
-    .proof-row{flex-direction:column;align-items:flex-start}
-    .rating{border-right:0;padding-right:0}
-    .works-grid{grid-template-columns:1fr}
-    .works .arrow{display:none}
+    .nav-row{grid-template-columns:1fr auto}
+    .hero h1{font-size:52px}
+    .app{grid-template-columns:1fr}.side{display:none}
+    .bento,.grid3{grid-template-columns:1fr 1fr}
+    .story.on{grid-template-columns:1fr}
     .f-grid{grid-template-columns:1fr 1fr 1fr}
-    .f-more{grid-template-columns:1fr}
-    .f-more ul{grid-template-columns:1fr 1fr}
+    .f-more{grid-template-columns:1fr}.f-more ul{grid-template-columns:1fr 1fr}
   }
-  @media (max-width:640px){
+  @media (max-width:680px){
     .nav-actions .login,.nav-actions .btn-secondary{display:none}
-    .grid4{grid-template-columns:1fr}
-    .s-head h2,.closing h2{font-size:32px}
+    .hero{padding-top:64px}.hero h1{font-size:40px}
+    .flowline{grid-template-columns:1fr}.pipe{display:none}
+    .bento,.grid3,.grid2{grid-template-columns:1fr}.span2{grid-column:auto}
+    .s-head h2,.closing h2{font-size:34px}
     .f-grid{grid-template-columns:1fr 1fr}
   }
 </style>
@@ -271,14 +296,32 @@
 <body>
 
 <!-- Prototype variant bar: name + variant switcher only. Not part of the page. -->
-<div class="vbar" role="banner" aria-label="Prototype controls">
+<div class="vbar" aria-label="Prototype controls">
   <span class="vname">Synder.com homepage, light</span>
   <div class="vswitch" role="group" aria-label="Variant">
-    <button type="button" aria-pressed="true" data-variant="v1">v1</button>
+    <a href="v1.html" aria-pressed="false">v1</a>
+    <a href="./" aria-pressed="true">v2</a>
   </div>
 </div>
 
-<!-- ================= HEADER: one row ================= -->
+<!-- SVG icon set: one stroke weight (1.75) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14"/><path d="m5 7-3 7a3 3 0 0 0 6 0L5 7zM19 7l-3 7a3 3 0 0 0 6 0l-3-7z"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4M4 4h12l-2 4 2 4H4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></symbol>
+</svg>
+
 <header class="nav">
   <div class="wrap nav-row">
     <a class="logo" href="#top" aria-label="Synder home"><span class="logo-mark">S</span>Synder</a>
@@ -385,57 +428,63 @@
 <main id="top">
 <!-- ================= HERO ================= -->
 <section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="eyebrow">Accounting automation for online sales</p>
-      <h1>Every sale, fee, refund and tax lands in your books automatically</h1>
-      <p class="sub">Synder connects Shopify, Stripe, Amazon and 30+ other platforms to QuickBooks, Xero or NetSuite. It posts every transaction and flags only what needs your review.</p>
-      <div class="ctas">
-        <a class="btn btn-primary" href="#demo">Book a demo</a>
-        <a class="btn btn-secondary" href="#trial">Start free trial</a>
-      </div>
-      <p class="caption">Free for 15 days · Plans from <span class="ph">$XX/month (placeholder)</span></p>
+  <div class="wrap">
+    <span class="eyebrow-pill"><b>4.7 <span class="stars">★</span></b>Rated by 3,400+ reviewers</span>
+    <h1>Your sales land in your books. <span class="grad">Automatically.</span></h1>
+    <p class="sub">Sales, fees, refunds and taxes from Shopify, Stripe, Amazon and 30+ platforms post to QuickBooks, Xero or NetSuite. Synder flags only what needs your review.</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="#demo">Book a demo</a>
+      <a class="btn btn-secondary" href="#trial">Start free trial</a>
     </div>
+    <p class="caption">Free for 15 days · Plans from <span class="ph">$XX/mo (placeholder)</span></p>
+  </div>
 
-    <div class="flow" aria-label="Sample: sales flowing from platforms into the ledger">
-      <span class="sample-tag">Sample</span>
-      <div class="flow-cols">
-        <div class="src">
-          <div class="chip"><span class="dot" style="background:#5E8E3E">S</span>Shopify<span class="amt">42 orders</span></div>
-          <div class="chip"><span class="dot" style="background:#635BFF">S</span>Stripe<span class="amt">118 charges</span></div>
-          <div class="chip"><span class="dot" style="background:#232F3E">a</span>Amazon<span class="amt">67 orders</span></div>
-        </div>
-        <div class="arrow" aria-hidden="true"></div>
-        <div class="ledger-card">
-          <div class="lc-title">Posted to QuickBooks today</div>
-          <div class="lc-row"><span>Sales</span><span>$18,420.00</span></div>
-          <div class="lc-row"><span>Platform fees</span><span>−$612.35</span></div>
-          <div class="lc-row"><span>Refunds</span><span>−$389.00</span></div>
-          <div class="lc-row"><span>Sales tax</span><span>$1,204.10</span></div>
-          <div class="status">
-            <span class="pill ok">224 posted</span>
-            <span class="pill warn">3 to review</span>
+  <div class="frame-wrap reveal">
+    <div class="frame" aria-label="Sample: Synder syncing sales into QuickBooks">
+      <div class="frame-top"><i></i><i></i><i></i><span class="url">app.synder.com</span><span class="sample">Sample</span></div>
+      <div class="app">
+        <aside class="side" aria-hidden="true">
+          <div class="s-item"><svg class="i"><use href="#i-home"/></svg>Overview</div>
+          <div class="s-item on"><svg class="i"><use href="#i-sync"/></svg>Sync</div>
+          <div class="s-item"><svg class="i"><use href="#i-scale"/></svg>Reconciliation</div>
+          <div class="s-item"><svg class="i"><use href="#i-tag"/></svg>Rules</div>
+          <div class="s-item"><svg class="i"><use href="#i-chart"/></svg>Insights</div>
+          <div class="s-item"><svg class="i"><use href="#i-plug"/></svg>Integrations</div>
+        </aside>
+        <div class="main">
+          <div class="main-head"><h4>Today's sync</h4><span>Oct 26 · Synced 2 min ago</span></div>
+          <div class="flowline">
+            <div class="srcs">
+              <div class="src"><span class="lg" style="background:#5E8E3E">S</span>Shopify<span class="n">42 orders</span></div>
+              <div class="src"><span class="lg" style="background:#635BFF">S</span>Stripe<span class="n">118 charges</span></div>
+              <div class="src"><span class="lg" style="background:#232F3E">a</span>Amazon<span class="n">67 orders</span></div>
+            </div>
+            <div class="pipe" aria-hidden="true"></div>
+            <div class="ledger">
+              <div class="ledger-h">Posted to QuickBooks<span>227 transactions</span></div>
+              <div class="lrow">Sales<b>$18,420.00</b></div>
+              <div class="lrow">Platform fees<b>−$612.35</b></div>
+              <div class="lrow">Refunds<b>−$389.00</b></div>
+              <div class="lrow">Sales tax<b>$1,204.10</b></div>
+              <div class="ledger-f"><span class="pill ok">224 posted</span><span class="pill warn">3 to review</span></div>
+            </div>
           </div>
         </div>
       </div>
-      <p class="flow-foot">Synder posts everything and sets aside only what needs a second look.</p>
     </div>
   </div>
 </section>
 
-<!-- ================= PROOF: logos + rating ================= -->
-<section class="proof" aria-label="Customers and rating">
-  <div class="wrap proof-row">
-    <div class="rating">
-      <span class="score">4.7</span>
-      <div><span class="stars" aria-label="4.7 out of 5">★★★★★</span><small>from 3,400+ reviews</small></div>
-    </div>
-    <div class="logos" aria-label="Customers">
+<!-- ================= PROOF ================= -->
+<section class="proof" aria-label="Customers">
+  <div class="wrap">
+    <p><b>4.7 ★</b> from 3,400+ reviews · Trusted by online sellers, SaaS teams and accounting firms</p>
+    <div class="logos">
       <span class="logo-w lower">aarke</span>
       <span class="logo-w">Kittl</span>
       <span class="logo-w serif">Healthy Meals Direct</span>
       <span class="logo-w">RevenueCat</span>
-      <span class="logo-w thin">Decimal</span>
+      <span class="logo-w caps">Decimal</span>
       <span class="logo-w serif">Insogna CPA</span>
       <span class="logo-w lower">dot</span>
     </div>
@@ -443,168 +492,104 @@
 </section>
 
 <!-- ================= WORKS WITH ================= -->
-<section class="works" id="works" aria-label="Integrations">
-  <div class="wrap works-grid">
-    <h3>Works with</h3>
-    <div>
-      <div class="group-label">Where you sell and get paid</div>
-      <div class="tags"><span class="tag">Shopify</span><span class="tag">Amazon</span><span class="tag">Stripe</span><span class="tag">PayPal</span><span class="tag">Square</span></div>
+<section class="works reveal" id="works">
+  <div class="wrap">
+    <span class="label">Works with</span>
+    <div class="works-row">
+      <span class="chip">Shopify</span><span class="chip">Amazon</span><span class="chip">Stripe</span><span class="chip">PayPal</span><span class="chip">Square</span>
+      <span class="works-arrow"><svg class="i"><use href="#i-arrow"/></svg></span>
+      <span class="chip">QuickBooks</span><span class="chip">Xero</span><span class="chip">NetSuite</span><span class="chip">Sage Intacct</span>
     </div>
-    <div class="arrow" aria-hidden="true"></div>
-    <div>
-      <div class="group-label">Where your books live</div>
-      <div class="tags"><span class="tag">QuickBooks</span><span class="tag">Xero</span><span class="tag">NetSuite</span><span class="tag">Sage Intacct</span></div>
-    </div>
-    <a class="link-arrow" href="#">30+ more integrations</a>
+    <div class="more"><a class="link" href="#">See all 30+ integrations <svg class="i"><use href="#i-arrow"/></svg></a></div>
   </div>
 </section>
 
-<!-- ================= FEATURES ================= -->
+<!-- ================= FEATURES (bento) ================= -->
 <section class="s" id="features">
   <div class="wrap">
-    <div class="s-head">
-      <p class="kicker">What Synder does</p>
-      <h2>The bookkeeping work you no longer do by hand</h2>
-      <p>Four jobs Synder takes over. Each one starts with the result. The accounting detail is one click away.</p>
+    <div class="s-head reveal">
+      <span class="label">What Synder does</span>
+      <h2>The bookkeeping you no longer do by hand</h2>
+      <p>Each job starts with the result. The accounting detail is one click away.</p>
     </div>
-
-    <div class="tabs" role="tablist" aria-label="Features">
-      <button class="tab" role="tab" aria-selected="true" data-tab="f1">Sync your sales</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="f2">Reconcile</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="f3">Categorize</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="f4">Recognize revenue</button>
-    </div>
-
-    <!-- F1 sync -->
-    <div class="panel on" id="f1" role="tabpanel">
-      <div>
+    <div class="bento">
+      <article class="card span2 reveal">
+        <div class="ic"><svg class="i"><use href="#i-sync"/></svg></div>
         <h3>Your sales show up in your books on their own</h3>
-        <p class="lead">Sales, fees, refunds and taxes from 30+ platforms post to your accounting software automatically. Pick how much detail you want to see.</p>
-        <ul class="plain">
-          <li>Every sale, fee, refund and tax, from every channel</li>
-          <li>Past sales can be imported too</li>
-          <li>Multiple currencies handled</li>
-        </ul>
-        <details class="tech"><summary>For accountants: sync modes</summary>
-          <div><b>Per transaction</b> (each sale with SKU and customer) or <b>Summary</b> (one journal entry per day, month or payout).</div>
-        </details>
-      </div>
-      <div class="win">
-        <div class="win-top"><i></i><i></i><i></i><b>Synced transactions</b><span class="sample-inline">Sample</span></div>
-        <div class="win-body">
+        <p class="d">Sales, fees, refunds and taxes from 30+ platforms post automatically, including past sales and multiple currencies.</p>
+        <div class="viz">
           <table class="t">
             <thead><tr><th>Source</th><th>Type</th><th>Customer</th><th class="num">Amount</th><th>Status</th></tr></thead>
             <tbody>
               <tr><td>Shopify</td><td>Sale</td><td>J. Rivera</td><td class="num">$84.00</td><td><span class="pill ok">Posted</span></td></tr>
               <tr><td>Stripe</td><td>Fee</td><td>—</td><td class="num">−$2.74</td><td><span class="pill ok">Posted</span></td></tr>
               <tr><td>Amazon</td><td>Refund</td><td>M. Chen</td><td class="num">−$29.99</td><td><span class="pill ok">Posted</span></td></tr>
-              <tr><td>PayPal</td><td>Sale</td><td>A. Novak</td><td class="num">$140.00</td><td><span class="pill ok">Posted</span></td></tr>
-              <tr><td>Square</td><td>Sales tax</td><td>—</td><td class="num">$6.72</td><td><span class="pill ok">Posted</span></td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-
-    <!-- F2 reconcile -->
-    <div class="panel" id="f2" role="tabpanel">
-      <div>
+        <details class="tech"><summary>For accountants: sync modes</summary>
+          <div><b>Per transaction</b> (each sale with SKU and customer) or <b>Summary</b> (one journal entry per day, month or payout).</div></details>
+      </article>
+      <article class="card reveal">
+        <div class="ic"><svg class="i"><use href="#i-scale"/></svg></div>
         <h3>Know your books match what you were paid</h3>
-        <p class="lead">Synder checks what your platforms recorded against what is in your books, and flags anything that doesn't line up before month end.</p>
-        <ul class="plain">
-          <li>Mismatches flagged early, not found at close</li>
-          <li>Every reconciled period is logged for audit</li>
-        </ul>
+        <p class="d">Mismatches are flagged before month end, not found at close.</p>
+        <div class="viz">
+          <div class="match">Stripe · Oct 21<span class="pill ok">Matched</span></div>
+          <div class="match">Shopify · Oct 22<span class="pill ok">Matched</span></div>
+          <div class="match">PayPal · Oct 23<span class="pill warn">$30.00 off</span></div>
+        </div>
         <details class="tech"><summary>For accountants: how it works</summary>
-          <div>Each sale, fee, refund and tax syncs to a clearing account. Synder then reconciles both sides inside the app, and its matching engine flags discrepancies.</div>
-        </details>
-      </div>
-      <div class="win">
-        <div class="win-top"><i></i><i></i><i></i><b>Reconciliation · October</b><span class="sample-inline">Sample</span></div>
-        <div class="win-body">
-          <table class="t">
-            <thead><tr><th>Payout</th><th class="num">Platform</th><th class="num">In your books</th><th>Result</th></tr></thead>
-            <tbody>
-              <tr><td>Stripe · Oct 21</td><td class="num">$3,412.80</td><td class="num">$3,412.80</td><td><span class="pill ok">Matched</span></td></tr>
-              <tr><td>Shopify · Oct 22</td><td class="num">$1,980.15</td><td class="num">$1,980.15</td><td><span class="pill ok">Matched</span></td></tr>
-              <tr><td>PayPal · Oct 23</td><td class="num">$742.00</td><td class="num">$712.00</td><td><span class="pill warn">$30.00 off</span></td></tr>
-              <tr><td>Amazon · Oct 24</td><td class="num">$5,106.44</td><td class="num">$5,106.44</td><td><span class="pill ok">Matched</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- F3 categorize -->
-    <div class="panel" id="f3" role="tabpanel">
-      <div>
+          <div>Each sale, fee, refund and tax syncs to a clearing account. Synder reconciles both sides inside the app, its matching engine flags discrepancies, and every reconciled period is logged for audit.</div></details>
+      </article>
+      <article class="card reveal">
+        <div class="ic"><svg class="i"><use href="#i-tag"/></svg></div>
         <h3>Every transaction goes to the right account</h3>
-        <p class="lead">Set simple if-then rules once. Synder applies them to every transaction as it syncs, across all your platforms.</p>
-        <ul class="plain">
-          <li>Rules by amount, vendor, description or location</li>
-          <li>No more sorting transactions one by one</li>
-        </ul>
-        <details class="tech"><summary>For accountants: what rules can set</summary>
-          <div>Rules assign accounts, classes and tax codes to each transaction during sync.</div>
-        </details>
-      </div>
-      <div class="win">
-        <div class="win-top"><i></i><i></i><i></i><b>Rules</b><span class="sample-inline">Sample</span></div>
-        <div class="win-body">
-          <div class="rule"><span class="k">If</span> vendor <span class="v">is Facebook Ads</span><span class="k">then</span> account <span class="v">Advertising</span></div>
-          <div class="rule"><span class="k">If</span> location <span class="v">is Austin store</span><span class="k">then</span> class <span class="v">Retail · Austin</span></div>
-          <div class="rule"><span class="k">If</span> description <span class="v">contains "wholesale"</span><span class="k">then</span> account <span class="v">Wholesale sales</span></div>
-          <div class="rule"><span class="k">If</span> amount <span class="v">is over $5,000</span><span class="k">then</span> tax code <span class="v">Exempt</span></div>
+        <p class="d">Set simple if-then rules once by amount, vendor, description or location.</p>
+        <div class="viz">
+          <div class="rule"><span class="k">If</span> vendor <span class="v">Facebook Ads</span><span class="k">→</span><span class="v">Advertising</span></div>
+          <div class="rule"><span class="k">If</span> location <span class="v">Austin store</span><span class="k">→</span><span class="v">Retail · Austin</span></div>
         </div>
-      </div>
-    </div>
-
-    <!-- F4 revrec -->
-    <div class="panel" id="f4" role="tabpanel">
-      <div>
+        <details class="tech"><summary>For accountants: what rules set</summary>
+          <div>Rules assign accounts, classes and tax codes to each transaction during sync, across all connected platforms.</div></details>
+      </article>
+      <article class="card span2 reveal">
+        <div class="ic"><svg class="i"><use href="#i-cal"/></svg></div>
         <h3>Subscription revenue counted in the right month</h3>
-        <p class="lead">For subscription businesses: Synder spreads each payment over the months it was earned, and keeps up with upgrades, cancellations and prorations.</p>
-        <ul class="plain">
-          <li>Works from Stripe data or an Excel upload</li>
-          <li>Revenue recognized monthly on your P&amp;L</li>
-        </ul>
-        <details class="tech"><summary>For accountants: standard</summary>
-          <div>Synder RevRec builds ASC 606 recognition schedules and tracks upgrades, cancellations and prorations across the subscription lifecycle.</div>
-        </details>
-      </div>
-      <div class="win">
-        <div class="win-top"><i></i><i></i><i></i><b>Recognition schedule · Annual plan $1,200</b><span class="sample-inline">Sample</span></div>
-        <div class="win-body">
-          <div style="display:flex;justify-content:space-between;font-size:15px"><span>Recognized so far</span><b style="color:var(--ink)">$600 of $1,200</b></div>
-          <div class="bar"><span style="width:50%"></span></div>
+        <p class="d">Synder spreads each payment over the months it was earned, from Stripe data or an Excel upload, and keeps up with upgrades, cancellations and prorations.</p>
+        <div class="viz">
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--muted)"><span>Annual plan · $1,200</span><b style="color:var(--ink);font-weight:600">$600 recognized</b></div>
+          <div class="bar"><span></span></div>
           <div class="sched">
-            <div><span>Jul</span>$100</div><div><span>Aug</span>$100</div><div><span>Sep</span>$100</div>
-            <div><span>Oct</span>$100</div><div><span>Nov</span>$100</div><div><span>Dec</span>$100</div>
+            <div class="done"><span>Jul</span>$100</div><div class="done"><span>Aug</span>$100</div><div class="done"><span>Sep</span>$100</div>
+            <div class="done"><span>Oct</span>$100</div><div><span>Nov</span>$100</div><div><span>Dec</span>$100</div>
           </div>
-          <p style="margin-top:14px;font-size:15px;color:var(--muted)">Upgrade on Nov 12: remaining schedule recalculated automatically.</p>
         </div>
-      </div>
+        <details class="tech"><summary>For accountants: standard</summary>
+          <div>Synder RevRec builds ASC 606 recognition schedules and recognizes revenue monthly on the P&amp;L across the subscription lifecycle.</div></details>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- ================= WHAT LANDS IN YOUR LEDGER ================= -->
-<section class="s band" id="ledger">
-  <div class="wrap ledger-wrap">
-    <div>
-      <p class="kicker">See the result</p>
-      <h2 style="font-size:40px;line-height:1.15;font-weight:700">What actually lands in your books</h2>
-      <p style="font-size:18px;color:var(--muted);margin-top:16px">One $108 Stripe sale, from charge to bank deposit. The fee goes to an expense account, the net amount waits in a clearing account, and the payout clears it to zero.</p>
+<!-- ================= LEDGER ================= -->
+<section class="s s-band" id="ledger">
+  <div class="wrap">
+    <div class="s-head reveal" style="margin-bottom:28px">
+      <span class="label">See the result</span>
+      <h2>What actually lands in your books</h2>
+      <p>One $108 Stripe sale, from charge to bank deposit. The fee goes to expenses, the net waits in clearing, and the payout clears it to zero.</p>
+    </div>
+    <div style="text-align:center" class="reveal">
       <div class="seg" role="group" aria-label="Sync mode">
         <button type="button" aria-pressed="true" data-mode="pt">Per transaction</button>
         <button type="button" aria-pressed="false" data-mode="sum">Summary</button>
       </div>
       <p class="mode-note" id="modeNote">Per transaction: each sale with SKU and customer.</p>
     </div>
-
-    <div class="win">
-      <div class="win-top"><i></i><i></i><i></i><b>Journal entries · QuickBooks</b><span class="sample-inline">Sample</span></div>
-      <div class="win-body">
+    <div class="ledger-card reveal">
+      <div class="frame-top"><i></i><i></i><i></i><span class="url">Journal entries · QuickBooks</span><span class="sample">Sample</span></div>
+      <div class="body">
         <div id="je-pt">
           <div class="je">
             <div class="je-head"><b>1 · Stripe sale, Oct 24</b><span>Customer: J. Rivera · SKU TEE-BLK-M</span></div>
@@ -662,137 +647,109 @@
   </div>
 </section>
 
-<!-- ================= YOU STAY IN CONTROL ================= -->
+<!-- ================= CONTROL (bento) ================= -->
 <section class="s" id="control">
   <div class="wrap">
-    <div class="s-head">
-      <p class="kicker">You stay in control</p>
-      <h2>Automatic, but never a black box</h2>
+    <div class="s-head reveal">
+      <span class="label">You stay in control</span>
+      <h2>Automatic, never a black box</h2>
     </div>
-    <div class="grid4">
-      <div class="ctrl">
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
-        <h3>Problems are flagged</h3>
-        <p>Anything that doesn't match is set aside for you to review, before month end.</p>
+    <div class="bento">
+      <div class="card span2 reveal">
+        <div class="ic"><svg class="i"><use href="#i-flag"/></svg></div>
+        <h3>Problems are flagged, not buried</h3>
+        <p class="d">Anything that doesn't match is set aside for you to review before month end. Everything else posts on its own.</p>
       </div>
-      <div class="ctrl">
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></div>
+      <div class="card reveal">
+        <div class="ic"><svg class="i"><use href="#i-clock"/></svg></div>
         <h3>A record of every period</h3>
-        <p>Every reconciled period is logged, so you can show what was checked and when.</p>
+        <p class="d">Every reconciled period is logged for audit.</p>
       </div>
-      <div class="ctrl">
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/></svg></div>
+      <div class="card reveal">
+        <div class="ic"><svg class="i"><use href="#i-sliders"/></svg></div>
         <h3>Your rules, your accounts</h3>
-        <p>You decide which accounts, classes and tax codes are used, and how much detail is posted.</p>
+        <p class="d">You choose the accounts, classes, tax codes and level of detail.</p>
       </div>
-      <div class="ctrl">
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Your data is protected</h3>
-        <p>SOC 2 Type 2 certified security and end-to-end encryption.</p>
+      <div class="card span2 reveal">
+        <div class="soc">
+          <div class="soc-badge" aria-label="AICPA SOC 2 Type 2">AICPA<br>SOC 2<br>Type 2</div>
+          <div>
+            <h3>Your data is protected</h3>
+            <p class="d">SOC 2 Type 2 certified security, end-to-end encryption, plus GDPR and HIPAA readiness.</p>
+            <p style="margin-top:12px"><a class="link" href="https://trust.synder.com/" target="_blank" rel="noopener noreferrer">View the Trust Report <svg class="i"><use href="#i-arrow"/></svg></a></p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ================= PRODUCTS ================= -->
-<section class="s band" id="products">
+<section class="s s-band" id="products">
   <div class="wrap">
-    <div class="s-head center">
-      <p class="kicker">Products</p>
-      <h2>Three tools. Use one or all of them.</h2>
+    <div class="s-head reveal">
+      <span class="label">Products</span>
+      <h2>Three tools. Use one or all.</h2>
     </div>
     <div class="grid3">
-      <article class="prod">
-        <div class="mini" aria-hidden="true">
-          <div style="flex:1;height:40%;background:var(--blue-10);border-radius:6px"></div>
-          <div style="flex:1;height:65%;background:var(--blue-10);border-radius:6px"></div>
-          <div style="flex:1;height:85%;background:var(--blue);border-radius:6px"></div>
-        </div>
-        <span class="ptag">For sales across channels</span>
+      <article class="card prod reveal">
+        <div class="ic"><svg class="i"><use href="#i-sync"/></svg></div>
+        <span class="tagline">For sales across channels</span>
         <h3>Synder Sync</h3>
-        <p>Your sales, fees and taxes from every channel go into your books automatically.</p>
-        <ul><li>30+ platforms at no extra cost</li><li>Per transaction or Summary</li><li>Reconciliation built in</li></ul>
-        <a class="link-arrow" href="#">Explore Synder Sync</a>
+        <p class="d">Sales, fees and taxes from every channel go into your books automatically.</p>
+        <ul><li><svg class="i"><use href="#i-check"/></svg>30+ platforms at no extra cost</li><li><svg class="i"><use href="#i-check"/></svg>Per transaction or Summary</li><li><svg class="i"><use href="#i-check"/></svg>Reconciliation built in</li></ul>
+        <a class="link" href="#">Explore Sync <svg class="i"><use href="#i-arrow"/></svg></a>
       </article>
-      <article class="prod">
-        <div class="mini" aria-hidden="true">
-          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
-          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
-          <div style="flex:1;height:50%;background:var(--blue-10);border-radius:6px"></div>
-          <div style="flex:1;height:50%;background:var(--blue);border-radius:6px"></div>
-        </div>
-        <span class="ptag">For subscription businesses</span>
+      <article class="card prod reveal">
+        <div class="ic"><svg class="i"><use href="#i-cal"/></svg></div>
+        <span class="tagline">For subscription businesses</span>
         <h3>Synder RevRec</h3>
-        <p>Subscription revenue recognized in the right month, through upgrades, cancellations and prorations.</p>
-        <ul><li>ASC 606 recognition schedules</li><li>From Stripe or an Excel upload</li><li>Books ready for audit</li></ul>
-        <a class="link-arrow" href="#">Explore Synder RevRec</a>
+        <p class="d">Subscription revenue recognized in the right month, through upgrades, cancellations and prorations.</p>
+        <ul><li><svg class="i"><use href="#i-check"/></svg>ASC 606 recognition schedules</li><li><svg class="i"><use href="#i-check"/></svg>From Stripe or an Excel upload</li><li><svg class="i"><use href="#i-check"/></svg>Books ready for audit</li></ul>
+        <a class="link" href="#">Explore RevRec <svg class="i"><use href="#i-arrow"/></svg></a>
       </article>
-      <article class="prod">
-        <div class="mini" aria-hidden="true">
-          <svg viewBox="0 0 200 60" width="100%" height="100%" preserveAspectRatio="none"><polyline points="0,50 30,42 60,45 90,30 120,34 150,18 200,10" fill="none" stroke="#0053CC" stroke-width="3"/></svg>
-        </div>
-        <span class="ptag">For decisions</span>
+      <article class="card prod reveal">
+        <div class="ic"><svg class="i"><use href="#i-chart"/></svg></div>
+        <span class="tagline">For decisions</span>
         <h3>Synder Insights</h3>
-        <p>Your key sales, product and customer numbers on one dashboard, for every connected platform.</p>
-        <ul><li>Major KPI reports, every day</li><li>Metrics per platform</li><li>Sales, product and customer reports</li></ul>
-        <a class="link-arrow" href="#">Explore Synder Insights</a>
+        <p class="d">Key sales, product and customer numbers on one dashboard, for every connected platform.</p>
+        <ul><li><svg class="i"><use href="#i-check"/></svg>Major KPI reports, every day</li><li><svg class="i"><use href="#i-check"/></svg>Metrics per platform</li><li><svg class="i"><use href="#i-check"/></svg>Sales, product and customer reports</li></ul>
+        <a class="link" href="#">Explore Insights <svg class="i"><use href="#i-arrow"/></svg></a>
       </article>
     </div>
-  </div>
-</section>
-
-<!-- ================= CUSTOMIZATION + SECURITY ================= -->
-<section class="s" id="security">
-  <div class="wrap grid2">
-    <div class="box">
-      <p class="kicker">Customization</p>
-      <h3>Set it up the way your books work</h3>
-      <p>Rename line items, pull in metadata, remove taxes, or set up custom transaction mapping. Busy, high-volume setups are welcome.</p>
-      <div class="acts"><a class="link-arrow" href="#demo">Talk to us about a custom setup</a></div>
-    </div>
-    <div class="box">
-      <p class="kicker">Security</p>
-      <div class="soc">
-        <div class="soc-badge" aria-label="AICPA SOC 2 Type 2">AICPA<br>SOC 2<br>Type 2</div>
-        <div>
-          <h3>SOC 2 Type 2 certified</h3>
-          <p>End-to-end encryption, plus GDPR and HIPAA readiness.</p>
-        </div>
+    <div class="card reveal" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div style="max-width:640px">
+        <h3>Need a custom setup?</h3>
+        <p class="d">Rename line items, pull in metadata, remove taxes, or set up custom transaction mapping for high-volume books.</p>
       </div>
-      <div class="acts"><a class="link-arrow" href="https://trust.synder.com/" target="_blank" rel="noopener noreferrer">View the Trust Report</a></div>
+      <a class="link" href="#demo">Talk to us <svg class="i"><use href="#i-arrow"/></svg></a>
     </div>
   </div>
 </section>
 
-<!-- ================= TRUST (merged) ================= -->
-<section class="s band" id="trust">
+<!-- ================= TRUST ================= -->
+<section class="s" id="trust">
   <div class="wrap">
-    <div class="trust-top">
-      <div class="big-rating">
-        <div class="score">4.7 <span class="stars" style="font-size:24px;vertical-align:middle">★★★★★</span></div>
-        <p>Average rating from 3,400+ reviews on the QuickBooks App Store, Xero Marketplace and Capterra</p>
-      </div>
-      <div>
-        <h2 style="font-size:32px;font-weight:700;line-height:1.2;margin-bottom:20px">Trusted by accountants and partners</h2>
-        <div class="badges" aria-label="Partner badges">
-          <span class="badge">QuickBooks Solution Provider</span>
-          <span class="badge">QuickBooks Accountant Approved</span>
-          <span class="badge">Xero Growth App 2025</span>
-          <span class="badge">Stripe Verified Partner</span>
-          <span class="badge">Square Certified Partner</span>
-          <span class="badge">BDO Alliance USA</span>
-          <span class="badge">AICPA &amp; CPA.com Startup Accelerator</span>
-          <span class="badge">Backed by Y Combinator</span>
-          <span class="badge">G2</span>
-        </div>
-      </div>
+    <div class="s-head reveal" style="margin-bottom:40px">
+      <span class="label">Trusted</span>
+      <h2>Recognized by accountants and partners</h2>
     </div>
-    <div class="grid2">
-      <figure class="quote" style="margin:0">
+    <div class="rating-big reveal">
+      <div class="score">4.7</div>
+      <div class="stars" aria-label="4.7 out of 5">★★★★★</div>
+      <p>Average from 3,400+ reviews on the QuickBooks App Store, Xero Marketplace and Capterra</p>
+    </div>
+    <div class="badges reveal" aria-label="Partner badges">
+      <span class="badge">QuickBooks Solution Provider</span><span class="badge">QuickBooks Accountant Approved</span><span class="badge">Xero Growth App 2025</span>
+      <span class="badge">Stripe Verified Partner</span><span class="badge">Square Certified Partner</span><span class="badge">BDO Alliance USA</span>
+      <span class="badge">AICPA &amp; CPA.com Startup Accelerator</span><span class="badge">Backed by Y Combinator</span><span class="badge">G2</span>
+    </div>
+    <div class="grid2" style="margin-top:0">
+      <figure class="card quote reveal" style="margin:0">
         <blockquote>"As a Synder Sync partner the service we receive is second-to-none with resources that make it so much easier to gain immediate insights into all of our clients' online transactions and how they impact their overall financial picture."</blockquote>
         <figcaption class="who"><span class="avatar">GW</span><div><b>Geni Whitehouse</b><span>ITA President, BDCoCPA, Founder of the Impactful Advisor</span></div></figcaption>
       </figure>
-      <figure class="quote" style="margin:0">
+      <figure class="card quote reveal" style="margin:0">
         <blockquote>"Ecommerce is everywhere and Synder makes it easy to serve everyone! From growing retailers to professional service providers, Synder simplifies serving these types of clients and sweetens the deal with their personalized partner perks!"</blockquote>
         <figcaption class="who"><span class="avatar">KG</span><div><b>Kelly Gonsalves</b><span>QuickBooks Advanced Certified ProAdvisor, Founder of TotallyBooked</span></div></figcaption>
       </figure>
@@ -800,66 +757,65 @@
   </div>
 </section>
 
-<!-- ================= CUSTOMER STORIES ================= -->
-<section class="s" id="stories">
+<!-- ================= STORIES ================= -->
+<section class="s s-band" id="stories">
   <div class="wrap">
-    <div class="s-head">
-      <p class="kicker">Customer stories</p>
+    <div class="s-head reveal" style="margin-bottom:28px">
+      <span class="label">Customer stories</span>
       <h2>What changed for our customers</h2>
     </div>
-    <div class="tabs" role="tablist" aria-label="Customer stories">
-      <button class="tab" role="tab" aria-selected="true" data-story="s1">Ecommerce</button>
-      <button class="tab" role="tab" aria-selected="false" data-story="s2">SaaS</button>
-      <button class="tab" role="tab" aria-selected="false" data-story="s3">Accounting firm</button>
-    </div>
-
+    <div class="tabs reveal"><div class="seg" role="tablist" aria-label="Customer stories">
+      <button type="button" role="tab" aria-pressed="true" data-story="s1">Ecommerce</button>
+      <button type="button" role="tab" aria-pressed="false" data-story="s2">SaaS</button>
+      <button type="button" role="tab" aria-pressed="false" data-story="s3">Accounting firm</button>
+    </div></div>
     <div class="story on" id="s1">
-      <div>
+      <div class="card q">
         <blockquote>"Instead of a bookkeeper spending 40 hours a month manually reviewing thousands of transactions each month—clicking into each one, checking metadata, and categorizing it—Synder does it all automatically, the moment the charge happens. Which means we save 480 hours and almost $24K yearly."</blockquote>
         <div class="who"><span class="avatar">JM</span><div><b>Justin McKelvey</b><span>Head of Product at PlayYourCourt</span></div></div>
-        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
+        <p style="margin-top:20px"><a class="link" href="#">Read the full story <svg class="i"><use href="#i-arrow"/></svg></a></p>
       </div>
       <div class="stats">
-        <div class="stat"><b>40 hours a month</b><span>saved on transaction categorization (480+ a year)</span></div>
-        <div class="stat"><b>$24K+ a year</b><span>saved on bookkeeping services</span></div>
-        <div class="stat"><b>Stripe → QuickBooks</b><span>connected with no manual entry</span></div>
+        <div class="stat card"><b>40 hours a month</b><span>saved on transaction categorization (480+ a year)</span></div>
+        <div class="stat card"><b>$24K+ a year</b><span>saved on bookkeeping services</span></div>
+        <div class="stat card"><b>Stripe → QuickBooks</b><span>connected with no manual entry</span></div>
       </div>
     </div>
-
     <div class="story" id="s2">
-      <div>
+      <div class="card q">
         <blockquote>"Synder drastically speeds up the process of reconciliation and eliminates the need to manually check massive transaction files. It now takes me about 40 minutes to finish and review a month's data, whereas manually, it would have taken at least two days."</blockquote>
         <div class="who"><span class="avatar">OS</span><div><b>Olena Svoiak</b><span>Financial Manager at Stape</span></div></div>
-        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
+        <p style="margin-top:20px"><a class="link" href="#">Read the full story <svg class="i"><use href="#i-arrow"/></svg></a></p>
       </div>
       <div class="stats">
-        <div class="stat"><b>15 hours a month</b><span>saved reviewing month-end data (180 a year)</span></div>
-        <div class="stat"><b>95% less time</b><span>spent on manual reconciliation</span></div>
-        <div class="stat"><b>40 minutes</b><span>to review a month's data, down from at least two days</span></div>
+        <div class="stat card"><b>15 hours a month</b><span>saved reviewing month-end data (180 a year)</span></div>
+        <div class="stat card"><b>95% less time</b><span>spent on manual reconciliation</span></div>
+        <div class="stat card"><b>40 minutes</b><span>to review a month's data, down from at least two days</span></div>
+      </div>
+    </div>
+    <div class="story" id="s3">
+      <div class="card q">
+        <blockquote>"Since integrating Synder, Decimal has streamlined workflows, reduced reconciliation time by over 50%, and saved 6-8 hours per client each month, enabling the team to focus on strategic advisory services and client growth."</blockquote>
+        <div class="who"><span class="avatar">KM</span><div><b>Kristin Miller</b><span>Team Lead at Decimal</span></div></div>
+        <p style="margin-top:20px"><a class="link" href="#">Read the full story <svg class="i"><use href="#i-arrow"/></svg></a></p>
+      </div>
+      <div class="stats">
+        <div class="stat card"><b>140 hours a month</b><span>saved on month-end close, across 20 clients</span></div>
+        <div class="stat card"><b>50%+ less time</b><span>spent on reconciliation</span></div>
+        <div class="stat card"><b>9 platforms</b><span>synced, including Stripe, PayPal, Shopify, Amazon and QuickBooks</span></div>
       </div>
     </div>
 
-    <div class="story" id="s3">
-      <div>
-        <blockquote>"Since integrating Synder, Decimal has streamlined workflows, reduced reconciliation time by over 50%, and saved 6-8 hours per client each month, enabling the team to focus on strategic advisory services and client growth."</blockquote>
-        <div class="who"><span class="avatar">KM</span><div><b>Kristin Miller</b><span>Team Lead at Decimal</span></div></div>
-        <p style="margin-top:20px"><a class="link-arrow" href="#">Read the full story</a></p>
-      </div>
-      <div class="stats">
-        <div class="stat"><b>140 hours a month</b><span>saved on month-end close, across 20 clients</span></div>
-        <div class="stat"><b>50%+ less time</b><span>spent on reconciliation</span></div>
-        <div class="stat"><b>9 platforms</b><span>synced, including Stripe, PayPal, Shopify, Amazon and QuickBooks</span></div>
-      </div>
-    </div>
-    <p class="unit-note">Hours are shown per month for every story, converted from the yearly figures where needed.</p>
+    <p class="unit-note">Hours are shown per month for every story, converted from yearly figures where needed.</p>
   </div>
 </section>
 
-<!-- ================= CLOSING CTA ================= -->
+<!-- ================= CLOSING (dark band) ================= -->
 <section class="closing" id="demo">
-  <div class="wrap">
+  <div class="wrap reveal">
+    <span class="label">Get started</span>
     <h2>Stop typing sales into your books</h2>
-    <p>See Synder with your own platforms in a short demo, or connect them yourself and try it free for 15 days.</p>
+    <p>See Synder with your own platforms in a short demo, or connect them yourself free for 15 days.</p>
     <div class="ctas" id="trial">
       <a class="btn btn-primary" href="#demo">Book a demo</a>
       <a class="btn btn-secondary" href="#trial">Start free trial</a>
@@ -868,7 +824,6 @@
 </section>
 </main>
 
-<!-- ================= FOOTER ================= -->
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -918,21 +873,12 @@
 </footer>
 
 <script>
-  // Feature tabs
-  document.querySelectorAll('[data-tab]').forEach(function(t){
-    t.addEventListener('click',function(){
-      document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected','false')});
-      document.querySelectorAll('#features .panel').forEach(function(p){p.classList.remove('on')});
-      t.setAttribute('aria-selected','true');
-      document.getElementById(t.dataset.tab).classList.add('on');
-    });
-  });
   // Story tabs
   document.querySelectorAll('[data-story]').forEach(function(t){
     t.addEventListener('click',function(){
-      document.querySelectorAll('[data-story]').forEach(function(x){x.setAttribute('aria-selected','false')});
+      document.querySelectorAll('[data-story]').forEach(function(x){x.setAttribute('aria-pressed','false')});
       document.querySelectorAll('.story').forEach(function(p){p.classList.remove('on')});
-      t.setAttribute('aria-selected','true');
+      t.setAttribute('aria-pressed','true');
       document.getElementById(t.dataset.story).classList.add('on');
     });
   });
@@ -947,6 +893,14 @@
       document.getElementById('modeNote').textContent=notes[b.dataset.mode];
     });
   });
+  // Fade-up on scroll (respects reduced motion)
+  var els=document.querySelectorAll('.reveal');
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window)){
+    els.forEach(function(e){e.classList.add('in')});
+  } else {
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+    els.forEach(function(e){io.observe(e)});
+  }
 </script>
 </body>
 </html>
