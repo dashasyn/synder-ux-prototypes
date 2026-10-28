@@ -796,7 +796,7 @@
     .page-panel.is-checklist {
       /* checklist page: no panel frame so steps don’t sit in a bordered box */
       background: transparent; border: none; border-radius: 0; padding: 0;
-      max-width: 720px;
+      max-width: 720px; margin: 0 auto;
     }
     .snooze-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -2841,9 +2841,6 @@
           : '';
         actions = '<div class="hs-step-actions">' + whereBtn +
           '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button></div>';
-      } else if (status === 'done' && !isCall) {
-        actions = '<div class="hs-step-actions">' +
-          '<button type="button" class="hs-undo" data-mark="' + c.id + '">Undo</button></div>';
       } else if (status === 'locked' && c.contactInfo) {
         contactBlock = checklistContactHtml();
       }
