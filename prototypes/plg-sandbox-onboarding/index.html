@@ -67,12 +67,12 @@
     .proto-bar {
       position: sticky; top: 0; z-index: 300;
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-      min-height: var(--proto-bar-h);
+      min-height: 44px;
       padding: 8px 16px;
       background: #111827; color: #F9FAFB;
     }
     .proto-bar .brand {
-      font-size: 13px; font-weight: 500; letter-spacing: .02em;
+      font-size: 14px; font-weight: 500; letter-spacing: .02em;
       opacity: .92; white-space: nowrap; margin-right: 4px;
     }
     .proto-bar .spacer { flex: 1; min-width: 8px; }
@@ -81,8 +81,8 @@
       flex-wrap: wrap;
     }
     .proto-label {
-      font-size: 11px; color: #9CA3AF; text-transform: uppercase;
-      letter-spacing: .04em; white-space: nowrap;
+      font-size: 14px; color: #9CA3AF;
+      white-space: nowrap;
     }
     .seg {
       display: inline-flex; background: rgba(255,255,255,.06);
@@ -90,24 +90,24 @@
     }
     .seg button {
       appearance: none; border: none; background: transparent;
-      color: #9CA3AF; font: inherit; font-size: 12px; font-weight: 500;
-      height: 26px; padding: 0 10px; border-radius: 4px; cursor: pointer;
+      color: #9CA3AF; font: inherit; font-size: 14px; font-weight: 500;
+      height: 30px; padding: 0 10px; border-radius: 4px; cursor: pointer;
       white-space: nowrap;
     }
     .seg button:hover { color: #fff; background: rgba(255,255,255,.08); }
     .seg button.active { background: #0053CC; color: #fff; }
     .proto-reset {
-      font-size: 12px; color: #93B4F0; text-decoration: none;
+      font-size: 14px; color: #93B4F0; text-decoration: none;
       cursor: pointer; white-space: nowrap; padding: 4px 6px;
     }
     .proto-reset:hover { color: #fff; text-decoration: underline; }
     .proto-chip {
       display: none; align-items: center; gap: 6px;
-      font-size: 12px; color: #D1D5DB;
+      font-size: 14px; color: #D1D5DB;
     }
     .proto-chip.show { display: inline-flex; }
     .proto-chip select {
-      height: 26px; font-size: 12px; border-radius: 4px;
+      height: 30px; font-size: 14px; border-radius: 4px;
       border: 1px solid #374151; background: #1F2937; color: #F9FAFB;
       padding: 0 6px; font-family: inherit;
     }
@@ -1357,74 +1357,90 @@
     .ty-toggle input:checked + .ty-toggle-track { background: #0053CC; }
     .ty-toggle input:checked + .ty-toggle-track::before { transform: translateX(20px); }
 
-    /* ── Variant: Side sheet checklist ─────────────────── */
-    #seg-variant button { font-size: 14px; }
-    .cl-fab, .cl-sheet { display: none; }
+    /* ── Variant: Side sheet checklist (modal sheet + floating button) ── */
+    .cl-fab, .cl-sheet, .cl-scrim { display: none; }
+    body[data-variant="sheet"] .sidebar-health,
+    body[data-variant="sheet"] #ty-goto-checklist { display: none !important; }
     body[data-variant="sheet"][data-view="app"] .cl-fab,
-    body[data-variant="sheet"][data-view="thankyou"] .cl-fab { display: flex; }
+    body[data-variant="sheet"][data-view="thankyou"] .cl-fab { display: block; }
     body[data-variant="sheet"].sheet-open .cl-fab { display: none !important; }
     body[data-variant="sheet"].sheet-open[data-view="app"] .cl-sheet,
     body[data-variant="sheet"].sheet-open[data-view="thankyou"] .cl-sheet { display: flex; }
-    body[data-variant="sheet"].sheet-open .app-main,
-    body[data-variant="sheet"].sheet-open .ty-main { padding-right: 404px; }
+    body[data-variant="sheet"].sheet-open[data-view="app"] .cl-scrim,
+    body[data-variant="sheet"].sheet-open[data-view="thankyou"] .cl-scrim { display: block; }
+    /* Keep the last rows clear of the floating button */
+    body[data-variant="sheet"] .app-main,
+    body[data-variant="sheet"] .ty-main { padding-bottom: 160px; }
+    body[data-variant="sheet"].sheet-open { overflow: hidden; }
+
     .cl-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 250;
-      width: 280px; box-sizing: border-box;
-      appearance: none; font: inherit; text-align: left; cursor: pointer;
-      align-items: center; gap: 12px;
-      background: #fff; border: 1px solid #9DBCF0; border-radius: 8px;
-      padding: 12px 14px; box-shadow: 0 6px 20px rgba(26, 27, 36, .16);
-      color: #1A1B24;
+      width: 320px; max-width: calc(100vw - 48px); box-sizing: border-box;
+      appearance: none; border: none; font: inherit; text-align: left; cursor: pointer;
+      background: #0B1F44; color: #FFFFFF;
+      border-radius: 12px; padding: 14px 16px;
+      box-shadow: 0 10px 28px rgba(11, 31, 68, .35), 0 2px 6px rgba(11, 31, 68, .25);
+      transition: background .15s ease, transform .15s ease;
     }
-    .cl-fab:hover { border-color: #0053CC; background: #E6F0FF; }
-    .cl-fab-ico {
-      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-      background: #D6EBFF; color: #0053CC;
-      display: flex; align-items: center; justify-content: center;
+    .cl-fab:hover { background: #12306A; transform: translateY(-1px); }
+    .cl-fab:focus-visible { outline: 2px solid #9DBCF0; outline-offset: 2px; }
+    .cl-fab-top {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
     }
-    .cl-fab-ico .material-icons-round { font-size: 20px; }
-    .cl-fab.is-complete .cl-fab-ico { background: #ECFDDC; color: #1F8940; }
-    .cl-fab-body { flex: 1; min-width: 0; }
-    .cl-fab-title { font-size: 14px; font-weight: 500; line-height: 20px; }
-    .cl-fab-meta { font-size: 14px; line-height: 20px; color: #6B778C; margin-bottom: 6px; }
-    .cl-fab .hs-bar { margin-bottom: 0; }
-    .cl-fab-chev { color: #0053CC; font-size: 20px; }
-    .cl-sheet {
-      position: fixed; right: 0; z-index: 240;
-      top: calc(var(--proto-bar-h) + 56px); bottom: 0;
-      width: 380px; box-sizing: border-box;
-      flex-direction: column;
-      background: #fff; border-left: 1px solid #DFE4EC;
-      box-shadow: -6px 0 20px rgba(26, 27, 36, .08);
+    .cl-fab-top .material-icons-round { font-size: 20px; color: #9DBCF0; }
+    .cl-fab.is-complete .cl-fab-top .material-icons-round { color: #7FD49A; }
+    .cl-fab-title { font-size: 16px; font-weight: 500; line-height: 24px; flex: 1; }
+    .cl-fab-count { font-size: 14px; font-weight: 500; line-height: 20px; color: #D6EBFF; }
+    .cl-fab-bar {
+      display: block; height: 6px; border-radius: 3px; overflow: hidden;
+      background: rgba(255, 255, 255, .22); margin-bottom: 10px;
     }
-    .cl-sheet-head {
-      padding: 16px 20px 12px; border-bottom: 1px solid #DFE4EC; flex-shrink: 0;
+    .cl-fab-bar > span {
+      display: block; height: 100%; background: #9DBCF0; border-radius: 3px;
+      transition: width .25s ease;
     }
-    .cl-sheet-title-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      margin-bottom: 8px;
-    }
-    .cl-sheet-title-row h2 {
-      margin: 0; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24;
+    .cl-fab.is-complete .cl-fab-bar > span { background: #7FD49A; }
+    .cl-fab-next {
       display: flex; align-items: center; gap: 6px;
+      font-size: 14px; line-height: 20px; color: #FFFFFF;
     }
-    .cl-sheet-title-row h2 .material-icons-round { font-size: 20px; color: #0053CC; }
+    .cl-fab-next .lbl { color: #9DBCF0; flex-shrink: 0; }
+    .cl-fab-next .txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cl-fab-next .material-icons-round { font-size: 18px; margin-left: auto; color: #9DBCF0; }
+    .cl-fab-where { display: block; font-size: 14px; line-height: 20px; color: #B9C6DD; margin-top: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .cl-scrim {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      top: var(--proto-bar-live, var(--proto-bar-h));
+      z-index: 260; background: rgba(26, 27, 36, .35);
+    }
+    .cl-sheet {
+      position: fixed; right: 0; bottom: 0;
+      top: var(--proto-bar-live, var(--proto-bar-h));
+      z-index: 270; width: min(660px, 92vw); box-sizing: border-box;
+      flex-direction: column; background: #FFFFFF;
+      box-shadow: -8px 0 24px rgba(26, 27, 36, .18);
+    }
     .cl-sheet-x {
+      position: absolute; top: 28px; right: 28px;
       appearance: none; border: none; background: none; cursor: pointer;
-      width: 32px; height: 32px; border-radius: 4px; color: #3D4A5C;
+      width: 40px; height: 40px; border-radius: 4px; color: #6B778C;
       display: inline-flex; align-items: center; justify-content: center;
     }
-    .cl-sheet-x:hover { background: #F2F6FC; }
-    .cl-sheet-head .hs-meta { font-size: 14px; }
+    .cl-sheet-x:hover { background: #F2F6FC; color: #1A1B24; }
+    .cl-sheet-x .material-icons-round { font-size: 24px; }
+    .cl-sheet-head { padding: 40px 40px 20px; flex-shrink: 0; }
+    .cl-sheet-head h2 {
+      margin: 0 48px 6px 0; font-size: 32px; font-weight: 400; line-height: 40px; color: #1A1B24;
+    }
+    .cl-sheet-sub { margin: 0 0 16px; font-size: 16px; line-height: 24px; color: #6B778C; }
     .cl-sheet-head .hs-bar { margin-bottom: 0; }
-    .cl-sheet-hint { font-size: 14px; line-height: 20px; color: #6B778C; margin: 8px 0 0; }
-    .cl-sheet-body { flex: 1; overflow-y: auto; padding: 16px 20px 24px; }
-    .cl-sheet-body .hs-step-card { padding: 12px 14px; }
+    .cl-sheet-body { flex: 1; overflow-y: auto; padding: 4px 40px 40px; }
     .cl-sheet-body .hs-step-card.is-done .hs-step-desc,
     .cl-sheet-body .hs-step-card.is-pending .hs-step-desc { display: none; }
     .cl-sheet-body .hs-step-card.is-done .hs-step-title-row,
     .cl-sheet-body .hs-step-card.is-pending .hs-step-title-row { margin-bottom: 0; }
-    .cl-sheet-body .hs-step-actions { gap: 12px; }
     .cl-sheet-done {
       display: none; gap: 8px; align-items: flex-start;
       background: #ECFDDC; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
@@ -1931,25 +1947,24 @@
     </div>
   </div>
 
-  <!-- Variant B: floating Setup checklist block + non-modal side sheet -->
+  <!-- Variant B: floating Setup checklist button + modal side sheet -->
   <button type="button" class="cl-fab" id="cl-fab" aria-label="Open Setup checklist">
-    <span class="cl-fab-ico"><span class="material-icons-round" id="cl-fab-icon">checklist</span></span>
-    <span class="cl-fab-body">
-      <span class="cl-fab-title" style="display:block">Setup checklist</span>
-      <span class="cl-fab-meta hs-meta-chip" style="display:block">0 / 6 complete</span>
-      <span class="hs-bar hs-bar-chip" style="display:block"><span style="width:0%"></span></span>
+    <span class="cl-fab-top">
+      <span class="material-icons-round" id="cl-fab-icon">checklist</span>
+      <span class="cl-fab-title">Setup checklist</span>
+      <span class="cl-fab-count" id="cl-fab-count">0 / 6</span>
     </span>
-    <span class="material-icons-round cl-fab-chev">chevron_left</span>
+    <span class="cl-fab-bar" id="cl-fab-bar"><span style="width:0%"></span></span>
+    <span class="cl-fab-next"><span class="lbl" id="cl-fab-lbl">Next:</span><span class="txt" id="cl-fab-next">—</span><span class="material-icons-round">open_in_full</span></span>
+    <span class="cl-fab-where" id="cl-fab-where"></span>
   </button>
-  <aside class="cl-sheet" id="cl-sheet" aria-label="Setup checklist">
+  <div class="cl-scrim" id="cl-scrim" aria-hidden="true"></div>
+  <aside class="cl-sheet" id="cl-sheet" role="dialog" aria-modal="true" aria-labelledby="cl-sheet-title">
+    <button type="button" class="cl-sheet-x" id="cl-sheet-x" aria-label="Close Setup checklist"><span class="material-icons-round">close</span></button>
     <div class="cl-sheet-head">
-      <div class="cl-sheet-title-row">
-        <h2><span class="material-icons-round">checklist</span> Setup checklist</h2>
-        <button type="button" class="cl-sheet-x" id="cl-sheet-x" aria-label="Close Setup checklist"><span class="material-icons-round">close</span></button>
-      </div>
-      <div class="hs-meta hs-meta-chip">0 / 6 complete</div>
-      <div class="hs-bar hs-bar-chip"><span style="width:0%"></span></div>
-      <p class="cl-sheet-hint">Stays open while you work in Synder.</p>
+      <h2 id="cl-sheet-title">Setup checklist</h2>
+      <p class="cl-sheet-sub" id="cl-sheet-sub">0 of 6 steps done · your Synder specialist activates the rest on the call</p>
+      <div class="hs-bar" id="cl-sheet-bar"><span style="width:0%"></span></div>
     </div>
     <div class="cl-sheet-body">
       <div class="cl-sheet-done" id="cl-sheet-done" role="status">
@@ -3008,19 +3023,45 @@
     const fab = $('#cl-fab');
     if (fab) {
       fab.classList.toggle('is-complete', complete);
-      const ic = $('#cl-fab-icon');
-      if (ic) ic.textContent = complete ? 'check_circle' : 'checklist';
+      $('#cl-fab-icon').textContent = complete ? 'check_circle' : 'checklist';
+      $('#cl-fab-count').textContent = model.count + ' / ' + model.total;
+      $('#cl-fab-bar').firstElementChild.style.width = model.pct + '%';
+      const cur = model.currentStep;
+      $('#cl-fab-lbl').textContent = cur ? 'Next:' : 'Done:';
+      $('#cl-fab-next').textContent = cur ? cur.title : 'Ready for your setup call';
+      $('#cl-fab-where').textContent = cur && cur.whereHint ? 'Where: ' + cur.whereHint : '';
+      $('#cl-fab-where').style.display = cur && cur.whereHint ? '' : 'none';
     }
+    const sub = $('#cl-sheet-sub');
+    if (sub) sub.textContent = model.count + ' of ' + model.total + ' steps done · your Synder specialist activates the rest on the call';
+    paintScoreMeta(document.createElement('div'), $('#cl-sheet-bar'), model);
     const steps = $('#cl-sheet-steps');
     if (steps) steps.innerHTML = model.stepsHtml;
     const done = $('#cl-sheet-done');
     if (done) done.classList.toggle('show', !!model.selfAllDone);
   }
 
+  // Sheet + scrim start below the dark proto bar; also keeps sticky product chrome aligned when the bar wraps.
+  function syncProtoBarHeight() {
+    const bar = $('.proto-bar');
+    if (!bar) return;
+    const h = Math.round(bar.getBoundingClientRect().height) || 44;
+    document.documentElement.style.setProperty('--proto-bar-live', h + 'px');
+    document.documentElement.style.setProperty('--proto-bar-h', h + 'px');
+  }
+  syncProtoBarHeight();
+  if (window.ResizeObserver) new ResizeObserver(syncProtoBarHeight).observe($('.proto-bar'));
+  window.addEventListener('resize', syncProtoBarHeight);
+
   function setSheetOpen(open) {
     state.sheetOpen = !!open && state.variant === 'sheet';
     document.body.classList.toggle('sheet-open', state.sheetOpen);
-    if (state.sheetOpen) renderSheet();
+    if (state.sheetOpen) {
+      syncProtoBarHeight();
+      renderSheet();
+      const x = $('#cl-sheet-x');
+      if (x) x.focus();
+    }
   }
 
   function syncVariantUrl() {
@@ -3041,7 +3082,6 @@
       if (state.appPage === 'setup-checklist') {
         state.appPage = 'dashboard';
         if (state.view === 'app') renderApp();
-        setSheetOpen(true);
       }
     } else {
       setSheetOpen(false);
@@ -3380,8 +3420,7 @@
 
   function renderApp() {
     if (state.variant === 'sheet' && state.appPage === 'setup-checklist') {
-      state.appPage = 'dashboard';
-      setSheetOpen(true);
+      state.appPage = 'dashboard'; // no checklist page in Side sheet variant
     }
     const snoozeBanner = $('#snooze-banner');
     if (snoozeBanner) snoozeBanner.classList.toggle('show', !!state.surveySnoozed);
@@ -3406,6 +3445,14 @@
   });
   $('#cl-fab').addEventListener('click', () => setSheetOpen(true));
   $('#cl-sheet-x').addEventListener('click', () => setSheetOpen(false));
+  $('#cl-scrim').addEventListener('click', () => setSheetOpen(false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.sheetOpen) {
+      setSheetOpen(false);
+      const fab = $('#cl-fab');
+      if (fab) fab.focus();
+    }
+  });
 
   $('#seg-sync').addEventListener('click', e => {
     const btn = e.target.closest('button');
@@ -3536,7 +3583,10 @@
         setTimeout(() => { whereBtn.innerHTML = prev; }, 800);
         return;
       }
-      if (whereBtn.dataset.where) navigateWhere(whereBtn.dataset.where);
+      if (whereBtn.dataset.where) {
+        if (whereBtn.closest('#cl-sheet')) setSheetOpen(false); // modal sheet: close, then go
+        navigateWhere(whereBtn.dataset.where);
+      }
       return;
     }
     const talk = e.target.closest('#banner-talk');
