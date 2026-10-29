@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v40 -->
+<!-- period-lock v41 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v40" />
+<meta name="prototype-version" content="v41" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -277,6 +277,8 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   {id:'ch_1Q9kSeats',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice payment 26EC8A01-0109',type:'Invoice payment',amount:'480.00 USD',date:'2026-09-30',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 00:10',status:'warn',reason:'moved',objs:[['Invoice','in_1Q9kSeats'],['Payment','ch_1Q9kSeats']]},
   {id:'je_rr_shop_sep',integ:'shopify',info:'Revenue recognition · JE-2006',type:'Journal entry',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 06:12',status:'canceled',reason:'canceled',part:'journal entry',revrec:1,fdd:1},
   {id:'ch_1R7cTS08',integ:'shopify',info:'Northwind LLC · Invoice payment SH-4471-08',type:'Invoice payment',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-06',syncedAt:'2026-10-06 06:00',status:'canceled',reason:'canceled',part:'payment',fdd:1},
+  {id:'sq_pay_0915',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_8Kq2',type:'Payment',amount:'18.40 USD',date:'2026-09-15',webhook:'2026-09-22',syncedAt:'2026-09-22 08:14',status:'canceled',reason:'canceled'},
+  {id:'sq_pay_1014',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_9Rt7',type:'Payment',amount:'42.00 USD',date:'2026-10-14',webhook:'2026-10-14',syncedAt:'2026-10-14 16:02',status:'synced'},
   {id:'in_sub_jan',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice 1040',type:'Invoice',amount:'1,200.00 USD',date:'2026-01-01',webhook:'2026-01-01',syncedAt:'2026-01-01 00:05',status:'synced'}],
  activity:[
   {at:'2026-10-06 14:20',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'mzkt.by (Stripe): Soft lock, every month on day 5, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
@@ -291,6 +293,7 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   {at:'2026-08-30 08:15',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Updated timezone',type:'Integration',details:'mzkt.by (Stripe): timezone Europe/Vilnius'},
   {at:'2026-08-02 16:40',org:'pt',who:'ignat@synder.com',it:'User',action:'Added',type:'User management',details:'Added user anna@synder.com'},
   {at:'2026-10-02 12:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Soft lock, fixed date, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
+  {at:'2026-09-20 10:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Hard lock, fixed date, locked through Sep 15, 2026'},
   {at:'2026-09-15 10:30',org:'sm',who:'Support',it:'Support',action:'Entered',type:'User management',details:'Entered organization Green Leaf (Summary)'},
   {at:'2026-09-01 09:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Connected',type:'Integration',details:'Connected Green Leaf (Square)'}],
  products:[{id:'bread',name:'Bread',sku:'BR-01',cost:'1.20',price:'2.50'},{id:'croissant',name:'Croissant',sku:'CR-02',cost:'0.80',price:'1.90'},{id:'baguette',name:'Baguette',sku:'BG-03',cost:'0.95',price:'2.10'}]};
@@ -338,9 +341,9 @@ function nav(r){
  const oi=(o,av,n,t)=>`<a class="dropdown-item" onclick="event.stopPropagation();switchOrg('${o}')"><span class="sb-av">${av}</span><span class="oi"><span>${n}</span><span class="cell-subtext">${t}</span></span></a>`;
  let h=`<div class="sb-org" onclick="S.orgOpen=!S.orgOpen;render()"><span class="sb-av">${pt?'PT':'GL'}</span><span class="on">${org}</span><span class="mi">expand_more</span>${S.orgOpen?`<div class="dropdown-menu orgmenu">${oi('pt','PT','Per transaction test','Per Transaction')}${oi('sm','GL','Green Leaf (Summary)','Summary mode')}</div>`:''}</div>`;
  h+=it('dashboard','Dashboard','#dashboard',r==='dashboard');
- if(pt){h+=it('swap_horiz','Transactions',null,0,NEW+up)+'<div class="sb-subs">'+sb('Transactions list','#transactions',['transactions','sync'].includes(r))+sb('Import activity log','#imports',r==='imports')+sb('Transaction reconciliation','#recon',r==='recon',NEW)+sb('Period lock','#lock',['lock','edit'].includes(r))+'</div>'
+ if(pt){h+=it('swap_horiz','Transactions',null,0,NEW+up)+'<div class="sb-subs">'+sb('Transactions list','#transactions',['transactions','sync'].includes(r)&&S.org==='pt')+sb('Import activity log','#imports',r==='imports')+sb('Transaction reconciliation','#recon',r==='recon',NEW)+sb('Period lock','#lock',['lock','edit'].includes(r))+'</div>'
   h+=it('account_tree','Smart rules',null,0,cv)+it('description','Invoicing',null,0,cv)}
- else{h+=it('map','Mapping',null,0,cv)+it('summarize','Summaries',null,0,up)+'<div class="sb-subs">'+sb('Summaries list','#summaries',['summaries','summary'].includes(r))+sb('Register')+sb('Transactions list')+sb('Import activity log','#imports',r==='imports')+'</div>'
+ else{h+=it('map','Mapping',null,0,cv)+it('summarize','Summaries',null,0,up)+'<div class="sb-subs">'+sb('Summaries list','#summaries',['summaries','summary'].includes(r))+sb('Register')+sb('Transactions list','#smtx',r==='smtx'||r==='sync')+sb('Import activity log','#imports',r==='imports')+'</div>'
   h+=it('balance','Reconciliation')+it('lock','Period lock','#lock',['lock','edit'].includes(r))+it('shopping_cart','Products and services','#products',['products','product'].includes(r))}
  h+=it('bar_chart','Analytics',null,0,cv);
  if(pt)h+=it('trending_up','Revenue recognition',null,0,up)+'<div class="sb-subs">'+sb('Subscriptions','#subs',['subs','sub'].includes(r),'','event_repeat')+sb('One-time invoices','#rrinv',r==='rrinv','','receipt')+sb('Reports','#reports',['reports','balances'].includes(r),'','summarize')+sb('Configuration','#rrconfig',r==='rrconfig','','settings_applications')+'</div>';
@@ -361,7 +364,7 @@ const LOGO={stripe:'<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden=
 function vList(){
  const rows=integs().map(c=>`<tr class="row-clickable" onclick="openEdit('${c.id}')"><td><span class="pl-int">${LOGO[c.id]||''}<span>${c.name}</span></span></td><td>${modeTxt(c)}</td><td>${c.on?fmt(lockOf(c)):'—'}</td><td>${nextAuto(c)}</td><td>${fmt(c.at)}${sub(c.by)}</td><td class="act"><button class="btn-text" onclick="event.stopPropagation();openEdit('${c.id}')">See details</button></td></tr>`);
  return pg(head('Period lock',"Protect periods you've closed or reconciled from changes by syncs. Set a lock per integration.",`<a class="btn btn-outlined" href="#activity?type=Period%20lock">View activity log</a>`),
-  S.org==='sm'?al('info','info',"Summary sync and rollback aren't locked."+(IT===2?' Product cost updates always use Hard lock.':'')):'',
+  S.org==='sm'?al('info','info',"Summary sync and rollback aren't locked."):'',
   table(['Integration','Mode','Locked through','Next auto-lock','Last changed',''],rows))}
 function openEdit(id){S.menu=null;S.draft=null;S.prefill=null;go('#edit?i='+id)}
 
@@ -378,7 +381,7 @@ function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.dra
 const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
 const dirty=()=>{if(!S.draft)return false;const c=S.integ[S.draft.id],cur={...c,moveTo:effMove(c)};return norm(S.draft)!==norm(cur)};
 const dL=d=>!d.on?null:d.schedule==='recurring'?recur(d.runDay).lock:d.date;
-function lockErr(d){if(!d.on||d.schedule!=='fixed')return'';if(!d.date)return'Pick a date.';if(d.date>=TODAY)return'Pick a date before today ('+fmt(TODAY)+').';return''}
+function lockErr(d){if(!d.on||d.schedule!=='fixed')return'';if(!d.date)return'Pick a date.';if(d.date>TODAY)return'Pick today ('+fmt(TODAY)+') or an earlier date.';return''}
 function validate(d){const e={};if(!d.on)return e;const L=dL(d),le=lockErr(d);if(le)e.date=le;
  if(d.mode==='soft'){if(!d.moveTo)e.move='Pick a date.';else if(!le&&L&&d.moveTo<=L)e.move='Pick a date after '+fmt(L)+'.'}
  return e}
@@ -394,7 +397,7 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
  const stop='onclick="event.stopPropagation()"';
  const moveIn=`<div class="plc-in" ${stop}><label for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}${warnEl(moveWarn(d,er))}</div>`;
  const recIn=`<div class="plc-sent" ${stop}>On day<select class="select" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>lock the previous month.</div>`;
- const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${addDays(TODAY,-1)}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
+ const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${TODAY}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
  let lines;
  if(off)lines=['Period lock is off for this integration. Turn it on to set mode, schedule, and dates.'];
  else{/* no edits: current state; edits: "When you save…"; a field with an error hides its part */
@@ -411,7 +414,7 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
 /* Move-to = day after the last VALID lock, until the user edits Move-to. An invalid Locked through never changes it. */
 function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='on'&&v){if(!d.mode||IT===1)d.mode=IT===1?'hard':'soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5}
- if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>=TODAY))d.date=recur(d.runDay).lock;
+ if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>TODAY))d.date=recur(d.runDay).lock;
  if(k==='moveTo')d._mvU=!!v;
  const L=dL(d);if(L&&!lockErr(d)){d._lv=L;if(!d._mvU||!d.moveTo)d.moveTo=addDays(L,1)}
  render()}
@@ -460,7 +463,7 @@ const vTabs=(ls,on)=>`<div class="rr-tabs flush" role="tablist">${ls.map((l,i)=>
 const cbx='<input type="checkbox" class="checkbox" aria-label="Select">';
 const disItem=(l,why)=>`<div class="dropdown-item dis" aria-disabled="true">${l}${why?sub(why):''}</div>`;
 function vTxns(q){const st=q.get('status')||'all',rs=q.get('reason');
- const rows=S.txns.filter(t=>(st==='all'||t.status===st)&&(!rs||t.reason===rs));
+ const rows=S.txns.filter(t=>S.integ[t.integ].org==='pt'&&(st==='all'||t.status===st)&&(!rs||t.reason===rs));
  const opts=[['all','All statuses'],['synced','Synced'],['warn','Synced with warnings'],['canceled','Canceled'],['skipped','Skipped']].filter(o=>IT===2||o[0]!=='warn');
  const body=rows.map(t=>{const rsb=rsBlock(t);
   const items=(t.status==='synced'?disItem('Sync'):rsb?disItem('Sync',rsb):`<a class="dropdown-item" onclick="resync('${t.id}')">Sync</a>`)
@@ -473,6 +476,12 @@ function vTxns(q){const st=q.get('status')||'all',rs=q.get('reason');
  const bar=`<div><div class="tx-bar"><span class="rel"><button class="btn" onclick="event.stopPropagation();S.menu=S.menu==='act'?null:'act';render()">Actions <span class="mi">expand_more</span></button>${am}</span><button class="btn btn-outlined">Select all transactions</button><button class="btn btn-outlined">Reset all filters</button><input class="input" type="search" placeholder="Search" aria-label="Search"><select class="select" aria-label="Sync status">${opts.map(([v,l])=>`<option ${st===v?'selected':''}>${l}</option>`).join('')}</select><button class="btn btn-outlined" onclick="impDlg()">Import historical data</button><button class="btn btn-success" onclick="${mock}">See transactions in books</button><span style="flex:1"></span><button class="btn" onclick="go('#recon')">Run reconciliation</button></div><a class="text-link tx-adv"><span class="mi">chevron_right</span>Advanced search</a></div>`;
  return pg(head('Transactions list','Transactions imported from connected integrations and their sync status to your books.'),filt,bar,
   rows.length?table(['<input type="checkbox" class="checkbox" aria-label="Select all">','Transaction info','Transaction type','>Amount','Transaction date','Sync status','Action'],body):'<div class="card empty-state"><div class="empty-state-title">No transactions match</div><p class="empty-state-desc" style="margin-bottom:0">Try a different status.</p></div>')}
+/* v41: Summary sync Transactions list (FDD edge case 15: no Sync Issues on SM; users find lock cancels here by status, reason and the status filter). Filters visual only. No Sync again / Rollback (Q19 open). */
+function vSmTx(){const rows=S.txns.filter(t=>S.integ[t.integ].org==='sm');
+ const opts=['All statuses','Synced'].concat(IT===2?['Synced with warnings']:[]).concat(['Canceled','Skipped']);
+ const bar=`<div><div class="tx-bar"><button class="btn btn-outlined">Select all transactions</button><button class="btn btn-outlined">Reset all filters</button><input class="input" type="search" placeholder="Search" aria-label="Search"><select class="select" aria-label="Sync status">${opts.map(o=>`<option>${o}</option>`).join('')}</select><button class="btn btn-outlined" onclick="impDlg()">Import historical data</button></div><a class="text-link tx-adv"><span class="mi">chevron_right</span>Advanced search</a></div>`;
+ return pg(head('Transactions list','Transactions imported from connected integrations and their sync status to your datasource.'),bar,
+  table(['<input type="checkbox" class="checkbox" aria-label="Select all">','Transaction info','Transaction type','>Amount','Transaction date','Sync status','Action'],rows.map(t=>`<tr><td class="cb">${cbx}</td><td><a class="text-link" href="#sync?id=${t.id}">${t.info}</a></td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.posted||t.date)} ${(SX[t.id]||{}).time||'00:00'}</td><td><div class="tx-st">${chip(t)}<a class="text-link" href="#sync?id=${t.id}">Explain</a></div></td><td class="act"><a class="text-link" href="#sync?id=${t.id}">See details</a></td></tr>`)))}
 function filterRows(v){v=v.toLowerCase();let n=0;document.querySelectorAll('#app tbody tr').forEach(tr=>{const m=tr.cells[0].textContent.toLowerCase().includes(v);tr.style.display=m?'':'none';n+=m});const e=document.getElementById('noMatch');if(e)e.style.display=n?'none':''}
 /* v40 (FDD): the rollback always runs; if the date Synder received it is in the locked period, the status becomes Rollback canceled */
 function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);
@@ -503,6 +512,8 @@ const SX={ch_buddy:{sid:'812680',tid:'ch_3Q9kBuddy',time:'14:22',logs:[['Invoice
  je_rr_sep:{sid:'812900',tid:'rr_sub_1Q9kAnnual_2026_09',time:'00:00',objs:[['Journal entry','JE-1067']]},
  je_rr_shop_sep:{sid:'812905',tid:'rr_sub_1R7cTeamSeatsNorthwind_2026_09',time:'00:00',logs:[]},
  ch_1R7cTS08:{sid:'812910',tid:'ch_1R7cTS08',time:'00:00',logs:[]},
+ sq_pay_0915:{sid:'913204',tid:'pmt_8Kq2',time:'11:20'},
+ sq_pay_1014:{sid:'913377',tid:'pmt_9Rt7',time:'15:58',logs:[['Datasource record','pmt_9Rt7','Record was created.']]},
  in_sub_jan:{sid:'801100',tid:'in_1Q9kAnnual',time:'00:00',logs:[['Invoice','1040','Invoice was created.'],['Payment','ch_1Q9kAnnual','Payment was created.']]}};
 const al=(k,ic,body)=>`<div class="alert alert-${k}"><span class="mi">${ic}</span><div>${body}</div></div>`;
 const orgName=()=>S.org==='pt'?'Per transaction test':'Green Leaf (Summary)';
@@ -519,7 +530,8 @@ function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.inte
   notice=al('info','info',`Soft lock moved ${n} object${n>1?'s':''} to ${fmt(t.posted)}: ${n>1?'their dates are':'its date is'} in the locked period${thr}.${link}`);
   logs=o.map(([ty,inf])=>[ty,inf,`${ty} was created. Date changed from ${short(t.date)} to ${short(t.posted)} by period lock.${t.fx?' The exchange rate for '+fmt(t.date)+' (original date) was used.':''}`])}
  const tm=x.time||'00:00',st=t.syncedAt;
- const bar=`<div class="si-bar"><a class="btn btn-outlined" href="#transactions">← Transactions list</a><button class="btn btn-outlined" onclick="${mock}">Syncs history</button><button class="btn btn-outlined" onclick="rollback('${t.id}')">Rollback sync</button><span style="flex:1"></span><button class="btn btn-outlined" onclick="${mock}">How to reconcile</button></div>`;
+ const smx=c.org==='sm';
+ const bar=`<div class="si-bar"><a class="btn btn-outlined" href="${smx?'#smtx':'#transactions'}">← Transactions list</a><button class="btn btn-outlined" onclick="${mock}">Syncs history</button>${smx?'':`<button class="btn btn-outlined" onclick="rollback('${t.id}')">Rollback sync</button>`}<span style="flex:1"></span><button class="btn btn-outlined" onclick="${mock}">How to reconcile</button></div>`;
  const kv=[['Sync ID',x.sid||'—'],[c.pp+' company',c.name],['QuickBooks Online company',`${orgName()} <a class="text-link" style="margin-left:8px" onclick="${mock}">View connected Bank Register in QuickBooks</a>`],['Status',chip(t)],['Sync Start Date',fmt(st.slice(0,10))+' '+st.slice(11)],['Sync Date Finished',fmt(st.slice(0,10))+' '+st.slice(11)],['Amount',t.amount],['Transaction date',`${fmt(t.date)} ${tm} (${c.tz})`],['Transaction ID',`<a class="text-link" onclick="${mock}">${x.tid||t.id}</a>`],['Date Synder received it',fmt(t.webhook)]];
  const kvT=`<div class="card tcard"><table class="synder-table si-kv"><tbody>${kv.map(([k,v])=>`<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`;
  const cols=['','Object type','Object info','Object','Message'],yRow=m=>`<tr class="si-cx"><td class="cb"><span class="mi si-x">chevron_right</span></td><td>—</td><td>—</td><td>—</td><td>${m}</td></tr>`,lRow=l=>`<tr><td class="cb"><span class="mi si-x">chevron_right</span></td><td>${l[0]}</td><td>${l[1]}</td><td>${qbLink}</td><td>${l[2]}</td></tr>`;
@@ -692,19 +704,20 @@ function vActivity(q){if(q.get('type')&&S.afHash!==location.hash){S.af={...AF0,t
 /* ---------- dashboard ---------- */
 const LOCK_MSG='Sync canceled by period lock. Part of the transaction is dated in the locked period.';
 /* Synchronization Issues: grouped by status + exact message (production Dashboard tab) */
-function dashIssues(){if(S.org!=='pt')return[];const lk=S.txns.filter(t=>t.reason==='canceled'),ot=S.txns.filter(t=>t.reason==='other');
+function dashIssues(){if(S.org!=='pt')return[];const ptx=S.txns.filter(t=>S.integ[t.integ].org==='pt'),lk=ptx.filter(t=>t.reason==='canceled'),ot=ptx.filter(t=>t.reason==='other');
  return[lk.length&&{qty:lk.length,st:'canceled',msg:LOCK_MSG,last:lk.map(t=>t.syncedAt.slice(0,10)).sort().pop(),href:'#transactions?status=canceled&reason=canceled'},
   {qty:1,st:'failed',msg:'Account has not been found for product mapping.',last:'2026-10-09'},
   ot.length&&{qty:ot.length,st:'canceled',msg:'No matching open invoice found.',last:ot.map(t=>t.syncedAt.slice(0,10)).sort().pop(),href:'#transactions?status=canceled&reason=other'},
   {qty:1,st:'rbfailed',msg:'Invoice has not been deleted. Business Validation Error: The action could not be completed because another user was creating, editing or deleting a transaction.',last:'2026-09-24'}].filter(Boolean).sort((x,y)=>y.qty-x.qty)}
 const ISS_ST={canceled:'Canceled',failed:'Failed',rbfailed:'Rollback failed'};
 const issChip=s=>`<span class="status status-${s==='canceled'?'yellow':'red'}">${ISS_ST[s]}</span>`;
-function vDash(q){const pt=S.org==='pt',tab=q&&q.get('tab')||'issues';
- const tabs=[['overview','Overview'],['issues','Synchronization Issues'],['speed','Sync speed']];
+function vDash(q){const pt=S.org==='pt';let tab=q&&q.get('tab')||(pt?'issues':'overview');if(!pt&&tab==='issues')tab='overview';
+ /* v41: Summary sync has no Synchronization Issues page (FDD edge case 15) */
+ const tabs=[['overview','Overview']].concat(pt?[['issues','Synchronization Issues']]:[]).concat([['speed','Sync speed']]);
  const tb=`<div class="rr-tabs" role="tablist">${tabs.map(([k,l])=>`<a role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" href="#dashboard?tab=${k}">${l}</a>`).join('')}</div>`;
  let body;
  if(tab==='overview')body=`<div class="grid2"><div class="card"><div class="card-title">Syncs this month</div><div class="big">${pt?'1,284':'31'}</div><div class="text-secondary">${pt?'transactions':'summaries'}</div></div></div>`;
- else if(tab==='speed')body='<div class="card empty-state"><div class="empty-state-title">Not part of this demo</div><p class="empty-state-desc" style="margin-bottom:0">Open Synchronization Issues.</p></div>';
+ else if(tab==='speed')body=`<div class="card empty-state"><div class="empty-state-title">Not part of this demo</div><p class="empty-state-desc" style="margin-bottom:0">${pt?'Open Synchronization Issues.':'Open Overview.'}</p></div>`;
  else{const rows=dashIssues();
   const filt=`<div class="fbar">${fF('Search',fInp('Search by any word')+'<p class="pl-help">Enter at least 3 characters</p>')}${fF('Status',fSel(['All','Canceled','Failed','Rollback failed']))}${fF('Date range',fSel(['Custom']))}${fF('From / To',`<div style="display:flex;gap:8px">${fDate('2026-09-01')}${fDate('2026-10-15')}</div>`)}<div class="fbar-b"><button class="btn">Apply</button><button class="btn btn-outlined">Reset filters</button></div></div>`;
   body=pg(filt,rows.length?table(['Quantity <span class="mi" style="font-size:16px">arrow_downward</span>','Status','Error message','Actions <span class="mi" style="font-size:16px;color:var(--text-secondary)" title="Only the first 500 related transactions are shown at a time.">help_outline</span>'],rows.map(r=>`<tr><td>${r.qty}</td><td>${issChip(r.st)}</td><td>${r.msg}</td><td>${r.href?`<a class="btn-text" href="${r.href}">See related transactions</a>`:`<button class="btn-text" onclick="${mock}">See related transactions</button>`}</td></tr>`))+`<div class="pager"><span class="text-secondary">Rows per page:</span><select class="select" style="width:auto"><option>25</option><option>10</option><option>50</option></select><span class="text-secondary">1–${rows.length} of ${rows.length}</span></div>`:`<div class="card empty-state"><div class="empty-state-title">No synchronization issues</div><p class="empty-state-desc" style="margin-bottom:0">All syncs completed.</p></div>`)}
@@ -725,12 +738,15 @@ function vSums(){
 function vSum(q){const s=SUMS.find(x=>x.id===q.get('id'))||SUMS[2],c=S.integ.greenleaf,L=lockOf(c);
  const inLock=L&&s.date<=L;
  const note=inLock?`Dated in the locked period (locked through ${fmt(L)}). Period lock doesn't block summary sync, rollback or resync.`:IT===2&&s.moved?`${s.moved} datasource records dated Sep 28–30, 2026 were moved to ${fmt(s.date)} by soft lock and included in this summary.`:'';
+ /* v41 FDD edge case 14: lock-canceled transactions of that day stay under Pending transactions (kept as is) */
+ const pend=S.txns.filter(t=>S.integ[t.integ].org==='sm'&&t.status==='canceled'&&t.date===s.date);
  const lines=[['Sales · Bread (412 units)','','1,030.00'],['Sales · Croissant (380 units)','','722.00'],['Square fees','48.30',''],['COGS · Product cost','610.00','']];
  /* v37: normal page as in the original (no full-screen dialog) */
  return pg(`<div><a class="btn btn-outlined" href="#summaries">← Summaries list</a></div>`,
   `<div class="sd-head"><div><h1 class="page-title" style="margin:0">Summary</h1><p class="sd-range">${sRng(s.date)}</p><div class="sd-chips">${glCell()}<span class="status status-green">Fully fetched</span>${sumChip(s)}</div>${note?`<p class="sd-note">${note}</p>`:''}</div><div class="sd-amt"><div class="text-secondary">Amount</div><div class="big">${s.amt}</div></div></div>`,
   `<div class="btn-group"><button class="btn btn-outlined" onclick="toast('Rollback started.')">Rollback</button><button class="btn btn-outlined" onclick="toast('Resync started.')">Resync</button>${IT===2&&s.st==='adj'?`<button class="btn btn-outlined" onclick="${mock}">Show sync info</button>`:''}<button class="btn btn-outlined" onclick="${mock}">See in books <span class="mi" style="font-size:16px">open_in_new</span></button></div>`,
-  sec('Summary lines',table(['Line','>Debit','>Credit'],lines.map(l=>`<tr><td>${l[0]}</td><td class="r">${l[1]||'—'}</td><td class="r">${l[2]||'—'}</td></tr>`))))}
+  sec('Summary lines',table(['Line','>Debit','>Credit'],lines.map(l=>`<tr><td>${l[0]}</td><td class="r">${l[1]||'—'}</td><td class="r">${l[2]||'—'}</td></tr>`))),
+  pend.length?sec('Pending transactions',`<p style="margin:0 0 12px">These transactions were not included in the Journal Entry. You can wait until they are finalized.</p>`+table(['Transaction info','Transaction type','>Amount','Transaction date','Sync status',''],pend.map(t=>`<tr><td><a class="text-link" href="#sync?id=${t.id}">${t.info}</a></td><td>${t.type}</td><td class="r">${t.amount}</td><td>${fmt(t.date)}</td><td>${chip(t)}</td><td class="act"><a class="text-link" href="#sync?id=${t.id}">See details</a></td></tr>`))):'')}
 
 /* ---------- products (SM) ---------- */
 function vProducts(){
@@ -744,8 +760,8 @@ function vProduct(q){const p=S.products.find(x=>x.id===q.get('id'))||S.products[
  return dlg('Update product or service','#products',`<button class="btn" onclick="saveProduct('${p.id}')">Save changes</button>`,
   `<div class="pe"><h2 class="pe-h">Product/service details</h2><div class="pe-grid">${f('Name <span style="color:var(--color-red)">*</span>',`<input class="input" value="${p.name}">`)}${f('SKU',`<input class="input" value="${p.sku}" placeholder="Enter SKU">`)}${f('Product category','<select class="select"><option>Select category</option></select>')}${f('Verification status','<div class="select pe-vs"><span class="status status-yellow">Unverified</span></div>')}</div>
   <h2 class="pe-h" style="margin-top:40px">Prices and storage</h2><label class="pe-track"><input type="checkbox" class="switch" checked aria-label="I track this item"> I track this item <span class="mi" style="font-size:18px;color:var(--text-secondary)">help_outline</span></label>
-  <div class="pe-prices">${f('Sales price',`<input class="input" value="${p.price}">`)}${f('Purchase cost',`<input class="input" id="cost" value="${p.cost}">`)}</div>${IT===2&&L?`<p class="pl-help" style="margin-top:8px">Locked through ${fmt(L)}: records in the locked period keep the old cost. Cost updates always use hard lock.</p>`:''}</div>`)}
-function saveProduct(id){const v=$('#cost').value.trim()||'0';const p=S.products.find(x=>x.id===id);const n=x=>(parseFloat(String(x).replace(/[^0-9.]/g,''))||0).toFixed(2),changed=n(p.cost)!==n(v);p.cost=v;const L=IT===2&&lockOf(S.integ.greenleaf);go('#products');toast(changed&&L?`Success! Product has been updated. Records through ${fmt(L)} were not updated because the period is locked.`:'Success! Product has been updated successfully!')}
+  <div class="pe-prices">${f('Sales price',`<input class="input" value="${p.price}">`)}${f('Purchase cost',`<input class="input" id="cost" value="${p.cost}">`)}</div></div>`)}
+function saveProduct(id){const v=$('#cost').value.trim()||'0';const p=S.products.find(x=>x.id===id);const n=x=>(parseFloat(String(x).replace(/[^0-9.]/g,''))||0).toFixed(2),changed=n(p.cost)!==n(v);p.cost=v;const L=false;go('#products');toast(changed&&L?`Success! Product has been updated. Records through ${fmt(L)} were not updated because the period is locked.`:'Success! Product has been updated successfully!')}
 
 /* ---------- dev notes ---------- */
 /* old A/B/C variant history is hidden from Dev notes (v40) */
@@ -766,6 +782,13 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log41=['FDD v28 (Oct 29). Fixed date can be today: "Locked through" allows today; the error is only for a future date ("Pick today (…) or an earlier date.").',
+  'Summary sync has no Synchronization Issues page (FDD edge case 15): the Summary sync Dashboard shows Overview and Sync speed only.',
+  'Summary sync Transactions list (Summaries → Transactions list, #smtx): production-style toolbar with a visible Sync status filter, filters visual only. Green Leaf (Square) payment pmt_8Kq2 dated Sep 15, 2026 is Canceled (hard lock through Sep 15 set on Sep 20; it stays Canceled after later lock changes, FDD). See details / Explain open its Sync info with the yellow Sync log row "Sync canceled by period lock. Part of the transaction is dated in the locked period." No Sync again or Rollback on Summary sync (Q19 open).',
+  'Summary detail of the locked day (Sep 15, 2026) lists that transaction under Pending transactions (FDD edge case 14, kept as is).',
+  'Product cost lock note and the "Records … were not updated because the period is locked" toast removed in both iterations: COGS cost updates are out of v1, and both iterations ship as v1.'];
+ const new41=['Summary sync Transactions list and Pending transactions block with a lock-canceled row (prototype demo of FDD edge cases 14–15).'];
+ const pend41=['Q19 (Summary sync, Sync again / Rollback for lock-canceled rows): undecided. Not prototyped; the Summary sync Transactions list and Sync info show no Sync again or Rollback.','RevRec onboarding (FDD rule): if the RevRec start date is in the locked period, Synder stops onboarding with an error toast. Final copy is in Figma; not prototyped.','Pending transactions copy is a placeholder from the FDD description; replace with the production text.'];
  const log40=['Iteration switcher in the dark prototype bar: Iteration 1 (default) and Iteration 2. The choice is kept in the URL (?it=1 / ?it=2) next to the route hash, so deep links keep it. Switching re-renders the current route with that iteration\'s demo data (unsaved settings ask first); a route that doesn\'t exist in the iteration falls back to its list (Sync info → Transactions list, Subscription → Subscriptions). Today (demo), Dev notes and Reset demo moved to the Demo button at the bottom right.',
   'Iteration 1 = hard lock only. Settings: Soft lock card disabled with a Coming soon badge ("Coming soon. Soft lock will be available in a later release."), Hard selected, no Move late transactions to, no Hard → Soft confirmation, Preview without soft wording. All integrations Hard or Off (PayPal stays Off). No Synced with warnings, Synced adjustment, soft Sync info, Balances shift or soft Activity log text. Soft demos (re_3P8, inv_eur, po_mix, JE-1067, Buddy QA Customer and its Invoice 1040) exist only in Iteration 2. Product cost lock note removed (COGS is out of v1).',
   'Iteration 2 = soft + hard: v39 settings with Soft lock, Move late transactions to and the Hard → Soft confirmation; soft demos in the Transactions list and Sync info (FDD: Sync info shows the objects that got a new date); Summaries show Synced adjustment.',
@@ -879,9 +902,12 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v40','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v41','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v41',log41),
+ nw('New in v41 (not in production)',new41),
+ cl('Pending decisions (not prototyped)',pend41),
  cl('Changelog v40',log40),
  nw('New in v40 (not in production)',new40),
  cl('Changelog v39',log39),
@@ -933,11 +959,12 @@ function render(){const{r,q}=parse();renderBar();
  if(r==='sync'&&!S.txns.find(x=>x.id===q.get('id'))){location.replace('#transactions');return}
  if(r==='sub'&&!subsV().find(x=>x.id===q.get('id'))){location.replace('#subs');return}
  if(r==='revrec'){location.replace('#subs');return}
- if(['transactions','sync','recon','subs','sub','reports','balances','rrconfig','rrinv'].includes(r)&&S.org!=='pt')S.org='pt';
- if(['summaries','summary','products','product'].includes(r)&&S.org!=='sm')S.org='sm';
+ if(r==='sync'){const t=S.txns.find(x=>x.id===q.get('id'));S.org=S.integ[t.integ].org}
+ if(['transactions','recon','subs','sub','reports','balances','rrconfig','rrinv'].includes(r)&&S.org!=='pt')S.org='pt';
+ if(['summaries','summary','products','product','smtx'].includes(r)&&S.org!=='sm')S.org='sm';
  if(['lock','edit'].includes(r)&&!['lock','edit'].includes(lastR)&&lastR!==null&&!S._noVisit)track('PeriodLockVisited',{});
  S._noVisit=0;lastR=r;nav(r);
- const V={dashboard:vDash,lock:vList,edit:vEdit,transactions:vTxns,sync:vSync,imports:vImports,recon:vRecon,subs:vSubs,sub:vSub,reports:vReports,balances:vBalances,rrconfig:vRRConfig,rrinv:vRRInv,summaries:vSums,summary:vSum,products:vProducts,product:vProduct,activity:vActivity,dev:vDev};
+ const V={dashboard:vDash,lock:vList,edit:vEdit,transactions:vTxns,sync:vSync,smtx:vSmTx,imports:vImports,recon:vRecon,subs:vSubs,sub:vSub,reports:vReports,balances:vBalances,rrconfig:vRRConfig,rrinv:vRRInv,summaries:vSums,summary:vSum,products:vProducts,product:vProduct,activity:vActivity,dev:vDev};
  const out=(V[r]||vList)(q),fs=$('#fs'),sh=$('#shell');
  if(out&&out.dlg){const sc=fs.querySelector('.dbody')?.scrollTop||0;
   fs.innerHTML=`<div class="dbar"><button class="btn-icon dx" aria-label="Close" onclick="go('${out.back}')"><span class="mi">close</span></button><span class="dv"></span><span class="dt">${out.title}</span><span class="sp"></span><div class="dbar-r">${out.actions}</div></div><div class="dbody"><div class="dwrap">${out.body}</div></div>`;
