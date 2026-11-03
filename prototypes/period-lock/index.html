@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v41 -->
+<!-- period-lock v42 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v41" />
+<meta name="prototype-version" content="v42" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -258,30 +258,30 @@ function recur(rd){rd=+rd;const[y,m,d]=TODAY.split('-').map(Number);let last,nex
  return{last,next,lock:endPrev(last),nextLock:endPrev(next)}}
 const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOpen:false,
  integ:{
-  stripe:{id:'stripe',org:'pt',name:'mzkt.by (Stripe)',short:'Stripe',pp:'Stripe',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveTo:'2026-10-01',baseLock:'2026-09-30',by:'Viacheslav Tarabarov',at:'2026-10-06'},
-  shopify:{id:'shopify',org:'pt',name:'andrewshitsko (Shopify)',short:'Shopify',pp:'Shopify',tz:'Europe/Vilnius',on:true,mode:'hard',schedule:'recurring',runDay:5,date:'2026-09-30',moveTo:null,by:'Viacheslav Tarabarov',at:'2026-10-05'},
-  greenleaf:{id:'greenleaf',org:'sm',name:'Green Leaf (Square)',short:'Square',pp:'Square',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'fixed',runDay:5,date:'2026-09-30',moveTo:'2026-10-01',by:'Ignat Plot',at:'2026-10-02'},
-  paypal:{id:'paypal',org:'pt',name:'mzkt.by (PayPal)',short:'PayPal',pp:'PayPal',tz:'Europe/Vilnius',on:false,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveTo:'2026-10-01',by:'Viacheslav Tarabarov',at:'2026-09-14'}},
+  stripe:{id:'stripe',org:'pt',name:'mzkt.by (Stripe)',short:'Stripe',pp:'Stripe',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:5,by:'Viacheslav Tarabarov',at:'2026-10-06'},
+  shopify:{id:'shopify',org:'pt',name:'andrewshitsko (Shopify)',short:'Shopify',pp:'Shopify',tz:'Europe/Vilnius',on:true,mode:'hard',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:1,by:'Viacheslav Tarabarov',at:'2026-10-05'},
+  greenleaf:{id:'greenleaf',org:'sm',name:'Green Leaf (Square)',short:'Square',pp:'Square',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'fixed',runDay:5,date:'2026-09-30',moveDay:1,by:'Ignat Plot',at:'2026-10-02'},
+  paypal:{id:'paypal',org:'pt',name:'mzkt.by (PayPal)',short:'PayPal',pp:'PayPal',tz:'Europe/Vilnius',on:false,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:1,by:'Viacheslav Tarabarov',at:'2026-09-14'}},
  txns:[
   {id:'ch_buddy',integ:'stripe',info:'Buddy QA Customer · ch_3Q9k',type:'Invoice payment',amount:'128.00 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 09:14',status:'synced'},
-  {id:'re_3P8',it2:1,integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
-  {id:'inv_eur',it2:1,integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-01',webhook:'2026-10-02',syncedAt:'2026-10-02 11:40',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
-  {id:'po_mix',it2:1,integ:'stripe',info:'Payout · po_1UAmix',type:'Payout',amount:'247.50 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 06:30',status:'warn',reason:'moved',parts:[{t:'Payment',i:'ch_3QmPay',d:'2026-10-03'},{t:'Refund receipt',i:'re_3QmRef',d:'2026-09-29',mv:'2026-10-01'},{t:'Transfer',i:'po_1UAmix',d:'2026-10-03'}]},
+  {id:'re_3P8',it2:1,integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
+  {id:'inv_eur',it2:1,integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-05',webhook:'2026-10-02',syncedAt:'2026-10-02 11:40',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
+  {id:'po_mix',it2:1,integ:'stripe',info:'Payout · po_1UAmix',type:'Payout',amount:'247.50 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 06:30',status:'warn',reason:'moved',parts:[{t:'Payment',i:'ch_3QmPay',d:'2026-10-03'},{t:'Refund receipt',i:'re_3QmRef',d:'2026-09-29',mv:'2026-10-05'},{t:'Transfer',i:'po_1UAmix',d:'2026-10-03'}]},
   {id:'order_2120',integ:'shopify',info:'andrewshitsko · Order #2120',type:'Order',amount:'54.00 USD',date:'2026-10-06',webhook:'2026-10-06',syncedAt:'2026-10-06 15:02',status:'synced'},
   {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 08:30',status:'canceled',reason:'canceled',part:'payment'},
   {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-28',webhook:'2026-10-02',syncedAt:'2026-10-02 10:21',status:'canceled',reason:'canceled',part:'shipping fee',openPart:{t:'order payment',d:'2026-10-02'}},
   {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Oct 3)',type:'Order',amount:'72.00 USD',date:'2026-09-26',webhook:'2026-09-26',syncedAt:'2026-10-03 12:05',status:'rbcx',reason:'rbcx',edit:'2026-10-03'},
   {id:'cn_1QzVd',integ:'stripe',info:'Credit note void · cn_1QzVd',type:'Credit memo',amount:'-35.00 USD',date:'2026-09-24',webhook:'2026-09-24',syncedAt:'2026-10-07 09:40',status:'rbcx',reason:'rbcx'},
   {id:'ch_other',integ:'stripe',info:'Acme Ltd · ch_3QaB',type:'Invoice payment',amount:'60.00 USD',date:'2026-10-08',webhook:'2026-10-08',syncedAt:'2026-10-08 10:00',status:'canceled',reason:'other'},
-  {id:'je_rr_sep',it2:1,integ:'stripe',info:'Revenue recognition · JE-1067',type:'Journal entry',amount:'98.63 USD',date:'2026-09-30',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 06:10',status:'warn',reason:'moved',revrec:1},
-  {id:'ch_1Q9kSeats',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice payment 26EC8A01-0109',type:'Invoice payment',amount:'480.00 USD',date:'2026-09-30',posted:'2026-10-01',webhook:'2026-10-01',syncedAt:'2026-10-01 00:10',status:'warn',reason:'moved',objs:[['Invoice','in_1Q9kSeats'],['Payment','ch_1Q9kSeats']]},
+  {id:'je_rr_sep',it2:1,integ:'stripe',info:'Revenue recognition · JE-1067',type:'Journal entry',amount:'98.63 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 06:10',status:'warn',reason:'moved',revrec:1},
+  {id:'ch_1Q9kSeats',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice payment 26EC8A01-0109',type:'Invoice payment',amount:'480.00 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 00:10',status:'warn',reason:'moved',objs:[['Invoice','in_1Q9kSeats'],['Payment','ch_1Q9kSeats']]},
   {id:'je_rr_shop_sep',integ:'shopify',info:'Revenue recognition · JE-2006',type:'Journal entry',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 06:12',status:'canceled',reason:'canceled',part:'journal entry',revrec:1,fdd:1},
   {id:'ch_1R7cTS08',integ:'shopify',info:'Northwind LLC · Invoice payment SH-4471-08',type:'Invoice payment',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-06',syncedAt:'2026-10-06 06:00',status:'canceled',reason:'canceled',part:'payment',fdd:1},
   {id:'sq_pay_0915',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_8Kq2',type:'Payment',amount:'18.40 USD',date:'2026-09-15',webhook:'2026-09-22',syncedAt:'2026-09-22 08:14',status:'canceled',reason:'canceled'},
   {id:'sq_pay_1014',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_9Rt7',type:'Payment',amount:'42.00 USD',date:'2026-10-14',webhook:'2026-10-14',syncedAt:'2026-10-14 16:02',status:'synced'},
   {id:'in_sub_jan',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice 1040',type:'Invoice',amount:'1,200.00 USD',date:'2026-01-01',webhook:'2026-01-01',syncedAt:'2026-01-01 00:05',status:'synced'}],
  activity:[
-  {at:'2026-10-06 14:20',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'mzkt.by (Stripe): Soft lock, every month on day 5, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
+  {at:'2026-10-06 14:20',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'mzkt.by (Stripe): Soft lock, every month on day 5, locked through Sep 30, 2026, late transactions move to day 5 (Oct 5, 2026)'},
   {at:'2026-10-05 14:10',org:'pt',who:'Support',it:'Support',action:'Entered',type:'User management',details:'Entered organization Per transaction test'},
   {at:'2026-10-05 09:02',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'andrewshitsko (Shopify): Hard lock, every month on day 5, locked through Sep 30, 2026'},
   {at:'2026-10-04 10:22',org:'pt',who:'System',it:'System',action:'Reconnected',type:'Integration',details:'Reconnected mzkt.by (Stripe)'},
@@ -292,7 +292,7 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   {at:'2026-09-12 11:03',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Connected',type:'Integration',details:'Connected andrewshitsko (Shopify)'},
   {at:'2026-08-30 08:15',org:'pt',who:'viacheslav@synder.com',it:'User',action:'Updated timezone',type:'Integration',details:'mzkt.by (Stripe): timezone Europe/Vilnius'},
   {at:'2026-08-02 16:40',org:'pt',who:'ignat@synder.com',it:'User',action:'Added',type:'User management',details:'Added user anna@synder.com'},
-  {at:'2026-10-02 12:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Soft lock, fixed date, locked through Sep 30, 2026, late transactions sync on Oct 1, 2026'},
+  {at:'2026-10-02 12:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Soft lock, fixed date, locked through Sep 30, 2026, late transactions move to day 1 (Oct 1, 2026)'},
   {at:'2026-09-20 10:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Period lock set',type:'Period lock',details:'Green Leaf (Square): Hard lock, fixed date, locked through Sep 15, 2026'},
   {at:'2026-09-15 10:30',org:'sm',who:'Support',it:'Support',action:'Entered',type:'User management',details:'Entered organization Green Leaf (Summary)'},
   {at:'2026-09-01 09:00',org:'sm',who:'ignat@synder.com',it:'User',action:'Connected',type:'Integration',details:'Connected Green Leaf (Square)'}],
@@ -301,8 +301,8 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
 const BASE=JSON.stringify(S);
 let IT=new URLSearchParams(location.search).get('it')==='2'?2:1;
 function itData(n){const x=JSON.parse(BASE);if(n===1){x.txns=x.txns.filter(t=>!t.it2);
- Object.values(x.integ).forEach(c=>{c.mode='hard';c.moveTo=null});
- x.activity.forEach(a=>{a.details=a.details.replace('Soft lock','Hard lock').replace(/, late transactions sync on .*$/,'')})}
+ Object.values(x.integ).forEach(c=>{c.mode='hard'});
+ x.activity.forEach(a=>{a.details=a.details.replace('Soft lock','Hard lock').replace(/, late transactions (sync on|move to) .*$/,'')})}
  return x}
 Object.assign(S,itData(IT));
 function setIt(n){if(n===IT)return;if(leaveC(()=>setIt(n)))return;IT=n;const u=new URL(location.href);u.searchParams.set('it',n);history.replaceState(null,'',u);
@@ -369,24 +369,20 @@ function vList(){
 function openEdit(id){S.menu=null;S.draft=null;S.prefill=null;go('#edit?i='+id)}
 
 /* ---------- settings ---------- */
-/* Move-to date: FDD = always the user-set date (default day after lock). Assumption: on recurring, it shifts by one month with each auto-advance. */
-function addMonths(s,n){const[y,m,d]=s.split('-').map(Number);const dm=new Date(Date.UTC(y,m-1+n+1,0)).getUTCDate();return iso(y,m-1+n,Math.min(d,dm))}
-function monthsBetween(a,b){const[y1,m1]=a.split('-').map(Number),[y2,m2]=b.split('-').map(Number);return(y2-y1)*12+(m2-m1)}
-function effMove(c){const L=lockOf(c);if(!L)return null;if(!c.moveTo)return addDays(L,1);if(c.schedule==='recurring'&&c.baseLock)return addMonths(c.moveTo,monthsBetween(c.baseLock,L));return c.moveTo}
-function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.draft=JSON.parse(JSON.stringify(c));S.draft.moveTo=effMove(c);
-  if(S.prefill&&S.prefill.i===id){const cur=lockOf(c);if(!cur||S.prefill.to>cur){Object.assign(S.draft,{on:true,schedule:'fixed',date:S.prefill.to,moveTo:addDays(S.prefill.to,1)});S.prefill.applied=1}else S.prefill.covered=cur}
-  const d=S.draft,L=dL(d);d._lv=L&&!lockErr(d)?L:null;d._mvU=!!(d.moveTo&&L&&d.moveTo!==addDays(L,1))}
+/* v42 Move-to = a day of the month (1–31). On each run: that day in the first open month (the month after Locked through). Missing day (e.g. 31 in Nov) → that month's last day (assumption). */
+function mvDate(L,day){const[y,m]=L.split('-').map(Number);const last=new Date(Date.UTC(y,m+1,0)).getUTCDate();return iso(y,m,Math.min(+day||1,last))}
+function effMove(c){const L=lockOf(c);return L?mvDate(L,c.moveDay):null}
+function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.draft=JSON.parse(JSON.stringify(c));if(!S.draft.moveDay)S.draft.moveDay=1;
+  if(S.prefill&&S.prefill.i===id){const cur=lockOf(c);if(!cur||S.prefill.to>cur){Object.assign(S.draft,{on:true,schedule:'fixed',date:S.prefill.to});S.prefill.applied=1}else S.prefill.covered=cur}
+}
  return S.draft}
-/* draft-only keys start with "_": _lv = last valid lock, _mvU = user edited Move-to */
-const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
-const dirty=()=>{if(!S.draft)return false;const c=S.integ[S.draft.id],cur={...c,moveTo:effMove(c)};return norm(S.draft)!==norm(cur)};
+/* draft-only keys start with "_" */
+const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;delete x.moveTo;if(!x.moveDay)x.moveDay=1;Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
+const dirty=()=>{if(!S.draft)return false;const c=S.integ[S.draft.id];return norm(S.draft)!==norm(c)};
 const dL=d=>!d.on?null:d.schedule==='recurring'?recur(d.runDay).lock:d.date;
 function lockErr(d){if(!d.on||d.schedule!=='fixed')return'';if(!d.date)return'Pick a date.';if(d.date>TODAY)return'Pick today ('+fmt(TODAY)+') or an earlier date.';return''}
 function validate(d){const e={};if(!d.on)return e;const L=dL(d),le=lockErr(d);if(le)e.date=le;
- if(d.mode==='soft'){if(!d.moveTo)e.move='Pick a date.';else if(!le&&L&&d.moveTo<=L)e.move='Pick a date after '+fmt(L)+'.'}
  return e}
-/* non-blocking: Move-to later than the end of the first open month */
-function moveWarn(d,er){const L=dL(d);if(!d.on||d.mode!=='soft'||!d.moveTo||!L||er.date||er.move)return'';const o=addDays(L,1),end=iso(+o.slice(0,4),+o.slice(5,7),0);return d.moveTo>end?'This is more than a month after the lock. Late transactions will sync far from their real dates.':''}
 const warnEl=t=>t?`<p class="pl-warn" role="status"><span class="mi">warning_amber</span><span>${t}</span></p>`:'';
 function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.integ[id];if(c.org!==S.org){S.org=c.org;nav('edit')}
  const d=ensureDraft(id),ro=!isAdmin(),er=validate(d),rec=d.schedule==='recurring',L=dL(d),off=!d.on,dis=ro||off?'disabled':'';
@@ -395,14 +391,15 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
   return`<div class="plc-card${on?' on':''}" data-k="${k}" data-v="${v}" onclick="${set}"><input type="radio" class="radio" name="c-${k}" aria-label="${title}" ${on?'checked':''} ${dis} onchange="${set}"><div style="min-width:0;flex:1"><b>${title}</b><p class="plc-cd">${desc}</p>${on&&inner?inner:''}</div></div>`};
  let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
  const stop='onclick="event.stopPropagation()"';
- const moveIn=`<div class="plc-in" ${stop}><label for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}${warnEl(moveWarn(d,er))}</div>`;
+ let o31='';for(let i=1;i<=31;i++)o31+=`<option value="${i}" ${+d.moveDay===i?'selected':''}>${i}</option>`;
+ const moveIn=`<div class="plc-sent" ${stop}>Move late transactions to day<select class="select" id="pl-move" aria-label="Move late transactions to day" ${dis} onchange="setD('moveDay',+this.value)">${o31}</select>of the first open month.</div>`;
  const recIn=`<div class="plc-sent" ${stop}>On day<select class="select" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>lock the previous month.</div>`;
  const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${TODAY}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
  let lines;
  if(off)lines=['Period lock is off for this integration. Turn it on to set mode, schedule, and dates.'];
  else{/* no edits: current state; edits: "When you save…"; a field with an error hides its part */
-  const r=recur(d.runDay),ed=dirty(),lp=er.date||!L?'':(ed?'When you save, Synder locks through ':'Locked through ')+fmt(L)+'.',mt=d.mode==='soft'?(er.move||!d.moveTo?'':'Late transactions sync on '+fmt(d.moveTo)+'.'):'Late transactions are canceled.';
-  lines=[[lp,mt].filter(Boolean).join(' '),rec?'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+'. Imports keep running.':'Imports keep running.'].filter(Boolean)}
+  const r=recur(d.runDay),ed=dirty(),lp=er.date||!L?'':(ed?'When you save, Synder locks through ':'Locked through ')+fmt(L)+'.',mv=L&&!er.date?mvDate(L,d.moveDay):null,mt=d.mode==='soft'?(mv?'Late transactions move to '+fmt(mv)+'.':''):'Late transactions are canceled.';
+  lines=[[lp,mt].filter(Boolean).join(' '),rec?'Next auto-lock: '+fmt(r.next)+', through '+fmt(r.nextLock)+(d.mode==='soft'?', late transactions move to '+fmt(mvDate(r.nextLock,d.moveDay)):'')+'. Imports keep running.':'Imports keep running.'].filter(Boolean)}
  const pvT='Preview';
  const card=`<div class="card plc"><section class="plc-s plc-top"><div><h3 id="plc-lbl">Period lock</h3><p class="plc-d">Stop Synder from changing your books for dates you've already closed.</p></div><input type="checkbox" class="switch" aria-labelledby="plc-lbl" ${d.on?'checked':''} ${ro?'disabled':''} onchange="setD('on',this.checked)"></section>`
   +(off?`<section class="plc-s"><div class="plc-pv" id="pl-preview" style="margin-top:0"><b>${pvT}</b>${lines.map(l=>`<p>${l}</p>`).join('')}</div></section></div>`
@@ -411,12 +408,9 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
  const pre=S.prefill&&S.prefill.i===id?(S.prefill.applied?`<div class="alert alert-info"><span class="mi">info</span><div>Prefilled from your reconciliation: locked through ${fmt(S.prefill.to)}. Review and update.</div></div>`:S.prefill.covered?`<div class="alert alert-success"><span class="mi">check_circle</span><div>Already locked through ${fmt(S.prefill.covered)}, which covers your reconciliation through ${fmt(S.prefill.to)}. Nothing to change.</div></div>`:''):'';
  const alerts=(ro?'<div class="alert alert-warning"><span class="mi">lock</span><div>Only admins can change period lock.</div></div>':'')+pre;
  return `<div class="plc-page"><a class="plc-back" href="#lock"><span class="mi">chevron_left</span>Back to Period lock</a><h1 class="page-title plc-h1">Period lock for ${c.name}</h1>${alerts?`<div class="pg" style="margin-bottom:24px">${alerts}</div>`:''}${card}${ro?'':`<div class="plc-foot"><button class="btn" ${dirty()&&!Object.keys(er).length?'':'disabled'} onclick="confirmSave()">Update</button></div>`}</div>`}
-/* Move-to = day after the last VALID lock, until the user edits Move-to. An invalid Locked through never changes it. */
 function setD(k,v){const d=S.draft;d[k]=v;
- if(k==='on'&&v){if(!d.mode||IT===1)d.mode=IT===1?'hard':'soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5}
+ if(k==='on'&&v){if(!d.mode||IT===1)d.mode=IT===1?'hard':'soft';if(!d.schedule)d.schedule='recurring';if(!d.runDay)d.runDay=5;if(!d.moveDay)d.moveDay=1}
  if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>TODAY))d.date=recur(d.runDay).lock;
- if(k==='moveTo')d._mvU=!!v;
- const L=dL(d);if(L&&!lockErr(d)){d._lv=L;if(!d._mvU||!d.moveTo)d.moveTo=addDays(L,1)}
  render()}
 function confirmSave(){const d=S.draft,c=S.integ[d.id],oldT=lockOf(c),newT=dL(d);
  const off=c.on&&!d.on,earlier=c.on&&d.on&&newT<oldT,soft=c.on&&d.on&&c.mode==='hard'&&d.mode==='soft';
@@ -426,14 +420,14 @@ function confirmSave(){const d=S.draft,c=S.integ[d.id],oldT=lockOf(c),newT=dL(d)
  /* Now vs After, so the two states never read as one */
  let now,after;
  if(off){now='Now: locked through '+fmt(oldT)+'.';after='After turning off: all dates are open for syncs.'}
- else if(earlier){now='Now: locked through '+fmt(oldT)+'.';after='After the change: locked through '+fmt(newT)+'. '+short(addDays(newT,1))+' – '+fmt(oldT)+' is open for syncs again.'+(soft?' Transactions dated in the locked period sync on '+fmt(d.moveTo)+'.':'')}
- else{now='Now: transactions dated in the locked period are canceled.';after='After switching: they sync on '+fmt(d.moveTo)+'.'}
+ else if(earlier){now='Now: locked through '+fmt(oldT)+'.';after='After the change: locked through '+fmt(newT)+'. '+short(addDays(newT,1))+' – '+fmt(oldT)+' is open for syncs again.'+(soft?' Transactions dated in the locked period move to '+fmt(mvDate(newT,d.moveDay))+'.':'')}
+ else{now='Now: transactions dated in the locked period are canceled.';after='After switching: they move to '+fmt(mvDate(newT,d.moveDay))+'.'}
  const n=aff.length,li=[n?`${n} transaction${n>1?'s':''} canceled by this lock stay${n>1?'':'s'} Canceled. Synder won't sync ${n>1?'them':'it'} until you resync.`:c.mode==='hard'?'No transactions were canceled by this lock.':'',c.mode==='soft'?'Transactions moved by the soft lock keep their new dates.':'','Already synced transactions won\'t change.'].filter(Boolean);
  modal(title,`<p style="margin:0">${now}</p><p>${after}</p><ul>${li.map(x=>`<li>${x}</li>`).join('')}</ul>`,
   `<button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="doSave(false,${n})">${off?'Turn off':earlier?'Change lock':'Switch to soft'}</button>`)}
 function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];
- d.by=S.org==='pt'?'Viacheslav Tarabarov':'Ignat Plot';d.at=TODAY;Object.assign(c,JSON.parse(norm(d)));c.baseLock=lockOf(c);
- const det=!c.on?'Off':(c.mode==='soft'?'Soft lock':'Hard lock')+' · '+(c.schedule==='recurring'?'Monthly on day '+c.runDay:'Fixed date')+' · Locked through '+fmt(lockOf(c))+(c.mode==='soft'?' · Move late transactions to '+fmt(c.moveTo):'');
+ d.by=S.org==='pt'?'Viacheslav Tarabarov':'Ignat Plot';d.at=TODAY;Object.assign(c,JSON.parse(norm(d)));
+ const det=!c.on?'Off':(c.mode==='soft'?'Soft lock':'Hard lock')+' · '+(c.schedule==='recurring'?'Monthly on day '+c.runDay:'Fixed date')+' · Locked through '+fmt(lockOf(c))+(c.mode==='soft'?' · Move late transactions to day '+c.moveDay:'');
  S.activity.unshift({at:TODAY+' '+new Date().toTimeString().slice(0,5),org:c.org,who:c.org==='pt'?'viacheslav@synder.com':'ignat@synder.com',it:'User',action:c.on?'Period lock set':'Period lock disabled',type:'Period lock',details:actDet(c)});
  if(c.on)track('PeriodLockSet',{lockMode:c.mode,lockSchedule:c.schedule,orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});else track('PeriodLockDisabled',{orgId:c.org==='pt'?'org_1042':'org_2210',ppProvider:c.pp,accProvider:'QuickBooks Online'});
  if(rs)S.txns.forEach(t=>{if(t.integ===c.id&&t.reason==='canceled'){t.status='synced';t.reason=null}});
@@ -442,7 +436,7 @@ function doSave(rs,n){closeM();const d=S.draft,c=S.integ[d.id];
 function leaveC(fn){if(parse().r!=='edit'||!dirty())return false;S._leave=fn;modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM();S._leave=null">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;const f=S._leave;S._leave=null;f&&f()">Discard</button>`);return true}
 window.addEventListener('beforeunload',e=>{if(parse().r==='edit'&&dirty()){e.preventDefault();e.returnValue=''}});
 /* Activity log details: only the state after the update (FDD) */
-function actDet(c){if(!c.on)return c.name+': Off';const L=lockOf(c);return c.name+': '+(c.mode==='soft'?'Soft lock':'Hard lock')+', '+(c.schedule==='recurring'?'every month on day '+c.runDay:'fixed date')+', locked through '+fmt(L)+(c.mode==='soft'?', late transactions sync on '+fmt(c.moveTo):'')}
+function actDet(c){if(!c.on)return c.name+': Off';const L=lockOf(c);return c.name+': '+(c.mode==='soft'?'Soft lock':'Hard lock')+', '+(c.schedule==='recurring'?'every month on day '+c.runDay:'fixed date')+', locked through '+fmt(L)+(c.mode==='soft'?', late transactions move to day '+c.moveDay+' ('+fmt(effMove(c))+')':'')}
 function guard(h){if(dirty()){modal('Discard changes?','<p style="margin:0">You have unsaved period lock changes for this integration.</p>',`<button class="btn btn-outlined" onclick="closeM()">Keep editing</button><button class="btn" onclick="closeM();S.draft=null;go('${h}')">Discard</button>`);return false}return true}
 
 /* ---------- transactions ---------- */
@@ -488,13 +482,13 @@ function rollback(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.
  if(L&&t.webhook<=L&&t.status!=='canceled'){t.status='rbcx';t.reason='rbcx'}render();toast('Rollback started.')}
 function resync(id){S.menu=null;const t=S.txns.find(x=>x.id===id),c=S.integ[t.integ],L=lockOf(c);render();
  if(t.reason==='canceled'&&L&&c.mode==='hard'){const pd=t.batch?t.batch.bad.d:t.date;if(pd<=L)return toast('Still locked: dated '+fmt(pd)+', locked through '+fmt(L)+'. Change the lock first.','warning')}
- if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Sync started. It syncs on '+fmt(moveOf(c))+' again.');toast('Sync started.')}
+ if(c.on&&c.mode==='soft'&&t.date<=L)return toast('Sync started. Transactions dated in the locked period move to '+fmt(moveOf(c))+'.');toast('Sync started.')}
 function bulk(st){st=st||{integ:integs()[0].id,from:'2026-09-15',to:'2026-10-05'};S.bulk=st;
  const msg=st.from>st.to?'<div class="form-error-msg">From must be before To.</div>':'';
  modal('Roll back by date range',`<div class="pl-field" style="margin-bottom:16px"><label class="form-label">Integration</label><select class="select" onchange="S.bulk.integ=this.value;bulk(S.bulk)">${integs().map(i=>`<option value="${i.id}" ${i.id===st.integ?'selected':''}>${i.name}</option>`).join('')}</select></div><div style="display:flex;gap:16px;margin-bottom:16px"><div class="pl-field"><label class="form-label">From</label><input class="input" type="date" value="${st.from}" onchange="S.bulk.from=this.value;bulk(S.bulk)"></div><div class="pl-field"><label class="form-label">To</label><input class="input" type="date" value="${st.to}" onchange="S.bulk.to=this.value;bulk(S.bulk)"></div></div>${msg}`,`<button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" ${msg?'disabled':''} onclick="closeM();toast('Rollback started.')">Roll back</button>`)}
 /* FDD import warning: shown when the import range is in the locked period */
 function impDlg(st){st=st||{integ:integs().filter(c=>c.on)[0].id,from:'2026-09-01',to:'2026-09-30'};S.imp=st;const c=S.integ[st.integ],L=lockOf(c);
- const w=L&&st.from<=L?al('warning','warning_amber',`Part of this range is in the locked period (locked through ${fmt(L)}). The import runs, but ${c.mode==='soft'?'transactions dated in the locked period sync on '+fmt(moveOf(c))+'.':'syncs of transactions dated in the locked period are canceled.'}`):'';
+ const w=L&&st.from<=L?al('warning','warning_amber',`${c.name} is locked through ${fmt(L)}. Part of this range is in the locked period. The import runs, but ${c.mode==='soft'?'transactions dated in the locked period move to '+fmt(moveOf(c))+'.':'syncs of transactions dated in the locked period are canceled.'}`):'';
  modal('Import historical data',`<div class="pl-field" style="margin-bottom:16px"><label class="form-label">Integration</label><select class="select" onchange="S.imp.integ=this.value;impDlg(S.imp)">${integs().map(i=>`<option value="${i.id}" ${i.id===st.integ?'selected':''}>${i.name}</option>`).join('')}</select></div><div style="display:flex;gap:16px;margin-bottom:16px"><div class="pl-field"><label class="form-label">From</label><input class="input" type="date" value="${st.from}" onchange="S.imp.from=this.value;impDlg(S.imp)"></div><div class="pl-field"><label class="form-label">To</label><input class="input" type="date" value="${st.to}" onchange="S.imp.to=this.value;impDlg(S.imp)"></div></div><label class="synder-checkbox" style="margin-bottom:16px;color:var(--text-primary)"><input type="checkbox" checked> Sync after import</label>${w}`,`<button class="btn btn-outlined" onclick="closeM()">Cancel</button><button class="btn" onclick="closeM();toast('Import started.')">Import</button>`)}
 
 /* ---------- sync info (production /sync/show/{id}: normal page, no title) ---------- */
@@ -525,10 +519,10 @@ function vSync(q){const t=S.txns.find(x=>x.id===q.get('id'))||S.txns[1],c=S.inte
  if(t.status==='canceled'||t.status==='rbcx'){}
  else if(t.reason==='moved'&&t.parts){const n=t.parts.filter(p=>p.mv).length,mv=t.parts.find(p=>p.mv).mv;
   notice=al('info','info',`Soft lock moved ${n} object${n>1?'s':''} to ${fmt(mv)}: ${n>1?'their dates are':'its date is'} in the locked period${thr}. Other objects kept their dates.${link}`);
-  logs=t.parts.map(p=>[p.t,p.i,`${p.t} was created.`+(p.mv?` Date changed from ${short(p.d)} to ${short(p.mv)} by period lock.`:'')])}
+  logs=t.parts.map(p=>[p.t,p.i,p.mv?`${p.t}: date moved from ${short(p.d)} to ${short(p.mv)} by period lock.`:`${p.t} was created.`])}
  else if(t.reason==='moved'){const o=x.objs||[[t.type,x.tid]],n=o.length;
   notice=al('info','info',`Soft lock moved ${n} object${n>1?'s':''} to ${fmt(t.posted)}: ${n>1?'their dates are':'its date is'} in the locked period${thr}.${link}`);
-  logs=o.map(([ty,inf])=>[ty,inf,`${ty} was created. Date changed from ${short(t.date)} to ${short(t.posted)} by period lock.${t.fx?' The exchange rate for '+fmt(t.date)+' (original date) was used.':''}`])}
+  logs=o.map(([ty,inf])=>[ty,inf,`${ty}: date moved from ${short(t.date)} to ${short(t.posted)} by period lock.${t.fx?' The exchange rate for '+fmt(t.date)+' (original date) was used.':''}`])}
  const tm=x.time||'00:00',st=t.syncedAt;
  const smx=c.org==='sm';
  const bar=`<div class="si-bar"><a class="btn btn-outlined" href="${smx?'#smtx':'#transactions'}">← Transactions list</a><button class="btn btn-outlined" onclick="${mock}">Syncs history</button>${smx?'':`<button class="btn btn-outlined" onclick="rollback('${t.id}')">Rollback sync</button>`}<span style="flex:1"></span><button class="btn btn-outlined" onclick="${mock}">How to reconcile</button></div>`;
@@ -574,7 +568,7 @@ function vRecon(q){const id=q&&q.get('id');if(id)return vReconRes(id,q.get('tab'
 const msOf=r=>IT===2&&r.ms?r.ms:[];
 const rcChip=r=>msOf(r).length?'<span class="status status-yellow">Attention required</span>':'<span class="status status-green">Reconciled</span>';
 const RECON=[
- {id:'oct',from:'2026-10-01',to:'2026-10-05',created:'2026-10-05',m:18,d:[],ms:[['2026-10-01','re_3P8mXy9kL2','-42.50 USD','Refund receipt;Expense','—',2]],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
+ {id:'oct',from:'2026-10-01',to:'2026-10-05',created:'2026-10-05',m:18,d:[],ms:[['2026-10-05','re_3P8mXy9kL2','-42.50 USD','Refund receipt;Expense','—',2]],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
  {id:'sep',from:'2026-09-01',to:'2026-09-30',created:'2026-10-02',m:412,d:[['2026-09-18','ch_3Q7h…','59.00 USD','58.50 USD'],['2026-09-09','ch_3Q6c…','24.00 USD','—']],rows:[['2026-09-28','ch_3Q8k…','128.00 USD','Payment;Expense;charge','Auto',3],['2026-09-15','po_1U8V…','161.26 USD','Transfer;payout','Auto',2]]},
  {id:'aug',from:'2026-08-01',to:'2026-08-31',created:'2026-09-05',m:398,d:[],rows:[['2026-08-27','ch_3Q5m…','96.00 USD','Payment;Expense;charge','Auto',3],['2026-08-14','po_1U7K…','212.40 USD','Transfer;payout','Auto',2]]}];
 function vReconRes(id,tab){const r=RECON.find(x=>x.id===id)||RECON[1],c=S.integ.stripe,L=lockOf(c);
@@ -615,7 +609,7 @@ const SUBS=[
  gS('xls_sub_0007','Aidan Gonzales','2024-04-30',null,{src:'Excel',integ:'excel',status:'Ready',prod:'Consulting_retainer',je0:3001,tn:'XL-0007-',px:'in_xl0007'}),
  {id:'sub_1Q9kAnnual',it2:1,cust:'Buddy QA Customer',start:'2026-01-01',cancel:null,src:'External',integ:'stripe',period:'Yearly',status:'Ready',prod:'Annual_plan',unit:'$1,200.00 / year',je0:1059,tn:'26EC8A01-01',
   inv:[{id:'in_1Q9kAnnual',from:'2026-01-01',to:'2026-12-31',amt:1200,pay:'ch_1Q9kAnnual',sync:'in_sub_jan'}],
-  tlx:[{id:'in_1Q9kSeats',from:'2026-09-30',posted:'2026-10-01',amt:480,pay:'ch_1Q9kSeats',sync:'ch_1Q9kSeats',num:'26EC8A01-0109'}]},
+  tlx:[{id:'in_1Q9kSeats',from:'2026-09-30',posted:'2026-10-05',amt:480,pay:'ch_1Q9kSeats',sync:'ch_1Q9kSeats',num:'26EC8A01-0109'}]},
  {id:'sub_1R7cTeamSeatsNorthwind',cust:'Northwind LLC',start:'2026-04-01',cancel:null,src:'External',integ:'shopify',period:'Monthly',status:'Ready',prod:'Team_seats',unit:'$240.00 / month',je0:2001,tn:'SH-4471-',px:'in_1R7cTS',
   inv:null,tlx:[{id:'in_1R7cTS08',from:'2026-09-30',amt:240,pay:'ch_1R7cTS08',sync:'ch_1R7cTS08',num:'SH-4471-08'}]}];
 function subInv(s){if(s.inv)return s.inv;
@@ -631,10 +625,10 @@ function subSched(s){const inv=subInv(s),last=(s.cancel&&s.cancel<TODAY?s.cancel
   out.push({ps,pe,lines,billed:lines.reduce((a,l)=>a+l.billed,0),rec:+lines.reduce((a,l)=>a+l.rec,0).toFixed(2)});m++}
  let cb=0,cr=0;out.forEach(r=>{cb+=r.billed;cr=+(cr+r.rec).toFixed(2);r.cum=cr;r.def=+(cb-cr).toFixed(2)});return out}
 /* RR journal entries: one per closed month, dated the month end, generated at the start of the next month.
-   Stripe (Soft): Sep entry moved to Oct 1. Shopify (Hard): Sep entry canceled. */
+   Stripe (Soft): Sep entry moved to Oct 5 (move-to day 5). Shopify (Hard): Sep entry canceled. */
 function subJEs(s){if(s.status!=='Ready')return[];const mStart=TODAY.slice(0,8)+'01';
  return subSched(s).filter(r=>r.pe<mStart&&r.rec>0).map((r,i)=>{const sep=r.pe==='2026-09-30',mv=sep&&s.id==='sub_1Q9kAnnual',cx=sep&&s.id==='sub_1R7cTeamSeatsNorthwind';
-  return{num:'JE-'+(s.je0+i),period:r.ps,date:r.pe,posted:mv?'2026-10-01':r.pe,amt:r.rec,st:cx?'canceled':mv?'warn':'synced',sync:mv?'je_rr_sep':cx?'je_rr_shop_sep':null}})}
+  return{num:'JE-'+(s.je0+i),period:r.ps,date:r.pe,posted:mv?'2026-10-05':r.pe,amt:r.rec,st:cx?'canceled':mv?'warn':'synced',sync:mv?'je_rr_sep':cx?'je_rr_shop_sep':null}})}
 const rrSubChip=(s,w)=>s==='Ready'?'<span class="status status-green rr-ok">Ready</span>':`<span class="status status-grey${w?' rr-gen':''}">Generating Entries</span>`;
 const srcChip=s=>`<span class="status status-${s==='Internal'?'blue':'green'}${s==='Internal'?'':' rr-ok'}">${s}</span>`;
 const jeChip=s=>s==='warn'?'<span class="status status-yellow">Synced with warnings</span>':s==='canceled'?'<span class="status status-yellow">Canceled</span>':'<span class="status status-green">Synced</span>';
@@ -782,6 +776,12 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log42=['Iteration 2, Soft lock: "Move late transactions to" is now a day-of-month picker (1–31) in the same sentence style as the Recurring card: "Move late transactions to day [5] of the first open month." The date picker, its errors and the "more than a month" warning are gone. Card descriptions stay date-free; Preview shows the concrete date ("Late transactions move to Oct 5, 2026."; Recurring also shows the next run). Works for Recurring and Fixed date; the unsaved-changes dialog still applies.',
+  'Rule: move-to date = that day in the month after Locked through; a missing day falls back to the month\'s last day (assumption, see Assumptions).',
+  'Demo data: mzkt.by (Stripe) moves late transactions to day 5, so all Stripe soft demos now post on Oct 5, 2026 (re_3P8, in_EU5521, po_1UAmix refund part, JE-1067, Buddy QA payment 26EC8A01-0109 in the Transactions list, Transaction timeline and RR tab, recon Missing source row). Green Leaf (Square) uses day 1 (Oct 1, summary Synced adjustment unchanged). Activity log: "…, late transactions move to day 5 (Oct 5, 2026)".',
+  'Sync info, one row per moved object: "Invoice: date moved from Sep 5 to Oct 5 by period lock." (FDD comment thread, meaning approved).',
+  'Deep link #transactions?import=stripe (or shopify) opens the Import historical data dialog.',
+  'Both iterations: Import historical data warning names the integration as Name (Platform): "mzkt.by (Stripe) is locked through Sep 30, 2026. Part of this range is in the locked period. The import runs, but …".'];
  const log41=['FDD v28 (Oct 29). Fixed date can be today: "Locked through" allows today; the error is only for a future date ("Pick today (…) or an earlier date.").',
   'Summary sync has no Synchronization Issues page (FDD edge case 15): the Summary sync Dashboard shows Overview and Sync speed only.',
   'Summary sync Transactions list (Summaries → Transactions list, #smtx): production-style toolbar with a visible Sync status filter, filters visual only. Green Leaf (Square) payment pmt_8Kq2 dated Sep 15, 2026 is Canceled (hard lock through Sep 15 set on Sep 20; it stays Canceled after later lock changes, FDD). See details / Explain open its Sync info with the yellow Sync log row "Sync canceled by period lock. Part of the transaction is dated in the locked period." No Sync again or Rollback on Summary sync (Q19 open).',
@@ -902,9 +902,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v41','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v42','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v42',log42),
  cl('Changelog v41',log41),
  nw('New in v41 (not in production)',new41),
  cl('Pending decisions (not prototyped)',pend41),
@@ -946,7 +947,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
  sec('Assumptions to confirm',`<div class="card"><ul>
  <li>No impact counts are shown; the confirm dialog appears only when the lock weakens (off, earlier date, hard → soft).</li>
  <li>Recurring run day is limited to 1–28 so it runs every month (FDD: one recurring option, lock through end of previous month).</li>
- <li>"Move late transactions to" is always user-set (FDD), default the day after the lock. Assumption: with a monthly schedule it shifts forward one month each time the lock auto-advances.</li>
+ <li>"Move late transactions to" is a day of the month (1–31, default 1). On each run the move-to date is that day in the first open month (the month after Locked through), for both Recurring and Fixed date. Assumption: if the month has no such day (e.g. 31 in November), Synder uses the last day of that month. Assumption: with a Fixed date in mid-month (e.g. through Oct 15) the first open month is still the next month (Nov), so late transactions skip the open rest of the lock month.</li>
  <li>Hard lock, batch with two internal transactions (FDD edge case 4): the full sync is canceled, no payment syncs.</li>
  <li>Activity log shows only "Period lock set" and "Period lock disabled" with the state after the update (FDD). Monthly auto-advance writes a System entry "Recurring on day 5".</li>
  <li>Recon "Lock period" prefills the recon end date and never moves an existing lock earlier. FDD edge case 2: recon shows no callout for re-dated rows.</li>
@@ -969,7 +970,9 @@ function render(){const{r,q}=parse();renderBar();
  if(out&&out.dlg){const sc=fs.querySelector('.dbody')?.scrollTop||0;
   fs.innerHTML=`<div class="dbar"><button class="btn-icon dx" aria-label="Close" onclick="go('${out.back}')"><span class="mi">close</span></button><span class="dv"></span><span class="dt">${out.title}</span><span class="sp"></span><div class="dbar-r">${out.actions}</div></div><div class="dbody"><div class="dwrap">${out.body}</div></div>`;
   fs.querySelector('.dbody').scrollTop=sc;fs.hidden=false;sh.hidden=true;sh.style.display='none';$('#app').innerHTML=''}
- else{fs.hidden=true;fs.innerHTML='';sh.hidden=false;sh.style.display='';$('#app').innerHTML=out}}
+ else{fs.hidden=true;fs.innerHTML='';sh.hidden=false;sh.style.display='';$('#app').innerHTML=out}
+ /* v42 deep link: #transactions?import=stripe opens Import historical data */
+ if(q.get('import')&&['transactions','imports'].includes(r)){const i=q.get('import'),h='#'+r;history.replaceState(null,'',location.pathname+location.search+h);prevHash=h;impDlg(S.integ[i]&&S.integ[i].on&&S.integ[i].org==='pt'?{integ:i,from:'2026-09-01',to:'2026-09-30'}:undefined)}}
 function setToday(v){if(!v)return;TODAY=v;S.draft=null;render();toast('Demo date set to '+fmt(v)+'.','info')}
 function resetDemo(){Object.assign(S,itData(IT));TODAY='2026-10-15';$('#today').value=TODAY;closeM();go('#lock');render()}
 document.addEventListener('click',e=>{if(!e.target.closest('.vmw'))$('#vmenu').classList.remove('show');if(!e.target.closest('.acw'))$('#acm').classList.remove('show');if((S.menu||S.orgOpen)&&!e.target.closest('.dropdown-menu')&&!e.target.closest('.sb-org')){S.menu=null;S.orgOpen=false;render()}});
