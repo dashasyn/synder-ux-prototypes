@@ -1416,78 +1416,26 @@
     .hs-note-preview .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
     .hs-notes-count { display: flex; gap: 6px; align-items: center; margin-top: 6px; color: #3D4A5C; }
     .hs-notes-count .material-icons-round { font-size: 16px; color: #6B778C; }
-    /* ── Variant C: Before your call ── */
-    .bc-wrap { max-width: 760px; }
-    .bc-must {
-      display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
-      border: 1px solid #B7D0FF; background: #E6F0FF; border-radius: 8px; padding: 16px; margin-bottom: 16px;
+    /* ── Variant C: Before your call (plain list) ── */
+    .bc-wrap { max-width: 720px; }
+    .bc-section-h {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+      margin: 8px 0 10px;
     }
-    .bc-must.is-done { background: #F3FAF0; border-color: transparent; }
-    .bc-must .ico {
-      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
-      border: 1.5px solid #0053CC; background: #fff; display: flex; align-items: center; justify-content: center;
+    .bc-section-h h2 { margin: 0; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .bc-section-h .bc-meta { font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-section-h .bc-meta.is-done { color: #1F8940; }
+    .hs-step-card .ico.look { background: #E6F0FF; color: #0053CC; border: none; }
+    .bc-call-list { list-style: none; margin: 0 0 12px; padding: 0; }
+    .bc-call-list li {
+      position: relative; padding: 6px 0 6px 18px;
+      font-size: 14px; line-height: 20px; color: #3D4A5C;
     }
-    .bc-must.is-done .ico { background: #1F8940; border: none; color: #fff; }
-    .bc-must .ico .material-icons-round { font-size: 14px; }
-    .bc-must-body { flex: 1; min-width: 220px; }
-    .bc-must h2, .bc-card h2 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
-    .bc-must.is-done h2 { color: #6B778C; }
-    .bc-must p, .bc-card p { margin: 0; font-size: 14px; line-height: 20px; color: #6B778C; }
-    .bc-must-actions { display: flex; gap: 16px; align-items: center; flex-basis: 100%; padding-left: 34px; }
-    .bc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media (max-width: 900px) { .bc-grid { grid-template-columns: 1fr; } }
-    .bc-card {
-      border: 1px solid #DFE4EC; border-radius: 8px; background: #fff; padding: 16px;
-      display: flex; flex-direction: column; align-items: flex-start;
+    .bc-call-list li::before {
+      content: ''; position: absolute; left: 4px; top: 14px;
+      width: 5px; height: 5px; border-radius: 50%; background: #9AA3B2;
     }
-    .bc-card-ico { font-size: 22px; color: #0053CC; margin-bottom: 8px; }
-    .bc-pointers { margin: 10px 0 14px; padding-left: 18px; font-size: 14px; line-height: 22px; color: #1A1B24; }
-    .bc-cta { margin-top: auto; }
-    .bc-card > p + .bc-cta { margin-top: 14px; }
-    .bc-results { list-style: none; margin: 12px 0 0; padding: 0; width: 100%; }
-    .bc-results li {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 8px 0; border-top: 1px solid #EFF1F5; font-size: 14px; line-height: 20px;
-    }
-    .bc-res-main { display: flex; flex-direction: column; min-width: 0; }
-    .bc-res-name { color: #1A1B24; }
-    .bc-res-to { color: #6B778C; }
-    .ask-link {
-      appearance: none; border: none; background: none; cursor: pointer; padding: 0;
-      font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; color: #0053CC;
-      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
-    }
-    .ask-link:hover { text-decoration: underline; }
-    .ask-link .material-icons-round, .ask-added .material-icons-round { font-size: 16px; }
-    .ask-added { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; color: #1F8940; white-space: nowrap; }
-    .vo-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .freq-section-head .ask-link, .freq-section-head .ask-added { margin-left: auto; }
-    .bc-questions { flex-direction: row; gap: 24px; align-items: stretch; flex-wrap: wrap; }
-    .bc-q-main { flex: 1 1 360px; min-width: 0; }
-    .bc-q-call { flex: 0 1 240px; border-left: 1px solid #DFE4EC; padding-left: 20px; }
-    .bc-q-call .hs-contact-info { margin: 0; }
-    .bc-qlist { list-style: none; margin: 12px 0 0; padding: 0; }
-    .bc-qlist li {
-      display: flex; align-items: flex-start; gap: 8px; padding: 8px 0;
-      border-top: 1px solid #EFF1F5; font-size: 14px; line-height: 20px; color: #1A1B24;
-    }
-    .bc-qlist li > .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
-    .bc-qtext { flex: 1; min-width: 0; }
-    .bc-qx {
-      appearance: none; border: none; background: none; cursor: pointer; color: #6B778C;
-      width: 28px; height: 28px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .bc-qx:hover { background: #F2F6FC; color: #1A1B24; }
-    .bc-qx .material-icons-round { font-size: 18px; }
-    .bc-empty { margin-top: 12px !important; }
-    .bc-qadd { display: flex; gap: 8px; margin-top: 12px; }
-    .bc-qadd input {
-      flex: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px;
-      font: inherit; font-size: 14px; color: #1A1B24; border: 1px solid #C8C7CC; border-radius: 4px;
-    }
-    .bc-qadd input:focus { outline: none; border-color: #0053CC; box-shadow: 0 0 0 1px #0053CC; }
-    .bc-oncall { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0 0; font-size: 14px; line-height: 20px; color: #6B778C; }
-    .bc-oncall .material-icons-round { font-size: 18px; color: #6B778C; }
+    .bc-call-details .hs-contact-info { margin: 0; }
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -2005,8 +1953,6 @@
     variant: 'quick',     // 'quick' (A) | 'prepare' (B) — proto bar
     notes: {},            // Variant B: stepId -> note for specialist
     noteOpen: null,       // Variant B: stepId whose note box is open
-    questions: [],        // Variant C: [{ id, text, kind: 'ask' | 'flag' | 'own' }]
-    testSynced: false,    // Variant C: Test a sync ran (per mode)
     syncFrequency: 'manual', // 'daily' | 'fully' | 'manual' — Summary Sync only
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete' — presets doneIds
     doneIds: [],          // checkpoint ids marked Done (drives score)
@@ -2161,7 +2107,37 @@
     },
   };
 
-  CHECKPOINTS.before = { summary: [STEP.channel], 'per-txn': [STEP.channel] };
+  // C — Before your call: only rows the user can really do now ('self' = completable, 'look' = view-only explore).
+  // 'call' rows render as a plain list of what the Synder specialist does on the call.
+  const CONNECT_C = {
+    id: 'channel', phase: 'self',
+    title: 'Connect your sales channel',
+    desc: 'Connect every channel you get paid from.',
+    where: 'Go to Organization settings',
+  };
+  CHECKPOINTS.before = {
+    summary: [
+      CONNECT_C,
+      { id: 'mapping', phase: 'self', title: 'Complete account mapping',
+        desc: 'Map Sale, Refund, Expense, and Adjustment groups to accounts.', where: 'Go to Mappings list' },
+      { id: 'test-sync', phase: 'self', title: 'Sync a summary manually',
+        desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
+        where: 'Go to Summaries list' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+    ],
+    'per-txn': [
+      CONNECT_C,
+      { id: 'explore', phase: 'look', title: 'Look through your clearing account and sales settings',
+        desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
+        where: 'Open Settings (view only)' },
+      { id: 'test-sync', phase: 'self', title: 'Sync 3 transactions to see how they’ll look in your books',
+        desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and core sales settings' },
+      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+    ],
+  };
 
   function activeCheckpoints() {
     return CHECKPOINTS[state.variant][state.syncMode];
@@ -2897,7 +2873,7 @@
   /* ── setup checklist ─────────────────────────────────── */
   function presetDoneIds(prog) {
     const list = activeCheckpoints();
-    const selfList = list.filter(c => c.phase !== 'call');
+    const selfList = list.filter(c => c.phase === 'self');
     let ids = [];
     if (prog === 'empty') ids = [];
     else if (prog === 'mid') ids = selfList.slice(0, Math.max(1, Math.floor(selfList.length / 2))).map(c => c.id);
@@ -2909,7 +2885,7 @@
 
   function syncScoreChipFromDone() {
     const list = activeCheckpoints();
-    const selfList = list.filter(c => c.phase !== 'call');
+    const selfList = list.filter(c => c.phase === 'self');
     const done = new Set(state.doneIds);
     const selfAllDone = selfList.length > 0 && selfList.every(c => done.has(c.id));
     const allDone = list.length > 0 && list.every(c => done.has(c.id));
@@ -2971,7 +2947,7 @@
   function healthModel() {
     const list = activeCheckpoints();
     const done = new Set(state.doneIds);
-    const selfList = list.filter(c => c.phase !== 'call');
+    const selfList = list.filter(c => c.phase === 'self');
     // Score is self-serve only (call-phase steps are specialist-activated)
     const scoreList = selfList;
     const total = scoreList.length;
@@ -3077,12 +3053,10 @@
       const cnt = $('.sb-cl-count', row);
       const lbl = $('.sb-cl-label', row);
       if (state.variant === 'before') {
-        const q = state.questions.length;
         if (lbl) lbl.textContent = 'Before your call';
-        if (ico) ico.textContent = 'event_note';
-        row.classList.remove('is-complete');
+        if (ico) ico.textContent = complete ? 'check_circle' : 'event_note';
         row.setAttribute('aria-label', 'Open Before your call');
-        if (cnt) { cnt.textContent = q + (q === 1 ? ' question' : ' questions'); cnt.style.display = q ? '' : 'none'; }
+        if (cnt) { cnt.textContent = model.count + ' / ' + model.total; cnt.style.display = ''; }
       } else {
         if (lbl) lbl.textContent = 'Setup checklist';
         row.setAttribute('aria-label', 'Open Setup checklist');
@@ -3171,13 +3145,13 @@
   function toggleStepDone(id) {
     const list = activeCheckpoints();
     const step = list.find(c => c.id === id);
-    if (!step || step.phase === 'call') return; // call-phase stays locked / specialist-only
+    if (!step || step.phase !== 'self') return; // call / look rows can't be marked done
     const set = new Set(state.doneIds);
     if (set.has(id)) {
       set.delete(id);
     } else {
-      const currentId = (list.filter(c => c.phase !== 'call').find(c => !set.has(c.id)) || {}).id;
-      if (id !== currentId) return; // only the current step can be marked done
+      const currentId = (list.filter(c => c.phase === 'self').find(c => !set.has(c.id)) || {}).id;
+      if (id !== currentId && state.variant !== 'before') return; // A/B: only the current step; C: any completable row
       set.add(id);
     }
     const order = list.map(c => c.id);
@@ -3193,6 +3167,7 @@
       period: 'settings',
       clearing: 'settings',
       'core-sales': 'settings',
+      explore: 'settings',
       'call-settings': 'settings',
       'test-sync': state.syncMode === 'summary' ? 'summaries' : 'transactions',
       historical: state.syncMode === 'summary' ? 'summaries' : 'historical',
@@ -3219,123 +3194,48 @@
     }
   }
 
-  /* ── Variant C: Before your call ── */
-  let qSeq = 0;
-  function addQuestion(text, kind) {
-    const t = String(text || '').trim();
-    if (!t) return false;
-    if (state.questions.some(q => q.text === t)) return false;
-    state.questions.push({ id: 'q' + (++qSeq), text: t, kind: kind || 'own' });
-    return true;
-  }
-  function hasQuestion(text) { return state.questions.some(q => q.text === text); }
-
-  function askLink(text) {
-    if (state.variant !== 'before') return '';
-    if (hasQuestion(text)) return '<span class="ask-added"><span class="material-icons-round">check</span>Added to questions</span>';
-    return '<button type="button" class="ask-link" data-ask="' + escapeHtml(text) + '"><span class="material-icons-round">help_outline</span>Ask about this</button>';
-  }
-
-  function summaryMappingVoHtml() {
-    return `
-        <section class="vo-section" aria-labelledby="vo-map-h">
-          <h2 id="vo-map-h">Mapping</h2>
-          <p>Which accounts your summary lines post to.</p>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-sales">Sales</label>${askLink('Sales — should sales go to Sales income?')}</div>
-            <select id="vo-map-sales" disabled><option>Sales income (Income)</option></select></div>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-fees">Stripe fees</label>${askLink('Stripe fees — should fees go to Merchant fees?')}</div>
-            <select id="vo-map-fees" disabled><option>Merchant fees (Expense)</option></select></div>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-ref">Refunds</label>${askLink('Refunds — is the Refunds account right?')}</div>
-            <select id="vo-map-ref" disabled><option>Refunds (Contra income)</option></select></div>
-        </section>`;
-  }
-
-  function testResults() {
-    return state.syncMode === 'summary'
-      ? [
-          { id: 'r1', name: 'Summary Mar 1–7 · Sales', to: 'Sales income', amt: '$3,482.10' },
-          { id: 'r2', name: 'Summary Mar 1–7 · Stripe fees', to: 'Merchant fees', amt: '−$101.20' },
-          { id: 'r3', name: 'Summary Mar 1–7 · Refunds', to: 'Refunds', amt: '−$54.00' },
-        ]
-      : [
-          { id: 'r1', name: 'Shopify · Order #1042', to: 'Sales receipt', amt: '$84.00' },
-          { id: 'r2', name: 'Stripe · Payout', to: 'Deposit', amt: '$1,240.50' },
-          { id: 'r3', name: 'Stripe · Fee', to: 'Merchant fees', amt: '$2.74' },
-        ];
-  }
-  function flagText(r) { return 'Flagged: ' + r.name + ' → ' + r.to + ' (' + r.amt + ')'; }
-
+  /* ── Variant C: Before your call (plain list) ── */
   function beforeCallHtml() {
-    const summary = state.syncMode === 'summary';
-    const channelDone = state.doneIds.includes('channel');
-    const pointers = summary
-      ? ['Check which account your Stripe fees go to', 'See how sales and refunds are mapped', 'See why sync is Manual for now']
-      : ['Check your clearing account', 'See how products, taxes, and fees post', 'Check which account your Stripe fees go to'];
-    const syncLabel = summary ? 'Sync manually' : 'Sync 3 transactions';
-    const results = state.testSynced
-      ? '<ul class="bc-results">' + testResults().map(r => {
-          const flagged = hasQuestion(flagText(r));
-          return '<li><div class="bc-res-main"><span class="bc-res-name">' + r.name + '</span><span class="bc-res-to">→ ' + r.to + ' · ' + r.amt + '</span></div>' +
-            (flagged
-              ? '<span class="ask-added"><span class="material-icons-round">flag</span>Flagged</span>'
-              : '<button type="button" class="ask-link" data-flag="' + r.id + '">Something looks off?</button>') +
-            '</li>';
-        }).join('') + '</ul>'
-      : '';
-    const qs = state.questions.length
-      ? '<ul class="bc-qlist">' + state.questions.map(q =>
-          '<li><span class="material-icons-round">' + (q.kind === 'flag' ? 'flag' : q.kind === 'ask' ? 'help_outline' : 'chat_bubble_outline') + '</span>' +
-          '<span class="bc-qtext">' + escapeHtml(q.text) + '</span>' +
-          '<button type="button" class="bc-qx" data-q-remove="' + q.id + '" aria-label="Remove question"><span class="material-icons-round">close</span></button></li>'
-        ).join('') + '</ul>'
-      : '<p class="bc-empty">Nothing yet. Use “Ask about this” in Settings or flag a sync result.</p>';
-    const unlock = summary
-      ? 'sync frequency, auto-sync, and historical import.'
-      : 'sync frequency, clearing account, sales settings, and auto-sync.';
+    const list = activeCheckpoints();
+    const done = new Set(state.doneIds);
+    const selfList = list.filter(c => c.phase === 'self');
+    const count = selfList.filter(c => done.has(c.id)).length;
+    const allDone = selfList.length > 0 && count === selfList.length;
+    const firstOpen = (selfList.find(c => !done.has(c.id)) || {}).id;
+    const rows = list.filter(c => c.phase !== 'call').map(c => {
+      const isLook = c.phase === 'look';
+      const isDone = !isLook && done.has(c.id);
+      const status = isDone ? 'done' : (c.id === firstOpen ? 'current' : 'pending');
+      const ico = isLook
+        ? '<span class="ico look"><span class="material-icons-round">visibility</span></span>'
+        : isDone
+          ? '<span class="ico done"><span class="material-icons-round">check</span></span>'
+          : '<span class="ico ' + (status === 'current' ? 'current' : 'todo') + '"></span>';
+      let actions = '';
+      if (!isDone) {
+        const primary = status === 'current' ? '' : ' is-secondary';
+        actions = '<div class="hs-step-actions"><button type="button" class="hs-where' + primary + '" data-where="' + c.id + '">' + c.where + '</button>' +
+          (isLook ? '' : '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button>') + '</div>';
+      }
+      return '<article class="hs-step-card is-' + status + '" data-step-id="' + c.id + '" data-status="' + (isLook ? 'look' : status) + '">' +
+        '<div class="hs-step-top">' + ico + '<div class="hs-step-body">' +
+        '<div class="hs-step-title-row"><h3 class="hs-step-title">' + c.title + '</h3></div>' +
+        '<p class="hs-step-desc">' + c.desc + '</p>' + actions +
+        '</div></div></article>';
+    }).join('');
+    const callRows = list.filter(c => c.phase === 'call').map(c => '<li>' + c.title + '</li>').join('');
+    const meta = allDone
+      ? '<span class="bc-meta is-done">All done — you’re ready for your call</span>'
+      : '<span class="bc-meta">' + count + ' / ' + selfList.length + ' done</span>';
     return `
       <div class="bc-wrap">
         <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
-        <p class="page-subtitle" style="margin-bottom:20px">Get familiar with Synder and collect questions for your Synder specialist.</p>
-
-        <section class="bc-must${channelDone ? ' is-done' : ''}" aria-label="Must do">
-          <span class="ico">${channelDone ? '<span class="material-icons-round">check</span>' : ''}</span>
-          <div class="bc-must-body">
-            <h2>Connect your sales channel</h2>
-            <p>${channelDone ? 'Connected. Synder is collecting your sales.' : 'The one thing to do before the call — connect where you get paid.'}</p>
-          </div>
-          ${channelDone ? '' : '<div class="bc-must-actions"><button type="button" class="hs-where" data-where="channel">Go to Organization settings</button><button type="button" class="hs-mark" data-mark="channel">Mark as done</button></div>'}
-        </section>
-
-        <div class="bc-grid">
-          <section class="bc-card" aria-labelledby="bc-explore-h">
-            <span class="bc-card-ico material-icons-round">visibility</span>
-            <h2 id="bc-explore-h">Explore your settings</h2>
-            <p>See how Synder will record your sales.</p>
-            <ul class="bc-pointers">${pointers.map(t => '<li>' + t + '</li>').join('')}</ul>
-            <button type="button" class="btn btn-outlined bc-cta" data-bc-explore="1">Explore settings</button>
-          </section>
-          <section class="bc-card" aria-labelledby="bc-test-h">
-            <span class="bc-card-ico material-icons-round">sync</span>
-            <h2 id="bc-test-h">Test a sync</h2>
-            <p>${summary ? 'Sync one summary manually and see where each line lands.' : 'Sync 3 transactions and see how they land in your books.'}</p>
-            ${state.testSynced ? results : '<button type="button" class="btn btn-outlined bc-cta" data-bc-sync="1">' + syncLabel + '</button>'}
-          </section>
-        </div>
-
-        <section class="bc-card bc-questions" aria-labelledby="bc-q-h">
-          <div class="bc-q-main">
-            <h2 id="bc-q-h">Your questions for the specialist</h2>
-            <p>Your Synder specialist will read these before the call.</p>
-            ${qs}
-            <div class="bc-qadd">
-              <input type="text" id="bc-q-input" placeholder="Add your own question" aria-label="Add your own question" />
-              <button type="button" class="btn btn-primary" id="bc-q-add">Add</button>
-            </div>
-          </div>
-          <aside class="bc-q-call">${checklistContactBaseHtml()}</aside>
-        </section>
-
-        <p class="bc-oncall"><span class="material-icons-round">event</span>On the call, your Synder specialist will unlock: ${unlock}</p>
+        <p class="page-subtitle" style="margin-bottom:16px">Here’s what you can do now, and what your Synder specialist will set up with you.</p>
+        <div class="bc-section-h"><h2>While you wait for your call</h2>${meta}</div>
+        <div class="hs-steps">${rows}</div>
+        <div class="bc-section-h"><h2>On the call</h2></div>
+        <ul class="bc-call-list">${callRows}</ul>
+        <div class="bc-call-details">${checklistContactBaseHtml()}</div>
       </div>`;
   }
 
@@ -3527,12 +3427,10 @@
         body = `
         <h1 class="page-title" style="margin-bottom:4px">Settings</h1>
         <p class="page-subtitle" style="margin-bottom:16px">Summary Sync settings for this sandbox org.</p>
-        ${state.variant === 'before' ? summaryMappingVoHtml() : ''}
         <section class="freq-section" aria-labelledby="freq-heading">
           <div class="freq-section-head">
             <h2 id="freq-heading">Synchronization frequency</h2>
             ${softPill('Ready to activate')}
-            ${askLink('Synchronization frequency — which option fits us?')}
           </div>
           <p class="freq-intro">Sync is Manual until your setup call. Your specialist sets the frequency with you.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
@@ -3544,17 +3442,17 @@
         <section class="vo-section" id="vo-sales" aria-labelledby="vo-sales-h">
           <h2 id="vo-sales-h">Sales</h2>
           <p>Where Synder posts sales before payout.</p>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-clearing">Clearing account</label>${askLink('Clearing account — is Shopify Clearing (Bank) right for us?')}</div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-clearing">Clearing account</label></div>
             <select id="vo-clearing" disabled><option>Shopify Clearing (Bank)</option></select></div>
         </section>
         <section class="vo-section" id="vo-core" aria-labelledby="vo-core-h">
           <h2 id="vo-core-h">Products/Services, Taxes, and Fees</h2>
           <p>How your sales post to your books.</p>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-product">Default product</label>${askLink('Default product — should sales post as Shopify Sales?')}</div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-product">Default product</label></div>
             <select id="vo-product" disabled><option>Shopify Sales</option></select></div>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-tax">Tax</label>${askLink('Tax — should tax post as a separate line?')}</div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-tax">Tax</label></div>
             <select id="vo-tax" disabled><option>Post as separate line</option></select></div>
-          <div class="vo-field"><div class="vo-label-row"><label for="vo-fees">Fees account</label>${askLink('Fees account — should fees go to Merchant fees?')}</div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-fees">Fees account</label></div>
             <select id="vo-fees" disabled><option>Merchant fees (Expense)</option></select></div>
         </section>
         ${autoSyncRowHtml()}`;
@@ -3624,7 +3522,6 @@
     const btn = e.target.closest('button');
     if (!btn) return;
     state.syncMode = btn.dataset.sync;
-    state.testSynced = false;
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b === btn));
     // Re-apply current score preset for the new mode’s checkpoint count
     presetDoneIds(state.scoreProgress);
@@ -3728,45 +3625,6 @@
       toggleStepDone(markBtn.dataset.mark);
       return;
     }
-    const askBtn = e.target.closest('[data-ask]');
-    if (askBtn) {
-      e.preventDefault();
-      addQuestion(askBtn.dataset.ask, 'ask');
-      renderApp();
-      return;
-    }
-    const flagBtn = e.target.closest('[data-flag]');
-    if (flagBtn) {
-      e.preventDefault();
-      const r = testResults().find(x => x.id === flagBtn.dataset.flag);
-      if (r) addQuestion(flagText(r), 'flag');
-      renderApp();
-      return;
-    }
-    const qRemove = e.target.closest('[data-q-remove]');
-    if (qRemove) {
-      e.preventDefault();
-      state.questions = state.questions.filter(q => q.id !== qRemove.dataset.qRemove);
-      renderApp();
-      return;
-    }
-    if (e.target.closest('#bc-q-add')) {
-      e.preventDefault();
-      submitOwnQuestion();
-      return;
-    }
-    if (e.target.closest('[data-bc-explore]')) {
-      e.preventDefault();
-      state.appPage = 'settings';
-      renderApp();
-      return;
-    }
-    if (e.target.closest('[data-bc-sync]')) {
-      e.preventDefault();
-      state.testSynced = true;
-      renderApp();
-      return;
-    }
     const noteOpen = e.target.closest('[data-note-open]');
     if (noteOpen) {
       e.preventDefault();
@@ -3833,22 +3691,6 @@
     }
     if (e.target === $('#learn-modal')) {
       closeLearnModal();
-    }
-  });
-
-  function submitOwnQuestion() {
-    const input = $('#bc-q-input');
-    if (!input) return;
-    if (addQuestion(input.value, 'own')) {
-      renderApp();
-      const again = $('#bc-q-input');
-      if (again) again.focus();
-    }
-  }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && e.target && e.target.id === 'bc-q-input') {
-      e.preventDefault();
-      submitOwnQuestion();
     }
   });
 
