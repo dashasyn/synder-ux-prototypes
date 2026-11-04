@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v45 -->
+<!-- period-lock v46 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v45" />
+<meta name="prototype-version" content="v46" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -57,7 +57,7 @@ body{margin:0;display:flex;flex-direction:column;min-height:100vh;background:var
 .acb{width:32px;height:32px;border-radius:50%;background:var(--color-primary)!important;align-items:center;justify-content:center}.top .acb .mi{color:var(--color-white);font-size:20px}
 .orgmenu .dropdown-item{display:flex;align-items:center;gap:10px}.orgmenu .oi{display:flex;flex-direction:column}
 /* ---- v37 production layout helpers (visual only) ---- */
-.fbar{background:#F3F4F7;border-radius:8px;padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.fbar{background:var(--bg-hover,#EFF1F5);border-radius:8px;padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
 .fbar .ff{display:flex;flex-direction:column;gap:4px;min-width:180px}.fbar .ff .form-label{margin:0}
 .fbar .pl-help{margin:0}
 .fbar-b{display:flex;gap:16px}
@@ -110,7 +110,7 @@ td.cb,th.cb{width:40px}
 .page-title-row{flex-wrap:wrap}
 .card{border:1px solid var(--border-default);box-shadow:none;padding:16px}
 .tcard{padding:0}
-.tcard .table-wrap{box-shadow:none;border-radius:0;overflow:visible}
+.tcard .table-wrap{box-shadow:none;border-radius:0;overflow:visible;border:none}
 table.synder-table thead th{height:52px;font-size:14px;line-height:20px;font-weight:500}
 table.synder-table tbody tr:last-child td{border-bottom:0}
 table.synder-table th.r,table.synder-table td.r{text-align:right}
@@ -122,6 +122,7 @@ td.act .btn-icon{vertical-align:middle}
 .dropdown-item.dis:hover{background:none}
 .dropdown-item.dis .cell-subtext{color:var(--text-secondary)}
 .sec-t{font-size:16px;line-height:24px;font-weight:600;color:var(--text-primary);margin:0 0 12px}
+.card.fcard{background:var(--bg-hover,#EFF1F5);border:none;border-radius:8px}
 .fcard .fgrid{display:flex;flex-wrap:wrap;gap:16px}
 .fcard .ff{display:flex;flex-direction:column;gap:4px;width:280px}
 .fcard .chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
@@ -199,7 +200,7 @@ tr.si-sub td{background:#F7F8FA}
 .rr-tabs a.on{color:#0053CC;border-bottom-color:#0053CC}
 .rr-list{margin:0;padding-left:20px}.rr-list li{margin:6px 0}
 th.grp{text-align:center!important;border-bottom:1px solid var(--border-default)}
-.rr-fpanel{background:#F3F4F7;border-radius:8px;padding:16px}
+.rr-fpanel{background:var(--bg-hover,#EFF1F5);border-radius:8px;padding:16px}
 .rr-strip{display:flex;flex-wrap:wrap;align-items:center;gap:12px 32px;background:#F3F4F7;border-radius:4px;padding:12px 16px}
 .rr-lbl{color:var(--text-secondary)}.rr-q{font-size:18px;vertical-align:-4px;color:var(--text-secondary);cursor:help}
 .rr-h{display:flex;align-items:center;gap:8px}.rr-h .text-link{font-weight:inherit}
@@ -801,6 +802,8 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log46=['Filter panels on every page (Transactions list toolbar filters, Summary sync Transactions list, Sync Issues, Activity log, Subscriptions, Summaries, Products, Reconciliation, Import activity log) use one background: #EFF1F5 (UI kit --bg-hover; sampled from the production Subscriptions screenshot). Was #F3F4F7 (grey panels) and white (Activity log, Dashboard, Reconciliation filter cards). Controls inside stay white (kit).',
+  'Tables: 1px outline. The card and the kit table wrapper both drew a 1px #DFE4EC border, which read as 2px; the inner wrapper border is removed. Applies to every table.'];
  const log45=['Demo data matches the Activity log: Stripe and Shopify are locked through Aug 31 until the System "date advanced" run on Oct 5, so every lock result for a Sep-dated item now syncs on Oct 6–7, after that run.',
   'Shopify (hard): batch_77 received and synced Oct 6 08:30; order #2108 Oct 7 10:21; JE-2006 Oct 6 06:12; order #1043 edited Oct 7, Rollback canceled Oct 7 12:05; Northwind SH-4471-08 already Oct 6.',
   'Stripe (soft, Iteration 2): re_3P8 Oct 6 00:04; Buddy QA payment 0109 Oct 6 00:10; JE-1067 Oct 6 06:10; in_EU5521 Oct 7 11:40; payout po_1UAmix dated Oct 6 (payment and transfer parts Oct 6). Posted dates stay Oct 5 (move-to day 5). Transaction reconciliation Oct 1–5 created Oct 8 so it includes them.'];
@@ -938,9 +941,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v45','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v46','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v46',log46),
  cl('Changelog v45',log45),
  cl('Changelog v44',log44),
  cl('Changelog v43',log43),
