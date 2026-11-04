@@ -46,10 +46,10 @@
     .p-top {
       height: 56px; background: #fff; border-bottom: 1px solid #C8C7CC;
       display: flex; align-items: center; justify-content: flex-end;
-      gap: 16px; padding: 0 20px;
+      gap: 16px; padding: 0 20px 0 10px;
       position: sticky; top: var(--proto-bar-h); z-index: 30;
     }
-    .t-balance { font-size: 14px; color: #1A1B24; border-bottom: 2px solid #0053CC; padding-bottom: 2px; cursor: default; }
+    .t-balance { font-size: 14px; line-height: 20px; color: #1A1B24; padding: 2px 0; box-shadow: inset 0 -2px 0 #0053CC; cursor: default; }
     .t-balance b { color: #0053CC; font-weight: 600; }
     .t-how { font-size: 14px; color: #0053CC; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
     .t-how:hover { text-decoration: underline; }
@@ -85,6 +85,7 @@
     .p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 56px); }
     .p-side {
       width: 248px; min-width: 248px; background: #F6F6F6; border-right: 1px solid #C8C7CC;
+      scrollbar-gutter: stable;
       position: sticky; top: calc(var(--proto-bar-h) + 56px);
       height: calc(100vh - var(--proto-bar-h) - 56px); overflow-y: auto;
       display: flex; flex-direction: column;
@@ -92,14 +93,18 @@
     .p-main { flex: 1; min-width: 0; padding: 24px 32px 48px; }
 
     /* ── Context switcher trigger ── */
-    .ctx { position: relative; padding: 10px 10px 8px; border-bottom: 1px solid #C8C7CC; }
+    .ctx { position: relative; flex: 0 0 228px; width: 228px; height: 40px; display: flex; align-items: center; }
+    .t-left { display: flex; align-items: center; gap: 12px; margin-right: auto; height: 40px; }
+    .t-left #backChip:empty { display: none; }
     .ctx-trigger {
       width: 100%; display: flex; align-items: center; gap: 10px;
-      padding: 6px 8px; border: 1px solid transparent; border-radius: 6px;
+      height: 40px; padding: 0 8px; border: 0; border-radius: 6px;
       background: transparent; cursor: pointer; text-align: left; font: inherit; color: inherit;
     }
-    .ctx-trigger:hover, .ctx-trigger[aria-expanded="true"] { background: #fff; border-color: #DFE4EC; }
-    .ctx-trigger:focus-visible { outline: 2px solid #0053CC; outline-offset: 1px; }
+    .ctx-trigger:hover { background: #F2F6FC; }
+    .ctx-trigger[aria-expanded="true"] { background: #F2F6FC; box-shadow: inset 0 0 0 1px #DFE4EC; }
+    .ctx-trigger:focus-visible { outline: 2px solid #0053CC; outline-offset: 0; }
+    .ctx-trigger .av { width: 28px; height: 28px; font-size: 12px; }
     .ctx-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .ctx-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ctx-cap { font-size: 12px; line-height: 16px; color: #6B778C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -115,7 +120,7 @@
     .av.sm.firm { border-radius: 6px; }
 
     .back-chip {
-      display: inline-flex; align-items: center; gap: 4px; margin: 6px 8px 0;
+      display: inline-flex; align-items: center; gap: 4px; margin: 0; height: 28px;
       padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #6B778C;
       text-decoration: none; cursor: pointer; background: none; border: none; font-family: inherit;
     }
@@ -124,7 +129,7 @@
 
     /* ── Switcher popover ── */
     .pop {
-      position: absolute; left: 10px; top: calc(100% - 2px); z-index: 50;
+      position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
       width: 300px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
       box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none; overflow: hidden;
     }
@@ -221,7 +226,7 @@
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v2</span>
+    <span class="brand">Firm context switcher · v3</span>
     <span class="spacer"></span>
     <div class="seg" id="scenarioSeg">
       <button data-s="firm">Firm user</button>
@@ -231,6 +236,20 @@
   </div>
 
   <div class="p-top">
+    <div class="t-left">
+      <div class="ctx">
+        <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
+        <div class="pop" id="pop" role="dialog" aria-label="Switch firm or organization">
+          <div class="pop-search" id="popSearchWrap">
+            <input type="search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
+            <span class="kbd" id="kbdHint">Ctrl K</span>
+          </div>
+          <div class="pop-list" id="popList"></div>
+          <div class="pop-foot" id="popFoot"></div>
+        </div>
+      </div>
+      <div id="backChip"></div>
+    </div>
     <span class="t-balance">Balance: <b>∞</b></span>
     <button type="button" class="t-how" data-top="how">How it works?</button>
     <button type="button" class="t-ico" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications_none</span><span class="t-badge">3</span></button>
@@ -249,18 +268,6 @@
 
   <div class="p-body">
     <aside class="p-side">
-      <div class="ctx">
-        <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
-        <div id="backChip"></div>
-        <div class="pop" id="pop" role="dialog" aria-label="Switch firm or organization">
-          <div class="pop-search" id="popSearchWrap">
-            <input type="search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
-            <span class="kbd" id="kbdHint">Ctrl K</span>
-          </div>
-          <div class="pop-list" id="popList"></div>
-          <div class="pop-foot" id="popFoot"></div>
-        </div>
-      </div>
       <nav class="nav" id="nav"></nav>
     </aside>
     <main class="p-main" id="main"></main>
