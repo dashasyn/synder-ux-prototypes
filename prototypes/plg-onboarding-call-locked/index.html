@@ -893,7 +893,7 @@
     .page-panel.locked .lockable { opacity: .45; pointer-events: none; user-select: none; }
     .soft-pill {
       display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
-      border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 20px;
+      border-radius: 4px; font-size: 14px; font-weight: 500; line-height: 20px;
       color: #0053CC; background: #EEF4FF; white-space: nowrap;
     }
     .title-with-pill {
@@ -912,7 +912,7 @@
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       font-size: 14px; font-weight: 500; color: #1A1B24;
     }
-    .soft-row-help { font-size: 13px; line-height: 18px; color: #6B778C; }
+    .soft-row-help { font-size: 14px; line-height: 20px; color: #6B778C; }
     .soft-toggle {
       position: relative; width: 40px; height: 22px; flex-shrink: 0;
       border-radius: 11px; background: #DFE4EC; border: none; cursor: not-allowed;
@@ -928,7 +928,7 @@
     }
     .soft-form .field { margin-bottom: 14px; }
     .soft-form label {
-      display: block; font-size: 13px; font-weight: 500; color: #1A1B24; margin-bottom: 6px;
+      display: block; font-size: 14px; font-weight: 500; color: #1A1B24; margin-bottom: 6px;
     }
     .soft-form input, .soft-form select {
       width: 100%; height: 36px; padding: 0 10px; border: 1px solid #DFE4EC;
@@ -953,7 +953,7 @@
       border: 1px solid #DFE4EC; border-radius: 6px; padding: 16px;
       background: #F7F8FA;
     }
-    .placeholder-card .ph-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .placeholder-card .ph-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
     .placeholder-card .ph-line {
       height: 8px; background: #DFE4EC; border-radius: 4px; margin-bottom: 6px;
     }
@@ -1416,6 +1416,78 @@
     .hs-note-preview .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
     .hs-notes-count { display: flex; gap: 6px; align-items: center; margin-top: 6px; color: #3D4A5C; }
     .hs-notes-count .material-icons-round { font-size: 16px; color: #6B778C; }
+    /* ── Variant C: Before your call ── */
+    .bc-wrap { max-width: 760px; }
+    .bc-must {
+      display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;
+      border: 1px solid #B7D0FF; background: #E6F0FF; border-radius: 8px; padding: 16px; margin-bottom: 16px;
+    }
+    .bc-must.is-done { background: #F3FAF0; border-color: transparent; }
+    .bc-must .ico {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+      border: 1.5px solid #0053CC; background: #fff; display: flex; align-items: center; justify-content: center;
+    }
+    .bc-must.is-done .ico { background: #1F8940; border: none; color: #fff; }
+    .bc-must .ico .material-icons-round { font-size: 14px; }
+    .bc-must-body { flex: 1; min-width: 220px; }
+    .bc-must h2, .bc-card h2 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .bc-must.is-done h2 { color: #6B778C; }
+    .bc-must p, .bc-card p { margin: 0; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-must-actions { display: flex; gap: 16px; align-items: center; flex-basis: 100%; padding-left: 34px; }
+    .bc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 900px) { .bc-grid { grid-template-columns: 1fr; } }
+    .bc-card {
+      border: 1px solid #DFE4EC; border-radius: 8px; background: #fff; padding: 16px;
+      display: flex; flex-direction: column; align-items: flex-start;
+    }
+    .bc-card-ico { font-size: 22px; color: #0053CC; margin-bottom: 8px; }
+    .bc-pointers { margin: 10px 0 14px; padding-left: 18px; font-size: 14px; line-height: 22px; color: #1A1B24; }
+    .bc-cta { margin-top: auto; }
+    .bc-card > p + .bc-cta { margin-top: 14px; }
+    .bc-results { list-style: none; margin: 12px 0 0; padding: 0; width: 100%; }
+    .bc-results li {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 0; border-top: 1px solid #EFF1F5; font-size: 14px; line-height: 20px;
+    }
+    .bc-res-main { display: flex; flex-direction: column; min-width: 0; }
+    .bc-res-name { color: #1A1B24; }
+    .bc-res-to { color: #6B778C; }
+    .ask-link {
+      appearance: none; border: none; background: none; cursor: pointer; padding: 0;
+      font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; color: #0053CC;
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .ask-link:hover { text-decoration: underline; }
+    .ask-link .material-icons-round, .ask-added .material-icons-round { font-size: 16px; }
+    .ask-added { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; color: #1F8940; white-space: nowrap; }
+    .vo-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .freq-section-head .ask-link, .freq-section-head .ask-added { margin-left: auto; }
+    .bc-questions { flex-direction: row; gap: 24px; align-items: stretch; flex-wrap: wrap; }
+    .bc-q-main { flex: 1 1 360px; min-width: 0; }
+    .bc-q-call { flex: 0 1 240px; border-left: 1px solid #DFE4EC; padding-left: 20px; }
+    .bc-q-call .hs-contact-info { margin: 0; }
+    .bc-qlist { list-style: none; margin: 12px 0 0; padding: 0; }
+    .bc-qlist li {
+      display: flex; align-items: flex-start; gap: 8px; padding: 8px 0;
+      border-top: 1px solid #EFF1F5; font-size: 14px; line-height: 20px; color: #1A1B24;
+    }
+    .bc-qlist li > .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
+    .bc-qtext { flex: 1; min-width: 0; }
+    .bc-qx {
+      appearance: none; border: none; background: none; cursor: pointer; color: #6B778C;
+      width: 28px; height: 28px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .bc-qx:hover { background: #F2F6FC; color: #1A1B24; }
+    .bc-qx .material-icons-round { font-size: 18px; }
+    .bc-empty { margin-top: 12px !important; }
+    .bc-qadd { display: flex; gap: 8px; margin-top: 12px; }
+    .bc-qadd input {
+      flex: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px;
+      font: inherit; font-size: 14px; color: #1A1B24; border: 1px solid #C8C7CC; border-radius: 4px;
+    }
+    .bc-qadd input:focus { outline: none; border-color: #0053CC; box-shadow: 0 0 0 1px #0053CC; }
+    .bc-oncall { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0 0; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-oncall .material-icons-round { font-size: 18px; color: #6B778C; }
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -1435,55 +1507,31 @@
     .vo-field select { font: inherit; font-size: 14px; height: 36px; padding: 0 8px; border: 1px solid #DFE4EC; border-radius: 4px; background: #F7F8FA; color: #3D4A5C; }
   </style>
 </head>
-<body data-view="plan" data-variant="quick">
+<body data-view="app" data-variant="quick">
 
   <!-- Dark top variant bar -->
   <div class="proto-bar">
     <span class="brand">PLG onboarding — call-locked settings</span>
     <div class="spacer"></div>
 
-    <div class="proto-group">
-      <span class="proto-label">View</span>
-      <div class="seg" id="seg-view">
-        <button type="button" data-view="plan" class="active">Plan</button>
-        <button type="button" data-view="checkout">Checkout</button>
-        <button type="button" data-view="survey">Survey</button>
-        <button type="button" data-view="hubspot">HubSpot</button>
-        <button type="button" data-view="success">Success</button>
-        <button type="button" data-view="thankyou">Thank you</button>
-        <button type="button" data-view="app">App</button>
-      </div>
-    </div>
 
     <div class="proto-group">
       <span class="proto-label">Variant</span>
       <div class="seg" id="seg-variant">
         <button type="button" data-variant="quick" class="active">A · Quick fix</button>
         <button type="button" data-variant="prepare">B · Prepare for the call</button>
+        <button type="button" data-variant="before">C · Before your call</button>
       </div>
     </div>
 
     <div class="proto-group proto-app-only">
-      <span class="proto-label">Sync mode</span>
+      <span class="proto-label">Mode</span>
       <div class="seg" id="seg-sync">
         <button type="button" data-sync="summary" class="active">Summary</button>
         <button type="button" data-sync="per-txn">Per transaction</button>
       </div>
     </div>
 
-
-    <div class="proto-group proto-contact-demo proto-chip" id="contact-chips">
-      <span class="proto-label">Contact</span>
-      <label>
-        <select id="demo-contact">
-          <option value="zoom">Zoom</option>
-          <option value="phone">Phone</option>
-          <option value="email">Email</option>
-        </select>
-      </label>
-    </div>
-
-    <a class="proto-reset" id="btn-reset" href="#">Reset</a>
   </div>
 
   <!-- ═══════════════ FLOW 0 — Choose plan ═══════════════ -->
@@ -1957,6 +2005,8 @@
     variant: 'quick',     // 'quick' (A) | 'prepare' (B) — proto bar
     notes: {},            // Variant B: stepId -> note for specialist
     noteOpen: null,       // Variant B: stepId whose note box is open
+    questions: [],        // Variant C: [{ id, text, kind: 'ask' | 'flag' | 'own' }]
+    testSynced: false,    // Variant C: Test a sync ran (per mode)
     syncFrequency: 'manual', // 'daily' | 'fully' | 'manual' — Summary Sync only
     scoreProgress: 'empty', // 'empty' | 'mid' | 'almost' | 'complete' — presets doneIds
     doneIds: [],          // checkpoint ids marked Done (drives score)
@@ -2110,6 +2160,8 @@
       ],
     },
   };
+
+  CHECKPOINTS.before = { summary: [STEP.channel], 'per-txn': [STEP.channel] };
 
   function activeCheckpoints() {
     return CHECKPOINTS[state.variant][state.syncMode];
@@ -2764,15 +2816,15 @@
     if (contact === 'pending') {
       if (!state.demoForced) {
         state.demoContact = 'email';
-        $('#demo-contact').value = 'email';
+        if ($('#demo-contact')) $('#demo-contact').value = 'email';
       }
     } else {
       state.demoContact = contact;
-      $('#demo-contact').value = contact;
+      if ($('#demo-contact')) $('#demo-contact').value = contact;
     }
 
     renderContactBlock(contact);
-    $('#contact-chips').classList.add('show');
+    if ($('#contact-chips')) $('#contact-chips').classList.add('show');
   }
 
   $('#btn-enter-app').addEventListener('click', () => {
@@ -3023,7 +3075,19 @@
       const ico = $('.sb-cl-ico', row);
       if (ico) ico.textContent = complete ? 'check_circle' : 'checklist';
       const cnt = $('.sb-cl-count', row);
-      if (cnt) cnt.textContent = model.count + ' / ' + model.total;
+      const lbl = $('.sb-cl-label', row);
+      if (state.variant === 'before') {
+        const q = state.questions.length;
+        if (lbl) lbl.textContent = 'Before your call';
+        if (ico) ico.textContent = 'event_note';
+        row.classList.remove('is-complete');
+        row.setAttribute('aria-label', 'Open Before your call');
+        if (cnt) { cnt.textContent = q + (q === 1 ? ' question' : ' questions'); cnt.style.display = q ? '' : 'none'; }
+      } else {
+        if (lbl) lbl.textContent = 'Setup checklist';
+        row.setAttribute('aria-label', 'Open Setup checklist');
+        if (cnt) { cnt.textContent = model.count + ' / ' + model.total; cnt.style.display = ''; }
+      }
     });
     const main = $('#main-health');
     if (main) paintMainHealth(main, model);
@@ -3044,14 +3108,14 @@
   function syncVariantUrl() {
     try {
       const url = new URL(window.location.href);
-      if (state.variant === 'prepare') url.searchParams.set('variant', 'prepare');
+      if (state.variant !== 'quick') url.searchParams.set('variant', state.variant);
       else url.searchParams.delete('variant');
       history.replaceState(null, '', url.toString());
     } catch (err) { /* file:// or sandbox — ignore */ }
   }
 
   function setVariant(v) {
-    state.variant = v === 'prepare' ? 'prepare' : 'quick';
+    state.variant = (v === 'prepare' || v === 'before') ? v : 'quick';
     state.noteOpen = null;
     document.body.setAttribute('data-variant', state.variant);
     $$('#seg-variant button').forEach(b => b.classList.toggle('active', b.dataset.variant === state.variant));
@@ -3155,6 +3219,126 @@
     }
   }
 
+  /* ── Variant C: Before your call ── */
+  let qSeq = 0;
+  function addQuestion(text, kind) {
+    const t = String(text || '').trim();
+    if (!t) return false;
+    if (state.questions.some(q => q.text === t)) return false;
+    state.questions.push({ id: 'q' + (++qSeq), text: t, kind: kind || 'own' });
+    return true;
+  }
+  function hasQuestion(text) { return state.questions.some(q => q.text === text); }
+
+  function askLink(text) {
+    if (state.variant !== 'before') return '';
+    if (hasQuestion(text)) return '<span class="ask-added"><span class="material-icons-round">check</span>Added to questions</span>';
+    return '<button type="button" class="ask-link" data-ask="' + escapeHtml(text) + '"><span class="material-icons-round">help_outline</span>Ask about this</button>';
+  }
+
+  function summaryMappingVoHtml() {
+    return `
+        <section class="vo-section" aria-labelledby="vo-map-h">
+          <h2 id="vo-map-h">Mapping</h2>
+          <p>Which accounts your summary lines post to.</p>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-sales">Sales</label>${askLink('Sales — should sales go to Sales income?')}</div>
+            <select id="vo-map-sales" disabled><option>Sales income (Income)</option></select></div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-fees">Stripe fees</label>${askLink('Stripe fees — should fees go to Merchant fees?')}</div>
+            <select id="vo-map-fees" disabled><option>Merchant fees (Expense)</option></select></div>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-map-ref">Refunds</label>${askLink('Refunds — is the Refunds account right?')}</div>
+            <select id="vo-map-ref" disabled><option>Refunds (Contra income)</option></select></div>
+        </section>`;
+  }
+
+  function testResults() {
+    return state.syncMode === 'summary'
+      ? [
+          { id: 'r1', name: 'Summary Mar 1–7 · Sales', to: 'Sales income', amt: '$3,482.10' },
+          { id: 'r2', name: 'Summary Mar 1–7 · Stripe fees', to: 'Merchant fees', amt: '−$101.20' },
+          { id: 'r3', name: 'Summary Mar 1–7 · Refunds', to: 'Refunds', amt: '−$54.00' },
+        ]
+      : [
+          { id: 'r1', name: 'Shopify · Order #1042', to: 'Sales receipt', amt: '$84.00' },
+          { id: 'r2', name: 'Stripe · Payout', to: 'Deposit', amt: '$1,240.50' },
+          { id: 'r3', name: 'Stripe · Fee', to: 'Merchant fees', amt: '$2.74' },
+        ];
+  }
+  function flagText(r) { return 'Flagged: ' + r.name + ' → ' + r.to + ' (' + r.amt + ')'; }
+
+  function beforeCallHtml() {
+    const summary = state.syncMode === 'summary';
+    const channelDone = state.doneIds.includes('channel');
+    const pointers = summary
+      ? ['Check which account your Stripe fees go to', 'See how sales and refunds are mapped', 'See why sync is Manual for now']
+      : ['Check your clearing account', 'See how products, taxes, and fees post', 'Check which account your Stripe fees go to'];
+    const syncLabel = summary ? 'Sync manually' : 'Sync 3 transactions';
+    const results = state.testSynced
+      ? '<ul class="bc-results">' + testResults().map(r => {
+          const flagged = hasQuestion(flagText(r));
+          return '<li><div class="bc-res-main"><span class="bc-res-name">' + r.name + '</span><span class="bc-res-to">→ ' + r.to + ' · ' + r.amt + '</span></div>' +
+            (flagged
+              ? '<span class="ask-added"><span class="material-icons-round">flag</span>Flagged</span>'
+              : '<button type="button" class="ask-link" data-flag="' + r.id + '">Something looks off?</button>') +
+            '</li>';
+        }).join('') + '</ul>'
+      : '';
+    const qs = state.questions.length
+      ? '<ul class="bc-qlist">' + state.questions.map(q =>
+          '<li><span class="material-icons-round">' + (q.kind === 'flag' ? 'flag' : q.kind === 'ask' ? 'help_outline' : 'chat_bubble_outline') + '</span>' +
+          '<span class="bc-qtext">' + escapeHtml(q.text) + '</span>' +
+          '<button type="button" class="bc-qx" data-q-remove="' + q.id + '" aria-label="Remove question"><span class="material-icons-round">close</span></button></li>'
+        ).join('') + '</ul>'
+      : '<p class="bc-empty">Nothing yet. Use “Ask about this” in Settings or flag a sync result.</p>';
+    const unlock = summary
+      ? 'sync frequency, auto-sync, and historical import.'
+      : 'sync frequency, clearing account, sales settings, and auto-sync.';
+    return `
+      <div class="bc-wrap">
+        <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
+        <p class="page-subtitle" style="margin-bottom:20px">Get familiar with Synder and collect questions for your Synder specialist.</p>
+
+        <section class="bc-must${channelDone ? ' is-done' : ''}" aria-label="Must do">
+          <span class="ico">${channelDone ? '<span class="material-icons-round">check</span>' : ''}</span>
+          <div class="bc-must-body">
+            <h2>Connect your sales channel</h2>
+            <p>${channelDone ? 'Connected. Synder is collecting your sales.' : 'The one thing to do before the call — connect where you get paid.'}</p>
+          </div>
+          ${channelDone ? '' : '<div class="bc-must-actions"><button type="button" class="hs-where" data-where="channel">Go to Organization settings</button><button type="button" class="hs-mark" data-mark="channel">Mark as done</button></div>'}
+        </section>
+
+        <div class="bc-grid">
+          <section class="bc-card" aria-labelledby="bc-explore-h">
+            <span class="bc-card-ico material-icons-round">visibility</span>
+            <h2 id="bc-explore-h">Explore your settings</h2>
+            <p>See how Synder will record your sales.</p>
+            <ul class="bc-pointers">${pointers.map(t => '<li>' + t + '</li>').join('')}</ul>
+            <button type="button" class="btn btn-outlined bc-cta" data-bc-explore="1">Explore settings</button>
+          </section>
+          <section class="bc-card" aria-labelledby="bc-test-h">
+            <span class="bc-card-ico material-icons-round">sync</span>
+            <h2 id="bc-test-h">Test a sync</h2>
+            <p>${summary ? 'Sync one summary manually and see where each line lands.' : 'Sync 3 transactions and see how they land in your books.'}</p>
+            ${state.testSynced ? results : '<button type="button" class="btn btn-outlined bc-cta" data-bc-sync="1">' + syncLabel + '</button>'}
+          </section>
+        </div>
+
+        <section class="bc-card bc-questions" aria-labelledby="bc-q-h">
+          <div class="bc-q-main">
+            <h2 id="bc-q-h">Your questions for the specialist</h2>
+            <p>Your Synder specialist will read these before the call.</p>
+            ${qs}
+            <div class="bc-qadd">
+              <input type="text" id="bc-q-input" placeholder="Add your own question" aria-label="Add your own question" />
+              <button type="button" class="btn btn-primary" id="bc-q-add">Add</button>
+            </div>
+          </div>
+          <aside class="bc-q-call">${checklistContactBaseHtml()}</aside>
+        </section>
+
+        <p class="bc-oncall"><span class="material-icons-round">event</span>On the call, your Synder specialist will unlock: ${unlock}</p>
+      </div>`;
+  }
+
   function renderAppPage() {
     const page = state.appPage;
     const lockedPages = ['auto-sync', 'historical', 'smart-rules'];
@@ -3187,6 +3371,7 @@
       'smart-rules': 'Smart Rules',
       settings: 'Settings',
     };
+    if (state.variant === 'before') titles['setup-checklist'] = 'Before your call';
     const title = titles[page] || 'Dashboard';
     const model = healthModel();
 
@@ -3206,7 +3391,9 @@
     }
 
     let body = '';
-    if (page === 'setup-checklist') {
+    if (page === 'setup-checklist' && state.variant === 'before') {
+      body = beforeCallHtml();
+    } else if (page === 'setup-checklist') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
         <p class="page-subtitle" style="margin-bottom:12px">Finish these steps so you’re ready for setup and the call goes faster. Join the call to activate the rest.</p>
@@ -3340,10 +3527,12 @@
         body = `
         <h1 class="page-title" style="margin-bottom:4px">Settings</h1>
         <p class="page-subtitle" style="margin-bottom:16px">Summary Sync settings for this sandbox org.</p>
+        ${state.variant === 'before' ? summaryMappingVoHtml() : ''}
         <section class="freq-section" aria-labelledby="freq-heading">
           <div class="freq-section-head">
             <h2 id="freq-heading">Synchronization frequency</h2>
             ${softPill('Ready to activate')}
+            ${askLink('Synchronization frequency — which option fits us?')}
           </div>
           <p class="freq-intro">Sync is Manual until your setup call. Your specialist sets the frequency with you.</p>
           <div class="freq-options" id="freq-options">${radios}</div>
@@ -3355,17 +3544,17 @@
         <section class="vo-section" id="vo-sales" aria-labelledby="vo-sales-h">
           <h2 id="vo-sales-h">Sales</h2>
           <p>Where Synder posts sales before payout.</p>
-          <div class="vo-field"><label for="vo-clearing">Clearing account</label>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-clearing">Clearing account</label>${askLink('Clearing account — is Shopify Clearing (Bank) right for us?')}</div>
             <select id="vo-clearing" disabled><option>Shopify Clearing (Bank)</option></select></div>
         </section>
         <section class="vo-section" id="vo-core" aria-labelledby="vo-core-h">
           <h2 id="vo-core-h">Products/Services, Taxes, and Fees</h2>
           <p>How your sales post to your books.</p>
-          <div class="vo-field"><label for="vo-product">Default product</label>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-product">Default product</label>${askLink('Default product — should sales post as Shopify Sales?')}</div>
             <select id="vo-product" disabled><option>Shopify Sales</option></select></div>
-          <div class="vo-field"><label for="vo-tax">Tax</label>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-tax">Tax</label>${askLink('Tax — should tax post as a separate line?')}</div>
             <select id="vo-tax" disabled><option>Post as separate line</option></select></div>
-          <div class="vo-field"><label for="vo-fees">Fees account</label>
+          <div class="vo-field"><div class="vo-label-row"><label for="vo-fees">Fees account</label>${askLink('Fees account — should fees go to Merchant fees?')}</div>
             <select id="vo-fees" disabled><option>Merchant fees (Expense)</option></select></div>
         </section>
         ${autoSyncRowHtml()}`;
@@ -3418,7 +3607,8 @@
   }
 
   /* ── top bar / nav ───────────────────────────────────── */
-  $('#seg-view').addEventListener('click', e => {
+  const segView = $('#seg-view');
+  if (segView) segView.addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
     setView(btn.dataset.view);
@@ -3434,6 +3624,7 @@
     const btn = e.target.closest('button');
     if (!btn) return;
     state.syncMode = btn.dataset.sync;
+    state.testSynced = false;
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b === btn));
     // Re-apply current score preset for the new mode’s checkpoint count
     presetDoneIds(state.scoreProgress);
@@ -3458,7 +3649,8 @@
     row.addEventListener('click', () => openChecklistFromChip());
   });
 
-  $('#demo-contact').addEventListener('change', e => {
+  const demoContactSel = $('#demo-contact');
+  if (demoContactSel) demoContactSel.addEventListener('change', e => {
     state.demoContact = e.target.value;
     state.demoForced = true;
     // Checklist assumes the call is already agreed — keep a demo Zoom slot for Zoom.
@@ -3475,7 +3667,8 @@
 
   // Product nav clicks: see goProductPage / .ty-snav handlers above.
 
-  $('#btn-reset').addEventListener('click', e => {
+  const btnReset = $('#btn-reset');
+  if (btnReset) btnReset.addEventListener('click', e => {
     e.preventDefault();
     resetAll();
   });
@@ -3515,9 +3708,9 @@
     closeLearnModal();
     const tyToggleReset = $('#ty-autocharge');
     if (tyToggleReset) tyToggleReset.checked = true;
-    $('#demo-contact').value = 'zoom';
+    if ($('#demo-contact')) $('#demo-contact').value = 'zoom';
     $$('#seg-sync button').forEach(b => b.classList.toggle('active', b.dataset.sync === 'summary'));
-    $('#contact-chips').classList.remove('show');
+    if ($('#contact-chips')) $('#contact-chips').classList.remove('show');
     clearAllStepErrors();
 
     const snoozeBanner = $('#snooze-banner');
@@ -3533,6 +3726,45 @@
     if (markBtn && markBtn.dataset.mark) {
       e.preventDefault();
       toggleStepDone(markBtn.dataset.mark);
+      return;
+    }
+    const askBtn = e.target.closest('[data-ask]');
+    if (askBtn) {
+      e.preventDefault();
+      addQuestion(askBtn.dataset.ask, 'ask');
+      renderApp();
+      return;
+    }
+    const flagBtn = e.target.closest('[data-flag]');
+    if (flagBtn) {
+      e.preventDefault();
+      const r = testResults().find(x => x.id === flagBtn.dataset.flag);
+      if (r) addQuestion(flagText(r), 'flag');
+      renderApp();
+      return;
+    }
+    const qRemove = e.target.closest('[data-q-remove]');
+    if (qRemove) {
+      e.preventDefault();
+      state.questions = state.questions.filter(q => q.id !== qRemove.dataset.qRemove);
+      renderApp();
+      return;
+    }
+    if (e.target.closest('#bc-q-add')) {
+      e.preventDefault();
+      submitOwnQuestion();
+      return;
+    }
+    if (e.target.closest('[data-bc-explore]')) {
+      e.preventDefault();
+      state.appPage = 'settings';
+      renderApp();
+      return;
+    }
+    if (e.target.closest('[data-bc-sync]')) {
+      e.preventDefault();
+      state.testSynced = true;
+      renderApp();
       return;
     }
     const noteOpen = e.target.closest('[data-note-open]');
@@ -3604,13 +3836,30 @@
     }
   });
 
+  function submitOwnQuestion() {
+    const input = $('#bc-q-input');
+    if (!input) return;
+    if (addQuestion(input.value, 'own')) {
+      renderApp();
+      const again = $('#bc-q-input');
+      if (again) again.focus();
+    }
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target && e.target.id === 'bc-q-input') {
+      e.preventDefault();
+      submitOwnQuestion();
+    }
+  });
+
   // init
   (function initVariant() {
     let v = 'quick';
     try {
       const q = (new URLSearchParams(window.location.search).get('variant') || '').toLowerCase();
       const h = (window.location.hash || '').replace(/^#/, '').toLowerCase();
-      if (q === 'prepare' || q === 'b' || /(^|&)variant=(prepare|b)/.test(h) || h === 'prepare') v = 'prepare';
+      if (q === 'prepare' || q === 'b' || /(^|&)variant=(prepare|b)\b/.test(h) || h === 'prepare') v = 'prepare';
+      if (q === 'before' || q === 'c' || /(^|&)variant=(before|c)\b/.test(h) || h === 'before') v = 'before';
     } catch (err) { /* ignore */ }
     state.variant = v;
     document.body.setAttribute('data-variant', v);
@@ -3619,7 +3868,10 @@
   buildPhoneTimezones();
   presetDoneIds('empty');
   setStep(1);
-  setView('plan');
+  state.demoContact = 'zoom';
+  state.zoomSlot = { dayLabel: 'Tue 14 Apr', time: '10:00 AM' }; // call already scheduled
+  state.appPage = 'setup-checklist';
+  setView('app');
   updateContinueButtons();
   syncBookCtaVisibility();
 })();
