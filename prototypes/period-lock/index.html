@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v44 -->
+<!-- period-lock v45 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v44" />
+<meta name="prototype-version" content="v45" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -264,18 +264,18 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   paypal:{id:'paypal',org:'pt',name:'mzkt.by (PayPal)',short:'PayPal',pp:'PayPal',tz:'Europe/Vilnius',on:false,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:1,by:'Viacheslav Tarabarov',at:'2026-09-14'}},
  txns:[
   {id:'ch_buddy',integ:'stripe',info:'Buddy QA Customer · ch_3Q9k',type:'Invoice payment',amount:'128.00 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 09:14',status:'synced'},
-  {id:'re_3P8',it2:1,integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
-  {id:'inv_eur',it2:1,integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-05',webhook:'2026-10-02',syncedAt:'2026-10-02 11:40',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
-  {id:'po_mix',it2:1,integ:'stripe',info:'Payout · po_1UAmix',type:'Payout',amount:'247.50 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 06:30',status:'warn',reason:'moved',parts:[{t:'Payment',i:'ch_3QmPay',d:'2026-10-03'},{t:'Refund receipt',i:'re_3QmRef',d:'2026-09-29',mv:'2026-10-05'},{t:'Transfer',i:'po_1UAmix',d:'2026-10-03'}]},
+  {id:'re_3P8',it2:1,integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-05',webhook:'2026-10-06',syncedAt:'2026-10-06 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
+  {id:'inv_eur',it2:1,integ:'stripe',info:'Invoice · in_EU5521 (EUR)',type:'Invoice',amount:'500.00 EUR',date:'2026-09-05',posted:'2026-10-05',webhook:'2026-10-07',syncedAt:'2026-10-07 11:40',status:'warn',reason:'moved',objs:['Invoice'],fx:'1 EUR = 1.0842 USD · rate for Sep 5, 2026 (original date, from QuickBooks)'},
+  {id:'po_mix',it2:1,integ:'stripe',info:'Payout · po_1UAmix',type:'Payout',amount:'247.50 USD',date:'2026-10-06',webhook:'2026-10-06',syncedAt:'2026-10-06 06:30',status:'warn',reason:'moved',parts:[{t:'Payment',i:'ch_3QmPay',d:'2026-10-06'},{t:'Refund receipt',i:'re_3QmRef',d:'2026-09-29',mv:'2026-10-05'},{t:'Transfer',i:'po_1UAmix',d:'2026-10-06'}]},
   {id:'order_2120',integ:'shopify',info:'andrewshitsko · Order #2120',type:'Order',amount:'54.00 USD',date:'2026-10-06',webhook:'2026-10-06',syncedAt:'2026-10-06 15:02',status:'synced'},
-  {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 08:30',status:'canceled',reason:'canceled',part:'payment'},
-  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-28',webhook:'2026-10-02',syncedAt:'2026-10-02 10:21',status:'canceled',reason:'canceled',part:'shipping fee',openPart:{t:'order payment',d:'2026-10-02'}},
-  {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Oct 3)',type:'Order',amount:'72.00 USD',date:'2026-09-26',webhook:'2026-09-26',syncedAt:'2026-10-03 12:05',status:'rbcx',reason:'rbcx',edit:'2026-10-03'},
+  {id:'batch_77',integ:'shopify',info:'andrewshitsko · Batch payout · 2 payments',type:'Batch payment',amount:'310.00 USD',date:'2026-09-30',webhook:'2026-10-06',syncedAt:'2026-10-06 08:30',status:'canceled',reason:'canceled',part:'payment'},
+  {id:'order_2108',integ:'shopify',info:'andrewshitsko · Order #2108',type:'Order',amount:'86.40 USD',date:'2026-09-28',webhook:'2026-10-07',syncedAt:'2026-10-07 10:21',status:'canceled',reason:'canceled',part:'shipping fee',openPart:{t:'order payment',d:'2026-10-02'}},
+  {id:'order_1043',integ:'shopify',info:'andrewshitsko · Order #1043 (edited Oct 7)',type:'Order',amount:'72.00 USD',date:'2026-09-26',webhook:'2026-09-26',syncedAt:'2026-10-07 12:05',status:'rbcx',reason:'rbcx',edit:'2026-10-07'},
   {id:'cn_1QzVd',integ:'stripe',info:'Credit note void · cn_1QzVd',type:'Credit memo',amount:'-35.00 USD',date:'2026-09-24',webhook:'2026-09-24',syncedAt:'2026-10-07 09:40',status:'rbcx',reason:'rbcx'},
   {id:'ch_other',integ:'stripe',info:'Acme Ltd · ch_3QaB',type:'Invoice payment',amount:'60.00 USD',date:'2026-10-08',webhook:'2026-10-08',syncedAt:'2026-10-08 10:00',status:'canceled',reason:'other'},
-  {id:'je_rr_sep',it2:1,integ:'stripe',info:'Revenue recognition · JE-1067',type:'Journal entry',amount:'98.63 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 06:10',status:'warn',reason:'moved',revrec:1},
-  {id:'ch_1Q9kSeats',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice payment 26EC8A01-0109',type:'Invoice payment',amount:'480.00 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-01',syncedAt:'2026-10-01 00:10',status:'warn',reason:'moved',objs:[['Invoice','in_1Q9kSeats'],['Payment','ch_1Q9kSeats']]},
-  {id:'je_rr_shop_sep',integ:'shopify',info:'Revenue recognition · JE-2006',type:'Journal entry',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-01',syncedAt:'2026-10-01 06:12',status:'canceled',reason:'canceled',part:'journal entry',revrec:1,fdd:1},
+  {id:'je_rr_sep',it2:1,integ:'stripe',info:'Revenue recognition · JE-1067',type:'Journal entry',amount:'98.63 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-06',syncedAt:'2026-10-06 06:10',status:'warn',reason:'moved',revrec:1},
+  {id:'ch_1Q9kSeats',it2:1,integ:'stripe',info:'Buddy QA Customer · Invoice payment 26EC8A01-0109',type:'Invoice payment',amount:'480.00 USD',date:'2026-09-30',posted:'2026-10-05',webhook:'2026-10-06',syncedAt:'2026-10-06 00:10',status:'warn',reason:'moved',objs:[['Invoice','in_1Q9kSeats'],['Payment','ch_1Q9kSeats']]},
+  {id:'je_rr_shop_sep',integ:'shopify',info:'Revenue recognition · JE-2006',type:'Journal entry',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-06',syncedAt:'2026-10-06 06:12',status:'canceled',reason:'canceled',part:'journal entry',revrec:1,fdd:1},
   {id:'ch_1R7cTS08',integ:'shopify',info:'Northwind LLC · Invoice payment SH-4471-08',type:'Invoice payment',amount:'240.00 USD',date:'2026-09-30',webhook:'2026-10-06',syncedAt:'2026-10-06 06:00',status:'canceled',reason:'canceled',part:'payment',fdd:1},
   {id:'sq_pay_0915',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_8Kq2',type:'Payment',amount:'18.40 USD',date:'2026-09-15',webhook:'2026-09-22',syncedAt:'2026-09-22 08:14',status:'canceled',reason:'canceled'},
   {id:'sq_pay_1014',integ:'greenleaf',info:'Green Leaf (Square) · Payment pmt_9Rt7',type:'Payment',amount:'42.00 USD',date:'2026-10-14',webhook:'2026-10-14',syncedAt:'2026-10-14 16:02',status:'synced'},
@@ -593,7 +593,7 @@ function vRecon(q){const id=q&&q.get('id');if(id)return vReconRes(id,q.get('tab'
 const msOf=r=>IT===2&&r.ms?r.ms:[];
 const rcChip=r=>msOf(r).length?'<span class="status status-yellow">Attention required</span>':'<span class="status status-green">Reconciled</span>';
 const RECON=[
- {id:'oct',from:'2026-10-01',to:'2026-10-05',created:'2026-10-05',m:18,d:[],ms:[['2026-10-05','re_3P8mXy9kL2','-42.50 USD','Refund receipt;Expense','—',2]],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
+ {id:'oct',from:'2026-10-01',to:'2026-10-05',created:'2026-10-08',m:18,d:[],ms:[['2026-10-05','re_3P8mXy9kL2','-42.50 USD','Refund receipt;Expense','—',2]],rows:[['2026-10-04','po_1U9E…','304.02 USD','Transfer;payout','Auto',2],['2026-10-03','ch_3Q9k…','128.00 USD','Payment;Expense;charge','Auto',3]]},
  {id:'sep',from:'2026-09-01',to:'2026-09-30',created:'2026-10-02',m:412,d:[['2026-09-18','ch_3Q7h…','59.00 USD','58.50 USD'],['2026-09-09','ch_3Q6c…','24.00 USD','—']],rows:[['2026-09-28','ch_3Q8k…','128.00 USD','Payment;Expense;charge','Auto',3],['2026-09-15','po_1U8V…','161.26 USD','Transfer;payout','Auto',2]]},
  {id:'aug',from:'2026-08-01',to:'2026-08-31',created:'2026-09-05',m:398,d:[],rows:[['2026-08-27','ch_3Q5m…','96.00 USD','Payment;Expense;charge','Auto',3],['2026-08-14','po_1U7K…','212.40 USD','Transfer;payout','Auto',2]]}];
 function vReconRes(id,tab){const r=RECON.find(x=>x.id===id)||RECON[1],c=S.integ.stripe,L=lockOf(c);
@@ -801,6 +801,9 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log45=['Demo data matches the Activity log: Stripe and Shopify are locked through Aug 31 until the System "date advanced" run on Oct 5, so every lock result for a Sep-dated item now syncs on Oct 6–7, after that run.',
+  'Shopify (hard): batch_77 received and synced Oct 6 08:30; order #2108 Oct 7 10:21; JE-2006 Oct 6 06:12; order #1043 edited Oct 7, Rollback canceled Oct 7 12:05; Northwind SH-4471-08 already Oct 6.',
+  'Stripe (soft, Iteration 2): re_3P8 Oct 6 00:04; Buddy QA payment 0109 Oct 6 00:10; JE-1067 Oct 6 06:10; in_EU5521 Oct 7 11:40; payout po_1UAmix dated Oct 6 (payment and transfer parts Oct 6). Posted dates stay Oct 5 (move-to day 5). Transaction reconciliation Oct 1–5 created Oct 8 so it includes them.'];
  const log44=['FDD v48 Activity log: 4 actions replace "Period lock set" and the System "Recurring on day 5" row: Period lock enabled, Period lock disabled, Period lock updated (full settings), Period lock date advanced (initiator System, same full settings). First enable + save writes Enabled and Updated with the same time. Action filter lists all 4.',
   'Demo history: Stripe and PayPal enabled + updated in Aug, monthly System date-advanced rows (Sep 5, Oct 5), Stripe updated Sep 28 (move-to day 1 → 5, Iteration 2 only), PayPal disabled Sep 14; Shopify enabled + updated Sep 12, date advanced Oct 5; Green Leaf enabled + updated Sep 20, updated Oct 2. Iteration 1: Hard lock, no move-to.',
   'Live: saving writes Enabled + Updated, Updated or Disabled; setting the demo date past a run day writes the System Date advanced rows. Mixpanel: PeriodLockEnabled, PeriodLockUpdated, PeriodLockDisabled, PeriodLockDateAdvanced (PeriodLockSet removed).',
@@ -935,9 +938,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v44','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v45','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v45',log45),
  cl('Changelog v44',log44),
  cl('Changelog v43',log43),
  cl('Changelog v42',log42),
