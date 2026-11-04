@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firm context switcher — Synder</title>
   <!--
+    v4: restructured firm-side Client details (Work/Profile/Billing/Firm colleagues), dev state toggle, pending client page. Deep link: #firm/c3
     Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
@@ -19,6 +20,7 @@
     :root { --proto-bar-h: 48px; }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+    html { scrollbar-gutter: stable; }
     body {
       font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 14px; line-height: 20px; color: var(--text-primary, #1A1B24); background: #fff;
@@ -222,16 +224,80 @@
     .idrow { display: flex; gap: 8px; margin-bottom: 20px; }
     .idrow input { font-size: 16px; letter-spacing: .04em; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+    /* ── v4 client details ── */
+    .cd-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+    .cd-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .cd-title h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .pager { display: inline-flex; align-items: center; gap: 2px; color: #6B778C; font-size: 13px; white-space: nowrap; }
+    .pager button { width: 28px; height: 28px; border: 0; background: none; border-radius: 4px; cursor: pointer; color: #6B778C; display: inline-flex; align-items: center; justify-content: center; }
+    .pager button:hover:not(:disabled) { background: #F2F6FC; color: #0053CC; }
+    .pager button:disabled { opacity: .35; cursor: default; }
+    .period { height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 8px; font: inherit; background: #fff; }
+    .tipwrap { position: relative; display: inline-flex; }
+    .tipwrap[data-tip]:hover::after {
+      content: attr(data-tip); position: absolute; right: 0; top: calc(100% + 6px); z-index: 70; width: 260px;
+      background: #1A1B24; color: #fff; font-size: 13px; line-height: 18px; padding: 8px 10px; border-radius: 6px; white-space: normal;
+    }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; pointer-events: none; }
+    .more { width: 36px; height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; background: #fff; cursor: pointer; color: #555; display: inline-flex; align-items: center; justify-content: center; }
+    .more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
+    .menu .danger, .menu .danger .material-icons { color: #CC2929; }
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid #DFE4EC; margin: 16px 0 20px; }
+    .tabs button { background: none; border: 0; font: inherit; color: #555; padding: 10px 0; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
+    .tabs button.on { color: #0053CC; box-shadow: inset 0 -2px 0 #0053CC; font-weight: 500; }
+    .card { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; margin-bottom: 16px; max-width: 880px; }
+    .sum { display: flex; gap: 12px; align-items: flex-start; }
+    .sum .material-icons { font-size: 24px; }
+    .sum h3 { margin: 0; font-size: 16px; font-weight: 500; }
+    .sum ul { margin: 6px 0 0; padding-left: 18px; color: #555; }
+    .sum li { margin: 2px 0; }
+    .sum.blocked { background: #FFF7F0; border-color: #F3D2B3; } .sum.blocked > .material-icons { color: #CB7515; }
+    .sum.ready { background: #F1F9F3; border-color: #BFE3C8; } .sum.ready > .material-icons { color: #1F8940; }
+    .sum.closed > .material-icons { color: #6B778C; }
+    .chk-h { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .chk-h h2 { font-size: 16px; font-weight: 500; margin: 0; }
+    .bar { flex: 0 0 120px; height: 6px; border-radius: 3px; background: #EFF1F5; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: #1F8940; }
+    .chk { border-top: 1px solid #EFF1F5; }
+    .chk summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
+    .chk summary::-webkit-details-marker { display: none; }
+    .chk .ic { font-size: 20px; }
+    .ic.pass { color: #1F8940; } .ic.fail { color: #CC2929; } .ic.warn { color: #CB7515; } .ic.wait { color: #B4BBCB; }
+    .chk .nm { width: 180px; font-weight: 500; }
+    .chk .stt { flex: 1; color: #555; }
+    .chk .exp { color: #6B778C; font-size: 20px; transition: transform .15s; }
+    .chk[open] .exp { transform: rotate(180deg); }
+    .chk .det { padding: 0 0 12px 32px; color: #6B778C; }
+    textarea.note { width: 100%; min-height: 72px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 8px; font: inherit; resize: vertical; }
+    .hist summary { cursor: pointer; color: #0053CC; list-style: none; }
+    .hist summary::-webkit-details-marker { display: none; }
+    .hist table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .hist td { padding: 6px 8px 6px 0; border-top: 1px solid #EFF1F5; vertical-align: top; }
+    .hist td:first-child { color: #6B778C; white-space: nowrap; width: 130px; }
+    .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; max-width: 880px; }
+    .form label { display: flex; flex-direction: column; gap: 4px; color: #555; font-size: 13px; }
+    .form .full { grid-column: 1 / -1; }
+    .form input, .form textarea { font: inherit; font-size: 14px; color: #1A1B24; }
+    .kv { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+    .kv dt { color: #6B778C; } .kv dd { margin: 0; }
+    tr.rowlink { cursor: pointer; } tr.rowlink:hover td { background: #F7F8FA; }
+    #stateSeg.hide { visibility: hidden; }
   </style>
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v3</span>
+    <span class="brand">Firm context switcher · v4</span>
     <span class="spacer"></span>
     <div class="seg" id="scenarioSeg">
       <button data-s="firm">Firm user</button>
       <button data-s="firm-1">Firm user, 1 client</button>
       <button data-s="normal">Normal user</button>
+    </div>
+    <div class="seg hide" id="stateSeg" title="Client page state">
+      <button data-cs="blocked">Blocked</button>
+      <button data-cs="ready">Ready to close</button>
+      <button data-cs="closed">Closed month</button>
     </div>
   </div>
 
@@ -297,7 +363,7 @@
     { id: 'c13', name: 'Northgate Auto Repair',    ledger: null,                pay: null,              books: ['grey', 'Setup needed'],        month: null }
   ];
   const SCENARIOS = {
-    'firm':   { firm: true,  clients: CLIENTS,           own: [{ id: 'o1', name: 'WLS Labs Books' }] },
+    'firm':   { firm: true,  clients: CLIENTS.concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]),           own: [{ id: 'o1', name: 'WLS Labs Books' }] },
     'firm-1': { firm: true,  clients: [CLIENTS[0]],      own: [{ id: 'o1', name: 'WLS Labs Books' }] },
     'normal': { firm: false, clients: [],                own: [
       { id: 'n1', name: 'Northwind Goods' },
@@ -329,6 +395,7 @@
   let scenario = 'firm';
   let st = null;          // { ctx: 'firm'|'org', orgId, page, clientId, recent: [] }
   let kbIndex = -1;
+  let cdState = 'blocked';
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -361,6 +428,7 @@
 
   /* ───────── Navigation ───────── */
   function goFirm(page, clientId) {
+    if (page === 'client' && clientId !== st.clientId) st.tab = 'work';
     st.ctx = 'firm'; st.page = page || 'clients'; st.clientId = clientId || null;
     if (clientId) touchRecent(clientId);
     save(); render();
@@ -408,13 +476,13 @@
     const q = (st._q || '').toLowerCase();
     const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
     const body = rows.map((c) => `
-      <tr>
+      <tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button class="linkish" data-detail="${c.id}">${esc(c.name)}</button></div></td>
         <td>${c.ledger ? esc(c.ledger) : '<span class="muted">Not connected</span>'}</td>
         <td>${c.pay ? esc(c.pay) : '<span class="muted">—</span>'}</td>
-        <td><span class="status status-${c.books[0]}">${esc(c.books[1])}</span></td>
+        <td><span class="status status-${c.pending ? 'yellow' : c.books[0]}">${esc(c.books[1])}</span></td>
         <td>${c.month ? esc(c.month) : '<span class="muted">—</span>'}</td>
-        <td style="text-align:right"><button class="btn-text" data-open="${c.id}">Open in Synder</button></td>
+        <td style="text-align:right">${c.pending ? `<button class="btn-text" data-detail="${c.id}">Review request</button>` : `<button class="btn-text" data-open="${c.id}">Open in Synder</button>`}</td>
       </tr>`).join('');
     return `
       <div class="ph"><div><h1>Clients</h1></div>
@@ -427,15 +495,145 @@
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
   }
 
+  /* ───────── v4: Client details (firm side) ───────── */
+  const PERIODS = ['Jul 2026', 'Aug 2026', 'Sep 2026', 'Oct 2026', 'Nov 2026'];
+  const MONTH_FULL = { Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November' };
+  const mName = (p) => MONTH_FULL[p.split(' ')[0]];
+  function cdPeriod(c) { if (!st.period || !PERIODS.includes(st.period)) st.period = c.month || 'Oct 2026'; return st.period; }
+  function cdChecks(c) {
+    const m = mName(cdPeriod(c));
+    const noLedger = !c.ledger && cdState === 'blocked';
+    const ledger = c.ledger || 'QuickBooks Online';
+    const ok = cdState !== 'blocked';
+    const W = 'Waiting for accounting connection';
+    return [
+      { k: 'acc', nm: 'Accounting connection', s: noLedger ? 'fail' : 'pass',
+        t: noLedger ? 'No accounting system connected' : 'Connected to ' + ledger,
+        a: noLedger ? ['Connect ledger', 'settings'] : null,
+        d: noLedger ? 'Syncs, mappings and reconciliation all need a connected ledger. Connect one in the client’s Settings.' : 'Last checked today.' },
+      { k: 'syn', nm: 'Syncs', s: noLedger ? 'wait' : ok ? 'pass' : 'fail',
+        t: noLedger ? W : ok ? 'All ' + m + ' syncs went through' : '16 syncs failed in ' + m,
+        a: noLedger ? null : ok ? null : ['Review failed syncs', 'dashboard'],
+        d: noLedger ? 'Checked once a ledger is connected.' : ok ? '2,318 transactions synced.' : '16 of 2,318 transactions failed. Fix or ignore them before closing.' },
+      { k: 'map', nm: 'Mappings', s: noLedger ? 'wait' : 'pass',
+        t: noLedger ? W : 'All payment sources are mapped',
+        a: null,
+        d: noLedger ? 'Checked once a ledger is connected.' : (c.pay || 'Stripe') + ' mapped to ' + ledger + ' accounts.' },
+      { k: 'rec', nm: 'Reconciliation', s: noLedger ? 'wait' : ok ? 'pass' : 'warn',
+        t: noLedger ? W : ok ? m + ' is reconciled' : 'We couldn’t read reconciliation results',
+        a: noLedger ? null : ok ? null : ['Open reconciliation', 'reconciliation'],
+        d: noLedger ? 'Checked once a ledger is connected.' : 'Transaction reconciliation is available for ' + ledger + '.' + (ok ? '' : ' Open Reconciliation to run it again.') }
+    ];
+  }
+  const ICON = { pass: 'check_circle', fail: 'error', warn: 'warning', wait: 'schedule' };
+  function cdHistory(c) {
+    const p = cdPeriod(c); const mon = p.split(' ')[0];
+    const rows = [[mon + ' 1, 09:00', 'Status changed: Not started → In progress'],
+      [mon + ' 3, 02:14', c.ledger || cdState !== 'blocked' ? 'Sync finished: 412 transactions' : 'Sync skipped: no accounting connection']];
+    if (cdState === 'blocked') rows.push([mon + ' 28, 18:40', 'Status changed: In progress → Blocked']);
+    if (cdState === 'ready') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close']);
+    if (cdState === 'closed') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close'], [mon + ' 30, 16:22', 'Status changed: Ready to close → Closed (Ignat Plot)']);
+    return rows.reverse();
+  }
+  function renderPending(c) {
+    return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
+      <div class="cd-top"><div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-yellow">Pending</span></div></div>
+      <div class="empty"><span class="material-icons">how_to_reg</span><h2>${esc(c.name)} wants to connect</h2>
+        <p>Accept to add them to your clients and get access to their books.</p>
+        <button class="btn" id="acceptBtn">Accept</button>
+        <button class="btn-text sec" id="pendBack">Back to Clients</button></div>`;
+  }
   function renderClientDetail() {
     const c = findOrg(st.clientId);
+    if (c.pending) return renderPending(c);
+    const list = sc().clients.filter((x) => !x.pending);
+    const i = list.findIndex((x) => x.id === c.id);
+    const p = cdPeriod(c); const m = mName(p);
+    const checks = cdChecks(c);
+    const passed = checks.filter((x) => x.s === 'pass').length;
+    const blockers = checks.filter((x) => x.s === 'fail' || x.s === 'warn');
+    const statusBadge = cdState === 'closed' ? ['grey', 'Closed'] : cdState === 'ready' ? ['green', 'Ready to close'] : ['yellow', 'Blocked'];
+    const tip = blockers.length ? 'Can’t close ' + m + ': ' + blockers.map((b) => b.t.charAt(0).toLowerCase() + b.t.slice(1)).join('; ') + '.' : '';
+    const primary = cdState === 'closed' ? '' :
+      `<span class="tipwrap"${cdState === 'blocked' ? ` data-tip="${esc(tip)}"` : ''}><button class="btn" id="closeMonth"${cdState === 'blocked' ? ' disabled' : ''}>Close month</button></span>`;
+    const tab = st.tab || 'work';
+    let body = '';
+    if (tab === 'work') {
+      let sum;
+      if (cdState === 'blocked') sum = `<div class="card sum blocked"><span class="material-icons">block</span><div><h3>${m} can’t be closed yet</h3><ul>${
+        blockers.map((b) => `<li>${esc(b.t)}. ${b.a ? `<button class="linkish" data-fix="${b.a[1]}">${esc(b.a[0])}</button>` : ''}</li>`).join('')}</ul></div></div>`;
+      else if (cdState === 'ready') sum = `<div class="card sum ready"><span class="material-icons">check_circle</span><div><h3>Ready to close ${m}</h3><div class="muted">All checks passed.</div></div></div>`;
+      else sum = `<div class="card sum closed"><span class="material-icons">lock</span><div><h3>${m} is closed</h3><div class="muted">Closed on ${p.split(' ')[0]} 30 by Ignat Plot.</div></div></div>`;
+      const note = (st.notes || {})[c.id + '|' + p] || '';
+      body = sum + `
+        <div class="card">
+          <div class="chk-h"><h2>Checks</h2><span class="muted">${passed} of ${checks.length} passed</span><span class="bar"><i style="width:${passed / checks.length * 100}%"></i></span></div>
+          ${checks.map((x) => `<details class="chk"><summary><span class="material-icons ic ${x.s}">${ICON[x.s]}</span><span class="nm">${x.nm}</span><span class="stt">${esc(x.t)}</span>${x.a ? `<button class="btn-text" data-fix="${x.a[1]}">${esc(x.a[0])}</button>` : ''}<span class="material-icons exp">expand_more</span></summary><div class="det">${esc(x.d)}</div></details>`).join('')}
+        </div>
+        <div class="card"><div class="chk-h"><h2>Notes for ${m}</h2></div>
+          <textarea class="note" id="cdNote" placeholder="Only you and your colleagues see these notes.">${esc(note)}</textarea></div>
+        <details class="card hist"><summary>History for ${m} (${cdHistory(c).length})</summary>
+          <table>${cdHistory(c).map(([t, e]) => `<tr><td>${esc(t)}</td><td>${esc(e)}</td></tr>`).join('')}</table></details>`;
+    } else if (tab === 'profile') {
+      const f = (l, v, full) => `<label${full ? ' class="full"' : ''}>${l}<input type="text" value="${esc(v)}" /></label>`;
+      body = `<div class="form">
+        ${f('Client name', c.name)}${f('Contact person', 'Jordan Lee')}
+        ${f('Email', 'jordan@' + c.name.toLowerCase().replace(/[^a-z]/g, '') + '.com')}${f('Phone', '+1 415 555 0134')}
+        ${f('Business type', 'LLC')}${f('Accounting software', c.ledger || 'Not connected')}
+        ${f('Fiscal year start', 'January')}${f('Tax ID', '84-1234567')}
+        ${f('Address', '120 Market St, San Francisco, CA', true)}
+        <label class="full">Notes<textarea class="note"></textarea></label>
+        <div class="full"><button class="btn" id="saveProfile">Save</button></div></div>`;
+    } else if (tab === 'billing') {
+      body = `<div class="card"><dl class="kv"><dt>Plan</dt><dd>Pro, billed to ${esc(FIRM.name)}</dd><dt>Price</dt><dd>$110 / month</dd><dt>Next invoice</dt><dd>Dec 1, 2026</dd><dt>License</dt><dd>1 of 15 firm licenses</dd></dl></div>`;
+    } else {
+      body = `<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+        <tr><td>Ignat Plot</td><td>ignat@wlslabs.com</td><td>Admin</td></tr>
+        <tr><td>Dasha Ivanova</td><td>dasha@wlslabs.com</td><td>Accountant</td></tr></tbody></table></div>`;
+    }
+    const T = [['work', 'Work'], ['profile', 'Profile'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
     return `
       <button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
-      <div class="ph"><div><h1>${esc(c.name)}</h1><div class="sub">${c.ledger ? esc(c.ledger) : 'No ledger connected'}${c.pay ? ' · ' + esc(c.pay) : ''}</div></div>
-        <div class="ph-actions"><button class="btn" data-open="${c.id}">Open in Synder</button></div></div>
-      <h2 class="section-h">Work</h2>
-      <div class="empty"><span class="material-icons">event_available</span><h2>${c.month ? esc(c.month.replace(' 2026', '')) + ' close not started' : 'Nothing to close yet'}</h2>
-        <p>The Work tab gets its own step. Here it only shows where firm-side details live.</p></div>`;
+      <div class="cd-top">
+        <div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-${statusBadge[0]}">${statusBadge[1]}</span></div>
+        <div class="cd-actions">
+          <span class="pager"><button id="prevC" aria-label="Previous client"${i <= 0 ? ' disabled' : ''}><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"${i >= list.length - 1 ? ' disabled' : ''}><span class="material-icons">chevron_right</span></button></span>
+          <select class="period" id="periodSel" aria-label="Period">${PERIODS.map((x) => `<option${x === p ? ' selected' : ''}>${x}</option>`).join('')}</select>
+          <button class="btn-outlined" data-open="${c.id}">Open in Synder</button>
+          ${primary}
+          <span class="t-wrap"><button class="more" id="moreBtn" aria-label="More actions" aria-expanded="false"><span class="material-icons">more_horiz</span></button>
+            <div class="menu" id="moreMenu"><button class="danger" id="removeBtn"><span class="material-icons">person_remove</span>Remove client</button></div></span>
+        </div>
+      </div>
+      <div class="tabs">${T.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${body}`;
+  }
+  function bindClientDetail() {
+    const c = findOrg(st.clientId); const m = $('main');
+    const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    on('acceptBtn', () => { c.pending = false; c.books = ['grey', 'Setup needed']; goFirm('client', c.id); });
+    on('pendBack', () => goFirm('clients'));
+    if (c.pending) return;
+    const list = sc().clients.filter((x) => !x.pending); const i = list.indexOf(c);
+    on('prevC', () => goFirm('client', list[i - 1].id));
+    on('nextC', () => goFirm('client', list[i + 1].id));
+    $('periodSel').onchange = (e) => { st.period = e.target.value; save(); renderMain(); };
+    on('closeMonth', () => { cdState = 'closed'; render(); });
+    on('moreBtn', () => toggleMenu('moreBtn', 'moreMenu'));
+    on('removeBtn', () => { closeMenus(); openRemove(c); });
+    on('saveProfile', (e) => { e.target.textContent = 'Saved'; });
+    m.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { st.tab = b.dataset.tab; save(); renderMain(); });
+    m.querySelectorAll('[data-fix]').forEach((b) => b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); goOrg(c.id, b.dataset.fix); });
+    const n = $('cdNote');
+    if (n) n.oninput = () => { st.notes = st.notes || {}; st.notes[c.id + '|' + st.period] = n.value; save(); };
+  }
+  function openRemove(c) {
+    $('modal').innerHTML = `<h3>Remove ${esc(c.name)}?</h3>
+      <p>${esc(FIRM.name)} loses access to ${esc(c.name)}’s books, and the client leaves your Clients list. Their Synder organization and data stay with them. To reconnect, they’d send a new request.</p>
+      <div class="modal-actions"><button class="btn-outlined" id="cancelRm">Cancel</button><button class="btn" id="doRm" style="background:#CC2929">Remove client</button></div>`;
+    $('scrim').classList.add('open');
+    $('cancelRm').onclick = closeModal;
+    $('doRm').onclick = () => { const arr = sc().clients; arr.splice(arr.indexOf(c), 1); st.recent = (st.recent || []).filter((x) => x !== c.id); closeModal(); goFirm('clients'); };
   }
 
   function renderDashboard() {
@@ -486,7 +684,10 @@
     }
     $('main').innerHTML = html;
     const m = $('main');
-    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = () => goFirm('client', b.dataset.detail));
+    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); goFirm('client', b.dataset.detail); });
+    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button')) goFirm('client', tr.dataset.row); });
+    m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
+    if (st.ctx === 'firm' && st.page === 'client') bindClientDetail();
     m.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => goOrg(b.dataset.open));
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
@@ -524,9 +725,10 @@
     }
     if (s.firm) {
       let list;
-      if (q) list = s.clients.filter((c) => c.name.toLowerCase().includes(q));
+      if (q) list = s.clients.filter((c) => !c.pending && c.name.toLowerCase().includes(q));
       else list = (st.recent || []).map(findOrg).filter((c) => c && isClient(c.id));
-      if (!q && list.length === 0) list = s.clients.slice(0, 4);
+      list = list.filter((c) => !c.pending);
+      if (!q && list.length === 0) list = s.clients.filter((c) => !c.pending).slice(0, 4);
       if (list.length) {
         html += `<div class="pop-sec">${q ? 'Clients' : 'Recent clients'}</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
@@ -590,9 +792,10 @@
 
   /* ───────── Scenario ───────── */
   function setScenario(s, fromCta) {
+    const parts = String(s || '').split('/'); s = parts[0];
     scenario = SCENARIOS[s] ? s : 'firm';
-    if (location.hash !== '#' + scenario) history.replaceState(null, '', '#' + scenario);
     load();
+    if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) { st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work'; }
     if (fromCta) { st = defaultState(); save(); }
     document.querySelectorAll('#scenarioSeg button').forEach((b) => b.classList.toggle('active', b.dataset.s === scenario));
     closePop(); render();
@@ -600,7 +803,15 @@
   document.querySelectorAll('#scenarioSeg button').forEach((b) => b.onclick = () => setScenario(b.dataset.s));
   window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
 
-  function render() { renderTrigger(); renderNav(); renderMain(); renderUserMenu(); }
+  function render() {
+    renderTrigger(); renderNav(); renderMain(); renderUserMenu();
+    const onClient = st.ctx === 'firm' && st.page === 'client' && st.clientId && findOrg(st.clientId) && !findOrg(st.clientId).pending;
+    $('stateSeg').classList.toggle('hide', !onClient);
+    document.querySelectorAll('#stateSeg button').forEach((b) => b.classList.toggle('active', b.dataset.cs === cdState));
+    const h = '#' + scenario + (st.ctx === 'firm' && st.page === 'client' && st.clientId ? '/' + st.clientId : '');
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  document.querySelectorAll('#stateSeg button').forEach((b) => b.onclick = () => { cdState = b.dataset.cs; render(); });
 
   /* ───────── Top bar menus ───────── */
   function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
@@ -625,6 +836,7 @@
     $('scrim').classList.add('open'); $('doneModal').onclick = closeModal;
   }
   function closeMenus() {
+    const mm = $('moreMenu'); if (mm) { mm.classList.remove('open'); $('moreBtn').setAttribute('aria-expanded', 'false'); }
     ['helpMenu', 'userMenu'].forEach((id) => $(id).classList.remove('open'));
     ['helpBtn', 'userBtn'].forEach((id) => $(id).setAttribute('aria-expanded', 'false'));
   }
