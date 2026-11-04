@@ -30,9 +30,9 @@
   <style>
     :root {
       --proto-bar-h: 44px;
-      --beige: #FFF8EE;
-      --beige-border: #F0E0C8;
-      --beige-text: #8A6A3A;
+      --beige: #E6F0FF;          /* was beige; UI kit blue */
+      --beige-border: #D6EBFF;
+      --beige-text: #1A1B24;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; min-height: 100%; }
@@ -243,7 +243,7 @@
       letter-spacing: var(--font-body2-letter-spacing);
       margin-bottom: 16px;
     }
-    .callout-beige .material-icons-round { font-size: 18px; color: #CB7515; margin-top: 1px; }
+    .callout-beige .material-icons-round { font-size: 18px; color: #0053CC; margin-top: 1px; }
     .phone-expand {
       display: none; flex-direction: column; gap: 12px;
       margin-top: 12px; padding-top: 4px; width: 100%;
@@ -430,7 +430,7 @@
     .sandbox-pill {
       display: inline-flex; align-items: center; height: 20px;
       padding: 0 8px; border-radius: 4px; margin-left: 8px;
-      background: #FFF1DD; color: #CB7515; font-size: 12px; font-weight: 500;
+      background: #E6F0FF; color: #0053CC; font-size: 14px; font-weight: 500;
     }
     .app-body { display: flex; flex: 1; min-height: 0; }
     .app-sidebar {
@@ -819,11 +819,11 @@
     .soft-lock-banner {
       display: none; align-items: flex-start; gap: 12px;
       padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;
-      background: #FFF1DD; border: 1px solid #F0E0C8; color: #8A6A3A;
+      background: #E6F0FF; border: 1px solid #D6EBFF; color: #1A1B24;
       font-size: 14px; line-height: 20px;
     }
     .soft-lock-banner.show { display: flex; }
-    .soft-lock-banner .material-icons-round { color: #CB7515; font-size: 20px; }
+    .soft-lock-banner .material-icons-round { color: #0053CC; font-size: 20px; }
     .soft-lock-banner .actions {
       display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
     }
@@ -894,7 +894,7 @@
     .soft-pill {
       display: inline-flex; align-items: center; height: 20px; padding: 0 6px;
       border-radius: 4px; font-size: 14px; font-weight: 500; line-height: 20px;
-      color: #0053CC; background: #EEF4FF; white-space: nowrap;
+      color: #0053CC; background: #E6F0FF; white-space: nowrap;
     }
     .title-with-pill {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
@@ -1416,22 +1416,36 @@
     .hs-note-preview .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
     .hs-notes-count { display: flex; gap: 6px; align-items: center; margin-top: 6px; color: #3D4A5C; }
     .hs-notes-count .material-icons-round { font-size: 16px; color: #6B778C; }
-    /* ── Variant C: Before your call (suggestions list, dev visual language) ── */
-    .bc-wrap { max-width: 660px; margin: 0 auto; }
+    /* ── Variant C: Before your call (call reminder → while you wait → on the call) ── */
+    .bc-wrap { max-width: 720px; margin: 0 auto; }
     .bc-wrap .page-title { font-size: 32px; font-weight: 400; line-height: 40px; color: #1A1B24; }
+    .bc-call {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #F5F7FA; border-radius: 8px; padding: 16px 20px; margin: 0 0 28px;
+    }
+    .bc-call-ico {
+      width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+      background: #E6F0FF; color: #0053CC; display: flex; align-items: center; justify-content: center;
+    }
+    .bc-call-ico .material-icons-round { font-size: 22px; }
+    .bc-call-body { flex: 1; min-width: 0; }
+    .bc-call-label { font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-call-when { margin: 2px 0 4px; font-size: 20px; font-weight: 500; line-height: 28px; color: #1A1B24; }
+    .bc-call-meta { font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-resched {
+      appearance: none; border: none; background: none; cursor: pointer; padding: 0; flex-shrink: 0;
+      font: inherit; font-size: 14px; font-weight: 500; line-height: 20px; color: #0053CC; margin-top: 2px;
+    }
+    .bc-resched:hover { text-decoration: underline; }
     .bc-label { margin: 0 0 10px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
-    .bc-list { display: flex; flex-direction: column; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; }
+    .bc-list { display: flex; flex-direction: column; gap: 10px; margin: 0 0 28px; padding: 0; list-style: none; }
     .bc-row {
       display: flex; align-items: flex-start; gap: 14px;
       background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
       transition: border-color .15s ease;
     }
     .bc-row:hover { border-color: #9DBCF0; }
-    .bc-num {
-      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
-      background: #F5F7FA; border: 1px solid #DFE4EC; color: #6B778C;
-      font-size: 14px; font-weight: 500; line-height: 22px; text-align: center; box-sizing: border-box;
-    }
+    .bc-row-ico { font-size: 22px; color: #6B778C; flex-shrink: 0; margin-top: 1px; }
     .bc-row-body { flex: 1; min-width: 0; }
     .bc-row h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
     .bc-row p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #6B778C; }
@@ -1442,31 +1456,18 @@
       display: inline-flex; align-items: center; gap: 4px;
     }
     .bc-go:hover { background: #E6F0FF; color: #0053CC; text-decoration: none; }
-    .bc-go .material-icons-round { font-size: 16px; }
-    .bc-blocks { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
-    .bc-block {
-      background: #F5F7FA; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
-      box-sizing: border-box;
+    .bc-go.is-primary { background: #0053CC; color: #FFFFFF; }
+    .bc-go.is-primary:hover { background: #0046B0; color: #FFFFFF; }
+    .bc-tiles {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+      list-style: none; margin: 0; padding: 0;
     }
-    .bc-block.call-plan { flex: 3 1 340px; }
-    .bc-block.call-details { flex: 2 1 220px; }
-    .bc-block h2 {
-      display: flex; align-items: center; gap: 8px;
-      margin: 0 0 8px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24;
+    .bc-tile {
+      background: #F5F7FA; border-radius: 8px; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 14px; font-weight: 500; line-height: 20px; color: #1A1B24;
     }
-    .bc-block h2 .material-icons-round { font-size: 20px; color: #6B778C; }
-    .bc-block ul { list-style: none; margin: 0; padding: 0; }
-    .bc-block li {
-      position: relative; padding: 4px 0 4px 16px;
-      font-size: 14px; line-height: 20px; color: #3D4A5C;
-    }
-    .bc-block.call-plan li::before {
-      content: ''; position: absolute; left: 3px; top: 12px;
-      width: 5px; height: 5px; border-radius: 50%; background: #9AA3B2;
-    }
-    .bc-block.call-details li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
-    .bc-block.call-details li .material-icons-round { font-size: 18px; color: #6B778C; margin-top: 1px; }
-    .bc-when { color: #1A1B24 !important; font-weight: 500; }
+    .bc-tile .material-icons-round { font-size: 22px; color: #0053CC; }
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -2141,7 +2142,7 @@
   // C — Before your call: a list of suggestions the user can really do now (no done state),
   // plus 'call' items rendered as a plain list of what the Synder specialist does on the call.
   const CONNECT_C = {
-    id: 'channel', phase: 'tip',
+    id: 'channel', phase: 'tip', icon: 'power', primary: true,
     title: 'Connect your sales channel',
     desc: 'Connect every channel you get paid from.',
     where: 'Go to Organization settings',
@@ -2149,24 +2150,24 @@
   CHECKPOINTS.before = {
     summary: [
       CONNECT_C,
-      { id: 'mapping', phase: 'tip', title: 'Complete account mapping',
+      { id: 'mapping', phase: 'tip', icon: 'account_tree', title: 'Complete account mapping',
         desc: 'Map Sale, Refund, Expense, and Adjustment groups to accounts.', where: 'Go to Mappings list' },
-      { id: 'test-sync', phase: 'tip', title: 'Sync a summary manually',
+      { id: 'test-sync', phase: 'tip', icon: 'sync', title: 'Sync a summary manually',
         desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
         where: 'Go to Summaries list' },
-      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
-      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+      { id: 'call-frequency', phase: 'call', icon: 'schedule', title: 'Set your sync frequency' },
+      { id: 'call-auto', phase: 'call', icon: 'autorenew', title: 'Turn on auto-sync and import historical data' },
     ],
     'per-txn': [
       CONNECT_C,
-      { id: 'test-sync', phase: 'tip', title: 'Sync 3 transactions to see how they’ll look in your books',
+      { id: 'test-sync', phase: 'tip', icon: 'sync', title: 'Sync 3 transactions to see how they’ll look in your books',
         desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
-      { id: 'explore', phase: 'tip', title: 'Look through your clearing account and sales settings',
+      { id: 'explore', phase: 'tip', icon: 'visibility', title: 'Look through your clearing account and sales settings',
         desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
         where: 'Open Settings (view only)' },
-      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and core sales settings' },
-      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
-      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+      { id: 'call-settings', phase: 'call', icon: 'tune', title: 'Set up your clearing account and core sales settings' },
+      { id: 'call-fix', phase: 'call', icon: 'build', title: 'Fix anything in your test transactions' },
+      { id: 'call-auto', phase: 'call', icon: 'autorenew', title: 'Turn on auto-sync and import historical data' },
     ],
   };
 
@@ -3249,36 +3250,35 @@
 
   function beforeCallHtml() {
     const list = activeCheckpoints();
-    const tips = list.filter(c => c.phase === 'tip');
-    const rows = tips.map((c, i) =>
+    const rows = list.filter(c => c.phase === 'tip').map(c =>
       '<li class="bc-row" data-step-id="' + c.id + '">' +
-        '<span class="bc-num" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<span class="material-icons-round bc-row-ico" aria-hidden="true">' + c.icon + '</span>' +
         '<div class="bc-row-body"><h3>' + c.title + '</h3><p>' + c.desc + '</p>' +
-        '<button type="button" class="bc-go hs-where" data-where="' + c.id + '">' + c.where + '</button></div>' +
+        '<button type="button" class="bc-go hs-where' + (c.primary ? ' is-primary' : '') + '" data-where="' + c.id + '">' + c.where + '</button></div>' +
       '</li>'
     ).join('');
-    const callRows = list.filter(c => c.phase === 'call').map(c => '<li>' + c.title + '</li>').join('');
-    const email = state.accountEmail ? '<li><span class="material-icons-round">mail_outline</span><span>Invite sent to ' + escapeHtml(state.accountEmail) + '</span></li>' : '';
+    const tiles = list.filter(c => c.phase === 'call').map(c =>
+      '<li class="bc-tile"><span class="material-icons-round" aria-hidden="true">' + c.icon + '</span>' + c.title + '</li>'
+    ).join('');
+    const meta = ['Zoom', 'link in your calendar invite'];
+    if (state.accountEmail) meta.push('Invite sent to ' + escapeHtml(state.accountEmail));
     return `
       <div class="bc-wrap">
         <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
-        <p class="page-subtitle" style="margin-bottom:24px">A few things you can try now. Your Synder specialist sets up the rest with you on the call.</p>
-        <h2 class="bc-label">While you wait for your call</h2>
+        <p class="page-subtitle" style="margin-bottom:20px">Your setup call is booked. Here’s what you can do until then.</p>
+        <section class="bc-call" aria-label="Your setup call">
+          <span class="bc-call-ico"><span class="material-icons-round">event</span></span>
+          <div class="bc-call-body">
+            <div class="bc-call-label">Your setup call</div>
+            <div class="bc-call-when">${callWhenText()}</div>
+            <div class="bc-call-meta">${meta.join(' · ')}</div>
+          </div>
+          <button type="button" class="bc-resched" id="bc-resched">Reschedule</button>
+        </section>
+        <h2 class="bc-label">While you wait</h2>
         <ul class="bc-list">${rows}</ul>
-        <div class="bc-blocks">
-          <section class="bc-block call-plan" aria-labelledby="bc-plan-h">
-            <h2 id="bc-plan-h"><span class="material-icons-round">event</span>On your setup call</h2>
-            <ul>${callRows}</ul>
-          </section>
-          <section class="bc-block call-details" aria-labelledby="bc-details-h">
-            <h2 id="bc-details-h"><span class="material-icons-round">videocam</span>Your setup call</h2>
-            <ul>
-              <li class="bc-when"><span class="material-icons-round">schedule</span><span>${callWhenText()}</span></li>
-              <li><span class="material-icons-round">link</span><span>Zoom · link in your calendar invite</span></li>
-              ${email}
-            </ul>
-          </section>
-        </div>
+        <h2 class="bc-label">On your setup call</h2>
+        <ul class="bc-tiles">${tiles}</ul>
       </div>`;
   }
 
