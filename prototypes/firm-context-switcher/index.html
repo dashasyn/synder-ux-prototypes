@@ -9,7 +9,7 @@
     Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
-    - Scenarios (dark bar, URL hash): #firm, #firm-1, #normal.
+    - Firm user only (v5). Old hashes fall back to #firm.
     - Ctrl/Cmd+K opens the switcher; arrows + Enter + Esc work inside.
     - Last context remembered per scenario in localStorage.
   -->
@@ -243,7 +243,19 @@
     .more { width: 36px; height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; background: #fff; cursor: pointer; color: #555; display: inline-flex; align-items: center; justify-content: center; }
     .more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
     .menu .danger, .menu .danger .material-icons { color: #CC2929; }
-    .tabs { display: flex; gap: 24px; border-bottom: 1px solid #DFE4EC; margin: 16px 0 20px; }
+    .wk-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; max-width: 880px; margin-bottom: 24px; }
+    .mpick { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+    .mpick select { appearance: none; border: 0; background: none; font: inherit; font-size: 20px; line-height: 28px; font-weight: 500; color: #1A1B24; padding: 0 26px 0 0; cursor: pointer; }
+    .mpick .material-icons { position: absolute; right: 0; pointer-events: none; color: #6B778C; }
+    .mpick select:focus-visible { outline: 2px solid #0053CC; border-radius: 4px; }
+    .wk-line { margin-top: 4px; color: #555; }
+    .ln-warn { color: #B35E0B; font-weight: 500; } .ln-ok { color: #1F8940; font-weight: 500; }
+    .wk-sec { max-width: 880px; margin-bottom: 28px; }
+    .sec-h { font-size: 14px; font-weight: 500; margin-bottom: 4px; display: flex; gap: 8px; }
+    .sec-h .muted { font-weight: 400; }
+    .tabs-l { display: flex; gap: 24px; }
+    .tabs { justify-content: space-between; align-items: center; }
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid #DFE4EC; margin: 12px 0 24px; }
     .tabs button { background: none; border: 0; font: inherit; color: #555; padding: 10px 0; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
     .tabs button.on { color: #0053CC; box-shadow: inset 0 -2px 0 #0053CC; font-weight: 500; }
     .card { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; margin-bottom: 16px; max-width: 880px; }
@@ -259,7 +271,7 @@
     .chk-h h2 { font-size: 16px; font-weight: 500; margin: 0; }
     .bar { flex: 0 0 120px; height: 6px; border-radius: 3px; background: #EFF1F5; overflow: hidden; }
     .bar i { display: block; height: 100%; background: #1F8940; }
-    .chk { border-top: 1px solid #EFF1F5; }
+    .chk { border-bottom: 1px solid #EFF1F5; }
     .chk summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
     .chk summary::-webkit-details-marker { display: none; }
     .chk .ic { font-size: 20px; }
@@ -270,7 +282,7 @@
     .chk[open] .exp { transform: rotate(180deg); }
     .chk .det { padding: 0 0 12px 32px; color: #6B778C; }
     textarea.note { width: 100%; min-height: 72px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 8px; font: inherit; resize: vertical; }
-    .hist summary { cursor: pointer; color: #0053CC; list-style: none; }
+    .hist summary { cursor: pointer; color: #6B778C; list-style: none; }
     .hist summary::-webkit-details-marker { display: none; }
     .hist table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     .hist td { padding: 6px 8px 6px 0; border-top: 1px solid #EFF1F5; vertical-align: top; }
@@ -287,13 +299,8 @@
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v4</span>
+    <span class="brand">Firm context switcher · v5</span>
     <span class="spacer"></span>
-    <div class="seg" id="scenarioSeg">
-      <button data-s="firm">Firm user</button>
-      <button data-s="firm-1">Firm user, 1 client</button>
-      <button data-s="normal">Normal user</button>
-    </div>
     <div class="seg hide" id="stateSeg" title="Client page state">
       <button data-cs="blocked">Blocked</button>
       <button data-cs="ready">Ready to close</button>
@@ -364,12 +371,6 @@
   ];
   const SCENARIOS = {
     'firm':   { firm: true,  clients: CLIENTS.concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]),           own: [{ id: 'o1', name: 'WLS Labs Books' }] },
-    'firm-1': { firm: true,  clients: [CLIENTS[0]],      own: [{ id: 'o1', name: 'WLS Labs Books' }] },
-    'normal': { firm: false, clients: [],                own: [
-      { id: 'n1', name: 'Northwind Goods' },
-      { id: 'n2', name: 'Northwind Goods EU' },
-      { id: 'n3', name: 'Paper Lantern Studio' }
-    ] }
   };
   const PALETTE = ['#0053CC', '#1F8940', '#CB7515', '#310BB0', '#3C4EAC', '#CC2929', '#0E7C86', '#8A4FBF'];
   const FIRM_NAV = [
@@ -559,20 +560,26 @@
     const tab = st.tab || 'work';
     let body = '';
     if (tab === 'work') {
-      let sum;
-      if (cdState === 'blocked') sum = `<div class="card sum blocked"><span class="material-icons">block</span><div><h3>${m} can’t be closed yet</h3><ul>${
-        blockers.map((b) => `<li>${esc(b.t)}. ${b.a ? `<button class="linkish" data-fix="${b.a[1]}">${esc(b.a[0])}</button>` : ''}</li>`).join('')}</ul></div></div>`;
-      else if (cdState === 'ready') sum = `<div class="card sum ready"><span class="material-icons">check_circle</span><div><h3>Ready to close ${m}</h3><div class="muted">All checks passed.</div></div></div>`;
-      else sum = `<div class="card sum closed"><span class="material-icons">lock</span><div><h3>${m} is closed</h3><div class="muted">Closed on ${p.split(' ')[0]} 30 by Ignat Plot.</div></div></div>`;
+      const line = cdState === 'blocked'
+        ? `<span class="ln-warn">${blockers.length} blocker${blockers.length > 1 ? 's' : ''}</span> · ${blockers.map((b) => esc(b.t)).join(' · ')}`
+        : cdState === 'ready' ? '<span class="ln-ok">Ready to close</span> · all checks passed'
+        : `Closed by Ignat Plot on ${p.split(' ')[0]} 30, ${p.split(' ')[1]}`;
       const note = (st.notes || {})[c.id + '|' + p] || '';
-      body = sum + `
-        <div class="card">
-          <div class="chk-h"><h2>Checks</h2><span class="muted">${passed} of ${checks.length} passed</span><span class="bar"><i style="width:${passed / checks.length * 100}%"></i></span></div>
-          ${checks.map((x) => `<details class="chk"><summary><span class="material-icons ic ${x.s}">${ICON[x.s]}</span><span class="nm">${x.nm}</span><span class="stt">${esc(x.t)}</span>${x.a ? `<button class="btn-text" data-fix="${x.a[1]}">${esc(x.a[0])}</button>` : ''}<span class="material-icons exp">expand_more</span></summary><div class="det">${esc(x.d)}</div></details>`).join('')}
+      body = `
+        <div class="wk-top">
+          <div><label class="mpick"><select id="periodSel" aria-label="Month">${PERIODS.map((x) => `<option value="${x}"${x === p ? ' selected' : ''}>${mName(x)} ${x.split(' ')[1]}</option>`).join('')}</select><span class="material-icons">expand_more</span></label>
+            <div class="wk-line">${line}</div></div>
+          ${primary}
         </div>
-        <div class="card"><div class="chk-h"><h2>Notes for ${m}</h2></div>
-          <textarea class="note" id="cdNote" placeholder="Only you and your colleagues see these notes.">${esc(note)}</textarea></div>
-        <details class="card hist"><summary>History for ${m} (${cdHistory(c).length})</summary>
+        <div class="wk-sec">
+          <div class="sec-h">Checks <span class="muted">${passed} of ${checks.length} passed</span></div>
+          ${checks.map((x) => `<details class="chk"><summary><span class="material-icons ic ${x.s}">${ICON[x.s]}</span><span class="nm">${x.nm}</span><span class="stt">${esc(x.t)}</span>${x.a ? `<button class="linkish" data-fix="${x.a[1]}">${esc(x.a[0])}</button>` : ''}<span class="material-icons exp">expand_more</span></summary><div class="det">${esc(x.d)}</div></details>`).join('')}
+        </div>
+        <div class="wk-sec">
+          <div class="sec-h">Notes</div>
+          <textarea class="note" id="cdNote" placeholder="Notes for ${m}. Visible to your firm colleagues.">${esc(note)}</textarea>
+        </div>
+        <details class="wk-sec hist"><summary>History for ${m} (${cdHistory(c).length})</summary>
           <table>${cdHistory(c).map(([t, e]) => `<tr><td>${esc(t)}</td><td>${esc(e)}</td></tr>`).join('')}</table></details>`;
     } else if (tab === 'profile') {
       const f = (l, v, full) => `<label${full ? ' class="full"' : ''}>${l}<input type="text" value="${esc(v)}" /></label>`;
@@ -592,20 +599,18 @@
         <tr><td>Dasha Ivanova</td><td>dasha@wlslabs.com</td><td>Accountant</td></tr></tbody></table></div>`;
     }
     const T = [['work', 'Work'], ['profile', 'Profile'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
+    const pager = `<span class="pager"><button id="prevC" aria-label="Previous client"${i <= 0 ? ' disabled' : ''}><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"${i >= list.length - 1 ? ' disabled' : ''}><span class="material-icons">chevron_right</span></button></span>`;
     return `
       <button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
       <div class="cd-top">
         <div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-${statusBadge[0]}">${statusBadge[1]}</span></div>
         <div class="cd-actions">
-          <span class="pager"><button id="prevC" aria-label="Previous client"${i <= 0 ? ' disabled' : ''}><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"${i >= list.length - 1 ? ' disabled' : ''}><span class="material-icons">chevron_right</span></button></span>
-          <select class="period" id="periodSel" aria-label="Period">${PERIODS.map((x) => `<option${x === p ? ' selected' : ''}>${x}</option>`).join('')}</select>
-          <button class="btn-outlined" data-open="${c.id}">Open in Synder</button>
-          ${primary}
+          <button class="btn-text" data-open="${c.id}">Open in Synder</button>
           <span class="t-wrap"><button class="more" id="moreBtn" aria-label="More actions" aria-expanded="false"><span class="material-icons">more_horiz</span></button>
             <div class="menu" id="moreMenu"><button class="danger" id="removeBtn"><span class="material-icons">person_remove</span>Remove client</button></div></span>
         </div>
       </div>
-      <div class="tabs">${T.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="tabs"><div class="tabs-l">${T.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div>${pager}</div>
       ${body}`;
   }
   function bindClientDetail() {
@@ -696,7 +701,7 @@
     bind('addClient', openAddClient);
     bind('dashCta', () => goOrg(st.orgId, 'settings'));
     bind('dashSec', () => goFirm('clients'));
-    bind('cfCta', () => setScenario('firm-1', true));
+    
     bind('cfSec', () => goOrg(st.orgId || sc().own[0].id, 'dashboard'));
     bind('coCta', () => { if (st.ctx === 'firm') goFirm('clients'); else goOrg(st.orgId, 'dashboard'); });
     const t = st.ctx === 'firm' ? (st.page === 'client' ? findOrg(st.clientId).name : FIRM.name) : findOrg(st.orgId).name;
@@ -743,7 +748,7 @@
     $('popList').innerHTML = html;
     $('popFoot').innerHTML =
       `<button data-act="createorg"><span class="material-icons">add</span>Create organization</button>` +
-      (s.firm ? '' : `<button data-act="createfirm"><span class="material-icons">domain_add</span>Create a Firm</button>`);
+      '';
     $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
   }
   function act(a) {
@@ -797,10 +802,8 @@
     load();
     if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) { st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work'; }
     if (fromCta) { st = defaultState(); save(); }
-    document.querySelectorAll('#scenarioSeg button').forEach((b) => b.classList.toggle('active', b.dataset.s === scenario));
     closePop(); render();
   }
-  document.querySelectorAll('#scenarioSeg button').forEach((b) => b.onclick = () => setScenario(b.dataset.s));
   window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
 
   function render() {
