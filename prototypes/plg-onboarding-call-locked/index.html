@@ -1416,51 +1416,181 @@
     .hs-note-preview .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
     .hs-notes-count { display: flex; gap: 6px; align-items: center; margin-top: 6px; color: #3D4A5C; }
     .hs-notes-count .material-icons-round { font-size: 16px; color: #6B778C; }
-    /* ── Variant C: Before your call — call block as header, then a numbered list ── */
-    .bc-wrap { max-width: 720px; margin: 0 auto; padding-top: 16px; } /* + 24px app padding = 40 */
-    .bc-call { background: #E6F0FF; border-radius: 8px; padding: 32px; }
-    .bc-call-label { font-size: 14px; line-height: 24px; font-weight: 500; color: #0053CC; }
-    .bc-call-when { margin: 8px 0; font-size: 28px; line-height: 36px; font-weight: 500; color: #1A1B24; }
-    .bc-call-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; line-height: 24px; color: #5A6474; }
-    .bc-call-links { display: inline-flex; gap: 16px; }
-    .bc-link {
+    /* ── Variant C1 (restored) — Before your call (suggestions list, dev visual language) ── */
+    .v-c1 .bc-wrap { max-width: 660px; margin: 0 auto; }
+    .v-c1 .bc-wrap .page-title { font-size: 32px; font-weight: 400; line-height: 40px; color: #1A1B24; }
+    .v-c1 .bc-label { margin: 0 0 10px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .v-c1 .bc-list { display: flex; flex-direction: column; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; }
+    .v-c1 .bc-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
+      transition: border-color .15s ease;
+    }
+    .v-c1 .bc-row:hover { border-color: #9DBCF0; }
+    .v-c1 .bc-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: #F5F7FA; border: 1px solid #DFE4EC; color: #6B778C;
+      font-size: 14px; font-weight: 500; line-height: 22px; text-align: center; box-sizing: border-box;
+    }
+    .v-c1 .bc-row-body { flex: 1; min-width: 0; }
+    .v-c1 .bc-row h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .v-c1 .bc-row p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .v-c1 .bc-go {
+      appearance: none; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; line-height: 20px;
+      height: 32px; padding: 0 14px; border-radius: 4px;
+      background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .v-c1 .bc-go:hover { background: #E6F0FF; color: #0053CC; text-decoration: none; }
+    .v-c1 .bc-go .material-icons-round { font-size: 16px; }
+    .v-c1 .bc-blocks { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+    .v-c1 .bc-block {
+      background: #F5F7FA; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
+      box-sizing: border-box;
+    }
+    .v-c1 .bc-block.call-plan { flex: 3 1 340px; }
+    .v-c1 .bc-block.call-details { flex: 2 1 220px; }
+    .v-c1 .bc-block h2 {
+      display: flex; align-items: center; gap: 8px;
+      margin: 0 0 8px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24;
+    }
+    .v-c1 .bc-block h2 .material-icons-round { font-size: 20px; color: #6B778C; }
+    .v-c1 .bc-block ul { list-style: none; margin: 0; padding: 0; }
+    .v-c1 .bc-block li {
+      position: relative; padding: 4px 0 4px 16px;
+      font-size: 14px; line-height: 20px; color: #3D4A5C;
+    }
+    .v-c1 .bc-block.call-plan li::before {
+      content: ''; position: absolute; left: 3px; top: 12px;
+      width: 5px; height: 5px; border-radius: 50%; background: #9AA3B2;
+    }
+    .v-c1 .bc-block.call-details li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
+    .v-c1 .bc-block.call-details li .material-icons-round { font-size: 18px; color: #6B778C; margin-top: 1px; }
+    .v-c1 .bc-when { color: #1A1B24 !important; font-weight: 500; }
+    /* ── Variant C2 (restored) — Before your call (call reminder → while you wait → on the call) ── */
+    .v-c2 .bc-wrap { max-width: 720px; margin: 0 auto; }
+    .v-c2 .bc-wrap .page-title { font-size: 32px; font-weight: 400; line-height: 40px; color: #1A1B24; }
+    .v-c2 .bc-call {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #F5F7FA; border-radius: 8px; padding: 16px 20px; margin: 0 0 28px;
+    }
+    .v-c2 .bc-call-ico {
+      width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+      background: #E6F0FF; color: #0053CC; display: flex; align-items: center; justify-content: center;
+    }
+    .v-c2 .bc-call-ico .material-icons-round { font-size: 22px; }
+    .v-c2 .bc-call-body { flex: 1; min-width: 0; }
+    .v-c2 .bc-call-label { font-size: 14px; line-height: 20px; color: #6B778C; }
+    .v-c2 .bc-call-when { margin: 2px 0 4px; font-size: 20px; font-weight: 500; line-height: 28px; color: #1A1B24; }
+    .v-c2 .bc-call-meta { font-size: 14px; line-height: 20px; color: #6B778C; }
+    .v-c2 .bc-label { margin: 0 0 10px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .v-c2 .bc-list { display: flex; flex-direction: column; gap: 10px; margin: 0 0 28px; padding: 0; list-style: none; }
+    .v-c2 .bc-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
+      transition: border-color .15s ease;
+    }
+    .v-c2 .bc-row:hover { border-color: #9DBCF0; }
+    .v-c2 .bc-row-ico { font-size: 22px; color: #6B778C; flex-shrink: 0; margin-top: 1px; }
+    .v-c2 .bc-row-body { flex: 1; min-width: 0; }
+    .v-c2 .bc-row h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .v-c2 .bc-row p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .v-c2 .bc-go {
+      appearance: none; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; line-height: 20px;
+      height: 32px; padding: 0 14px; border-radius: 4px;
+      background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .v-c2 .bc-go:hover { background: #E6F0FF; color: #0053CC; text-decoration: none; }
+    .v-c2 .bc-go.is-primary { background: #0053CC; color: #FFFFFF; }
+    .v-c2 .bc-go.is-primary:hover { background: #0046B0; color: #FFFFFF; }
+    .v-c2 .bc-tiles {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+      list-style: none; margin: 0; padding: 0;
+    }
+    .v-c2 .bc-tile {
+      background: #F5F7FA; border-radius: 8px; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 14px; font-weight: 500; line-height: 20px; color: #1A1B24;
+    }
+    .v-c2 .bc-tile .material-icons-round { font-size: 22px; color: #0053CC; }
+    /* ── Variant C3 (restored) — Before your call — call block as header, then a numbered list ── */
+    .v-c3 .bc-wrap { max-width: 720px; margin: 0 auto; padding-top: 16px; } /* + 24px app padding = 40 */
+    .v-c3 .bc-call { background: #E6F0FF; border-radius: 8px; padding: 32px; }
+    .v-c3 .bc-call-label { font-size: 14px; line-height: 24px; font-weight: 500; color: #0053CC; }
+    .v-c3 .bc-call-when { margin: 8px 0; font-size: 28px; line-height: 36px; font-weight: 500; color: #1A1B24; }
+    .v-c3 .bc-call-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; line-height: 24px; color: #5A6474; }
+    .v-c3 .bc-link {
       appearance: none; border: none; background: none; cursor: pointer; padding: 0;
       font: inherit; font-size: 14px; line-height: 24px; font-weight: 500; color: #0053CC;
     }
-    .bc-link:hover { text-decoration: underline; }
-    .bc-tiles-label { margin: 24px 0 8px; font-size: 14px; line-height: 24px; font-weight: 500; color: #1A1B24; }
-    .bc-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
-    @media (max-width: 860px) { .bc-tiles { grid-template-columns: 1fr; } }
-    .bc-tile {
+    .v-c3 .bc-link:hover { text-decoration: underline; }
+    .v-c3 .bc-tiles-label { margin: 24px 0 8px; font-size: 14px; line-height: 24px; font-weight: 500; color: #1A1B24; }
+    .v-c3 .bc-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0; }
+   .v-c3 @media (max-width: 860px) { .bc-tiles { grid-template-columns: 1fr; } }
+    .v-c3 .bc-tile {
       background: #FFFFFF; border-radius: 8px; padding: 16px; cursor: default;
       display: flex; flex-direction: column; gap: 8px;
       font-size: 14px; line-height: 20px; font-weight: 500; color: #1A1B24;
     }
-    .bc-tile .material-icons-round { font-size: 20px; color: #0053CC; }
-    .bc-label { margin: 40px 0 8px; font-size: 16px; line-height: 24px; font-weight: 600; color: #1A1B24; }
-    .bc-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #DFE4EC; }
-    .bc-row {
+    .v-c3 .bc-tile .material-icons-round { font-size: 20px; color: #0053CC; }
+    .v-c3 .bc-label { margin: 40px 0 8px; font-size: 16px; line-height: 24px; font-weight: 600; color: #1A1B24; }
+    .v-c3 .bc-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #DFE4EC; }
+    .v-c3 .bc-row {
       display: flex; align-items: center; gap: 16px;
       padding: 16px 0; border-bottom: 1px solid #DFE4EC;
     }
-    .bc-num {
+    .v-c3 .bc-num {
       width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box;
       border: 1px solid #0053CC; color: #0053CC; align-self: flex-start;
       font-size: 14px; font-weight: 500; line-height: 22px; text-align: center;
     }
-    .bc-row-body { flex: 1; min-width: 0; }
-    .bc-row h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
-    .bc-row p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
-    .bc-action { flex-shrink: 0; }
-    .bc-primary {
+    .v-c3 .bc-row-body { flex: 1; min-width: 0; }
+    .v-c3 .bc-row h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
+    .v-c3 .bc-row p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-c3 .bc-action { flex-shrink: 0; }
+    .v-c3 .bc-primary {
       appearance: none; border: none; cursor: pointer; font: inherit;
       font-size: 14px; line-height: 20px; font-weight: 500; height: 40px; padding: 0 16px; border-radius: 4px;
       background: #0053CC; color: #FFFFFF;
     }
-    .bc-primary:hover { background: #0046B0; }
-    @media (max-width: 860px) {
-      .bc-row { flex-wrap: wrap; }
-      .bc-action { flex-basis: 100%; padding-left: 40px; }
+    .v-c3 .bc-primary:hover { background: #0046B0; }
+   .v-c3 @media (max-width: 860px) {
+      .v-c3 .bc-row { flex-wrap: wrap; }
+      .v-c3 .bc-action { flex-basis: 100%; padding-left: 40px; }
+    }
+    /* ── Variant D: Simple — title + two horizontal sections ── */
+    .v-d .d-wrap { max-width: 760px; margin: 0 auto; padding-top: 16px; }
+    .v-d .d-title { margin: 0 0 8px; font-size: 32px; line-height: 40px; font-weight: 400; color: #1A1B24; }
+    .v-d .d-sub { margin: 0 0 32px; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-d .d-section {
+      display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px;
+      padding: 24px 0; border-top: 1px solid #DFE4EC;
+    }
+    .v-d .d-section:last-child { border-bottom: 1px solid #DFE4EC; }
+    .v-d .d-section h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; color: #1A1B24; }
+    .v-d .d-caption { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-d .d-call-list { list-style: none; margin: 0; padding: 0; }
+    .v-d .d-call-list li {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 0 0 8px; font-size: 14px; line-height: 24px; color: #1A1B24;
+    }
+    .v-d .d-call-list li:last-child { padding-bottom: 0; }
+    .v-d .d-call-list .material-icons-round { font-size: 16px; line-height: 24px; color: #0053CC; }
+    .v-d .d-tips { list-style: none; margin: 0; padding: 0; }
+    .v-d .d-tip { display: flex; align-items: flex-start; gap: 24px; padding: 0 0 16px; }
+    .v-d .d-tip + .d-tip { padding-top: 16px; border-top: 1px solid #EFF1F5; }
+    .v-d .d-tip:last-child { padding-bottom: 0; }
+    .v-d .d-tip-body { flex: 1; min-width: 0; }
+    .v-d .d-tip h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
+    .v-d .d-tip p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-d .d-link {
+      appearance: none; border: none; background: none; cursor: pointer; padding: 0; flex-shrink: 0;
+      font: inherit; font-size: 14px; line-height: 24px; font-weight: 500; color: #0053CC; white-space: nowrap;
+    }
+    .v-d .d-link:hover { text-decoration: underline; }
+    @media (max-width: 900px) {
+      .v-d .d-section { grid-template-columns: 1fr; gap: 8px; }
     }
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
@@ -1481,7 +1611,7 @@
     .vo-field select { font: inherit; font-size: 14px; height: 36px; padding: 0 8px; border: 1px solid #DFE4EC; border-radius: 4px; background: #F7F8FA; color: #3D4A5C; }
   </style>
 </head>
-<body data-view="app" data-variant="quick">
+<body data-view="app" data-variant="d">
 
   <!-- Dark top variant bar -->
   <div class="proto-bar">
@@ -1492,9 +1622,12 @@
     <div class="proto-group">
       <span class="proto-label">Variant</span>
       <div class="seg" id="seg-variant">
-        <button type="button" data-variant="quick" class="active">A · Quick fix</button>
-        <button type="button" data-variant="prepare">B · Prepare for the call</button>
-        <button type="button" data-variant="before">C · Before your call</button>
+        <button type="button" data-variant="quick">A · Quick fix</button>
+        <button type="button" data-variant="prepare">B · Prepare</button>
+        <button type="button" data-variant="c1">C1 · List</button>
+        <button type="button" data-variant="c2">C2 · Call first</button>
+        <button type="button" data-variant="c3">C3 · Blue block</button>
+        <button type="button" data-variant="d" class="active">D · Simple</button>
       </div>
     </div>
 
@@ -1503,6 +1636,15 @@
       <div class="seg" id="seg-sync">
         <button type="button" data-sync="summary" class="active">Summary</button>
         <button type="button" data-sync="per-txn">Per transaction</button>
+      </div>
+    </div>
+
+    <div class="proto-group">
+      <span class="proto-label">Contact</span>
+      <div class="seg" id="seg-contact">
+        <button type="button" data-contact="zoom" class="active">Zoom</button>
+        <button type="button" data-contact="phone">Phone</button>
+        <button type="button" data-contact="email">Email</button>
       </div>
     </div>
 
@@ -2135,15 +2277,71 @@
 
   // C — Before your call: a list of suggestions the user can really do now (no done state),
   // plus 'call' items rendered as a plain list of what the Synder specialist does on the call.
-  const CONNECT_C = {
+  const CONNECT_C1 = {
+    id: 'channel', phase: 'tip',
+    title: 'Connect your sales channel',
+    desc: 'Connect every channel you get paid from.',
+    where: 'Go to Organization settings',
+  };
+  CHECKPOINTS.c1 = {
+    summary: [
+      CONNECT_C1,
+      { id: 'mapping', phase: 'tip', title: 'Complete account mapping',
+        desc: 'Map Sale, Refund, Expense, and Adjustment groups to accounts.', where: 'Go to Mappings list' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync a summary manually',
+        desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
+        where: 'Go to Summaries list' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+    ],
+    'per-txn': [
+      CONNECT_C1,
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 transactions to see how they’ll look in your books',
+        desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
+      { id: 'explore', phase: 'tip', title: 'Look through your clearing account and sales settings',
+        desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
+        where: 'Open Settings (view only)' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and core sales settings' },
+      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+    ],
+  };  const CONNECT_C2 = {
+    id: 'channel', phase: 'tip', icon: 'power', primary: true,
+    title: 'Connect your sales channel',
+    desc: 'Connect every channel you get paid from.',
+    where: 'Go to Organization settings',
+  };
+  CHECKPOINTS.c2 = {
+    summary: [
+      CONNECT_C2,
+      { id: 'mapping', phase: 'tip', icon: 'account_tree', title: 'Complete account mapping',
+        desc: 'Map Sale, Refund, Expense, and Adjustment groups to accounts.', where: 'Go to Mappings list' },
+      { id: 'test-sync', phase: 'tip', icon: 'sync', title: 'Sync a summary manually',
+        desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
+        where: 'Go to Summaries list' },
+      { id: 'call-frequency', phase: 'call', icon: 'schedule', title: 'Set your sync frequency' },
+      { id: 'call-auto', phase: 'call', icon: 'autorenew', title: 'Turn on auto-sync and import historical data' },
+    ],
+    'per-txn': [
+      CONNECT_C2,
+      { id: 'test-sync', phase: 'tip', icon: 'sync', title: 'Sync 3 transactions to see how they’ll look in your books',
+        desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
+      { id: 'explore', phase: 'tip', icon: 'visibility', title: 'Look through your clearing account and sales settings',
+        desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
+        where: 'Open Settings (view only)' },
+      { id: 'call-settings', phase: 'call', icon: 'tune', title: 'Set up your clearing account and core sales settings' },
+      { id: 'call-fix', phase: 'call', icon: 'build', title: 'Fix anything in your test transactions' },
+      { id: 'call-auto', phase: 'call', icon: 'autorenew', title: 'Turn on auto-sync and import historical data' },
+    ],
+  };  const CONNECT_C3 = {
     id: 'channel', phase: 'tip', primary: true,
     title: 'Connect your sales channel',
     desc: 'Add every channel you get paid from.',
     where: 'Connect sales channel',
   };
-  CHECKPOINTS.before = {
+  CHECKPOINTS.c3 = {
     summary: [
-      CONNECT_C,
+      CONNECT_C3,
       { id: 'mapping', phase: 'tip', title: 'Map your accounts',
         desc: 'Map Sale, Refund, Expense and Adjustment groups to accounts.', where: 'Map accounts' },
       { id: 'test-sync', phase: 'tip', title: 'Sync a test summary',
@@ -2153,14 +2351,34 @@
       { id: 'call-historical', phase: 'call', icon: 'history', title: 'Import your historical data' },
     ],
     'per-txn': [
-      CONNECT_C,
+      CONNECT_C3,
       { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions',
         desc: 'See how they look in your books. Anything off gets fixed on the call.', where: 'Sync 3 transactions' },
       { id: 'call-settings', phase: 'call', icon: 'tune', title: 'Set up your clearing account and sales settings' },
       { id: 'call-fix', phase: 'call', icon: 'build', title: 'Fix anything in your test transactions' },
       { id: 'call-auto', phase: 'call', icon: 'autorenew', title: 'Turn on auto-sync and import history' },
     ],
+  };  // D — Simple: on the call + optional suggestions (text links only)
+  CHECKPOINTS.d = {
+    summary: [
+      { id: 'channel', phase: 'tip', title: 'Connect your sales channel', desc: 'Add every channel you get paid from.', where: 'Connect' },
+      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups to accounts.', where: 'Open Mapping' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary manually and check it in your books.', where: 'Open Summaries' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync' },
+      { id: 'call-historical', phase: 'call', title: 'Import your historical data' },
+    ],
+    'per-txn': [
+      { id: 'channel', phase: 'tip', title: 'Connect your sales channel', desc: 'Add every channel you get paid from.', where: 'Connect' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they look in your books. Anything off gets fixed on the call.', where: 'Open Transactions' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings' },
+      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import history' },
+    ],
   };
+  const BEFORE_VARIANTS = ['c1', 'c2', 'c3', 'd'];
+  function isBefore() { return BEFORE_VARIANTS.includes(state.variant); }
+
 
   function activeCheckpoints() {
     return CHECKPOINTS[state.variant][state.syncMode];
@@ -3075,7 +3293,7 @@
       if (ico) ico.textContent = complete ? 'check_circle' : 'checklist';
       const cnt = $('.sb-cl-count', row);
       const lbl = $('.sb-cl-label', row);
-      if (state.variant === 'before') {
+      if (isBefore()) {
         if (lbl) lbl.textContent = 'Before your call';
         if (ico) ico.textContent = 'event_note';
         row.classList.remove('is-complete');
@@ -3106,14 +3324,14 @@
   function syncVariantUrl() {
     try {
       const url = new URL(window.location.href);
-      if (state.variant !== 'quick') url.searchParams.set('variant', state.variant);
+      if (state.variant !== 'd') url.searchParams.set('variant', state.variant);
       else url.searchParams.delete('variant');
       history.replaceState(null, '', url.toString());
     } catch (err) { /* file:// or sandbox — ignore */ }
   }
 
   function setVariant(v) {
-    state.variant = (v === 'prepare' || v === 'before') ? v : 'quick';
+    state.variant = (v === 'prepare' || v === 'quick' || BEFORE_VARIANTS.includes(v)) ? v : 'd';
     state.noteOpen = null;
     document.body.setAttribute('data-variant', state.variant);
     $$('#seg-variant button').forEach(b => b.classList.toggle('active', b.dataset.variant === state.variant));
@@ -3175,7 +3393,7 @@
       set.delete(id);
     } else {
       const currentId = (list.filter(c => c.phase === 'self').find(c => !set.has(c.id)) || {}).id;
-      if (id !== currentId && state.variant !== 'before') return; // A/B: only the current step; C: any completable row
+      if (id !== currentId && !isBefore()) return; // A/B: only the current step; C: any completable row
       set.add(id);
     }
     const order = list.map(c => c.id);
@@ -3198,7 +3416,7 @@
       'smart-rules': 'smart-rules',
       'auto-historical': state.syncMode === 'summary' ? 'summaries' : 'historical',
     };
-    if (state.variant === 'before') {
+    if (isBefore()) {
       // C: send doable rows to pages where they can be done (not the view-only Settings)
       map.channel = 'org-settings';
       map.mapping = 'mapping';
@@ -3239,8 +3457,75 @@
     return slot.dayLabel + ' · ' + startTxt + (sameAp ? '' : ' ' + m[3].toUpperCase()) + '–' + endTxt + ' ' + endAp + ' ET';
   }
 
-  function beforeCallHtml() {
+  function beforeC1Html() {
     const list = activeCheckpoints();
+    const tips = list.filter(c => c.phase === 'tip');
+    const rows = tips.map((c, i) =>
+      '<li class="bc-row" data-step-id="' + c.id + '">' +
+        '<span class="bc-num" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<div class="bc-row-body"><h3>' + c.title + '</h3><p>' + c.desc + '</p>' +
+        '<button type="button" class="bc-go hs-where" data-where="' + c.id + '">' + c.where + '</button></div>' +
+      '</li>'
+    ).join('');
+    const callRows = list.filter(c => c.phase === 'call').map(c => '<li>' + c.title + '</li>').join('');
+    const ci = callInfo();
+    return `
+      <div class="bc-wrap">
+        <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
+        <p class="page-subtitle" style="margin-bottom:24px">A few things you can try now. Your Synder specialist sets up the rest with you on the call.</p>
+        <h2 class="bc-label">While you wait for your call</h2>
+        <ul class="bc-list">${rows}</ul>
+        <div class="bc-blocks">
+          <section class="bc-block call-plan" aria-labelledby="bc-plan-h">
+            <h2 id="bc-plan-h"><span class="material-icons-round">event</span>On your setup call</h2>
+            <ul>${callRows}</ul>
+          </section>
+          <section class="bc-block call-details" aria-labelledby="bc-details-h">
+            <h2 id="bc-details-h"><span class="material-icons-round">${ci.icon}</span>Your setup call</h2>
+            <ul>
+              <li class="bc-when"><span>${ci.title}</span></li>
+              <li><span>${ci.sub}</span></li>
+            </ul>
+          </section>
+        </div>
+      </div>`;
+  }
+
+  function beforeC2Html() {
+    const list = activeCheckpoints();
+    const rows = list.filter(c => c.phase === 'tip').map(c =>
+      '<li class="bc-row" data-step-id="' + c.id + '">' +
+        '<span class="material-icons-round bc-row-ico" aria-hidden="true">' + c.icon + '</span>' +
+        '<div class="bc-row-body"><h3>' + c.title + '</h3><p>' + c.desc + '</p>' +
+        '<button type="button" class="bc-go hs-where' + (c.primary ? ' is-primary' : '') + '" data-where="' + c.id + '">' + c.where + '</button></div>' +
+      '</li>'
+    ).join('');
+    const tiles = list.filter(c => c.phase === 'call').map(c =>
+      '<li class="bc-tile"><span class="material-icons-round" aria-hidden="true">' + c.icon + '</span>' + c.title + '</li>'
+    ).join('');
+    const ci = callInfo();
+    return `
+      <div class="bc-wrap">
+        <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
+        <p class="page-subtitle" style="margin-bottom:20px">Here’s what you can do until your setup call.</p>
+        <section class="bc-call" aria-label="Your setup call">
+          <span class="bc-call-ico"><span class="material-icons-round">${ci.icon}</span></span>
+          <div class="bc-call-body">
+            <div class="bc-call-label">Your setup call</div>
+            <div class="bc-call-when">${ci.title}</div>
+            <div class="bc-call-meta">${ci.sub}</div>
+          </div>
+        </section>
+        <h2 class="bc-label">While you wait</h2>
+        <ul class="bc-list">${rows}</ul>
+        <h2 class="bc-label">On your setup call</h2>
+        <ul class="bc-tiles">${tiles}</ul>
+      </div>`;
+  }
+
+  function beforeC3Html() {
+    const list = activeCheckpoints();
+    const ci = callInfo();
     const tiles = list.filter(c => c.phase === 'call').map(c =>
       '<li class="bc-tile"><span class="material-icons-round" aria-hidden="true">' + c.icon + '</span>' + c.title + '</li>'
     ).join('');
@@ -3255,20 +3540,68 @@
       <div class="bc-wrap">
         <section class="bc-call" aria-labelledby="bc-call-label">
           <div class="bc-call-label" id="bc-call-label">Your setup call</div>
-          <div class="bc-call-when">${callWhenText()}</div>
-          <div class="bc-call-meta">
-            <span>Zoom · link in your calendar invite</span>
-            <span class="bc-call-links">
-              <button type="button" class="bc-link" id="bc-add-cal">Add to calendar</button>
-              <button type="button" class="bc-link" id="bc-resched">Reschedule</button>
-            </span>
-          </div>
+          <div class="bc-call-when">${ci.title}</div>
+          <div class="bc-call-meta"><span>${ci.sub}</span></div>
           <div class="bc-tiles-label">On the call, your specialist will</div>
           <ul class="bc-tiles">${tiles}</ul>
         </section>
         <h2 class="bc-label">While you wait</h2>
         <ol class="bc-list">${rows}</ol>
       </div>`;
+  }
+
+  function callInfo() {
+    const kind = ['zoom', 'phone', 'email'].includes(state.demoContact) ? state.demoContact : 'zoom';
+    if (kind === 'phone') {
+      return { kind, icon: 'call', title: 'Phone call · Your Synder specialist will call you',
+        sub: phoneWindowLabel() + ' · ' + tzShort() };
+    }
+    if (kind === 'email') {
+      return { kind, icon: 'mail_outline', title: 'Email · Your Synder specialist will email you to set a time',
+        sub: 'Check ' + escapeHtml(state.accountEmail || 'jane@greenleafstore.com') };
+    }
+    return { kind, icon: 'videocam', title: 'Zoom call · ' + callWhenText(), sub: 'Link in your calendar invite' };
+  }
+  function phoneWindowLabel() {
+    return { morning: 'Morning (9:00–12:00)', afternoon: 'Afternoon (12:00–17:00)', evening: 'Evening (17:00–20:00)' }[state.timeWindow] || 'Morning (9:00–12:00)';
+  }
+  function tzShort() {
+    const m = /\(([^)]+)\)/.exec(timezoneLabel(state.phoneTimezone || 'America/New_York'));
+    return m ? m[1] : 'ET';
+  }
+  function beforeDSubtitle() {
+    const ci = callInfo();
+    if (ci.kind === 'phone') {
+      const w = { morning: 'in the morning (9:00–12:00', afternoon: 'in the afternoon (12:00–17:00', evening: 'in the evening (17:00–20:00' }[state.timeWindow] || 'in the morning (9:00–12:00';
+      return 'Your Synder specialist will call you ' + w + ' ' + tzShort() + ').';
+    }
+    if (ci.kind === 'email') return 'Your Synder specialist will email you to set a time.';
+    return 'Your Zoom call is on ' + callWhenText() + '.';
+  }
+  function beforeDHtml() {
+    const list = activeCheckpoints();
+    const calls = list.filter(c => c.phase === 'call').map(c =>
+      '<li><span class="material-icons-round" aria-hidden="true">check</span><span>' + c.title + '</span></li>').join('');
+    const tips = list.filter(c => c.phase === 'tip').map(c =>
+      '<li class="d-tip" data-step-id="' + c.id + '"><div class="d-tip-body"><h3>' + c.title + '</h3><p>' + c.desc + '</p></div>' +
+      '<button type="button" class="d-link bc-where" data-where="' + c.id + '">' + c.where + '</button></li>').join('');
+    return `
+      <div class="d-wrap">
+        <h1 class="d-title">Before your call</h1>
+        <p class="d-sub">${beforeDSubtitle()}</p>
+        <section class="d-section" aria-labelledby="d-call-h">
+          <div><h2 id="d-call-h">On the call</h2><p class="d-caption">With your Synder specialist</p></div>
+          <ul class="d-call-list">${calls}</ul>
+        </section>
+        <section class="d-section" aria-labelledby="d-before-h">
+          <div><h2 id="d-before-h">Before the call</h2><p class="d-caption">Optional suggestions</p></div>
+          <ul class="d-tips">${tips}</ul>
+        </section>
+      </div>`;
+  }
+  function beforeCallHtml() {
+    const fn = { c1: beforeC1Html, c2: beforeC2Html, c3: beforeC3Html, d: beforeDHtml }[state.variant];
+    return '<div class="v-' + state.variant + '">' + fn() + '</div>';
   }
 
   function renderAppPage() {
@@ -3304,7 +3637,7 @@
       settings: 'Settings',
       'org-settings': 'Organization settings',
     };
-    if (state.variant === 'before') titles['setup-checklist'] = 'Before your call';
+    if (isBefore()) titles['setup-checklist'] = 'Before your call';
     const title = titles[page] || 'Dashboard';
     const model = healthModel();
 
@@ -3324,7 +3657,7 @@
     }
 
     let body = '';
-    if (page === 'setup-checklist' && state.variant === 'before') {
+    if (page === 'setup-checklist' && isBefore()) {
       body = beforeCallHtml();
     } else if (page === 'setup-checklist') {
       body = `
@@ -3563,6 +3896,15 @@
     setVariant(btn.dataset.variant);
   });
 
+  $('#seg-contact').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    state.demoContact = btn.dataset.contact;
+    state.demoForced = true;
+    $$('#seg-contact button').forEach(b => b.classList.toggle('active', b === btn));
+    renderApp();
+  });
+
   $('#seg-sync').addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -3741,12 +4083,14 @@
 
   // init
   (function initVariant() {
-    let v = 'quick';
+    let v = 'd'; // default: D · Simple
     try {
       const q = (new URLSearchParams(window.location.search).get('variant') || '').toLowerCase();
-      const h = (window.location.hash || '').replace(/^#/, '').toLowerCase();
-      if (q === 'prepare' || q === 'b' || /(^|&)variant=(prepare|b)\b/.test(h) || h === 'prepare') v = 'prepare';
-      if (q === 'before' || q === 'c' || /(^|&)variant=(before|c)\b/.test(h) || h === 'before') v = 'before';
+      const h = (window.location.hash || '').replace(/^#/, '').toLowerCase().replace(/^variant=/, '');
+      const key = q || h;
+      const alias = { quick: 'quick', a: 'quick', prepare: 'prepare', b: 'prepare',
+        c1: 'c1', c2: 'c2', c3: 'c3', c: 'c3', before: 'c3', d: 'd', simple: 'd' };
+      if (alias[key]) v = alias[key];
     } catch (err) { /* ignore */ }
     state.variant = v;
     document.body.setAttribute('data-variant', v);
@@ -3757,6 +4101,8 @@
   setStep(1);
   state.demoContact = 'zoom';
   state.zoomSlot = { dayLabel: 'Thu, Nov 12', time: '10:00 AM' }; // call already scheduled
+  state.phoneTimezone = 'America/New_York'; // demo: ET
+  state.timeWindow = 'morning';
   state.appPage = 'setup-checklist';
   setView('app');
   updateContinueButtons();
