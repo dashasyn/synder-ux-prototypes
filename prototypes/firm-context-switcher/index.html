@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firm context switcher — Synder</title>
   <!--
-    Firm context switcher v1 (Ignat, Nov 4 2026)
+    Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
     - Scenarios (dark bar, URL hash): #firm, #firm-1, #normal.
@@ -44,24 +44,49 @@
 
     /* ── Product shell ── */
     .p-top {
-      height: 59px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; border-bottom: 1px solid #C8C7CC; background: #fff;
-      position: sticky; top: var(--proto-bar-h); z-index: 20;
+      height: 56px; background: #fff; border-bottom: 1px solid #C8C7CC;
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 16px; padding: 0 20px;
+      position: sticky; top: var(--proto-bar-h); z-index: 30;
     }
-    .p-logo { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; }
-    .p-logo .mark {
-      width: 24px; height: 24px; border-radius: 5px; background: #0053CC; color: #fff;
-      font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    .t-balance { font-size: 14px; color: #1A1B24; border-bottom: 2px solid #0053CC; padding-bottom: 2px; cursor: default; }
+    .t-balance b { color: #0053CC; font-weight: 600; }
+    .t-how { font-size: 14px; color: #0053CC; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
+    .t-how:hover { text-decoration: underline; }
+    .t-wrap { position: relative; }
+    .t-ico {
+      position: relative; height: 32px; min-width: 32px; border-radius: 6px; padding: 0 4px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0;
+      color: #0053CC; background: transparent; border: none; cursor: pointer; font-family: inherit;
     }
-    .p-user {
-      width: 32px; height: 32px; border-radius: 50%; background: #EFF1F5; color: #1A1B24;
-      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500;
+    .t-ico:hover, .t-ico[aria-expanded="true"] { background: #F2F6FC; }
+    .t-ico .material-icons { font-size: 22px; }
+    .t-ico .chev { font-size: 18px; opacity: .7; }
+    .t-badge {
+      position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 8px; background: #CC2929; color: #fff; font-size: 11px; line-height: 16px; font-weight: 500;
     }
-    .p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 59px); }
+    .menu {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 220px;
+      background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; padding: 6px 0;
+      box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none;
+    }
+    .menu.open { display: block; }
+    .menu button {
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 16px;
+      background: none; border: none; cursor: pointer; font: inherit; font-size: 14px; color: #1A1B24; text-align: left;
+    }
+    .menu button:hover { background: #F2F6FC; }
+    .menu .material-icons { font-size: 20px; color: #6B778C; }
+    .menu .div { height: 1px; background: #EFF1F5; margin: 6px 0; }
+    .menu .who { padding: 8px 16px 10px; border-bottom: 1px solid #EFF1F5; margin-bottom: 6px; }
+    .menu .who b { display: block; font-weight: 500; }
+    .menu .who span { color: #6B778C; }
+    .p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 56px); }
     .p-side {
       width: 248px; min-width: 248px; background: #F6F6F6; border-right: 1px solid #C8C7CC;
-      position: sticky; top: calc(var(--proto-bar-h) + 59px);
-      height: calc(100vh - var(--proto-bar-h) - 59px); overflow-y: auto;
+      position: sticky; top: calc(var(--proto-bar-h) + 56px);
+      height: calc(100vh - var(--proto-bar-h) - 56px); overflow-y: auto;
       display: flex; flex-direction: column;
     }
     .p-main { flex: 1; min-width: 0; padding: 24px 32px 48px; }
@@ -196,7 +221,7 @@
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v1</span>
+    <span class="brand">Firm context switcher · v2</span>
     <span class="spacer"></span>
     <div class="seg" id="scenarioSeg">
       <button data-s="firm">Firm user</button>
@@ -206,8 +231,20 @@
   </div>
 
   <div class="p-top">
-    <div class="p-logo"><span class="mark">S</span>Synder</div>
-    <div class="p-user" title="Ignat Plot">IP</div>
+    <span class="t-balance">Balance: <b>∞</b></span>
+    <button type="button" class="t-how" data-top="how">How it works?</button>
+    <button type="button" class="t-ico" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications_none</span><span class="t-badge">3</span></button>
+    <div class="t-wrap">
+      <button type="button" class="t-ico" id="helpBtn" aria-label="Help" aria-expanded="false"><span class="material-icons">help_outline</span><span class="material-icons chev">expand_more</span></button>
+      <div class="menu" id="helpMenu">
+        <button data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
+        <button data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
+      </div>
+    </div>
+    <div class="t-wrap">
+      <button type="button" class="t-ico" id="userBtn" aria-label="Account" aria-expanded="false"><span class="material-icons">account_circle</span><span class="material-icons chev">expand_more</span></button>
+      <div class="menu" id="userMenu"></div>
+    </div>
   </div>
 
   <div class="p-body">
@@ -273,6 +310,12 @@
     ['products', 'inventory_2', 'Products and services'], ['analytics', 'insights', 'Analytics'],
     ['revrec', 'timeline', 'Revenue recognition'], ['settings', 'settings', 'Settings']
   ];
+  const TOP_PAGES = {
+    how: ['live_help', 'How it works?'], notifications: ['notifications_none', 'Notifications'],
+    helpcenter: ['menu_book', 'Help center'], support: ['chat_bubble_outline', 'Contact support'],
+    orgsettings: ['tune', 'Organization settings'], activity: ['history', 'Activity log'],
+    profile: ['person_outline', 'User profile'], orglist: ['list', 'List of organizations']
+  };
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
 
   /* ───────── State ───────── */
@@ -421,7 +464,9 @@
 
   function renderMain() {
     let html;
-    if (st.ctx === 'firm') {
+    if (TOP_PAGES[st.page]) {
+      html = placeholder(TOP_PAGES[st.page][1], st.ctx === 'firm' ? FIRM.name : findOrg(st.orgId).name);
+    } else if (st.ctx === 'firm') {
       if (st.page === 'clients') html = renderClients();
       else if (st.page === 'client') html = renderClientDetail();
       else if (st.page === 'createorg') html = renderCreateOrg();
@@ -548,7 +593,43 @@
   document.querySelectorAll('#scenarioSeg button').forEach((b) => b.onclick = () => setScenario(b.dataset.s));
   window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
 
-  function render() { renderTrigger(); renderNav(); renderMain(); }
+  function render() { renderTrigger(); renderNav(); renderMain(); renderUserMenu(); }
+
+  /* ───────── Top bar menus ───────── */
+  function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
+  function renderUserMenu() {
+    const items = [];
+    if (sc().firm) items.push(['myfirm', 'domain', 'My firm']);
+    items.push(['orgsettings', 'tune', 'Organization settings'], ['activity', 'history', 'Activity log'],
+      ['profile', 'person_outline', 'User profile'], ['orglist', 'list', 'List of organizations']);
+    $('userMenu').innerHTML = `<div class="who"><b>Ignat Plot</b><span>ignat@wlslabs.com</span></div>` +
+      items.map(([k, ic, l]) => `<button data-um="${k}"><span class="material-icons">${ic}</span>${l}</button>`).join('') +
+      `<div class="div"></div><button data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
+    $('userMenu').querySelectorAll('[data-um]').forEach((b) => b.onclick = () => {
+      const k = b.dataset.um;
+      if (k === 'myfirm') { closeMenus(); goFirm('clients'); }
+      else if (k === 'logout') { closeMenus(); openLogout(); }
+      else goTop(k);
+    });
+  }
+  function openLogout() {
+    $('modal').innerHTML = `<h3>Log out</h3><p>This prototype keeps you signed in, so you can keep exploring.</p>
+      <div class="modal-actions"><button class="btn" id="doneModal">OK</button></div>`;
+    $('scrim').classList.add('open'); $('doneModal').onclick = closeModal;
+  }
+  function closeMenus() {
+    ['helpMenu', 'userMenu'].forEach((id) => $(id).classList.remove('open'));
+    ['helpBtn', 'userBtn'].forEach((id) => $(id).setAttribute('aria-expanded', 'false'));
+  }
+  function toggleMenu(btn, menu) {
+    const open = !$(menu).classList.contains('open'); closeMenus(); closePop();
+    if (open) { $(menu).classList.add('open'); $(btn).setAttribute('aria-expanded', 'true'); }
+  }
+  $('helpBtn').onclick = () => toggleMenu('helpBtn', 'helpMenu');
+  $('userBtn').onclick = () => toggleMenu('userBtn', 'userMenu');
+  document.querySelectorAll('[data-top]').forEach((b) => b.onclick = () => goTop(b.dataset.top));
+  document.addEventListener('mousedown', (e) => { if (!e.target.closest('.t-wrap')) closeMenus(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
 
   $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
   setScenario((location.hash || '#firm').slice(1));
