@@ -1416,26 +1416,57 @@
     .hs-note-preview .material-icons-round { font-size: 16px; color: #6B778C; margin-top: 2px; }
     .hs-notes-count { display: flex; gap: 6px; align-items: center; margin-top: 6px; color: #3D4A5C; }
     .hs-notes-count .material-icons-round { font-size: 16px; color: #6B778C; }
-    /* ── Variant C: Before your call (plain list) ── */
-    .bc-wrap { max-width: 720px; }
-    .bc-section-h {
-      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-      margin: 8px 0 10px;
+    /* ── Variant C: Before your call (suggestions list, dev visual language) ── */
+    .bc-wrap { max-width: 660px; margin: 0 auto; }
+    .bc-wrap .page-title { font-size: 32px; font-weight: 400; line-height: 40px; color: #1A1B24; }
+    .bc-label { margin: 0 0 10px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .bc-list { display: flex; flex-direction: column; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; }
+    .bc-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
+      transition: border-color .15s ease;
     }
-    .bc-section-h h2 { margin: 0; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
-    .bc-section-h .bc-meta { font-size: 14px; line-height: 20px; color: #6B778C; }
-    .bc-section-h .bc-meta.is-done { color: #1F8940; }
-    .hs-step-card .ico.look { background: #E6F0FF; color: #0053CC; border: none; }
-    .bc-call-list { list-style: none; margin: 0 0 12px; padding: 0; }
-    .bc-call-list li {
-      position: relative; padding: 6px 0 6px 18px;
+    .bc-row:hover { border-color: #9DBCF0; }
+    .bc-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: #F5F7FA; border: 1px solid #DFE4EC; color: #6B778C;
+      font-size: 14px; font-weight: 500; line-height: 22px; text-align: center; box-sizing: border-box;
+    }
+    .bc-row-body { flex: 1; min-width: 0; }
+    .bc-row h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24; }
+    .bc-row p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .bc-go {
+      appearance: none; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; line-height: 20px;
+      height: 32px; padding: 0 14px; border-radius: 4px;
+      background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .bc-go:hover { background: #E6F0FF; color: #0053CC; text-decoration: none; }
+    .bc-go .material-icons-round { font-size: 16px; }
+    .bc-blocks { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+    .bc-block {
+      background: #F5F7FA; border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px 20px;
+      box-sizing: border-box;
+    }
+    .bc-block.call-plan { flex: 3 1 340px; }
+    .bc-block.call-details { flex: 2 1 220px; }
+    .bc-block h2 {
+      display: flex; align-items: center; gap: 8px;
+      margin: 0 0 8px; font-size: 16px; font-weight: 500; line-height: 24px; color: #1A1B24;
+    }
+    .bc-block h2 .material-icons-round { font-size: 20px; color: #6B778C; }
+    .bc-block ul { list-style: none; margin: 0; padding: 0; }
+    .bc-block li {
+      position: relative; padding: 4px 0 4px 16px;
       font-size: 14px; line-height: 20px; color: #3D4A5C;
     }
-    .bc-call-list li::before {
-      content: ''; position: absolute; left: 4px; top: 14px;
+    .bc-block.call-plan li::before {
+      content: ''; position: absolute; left: 3px; top: 12px;
       width: 5px; height: 5px; border-radius: 50%; background: #9AA3B2;
     }
-    .bc-call-details .hs-contact-info { margin: 0; }
+    .bc-block.call-details li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
+    .bc-block.call-details li .material-icons-round { font-size: 18px; color: #6B778C; margin-top: 1px; }
+    .bc-when { color: #1A1B24 !important; font-weight: 500; }
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -2107,10 +2138,10 @@
     },
   };
 
-  // C — Before your call: only rows the user can really do now ('self' = completable, 'look' = view-only explore).
-  // 'call' rows render as a plain list of what the Synder specialist does on the call.
+  // C — Before your call: a list of suggestions the user can really do now (no done state),
+  // plus 'call' items rendered as a plain list of what the Synder specialist does on the call.
   const CONNECT_C = {
-    id: 'channel', phase: 'self',
+    id: 'channel', phase: 'tip',
     title: 'Connect your sales channel',
     desc: 'Connect every channel you get paid from.',
     where: 'Go to Organization settings',
@@ -2118,9 +2149,9 @@
   CHECKPOINTS.before = {
     summary: [
       CONNECT_C,
-      { id: 'mapping', phase: 'self', title: 'Complete account mapping',
+      { id: 'mapping', phase: 'tip', title: 'Complete account mapping',
         desc: 'Map Sale, Refund, Expense, and Adjustment groups to accounts.', where: 'Go to Mappings list' },
-      { id: 'test-sync', phase: 'self', title: 'Sync a summary manually',
+      { id: 'test-sync', phase: 'tip', title: 'Sync a summary manually',
         desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
         where: 'Go to Summaries list' },
       { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
@@ -2128,11 +2159,11 @@
     ],
     'per-txn': [
       CONNECT_C,
-      { id: 'explore', phase: 'look', title: 'Look through your clearing account and sales settings',
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 transactions to see how they’ll look in your books',
+        desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
+      { id: 'explore', phase: 'tip', title: 'Look through your clearing account and sales settings',
         desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
         where: 'Open Settings (view only)' },
-      { id: 'test-sync', phase: 'self', title: 'Sync 3 transactions to see how they’ll look in your books',
-        desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
       { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and core sales settings' },
       { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
       { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
@@ -3054,9 +3085,10 @@
       const lbl = $('.sb-cl-label', row);
       if (state.variant === 'before') {
         if (lbl) lbl.textContent = 'Before your call';
-        if (ico) ico.textContent = complete ? 'check_circle' : 'event_note';
+        if (ico) ico.textContent = 'event_note';
+        row.classList.remove('is-complete');
         row.setAttribute('aria-label', 'Open Before your call');
-        if (cnt) { cnt.textContent = model.count + ' / ' + model.total; cnt.style.display = ''; }
+        if (cnt) { cnt.textContent = ''; cnt.style.display = 'none'; }
       } else {
         if (lbl) lbl.textContent = 'Setup checklist';
         row.setAttribute('aria-label', 'Open Setup checklist');
@@ -3174,6 +3206,11 @@
       'smart-rules': 'smart-rules',
       'auto-historical': state.syncMode === 'summary' ? 'summaries' : 'historical',
     };
+    if (state.variant === 'before') {
+      // C: send doable rows to pages where they can be done (not the view-only Settings)
+      map.channel = 'org-settings';
+      map.mapping = 'mapping';
+    }
     const page = map[id];
     if (!page) return;
     state.appPage = page;
@@ -3194,48 +3231,54 @@
     }
   }
 
-  /* ── Variant C: Before your call (plain list) ── */
+  /* ── Variant C: Before your call (suggestions list) ── */
+  function callWhenText() {
+    const slot = state.zoomSlot || { dayLabel: 'Thu, Nov 12', time: '10:00 AM' };
+    const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(slot.time || '');
+    if (!m) return slot.dayLabel + ' · ' + slot.time;
+    let h = +m[1] % 12 + (m[3].toUpperCase() === 'PM' ? 12 : 0);
+    let min = +m[2] + 30;
+    if (min >= 60) { min -= 60; h = (h + 1) % 24; }
+    const endH = h % 12 || 12;
+    const endAp = h < 12 ? 'AM' : 'PM';
+    const startTxt = m[1] + ':' + m[2];
+    const endTxt = endH + ':' + String(min).padStart(2, '0');
+    const sameAp = endAp === m[3].toUpperCase();
+    return slot.dayLabel + ' · ' + startTxt + (sameAp ? '' : ' ' + m[3].toUpperCase()) + '–' + endTxt + ' ' + endAp + ' ET';
+  }
+
   function beforeCallHtml() {
     const list = activeCheckpoints();
-    const done = new Set(state.doneIds);
-    const selfList = list.filter(c => c.phase === 'self');
-    const count = selfList.filter(c => done.has(c.id)).length;
-    const allDone = selfList.length > 0 && count === selfList.length;
-    const firstOpen = (selfList.find(c => !done.has(c.id)) || {}).id;
-    const rows = list.filter(c => c.phase !== 'call').map(c => {
-      const isLook = c.phase === 'look';
-      const isDone = !isLook && done.has(c.id);
-      const status = isDone ? 'done' : (c.id === firstOpen ? 'current' : 'pending');
-      const ico = isLook
-        ? '<span class="ico look"><span class="material-icons-round">visibility</span></span>'
-        : isDone
-          ? '<span class="ico done"><span class="material-icons-round">check</span></span>'
-          : '<span class="ico ' + (status === 'current' ? 'current' : 'todo') + '"></span>';
-      let actions = '';
-      if (!isDone) {
-        const primary = status === 'current' ? '' : ' is-secondary';
-        actions = '<div class="hs-step-actions"><button type="button" class="hs-where' + primary + '" data-where="' + c.id + '">' + c.where + '</button>' +
-          (isLook ? '' : '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button>') + '</div>';
-      }
-      return '<article class="hs-step-card is-' + status + '" data-step-id="' + c.id + '" data-status="' + (isLook ? 'look' : status) + '">' +
-        '<div class="hs-step-top">' + ico + '<div class="hs-step-body">' +
-        '<div class="hs-step-title-row"><h3 class="hs-step-title">' + c.title + '</h3></div>' +
-        '<p class="hs-step-desc">' + c.desc + '</p>' + actions +
-        '</div></div></article>';
-    }).join('');
+    const tips = list.filter(c => c.phase === 'tip');
+    const rows = tips.map((c, i) =>
+      '<li class="bc-row" data-step-id="' + c.id + '">' +
+        '<span class="bc-num" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<div class="bc-row-body"><h3>' + c.title + '</h3><p>' + c.desc + '</p>' +
+        '<button type="button" class="bc-go hs-where" data-where="' + c.id + '">' + c.where + '</button></div>' +
+      '</li>'
+    ).join('');
     const callRows = list.filter(c => c.phase === 'call').map(c => '<li>' + c.title + '</li>').join('');
-    const meta = allDone
-      ? '<span class="bc-meta is-done">All done — you’re ready for your call</span>'
-      : '<span class="bc-meta">' + count + ' / ' + selfList.length + ' done</span>';
+    const email = state.accountEmail ? '<li><span class="material-icons-round">mail_outline</span><span>Invite sent to ' + escapeHtml(state.accountEmail) + '</span></li>' : '';
     return `
       <div class="bc-wrap">
         <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
-        <p class="page-subtitle" style="margin-bottom:16px">Here’s what you can do now, and what your Synder specialist will set up with you.</p>
-        <div class="bc-section-h"><h2>While you wait for your call</h2>${meta}</div>
-        <div class="hs-steps">${rows}</div>
-        <div class="bc-section-h"><h2>On the call</h2></div>
-        <ul class="bc-call-list">${callRows}</ul>
-        <div class="bc-call-details">${checklistContactBaseHtml()}</div>
+        <p class="page-subtitle" style="margin-bottom:24px">A few things you can try now. Your Synder specialist sets up the rest with you on the call.</p>
+        <h2 class="bc-label">While you wait for your call</h2>
+        <ul class="bc-list">${rows}</ul>
+        <div class="bc-blocks">
+          <section class="bc-block call-plan" aria-labelledby="bc-plan-h">
+            <h2 id="bc-plan-h"><span class="material-icons-round">event</span>On your setup call</h2>
+            <ul>${callRows}</ul>
+          </section>
+          <section class="bc-block call-details" aria-labelledby="bc-details-h">
+            <h2 id="bc-details-h"><span class="material-icons-round">videocam</span>Your setup call</h2>
+            <ul>
+              <li class="bc-when"><span class="material-icons-round">schedule</span><span>${callWhenText()}</span></li>
+              <li><span class="material-icons-round">link</span><span>Zoom · link in your calendar invite</span></li>
+              ${email}
+            </ul>
+          </section>
+        </div>
       </div>`;
   }
 
@@ -3270,6 +3313,7 @@
       historical: 'Historical import',
       'smart-rules': 'Smart Rules',
       settings: 'Settings',
+      'org-settings': 'Organization settings',
     };
     if (state.variant === 'before') titles['setup-checklist'] = 'Before your call';
     const title = titles[page] || 'Dashboard';
@@ -3298,6 +3342,18 @@
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
         <p class="page-subtitle" style="margin-bottom:12px">Finish these steps so you’re ready for setup and the call goes faster. Join the call to activate the rest.</p>
         ${mainHealthPanelHtml(model)}`;
+    } else if (page === 'org-settings') {
+      body = `
+        <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
+        <p class="page-subtitle" style="margin-bottom:16px">Connect the sales channels you get paid from.</p>
+        <div class="toolbar-fake">
+          <button type="button" class="btn btn-primary">Connect a channel</button>
+        </div>
+        <div class="placeholder-grid">
+          <div class="placeholder-card"><div class="ph-title">Shopify</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Stripe</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+          <div class="placeholder-card"><div class="ph-title">Amazon</div><div class="ph-line"></div><div class="ph-line short"></div></div>
+        </div>`;
     } else if (page === 'dashboard') {
       body = `
         <h1 class="page-title" style="margin-bottom:4px">${title}</h1>
@@ -3711,7 +3767,7 @@
   presetDoneIds('empty');
   setStep(1);
   state.demoContact = 'zoom';
-  state.zoomSlot = { dayLabel: 'Tue 14 Apr', time: '10:00 AM' }; // call already scheduled
+  state.zoomSlot = { dayLabel: 'Thu, Nov 12', time: '10:00 AM' }; // call already scheduled
   state.appPage = 'setup-checklist';
   setView('app');
   updateContinueButtons();
