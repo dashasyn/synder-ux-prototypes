@@ -1464,6 +1464,9 @@
       content: ''; position: absolute; left: 3px; top: 12px;
       width: 5px; height: 5px; border-radius: 50%; background: #9AA3B2;
     }
+    .v-c1 .bc-call-help { font-weight: 400; color: #6B778C; font-size: 14px; line-height: 20px; }
+    .v-c1 .bc-blocks { display: block; }
+    .v-c1 .bc-block.call-plan { flex: none; width: 100%; }
     .v-c1 .bc-block.call-details li { padding-left: 0; display: flex; gap: 8px; align-items: flex-start; }
     .v-c1 .bc-block.call-details li .material-icons-round { font-size: 18px; color: #6B778C; margin-top: 1px; }
     .v-c1 .bc-when { color: #1A1B24 !important; font-weight: 500; }
@@ -1639,14 +1642,6 @@
       </div>
     </div>
 
-    <div class="proto-group">
-      <span class="proto-label">Contact</span>
-      <div class="seg" id="seg-contact">
-        <button type="button" data-contact="zoom" class="active">Zoom</button>
-        <button type="button" data-contact="phone">Phone</button>
-        <button type="button" data-contact="email">Email</button>
-      </div>
-    </div>
 
   </div>
 
@@ -2181,22 +2176,22 @@
     autoHistorical: {
       id: 'auto-historical', phase: 'call',
       title: 'Turn on auto-sync & import historical data',
-      desc: 'Your Synder specialist turns on auto-sync and agrees which historical data to import.',
+      desc: 'Your Synder Specialist turns on auto-sync and agrees which historical data to import.',
     },
     csmSummary: {
       id: 'csm', phase: 'call',
-      title: 'Finish setup with your Synder specialist',
+      title: 'Finish setup with your Synder Specialist',
       desc: 'Walk through posting together so what hit the books looks right.',
       contactInfo: true,
     },
     csmTxn: {
       id: 'csm', phase: 'call',
-      title: 'Finish setup with your Synder specialist',
+      title: 'Finish setup with your Synder Specialist',
       desc: 'Walk through posting together so everything looks right. Ask about Smart Rules if you have exceptions.',
       contactInfo: true,
     },
   };
-  const WHY = 'Your specialist unlocks this on the call';
+  const WHY = 'Your Synder Specialist unlocks this on the call';
 
   // A — Quick fix: every blocked step moves to "On the call".
   // B — Prepare for the call: blocked steps stay as view-only review tasks; changes happen on the call.
@@ -2291,19 +2286,24 @@
       { id: 'test-sync', phase: 'tip', title: 'Sync a summary manually',
         desc: 'Sync one Ready to sync summary and check it in your books. Sync stays Manual until your call.',
         where: 'Go to Summaries list' },
-      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' },
-      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency',
+        desc: 'Your Synder Specialist picks how often summaries sync to your books.' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync & import historical data',
+        desc: 'Your Synder Specialist turns on auto-sync and agrees which historical data to import.' },
     ],
     'per-txn': [
       CONNECT_C1,
       { id: 'test-sync', phase: 'tip', title: 'Sync 3 transactions to see how they’ll look in your books',
         desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
       { id: 'explore', phase: 'tip', title: 'Look through your clearing account and sales settings',
-        desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
+        desc: 'See how Synder will record your sales. View only — your Synder Specialist sets these up with you.',
         where: 'Open Settings (view only)' },
-      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and core sales settings' },
-      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions' },
-      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings',
+        desc: 'Your Synder Specialist confirms clearing account, products, taxes, and fees with you.' },
+      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions',
+        desc: 'Walk through posting together so everything looks right.' },
+      { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync & import historical data',
+        desc: 'Your Synder Specialist turns on auto-sync and agrees which historical data to import.' },
     ],
   };  const CONNECT_C2 = {
     id: 'channel', phase: 'tip', icon: 'power', primary: true,
@@ -2327,7 +2327,7 @@
       { id: 'test-sync', phase: 'tip', icon: 'sync', title: 'Sync 3 transactions to see how they’ll look in your books',
         desc: 'Anything that looks off gets fixed on the call.', where: 'Go to Transactions' },
       { id: 'explore', phase: 'tip', icon: 'visibility', title: 'Look through your clearing account and sales settings',
-        desc: 'See how Synder will record your sales. View only — your Synder specialist sets these up with you.',
+        desc: 'See how Synder will record your sales. View only — your Synder Specialist sets these up with you.',
         where: 'Open Settings (view only)' },
       { id: 'call-settings', phase: 'call', icon: 'tune', title: 'Set up your clearing account and core sales settings' },
       { id: 'call-fix', phase: 'call', icon: 'build', title: 'Fix anything in your test transactions' },
@@ -3139,50 +3139,11 @@
   }
 
 
+  // Call logistics (Zoom / Phone / Email / date) are not shown — only specialist notes for Variant B.
   function checklistContactHtml() {
-    const html = checklistContactBaseHtml();
     const n = notesCount();
-    if (!n) return html;
-    const line = '<div class="hs-notes-count"><span class="material-icons-round">sticky_note_2</span>' + n + ' note' + (n === 1 ? '' : 's') + ' for your specialist</div>';
-    return html.replace(/<\/div>$/, line + '</div>');
-  }
-
-  function checklistContactBaseHtml() {
-    // Checklist: show booked details when known; Book CTA when HubSpot was left without a slot.
-    const contact = deriveContact();
-    const email = state.accountEmail || 'jane@greenleafstore.com';
-    const phone = (state.phone && state.phone.trim())
-      ? state.phone.trim()
-      : '+1 (415) 555-0192';
-    const tz = timezoneLabel(state.phoneTimezone);
-    const windowFull = {
-      morning: 'Morning (9:00–12:00)',
-      afternoon: 'Afternoon (12:00–17:00)',
-      evening: 'Evening (17:00–20:00)',
-    }[state.timeWindow] || 'Morning (9:00–12:00)';
-    if (contact === 'zoom') {
-      const slot = state.zoomSlot;
-      if (slot && slot.dayLabel && slot.time) {
-        return `<div class="hs-contact-info"><span class="label">Setup call</span>
-          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · scheduled<br>Booked with your Synder specialist.</span></div></div>`;
-      }
-      if (shouldShowBookCta()) {
-        return `<div class="hs-contact-info"><span class="label">Setup call</span>
-          <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · not booked yet<br><a href="${BOOKING_URL}" class="hs-book-inline" data-open-booking="1">Book free setup call ↗</a></span></div></div>`;
-      }
-      return `<div class="hs-contact-info"><span class="label">Setup call</span>
-        <div class="row"><span class="material-icons-round">videocam</span><span><strong>Zoom</strong> · scheduled<br>Booked with your Synder specialist.</span></div></div>`;
-    }
-    if (contact === 'phone') {
-      return `<div class="hs-contact-info"><span class="label">Setup call</span>
-        <div class="row"><span class="material-icons-round">call</span><span><strong>Phone</strong> · ${windowFull} · ${tz}<br>${phone}</span></div></div>`;
-    }
-    if (contact === 'email') {
-      return `<div class="hs-contact-info"><span class="label">Setup call</span>
-        <div class="row"><span class="material-icons-round">mail</span><span><strong>Email</strong> · ${email}<br>We’ll write to this address to finish setup.</span></div></div>`;
-    }
-    return `<div class="hs-contact-info"><span class="label">Setup call</span>
-      <div class="row"><span class="material-icons-round">support_agent</span><span>Your Synder specialist will reach out using the contact you chose.</span></div></div>`;
+    if (!n) return '';
+    return '<div class="hs-notes-count"><span class="material-icons-round">sticky_note_2</span>' + n + ' note' + (n === 1 ? '' : 's') + ' for your Synder Specialist</div>';
   }
 
   function healthModel() {
@@ -3197,7 +3158,7 @@
     const currentId = (selfList.find(c => !done.has(c.id)) || {}).id || null;
     const selfAllDone = selfList.length > 0 && selfList.every(c => done.has(c.id));
     const allDone = list.length > 0 && list.every(c => done.has(c.id));
-    const callDividerText = 'On the call';
+    const callDividerText = 'On your setup call';
     let callDividerShown = false;
     const parts = [];
     list.forEach(c => {
@@ -3442,21 +3403,6 @@
   }
 
   /* ── Variant C: Before your call (suggestions list) ── */
-  function callWhenText() {
-    const slot = state.zoomSlot || { dayLabel: 'Thu, Nov 12', time: '10:00 AM' };
-    const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(slot.time || '');
-    if (!m) return slot.dayLabel + ' · ' + slot.time;
-    let h = +m[1] % 12 + (m[3].toUpperCase() === 'PM' ? 12 : 0);
-    let min = +m[2] + 30;
-    if (min >= 60) { min -= 60; h = (h + 1) % 24; }
-    const endH = h % 12 || 12;
-    const endAp = h < 12 ? 'AM' : 'PM';
-    const startTxt = m[1] + ':' + m[2];
-    const endTxt = endH + ':' + String(min).padStart(2, '0');
-    const sameAp = endAp === m[3].toUpperCase();
-    return slot.dayLabel + ' · ' + startTxt + (sameAp ? '' : ' ' + m[3].toUpperCase()) + '–' + endTxt + ' ' + endAp + ' ET';
-  }
-
   function beforeC1Html() {
     const list = activeCheckpoints();
     const tips = list.filter(c => c.phase === 'tip');
@@ -3467,27 +3413,19 @@
         '<button type="button" class="bc-go hs-where" data-where="' + c.id + '">' + c.where + '</button></div>' +
       '</li>'
     ).join('');
-    const callRows = list.filter(c => c.phase === 'call').map(c => '<li>' + c.title + '</li>').join('');
-    const ci = callInfo();
+    const callRows = list.filter(c => c.phase === 'call').map(c =>
+      '<li><strong>' + c.title + '</strong>' + (c.desc ? '<br><span class="bc-call-help">' + c.desc + '</span>' : '') + '</li>'
+    ).join('');
     return `
       <div class="bc-wrap">
         <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
-        <p class="page-subtitle" style="margin-bottom:24px">A few things you can try now. Your Synder specialist sets up the rest with you on the call.</p>
+        <p class="page-subtitle" style="margin-bottom:24px">Finish these steps so you’re ready for setup and the call goes faster. Join the call to activate the rest.</p>
         <h2 class="bc-label">While you wait for your call</h2>
         <ul class="bc-list">${rows}</ul>
-        <div class="bc-blocks">
-          <section class="bc-block call-plan" aria-labelledby="bc-plan-h">
-            <h2 id="bc-plan-h"><span class="material-icons-round">event</span>On your setup call</h2>
-            <ul>${callRows}</ul>
-          </section>
-          <section class="bc-block call-details" aria-labelledby="bc-details-h">
-            <h2 id="bc-details-h"><span class="material-icons-round">${ci.icon}</span>Your setup call</h2>
-            <ul>
-              <li class="bc-when"><span>${ci.title}</span></li>
-              <li><span>${ci.sub}</span></li>
-            </ul>
-          </section>
-        </div>
+        <section class="bc-block call-plan" aria-labelledby="bc-plan-h">
+          <h2 id="bc-plan-h"><span class="material-icons-round">event</span>On your setup call</h2>
+          <ul>${callRows}</ul>
+        </section>
       </div>`;
   }
 
@@ -3503,17 +3441,16 @@
     const tiles = list.filter(c => c.phase === 'call').map(c =>
       '<li class="bc-tile"><span class="material-icons-round" aria-hidden="true">' + c.icon + '</span>' + c.title + '</li>'
     ).join('');
-    const ci = callInfo();
     return `
       <div class="bc-wrap">
         <h1 class="page-title" style="margin-bottom:4px">Before your call</h1>
-        <p class="page-subtitle" style="margin-bottom:20px">Here’s what you can do until your setup call.</p>
-        <section class="bc-call" aria-label="Your setup call">
-          <span class="bc-call-ico"><span class="material-icons-round">${ci.icon}</span></span>
+        <p class="page-subtitle" style="margin-bottom:20px">Finish these steps so you’re ready for setup and the call goes faster. Join the call to activate the rest.</p>
+        <section class="bc-call" aria-label="On your setup call">
+          <span class="bc-call-ico"><span class="material-icons-round">event</span></span>
           <div class="bc-call-body">
-            <div class="bc-call-label">Your setup call</div>
-            <div class="bc-call-when">${ci.title}</div>
-            <div class="bc-call-meta">${ci.sub}</div>
+            <div class="bc-call-label">On your setup call</div>
+            <div class="bc-call-when">Your Synder Specialist finishes setup with you</div>
+            <div class="bc-call-meta">They unlock auto-sync, historical import, and anything still locked.</div>
           </div>
         </section>
         <h2 class="bc-label">While you wait</h2>
@@ -3525,7 +3462,6 @@
 
   function beforeC3Html() {
     const list = activeCheckpoints();
-    const ci = callInfo();
     const tiles = list.filter(c => c.phase === 'call').map(c =>
       '<li class="bc-tile"><span class="material-icons-round" aria-hidden="true">' + c.icon + '</span>' + c.title + '</li>'
     ).join('');
@@ -3539,10 +3475,10 @@
     return `
       <div class="bc-wrap">
         <section class="bc-call" aria-labelledby="bc-call-label">
-          <div class="bc-call-label" id="bc-call-label">Your setup call</div>
-          <div class="bc-call-when">${ci.title}</div>
-          <div class="bc-call-meta"><span>${ci.sub}</span></div>
-          <div class="bc-tiles-label">On the call, your specialist will</div>
+          <div class="bc-call-label" id="bc-call-label">On your setup call</div>
+          <div class="bc-call-when">Your Synder Specialist finishes setup with you</div>
+          <div class="bc-call-meta"><span>They unlock auto-sync, historical import, and anything still locked.</span></div>
+          <div class="bc-tiles-label">On the call, your Synder Specialist will</div>
           <ul class="bc-tiles">${tiles}</ul>
         </section>
         <h2 class="bc-label">While you wait</h2>
@@ -3550,34 +3486,6 @@
       </div>`;
   }
 
-  function callInfo() {
-    const kind = ['zoom', 'phone', 'email'].includes(state.demoContact) ? state.demoContact : 'zoom';
-    if (kind === 'phone') {
-      return { kind, icon: 'call', title: 'Phone call · Your Synder specialist will call you',
-        sub: phoneWindowLabel() + ' · ' + tzShort() };
-    }
-    if (kind === 'email') {
-      return { kind, icon: 'mail_outline', title: 'Email · Your Synder specialist will email you to set a time',
-        sub: 'Check ' + escapeHtml(state.accountEmail || 'jane@greenleafstore.com') };
-    }
-    return { kind, icon: 'videocam', title: 'Zoom call · ' + callWhenText(), sub: 'Link in your calendar invite' };
-  }
-  function phoneWindowLabel() {
-    return { morning: 'Morning (9:00–12:00)', afternoon: 'Afternoon (12:00–17:00)', evening: 'Evening (17:00–20:00)' }[state.timeWindow] || 'Morning (9:00–12:00)';
-  }
-  function tzShort() {
-    const m = /\(([^)]+)\)/.exec(timezoneLabel(state.phoneTimezone || 'America/New_York'));
-    return m ? m[1] : 'ET';
-  }
-  function beforeDSubtitle() {
-    const ci = callInfo();
-    if (ci.kind === 'phone') {
-      const w = { morning: 'in the morning (9:00–12:00', afternoon: 'in the afternoon (12:00–17:00', evening: 'in the evening (17:00–20:00' }[state.timeWindow] || 'in the morning (9:00–12:00';
-      return 'Your Synder specialist will call you ' + w + ' ' + tzShort() + ').';
-    }
-    if (ci.kind === 'email') return 'Your Synder specialist will email you to set a time.';
-    return 'Your Zoom call is on ' + callWhenText() + '.';
-  }
   function beforeDHtml() {
     const list = activeCheckpoints();
     const calls = list.filter(c => c.phase === 'call').map(c =>
@@ -3588,9 +3496,9 @@
     return `
       <div class="d-wrap">
         <h1 class="d-title">Before your call</h1>
-        <p class="d-sub">${beforeDSubtitle()}</p>
+        <p class="d-sub">Finish these steps so you’re ready for setup and the call goes faster. Join the call to activate the rest.</p>
         <section class="d-section" aria-labelledby="d-call-h">
-          <div><h2 id="d-call-h">On the call</h2><p class="d-caption">With your Synder specialist</p></div>
+          <div><h2 id="d-call-h">On your setup call</h2><p class="d-caption">With your Synder Specialist</p></div>
           <ul class="d-call-list">${calls}</ul>
         </section>
         <section class="d-section" aria-labelledby="d-before-h">
@@ -3896,14 +3804,6 @@
     setVariant(btn.dataset.variant);
   });
 
-  $('#seg-contact').addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    state.demoContact = btn.dataset.contact;
-    state.demoForced = true;
-    $$('#seg-contact button').forEach(b => b.classList.toggle('active', b === btn));
-    renderApp();
-  });
 
   $('#seg-sync').addEventListener('click', e => {
     const btn = e.target.closest('button');
