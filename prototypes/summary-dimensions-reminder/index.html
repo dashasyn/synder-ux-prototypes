@@ -4,43 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SET-1439 · Dimensions reminder after suggested mapping</title>
-  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --proto-bar: #111827;
-      --amber-outline: #F5A623;
-      --amber-soft: #FFF8E8;
-      --amber-border: #F0D9A0;
-      --orange-banner: #FFF1DD;
-      --orange-banner-border: #F5C97A;
-      --orange-text: #CB7515;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
-      font-family: Roboto, Arial, sans-serif;
+      font-family: Roboto, Arial, Helvetica, sans-serif;
       font-size: 14px;
       line-height: 1.45;
-      color: var(--text-primary, #1A1B24);
-      background: var(--bg-page, #F7F8FA);
-      min-height: 100vh;
+      color: #1A1B24;
+      background: #F7F8FA;
       display: flex;
       flex-direction: column;
+      min-width: 1100px;
     }
 
-    /* —— Dark prototype bar —— */
+    /* —— Prototype bar —— */
     .proto-bar {
-      background: var(--proto-bar);
+      flex-shrink: 0;
+      background: #111827;
       color: #F9FAFB;
       padding: 10px 16px;
       display: flex;
       align-items: center;
       gap: 14px;
-      flex-wrap: wrap;
-      flex-shrink: 0;
-      z-index: 200;
+      z-index: 400;
     }
     .proto-bar .brand {
       font-weight: 600;
@@ -50,7 +38,8 @@
       white-space: nowrap;
     }
     .proto-bar .sep {
-      width: 1px; height: 22px;
+      width: 1px;
+      height: 22px;
       background: rgba(255,255,255,.18);
       flex-shrink: 0;
     }
@@ -65,183 +54,222 @@
       font-weight: 500;
       font-size: 13px;
       cursor: pointer;
+      white-space: nowrap;
     }
     .proto-tab:hover { color: #fff; background: rgba(255,255,255,.06); }
     .proto-tab.active {
-      background: var(--color-primary, #0053CC);
+      background: #0053CC;
       color: #fff;
-      border-color: var(--color-primary, #0053CC);
+      border-color: #0053CC;
     }
 
     /* —— App shell —— */
     .shell {
-      display: grid;
-      grid-template-columns: 230px 1fr;
       flex: 1;
+      display: flex;
       min-height: 0;
+      min-width: 0;
     }
     .sidebar {
-      background: #fff;
-      border-right: 1px solid #E5E7EB;
-      padding: 12px 0 24px;
+      width: 220px;
+      flex-shrink: 0;
+      background: #EEF3FA;
+      border-right: 1px solid #D8E0EC;
+      padding: 16px 0 24px;
       overflow-y: auto;
     }
     .brand-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 16px 16px;
-      font-weight: 500; font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px 18px;
+      font-weight: 500;
+      font-size: 15px;
+      color: #1A1B24;
     }
     .brand-mark {
-      width: 24px; height: 24px; border-radius: 4px;
-      background: var(--color-primary, #0053CC); color: #fff;
-      display: grid; place-items: center;
-      font-size: 12px; font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: #0053CC;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
     }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
+    .nav-item,
+    .nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 8px 16px;
       color: #374151;
       font-size: 14px;
-      cursor: default;
-      border-left: 3px solid transparent;
+      white-space: nowrap;
     }
-    .nav-item .material-icons { font-size: 20px; color: #6B778C; }
-    .nav-item.active {
-      background: #E8F1FF;
-      color: #007AFF;
-      border-left-color: #007AFF;
+    .nav-item.active,
+    .nav-group.active {
+      background: #DCE9FC;
+      color: #0053CC;
       font-weight: 500;
+      border-right: 3px solid #0053CC;
     }
-    .nav-item.active .material-icons { color: #007AFF; }
-    .nav-group-label {
-      padding: 8px 16px 4px;
-      font-size: 14px;
-      color: #374151;
-      display: flex; align-items: center; gap: 10px;
+    .nav-ico {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: .7;
     }
-    .nav-group-label .material-icons { font-size: 20px; color: #6B778C; }
+    .nav-item.active .nav-ico,
+    .nav-group.active .nav-ico { opacity: 1; }
     .nav-sub {
-      padding: 6px 16px 6px 46px;
+      padding: 6px 16px 6px 44px;
       font-size: 14px;
       color: #6B778C;
-      cursor: default;
+      white-space: nowrap;
     }
     .nav-sub.active {
-      color: #007AFF;
+      color: #0053CC;
       font-weight: 500;
-      background: #E8F1FF;
+      background: #DCE9FC;
     }
 
     .main {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      min-width: 0;
       background: #F7F8FA;
     }
     .topbar {
-      height: 59px;
+      height: 52px;
+      flex-shrink: 0;
       background: #fff;
       border-bottom: 1px solid #E5E7EB;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding: 0 20px;
-      gap: 16px;
-      flex-shrink: 0;
+      padding: 0 24px;
+      gap: 14px;
     }
-    .topbar .balance {
-      font-size: 14px;
-      color: #6B778C;
-    }
+    .topbar .balance { font-size: 14px; color: #6B778C; }
     .topbar .avatar {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: #E0EBFD; color: #0053CC;
-      display: grid; place-items: center;
-      font-size: 13px; font-weight: 600;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #E0EBFD;
+      color: #0053CC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .content {
       flex: 1;
-      padding: 20px 24px 40px;
       overflow: auto;
-      min-width: 0;
+      padding: 20px 24px 40px;
     }
+
+    /* Page head */
     .page-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .page-head h1 {
-      margin: 0 0 4px;
       font-size: 22px;
       font-weight: 500;
       color: #1A1B24;
+      margin-bottom: 4px;
     }
-    .page-sub {
-      margin: 0;
-      color: #6B778C;
-      font-size: 14px;
-    }
-    .head-actions { display: flex; gap: 8px; align-items: center; }
+    .page-sub { color: #6B778C; font-size: 14px; }
 
+    /* Buttons */
     .btn {
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: .15px;
-      border-radius: 4px;
-      height: 32px;
-      padding: 0 16px;
-      cursor: pointer;
-      border: 1px solid transparent;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      background: var(--color-primary, #0053CC);
-      color: #fff;
-      white-space: nowrap;
-    }
-    .btn:hover { background: #1A43A2; }
-    .btn:disabled {
-      opacity: .45;
-      cursor: not-allowed;
-      background: var(--color-primary, #0053CC);
-    }
-    .btn-outlined {
-      background: #fff;
-      color: var(--color-primary, #0053CC);
-      border-color: var(--color-primary, #0053CC);
-    }
-    .btn-outlined:hover { background: #F2F6FC; }
-    .btn-text {
-      background: transparent;
-      color: var(--color-primary, #0053CC);
-      border: none;
       height: 32px;
-      padding: 0 10px;
+      padding: 0 14px;
+      border-radius: 4px;
+      border: 1px solid transparent;
       font: inherit;
       font-size: 14px;
       cursor: pointer;
+      white-space: nowrap;
+      background: #0053CC;
+      color: #fff;
     }
-    .btn-text:hover { text-decoration: underline; }
+    .btn:hover { background: #1A43A2; }
+    .btn:disabled,
+    .btn.is-disabled {
+      background: #DFE4EC;
+      color: #6B778C;
+      border-color: #DFE4EC;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .btn-outlined {
+      background: #fff;
+      color: #0053CC;
+      border-color: #0053CC;
+    }
+    .btn-outlined:hover { background: #F2F6FC; }
     .btn-ghost {
       background: #fff;
       color: #374151;
-      border: 1px solid #DFE4EC;
+      border-color: #DFE4EC;
     }
     .btn-ghost:hover { background: #F7F8FA; }
+    .btn-text {
+      background: transparent;
+      border: none;
+      color: #0053CC;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0 4px;
+      height: 32px;
+      white-space: nowrap;
+    }
+    .btn-text:hover { text-decoration: underline; }
 
-    .filters {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    /* Filter panel */
+    .filter-panel {
+      background: #EFF1F5;
+      border: 1px solid #DFE4EC;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px 16px;
       margin-bottom: 12px;
     }
-    .filters .select, .cell-select {
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B778C;
+      white-space: nowrap;
+    }
+    .select {
+      width: 100%;
       height: 32px;
       padding: 0 28px 0 10px;
       border: 1px solid #DFE4EC;
@@ -252,19 +280,26 @@
       color: #1A1B24;
       appearance: none;
       -webkit-appearance: none;
-      min-width: 140px;
+      min-width: 0;
     }
-    .filters .select:focus, .cell-select:focus {
+    .select:focus {
       outline: none;
       border-color: #0053CC;
       box-shadow: 0 0 0 2px rgba(0,83,204,.15);
     }
-    .toggle-row {
+    .select.is-empty { color: #9CA3AF; }
+
+    .filter-controls {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+      gap: 20px;
+      flex-wrap: nowrap;
+    }
+    .toggles {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-shrink: 0;
     }
     .toggle {
       display: inline-flex;
@@ -272,10 +307,12 @@
       gap: 8px;
       font-size: 14px;
       color: #374151;
-      cursor: default;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .switch {
-      width: 36px; height: 20px;
+      width: 36px;
+      height: 20px;
       border-radius: 999px;
       background: #B4BBCB;
       position: relative;
@@ -285,11 +322,12 @@
     .switch::after {
       content: "";
       position: absolute;
-      top: 2px; left: 2px;
-      width: 16px; height: 16px;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #fff;
-      transition: left .15s ease;
     }
     .switch.on::after { left: 18px; }
 
@@ -299,20 +337,24 @@
       align-items: flex-start;
       gap: 12px;
       padding: 12px 14px;
-      background: var(--orange-banner);
-      border: 1px solid var(--orange-banner-border);
+      background: #FFF1DD;
+      border: 1px solid #F5C97A;
       border-radius: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .suggest-banner.show { display: flex; }
     .suggest-banner .ico {
       flex-shrink: 0;
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: #fff;
-      color: var(--orange-text);
-      display: grid; place-items: center;
-      font-size: 18px;
+      color: #CB7515;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
     }
     .suggest-banner .copy { flex: 1; min-width: 0; }
     .suggest-banner .copy strong {
@@ -328,25 +370,22 @@
     }
     .suggest-banner .btn { flex-shrink: 0; align-self: center; }
 
-    /* Persistent strip */
+    /* Strip */
     .dim-strip {
       display: none;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
       padding: 9px 12px;
-      background: var(--amber-soft);
-      border: 1px solid var(--amber-border);
+      background: #FFF8E8;
+      border: 1px solid #F0D9A0;
       border-radius: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-size: 14px;
       color: #1A1B24;
     }
     .dim-strip.show { display: flex; }
-    .dim-strip .strip-ico {
-      color: var(--orange-text);
-      font-size: 18px;
-    }
+    .dim-strip .strip-ico { color: #CB7515; font-weight: 700; }
     .dim-strip .strip-link {
       background: none;
       border: none;
@@ -356,6 +395,7 @@
       cursor: pointer;
       text-decoration: underline;
       text-underline-offset: 2px;
+      white-space: nowrap;
     }
     .dim-strip .strip-sep { color: #B4BBCB; }
     .dim-strip .strip-reset {
@@ -366,27 +406,35 @@
       font-size: 14px;
       color: #6B778C;
       cursor: pointer;
+      white-space: nowrap;
     }
     .dim-strip .strip-reset:hover { color: #0053CC; text-decoration: underline; }
 
-    /* Tabs */
-    .tabs {
+    /* Tabs + actions */
+    .tabs-row {
       display: flex;
-      gap: 0;
-      border-bottom: 1px solid #DFE4EC;
-      margin-bottom: 0;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
       background: #fff;
-      border-radius: 8px 8px 0 0;
-      padding: 0 8px;
       border: 1px solid #DFE4EC;
       border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 0 12px;
+      min-height: 44px;
+    }
+    .tabs {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-width: 0;
     }
     .tab {
-      padding: 10px 14px;
+      padding: 12px 14px 10px;
       font-size: 14px;
       color: #6B778C;
       border-bottom: 2px solid transparent;
-      cursor: default;
+      white-space: nowrap;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -397,11 +445,22 @@
       font-weight: 500;
     }
     .tab .dot {
-      width: 10px; height: 10px; border-radius: 2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
     }
     .tab .dot.stripe { background: #635BFF; }
     .tab .dot.shopify { background: #96BF48; }
+    .tabs-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      flex-shrink: 0;
+    }
 
+    /* Table */
     .table-card {
       background: #fff;
       border: 1px solid #DFE4EC;
@@ -431,16 +490,24 @@
       vertical-align: middle;
     }
     table.mappings tr:last-child td { border-bottom: none; }
-    table.mappings tr.hidden { display: none; }
     .col-check { width: 40px; }
     .cell-select {
       width: 100%;
       min-width: 140px;
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid #DFE4EC;
+      border-radius: 4px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B778C' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E") no-repeat right 10px center;
+      font: inherit;
+      font-size: 14px;
       color: #1A1B24;
+      appearance: none;
+      -webkit-appearance: none;
     }
     .cell-select.is-empty { color: #9CA3AF; }
     .cell-select.highlight-empty {
-      border-color: var(--amber-outline);
+      border-color: #F5A623;
       box-shadow: 0 0 0 2px rgba(245,166,35,.25);
       background-color: #FFFBF3;
     }
@@ -452,6 +519,7 @@
       font-weight: 500;
       background: #EFF1F5;
       color: #374151;
+      white-space: nowrap;
     }
     .integ-pill.shopify { background: #ECF7E0; color: #3F6B12; }
     .integ-pill.stripe { background: #EEEBFF; color: #3D2E9E; }
@@ -472,7 +540,7 @@
       position: fixed;
       inset: 0;
       background: rgba(26,27,36,.45);
-      z-index: 300;
+      z-index: 500;
       align-items: center;
       justify-content: center;
       padding: 24px;
@@ -509,23 +577,24 @@
       cursor: pointer;
       color: #6B778C;
       padding: 0;
+      font-size: 22px;
       line-height: 1;
+      width: 28px;
+      height: 28px;
     }
-    .modal-close .material-icons { font-size: 22px; }
     .modal-icon {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      display: grid; place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      font-size: 18px;
+      font-weight: 700;
     }
-    .modal-icon.warn {
-      background: var(--amber-soft);
-      color: var(--orange-text);
-    }
-    .modal-icon.info {
-      background: #E0EBFD;
-      color: #0053CC;
-    }
+    .modal-icon.warn { background: #FFF8E8; color: #CB7515; }
+    .modal-icon.info { background: #E0EBFD; color: #0053CC; }
     .modal-body {
       padding: 12px 20px 8px;
       overflow: auto;
@@ -543,8 +612,8 @@
       padding: 12px 20px 20px;
     }
     .gap-list {
-      border: 1px solid var(--amber-border);
-      background: var(--amber-soft);
+      border: 1px solid #F0D9A0;
+      background: #FFF8E8;
       border-radius: 8px;
       overflow: hidden;
       margin: 4px 0 8px;
@@ -557,7 +626,7 @@
       padding: 12px 14px;
       background: transparent;
       border: none;
-      border-bottom: 1px solid var(--amber-border);
+      border-bottom: 1px solid #F0D9A0;
       font: inherit;
       font-size: 14px;
       cursor: pointer;
@@ -567,15 +636,20 @@
     .gap-row:last-child { border-bottom: none; }
     .gap-row:hover { background: #FFEEC8; }
     .gap-row .left {
-      display: flex; align-items: center; gap: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-weight: 500;
+      white-space: nowrap;
     }
     .gap-row .bullet {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--orange-text);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #CB7515;
       flex-shrink: 0;
     }
-    .gap-row .count { color: #6B778C; font-weight: 400; }
+    .gap-row .count { color: #6B778C; font-weight: 400; white-space: nowrap; }
 
     .preview-table {
       width: 100%;
@@ -590,6 +664,7 @@
       padding: 8px;
       border-bottom: 1px solid #DFE4EC;
       background: #F7F8FA;
+      white-space: nowrap;
     }
     .preview-table td {
       padding: 8px;
@@ -600,12 +675,6 @@
       margin: 0 0 10px;
       font-size: 14px;
       color: #6B778C;
-    }
-
-    .sr-only {
-      position: absolute; width: 1px; height: 1px;
-      padding: 0; margin: -1px; overflow: hidden;
-      clip: rect(0,0,0,0); border: 0;
     }
   </style>
 </head>
@@ -623,17 +692,44 @@
   <div class="shell">
     <aside class="sidebar" aria-label="Main navigation">
       <div class="brand-row"><span class="brand-mark">S</span> Synder</div>
-      <div class="nav-item"><span class="material-icons">dashboard</span> Dashboard</div>
-      <div class="nav-group-label"><span class="material-icons">swap_horiz</span> Mapping</div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-group active">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        Mapping
+      </div>
       <div class="nav-sub active">Mappings list</div>
       <div class="nav-sub">Groups</div>
-      <div class="nav-item"><span class="material-icons">account_balance</span> Summaries</div>
-      <div class="nav-item"><span class="material-icons">fact_check</span> Reconciliation</div>
-      <div class="nav-item"><span class="material-icons">inventory_2</span> Products and services</div>
-      <div class="nav-item"><span class="material-icons">insights</span> Financials</div>
-      <div class="nav-item"><span class="material-icons">settings</span> Settings</div>
-      <div class="nav-item"><span class="material-icons">smart_toy</span> AI Agents</div>
-      <div class="nav-item"><span class="material-icons">new_releases</span> What's New</div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Summaries
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Reconciliation
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Products and services
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+        Financials
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        Settings
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="8" width="16" height="10" rx="2"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9 8V6a3 3 0 016 0v2"/></svg>
+        AI Agents
+      </div>
+      <div class="nav-item">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16.8 5.6 21.2 8 14 2 9.2h7.6z"/></svg>
+        What's New
+      </div>
     </aside>
 
     <div class="main">
@@ -648,43 +744,54 @@
             <h1>Mappings list</h1>
             <p class="page-sub">Create mappings between transactions and your Chart of Accounts.</p>
           </div>
-          <div class="head-actions">
-            <button type="button" class="btn-ghost btn" style="background:#fff;color:#374151;border-color:#DFE4EC;">Export CSV</button>
-            <button type="button" class="btn-outlined">Add group ▾</button>
-            <button type="button" class="btn" id="saveMappingsBtn" disabled>Save mappings</button>
+          <button type="button" class="btn btn-ghost" id="exportBtn">Export CSV</button>
+        </div>
+
+        <div class="filter-panel">
+          <div class="filter-grid">
+            <div class="field">
+              <label for="filterGroups">Groups</label>
+              <select class="select" id="filterGroups">
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterGateway">Payment gateway</label>
+              <select class="select" id="filterGateway">
+                <option value="all">All</option>
+                <option value="Shopify">Shopify</option>
+                <option value="Stripe">Stripe</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterAccount">Account</label>
+              <select class="select" id="filterAccount">
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="filterStatus">Mapping status</label>
+              <select class="select" id="filterStatus">
+                <option value="all">All</option>
+                <option value="mapped">Mapped</option>
+                <option value="not_mapped">Not mapped</option>
+                <option value="missing_dimensions">Missing dimensions</option>
+                <option value="missing_tax">Missing tax code</option>
+                <option value="missing_location">Missing location</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-controls">
+            <button type="button" class="btn-text" id="resetFiltersBtn">Reset filters</button>
+            <div class="toggles">
+              <span class="toggle"><span class="switch on" aria-hidden="true"></span> Enable locations</span>
+              <span class="toggle"><span class="switch" aria-hidden="true"></span> Enable classes</span>
+            </div>
           </div>
         </div>
 
-        <div class="filters">
-          <select class="select" id="filterGroups" aria-label="Groups">
-            <option value="all">Groups: All</option>
-          </select>
-          <select class="select" id="filterGateway" aria-label="Payment gateway">
-            <option value="all">Payment gateway: All</option>
-            <option value="Shopify">Shopify</option>
-            <option value="Stripe">Stripe</option>
-          </select>
-          <select class="select" id="filterAccount" aria-label="Account">
-            <option value="all">Account: All</option>
-          </select>
-          <select class="select" id="filterStatus" aria-label="Mapping status">
-            <option value="all">Mapping status: All</option>
-            <option value="mapped">Mapped</option>
-            <option value="not_mapped">Not mapped</option>
-            <option value="missing_dimensions">Missing dimensions</option>
-            <option value="missing_tax">Missing tax code</option>
-            <option value="missing_location">Missing location</option>
-          </select>
-          <button type="button" class="btn-text" id="resetFiltersBtn">Reset filters</button>
-        </div>
-
-        <div class="toggle-row">
-          <span class="toggle"><span class="switch on" aria-hidden="true"></span> Enable locations</span>
-          <span class="toggle"><span class="switch" aria-hidden="true"></span> Enable classes</span>
-        </div>
-
         <div class="suggest-banner show" id="suggestBanner">
-          <span class="ico material-icons">lightbulb</span>
+          <span class="ico">💡</span>
           <div class="copy">
             <strong>Review suggested mapping</strong>
             <p>Synder has found unmapped groups and can offer tailored suggestions to align with your Chart of Accounts. You can easily review these suggestions and make any adjustments you need. Plus, you can reverse this process at any point.</p>
@@ -693,15 +800,21 @@
         </div>
 
         <div class="dim-strip" id="dimStrip" role="status">
-          <span class="material-icons strip-ico">warning_amber</span>
+          <span class="strip-ico">⚠</span>
           <span id="stripContent"></span>
           <button type="button" class="strip-reset" id="stripShowAll">Show all</button>
         </div>
 
-        <div class="tabs" role="tablist">
-          <div class="tab active">All</div>
-          <div class="tab"><span class="dot stripe"></span> Stripe Test (sandbox)</div>
-          <div class="tab"><span class="dot shopify"></span> Changolivia (Shopify)</div>
+        <div class="tabs-row">
+          <div class="tabs" role="tablist">
+            <div class="tab active">All</div>
+            <div class="tab"><span class="dot stripe"></span> Stripe Test (sandbox)</div>
+            <div class="tab"><span class="dot shopify"></span> Changolivia (Shopify)</div>
+          </div>
+          <div class="tabs-actions">
+            <button type="button" class="btn btn-outlined">Add group ▾</button>
+            <button type="button" class="btn is-disabled" id="saveMappingsBtn" disabled>Save mappings</button>
+          </div>
         </div>
 
         <div class="table-card">
@@ -732,9 +845,9 @@
   <div class="modal-bg" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
     <div class="modal wide">
       <div class="modal-header">
-        <div class="modal-icon info"><span class="material-icons">auto_awesome</span></div>
+        <div class="modal-icon info">✦</div>
         <h2 id="previewTitle">Suggested mapping preview</h2>
-        <button type="button" class="modal-close" data-close="previewModal" aria-label="Close"><span class="material-icons">close</span></button>
+        <button type="button" class="modal-close" data-close="previewModal" aria-label="Close">×</button>
       </div>
       <div class="modal-body">
         <p class="preview-note">Synder has pre-mapped groups to corresponding accounts. Review and adjust these mappings as needed. No changes will take effect until you confirm by saving.</p>
@@ -754,7 +867,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-outlined" id="saveGoSummariesBtn">Save and go to Summaries</button>
+        <button type="button" class="btn btn-outlined" id="saveGoSummariesBtn">Save and go to Summaries</button>
         <button type="button" class="btn" id="saveAllBtn">Save all</button>
       </div>
     </div>
@@ -764,16 +877,16 @@
   <div class="modal-bg" id="reminderModal" role="dialog" aria-modal="true" aria-labelledby="reminderTitle">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-icon warn"><span class="material-icons">warning_amber</span></div>
+        <div class="modal-icon warn">!</div>
         <h2 id="reminderTitle">Tax codes and locations are still empty</h2>
-        <button type="button" class="modal-close" data-close="reminderModal" aria-label="Close"><span class="material-icons">close</span></button>
+        <button type="button" class="modal-close" data-close="reminderModal" aria-label="Close">×</button>
       </div>
       <div class="modal-body">
         <p id="reminderBody">Suggested mapping fills accounts only. Without these, summaries post to your books without them.</p>
         <div class="gap-list" id="gapList"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-outlined" id="skipBtn">Skip for now</button>
+        <button type="button" class="btn btn-outlined" id="skipBtn">Skip for now</button>
         <button type="button" class="btn" id="finishBtn">Finish mapping</button>
       </div>
     </div>
@@ -785,7 +898,6 @@
   const TAX_CODES = ["", "VAT 20%", "VAT 0%", "Exempt", "Out of scope", "Sales tax"];
   const ENABLED = { location: true, tax: true, class: false };
 
-  // 14 rows matching the sketch pattern (Shopify + Stripe)
   const SUGGESTED = {
     1: "Accounts Receivable (A/R)",
     2: "Accounts Receivable (A/R)",
@@ -824,11 +936,11 @@
 
   const state = {
     variant: "A",
-    phase: "unmapped", // unmapped | mapped
+    phase: "unmapped",
     rows: buildRows(),
     filterStatus: "all",
     filterGateway: "all",
-    highlightMissing: null, // null | 'any' | 'tax' | 'location'
+    highlightMissing: null,
     showStrip: false,
     dirty: false
   };
@@ -895,11 +1007,17 @@
   function renderTable() {
     const rows = filteredRows();
     const tbody = $("tbody");
+    const uniqueAccounts = Object.values(SUGGESTED).filter((v, i, a) => a.indexOf(v) === i);
     tbody.innerHTML = rows.map((r) => {
       const locCls = "cell-select" + (!r.location ? " is-empty" : "") + (shouldHighlight(r, "location") ? " highlight-empty" : "");
       const taxCls = "cell-select" + (!r.tax ? " is-empty" : "") + (shouldHighlight(r, "tax") ? " highlight-empty" : "");
       const accCls = "cell-select" + (!r.account ? " is-empty" : "");
       const pillCls = r.gateway === "Shopify" ? "shopify" : "stripe";
+      const accountOpts = ['<option value="">Select</option>']
+        .concat(uniqueAccounts.map((v) => {
+          const sel = v === r.account ? " selected" : "";
+          return '<option value="' + escapeHtml(v) + '"' + sel + ">" + escapeHtml(v) + "</option>";
+        })).join("");
       return (
         '<tr data-id="' + r.id + '">' +
           '<td class="col-check"><input type="checkbox" disabled aria-label="Select row" /></td>' +
@@ -911,14 +1029,8 @@
             optionHtml(LOCATIONS, r.location) + '</select></td>' +
           '<td><select class="' + taxCls + '" data-field="tax" data-id="' + r.id + '" aria-label="Tax code">' +
             optionHtml(TAX_CODES, r.tax) + '</select></td>' +
-          '<td><select class="' + accCls + '" data-field="account" data-id="' + r.id + '" aria-label="Account" ' +
-            (state.phase === "unmapped" ? "" : "") + '>' +
-            '<option value="">' + (r.account ? escapeHtml(r.account) : "Select") + '</option>' +
-            (r.account ? '<option value="' + escapeHtml(r.account) + '" selected>' + escapeHtml(r.account) + '</option>' : "") +
-            Object.values(SUGGESTED).filter((v, i, a) => a.indexOf(v) === i && v !== r.account).map((v) =>
-              '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'
-            ).join("") +
-          '</select></td>' +
+          '<td><select class="' + accCls + '" data-field="account" data-id="' + r.id + '" aria-label="Account">' +
+            accountOpts + '</select></td>' +
         '</tr>'
       );
     }).join("");
@@ -954,7 +1066,10 @@
   }
 
   function updateSaveBtn() {
-    $("saveMappingsBtn").disabled = !(state.dirty && state.phase === "mapped");
+    const btn = $("saveMappingsBtn");
+    const enabled = state.dirty && state.phase === "mapped";
+    btn.disabled = !enabled;
+    btn.classList.toggle("is-disabled", !enabled);
   }
 
   function openModal(id) { $(id).classList.add("open"); }
@@ -1000,15 +1115,10 @@
   }
 
   function applySuggestedAccounts() {
-    // After Save all: accounts filled. Tax left empty on 6 sales/tax/invoice rows
-    // (matches sketch counts). Location left empty on all 14.
-    const taxNeeded = new Set([1, 2, 5, 6, 7, 8]); // Invoices + Sales + Sales tax payable
+    const taxNeeded = new Set([1, 2, 5, 6, 7, 8]);
     state.rows.forEach((r) => {
       r.account = SUGGESTED[r.id];
-      if (!taxNeeded.has(r.id)) {
-        r.tax = "Out of scope"; // not needed for clearing/fees/refunds/expenses
-      }
-      // location stays ""
+      if (!taxNeeded.has(r.id)) r.tax = "Out of scope";
     });
     state.phase = "mapped";
     state.dirty = false;
@@ -1036,7 +1146,6 @@
 
     renderReminder();
     openModal("reminderModal");
-    // Strip becomes visible after modal closes for variant A
     state.showStrip = (state.variant === "A");
     renderTable();
   }
@@ -1078,7 +1187,6 @@
     renderTable();
   }
 
-  // Events
   document.querySelectorAll(".proto-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".proto-tab").forEach((t) => {
@@ -1097,7 +1205,6 @@
 
   $("saveAllBtn").addEventListener("click", afterSaveAll);
   $("saveGoSummariesBtn").addEventListener("click", afterSaveAll);
-
   $("finishBtn").addEventListener("click", () => finishMapping("any"));
   $("skipBtn").addEventListener("click", skipForNow);
 
@@ -1109,9 +1216,7 @@
 
   $("dimStrip").addEventListener("click", (e) => {
     const link = e.target.closest(".strip-link");
-    if (link) {
-      finishMapping(link.getAttribute("data-filter"));
-    }
+    if (link) finishMapping(link.getAttribute("data-filter"));
   });
 
   $("stripShowAll").addEventListener("click", () => {
@@ -1153,10 +1258,6 @@
     if (!row) return;
     row[field] = sel.value;
     state.dirty = true;
-    // Clear highlight for this cell once filled
-    if ((field === "tax" || field === "location") && sel.value) {
-      // re-evaluate strip / filters
-    }
     renderTable();
   });
 
@@ -1164,9 +1265,8 @@
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-close");
       closeModal(id);
-      if (id === "reminderModal") {
-        // Same as skip — strip stays for A
-        if (state.variant === "A") state.showStrip = true;
+      if (id === "reminderModal" && state.variant === "A") {
+        state.showStrip = true;
         renderTable();
       }
     });
@@ -1186,8 +1286,6 @@
 
   $("saveMappingsBtn").addEventListener("click", () => {
     state.dirty = false;
-    updateSaveBtn();
-    // If all dimensions filled, strip goes away via updateStrip
     const c = counts();
     if (c.tax === 0 && c.location === 0) {
       state.showStrip = false;
@@ -1195,6 +1293,24 @@
     }
     renderTable();
   });
+
+  // Expose for headless verification scripts
+  window.__proto = {
+    saveAll: afterSaveAll,
+    openPreview: function () { renderPreview(); openModal("previewModal"); },
+    finish: function () { finishMapping("any"); },
+    skip: skipForNow,
+    setVariant: function (v) {
+      document.querySelectorAll(".proto-tab").forEach((t) => {
+        const on = t.getAttribute("data-variant") === v;
+        t.classList.toggle("active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      state.variant = v;
+      resetPrototype();
+    },
+    state: state
+  };
 
   renderTable();
 })();
