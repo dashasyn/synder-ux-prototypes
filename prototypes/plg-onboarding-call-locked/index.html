@@ -1617,12 +1617,19 @@
     .v-cards .e-divider::before, .v-cards .e-divider::after { content: ''; flex: 1; height: 1px; background: #DFE4EC; }
     .v-cards .e-divider .material-icons-round { font-size: 18px; }
 
-    /* A: every self-serve card reserves the same description-to-action gap and action height. */
+    /* A matches the product checklist state treatment; other variants stay unchanged. */
+    body[data-variant="quick"] .hs-step-card { padding: 16px 20px; }
+    body[data-variant="quick"] .hs-step-card.is-done { background: #F3FAF0; border-color: #B8DDAA; }
+    body[data-variant="quick"] .hs-step-card.is-done .hs-step-title { color: #1F8940; }
+    body[data-variant="quick"] .hs-step-card.is-current { background: #E6F0FF; border-color: #0053CC; }
+    body[data-variant="quick"] .hs-step-card.is-current .hs-step-title { color: #0053CC; }
+    body[data-variant="quick"] .hs-step-card.is-locked { background: #F5F7FA; border-color: #DFE4EC; }
     body[data-variant="quick"] .hs-step-desc { margin-bottom: 0; }
-    body[data-variant="quick"] .hs-step-actions { margin-top: 12px; min-height: 32px; align-items: center; }
-    body[data-variant="quick"] .hs-step-actions .hs-mark { min-height: 32px; padding: 0; display: inline-flex; align-items: center; }
-    body[data-variant="quick"] .hs-where.a-outlined { background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC; }
-    body[data-variant="quick"] .hs-where.a-outlined:hover { background: #E6F0FF; color: #0053CC; }
+    body[data-variant="quick"] .hs-step-actions { margin-top: 12px; min-height: 36px; align-items: center; gap: 12px; }
+    body[data-variant="quick"] .hs-step-actions .hs-where { height: 36px; padding: 0 16px; }
+    body[data-variant="quick"] .hs-step-actions .hs-mark { height: 36px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid #0053CC; border-radius: 4px; background: #FFFFFF; color: #0053CC; }
+    body[data-variant="quick"] .hs-step-actions .hs-mark:hover { background: #E6F0FF; text-decoration: none; }
+    body[data-variant="quick"] .hs-all-done { display: none !important; }
 
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
@@ -3194,7 +3201,7 @@
     const done = new Set(state.doneIds);
     const selfList = list.filter(c => c.phase === 'self');
     // Score is self-serve only (call-phase steps are specialist-activated)
-    const scoreList = selfList;
+    const scoreList = state.variant === 'quick' ? list : selfList;
     const total = scoreList.length;
     const count = scoreList.filter(c => done.has(c.id)).length;
     const pct = total ? Math.round((count / total) * 100) : 0;
@@ -3247,13 +3254,12 @@
 
       let actions = '';
       let contactBlock = '';
-      if (state.variant === 'quick' && c.phase === 'self') {
+      if (state.variant === 'quick' && status === 'current') {
         const destinations = { channel: 'Organization settings', mapping: 'Mapping',
           'test-sync': state.syncMode === 'summary' ? 'Summaries' : 'Transactions' };
         const label = destinations[c.id];
-        const go = label ? '<button type="button" class="hs-where a-outlined" data-where="' + c.id + '">Open ' + label + '</button>' : '';
-        const mark = status === 'current' ? '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button>' : '';
-        actions = '<div class="hs-step-actions">' + go + mark + '</div>';
+        actions = '<div class="hs-step-actions"><button type="button" class="hs-where" data-where="' + c.id + '">Go to ' + label + ' <span class="material-icons-round" aria-hidden="true">arrow_forward</span></button>' +
+          '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button></div>';
       } else if (status === 'current') {
         const whereBtn = c.where
           ? '<button type="button" class="hs-where" data-where="' + c.id + '">' + c.where + '</button>'
