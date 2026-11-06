@@ -1595,6 +1595,28 @@
     @media (max-width: 900px) {
       .v-d .d-section { grid-template-columns: 1fr; gap: 8px; }
     }
+    /* Variant E: Cards — scoped; comparison variants stay untouched. */
+    .v-cards .e-wrap { max-width: 720px; margin: 0 auto; padding-top: 16px; }
+    .v-cards h1 { margin: 0 0 8px; font-size: 24px; line-height: 32px; font-weight: 400; color: #1A1B24; }
+    .v-cards .e-sub { margin: 0 0 24px; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-cards h2 { margin: 0 0 8px; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
+    .v-cards .e-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .v-cards .e-card { display: flex; gap: 12px; padding: 16px 20px; background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; }
+    .v-cards .e-locked { background: #F5F7FA; }
+    .v-cards .e-body { flex: 1; min-width: 0; }
+    .v-cards h3 { margin: 0 0 4px; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
+    .v-cards .e-card p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-cards .e-lock { font-size: 18px; color: #6B778C; flex-shrink: 0; margin-top: 3px; }
+    .v-cards .e-action { margin-top: 12px; }
+    .v-cards .e-link, .v-cards .e-primary { appearance: none; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; }
+    .v-cards .e-link { background: none; border: none; padding: 0; color: #0053CC; }
+    .v-cards .e-link:hover { text-decoration: underline; }
+    .v-cards .e-primary { background: #0053CC; color: #FFFFFF; border: none; border-radius: 4px; padding: 8px 16px; }
+    .v-cards .e-primary:hover { background: #0046B0; }
+    .v-cards .e-divider { display: flex; align-items: center; gap: 8px; margin: 24px 0 16px; font-size: 14px; line-height: 20px; font-weight: 500; color: #6B778C; }
+    .v-cards .e-divider::before, .v-cards .e-divider::after { content: ''; flex: 1; height: 1px; background: #DFE4EC; }
+    .v-cards .e-divider .material-icons-round { font-size: 18px; }
+
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -1631,6 +1653,7 @@
         <button type="button" data-variant="c2">C2 · Call first</button>
         <button type="button" data-variant="c3">C3 · Blue block</button>
         <button type="button" data-variant="d" class="active">D · Simple</button>
+        <button type="button" data-variant="cards">E · Cards</button>
       </div>
     </div>
 
@@ -2376,7 +2399,29 @@
       { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import history' },
     ],
   };
-  const BEFORE_VARIANTS = ['c1', 'c2', 'c3', 'd'];
+  const CARD_CONNECT = { id: 'channel', phase: 'tip', primary: true,
+    title: 'Connect sales channel', desc: 'Add every channel you get paid from.', where: 'Connect sales channel' };
+  const CARD_AUTO = { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync & import historical data',
+    desc: 'Your Synder Specialist turns on auto-sync and agrees which historical data to import.' };
+  const CARD_FINISH = { id: 'call-finish', phase: 'call', title: 'Finish setup with your Synder Specialist',
+    desc: 'Walk through posting together so everything looks right. Ask about Smart Rules if you have exceptions.' };
+  CHECKPOINTS.cards = {
+    summary: [
+      CARD_CONNECT,
+      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups to accounts.', where: 'Open Mapping' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary manually and check it in your books.', where: 'Open Summaries' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency', desc: 'Your Synder Specialist sets how often summaries sync. Until then, sync is Manual.' },
+      CARD_AUTO, CARD_FINISH,
+    ],
+    'per-txn': [
+      CARD_CONNECT,
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they look in your books. Anything off gets fixed on the call.', where: 'Open Transactions' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings', desc: 'Your Synder Specialist confirms your clearing account, products, taxes, and fees with you.' },
+      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions', desc: 'Review your test results together and adjust settings so sales post correctly.' },
+      CARD_AUTO, CARD_FINISH,
+    ],
+  };
+  const BEFORE_VARIANTS = ['c1', 'c2', 'c3', 'd', 'cards'];
   function isBefore() { return BEFORE_VARIANTS.includes(state.variant); }
 
 
@@ -3507,8 +3552,24 @@
         </section>
       </div>`;
   }
+  function beforeCardsHtml() {
+    const list = activeCheckpoints();
+    function card(c) {
+      const locked = c.phase === 'call';
+      const action = locked ? '' : '<div class="e-action"><button type="button" class="bc-where ' + (c.primary ? 'e-primary' : 'e-link') + '" data-where="' + c.id + '">' + escapeHtml(c.where) + '</button></div>';
+      return '<li class="e-card' + (locked ? ' e-locked' : '') + '" data-step-id="' + c.id + '">' +
+        (locked ? '<span class="material-icons-round e-lock" aria-hidden="true">lock</span>' : '') +
+        '<div class="e-body"><h3>' + escapeHtml(c.title) + '</h3><p>' + escapeHtml(c.desc) + '</p>' + action + '</div></li>';
+    }
+    return '<div class="e-wrap"><h1>Before your call</h1>' +
+      '<p class="e-sub">Do a couple of things yourself. Your Synder Specialist finishes the rest on the call.</p>' +
+      '<h2>Do before the call</h2><ul class="e-list">' + list.filter(c => c.phase === 'tip').map(card).join('') + '</ul>' +
+      '<div class="e-divider"><span class="material-icons-round" aria-hidden="true">event</span>On your setup call</div>' +
+      '<ul class="e-list" aria-label="On your setup call">' + list.filter(c => c.phase === 'call').map(card).join('') + '</ul></div>';
+  }
+
   function beforeCallHtml() {
-    const fn = { c1: beforeC1Html, c2: beforeC2Html, c3: beforeC3Html, d: beforeDHtml }[state.variant];
+    const fn = { c1: beforeC1Html, c2: beforeC2Html, c3: beforeC3Html, d: beforeDHtml, cards: beforeCardsHtml }[state.variant];
     return '<div class="v-' + state.variant + '">' + fn() + '</div>';
   }
 
@@ -3989,7 +4050,7 @@
       const h = (window.location.hash || '').replace(/^#/, '').toLowerCase().replace(/^variant=/, '');
       const key = q || h;
       const alias = { quick: 'quick', a: 'quick', prepare: 'prepare', b: 'prepare',
-        c1: 'c1', c2: 'c2', c3: 'c3', c: 'c3', before: 'c3', d: 'd', simple: 'd' };
+        c1: 'c1', c2: 'c2', c3: 'c3', c: 'c3', before: 'c3', d: 'd', simple: 'd', cards: 'cards', e: 'cards' };
       if (alias[key]) v = alias[key];
     } catch (err) { /* ignore */ }
     state.variant = v;
