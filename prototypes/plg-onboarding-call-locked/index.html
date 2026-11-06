@@ -1602,11 +1602,14 @@
     .v-cards h2 { margin: 0 0 8px; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
     .v-cards .e-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
     .v-cards .e-card { display: flex; gap: 12px; padding: 16px 20px; background: #FFFFFF; border: 1px solid #DFE4EC; border-radius: 8px; }
-    .v-cards .e-locked { background: #F5F7FA; }
+    .v-cards .e-finish { background: #E6F0FF; border-radius: 8px; padding: 20px; }
+    .v-cards .e-finish h2 { margin: 0 0 8px; }
+    .v-cards .e-finish p { margin: 0 0 12px; font-size: 14px; line-height: 20px; color: #5A6474; }
+    .v-cards .e-finish ul { margin: 0; padding-left: 20px; font-size: 14px; line-height: 24px; color: #1A1B24; }
+    .v-cards .e-finish li + li { margin-top: 4px; }
     .v-cards .e-body { flex: 1; min-width: 0; }
     .v-cards h3 { margin: 0 0 4px; font-size: 16px; line-height: 24px; font-weight: 500; color: #1A1B24; }
     .v-cards .e-card p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
-    .v-cards .e-lock { font-size: 18px; color: #6B778C; flex-shrink: 0; margin-top: 3px; }
     .v-cards .e-action { margin-top: 12px; }
     .v-cards .e-outlined { appearance: none; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC; border-radius: 4px; padding: 8px 16px; }
     .v-cards .e-outlined:hover { background: #E6F0FF; }
@@ -2393,25 +2396,21 @@
       { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import history' },
     ],
   };
-  const CARD_CONNECT = { id: 'channel', phase: 'tip', primary: true,
-    title: 'Connect sales channel', desc: 'Add every channel you get paid from.', where: 'Connect sales channel' };
-  const CARD_AUTO = { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync & import historical data',
-    desc: 'Your Synder Specialist turns on auto-sync and agrees which historical data to import.' };
-  const CARD_FINISH = { id: 'call-finish', phase: 'call', title: 'Finish setup with your Synder Specialist',
-    desc: 'Walk through posting together so everything looks right. Ask about Smart Rules if you have exceptions.' };
+  const CARD_CONNECT = { id: 'channel', phase: 'tip', title: 'Connect sales channel',
+    desc: 'Add every channel you get paid from.', where: 'Connect' };
+  const CARD_AUTO = { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' };
+  const CARD_RULES = { id: 'call-rules', phase: 'call', title: 'Create any Smart Rules you need' };
   CHECKPOINTS.cards = {
     summary: [
       CARD_CONNECT,
-      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups to accounts.', where: 'Open Mapping' },
-      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary manually and check it in your books.', where: 'Open Summaries' },
-      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency', desc: 'Your Synder Specialist sets how often summaries sync. Until then, sync is Manual.' },
-      CARD_AUTO, CARD_FINISH,
+      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups.', where: 'Open Mapping' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary and check it in your books.', where: 'Open Summaries' },
+      { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' }, CARD_AUTO, CARD_RULES,
     ],
     'per-txn': [
       CARD_CONNECT,
-      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they look in your books. Anything off gets fixed on the call.', where: 'Open Transactions' },
-      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings', desc: 'Your Synder Specialist confirms your clearing account, products, taxes, and fees with you.' },
-      CARD_AUTO, CARD_FINISH,
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they post in your books. Your Synder Specialist adjusts settings on the call.', where: 'Open Transactions' },
+      { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings' }, CARD_AUTO, CARD_RULES,
     ],
   };
   const BEFORE_VARIANTS = ['c1', 'c2', 'c3', 'd', 'cards'];
@@ -3547,18 +3546,18 @@
   }
   function beforeCardsHtml() {
     const list = activeCheckpoints();
-    function card(c) {
-      const locked = c.phase === 'call';
-      const action = locked ? '' : '<div class="e-action"><button type="button" class="bc-where e-outlined" data-where="' + c.id + '">' + escapeHtml(c.where) + '</button></div>';
-      return '<li class="e-card' + (locked ? ' e-locked' : '') + '" data-step-id="' + c.id + '">' +
-        (locked ? '<span class="material-icons-round e-lock" aria-hidden="true">lock</span>' : '') +
-        '<div class="e-body"><h3>' + escapeHtml(c.title) + '</h3><p>' + escapeHtml(c.desc) + '</p>' + action + '</div></li>';
-    }
+    const cards = list.filter(c => c.phase === 'tip').map(c =>
+      '<li class="e-card" data-step-id="' + c.id + '"><div class="e-body"><h3>' + escapeHtml(c.title) + '</h3><p>' + escapeHtml(c.desc) + '</p>' +
+      '<div class="e-action"><button type="button" class="bc-where e-outlined" data-where="' + c.id + '">' + escapeHtml(c.where) + '</button></div></div></li>'
+    ).join('');
+    const bullets = list.filter(c => c.phase === 'call').map(c => '<li>' + escapeHtml(c.title) + '</li>').join('');
     return '<div class="e-wrap"><h1>Before your call</h1>' +
       '<p class="e-sub">Do a couple of things yourself. Your Synder Specialist finishes the rest on the call.</p>' +
-      '<h2>Do before the call</h2><ul class="e-list">' + list.filter(c => c.phase === 'tip').map(card).join('') + '</ul>' +
+      '<h2>Do before the call</h2><ul class="e-list">' + cards + '</ul>' +
       '<div class="e-divider"><span class="material-icons-round" aria-hidden="true">event</span>On your setup call</div>' +
-      '<ul class="e-list" aria-label="On your setup call">' + list.filter(c => c.phase === 'call').map(card).join('') + '</ul></div>';
+      '<section class="e-finish" aria-labelledby="e-finish-title"><h2 id="e-finish-title">Finish setup with your Synder Specialist</h2>' +
+      '<p>You’ll walk through posting together so everything looks right. On the call you will:</p>' +
+      '<ul>' + bullets + '</ul></section></div>';
   }
 
   function beforeCallHtml() {
