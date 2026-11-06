@@ -1617,6 +1617,9 @@
     .v-cards .e-divider::before, .v-cards .e-divider::after { content: ''; flex: 1; height: 1px; background: #DFE4EC; }
     .v-cards .e-divider .material-icons-round { font-size: 18px; }
 
+    body[data-variant="quick"] .hs-where.a-outlined { background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC; }
+    body[data-variant="quick"] .hs-where.a-outlined:hover { background: #E6F0FF; color: #0053CC; }
+
     /* Settings stubs: view-only until the call */
     .viewonly-banner {
       display: none; align-items: flex-start; gap: 12px;
@@ -1636,7 +1639,7 @@
     .vo-field select { font: inherit; font-size: 14px; height: 36px; padding: 0 8px; border: 1px solid #DFE4EC; border-radius: 4px; background: #F7F8FA; color: #3D4A5C; }
   </style>
 </head>
-<body data-view="app" data-variant="d">
+<body data-view="app" data-variant="quick">
 
   <!-- Dark top variant bar -->
   <div class="proto-bar">
@@ -1647,9 +1650,9 @@
     <div class="proto-group">
       <span class="proto-label">Variant</span>
       <div class="seg" id="seg-variant">
-        <button type="button" data-variant="quick">A · Quick fix</button>
+        <button type="button" data-variant="quick" class="active">A · Quick fix</button>
         <button type="button" data-variant="prepare">B · Prepare</button>
-        <button type="button" data-variant="d" class="active">D · Simple</button>
+        <button type="button" data-variant="d">D · Simple</button>
         <button type="button" data-variant="cards">E · Cards</button>
       </div>
     </div>
@@ -3244,7 +3247,14 @@
 
       let actions = '';
       let contactBlock = '';
-      if (status === 'current') {
+      if (state.variant === 'quick' && c.phase === 'self') {
+        const destinations = { channel: 'Organization settings', mapping: 'Mapping',
+          'test-sync': state.syncMode === 'summary' ? 'Summaries' : 'Transactions' };
+        const label = destinations[c.id];
+        const go = label ? '<button type="button" class="hs-where a-outlined" data-where="' + c.id + '">Open ' + label + '</button>' : '';
+        const mark = status === 'current' ? '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button>' : '';
+        actions = '<div class="hs-step-actions">' + go + mark + '</div>';
+      } else if (status === 'current') {
         const whereBtn = c.where
           ? '<button type="button" class="hs-where" data-where="' + c.id + '">' + c.where + '</button>'
           : '';
@@ -3322,14 +3332,14 @@
   function syncVariantUrl() {
     try {
       const url = new URL(window.location.href);
-      if (state.variant !== 'd') url.searchParams.set('variant', state.variant);
+      if (state.variant !== 'quick') url.searchParams.set('variant', state.variant);
       else url.searchParams.delete('variant');
       history.replaceState(null, '', url.toString());
     } catch (err) { /* file:// or sandbox — ignore */ }
   }
 
   function setVariant(v) {
-    state.variant = (v === 'prepare' || v === 'quick' || BEFORE_VARIANTS.includes(v)) ? v : 'd';
+    state.variant = (v === 'prepare' || v === 'quick' || BEFORE_VARIANTS.includes(v)) ? v : 'quick';
     state.noteOpen = null;
     document.body.setAttribute('data-variant', state.variant);
     $$('#seg-variant button').forEach(b => b.classList.toggle('active', b.dataset.variant === state.variant));
@@ -3414,8 +3424,8 @@
       'smart-rules': 'smart-rules',
       'auto-historical': state.syncMode === 'summary' ? 'summaries' : 'historical',
     };
-    if (isBefore()) {
-      // C: send doable rows to pages where they can be done (not the view-only Settings)
+    if (isBefore() || state.variant === 'quick') {
+      // Send doable rows to pages where they can be done (not the view-only Settings)
       map.channel = 'org-settings';
       map.mapping = 'mapping';
     }
@@ -4036,7 +4046,7 @@
 
   // init
   (function initVariant() {
-    let v = 'd'; // default: D · Simple
+    let v = 'quick'; // default: A · Quick fix
     try {
       const q = (new URLSearchParams(window.location.search).get('variant') || '').toLowerCase();
       const h = (window.location.hash || '').replace(/^#/, '').toLowerCase().replace(/^variant=/, '');
