@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v48 -->
+<!-- period-lock v49 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v48" />
+<meta name="prototype-version" content="v49" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -262,7 +262,7 @@ const S={org:'pt',role:'admin',menu:null,draft:null,prefill:null,events:[],orgOp
   stripe:{id:'stripe',org:'pt',name:'mzkt.by (Stripe)',short:'Stripe',pp:'Stripe',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:5,by:'Viacheslav Tarabarov',at:'2026-09-28'},
   shopify:{id:'shopify',org:'pt',name:'andrewshitsko (Shopify)',short:'Shopify',pp:'Shopify',tz:'Europe/Vilnius',on:true,mode:'hard',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:1,by:'Viacheslav Tarabarov',at:'2026-09-12'},
   greenleaf:{id:'greenleaf',org:'sm',name:'Green Leaf (Square)',short:'Square',pp:'Square',tz:'Europe/Vilnius',on:true,mode:'soft',schedule:'fixed',runDay:5,date:'2026-09-30',moveTo:'2026-10-01',by:'Ignat Plot',at:'2026-10-02'},
-  paypal:{id:'paypal',org:'pt',name:'mzkt.by (PayPal)',short:'PayPal',pp:'PayPal',tz:'Europe/Vilnius',on:false,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:'last',by:'Viacheslav Tarabarov',at:'2026-09-14'}},
+  paypal:{id:'paypal',org:'pt',name:'mzkt.by (PayPal)',short:'PayPal',pp:'PayPal',tz:'Europe/Vilnius',on:false,mode:'soft',schedule:'recurring',runDay:5,date:'2026-09-30',moveDay:1,by:'Viacheslav Tarabarov',at:'2026-09-14'}},
  txns:[
   {id:'ch_buddy',integ:'stripe',info:'Buddy QA Customer · ch_3Q9k',type:'Invoice payment',amount:'128.00 USD',date:'2026-10-03',webhook:'2026-10-03',syncedAt:'2026-10-03 09:14',status:'synced'},
   {id:'re_3P8',it2:1,integ:'stripe',info:'Refund · re_3P8mXy9kL2',type:'Refund',amount:'-42.50 USD',date:'2026-09-29',posted:'2026-10-05',webhook:'2026-10-06',syncedAt:'2026-10-06 00:04',status:'warn',reason:'moved',objs:['Refund receipt','Expense']},
@@ -378,18 +378,18 @@ function vList(){
 function openEdit(id){S.menu=null;S.draft=null;S.prefill=null;go('#edit?i='+id)}
 
 /* ---------- settings ---------- */
-/* v48 Q36: Move-to = Day 1–28 or last day of the first open month. */
-function mvDate(L,day){const[y,m]=L.split('-').map(Number);if(day==='last')return iso(y,m+1,0);return iso(y,m,Math.min(Math.max(+day||1,1),28))}
-const moveDayLbl=d=>d==='last'?'last day of the month':'day '+d;
+/* v49 Q36: Move-to = Day 1–28 only (Last day of the month later). */
+function mvDate(L,day){const[y,m]=L.split('-').map(Number);return iso(y,m,Math.min(Math.max(+day||1,1),28))}
+const moveDayLbl=d=>'day '+(d==='last'?1:d);
 /* v43: Move-to follows the Schedule. Fixed date = a fixed Move-to date (after Locked through; default the day after). Recurring = day of the month in the first open month. */
 function dMove(d,L){if(!L)return null;return d.schedule==='recurring'?mvDate(L,d.moveDay):(d.moveTo||addDays(L,1))}
 function effMove(c){return dMove(c,lockOf(c))}
-function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.draft=JSON.parse(JSON.stringify(c));const d=S.draft;if(d.moveDay==null||d.moveDay==='')d.moveDay=1;
+function ensureDraft(id){if(!S.draft||S.draft.id!==id){const c=S.integ[id];S.draft=JSON.parse(JSON.stringify(c));const d=S.draft;if(d.moveDay==null||d.moveDay===''||d.moveDay==='last')d.moveDay=1;
   if(S.prefill&&S.prefill.i===id){const cur=lockOf(c);if(!cur||S.prefill.to>cur){Object.assign(d,{on:true,schedule:'fixed',date:S.prefill.to,moveTo:addDays(S.prefill.to,1)});S.prefill.applied=1}else S.prefill.covered=cur}
   const L=dL(d);if(d.schedule==='fixed'&&!d.moveTo&&L)d.moveTo=addDays(L,1);d._mvU=!!(d.schedule==='fixed'&&L&&d.moveTo&&d.moveTo!==addDays(L,1))}
  return S.draft}
 /* draft-only keys start with "_": _mvU = user edited the Fixed-date Move-to */
-const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;if(x.mode!=='soft'){delete x.moveTo;delete x.moveDay}else if(x.schedule==='recurring'){delete x.moveTo;if(x.moveDay==null||x.moveDay==='')x.moveDay=1}else{delete x.moveDay;if(!x.moveTo&&dL(x))x.moveTo=addDays(dL(x),1)}Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
+const norm=d=>{const x=JSON.parse(JSON.stringify(d));delete x.baseLock;if(x.mode!=='soft'){delete x.moveTo;delete x.moveDay}else if(x.schedule==='recurring'){delete x.moveTo;if(x.moveDay==null||x.moveDay===''||x.moveDay==='last')x.moveDay=1}else{delete x.moveDay;if(!x.moveTo&&dL(x))x.moveTo=addDays(dL(x),1)}Object.keys(x).forEach(k=>{if(k[0]==='_')delete x[k]});return JSON.stringify(x)};
 const dirty=()=>{if(!S.draft)return false;const c=S.integ[S.draft.id];return norm(S.draft)!==norm(c)};
 const dL=d=>!d.on?null:d.schedule==='recurring'?recur(d.runDay).lock:d.date;
 function lockErr(d){if(!d.on||d.schedule!=='fixed')return'';if(!d.date)return'Pick a date.';if(d.date>TODAY)return'Pick today ('+fmt(TODAY)+') or an earlier date.';return''}
@@ -404,8 +404,8 @@ function vEdit(q){const id=S.integ[q.get('i')]?q.get('i'):integs()[0].id,c=S.int
   return`<div class="plc-card${on?' on':''}" data-k="${k}" data-v="${v}" onclick="${set}"><input type="radio" class="radio" name="c-${k}" aria-label="${title}" ${on?'checked':''} ${dis} onchange="${set}"><div style="min-width:0;flex:1"><b>${title}</b><p class="plc-cd">${desc}</p>${on&&inner?inner:''}</div></div>`};
  let o='';for(let i=1;i<=28;i++)o+=`<option value="${i}" ${+d.runDay===i?'selected':''}>${i}</option>`;
  const stop='onclick="event.stopPropagation()"';
- let oMv='';for(let i=1;i<=28;i++)oMv+=`<option value="${i}" ${d.moveDay==i?'selected':''}>Day ${i}</option>`;oMv+=`<option value="last" ${d.moveDay==='last'?'selected':''}>Last day of the month</option>`;
- const moveIn=rec?`<div class="plc-sent" ${stop}>Move late transactions to <select class="select" id="pl-move" aria-label="Move late transactions to" ${dis} onchange="setD('moveDay',this.value==='last'?'last':+this.value)">${oMv}</select> of the first open month.</div>`
+ let oMv='';for(let i=1;i<=28;i++)oMv+=`<option value="${i}" ${+d.moveDay===i?'selected':''}>Day ${i}</option>`;
+ const moveIn=rec?`<div class="plc-sent" ${stop}>Move late transactions to <select class="select" id="pl-move" aria-label="Move late transactions to" ${dis} onchange="setD('moveDay',+this.value)">${oMv}</select> of the first open month.</div>`
   :`<div class="plc-in" ${stop}><label for="pl-move">Move late transactions to</label><input id="pl-move" class="input pl-dt${er.move?' error':''}" type="date" value="${d.moveTo||''}" min="${L?addDays(L,1):''}" ${dis} onchange="setD('moveTo',this.value)">${err(er.move)}</div>`;
  const recIn=`<div class="plc-sent" ${stop}>On day<select class="select" aria-label="Run day" ${dis} onchange="setD('runDay',+this.value)">${o}</select>lock the previous month.</div>`;
  const fixIn=`<div class="plc-in" ${stop}><label for="pl-date">Locked through</label><input id="pl-date" class="input pl-dt${er.date?' error':''}" type="date" value="${d.date||''}" max="${TODAY}" ${dis} onchange="setD('date',this.value)">${err(er.date)}</div>`;
@@ -427,7 +427,7 @@ function setD(k,v){const d=S.draft;d[k]=v;
  if(k==='schedule'&&v==='fixed'&&(!d.date||d.date>TODAY))d.date=recur(d.runDay).lock;
  /* switching Schedule swaps the Move-to control: saved value if it fits, else the default */
  const c=S.integ[d.id],L=dL(d);
- if(k==='schedule'){if(v==='fixed'){d.moveTo=c.schedule==='fixed'&&c.moveTo&&L&&c.moveTo>L?c.moveTo:(L?addDays(L,1):null);d._mvU=!!(L&&d.moveTo!==addDays(L,1))}else{const md=c.schedule==='recurring'&&c.moveDay!=null&&c.moveDay!==''?c.moveDay:1;d.moveDay=md==='last'?'last':Math.min(+md||1,28)}}
+ if(k==='schedule'){if(v==='fixed'){d.moveTo=c.schedule==='fixed'&&c.moveTo&&L&&c.moveTo>L?c.moveTo:(L?addDays(L,1):null);d._mvU=!!(L&&d.moveTo!==addDays(L,1))}else d.moveDay=Math.min(+(c.schedule==='recurring'&&c.moveDay!=null&&c.moveDay!==''&&c.moveDay!=='last'?c.moveDay:1)||1,28)}
  if(k==='moveTo')d._mvU=!!v;
  if(d.schedule==='fixed'&&L&&!lockErr(d)&&(!d._mvU||!d.moveTo))d.moveTo=addDays(L,1);
  render()}
@@ -804,10 +804,11 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log49=['Q36: removed "Last day of the month" from the recurring Move-to picker (Ignat: later). Options are Day 1–28 only. PayPal demo back to Day 1. Q&A answer updated.'];
  const log48=['Q36 (Ignat): Recurring Move-to picker = Day 1–28 plus "Last day of the month". On each run Last day → last calendar day of the first open month; Day N → that day. Stripe stays on Day 5; PayPal (Off) uses Last day so the option shows in settings. Preview, Activity log, import warning and toasts use the resolved date.',
   'Q37 (Ignat agreed): Sync info stays as v47 — separate Period lock Object type rows, "was created" unchanged, no blue banner, no exchange-rate sentence.',
   'Q38 (Ignat agreed): source date in Transactions list / timeline / RR tab (v47) confirmed.'];
- const qa4836='Q36 — Move-to day 1–28 or 1–31\nDay 1–28, plus Last day of the month. No days 29–31. Prototype: options labeled "Day 1"…"Day 28" and "Last day of the month".';
+ const qa4836='Q36 — Move-to day 1–28 or 1–31\nDay 1–28 only for now. Last day of the month later. No days 29–31. Prototype: Day 1…Day 28.';
  const qa4837='Q37 — How Sync info shows moved objects\nAgree. Keep Sync info as production. Separate Sync log rows with Object type Period lock and Message like "Invoice: date moved from Sep 10 to Oct 1 by period lock." Created objects keep "was created." No banner, no FX sentence. Implemented.';
  const qa4838='Q38 — Date in the Transactions list\nAgree. Transaction date = source date; Sync info shows moves. Implemented in v47.';
  const log47=['Summaries (Q39 / Slava Nov 5): removed the soft-lock "37 datasource records… moved…" note on the Oct 1 summary and the locked-day explanatory note on Sep 15. Synced adjustment chip and Pending transactions stay. Rollback / Resync stay.',
@@ -953,11 +954,12 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v48','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v49','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v49',log49),
  cl('Changelog v48',log48),
- cl('Q&A answers (Ignat, Nov 6)',[qa4836,qa4837,qa4838]),
+ cl('Q&A answers (Ignat)',[qa4836,qa4837,qa4838]),
  cl('Changelog v47',log47),
  cl('Changelog v46',log46),
  cl('Changelog v45',log45),
@@ -1005,7 +1007,7 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
  sec('Assumptions to confirm',`<div class="card"><ul>
  <li>No impact counts are shown; the confirm dialog appears only when the lock weakens (off, earlier date, hard → soft).</li>
  <li>Recurring run day is limited to 1–28 so it runs every month (FDD: one recurring option, lock through end of previous month).</li>
- <li>"Move late transactions to" follows the Schedule. Fixed date: a specific date after Locked through (default the day after). Recurring: Day 1–28 or Last day of the month; on each run that becomes a concrete date in the first open month. No 29–31 option.</li>
+ <li>"Move late transactions to" follows the Schedule. Fixed date: a specific date after Locked through (default the day after). Recurring: Day 1–28 of the first open month. Last day of the month is later. No 29–31.</li>
  <li>Hard lock, batch with two internal transactions (FDD edge case 4): the full sync is canceled, no payment syncs.</li>
  <li>Activity log (FDD v48): Period lock enabled / disabled show only the integration Name (Platform). Period lock updated and Period lock date advanced show the full settings: "Name (Platform): mode, Recurring on day N | Fixed date, locked through …, late transactions move to …" (soft only). First enable + save = two rows with the same time; in the newest-first table Updated sits above Enabled. Changing the demo date past a run day writes the System rows live.</li>
  <li>Recon "Lock period" prefills the recon end date and never moves an existing lock earlier. FDD edge case 2: recon shows no callout for re-dated rows.</li>
