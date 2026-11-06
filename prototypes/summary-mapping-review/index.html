@@ -30,177 +30,104 @@
     background: #fff;
     display: flex;
     flex-direction: column;
-    min-width: 1280px;
   }
   button, input, select, textarea, option, legend, label { font-family: inherit; font-size: 14px; line-height: 20px; color: inherit; }
-  h1, h2, h3, p { margin: 0; }
-  h1 { font-size: 28px; line-height: 36px; font-weight: 300; }
-  h2 { font-size: 16px; line-height: 24px; font-weight: 700; }
+  h1, h2, p { margin: 0; }
+  h1 { font-size: 28px; line-height: 32px; font-weight: 300; }
+  h2 { font-size: 20px; line-height: 28px; font-weight: 400; }
   button { cursor: pointer; }
   button:disabled { cursor: not-allowed; }
   :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
   .proto-bar {
-    flex: none;
-    background: #1A1B24;
-    color: #fff;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 16px;
-    font-size: 14px;
+    flex: none; background: #1A1B24; color: #fff; min-height: 40px;
+    display: flex; align-items: center; gap: 16px; padding: 4px 16px; font-size: 14px;
   }
   .proto-bar strong { font-size: 16px; font-weight: 500; }
   .proto-bar .sep { width: 1px; height: 20px; background: rgba(255,255,255,.3); }
-  .variant {
-    height: 32px;
-    padding: 0 12px;
-    border-radius: 4px;
-    border: 1px solid transparent;
-    background: var(--primary);
-    color: #fff;
-    font-size: 14px;
-  }
-
+  .variant { height: 32px; padding: 0 12px; border-radius: 4px; border: 0; background: var(--primary); color: #fff; font-size: 14px; }
   .shell { flex: 1; min-height: 0; display: flex; }
   .sidebar {
-    width: 240px;
-    flex: none;
-    background: var(--sidebar);
-    border-right: 1px solid var(--divider);
-    color: var(--sidebar-text);
-    overflow: auto;
-    font-size: 14px;
+    width: 220px; flex: none; background: var(--sidebar); border-right: 1px solid var(--divider);
+    color: var(--sidebar-text); overflow: auto; font-size: 14px;
   }
-  .org {
-    height: 56px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--divider);
-    color: var(--text);
-    font-size: 14px;
-  }
-  .avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: #C2185B; color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 14px; flex: none;
-  }
+  .org { height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-bottom: 1px solid var(--divider); color: var(--text); }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #C2185B; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
   .nav-btn, .nav-sub {
-    display: flex; align-items: center; gap: 10px;
-    width: 100%; min-height: 42px; padding: 0 16px;
-    border: 0; border-bottom: 1px solid var(--divider);
-    background: transparent; color: var(--sidebar-text);
+    display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 12px;
+    border: 0; border-bottom: 1px solid var(--divider); background: transparent; color: var(--sidebar-text);
     text-align: left; font-size: 14px; text-decoration: none;
   }
-  .nav-btn svg, .nav-sub svg { flex: none; }
   .nav-btn:hover, .nav-sub:hover { background: #D9D9D9; }
   .nav-btn.open { background: #D9D9D9; }
-  .nav-sub { padding-left: 46px; border-bottom: 0; }
-  .nav-sub[aria-current="page"], .nav-btn[aria-current="page"] { background: var(--nav); color: #fff; }
+  .nav-sub { padding-left: 36px; border-bottom: 0; }
+  .nav-sub[aria-current="page"] { background: var(--nav); color: #fff; }
   .nav-group { border-bottom: 1px solid var(--divider); }
   .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .topbar {
-    height: 56px; flex: none;
-    display: flex; align-items: center; justify-content: flex-end; gap: 24px;
-    padding: 0 24px; border-bottom: 1px solid var(--divider); background: #fff;
+    height: 48px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 16px;
+    padding: 0 16px; border-bottom: 1px solid var(--divider);
   }
-  .balance { font-size: 16px; color: var(--nav); border-bottom: 3px solid var(--nav); padding: 4px 0; }
-  .top-link {
-    background: none; border: 0; color: var(--nav); font-size: 16px; padding: 6px 0;
-  }
-  .icon-btn {
-    width: 32px; height: 32px; border: 0; background: transparent; color: var(--nav);
-    border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;
-  }
-  .content { flex: 1; overflow: auto; padding: 24px; }
-  .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
-  .subtitle { color: var(--muted); font-size: 14px; }
-  .head-actions { display: flex; gap: 8px; align-items: center; }
-  .reason { color: var(--muted); margin: 4px 0 12px; max-width: 70ch; }
-  .reason.ready { color: var(--ok); }
-  .btn {
-    height: 32px; padding: 6px 19px; border-radius: 4px; border: 1px solid transparent;
-    background: var(--primary); color: #fff; font-size: 14px; line-height: 20px;
+  .balance { font-size: 16px; color: var(--nav); border-bottom: 3px solid var(--nav); padding: 2px 0; }
+  .top-link { background: none; border: 0; color: var(--nav); font-size: 16px; padding: 4px 0; }
+  .icon-btn { width: 32px; height: 32px; border: 0; background: transparent; color: var(--nav); border-radius: 4px; }
+  .content { flex: 1; overflow: auto; padding: 12px 16px 16px; }
+  .page-head { margin-bottom: 8px; }
+  .subtitle, .flow, .save-note { color: var(--muted); font-size: 14px; line-height: 20px; }
+  .flow { margin-top: 2px; color: var(--text); }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0 4px; }
+  .save-note { margin: 0 0 8px; max-width: 90ch; }
+  .btn, .btn-outlined, .btn-text {
+    height: 32px; padding: 4px 14px; border-radius: 4px; border: 1px solid transparent;
+    background: var(--primary); color: #fff; font-size: 14px;
   }
   .btn:hover:not(:disabled) { background: var(--primary-hover); }
-  .btn:disabled { background: #E8EBF0; color: #555555; }
+  .btn:disabled { background: #E8EBF0; color: #555; }
   .btn-outlined { background: #fff; color: var(--primary); border-color: var(--primary); }
   .btn-outlined:hover:not(:disabled) { background: rgba(0,83,204,.04); }
-  .btn-text { background: none; border: 0; color: var(--primary); padding: 6px 8px; height: 32px; }
-  .counters { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 12px; color: var(--muted); }
-  .counters strong { color: var(--text); font-weight: 500; }
-  .action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 16px; }
-  .scopes { display: flex; gap: 16px; align-items: center; }
-  .scopes label, .modes label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
-  .panel {
-    border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 16px; background: #fff;
-  }
-  .panel h2 { margin-bottom: 4px; }
-  .hint { color: var(--muted); margin-bottom: 12px; }
-  .ex-list { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow: auto; border-top: 1px solid var(--border); }
-  .ex-list li {
-    display: grid; grid-template-columns: minmax(160px, 1.2fr) minmax(180px, 1.2fr) minmax(220px, 2fr) auto;
-    gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
-  }
-  .ex-reason { color: var(--danger); }
-  .batch-toggle {
-    width: 100%; text-align: left; background: #fff; border: 1px solid var(--border);
-    border-radius: 4px; min-height: 40px; padding: 8px 12px; margin-bottom: 8px; font-size: 14px;
-  }
-  .batch {
-    display: grid; grid-template-columns: minmax(180px, 1.4fr) minmax(180px, 1.2fr) auto auto;
-    gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px;
-  }
-  .batch-list { border: 1px solid var(--border); border-radius: 4px; margin: 0 0 8px; }
-  .filters {
-    background: #EFF1F5; border-radius: 4px; padding: 16px; display: flex; flex-wrap: wrap; gap: 12px 16px;
-    align-items: flex-end; margin-bottom: 16px;
-  }
-  .field { display: flex; flex-direction: column; gap: 4px; min-width: 180px; font-size: 14px; color: var(--muted); }
-  .field.grow { flex: 1; min-width: 240px; }
+  .btn-outlined[aria-pressed="true"] { background: #E0EBFD; }
+  .btn-text { background: none; border: 0; color: var(--primary); padding: 4px 8px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+  .filters label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; }
   .input, .select {
     height: 32px; border: 1px solid var(--border); border-radius: 4px; background: #fff;
-    padding: 0 8px; color: var(--text); width: 100%;
+    padding: 0 8px; color: var(--text); font-size: 14px;
   }
   .input:focus, .select:focus { border-color: var(--primary); outline: 2px solid rgba(0,83,204,.25); outline-offset: 0; }
+  .search { width: 220px; }
   .card { border: 1px solid var(--border); border-radius: 4px; background: #fff; }
-  .tabs { display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--border); }
   .tabs button {
-    height: 48px; padding: 0 16px; border: 0; background: transparent; color: var(--muted);
+    height: 36px; padding: 0 12px; border: 0; background: transparent; color: var(--muted);
     border-bottom: 2px solid transparent; font-size: 14px; white-space: nowrap;
   }
   .tabs button[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); }
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 1280px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; font-weight: 400; }
-  th { height: 56px; color: var(--text); background: #fff; }
-  td { height: 52px; background: #fff; }
-  tr.needs td { background: var(--needs); }
-  tr.pending td { box-shadow: inset 3px 0 0 var(--primary); }
-  .state-needs { color: var(--danger); }
-  .state-suggested { color: var(--primary); }
-  .state-confirmed { color: var(--ok); }
-  .pending-flag { display: block; color: var(--primary); }
-  .note { display: block; color: var(--muted); }
-  .cell-error { display: block; color: #CC2929; margin-top: 4px; }
-  .combo-input { min-width: 200px; }
-  .pager {
-    display: flex; justify-content: flex-end; align-items: center; gap: 12px;
-    min-height: 52px; padding: 8px 12px; border-top: 1px solid var(--border); font-size: 14px;
+  .selbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    padding: 8px 10px; border-bottom: 1px solid var(--border); background: #F2F6FC; font-size: 14px;
   }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 1180px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; font-weight: 400; }
+  th { height: 36px; background: #fff; }
+  tr.needs td { background: var(--needs); }
+  tr.account-unsaved td { box-shadow: inset 3px 0 0 var(--primary); }
+  .status-needs { color: var(--danger); }
+  .status-proposed { color: var(--muted); }
+  .status-unsaved { color: var(--primary); }
+  .status-confirmed { color: var(--ok); }
+  .note { display: block; color: var(--muted); font-size: 14px; }
+  .cell-error { display: block; color: #CC2929; margin-top: 4px; font-size: 14px; }
+  .combo-input { width: 210px; }
+  .dim-input { width: 150px; }
   .mark {
     width: 20px; height: 20px; border-radius: 4px; color: #fff; display: inline-flex;
-    align-items: center; justify-content: center; font-size: 14px; margin-right: 8px;
+    align-items: center; justify-content: center; font-size: 14px; margin-right: 6px;
   }
   .integ { display: inline-flex; align-items: center; white-space: nowrap; }
+  .pager { display: flex; justify-content: flex-end; align-items: center; gap: 12px; min-height: 40px; padding: 6px 10px; font-size: 14px; }
   #combo-pop {
-    position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border);
-    border-radius: 4px; box-shadow: 0 4px 16px rgba(26,27,36,.12);
-    max-height: 280px; overflow: auto; padding: 4px 0;
+    position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(26,27,36,.12); max-height: 240px; overflow: auto; padding: 4px 0;
   }
   #combo-pop[hidden] { display: none; }
   #combo-pop [role="option"] { padding: 8px 12px; font-size: 14px; cursor: pointer; }
@@ -208,34 +135,20 @@
   .empty-copy { padding: 12px; }
   .empty-copy strong, .empty-copy p { font-size: 14px; display: block; }
   .empty-copy p { color: var(--muted); margin-top: 4px; }
-  .modal-back {
-    position: fixed; inset: 0; background: rgba(26,27,36,.45); z-index: 50;
-    display: flex; align-items: center; justify-content: center; padding: 24px;
-  }
-  .modal {
-    background: #fff; width: 720px; max-width: 100%; max-height: calc(100vh - 48px);
-    border-radius: 4px; display: flex; flex-direction: column;
-  }
-  .modal h2 { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 20px; line-height: 28px; font-weight: 400; }
-  .modal-body { padding: 16px 24px; overflow: auto; }
-  .modal-body p { margin-bottom: 8px; }
-  .warn {
-    background: #FFF1DD; border: 1px solid #E7C8A0; border-radius: 4px; padding: 8px 12px; margin: 8px 0;
-  }
-  .preview, .skipped { list-style: none; margin: 0 0 12px; padding: 0; max-height: 220px; overflow: auto; border: 1px solid var(--border); }
+  .modal-back { position: fixed; inset: 0; background: rgba(26,27,36,.45); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal { background: #fff; width: 640px; max-width: 100%; max-height: calc(100vh - 48px); border-radius: 4px; display: flex; flex-direction: column; }
+  .modal h2 { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .modal-body { padding: 16px 20px; overflow: auto; }
+  .modal-body p { margin-bottom: 8px; font-size: 14px; }
+  .warn { background: #FFF1DD; border: 1px solid #E7C8A0; border-radius: 4px; padding: 8px 12px; margin: 8px 0; font-size: 14px; }
+  .preview, .skipped { list-style: none; margin: 0 0 12px; padding: 0; max-height: 180px; overflow: auto; border: 1px solid var(--border); }
   .preview li, .skipped li { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border); }
-  .modes { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .sim { max-width: 640px; }
+  .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); }
+  .field { display: flex; flex-direction: column; gap: 4px; color: var(--muted); margin-bottom: 8px; }
   .sim h1 { margin-bottom: 8px; }
   .sim p { margin-bottom: 16px; }
-  .toast {
-    position: fixed; right: 24px; bottom: 24px; z-index: 60; background: #1F8940; color: #fff;
-    padding: 14px 16px; border-radius: 4px; font-size: 14px; display: none;
-  }
+  .toast { position: fixed; right: 16px; bottom: 16px; z-index: 60; background: #1F8940; color: #fff; padding: 12px 16px; border-radius: 4px; font-size: 14px; display: none; }
   .toast.on { display: block; }
-  .banner { background: #F2F6FC; border: 1px solid #C9D8F5; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; }
-  .banner p { margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -243,10 +156,9 @@
     <strong>Summary mapping review</strong>
     <span class="sep" aria-hidden="true"></span>
     <div role="group" aria-label="Variant">
-      <button type="button" class="variant" aria-pressed="true">Review workspace</button>
+      <button type="button" class="variant" aria-pressed="true">Single table</button>
     </div>
   </div>
-
   <div class="shell">
     <nav class="sidebar" aria-label="Main">
       <div class="org"><span class="avatar">DS</span><span>DS_test_2_dasha</span></div>
@@ -265,31 +177,23 @@
       <header class="topbar">
         <span class="balance">Balance : 10000</span>
         <button type="button" class="top-link">How it works?</button>
-        <button type="button" class="icon-btn" aria-label="Notifications">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
-        </button>
-        <button type="button" class="icon-btn" aria-label="Help">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7V14"/><path d="M12 17h.01"/></svg>
-        </button>
-        <button type="button" class="icon-btn" aria-label="Account menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M5 19c1.5-3 4-4.5 7-4.5S17.5 16 19 19"/></svg>
-        </button>
+        <button type="button" class="icon-btn" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></button>
+        <button type="button" class="icon-btn" aria-label="Help"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7V14"/><path d="M12 17h.01"/></svg></button>
+        <button type="button" class="icon-btn" aria-label="Account menu"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M5 19c1.5-3 4-4.5 7-4.5S17.5 16 19 19"/></svg></button>
       </header>
       <div class="content" id="content"></div>
     </div>
   </div>
   <div id="combo-pop" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
 (function () {
-  var STORAGE = 'synder-summary-mapping-review-v1';
-  var PER = 25;
+  var STORAGE = 'synder-summary-mapping-review-v2';
+  var PER = 10;
   var LOCATIONS = ['Berlin', 'Stripe', 'Test'];
   var BANK_REASON = 'Bank accounts are entered by hand. Synder does not suggest an account for this row.';
   var EMPTY_REASON = 'No compatible account was proposed for this group.';
   var PLACEHOLDER = 'Search or start typing...';
-
   var INTEGRATIONS = [
     { id: 'stripe-1', provider: 'stripe', name: 'Test account_1 (Stripe)', mark: 'S', color: '#635bff' },
     { id: 'paypal-1', provider: 'paypal', name: 'Example Checkout (PayPal)', mark: 'P', color: '#003087' },
@@ -331,42 +235,40 @@
     { id: 'checking', name: 'Example checking', type: 'Bank' },
     { id: 'savings', name: 'Example savings', type: 'Bank' }
   ];
-
-  /* First seven stay suggested so page 1 of the default sort includes Sales and Fees. */
   var GROUPS = [
-    g('transfers', 'Transfers to balance', 'Other Current Asset', 'Move payouts into the clearing balance', ['Other Current Asset'], 'clearing'),
-    g('chargebacks', 'Chargebacks', 'Expense', 'Record chargebacks', ['Expense'], 'expenses'),
-    g('refunds', 'Refunds', 'Income', 'Record refunds', ['Income'], 'sales'),
-    g('sales', 'Sales', 'Income', 'Record sales', ['Income'], 'sales'),
-    g('clearing', 'Clearing', 'Other Current Asset', 'Hold processor clearing', ['Other Current Asset'], 'clearing'),
-    g('expenses', 'Expenses', 'Expense', 'Record operating expenses', ['Expense'], 'expenses'),
-    g('fees', 'Fees', 'Expense', 'Record processor fees', ['Expense'], 'fees'),
-    g('invoices', 'Invoices', 'Accounts Receivable', 'Record invoices', ['Accounts Receivable'], 'ar'),
-    g('tax', 'Sales tax payable', 'Other Current Liability', 'Record sales tax collected', ['Other Current Liability'], 'sales-tax'),
-    g('shipping-income', 'Shipping income', 'Income', 'Record shipping charged to customers', ['Income'], 'shipping-income'),
-    g('discounts', 'Discounts', 'Income', 'Record discounts', ['Income'], 'discounts'),
-    g('inventory', 'Inventory assets', 'Other Current Asset', 'Record inventory assets', ['Other Current Asset'], 'inventory'),
-    g('cogs', 'Cost of Goods sold', 'Cost of Goods Sold', 'Record cost of goods sold', ['Cost of Goods Sold'], 'cogs'),
-    g('gift', 'Gift card liability', 'Other Current Liability', 'Record gift card liability', ['Other Current Liability'], 'gift-card'),
-    g('customer', 'Customer Balance', 'Other Current Liability', 'Record customer balances', ['Other Current Liability'], 'customer-dep'),
-    g('bad', 'Bad Debts', 'Expense', 'Record bad debts', ['Expense'], 'bad-debt'),
-    g('deferred', 'Deferred Revenue', 'Other Current Liability', 'Record deferred revenue', ['Other Current Liability'], 'deferred'),
-    g('shipping-fees', 'Shipping fees', 'Expense', 'Record shipping fees', ['Expense'], 'expenses'),
-    g('unapplied', 'Unapplied cash payment income', 'Income', 'Record unapplied cash payments', ['Income'], 'unapplied'),
-    g('tips', 'Tips', 'Income', 'Record tips', ['Income'], 'tips'),
-    g('exchange', 'Exchange adjustments', 'Other Expense', 'Record currency differences', ['Other Expense'], 'fx'),
-    g('rounding', 'Rounding differences', 'Other Expense', 'Record rounding differences', ['Other Expense'], 'fx'),
-    g('advertising', 'Advertising', 'Expense', 'Record advertising', ['Expense'], 'expenses'),
-    g('commissions', 'Commissions', 'Expense', 'Record commissions', ['Expense'], 'fees'),
-    g('wholesale', 'Wholesale sales', 'Income', 'Record wholesale sales', ['Income'], 'sales'),
-    g('giftwrap', 'Gift wrap', 'Income', 'Record gift wrap', ['Income'], 'gift-wrap'),
-    g('subscriptions', 'Subscriptions', 'Income', 'Record subscriptions', ['Income'], 'subscriptions'),
-    g('packaging', 'Packaging', 'Expense', 'Record packaging', ['Expense'], 'expenses'),
-    g('withheld', 'Tax withheld by marketplace', 'Other Current Liability', 'Record tax withheld by the marketplace', ['Other Current Liability'], '', EMPTY_REASON),
-    g('reserves', 'Balance Reserves', 'Other Current Asset', 'Record balance reserves', ['Other Current Asset'], '', EMPTY_REASON),
-    g('stored', 'Stored Balances', 'Other Current Liability', 'Record stored balances', ['Other Current Liability'], '', EMPTY_REASON),
-    g('duties', 'Duties', 'Other Current Liability', 'Record duties', ['Other Current Liability'], '', EMPTY_REASON),
-    g('reserve-release', 'Reserve release', 'Other Current Asset', 'Record reserve releases', ['Other Current Asset'], '', EMPTY_REASON)
+    g('transfers', 'Transfers to balance', 'Other Current Asset', ['Other Current Asset'], 'clearing'),
+    g('chargebacks', 'Chargebacks', 'Expense', ['Expense'], 'expenses'),
+    g('refunds', 'Refunds', 'Income', ['Income'], 'sales'),
+    g('sales', 'Sales', 'Income', ['Income'], 'sales'),
+    g('clearing', 'Clearing', 'Other Current Asset', ['Other Current Asset'], 'clearing'),
+    g('expenses', 'Expenses', 'Expense', ['Expense'], 'expenses'),
+    g('fees', 'Fees', 'Expense', ['Expense'], 'fees'),
+    g('invoices', 'Invoices', 'Accounts Receivable', ['Accounts Receivable'], 'ar'),
+    g('tax', 'Sales tax payable', 'Other Current Liability', ['Other Current Liability'], 'sales-tax'),
+    g('shipping-income', 'Shipping income', 'Income', ['Income'], 'shipping-income'),
+    g('discounts', 'Discounts', 'Income', ['Income'], 'discounts'),
+    g('inventory', 'Inventory assets', 'Other Current Asset', ['Other Current Asset'], 'inventory'),
+    g('cogs', 'Cost of Goods sold', 'Cost of Goods Sold', ['Cost of Goods Sold'], 'cogs'),
+    g('gift', 'Gift card liability', 'Other Current Liability', ['Other Current Liability'], 'gift-card'),
+    g('customer', 'Customer Balance', 'Other Current Liability', ['Other Current Liability'], 'customer-dep'),
+    g('bad', 'Bad Debts', 'Expense', ['Expense'], 'bad-debt'),
+    g('deferred', 'Deferred Revenue', 'Other Current Liability', ['Other Current Liability'], 'deferred'),
+    g('shipping-fees', 'Shipping fees', 'Expense', ['Expense'], 'expenses'),
+    g('unapplied', 'Unapplied cash payment income', 'Income', ['Income'], 'unapplied'),
+    g('tips', 'Tips', 'Income', ['Income'], 'tips'),
+    g('exchange', 'Exchange adjustments', 'Other Expense', ['Other Expense'], 'fx'),
+    g('rounding', 'Rounding differences', 'Other Expense', ['Other Expense'], 'fx'),
+    g('advertising', 'Advertising', 'Expense', ['Expense'], 'expenses'),
+    g('commissions', 'Commissions', 'Expense', ['Expense'], 'fees'),
+    g('wholesale', 'Wholesale sales', 'Income', ['Income'], 'sales'),
+    g('giftwrap', 'Gift wrap', 'Income', ['Income'], 'gift-wrap'),
+    g('subscriptions', 'Subscriptions', 'Income', ['Income'], 'subscriptions'),
+    g('packaging', 'Packaging', 'Expense', ['Expense'], 'expenses'),
+    g('withheld', 'Tax withheld by marketplace', 'Other Current Liability', ['Other Current Liability'], '', EMPTY_REASON),
+    g('reserves', 'Balance Reserves', 'Other Current Asset', ['Other Current Asset'], '', EMPTY_REASON),
+    g('stored', 'Stored Balances', 'Other Current Liability', ['Other Current Liability'], '', EMPTY_REASON),
+    g('duties', 'Duties', 'Other Current Liability', ['Other Current Liability'], '', EMPTY_REASON),
+    g('reserve-release', 'Reserve release', 'Other Current Asset', ['Other Current Asset'], '', EMPTY_REASON)
   ];
   var COMPANIONS = [
     { parent: 'sales', key: 'sales-ex1', name: 'Morning blend' },
@@ -378,8 +280,8 @@
     { parent: 'clearing', key: 'clearing-ex1', name: 'Payout in transit' }
   ];
 
-  function g(key, name, subtype, purpose, types, suggest, reason) {
-    return { key: key, name: name, subtype: subtype, purpose: purpose, types: types, suggest: suggest || '', reason: reason || '' };
+  function g(key, name, subtype, types, suggest, reason) {
+    return { key: key, name: name, subtype: subtype, types: types, suggest: suggest || '', reason: reason || '' };
   }
   function accountById(id) { return ACCOUNTS.filter(function (a) { return a.id === id; })[0] || null; }
   function accountName(id) { var a = accountById(id); return a ? a.name : ''; }
@@ -393,35 +295,23 @@
     if (provider === 'paypal') return 'PayPal transfers';
     return 'Shopify payouts';
   }
-  function batchKey(purpose, suggestion, integrationId) {
-    if (!suggestion) return '';
-    return purpose + '||' + suggestion + '||' + integrationId;
-  }
   function firstCompatibleName(types, suggestion) {
     if (suggestion && accountById(suggestion) && types.indexOf(accountById(suggestion).type) >= 0) return accountName(suggestion);
     var found = ACCOUNTS.filter(function (a) { return types.indexOf(a.type) >= 0; })[0];
     return found ? found.name : '';
   }
+  function isValid(row, accountId) {
+    if (!accountId) return false;
+    var account = accountById(accountId);
+    return !!(account && row.types.indexOf(account.type) >= 0);
+  }
   function makeRow(spec) {
-    var suggestion = spec.manual ? '' : spec.suggestion;
+    var suggestion = spec.manual ? '' : (spec.suggestion || '');
     return {
-      id: spec.id,
-      group: spec.group,
-      subtype: spec.subtype,
-      gateway: 'Online Sales',
-      integrationId: spec.integrationId,
-      integrationName: spec.integrationName,
-      integIndex: spec.integIndex,
-      mark: spec.mark,
-      color: spec.color,
-      purpose: spec.purpose,
-      types: spec.types,
-      suggestion: suggestion,
-      manual: !!spec.manual,
-      reason: spec.reason || '',
-      batchKey: spec.manual ? '' : batchKey(spec.purpose, suggestion, spec.integrationId),
-      order: spec.order,
-      okAccountName: firstCompatibleName(spec.types, suggestion),
+      id: spec.id, group: spec.group, subtype: spec.subtype, gateway: 'Online Sales',
+      integrationId: spec.integrationId, integrationName: spec.integrationName, integIndex: spec.integIndex,
+      mark: spec.mark, color: spec.color, types: spec.types, suggestion: suggestion, manual: !!spec.manual,
+      reason: spec.reason || '', order: spec.order, okAccountName: firstCompatibleName(spec.types, suggestion),
       saved: { account: suggestion, location: '', className: '', confirmed: false },
       draft: { account: suggestion, location: '', className: '' }
     };
@@ -431,56 +321,22 @@
     INTEGRATIONS.forEach(function (integ, ii) {
       GROUPS.forEach(function (group, gi) {
         rows.push(makeRow({
-          id: integ.id + ':' + group.key,
-          group: group.name,
-          subtype: group.subtype,
-          purpose: group.purpose,
-          types: group.types,
-          suggestToken: group.suggest,
-          suggestion: resolveSuggestion(group.suggest, integ.provider),
-          reason: group.reason,
-          manual: false,
-          integrationId: integ.id,
-          integrationName: integ.name,
-          integIndex: ii,
-          mark: integ.mark,
-          color: integ.color,
-          order: gi + 1
+          id: integ.id + ':' + group.key, group: group.name, subtype: group.subtype, types: group.types,
+          suggestion: resolveSuggestion(group.suggest, integ.provider), reason: group.reason, manual: false,
+          integrationId: integ.id, integrationName: integ.name, integIndex: ii, mark: integ.mark, color: integ.color, order: gi + 1
         }));
       });
       rows.push(makeRow({
-        id: integ.id + ':bank',
-        group: bankName(integ.provider),
-        subtype: 'Bank',
-        purpose: 'Record bank deposits',
-        types: ['Bank'],
-        suggestion: '',
-        reason: BANK_REASON,
-        manual: true,
-        integrationId: integ.id,
-        integrationName: integ.name,
-        integIndex: ii,
-        mark: integ.mark,
-        color: integ.color,
-        order: 800
+        id: integ.id + ':bank', group: bankName(integ.provider), subtype: 'Bank', types: ['Bank'], suggestion: '',
+        reason: BANK_REASON, manual: true, integrationId: integ.id, integrationName: integ.name, integIndex: ii,
+        mark: integ.mark, color: integ.color, order: 800
       }));
       COMPANIONS.forEach(function (comp, ci) {
         var parent = GROUPS.filter(function (group) { return group.key === comp.parent; })[0];
         rows.push(makeRow({
-          id: integ.id + ':' + comp.key,
-          group: comp.name,
-          subtype: parent.subtype,
-          purpose: parent.purpose,
-          types: parent.types,
-          suggestion: resolveSuggestion(parent.suggest, integ.provider),
-          reason: '',
-          manual: false,
-          integrationId: integ.id,
-          integrationName: integ.name,
-          integIndex: ii,
-          mark: integ.mark,
-          color: integ.color,
-          order: 5000 + ci
+          id: integ.id + ':' + comp.key, group: comp.name, subtype: parent.subtype, types: parent.types,
+          suggestion: resolveSuggestion(parent.suggest, integ.provider), reason: '', manual: false,
+          integrationId: integ.id, integrationName: integ.name, integIndex: ii, mark: integ.mark, color: integ.color, order: 5000 + ci
         }));
       });
     });
@@ -489,111 +345,48 @@
 
   var ui = { combo: null };
   var S = null;
-
   function fresh() {
-    return {
-      rows: buildRows(),
-      integration: 'all',
-      status: 'all',
-      group: 'all',
-      gateway: 'all',
-      q: '',
-      page: 1,
-      selected: {},
-      scope: 'results',
-      inspect: null,
-      openIntegration: '',
-      view: 'mappings',
-      dialog: null
-    };
+    return { rows: buildRows(), integration: 'all', status: 'all', group: 'all', q: '', missingOnly: false, page: 1, selected: {}, view: 'mappings', dialog: null };
   }
-  function isPending(r) {
-    return r.draft.account !== r.saved.account || r.draft.location !== r.saved.location || r.draft.className !== r.saved.className;
+  function accountDirty(r) { return r.draft.account !== r.saved.account; }
+  function dimsDirty(r) { return r.draft.location !== r.saved.location || r.draft.className !== r.saved.className; }
+  function isPending(r) { return accountDirty(r) || dimsDirty(r); }
+  function accountStatus(r) {
+    if (!r.draft.account || !isValid(r, r.draft.account)) return { key: 'needs', label: 'Needs account' };
+    if (accountDirty(r)) return { key: 'unsaved', label: 'Unsaved' };
+    if (r.saved.confirmed) return { key: 'confirmed', label: 'Confirmed' };
+    return { key: 'proposed', label: 'Proposed' };
   }
-  function isValid(row, accountId) {
-    if (!accountId) return false;
-    var account = accountById(accountId);
-    if (!account) return false;
-    return row.types.indexOf(account.type) >= 0;
-  }
-  function classify(r) {
-    var pending = isPending(r);
-    var valid = isValid(r, r.draft.account);
-    var state = !valid ? 'needs' : (!r.saved.confirmed ? 'suggested' : 'confirmed');
-    return { pending: pending, valid: valid, state: state };
-  }
-  function stateLabel(state) {
-    if (state === 'needs') return 'Needs account';
-    if (state === 'suggested') return 'Suggested — needs confirmation';
-    return 'Confirmed';
-  }
-  function article(word) { return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
-  function invalidMessage(row) {
-    if (!row.draft.account || isValid(row, row.draft.account)) return '';
-    var account = accountById(row.draft.account);
-    var need = row.types[0];
-    return account.name + ' is ' + article(account.type) + ' ' + account.type + ' account. ' + row.group + ' needs ' + article(need) + ' ' + row.types.join(' or ') + ' account.';
-  }
-  function displayReason(row) {
-    var invalid = invalidMessage(row);
-    if (invalid) return invalid;
-    if (!row.draft.account) return row.reason || EMPTY_REASON;
-    return '';
-  }
-  function counts() {
-    var c = { needs: 0, suggested: 0, confirmed: 0, pending: 0 };
-    S.rows.forEach(function (r) {
-      var info = classify(r);
-      c[info.state] += 1;
-      if (info.pending) c.pending += 1;
+  function missingRows() { return S.rows.filter(function (r) { return accountStatus(r).key === 'needs'; }); }
+  function canContinue() {
+    return S.rows.every(function (r) {
+      return r.saved.confirmed && isValid(r, r.saved.account) && r.draft.account === r.saved.account;
     });
-    return c;
-  }
-  function blockReason() {
-    var c = counts();
-    if (c.needs === 0 && c.suggested === 0 && c.pending === 0) return '';
-    if (c.confirmed === 0) return 'zero';
-    if (c.needs > 0) return 'missing';
-    if (c.suggested > 0) return 'unconfirmed';
-    if (c.pending > 0) return 'pending';
-    return 'missing';
-  }
-  function reasonText(code, c) {
-    if (code === 'zero') return 'Continue to Summaries is unavailable. No accounts are confirmed yet.';
-    if (code === 'missing') return 'Continue to Summaries is unavailable. ' + c.needs + (c.needs === 1 ? ' group still needs' : ' groups still need') + ' an account.';
-    if (code === 'unconfirmed') return 'Continue to Summaries is unavailable. ' + c.suggested + (c.suggested === 1 ? ' account still needs' : ' accounts still need') + ' confirmation.';
-    if (code === 'pending') return 'Continue to Summaries is unavailable while ' + c.pending + (c.pending === 1 ? ' edit is' : ' edits are') + ' pending. Save or discard them first.';
-    return 'Every required account is confirmed. Empty class and location do not block summaries.';
   }
   function rowById(id) { return S.rows.filter(function (r) { return r.id === id; })[0]; }
-  function mapped(r) { var info = classify(r); return info.state === 'confirmed' && !info.pending; }
-  function resultsRows() {
+  function isMapped(r) { return accountStatus(r).key === 'confirmed'; }
+  function filteredRows() {
     var q = S.q.trim().toLowerCase();
     return S.rows.filter(function (r) {
       if (S.integration !== 'all' && r.integrationId !== S.integration) return false;
-      if (S.status === 'mapped' && !mapped(r)) return false;
-      if (S.status === 'not' && mapped(r)) return false;
+      if (S.missingOnly && accountStatus(r).key !== 'needs') return false;
+      if (S.status === 'mapped' && !isMapped(r)) return false;
+      if (S.status === 'not' && isMapped(r)) return false;
       if (S.group !== 'all' && r.group !== S.group) return false;
-      if (S.gateway !== 'all' && r.gateway !== S.gateway) return false;
       if (q) {
-        var blob = (r.group + ' ' + r.subtype + ' ' + r.integrationName + ' ' + r.purpose + ' ' + accountName(r.draft.account)).toLowerCase();
+        var blob = (r.group + ' ' + r.subtype + ' ' + r.integrationName + ' ' + accountName(r.draft.account)).toLowerCase();
         if (blob.indexOf(q) < 0) return false;
       }
       return true;
     });
   }
-  function seedMembers(key) { return S.rows.filter(function (r) { return r.batchKey === key; }); }
   function sortRows(list) {
     return list.slice().sort(function (a, b) {
-      var ra = classify(a).state === 'needs' ? 0 : classify(a).state === 'suggested' ? 1 : 2;
-      var rb = classify(b).state === 'needs' ? 0 : classify(b).state === 'suggested' ? 1 : 2;
-      return ra - rb || a.integIndex - b.integIndex || a.order - b.order || a.id.localeCompare(b.id);
+      var order = { needs: 0, unsaved: 1, proposed: 2, confirmed: 3 };
+      return order[accountStatus(a).key] - order[accountStatus(b).key] || a.integIndex - b.integIndex || a.order - b.order || a.id.localeCompare(b.id);
     });
   }
-  function tableRows() {
-    if (S.inspect) return sortRows(seedMembers(S.inspect));
-    return sortRows(resultsRows());
-  }
+  function tableRows() { return sortRows(filteredRows()); }
   function pageCount(n) { return Math.max(1, Math.ceil(n / PER)); }
   function currentPage() {
     var list = tableRows();
@@ -602,124 +395,115 @@
     if (S.page < 1) S.page = 1;
     return list.slice((S.page - 1) * PER, S.page * PER);
   }
-  function selectedOnPage() {
-    return currentPage().filter(function (r) { return S.selected[r.id]; });
+  function selectedIds() { return Object.keys(S.selected); }
+  function selectedRows() { return S.rows.filter(function (r) { return S.selected[r.id]; }); }
+  function selectionStats() {
+    var pageIds = {};
+    currentPage().forEach(function (r) { pageIds[r.id] = true; });
+    var visible = selectedIds().filter(function (id) { return pageIds[id]; }).length;
+    return { total: selectedIds().length, visible: visible, hidden: selectedIds().length - visible };
   }
-  function selectedCount() { return Object.keys(S.selected).length; }
-  function exactBatchMembers(key) {
-    return S.rows.filter(function (r) {
-      return r.batchKey === key && !r.manual && r.draft.account === r.suggestion && !isPending(r) && !r.saved.confirmed;
-    });
+  function article(word) { return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
+  function invalidMessage(row) {
+    if (!row.draft.account || isValid(row, row.draft.account)) return '';
+    var account = accountById(row.draft.account);
+    var need = row.types[0];
+    return account.name + ' is ' + article(account.type) + ' ' + account.type + ' account. ' + row.group + ' needs ' + article(need) + ' ' + row.types.join(' or ') + ' account.';
   }
-  function isExactMember(r) {
-    return !!(S.inspect && r.batchKey === S.inspect && !r.manual && r.draft.account === r.suggestion && !isPending(r) && !r.saved.confirmed);
+  function blankReason(row) {
+    var invalid = invalidMessage(row);
+    if (invalid) return invalid;
+    if (!row.draft.account) return row.reason || EMPTY_REASON;
+    return '';
   }
-  function scopeMeta() {
-    if (S.inspect) {
-      var batch = batchInfo(S.inspect);
-      return { scope: 'batch', n: exactBatchMembers(S.inspect).length, noun: 'in this batch', batch: batch };
-    }
-    if (S.scope === 'page') return { scope: 'page', n: selectedOnPage().length, noun: 'selected on this page' };
-    return { scope: 'results', n: resultsRows().length, noun: 'results' };
-  }
-  function labelFor(mode, meta) {
-    return (mode === 'set' ? 'Save' : 'Accept') + ' ' + meta.n + ' ' + meta.noun;
-  }
-  function scopeTargets(scope) {
-    if (scope === 'batch') return exactBatchMembers(S.inspect);
-    if (scope === 'page') return selectedOnPage();
-    return resultsRows();
-  }
-  function previewFor(scope, mode, accountId) {
+  function bulkPlan(accountId) {
     var changes = [];
     var skips = [];
-    scopeTargets(scope).forEach(function (r) {
-      var next = mode === 'set' ? accountId : r.draft.account;
-      if (!next) { skips.push({ id: r.id, reason: r.manual ? BANK_REASON : 'Needs an account' }); return; }
-      if (!isValid(r, next)) {
-        skips.push({ id: r.id, reason: r.manual ? 'Bank rows only accept a Bank account. They are not auto-confirmed.' : invalidMessage({ draft: { account: next }, group: r.group, types: r.types }) });
+    selectedRows().forEach(function (r) {
+      var label = r.group + ' — ' + r.integrationName;
+      if (!accountId || !isValid(r, accountId)) {
+        skips.push({ id: r.id, label: label, reason: !accountId ? 'Choose an account' : (r.manual ? 'Bank rows only accept a Bank account.' : invalidMessage({ draft: { account: accountId }, group: r.group, types: r.types })) });
         return;
       }
-      var same = r.saved.confirmed && !isPending(r) && r.saved.account === next;
-      if (same) return;
-      changes.push({ id: r.id, account: next, overwrite: !!r.saved.confirmed, label: r.group + ' — ' + r.integrationName });
+      if (r.draft.account === accountId) { skips.push({ id: r.id, label: label, reason: 'Already this account' }); return; }
+      changes.push({ id: r.id, label: label, overwrite: !!(r.saved.confirmed && r.saved.account !== accountId) });
     });
     return { changes: changes, skips: skips };
   }
-  function batchInfo(key) {
-    var parts = key.split('||');
-    var sample = seedMembers(key)[0];
-    return {
-      key: key,
-      purpose: parts[0],
-      accountId: parts[1],
-      accountName: accountName(parts[1]),
-      integrationId: parts[2],
-      integrationName: sample ? sample.integrationName : parts[2],
-      total: seedMembers(key).length,
-      exact: exactBatchMembers(key).length
-    };
-  }
-  function batches() {
-    var map = {};
+  function saveMappings() {
     S.rows.forEach(function (r) {
-      if (!r.batchKey || r.manual) return;
-      if (r.saved.confirmed && !seedMembers(r.batchKey).some(function (row) { return !row.saved.confirmed; })) return;
-      map[r.batchKey] = true;
+      var valid = isValid(r, r.draft.account);
+      var dirty = accountDirty(r) || dimsDirty(r);
+      if (valid) {
+        if (r.saved.confirmed && !dirty) return;
+        r.saved.account = r.draft.account;
+        r.saved.location = r.draft.location;
+        r.saved.className = r.draft.className;
+        r.saved.confirmed = true;
+        return;
+      }
+      if (dirty) {
+        r.saved.account = r.draft.account;
+        r.saved.location = r.draft.location;
+        r.saved.className = r.draft.className;
+        r.saved.confirmed = false;
+      }
     });
-    return Object.keys(map).map(batchInfo).filter(function (b) {
-      return seedMembers(b.key).some(function (r) { return !r.saved.confirmed; });
-    }).sort(function (a, b) {
-      return a.integrationName.localeCompare(b.integrationName) || a.purpose.localeCompare(b.purpose);
-    });
+    persist();
   }
-
+  function stageBulk(accountId) {
+    var plan = bulkPlan(accountId);
+    plan.changes.forEach(function (ch) { rowById(ch.id).draft.account = accountId; });
+    persist();
+    return plan.changes.length;
+  }
+  function revertRow(id) {
+    var row = rowById(id);
+    row.draft.account = row.saved.account;
+    row.draft.location = row.saved.location;
+    row.draft.className = row.saved.className;
+    persist();
+  }
+  function discardAll() {
+    S.rows.forEach(function (r) {
+      r.draft.account = r.saved.account;
+      r.draft.location = r.saved.location;
+      r.draft.className = r.saved.className;
+    });
+    persist();
+  }
   function persist() {
     var rows = {};
     S.rows.forEach(function (r) {
       rows[r.id] = {
-        account: r.saved.account,
-        location: r.saved.location,
-        className: r.saved.className,
-        confirmed: r.saved.confirmed,
-        draftAccount: r.draft.account,
-        draftLocation: r.draft.location,
-        draftClass: r.draft.className
+        account: r.saved.account, location: r.saved.location, className: r.saved.className, confirmed: r.saved.confirmed,
+        draftAccount: r.draft.account, draftLocation: r.draft.location, draftClass: r.draft.className
       };
     });
-    localStorage.setItem(STORAGE, JSON.stringify({ v: 1, rows: rows }));
+    localStorage.setItem(STORAGE, JSON.stringify({ v: 2, rows: rows }));
   }
-  function sanitizeAccount(id, row) {
-    if (!id) return '';
-    return accountById(id) ? id : '';
-  }
-  function sanitizeLocation(value) {
-    return LOCATIONS.indexOf(value) >= 0 ? value : '';
-  }
+  function sanitizeAccount(id) { return id && accountById(id) ? id : ''; }
+  function sanitizeLocation(value) { return LOCATIONS.indexOf(value) >= 0 ? value : ''; }
   function load() {
     S = fresh();
     try {
       var raw = JSON.parse(localStorage.getItem(STORAGE) || 'null');
-      if (!raw || raw.v !== 1 || !raw.rows) return;
+      if (!raw || raw.v !== 2 || !raw.rows) return;
       S.rows.forEach(function (r) {
         var saved = raw.rows[r.id];
         if (!saved) return;
-        r.saved.account = sanitizeAccount(saved.account || '', r);
+        r.saved.account = sanitizeAccount(saved.account || '');
         r.saved.location = sanitizeLocation(saved.location || '');
         r.saved.className = '';
         r.saved.confirmed = !!saved.confirmed && isValid(r, r.saved.account);
-        r.draft.account = sanitizeAccount(saved.draftAccount != null ? saved.draftAccount : r.saved.account, r);
+        r.draft.account = sanitizeAccount(saved.draftAccount != null ? saved.draftAccount : r.saved.account);
         r.draft.location = sanitizeLocation(saved.draftLocation != null ? saved.draftLocation : r.saved.location);
         r.draft.className = '';
-        if (r.manual && r.saved.confirmed && !isValid(r, r.saved.account)) r.saved.confirmed = false;
       });
-    } catch (err) { /* keep the seed */ }
+    } catch (err) {}
   }
-
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
   function toast(message) {
     var el = document.getElementById('toast');
@@ -728,7 +512,6 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(function () { el.classList.remove('on'); }, 4000);
   }
-
   function optionsFor(row, field, query) {
     var q = (query || '').trim().toLowerCase();
     if (field === 'class') return [];
@@ -737,8 +520,8 @@
         .filter(function (o) { return !q || o.name.toLowerCase().indexOf(q) >= 0; });
     }
     var accounts = ACCOUNTS.filter(function (a) { return !q || a.name.toLowerCase().indexOf(q) >= 0; })
-      .map(function (a) { return { value: a.id, name: a.name, type: a.type }; });
-    var clear = { value: '', name: 'Clear account', type: '' };
+      .map(function (a) { return { value: a.id, name: a.name }; });
+    var clear = { value: '', name: 'Clear account' };
     if (!q || clear.name.toLowerCase().indexOf(q) >= 0) return [clear].concat(accounts);
     return accounts;
   }
@@ -746,157 +529,84 @@
   function render() {
     var active = document.activeElement;
     var restore = null;
-    if (active && active.dataset && active.dataset.comboInput && ui.combo) {
-      restore = { combo: active.dataset.comboInput, start: active.selectionStart, end: active.selectionEnd };
-    } else if (active && active.id) {
-      restore = { id: active.id, start: active.selectionStart, end: active.selectionEnd };
-    }
+    if (active && active.dataset && active.dataset.comboInput && ui.combo) restore = { combo: active.dataset.comboInput, start: active.selectionStart, end: active.selectionEnd };
+    else if (active && active.id) restore = { id: active.id, start: active.selectionStart, end: active.selectionEnd };
     document.getElementById('content').innerHTML = S.view === 'summaries' ? summariesHtml() : mappingsHtml();
     document.getElementById('nav-mappings').setAttribute('aria-current', S.view === 'mappings' ? 'page' : 'false');
-    document.getElementById('nav-summaries').setAttribute('aria-current', S.view === 'summaries' ? 'page' : 'false');
     if (restore && restore.combo) {
       var input = document.querySelector('[data-combo-input="' + restore.combo + '"]');
-      if (input) {
-        input.focus();
-        if (typeof restore.start === 'number') { try { input.setSelectionRange(restore.start, restore.end); } catch (err) {} }
-      }
+      if (input) { input.focus(); if (typeof restore.start === 'number') { try { input.setSelectionRange(restore.start, restore.end); } catch (e) {} } }
     } else if (restore && restore.id) {
       var el = document.getElementById(restore.id);
-      if (el) {
-        el.focus();
-        if (typeof restore.start === 'number' && el.setSelectionRange) { try { el.setSelectionRange(restore.start, restore.end); } catch (err2) {} }
-      }
+      if (el) { el.focus(); if (typeof restore.start === 'number' && el.setSelectionRange) { try { el.setSelectionRange(restore.start, restore.end); } catch (e2) {} } }
     }
     paintPop();
-    if (S.dialog) {
+    if (S.dialog && S.dialog.focus) {
+      S.dialog.focus = false;
       var heading = document.getElementById('bulk-title');
-      if (heading && (!restore || restore.id === 'bulk-title')) heading.focus();
+      if (heading) heading.focus();
     }
   }
-
   function summariesHtml() {
-    return '<section class="sim" data-testid="summaries-simulated" data-total-rows="' + S.rows.length + '">' +
-      '<h1>Summaries</h1>' +
-      '<p>This is a simulated Summaries destination. Nothing is sent to your books.</p>' +
-      '<button type="button" class="btn btn-outlined" data-testid="back-to-mappings" id="back-to-mappings">Back to mappings</button>' +
-      '</section>';
+    return '<section class="sim" data-testid="summaries-simulated" data-total-rows="' + S.rows.length + '"><h1>Summaries</h1><p>This is a simulated Summaries destination. Nothing is sent to your books.</p><button type="button" class="btn btn-outlined" id="back-to-mappings">Back to mappings</button></section>';
   }
-
   function mappingsHtml() {
-    var c = counts();
-    var code = blockReason();
-    var meta = scopeMeta();
-    var mode = S.dialog ? S.dialog.mode : 'confirm';
-    var label = labelFor(mode, meta);
+    var missing = missingRows().length;
+    var pending = S.rows.some(isPending);
+    var ready = canContinue();
     var pages = pageCount(tableRows().length);
-    var html = '<div data-total-rows="' + S.rows.length + '">';
-    html += '<div class="page-head"><div><h1>Mappings list</h1><p class="subtitle">Create mappings between transactions and your Chart of Accounts.</p></div>';
-    html += '<div class="head-actions">';
-    html += '<button type="button" class="btn btn-outlined" data-testid="reset-demo" id="reset-demo">Reset demo</button>';
-    html += '<button type="button" class="btn" data-testid="continue" id="continue-btn" data-block-reason="' + esc(code) + '"' + (code ? ' disabled' : '') + ' aria-describedby="continue-reason">Continue to Summaries</button>';
-    html += '</div></div>';
-    html += '<p class="reason' + (code ? '' : ' ready') + '" id="continue-reason" data-testid="continue-reason" tabindex="-1">' + esc(reasonText(code, c)) + '</p>';
-    html += '<p class="counters" aria-label="Mapping progress">';
-    html += '<span>Needs account <strong data-testid="count-needs">' + c.needs + '</strong></span>';
-    html += '<span>Suggested — needs confirmation <strong data-testid="count-suggested">' + c.suggested + '</strong></span>';
-    html += '<span>Confirmed <strong data-testid="count-confirmed">' + c.confirmed + '</strong></span>';
-    html += '<span>Pending edits <strong data-testid="count-pending">' + c.pending + '</strong></span>';
-    html += '</p>';
-    if (c.pending) html += '<p><button type="button" class="btn-text" data-testid="discard" id="discard">Discard pending changes</button></p>';
-
-    html += '<div class="action-row">';
-    html += '<p><span data-testid="selected-total">' + selectedCount() + '</span> selected</p>';
-    if (S.inspect) {
-      var info = meta.batch;
-      html += '<p data-testid="batch-scope">Scope: this batch — ' + esc(info.purpose) + ' — ' + esc(info.accountName) + ' — ' + esc(info.integrationName) + '. <span data-testid="n-batch">' + meta.n + '</span> exact rows.</p>';
-    } else {
-      html += '<div class="scopes" role="radiogroup" aria-label="Save scope">';
-      html += '<label><input type="radio" name="save-scope" value="page"' + (S.scope === 'page' ? ' checked' : '') + '> Selected on this page (<span data-testid="n-page">' + selectedOnPage().length + '</span>)</label>';
-      html += '<label><input type="radio" name="save-scope" value="results"' + (S.scope === 'results' ? ' checked' : '') + '> All results (<span data-testid="n-results">' + resultsRows().length + '</span>)</label>';
-      html += '</div>';
-    }
-    html += '<button type="button" class="btn" data-testid="save-accept" id="save-accept" data-scope="' + meta.scope + '"' + (meta.n === 0 ? ' disabled' : '') + '>' + esc(label) + '</button>';
-    if (!S.inspect) {
-      html += '<button type="button" class="btn btn-outlined" data-testid="select-page" id="select-page">Select all on this page</button>';
-      html += '<button type="button" class="btn btn-outlined" data-testid="select-results" id="select-results">Select all results</button>';
-      html += '<button type="button" class="btn-text" data-testid="clear-selection" id="clear-selection">Clear selection</button>';
-    }
+    var html = '<div data-total-rows="' + S.rows.length + '"><div class="page-head"><h1>Mappings list</h1>';
+    html += '<p class="subtitle">Create mappings between transactions and your Chart of Accounts.</p>';
+    html += '<p class="flow">Review the proposed accounts. Fill any blanks, then save.</p></div>';
+    html += '<div class="toolbar">';
+    html += '<button type="button" class="' + (ready ? 'btn-outlined' : 'btn') + '" id="save-mappings" data-testid="save-mappings">Save mappings</button>';
+    if (pending) html += '<button type="button" class="btn-text" id="discard" data-testid="discard">Discard unsaved changes</button>';
+    html += '<button type="button" class="btn-text" id="reset-demo" data-testid="reset-demo">Reset demo</button>';
+    if (ready) html += '<button type="button" class="btn" id="continue-btn" data-testid="continue">Continue to Summaries</button>';
     html += '</div>';
-
-    html += exceptionsHtml();
-    html += S.inspect ? inspectBannerHtml(meta.batch) : batchesHtml();
-    html += filtersHtml();
+    html += '<p class="save-note" data-testid="save-note">This confirms populated proposed accounts and edits on every page, regardless of the current filter. Blank accounts stay unresolved.</p>';
+    html += filtersHtml(missing);
+    html += '<div class="card">';
+    html += tabsHtml();
+    html += selectionBarHtml();
     html += tableHtml(pages);
+    html += '</div>';
     if (S.dialog) html += dialogHtml();
     html += '</div>';
     return html;
   }
-
-  function exceptionsHtml() {
-    var rows = sortRows(S.rows.filter(function (r) { return classify(r).state === 'needs'; }));
-    if (!rows.length) return '';
-    var html = '<section class="panel" aria-labelledby="ex-heading"><h2 id="ex-heading">Needs an account</h2>';
-    html += '<p class="hint">These groups are listed before suggestions. Each one includes the reason it has no confirmed account.</p><ul class="ex-list">';
-    rows.forEach(function (r) {
-      html += '<li data-exception-id="' + esc(r.id) + '"><span>' + esc(r.group) + '</span><span>' + esc(r.integrationName) + '</span><span class="ex-reason">' + esc(displayReason(r)) + '</span>';
-      html += '<button type="button" class="btn-text" data-focus-row="' + esc(r.id) + '">Edit ' + esc(r.group) + ', ' + esc(r.integrationName) + '</button></li>';
-    });
-    html += '</ul></section>';
-    return html;
-  }
-
-  function batchesHtml() {
-    var list = batches();
-    var html = '<section class="panel" aria-labelledby="batch-heading"><h2 id="batch-heading">Suggested batches</h2>';
-    html += '<p class="hint">A batch is rows that share one purpose, one proposed account, and one integration. Sales, taxes, and bank rows stay apart even when an account name matches. Bank rows are never auto-confirmed.</p>';
-    if (!list.length) {
-      html += '<p>No suggestions are waiting for confirmation.</p></section>';
-      return html;
-    }
-    INTEGRATIONS.forEach(function (integ) {
-      var mine = list.filter(function (b) { return b.integrationId === integ.id; });
-      if (!mine.length) return;
-      var open = S.openIntegration === integ.id;
-      var waiting = mine.reduce(function (sum, b) { return sum + b.exact; }, 0);
-      html += '<button type="button" class="batch-toggle" data-testid="toggle-integration" data-integration="' + integ.id + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
-        (open ? 'Hide' : 'Review') + ' ' + esc(integ.name) + ' — ' + mine.length + ' batches, ' + waiting + ' exact rows</button>';
-      if (!open) return;
-      html += '<div class="batch-list">';
-      mine.forEach(function (b) {
-        html += '<div class="batch"><span>' + esc(b.purpose) + '</span><span>Proposed account ' + esc(b.accountName) + '</span><span>' + b.total + ' rows</span>';
-        html += '<button type="button" class="btn btn-outlined" data-testid="inspect-batch" data-batch-key="' + esc(b.key) + '">Inspect</button></div>';
-      });
-      html += '</div>';
-    });
-    html += '</section>';
-    return html;
-  }
-
-  function inspectBannerHtml(info) {
-    return '<div class="banner" data-testid="inspect-banner"><p><strong>' + esc(info.purpose) + '</strong> · Proposed account ' + esc(info.accountName) + ' · ' + esc(info.integrationName) + '</p>' +
-      '<p>The list below is this batch. Accept includes only rows that still have the proposed account and no individual edits. Change a row to leave it out.</p>' +
-      '<button type="button" class="btn btn-outlined" data-testid="back-batches" id="back-batches">Back to all groups</button></div>';
-  }
-
-  function filtersHtml() {
+  function filtersHtml(missing) {
     var groups = [];
     S.rows.forEach(function (r) { if (groups.indexOf(r.group) < 0) groups.push(r.group); });
     groups.sort();
     var html = '<div class="filters">';
-    html += '<div class="field grow"><label for="search">Search</label><input class="input" id="search" type="search" placeholder="Search group or account" value="' + esc(S.q) + '"' + (S.inspect ? ' disabled' : '') + '></div>';
-    html += '<div class="field"><label for="filter-status">Mapping status</label><select class="select" id="filter-status"' + (S.inspect ? ' disabled' : '') + '>';
-    html += '<option value="all"' + (S.status === 'all' ? ' selected' : '') + '>All</option>';
-    html += '<option value="mapped"' + (S.status === 'mapped' ? ' selected' : '') + '>Mapped</option>';
-    html += '<option value="not"' + (S.status === 'not' ? ' selected' : '') + '>Not mapped</option></select></div>';
-    html += '<div class="field"><label for="filter-group">Groups</label><select class="select" id="filter-group"' + (S.inspect ? ' disabled' : '') + '><option value="all">All</option>';
+    html += '<label>Search <input class="input search" id="search" type="search" placeholder="Search group or account" value="' + esc(S.q) + '"></label>';
+    html += '<label>Mapping status <select class="select" id="filter-status"><option value="all"' + (S.status === 'all' ? ' selected' : '') + '>All</option><option value="mapped"' + (S.status === 'mapped' ? ' selected' : '') + '>Mapped</option><option value="not"' + (S.status === 'not' ? ' selected' : '') + '>Not mapped</option></select></label>';
+    html += '<label>Groups <select class="select" id="filter-group"><option value="all">All</option>';
     groups.forEach(function (name) { html += '<option value="' + esc(name) + '"' + (S.group === name ? ' selected' : '') + '>' + esc(name) + '</option>'; });
-    html += '</select></div>';
-    html += '<div class="field"><label for="filter-gateway">Payment gateway</label><select class="select" id="filter-gateway"' + (S.inspect ? ' disabled' : '') + '><option value="all">All</option><option value="Online Sales"' + (S.gateway === 'Online Sales' ? ' selected' : '') + '>Online Sales</option></select></div>';
-    html += '<button type="button" class="btn btn-outlined" id="reset-filters">Reset filters</button></div>';
+    html += '</select></label>';
+    html += '<button type="button" class="btn-outlined" id="missing-filter" data-testid="missing-filter" aria-pressed="' + (S.missingOnly ? 'true' : 'false') + '"><span data-testid="missing-count">' + missing + '</span> need an account</button>';
+    html += '<button type="button" class="btn-text" id="reset-filters">Reset filters</button></div>';
     return html;
   }
-
-  function comboInput(r, field, label) {
+  function tabsHtml() {
+    var html = '<div class="tabs" role="tablist" aria-label="Integration">';
+    html += '<button type="button" role="tab" data-tab="all" aria-selected="' + (S.integration === 'all' ? 'true' : 'false') + '">All</button>';
+    INTEGRATIONS.forEach(function (integ) {
+      html += '<button type="button" role="tab" data-tab="' + integ.id + '" data-testid="tab-' + integ.id + '" aria-selected="' + (S.integration === integ.id ? 'true' : 'false') + '">' + esc(integ.name) + '</button>';
+    });
+    return html + '</div>';
+  }
+  function selectionBarHtml() {
+    var stats = selectionStats();
+    if (!stats.total) return '';
+    return '<div class="selbar" data-testid="selection-bar"><span><span data-testid="selected-total">' + stats.total + '</span> selected</span>' +
+      '<span><span data-testid="selected-visible">' + stats.visible + '</span> on this page</span>' +
+      '<span><span data-testid="selected-hidden">' + stats.hidden + '</span> hidden</span>' +
+      '<button type="button" class="btn" id="change-account" data-testid="change-account">Change account</button>' +
+      '<button type="button" class="btn-text" id="clear-selection" data-testid="clear-selection">Clear</button></div>';
+  }
+  function comboInput(r, field, label, className) {
     var open = ui.combo && ui.combo.rowId === r.id && ui.combo.field === field;
     var shown = '';
     if (open) shown = ui.combo.query;
@@ -906,86 +616,64 @@
     var invalid = field === 'account' ? invalidMessage(r) : '';
     var errId = 'err-' + field + '-' + r.id.replace(/[^a-z0-9_-]/gi, '');
     if (invalid) described = ' aria-invalid="true" aria-describedby="' + errId + '"';
-    var html = '<input class="input combo-input" data-field="' + field + '" data-row-id="' + esc(r.id) + '" data-combo-input="' + esc(r.id + ':' + field) + '" role="combobox" aria-autocomplete="list" aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="combo-pop" aria-label="' + esc(label) + '" placeholder="' + PLACEHOLDER + '" value="' + esc(shown) + '"' + described + '>';
+    var html = '<input class="input ' + className + '" data-field="' + field + '" data-row-id="' + esc(r.id) + '" data-combo-input="' + esc(r.id + ':' + field) + '" role="combobox" aria-autocomplete="list" aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="combo-pop" aria-label="' + esc(label) + '" placeholder="' + PLACEHOLDER + '" value="' + esc(shown) + '"' + described + '>';
     if (invalid) html += '<span class="cell-error" id="' + errId + '" role="alert">' + esc(invalid) + '</span>';
+    if (field === 'location' && r.draft.location !== r.saved.location) html += '<span class="note">Unsaved location</span>';
     return html;
   }
-
   function tableHtml(pages) {
     var slice = currentPage();
     var ids = slice.map(function (r) { return r.id; });
     var allChecked = ids.length > 0 && ids.every(function (id) { return S.selected[id]; });
-    var html = '<div class="card"><div class="tabs" role="tablist" aria-label="Integration">';
-    html += '<button type="button" role="tab" data-tab="all" aria-selected="' + (S.integration === 'all' ? 'true' : 'false') + '">All</button>';
-    INTEGRATIONS.forEach(function (integ) {
-      html += '<button type="button" role="tab" data-tab="' + integ.id + '" data-testid="tab-' + integ.id + '" aria-selected="' + (S.integration === integ.id ? 'true' : 'false') + '">' + esc(integ.name) + '</button>';
-    });
-    html += '</div><div class="table-wrap"><table aria-label="Mappings"><thead><tr>';
+    var html = '<div class="table-wrap"><table aria-label="Mappings"><thead><tr>';
     html += '<th><input type="checkbox" id="sel-page" aria-label="Select all on page"' + (allChecked ? ' checked' : '') + '></th>';
-    html += '<th>Group</th><th>Status</th><th>Account subtype</th><th>Payment gateway</th><th>Integration</th><th>Location</th><th>Class</th><th>Account</th>';
+    html += '<th>Group</th><th>Account</th><th>Status</th><th>Integration</th><th>Account subtype</th><th>Payment gateway</th><th>Location</th><th>Class</th>';
     html += '</tr></thead><tbody>';
     if (!slice.length) html += '<tr><td colspan="9">No groups match these filters.</td></tr>';
     slice.forEach(function (r) {
-      var info = classify(r);
-      var htmlRow = '<tr data-row-id="' + esc(r.id) + '" data-state="' + info.state + '" data-pending="' + (info.pending ? 'true' : 'false') + '" data-confirmed="' + (r.saved.confirmed ? 'true' : 'false') + '" data-manual="' + (r.manual ? 'true' : 'false') + '" data-account="' + esc(r.draft.account) + '" data-location="' + esc(r.draft.location) + '" data-class="" data-batch-key="' + esc(r.batchKey) + '" data-ok-account-name="' + esc(r.okAccountName) + '" data-types="' + esc(r.types.join('|')) + '" class="' + (info.state === 'needs' ? 'needs' : '') + (info.pending ? ' pending' : '') + '">';
-      htmlRow += '<td><input type="checkbox" data-select="' + esc(r.id) + '" aria-label="Select ' + esc(r.group) + ', ' + esc(r.integrationName) + '"' + (S.selected[r.id] ? ' checked' : '') + '></td>';
-      htmlRow += '<td>' + esc(r.group) + '</td><td><span class="state-' + info.state + '">' + stateLabel(info.state) + '</span>';
-      if (info.pending) htmlRow += '<span class="pending-flag">Pending</span>';
-      if (S.inspect && r.batchKey === S.inspect && !isExactMember(r) && !r.saved.confirmed) htmlRow += '<span class="note">Not in this exact batch</span>';
-      if (info.state === 'needs' && displayReason(r)) htmlRow += '<span class="note">' + esc(displayReason(r)) + '</span>';
-      htmlRow += '</td><td>' + esc(r.subtype) + '</td><td>' + esc(r.gateway) + '</td>';
-      htmlRow += '<td><span class="integ"><span class="mark" style="background:' + r.color + '">' + esc(r.mark) + '</span>' + esc(r.integrationName) + '</span></td>';
-      htmlRow += '<td>' + comboInput(r, 'location', 'Location for ' + r.group + ', ' + r.integrationName) + '</td>';
-      htmlRow += '<td>' + comboInput(r, 'class', 'Class for ' + r.group + ', ' + r.integrationName) + '</td>';
-      htmlRow += '<td>' + comboInput(r, 'account', 'Account for ' + r.group + ', ' + r.integrationName);
-      if (info.pending) htmlRow += '<button type="button" class="btn-text" data-revert="' + esc(r.id) + '">Revert ' + esc(r.group) + ', ' + esc(r.integrationName) + '</button>';
-      htmlRow += '</td></tr>';
-      html += htmlRow;
+      var status = accountStatus(r);
+      var cls = (status.key === 'needs' ? 'needs' : '') + (accountDirty(r) ? ' account-unsaved' : '');
+      html += '<tr data-row-id="' + esc(r.id) + '" data-status="' + status.key + '" data-pending="' + (isPending(r) ? 'true' : 'false') + '" data-account-pending="' + (accountDirty(r) ? 'true' : 'false') + '" data-confirmed="' + (r.saved.confirmed ? 'true' : 'false') + '" data-manual="' + (r.manual ? 'true' : 'false') + '" data-account="' + esc(r.draft.account) + '" data-saved-account="' + esc(r.saved.account) + '" data-location="' + esc(r.draft.location) + '" data-class="" data-ok-account-name="' + esc(r.okAccountName) + '" class="' + cls + '">';
+      html += '<td><input type="checkbox" data-select="' + esc(r.id) + '" aria-label="Select ' + esc(r.group) + ', ' + esc(r.integrationName) + '"' + (S.selected[r.id] ? ' checked' : '') + '></td>';
+      html += '<td>' + esc(r.group) + '</td>';
+      html += '<td>' + comboInput(r, 'account', 'Account for ' + r.group + ', ' + r.integrationName, 'combo-input') + '</td>';
+      html += '<td><span class="status status-' + status.key + '">' + status.label + '</span>';
+      if (status.key === 'needs') html += '<span class="note">' + esc(blankReason(r)) + '</span>';
+      if (isPending(r)) html += '<button type="button" class="btn-text" data-revert="' + esc(r.id) + '">Revert ' + esc(r.group) + ', ' + esc(r.integrationName) + '</button>';
+      html += '</td>';
+      html += '<td><span class="integ"><span class="mark" style="background:' + r.color + '">' + esc(r.mark) + '</span>' + esc(r.integrationName) + '</span></td>';
+      html += '<td>' + esc(r.subtype) + '</td><td>' + esc(r.gateway) + '</td>';
+      html += '<td>' + comboInput(r, 'location', 'Location for ' + r.group + ', ' + r.integrationName, 'dim-input') + '</td>';
+      html += '<td>' + comboInput(r, 'class', 'Class for ' + r.group + ', ' + r.integrationName, 'dim-input') + '</td>';
+      html += '</tr>';
     });
     var from = slice.length ? (S.page - 1) * PER + 1 : 0;
     var to = (S.page - 1) * PER + slice.length;
-    html += '</tbody></table></div><div class="pager"><span>Rows per page: 25</span><span>' + from + '–' + to + ' of ' + tableRows().length + '</span>';
-    html += '<button type="button" class="btn btn-outlined" data-testid="prev-page" id="prev-page" aria-label="Previous page"' + (S.page <= 1 ? ' disabled' : '') + '>Previous page</button>';
+    html += '</tbody></table></div><div class="pager"><span>Rows per page: 10</span><span>' + from + '–' + to + ' of ' + tableRows().length + '</span>';
+    html += '<button type="button" class="btn-outlined" data-testid="prev-page" id="prev-page" aria-label="Previous page"' + (S.page <= 1 ? ' disabled' : '') + '>Previous page</button>';
     html += '<span>Page ' + S.page + ' of ' + pages + '</span>';
-    html += '<button type="button" class="btn btn-outlined" data-testid="next-page" id="next-page" aria-label="Next page"' + (S.page >= pages ? ' disabled' : '') + '>Next page</button>';
-    html += '</div></div>';
+    html += '<button type="button" class="btn-outlined" data-testid="next-page" id="next-page" aria-label="Next page"' + (S.page >= pages ? ' disabled' : '') + '>Next page</button></div>';
     return html;
   }
-
   function dialogHtml() {
-    var meta = scopeMeta();
-    var preview = previewFor(meta.scope, S.dialog.mode, S.dialog.accountId);
-    var overwrites = preview.changes.filter(function (ch) { return ch.overwrite; });
-    var label = labelFor(S.dialog.mode, meta);
+    var plan = bulkPlan(S.dialog.accountId);
+    var overwrites = plan.changes.filter(function (ch) { return ch.overwrite; }).length;
     var html = '<div class="modal-back" data-testid="bulk-dialog"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="bulk-title">';
-    html += '<h2 id="bulk-title" tabindex="-1">' + esc(label) + '</h2><div class="modal-body">';
-    html += '<fieldset class="modes"><legend>How to apply</legend>';
-    html += '<label><input type="radio" name="bulk-mode" value="confirm"' + (S.dialog.mode === 'confirm' ? ' checked' : '') + '> Confirm the accounts already on these rows</label>';
-    html += '<label><input type="radio" name="bulk-mode" value="set"' + (S.dialog.mode === 'set' ? ' checked' : '') + '> Set one account for these rows</label></fieldset>';
-    html += '<div class="field"><label for="bulk-account">Account to apply</label><select class="select" id="bulk-account"' + (S.dialog.mode === 'confirm' ? ' disabled' : '') + '>';
-    html += '<option value="">' + PLACEHOLDER + '</option>';
-    ACCOUNTS.forEach(function (a) {
-      html += '<option value="' + esc(a.id) + '"' + (S.dialog.accountId === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>';
-    });
-    html += '</select></div>';
-    html += '<p class="warn" data-testid="overwrite-warning"' + (overwrites.length ? '' : ' hidden') + '>This will overwrite <span data-testid="overwrite-count">' + overwrites.length + '</span> confirmed ' + (overwrites.length === 1 ? 'mapping' : 'mappings') + '.</p>';
-    html += '<p>Will change <span data-testid="change-count">' + preview.changes.length + '</span>. Not changed <span data-testid="skip-count">' + preview.skips.length + '</span>.</p>';
-    html += '<ul class="preview" data-testid="bulk-preview">';
-    preview.changes.forEach(function (ch) {
-      html += '<li data-preview-id="' + esc(ch.id) + '">' + esc(ch.label) + ' → ' + esc(accountName(ch.account) || 'Clear account') + (ch.overwrite ? ' · overwrites a confirmed mapping' : '') + '</li>';
-    });
+    html += '<h2 id="bulk-title" tabindex="-1">Change account</h2><div class="modal-body">';
+    html += '<p data-testid="bulk-scope">Replaces the account on <span data-testid="stage-count">' + plan.changes.length + '</span> of <span data-testid="selected-in-dialog">' + selectedIds().length + '</span> selected rows. Class and location are not changed.</p>';
+    html += '<p class="warn" data-testid="overwrite-warning"' + (overwrites ? '' : ' hidden') + '>This overwrites <span data-testid="overwrite-count">' + overwrites + '</span> confirmed accounts. They stay unsaved until you Save mappings.</p>';
+    html += '<div class="field"><label for="bulk-account">Account</label><select class="select" id="bulk-account"><option value="">' + PLACEHOLDER + '</option>';
+    ACCOUNTS.forEach(function (a) { html += '<option value="' + a.id + '"' + (S.dialog.accountId === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>'; });
+    html += '</select></div><ul class="preview" data-testid="bulk-preview">';
+    plan.changes.forEach(function (ch) { html += '<li data-preview-id="' + esc(ch.id) + '">' + esc(ch.label) + (ch.overwrite ? ' · replaces a confirmed account' : '') + '</li>'; });
     html += '</ul><ul class="skipped" data-testid="bulk-skipped">';
-    preview.skips.forEach(function (sk) {
-      var row = rowById(sk.id);
-      html += '<li data-skip-id="' + esc(sk.id) + '">' + esc(row.group + ' — ' + row.integrationName) + ' · ' + esc(sk.reason) + '</li>';
-    });
+    plan.skips.forEach(function (sk) { html += '<li data-skip-id="' + esc(sk.id) + '">' + esc(sk.label) + ' · ' + esc(sk.reason) + '</li>'; });
     html += '</ul></div><div class="modal-foot">';
-    html += '<button type="button" class="btn btn-outlined" data-testid="bulk-cancel" id="bulk-cancel">Cancel</button>';
-    html += '<button type="button" class="btn" data-testid="bulk-commit" id="bulk-commit"' + (preview.changes.length ? '' : ' disabled') + '>' + esc(label) + '</button>';
+    html += '<button type="button" class="btn-outlined" id="bulk-cancel" data-testid="bulk-cancel">Cancel</button>';
+    html += '<button type="button" class="btn" id="bulk-stage" data-testid="bulk-stage"' + (plan.changes.length ? '' : ' disabled') + '>Change selected accounts</button>';
     html += '</div></div></div>';
     return html;
   }
-
   function paintPop() {
     var pop = document.getElementById('combo-pop');
     if (!ui.combo) { pop.hidden = true; pop.innerHTML = ''; return; }
@@ -994,15 +682,10 @@
     if (!row || !input) { pop.hidden = true; return; }
     var rect = input.getBoundingClientRect();
     pop.style.left = Math.max(8, rect.left) + 'px';
-    pop.style.width = Math.max(rect.width, 280) + 'px';
+    pop.style.width = Math.max(rect.width, 260) + 'px';
     var below = window.innerHeight - rect.bottom;
-    if (below < 220 && rect.top > below) {
-      pop.style.top = 'auto';
-      pop.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
-    } else {
-      pop.style.bottom = 'auto';
-      pop.style.top = (rect.bottom + 4) + 'px';
-    }
+    if (below < 200 && rect.top > below) { pop.style.top = 'auto'; pop.style.bottom = (window.innerHeight - rect.top + 4) + 'px'; }
+    else { pop.style.bottom = 'auto'; pop.style.top = (rect.bottom + 4) + 'px'; }
     if (ui.combo.field === 'class') {
       pop.setAttribute('role', 'region');
       pop.setAttribute('aria-label', 'Class');
@@ -1014,21 +697,14 @@
     pop.setAttribute('aria-label', ui.combo.field === 'account' ? 'Account' : 'Location');
     var options = optionsFor(row, ui.combo.field, ui.combo.query);
     if (ui.combo.active >= options.length) ui.combo.active = 0;
-    if (!options.length) {
-      pop.innerHTML = '<div class="empty-copy"><p>No matching accounts.</p></div>';
-      pop.hidden = false;
-      input.removeAttribute('aria-activedescendant');
-      return;
-    }
+    if (!options.length) { pop.innerHTML = '<div class="empty-copy"><p>No matching accounts.</p></div>'; pop.hidden = false; input.removeAttribute('aria-activedescendant'); return; }
     pop.innerHTML = options.map(function (opt, index) {
-      var id = 'opt-' + index;
-      return '<div role="option" id="' + id + '" data-value="' + esc(opt.value) + '" aria-selected="' + (index === ui.combo.active ? 'true' : 'false') + '">' + esc(opt.name) + '</div>';
+      return '<div role="option" id="opt-' + index + '" data-value="' + esc(opt.value) + '" aria-selected="' + (index === ui.combo.active ? 'true' : 'false') + '">' + esc(opt.name) + '</div>';
     }).join('');
     pop.hidden = false;
     var active = pop.querySelector('[aria-selected="true"]');
     if (active) input.setAttribute('aria-activedescendant', active.id);
   }
-
   function choose(rowId, field, value) {
     var row = rowById(rowId);
     if (!row || field === 'class') { ui.combo = null; paintPop(); return; }
@@ -1038,104 +714,16 @@
     persist();
     render();
   }
-  function setSelected(id, on) {
-    var before = selectedCount();
-    if (on) S.selected[id] = true; else delete S.selected[id];
-    var after = selectedCount();
-    if (before === 0 && after > 0 && !S.inspect) S.scope = 'page';
-    if (after === 0 && S.scope === 'page') S.scope = 'results';
-  }
-  function afterBulkSelect() {
-    if (selectedCount() > 0 && !S.inspect) S.scope = 'page';
-    if (selectedCount() === 0 && S.scope === 'page') S.scope = 'results';
-  }
-  function revertRow(id) {
-    var row = rowById(id);
-    row.draft.account = row.saved.account;
-    row.draft.location = row.saved.location;
-    row.draft.className = row.saved.className;
-    persist();
-    render();
-  }
-  function discardAll() {
-    S.rows.forEach(function (r) {
-      r.draft.account = r.saved.account;
-      r.draft.location = r.saved.location;
-      r.draft.className = r.saved.className;
-    });
-    persist();
-    render();
-    toast('Pending changes discarded');
-  }
-  function commitPreview(preview) {
-    preview.changes.forEach(function (ch) {
-      var row = rowById(ch.id);
-      row.draft.account = ch.account;
-      row.saved.account = ch.account;
-      row.saved.location = row.draft.location;
-      row.saved.className = row.draft.className;
-      row.saved.confirmed = true;
-      delete S.selected[ch.id];
-    });
-    if (selectedCount() === 0 && S.scope === 'page') S.scope = 'results';
-    persist();
-  }
-  function openDialog() {
-    var meta = scopeMeta();
-    if (!meta.n) return;
-    ui.combo = null;
-    S.dialog = { mode: 'confirm', accountId: '' };
-    render();
-  }
-  function focusRow(id) {
-    S.inspect = null;
-    S.integration = 'all';
-    S.status = 'all';
-    S.group = 'all';
-    S.gateway = 'all';
-    S.q = '';
-    S.view = 'mappings';
-    var list = tableRows();
-    var idx = list.findIndex(function (r) { return r.id === id; });
-    S.page = idx < 0 ? 1 : Math.floor(idx / PER) + 1;
-    render();
-    var input = document.querySelector('[data-combo-input="' + id + ':account"]');
-    if (input) input.focus();
-  }
-  function resetDemo() {
-    localStorage.removeItem(STORAGE);
-    ui.combo = null;
-    S = fresh();
-    persist();
-    render();
-    toast('Demo reset');
-  }
-  function goSummaries() {
-    if (blockReason()) {
-      var reason = document.getElementById('continue-reason');
-      if (reason) reason.focus();
-      return;
-    }
-    ui.combo = null;
-    S.dialog = null;
-    S.view = 'summaries';
-    render();
-  }
 
   document.addEventListener('mousedown', function (e) {
     var opt = e.target.closest && e.target.closest('#combo-pop [role="option"]');
-    if (!opt || !ui.combo) return;
-    e.preventDefault();
+    if (opt && ui.combo) e.preventDefault();
   });
   document.addEventListener('click', function (e) {
     var opt = e.target.closest && e.target.closest('#combo-pop [role="option"]');
-    if (opt && ui.combo) {
-      choose(ui.combo.rowId, ui.combo.field, opt.getAttribute('data-value'));
-      return;
-    }
-    var t = e.target;
-    if (t.closest && t.closest('#combo-pop')) return;
-    if (!(t.dataset && t.dataset.field) && ui.combo) {
+    if (opt && ui.combo) { choose(ui.combo.rowId, ui.combo.field, opt.getAttribute('data-value')); return; }
+    if (e.target.closest && e.target.closest('#combo-pop')) return;
+    if (!(e.target.dataset && e.target.dataset.field) && ui.combo) {
       ui.combo = null;
       paintPop();
       var openInput = document.querySelector('[aria-expanded="true"][data-field]');
@@ -1170,80 +758,18 @@
     var t = e.target;
     if (t.id === 'filter-status') { S.status = t.value; S.page = 1; render(); }
     else if (t.id === 'filter-group') { S.group = t.value; S.page = 1; render(); }
-    else if (t.id === 'filter-gateway') { S.gateway = t.value; S.page = 1; render(); }
-    else if (t.name === 'save-scope') { S.scope = t.value; render(); }
-    else if (t.name === 'bulk-mode') { S.dialog.mode = t.value; if (t.value === 'confirm') S.dialog.accountId = ''; render(); }
     else if (t.id === 'bulk-account') { S.dialog.accountId = t.value; render(); }
     else if (t.id === 'sel-page') {
       currentPage().forEach(function (r) { if (t.checked) S.selected[r.id] = true; else delete S.selected[r.id]; });
-      afterBulkSelect();
       render();
     } else if (t.dataset && t.dataset.select) {
-      setSelected(t.dataset.select, t.checked);
-      render();
-    }
-  });
-  document.getElementById('content').addEventListener('click', function (e) {
-    var t = e.target.closest('button, a');
-    if (!t) return;
-    if (t.dataset && t.dataset.field) e.stopPropagation();
-    if (t.id === 'reset-demo') resetDemo();
-    else if (t.id === 'continue-btn') goSummaries();
-    else if (t.id === 'discard') discardAll();
-    else if (t.id === 'save-accept') openDialog();
-    else if (t.id === 'select-page') {
-      currentPage().forEach(function (r) { S.selected[r.id] = true; });
-      afterBulkSelect();
-      render();
-    } else if (t.id === 'select-results') {
-      S.selected = {};
-      resultsRows().forEach(function (r) { S.selected[r.id] = true; });
-      S.scope = 'results';
-      render();
-    } else if (t.id === 'clear-selection') { S.selected = {}; S.scope = 'results'; render(); }
-    else if (t.id === 'reset-filters') { S.status = 'all'; S.group = 'all'; S.gateway = 'all'; S.q = ''; S.page = 1; render(); }
-    else if (t.id === 'prev-page') { S.page -= 1; render(); }
-    else if (t.id === 'next-page') { S.page += 1; render(); }
-    else if (t.id === 'back-batches') { S.inspect = null; S.page = 1; render(); }
-    else if (t.id === 'back-to-mappings') { S.view = 'mappings'; render(); }
-    else if (t.id === 'bulk-cancel') { S.dialog = null; render(); }
-    else if (t.id === 'bulk-commit') {
-      var meta = scopeMeta();
-      var appliedMode = S.dialog.mode;
-      var preview = previewFor(meta.scope, appliedMode, S.dialog.accountId);
-      if (!preview.changes.length) return;
-      commitPreview(preview);
-      S.dialog = null;
-      render();
-      toast(labelFor(appliedMode, meta).replace(/^Accept|^Save/, 'Saved'));
-    } else if (t.dataset && t.dataset.revert) revertRow(t.dataset.revert);
-    else if (t.dataset && t.dataset.focusRow) focusRow(t.dataset.focusRow);
-    else if (t.dataset && t.dataset.integration && t.dataset.testid === 'toggle-integration') {
-      S.openIntegration = S.openIntegration === t.dataset.integration ? '' : t.dataset.integration;
-      render();
-    } else if (t.dataset && t.dataset.batchKey) {
-      S.inspect = t.dataset.batchKey;
-      S.page = 1;
-      S.dialog = null;
-      render();
-    } else if (t.dataset && t.dataset.tab) {
-      S.integration = t.dataset.tab;
-      S.page = 1;
-      S.inspect = null;
+      if (t.checked) S.selected[t.dataset.select] = true; else delete S.selected[t.dataset.select];
       render();
     }
   });
   document.getElementById('content').addEventListener('keydown', function (e) {
     var t = e.target;
     if (S.dialog && e.key === 'Escape') { S.dialog = null; render(); e.preventDefault(); return; }
-    if (S.dialog && e.key === 'Tab') {
-      var nodes = Array.prototype.slice.call(document.querySelectorAll('#bulk-title, .modal button, .modal input, .modal select')).filter(function (el) { return !el.disabled; });
-      if (nodes.length) {
-        var index = nodes.indexOf(document.activeElement);
-        if (e.shiftKey && index <= 0) { nodes[nodes.length - 1].focus(); e.preventDefault(); }
-        else if (!e.shiftKey && index === nodes.length - 1) { nodes[0].focus(); e.preventDefault(); }
-      }
-    }
     if (!t.dataset || !t.dataset.field) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
@@ -1263,17 +789,36 @@
       var list = optionsFor(rowById(ui.combo.rowId), ui.combo.field, ui.combo.query);
       if (list[ui.combo.active]) choose(ui.combo.rowId, ui.combo.field, list[ui.combo.active].value);
     } else if (e.key === 'Escape') {
-      ui.combo = null;
-      paintPop();
-      t.setAttribute('aria-expanded', 'false');
-      e.preventDefault();
+      ui.combo = null; paintPop(); t.setAttribute('aria-expanded', 'false'); e.preventDefault();
     }
   });
+  document.getElementById('content').addEventListener('click', function (e) {
+    var t = e.target.closest('button, a');
+    if (!t) return;
+    if (t.id === 'save-mappings') { saveMappings(); render(); toast('Mappings saved. Blank accounts still need an account.'); }
+    else if (t.id === 'discard') { discardAll(); render(); toast('Unsaved changes discarded'); }
+    else if (t.id === 'reset-demo') { localStorage.removeItem(STORAGE); ui.combo = null; S = fresh(); persist(); render(); toast('Demo reset'); }
+    else if (t.id === 'continue-btn') { if (canContinue()) { ui.combo = null; S.dialog = null; S.view = 'summaries'; render(); } }
+    else if (t.id === 'missing-filter') { S.missingOnly = !S.missingOnly; S.page = 1; render(); }
+    else if (t.id === 'reset-filters') { S.status = 'all'; S.group = 'all'; S.q = ''; S.missingOnly = false; S.integration = 'all'; S.page = 1; render(); }
+    else if (t.id === 'change-account') { if (selectedIds().length) { ui.combo = null; S.dialog = { accountId: '', focus: true }; render(); } }
+    else if (t.id === 'clear-selection') { S.selected = {}; render(); }
+    else if (t.id === 'prev-page') { S.page -= 1; render(); }
+    else if (t.id === 'next-page') { S.page += 1; render(); }
+    else if (t.id === 'back-to-mappings') { S.view = 'mappings'; render(); }
+    else if (t.id === 'bulk-cancel') { S.dialog = null; render(); }
+    else if (t.id === 'bulk-stage') {
+      var n = stageBulk(S.dialog.accountId);
+      S.dialog = null;
+      render();
+      if (n) toast('Account change staged for ' + n + (n === 1 ? ' row. Save mappings to keep it.' : ' rows. Save mappings to keep it.'));
+    } else if (t.dataset && t.dataset.revert) { revertRow(t.dataset.revert); render(); }
+    else if (t.dataset && t.dataset.tab) { S.integration = t.dataset.tab; S.page = 1; render(); }
+  });
   document.getElementById('content').addEventListener('scroll', function () { if (ui.combo) paintPop(); });
-  document.getElementById('nav-summaries').addEventListener('click', function () { goSummaries(); });
+  document.getElementById('nav-summaries').addEventListener('click', function () { if (canContinue()) { S.view = 'summaries'; render(); } });
   document.getElementById('nav-mappings').addEventListener('click', function (e) { e.preventDefault(); S.view = 'mappings'; render(); });
   document.getElementById('nav-dashboard').addEventListener('click', function () { S.view = 'mappings'; render(); });
-
   load();
   persist();
   render();
