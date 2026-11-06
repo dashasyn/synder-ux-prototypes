@@ -1608,11 +1608,8 @@
     .v-cards .e-card p { margin: 0; font-size: 14px; line-height: 20px; color: #5A6474; }
     .v-cards .e-lock { font-size: 18px; color: #6B778C; flex-shrink: 0; margin-top: 3px; }
     .v-cards .e-action { margin-top: 12px; }
-    .v-cards .e-link, .v-cards .e-primary { appearance: none; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; }
-    .v-cards .e-link { background: none; border: none; padding: 0; color: #0053CC; }
-    .v-cards .e-link:hover { text-decoration: underline; }
-    .v-cards .e-primary { background: #0053CC; color: #FFFFFF; border: none; border-radius: 4px; padding: 8px 16px; }
-    .v-cards .e-primary:hover { background: #0046B0; }
+    .v-cards .e-outlined { appearance: none; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; cursor: pointer; background: #FFFFFF; color: #0053CC; border: 1px solid #0053CC; border-radius: 4px; padding: 8px 16px; }
+    .v-cards .e-outlined:hover { background: #E6F0FF; }
     .v-cards .e-divider { display: flex; align-items: center; gap: 8px; margin: 24px 0 16px; font-size: 14px; line-height: 20px; font-weight: 500; color: #6B778C; }
     .v-cards .e-divider::before, .v-cards .e-divider::after { content: ''; flex: 1; height: 1px; background: #DFE4EC; }
     .v-cards .e-divider .material-icons-round { font-size: 18px; }
@@ -1649,9 +1646,6 @@
       <div class="seg" id="seg-variant">
         <button type="button" data-variant="quick">A · Quick fix</button>
         <button type="button" data-variant="prepare">B · Prepare</button>
-        <button type="button" data-variant="c1">C1 · List</button>
-        <button type="button" data-variant="c2">C2 · Call first</button>
-        <button type="button" data-variant="c3">C3 · Blue block</button>
         <button type="button" data-variant="d" class="active">D · Simple</button>
         <button type="button" data-variant="cards">E · Cards</button>
       </div>
@@ -2417,7 +2411,6 @@
       CARD_CONNECT,
       { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they look in your books. Anything off gets fixed on the call.', where: 'Open Transactions' },
       { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings', desc: 'Your Synder Specialist confirms your clearing account, products, taxes, and fees with you.' },
-      { id: 'call-fix', phase: 'call', title: 'Fix anything in your test transactions', desc: 'Review your test results together and adjust settings so sales post correctly.' },
       CARD_AUTO, CARD_FINISH,
     ],
   };
@@ -3556,7 +3549,7 @@
     const list = activeCheckpoints();
     function card(c) {
       const locked = c.phase === 'call';
-      const action = locked ? '' : '<div class="e-action"><button type="button" class="bc-where ' + (c.primary ? 'e-primary' : 'e-link') + '" data-where="' + c.id + '">' + escapeHtml(c.where) + '</button></div>';
+      const action = locked ? '' : '<div class="e-action"><button type="button" class="bc-where e-outlined" data-where="' + c.id + '">' + escapeHtml(c.where) + '</button></div>';
       return '<li class="e-card' + (locked ? ' e-locked' : '') + '" data-step-id="' + c.id + '">' +
         (locked ? '<span class="material-icons-round e-lock" aria-hidden="true">lock</span>' : '') +
         '<div class="e-body"><h3>' + escapeHtml(c.title) + '</h3><p>' + escapeHtml(c.desc) + '</p>' + action + '</div></li>';
