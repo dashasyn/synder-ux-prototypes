@@ -59,53 +59,29 @@ Per integration, most default groups start with a proposed account. These start 
 - Bank rows (`Stripe transfers`, plus example `PayPal transfers` and `Shopify payouts`): “Bank accounts are entered by hand. Synder does not suggest an account for this row.”
 - Tax withheld by marketplace, Balance Reserves, Stored Balances, and the example groups Duties and Reserve release: “No compatible account was proposed for this group.”
 
-Pairing of the other groups to accounts is a proposal. Notably:
+Pairing of groups to accounts is a per-row proposal inside the table. It is not a live Synder rule. Sales, refunds, and wholesale can share an account name such as Stripe sales and still be separate rows. The screen does not group them into batches.
 
-- Sales, Refunds, and Wholesale sales can share an account name such as Stripe sales and still stay in different batches, because the purpose differs.
-- Fees and Commissions can share Stripe fees and stay apart for the same reason.
-- Expenses, Shipping fees, Advertising, and Packaging can share Stripe expenses and stay apart.
-- Exchange adjustments and Rounding differences can share Exchange Gain or Loss and stay apart.
-- Sales tax payable is not placed in the sales batch.
+### Compatibility (example only)
 
-### Compatibility
+A saved mapping counts as valid here only when the account type matches the group: Income, Expense, Bank, or the row’s own subtype. An incompatible choice stays unresolved. This is prototype data, not a verified books rule. Tests do not establish live Synder accounting rules.
 
-A row can be confirmed only when its account type matches the group:
+### How the screen behaves
 
-- Income groups accept Income.
-- Expense groups accept Expense.
-- Bank groups accept Bank only.
-- Other subtypes accept that subtype only.
-
-An incompatible choice stays on the row, is marked invalid, counts as **Needs account**, and blocks Continue to Summaries. Bulk apply skips incompatible rows and lists them. It does not change them.
-
-### Bank rows are never auto-confirmed
-
-Bank rows have no suggestion, are excluded from batches, and are not confirmed by “accept this batch”. They become confirmed only when a person chooses a Bank account and uses the scoped Save/Accept action. Loading the demo never marks them confirmed.
-
-### Batches
-
-A batch is the set of rows that share all three of: purpose, proposed account, and integration. Example companion rows (Morning blend, Card fee, and similar) exist only to give a few batches more than one row. They are not observed Synder groups.
-
-Accepting a batch confirms only rows that still have that proposed account and have no individual pending edit. A row someone changes is left out of that accept.
-
-### States, filters, and gating
-
-- **Needs account** — draft account empty or incompatible.
-- **Suggested — needs confirmation** — draft account is valid and the row is not confirmed. A premapped suggestion starts here. It is not confirmed.
-- **Confirmed** — a valid account has been accepted and nothing is pending.
-- **Pending** is separate. It means the draft differs from the last accepted values. Counters for the three states ignore filters and paging. Pending is an extra counter and also ignores filters and paging.
-- Mapping status **Mapped** means Confirmed and not pending. **Not mapped** is everything else. That reading of the observed filter is proposed.
-- Class and Location may stay empty. They never block Continue.
-- Continue to Summaries turns on only when every row is confirmed, every account is valid, and nothing is pending. The destination is labelled simulated.
-- One Save/Accept button renames itself to the active scope: selected on this page, all results (current integration, search, and filters, every page), or the open batch.
-- Selected-on-page changes only checked rows on the current page. Same group name on another integration is a different row.
+- One table. Missing rows sort first. A count button filters to them. There is no separate missing-account list and no suggestion-batch panel.
+- Column order puts Group and Account first, then a compact status, then integration, subtype, and payment gateway. Location and Class sit to the right of Account.
+- Status words: Needs account, Proposed (a filled suggestion that is not saved), Unsaved (the account draft differs from the saved account — not shown as confirmed), Confirmed.
+- **Save mappings** is the only save. It confirms every populated valid account on every page, including rows hidden by the current filter, and it keeps edits. It does not mark a blank account complete. A partial save is allowed. Rows that are already confirmed stay confirmed unless their account or dimensions were edited.
+- **Continue to Summaries** is hidden until every row has a valid saved account and there is no unsaved account change. Empty Class and Location do not block it. An unsaved location does not block it. The destination is labelled simulated.
+- Checkboxes are optional. The selection bar appears only above the table, and only when something is selected. It shows how many selected rows are on this page and how many are hidden. **Change account** writes the new account onto the exact selected ids and does not save. **Save mappings** commits that draft. The dialog states how many confirmed accounts would be replaced and says class and location are left alone. Filters and tabs do not add rows to the selection. Clearing a checkbox removes that id.
+- Revert restores one row. Discard unsaved changes restores every draft. Both are text actions, shown only when something is unsaved.
+- Browser storage key: `synder-summary-mapping-review-v2`. Reset demo clears it.
 
 ### Other example records
 
 - Integrations besides the observed one: `Example Checkout (PayPal)`, `Example Store (Shopify)`.
-- The demo seeds 123 rows (41 per integration).
-- Browser storage key: `synder-summary-mapping-review-v1`. Reset demo clears it and restores the seed.
-- The Status column and the batch/exception panels are proposed. They are not in the observed column list.
+- The demo seeds 123 rows (41 per integration), including example companion rows such as Morning blend and Card fee.
+- Bank rows start empty. They are confirmed only after a person chooses a Bank account and uses Save mappings.
+- The compact Status column is proposed. It is not in the observed column list. The on-screen column order also differs from the live demo so Account sits next to Group.
 
 ## How to run the tests
 
