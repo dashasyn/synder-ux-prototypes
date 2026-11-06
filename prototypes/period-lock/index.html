@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- period-lock v50 -->
+<!-- period-lock v51 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="prototype-version" content="v50" />
+<meta name="prototype-version" content="v51" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -321,7 +321,7 @@ const isAdmin=()=>true;/* v50: FDD all users can edit */
 const lockOf=c=>!c.on?null:(c.schedule==='recurring'?recur(c.runDay).lock:c.date);
 const moveOf=c=>effMove(c);
 const integs=()=>Object.values(S.integ).filter(c=>c.org===S.org);
-function toast(m,k){const t=document.createElement('div');t.className='alert alert-'+(k||'success');t.innerHTML='<span class="mi">'+(k==='info'?'info':k==='warning'?'warning_amber':'check_circle')+'</span><div>'+m+'</div>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),5000)}
+function toast(m,k){const t=document.createElement('div');t.className='alert alert-'+(k||'success');t.innerHTML='<span class="mi">'+(k==='info'?'info':k==='warning'?'warning_amber':k==='error'?'error_outline':'check_circle')+'</span><div>'+m+'</div>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),5000)}
 function modal(title,body,foot){$('#layer').innerHTML=`<div class="modal-bg show" onclick="if(event.target===this)closeM()"><div class="synder-modal" role="dialog"><div class="synder-modal-header">${title}</div><div class="synder-modal-body">${body}</div>${foot?`<div class="synder-modal-footer">${foot}</div>`:''}</div></div>`}
 function closeM(){$('#layer').innerHTML=''}
 function track(ev,props){S.events.push({ev,props:props||{},at:TODAY})}
@@ -716,7 +716,7 @@ function vBalances(){const months=['2026-07','2026-08','2026-09','2026-10'];
   mv?al('info','info',`Period lock moved the September recognition entry (${mv.num}, ${usd(mv.amt)}, ${mvS.id}) to ${fmt(mv.posted)}. Here it counts in October, while the revenue schedule keeps it in September.${cxJ.length?` ${cxJ.map(j=>j.num).join(', ')} (${cxS.map(x=>rrIntName(x.integ)).join(', ')}) was canceled by hard lock and isn't counted.`:''}`):'',
   `<div class="card tcard"><div class="table-wrap"><table class="synder-table"><thead><tr><th rowspan="2">Period</th><th colspan="3" class="grp">Deferred revenue</th><th colspan="3" class="grp">Recognized revenue</th></tr><tr><th class="r">Beginning balance</th><th class="r">Incoming revenue</th><th class="r">Ending balance</th><th class="r">Beginning balance</th><th class="r">New revenue</th><th class="r">Ending balance</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></div>`)}
 function rrTryOnboard(){const c=S.integ.stripe,L=lockOf(c),start=S.rrStart||'2026-09-01';
- if(c.on&&L&&start<=L)return toast('Period lock covers the RevRec start date (locked through '+fmt(L)+' for '+c.name+'). Turn the lock off or set Locked through to a date before the RevRec start date, then continue.','warning');
+ if(c.on&&L&&start<=L)return toast('Period lock covers the RevRec start date (locked through '+fmt(L)+' for '+c.name+'). Turn the lock off or set Locked through to a date before the RevRec start date, then continue.','error');
  toast('RevRec onboarding continued (demo).')}
 function vRRConfig(q){const c=S.integ.stripe,L=lockOf(c),start=(q&&q.get('start'))||S.rrStart||'2026-09-01';S.rrStart=start;
  const blocked=!!(c.on&&L&&start<=L);
@@ -728,6 +728,8 @@ function vRRConfig(q){const c=S.integ.stripe,L=lockOf(c),start=(q&&q.get('start'
   <button class="btn" onclick="rrTryOnboard()">Continue onboarding</button></div>
   <p class="pl-help" style="margin-top:12px">Placeholder toast copy (final text in Figma). Deep link: <a class="text-link" href="#rrconfig?start=2026-09-01&demo=1">#rrconfig?start=2026-09-01&demo=1</a>.</p>`)}
 
+const AF0={from:'',to:'',init:'',action:'',type:'',q:''};
+const ACTIONS=['Added','Connected','Connection lost','Deleted','Disconnected','Entered','Reconnected','Updated timezone','Period lock enabled','Period lock disabled','Period lock updated','Period lock date advanced'];
 function applyAct(){S.af={from:val('a-from'),to:val('a-to'),init:val('a-init'),action:val('a-action'),type:val('a-type'),q:val('a-q')};S.afPage=0;render()}
 function vActivity(q){if(q.get('type')&&S.afHash!==location.hash){S.af={...AF0,type:q.get('type')};S.afHash=location.hash}
  const f=S.af||AF0,all=S.activity.filter(a=>a.org===S.org),users=[...new Set(all.filter(a=>a.it==='User').map(a=>a.who))];
@@ -817,6 +819,8 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   'Layout from live Summaries/Mapping: 229px sidebar, 32px content padding, fluid width, 24px between blocks, 16px card padding, 1px bordered cards, 52px table rows, "See details" + kebab row actions, labelled filter card, outlined Actions.',
   'Activity log: separate Integration and Details columns. Mode shows as plain text (Hard has a lock icon). Recon "Locked" no longer reuses a chip.',
   'Prototype bar: name + Today (demo) + ⋯ menu (Dev notes, Reset demo).'];
+ const log51=['HIGH fix: restore Activity log AF0 + ACTIONS (removed in v50). #activity and #activity?type=Period%20lock work again — 4 lock actions, filters, Reset, System date-advanced rows, first-enable dual rows.',
+  'RevRec onboarding toast: severity error (was warning). Recovery copy unchanged (placeholder until Figma).'];
  const log50=['FDD Gap1 / RevRec onboarding: #rrconfig start-date form; Continue blocked with error toast when start ≤ Locked through; recovery link to period lock settings. Placeholder copy (Figma). Deep link #rrconfig?start=2026-09-01&demo=1.',
   'FDD Gap2 / Permissions: removed admin-only gate and Only-admins alert. All users can edit (FDD + comment).',
   'FDD Gap3 / Recon promote: Lock period / Reconciliation complete only when reconciled (no Missing source, no Discrepancy). I2 #recon?id=oct no longer shows Lock period.',
@@ -973,9 +977,10 @@ function vDev(){const ev=[['PeriodLockVisited','User opens Period lock from the 
   '"Move late transactions to" sits directly under the Soft lock radio, indented to the radio label, only when Soft is selected.',
   'Master toggle: On/Off text removed; one-line description under the "Period lock" label.',
   'Help text: "Must be after the Locked through date."'];
- return `<div class="dev">`+pg(head('Dev notes · v50','Prototype-only notes. Not product UI.'),
+ return `<div class="dev">`+pg(head('Dev notes · v51','Prototype-only notes. Not product UI.'),
  sec('Open question for the spec owner','<div class="card"><ul><li>Rollback checks the received (webhook) date per FDD; a Sep item received in Oct can still change a locked September (edge case 1).</li></ul></div>'),
  sec('Iterations',`<div class="card"><ul><li><b>Iteration 1</b> (default, <code>?it=1</code>): hard lock only. Soft lock is Coming soon.</li><li><b>Iteration 2</b> (<code>?it=2</code>): soft and hard lock. Hard behaves the same as in Iteration 1.</li></ul></div>`),
+ cl('Changelog v51',log51),
  cl('Changelog v50',log50),
  cl('Open FDD conflicts',['Soft duplicate search (I2): FDD Rules + edge case 19 say soft lock can create a duplicate invoice (search uses transaction date, original date not kept). Open inline comment still says soft lock must not create duplicates. No product decision — not prototyped as either outcome.']),
  cl('Changelog v49',log49),
