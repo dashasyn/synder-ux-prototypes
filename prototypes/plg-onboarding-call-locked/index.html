@@ -670,8 +670,10 @@
       letter-spacing: var(--font-body2-letter-spacing); color: #6B778C; margin: 0;
     }
     .hs-step-card.is-current .hs-step-desc,
-    .hs-step-card.is-done .hs-step-desc,
-    .hs-step-card.is-locked .hs-step-desc { margin-bottom: 10px; }
+    .hs-step-card.is-done .hs-step-desc { margin-bottom: 10px; }
+    /* No trailing paragraph margin: locked cards have equal top/bottom padding. */
+    .hs-step-card.is-locked .hs-step-desc { margin-bottom: 0; }
+    .hs-step-card.is-locked .hs-step-body > :last-child { margin-bottom: 0; }
     .hs-step-actions {
       display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
     }
