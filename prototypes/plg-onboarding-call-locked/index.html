@@ -2397,19 +2397,19 @@
     ],
   };
   const CARD_CONNECT = { id: 'channel', phase: 'tip', title: 'Connect sales channel',
-    desc: 'Add every channel you get paid from.', where: 'Go to Organization settings' };
+    desc: 'Add every channel you get paid from.', where: 'Open Organization settings' };
   const CARD_AUTO = { id: 'call-auto', phase: 'call', title: 'Turn on auto-sync and import historical data' };
   const CARD_RULES = { id: 'call-rules', phase: 'call', title: 'Create any Smart Rules you need' };
   CHECKPOINTS.cards = {
     summary: [
       CARD_CONNECT,
-      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups.', where: 'Go to Mapping' },
-      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary and check it in your books.', where: 'Go to Summaries' },
+      { id: 'mapping', phase: 'tip', title: 'Map your accounts', desc: 'Map Sale, Refund, Expense and Adjustment groups.', where: 'Open Mapping' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync a test summary', desc: 'Sync one summary and check it in your books.', where: 'Open Summaries' },
       { id: 'call-frequency', phase: 'call', title: 'Set your sync frequency' }, CARD_AUTO, CARD_RULES,
     ],
     'per-txn': [
       CARD_CONNECT,
-      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they post in your books. Your Synder Specialist adjusts settings on the call.', where: 'Go to Transactions' },
+      { id: 'test-sync', phase: 'tip', title: 'Sync 3 test transactions', desc: 'See how they post in your books. Your Synder Specialist adjusts settings on the call.', where: 'Open Transactions' },
       { id: 'call-settings', phase: 'call', title: 'Set up your clearing account and sales settings' }, CARD_AUTO, CARD_RULES,
     ],
   };
