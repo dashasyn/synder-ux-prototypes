@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SET-1439 · Dimensions reminder after suggested mapping</title>
+  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    :root {
+      --proto-bar: #111827;
+      --amber-outline: #F5A623;
+      --amber-soft: #FFF8E8;
+      --amber-border: #F0D9A0;
+      --orange-banner: #FFF1DD;
+      --orange-banner-border: #F5C97A;
+      --orange-text: #CB7515;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text-primary, #1A1B24);
+      background: var(--bg-page, #F7F8FA);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* —— Dark prototype bar —— */
+    .proto-bar {
+      background: var(--proto-bar);
+      color: #F9FAFB;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      z-index: 200;
+    }
+    .proto-bar .brand {
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: .02em;
+      opacity: .92;
+      white-space: nowrap;
+    }
+    .proto-bar .sep {
+      width: 1px; height: 22px;
+      background: rgba(255,255,255,.18);
+      flex-shrink: 0;
+    }
+    .proto-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .proto-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #9CA3AF;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .proto-tab:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .proto-tab.active {
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+      border-color: var(--color-primary, #0053CC);
+    }
+
+    /* —— App shell —— */
+    .shell {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid #E5E7EB;
+      padding: 12px 0 24px;
+      overflow-y: auto;
+    }
+    .brand-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px 16px;
+      font-weight: 500; font-size: 16px;
+    }
+    .brand-mark {
+      width: 24px; height: 24px; border-radius: 4px;
+      background: var(--color-primary, #0053CC); color: #fff;
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px;
+      color: #374151;
+      font-size: 14px;
+      cursor: default;
+      border-left: 3px solid transparent;
+    }
+    .nav-item .material-icons { font-size: 20px; color: #6B778C; }
+    .nav-item.active {
+      background: #E8F1FF;
+      color: #007AFF;
+      border-left-color: #007AFF;
+      font-weight: 500;
+    }
+    .nav-item.active .material-icons { color: #007AFF; }
+    .nav-group-label {
+      padding: 8px 16px 4px;
+      font-size: 14px;
+      color: #374151;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-group-label .material-icons { font-size: 20px; color: #6B778C; }
+    .nav-sub {
+      padding: 6px 16px 6px 46px;
+      font-size: 14px;
+      color: #6B778C;
+      cursor: default;
+    }
+    .nav-sub.active {
+      color: #007AFF;
+      font-weight: 500;
+      background: #E8F1FF;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #F7F8FA;
+    }
+    .topbar {
+      height: 59px;
+      background: #fff;
+      border-bottom: 1px solid #E5E7EB;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .topbar .balance {
+      font-size: 14px;
+      color: #6B778C;
+    }
+    .topbar .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #E0EBFD; color: #0053CC;
+      display: grid; place-items: center;
+      font-size: 13px; font-weight: 600;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px 24px 40px;
+      overflow: auto;
+      min-width: 0;
+    }
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .page-head h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 500;
+      color: #1A1B24;
+    }
+    .page-sub {
+      margin: 0;
+      color: #6B778C;
+      font-size: 14px;
+    }
+    .head-actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: .15px;
+      border-radius: 4px;
+      height: 32px;
+      padding: 0 16px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--color-primary, #0053CC);
+      color: #fff;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #1A43A2; }
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      background: var(--color-primary, #0053CC);
+    }
+    .btn-outlined {
+      background: #fff;
+      color: var(--color-primary, #0053CC);
+      border-color: var(--color-primary, #0053CC);
+    }
+    .btn-outlined:hover { background: #F2F6FC; }
+    .btn-text {
+      background: transparent;
+      color: var(--color-primary, #0053CC);
+      border: none;
+      height: 32px;
+      padding: 0 10px;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-text:hover { text-decoration: underline; }
+    .btn-ghost {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #DFE4EC;
+    }
+    .btn-ghost:hover { background: #F7F8FA; }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .filters .select, .cell-select {
+      height: 32px;
+      padding: 0 28px 0 10px;
+      border: 1px solid #DFE4EC;
+      border-radius: 4px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B778C' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E") no-repeat right 10px center;
+      font: inherit;
+      font-size: 14px;
+      color: #1A1B24;
+      appearance: none;
+      -webkit-appearance: none;
+      min-width: 140px;
+    }
+    .filters .select:focus, .cell-select:focus {
+      outline: none;
+      border-color: #0053CC;
+      box-shadow: 0 0 0 2px rgba(0,83,204,.15);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #374151;
+      cursor: default;
+    }
+    .switch {
+      width: 36px; height: 20px;
+      border-radius: 999px;
+      background: #B4BBCB;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .switch.on { background: #0053CC; }
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: left .15s ease;
+    }
+    .switch.on::after { left: 18px; }
+
+    /* Banner */
+    .suggest-banner {
+      display: none;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--orange-banner);
+      border: 1px solid var(--orange-banner-border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .suggest-banner.show { display: flex; }
+    .suggest-banner .ico {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--orange-text);
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+    .suggest-banner .copy { flex: 1; min-width: 0; }
+    .suggest-banner .copy strong {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 2px;
+      color: #1A1B24;
+    }
+    .suggest-banner .copy p {
+      margin: 0;
+      color: #5c5c5c;
+      font-size: 14px;
+    }
+    .suggest-banner .btn { flex-shrink: 0; align-self: center; }
+
+    /* Persistent strip */
+    .dim-strip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 9px 12px;
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #1A1B24;
+    }
+    .dim-strip.show { display: flex; }
+    .dim-strip .strip-ico {
+      color: var(--orange-text);
+      font-size: 18px;
+    }
+    .dim-strip .strip-link {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: #0053CC;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .dim-strip .strip-sep { color: #B4BBCB; }
+    .dim-strip .strip-reset {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font: inherit;
+      font-size: 14px;
+      color: #6B778C;
+      cursor: pointer;
+    }
+    .dim-strip .strip-reset:hover { color: #0053CC; text-decoration: underline; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #DFE4EC;
+      margin-bottom: 0;
+      background: #fff;
+      border-radius: 8px 8px 0 0;
+      padding: 0 8px;
+      border: 1px solid #DFE4EC;
+      border-bottom: none;
+    }
+    .tab {
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #6B778C;
+      border-bottom: 2px solid transparent;
+      cursor: default;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab.active {
+      color: #0053CC;
+      border-bottom-color: #0053CC;
+      font-weight: 500;
+    }
+    .tab .dot {
+      width: 10px; height: 10px; border-radius: 2px;
+    }
+    .tab .dot.stripe { background: #635BFF; }
+    .tab .dot.shopify { background: #96BF48; }
+
+    .table-card {
+      background: #fff;
+      border: 1px solid #DFE4EC;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table.mappings {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    table.mappings th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B778C;
+      padding: 10px 12px;
+      border-bottom: 1px solid #DFE4EC;
+      background: #F7F8FA;
+      white-space: nowrap;
+    }
+    table.mappings td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #EFF1F5;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    table.mappings tr:last-child td { border-bottom: none; }
+    table.mappings tr.hidden { display: none; }
+    .col-check { width: 40px; }
+    .cell-select {
+      width: 100%;
+      min-width: 140px;
+      color: #1A1B24;
+    }
+    .cell-select.is-empty { color: #9CA3AF; }
+    .cell-select.highlight-empty {
+      border-color: var(--amber-outline);
+      box-shadow: 0 0 0 2px rgba(245,166,35,.25);
+      background-color: #FFFBF3;
+    }
+    .integ-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #EFF1F5;
+      color: #374151;
+    }
+    .integ-pill.shopify { background: #ECF7E0; color: #3F6B12; }
+    .integ-pill.stripe { background: #EEEBFF; color: #3D2E9E; }
+    .pager {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #6B778C;
+      border-top: 1px solid #EFF1F5;
+    }
+
+    /* Modals */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,27,36,.45);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.18);
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal.wide { max-width: 820px; }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 20px 20px 0;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+      flex: 1;
+      line-height: 1.35;
+      color: #1A1B24;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6B778C;
+      padding: 0;
+      line-height: 1;
+    }
+    .modal-close .material-icons { font-size: 22px; }
+    .modal-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .modal-icon.warn {
+      background: var(--amber-soft);
+      color: var(--orange-text);
+    }
+    .modal-icon.info {
+      background: #E0EBFD;
+      color: #0053CC;
+    }
+    .modal-body {
+      padding: 12px 20px 8px;
+      overflow: auto;
+    }
+    .modal-body p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: #5c5c5c;
+      line-height: 1.5;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px 20px;
+    }
+    .gap-list {
+      border: 1px solid var(--amber-border);
+      background: var(--amber-soft);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 4px 0 8px;
+    }
+    .gap-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px 14px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--amber-border);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      color: #1A1B24;
+    }
+    .gap-row:last-child { border-bottom: none; }
+    .gap-row:hover { background: #FFEEC8; }
+    .gap-row .left {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 500;
+    }
+    .gap-row .bullet {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--orange-text);
+      flex-shrink: 0;
+    }
+    .gap-row .count { color: #6B778C; font-weight: 400; }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .preview-table th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6B778C;
+      padding: 8px;
+      border-bottom: 1px solid #DFE4EC;
+      background: #F7F8FA;
+    }
+    .preview-table td {
+      padding: 8px;
+      border-bottom: 1px solid #EFF1F5;
+    }
+    .preview-table tr { background: #FFF8F0; }
+    .preview-note {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #6B778C;
+    }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span class="brand">SET-1439 · Dimensions reminder</span>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="proto-tabs" role="tablist" aria-label="Prototype variants">
+      <button type="button" class="proto-tab active" data-variant="A" role="tab" aria-selected="true">A · Modal + strip</button>
+      <button type="button" class="proto-tab" data-variant="B" role="tab" aria-selected="false">B · Modal only</button>
+      <button type="button" class="proto-tab" data-variant="C" role="tab" aria-selected="false">C · Current</button>
+    </div>
+  </div>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand-row"><span class="brand-mark">S</span> Synder</div>
+      <div class="nav-item"><span class="material-icons">dashboard</span> Dashboard</div>
+      <div class="nav-group-label"><span class="material-icons">swap_horiz</span> Mapping</div>
+      <div class="nav-sub active">Mappings list</div>
+      <div class="nav-sub">Groups</div>
+      <div class="nav-item"><span class="material-icons">account_balance</span> Summaries</div>
+      <div class="nav-item"><span class="material-icons">fact_check</span> Reconciliation</div>
+      <div class="nav-item"><span class="material-icons">inventory_2</span> Products and services</div>
+      <div class="nav-item"><span class="material-icons">insights</span> Financials</div>
+      <div class="nav-item"><span class="material-icons">settings</span> Settings</div>
+      <div class="nav-item"><span class="material-icons">smart_toy</span> AI Agents</div>
+      <div class="nav-item"><span class="material-icons">new_releases</span> What's New</div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <span class="balance">Balance: 1000</span>
+        <span class="avatar" title="User">IP</span>
+      </header>
+
+      <div class="content">
+        <div class="page-head">
+          <div>
+            <h1>Mappings list</h1>
+            <p class="page-sub">Create mappings between transactions and your Chart of Accounts.</p>
+          </div>
+          <div class="head-actions">
+            <button type="button" class="btn-ghost btn" style="background:#fff;color:#374151;border-color:#DFE4EC;">Export CSV</button>
+            <button type="button" class="btn-outlined">Add group ▾</button>
+            <button type="button" class="btn" id="saveMappingsBtn" disabled>Save mappings</button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <select class="select" id="filterGroups" aria-label="Groups">
+            <option value="all">Groups: All</option>
+          </select>
+          <select class="select" id="filterGateway" aria-label="Payment gateway">
+            <option value="all">Payment gateway: All</option>
+            <option value="Shopify">Shopify</option>
+            <option value="Stripe">Stripe</option>
+          </select>
+          <select class="select" id="filterAccount" aria-label="Account">
+            <option value="all">Account: All</option>
+          </select>
+          <select class="select" id="filterStatus" aria-label="Mapping status">
+            <option value="all">Mapping status: All</option>
+            <option value="mapped">Mapped</option>
+            <option value="not_mapped">Not mapped</option>
+            <option value="missing_dimensions">Missing dimensions</option>
+            <option value="missing_tax">Missing tax code</option>
+            <option value="missing_location">Missing location</option>
+          </select>
+          <button type="button" class="btn-text" id="resetFiltersBtn">Reset filters</button>
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle"><span class="switch on" aria-hidden="true"></span> Enable locations</span>
+          <span class="toggle"><span class="switch" aria-hidden="true"></span> Enable classes</span>
+        </div>
+
+        <div class="suggest-banner show" id="suggestBanner">
+          <span class="ico material-icons">lightbulb</span>
+          <div class="copy">
+            <strong>Review suggested mapping</strong>
+            <p>Synder has found unmapped groups and can offer tailored suggestions to align with your Chart of Accounts. You can easily review these suggestions and make any adjustments you need. Plus, you can reverse this process at any point.</p>
+          </div>
+          <button type="button" class="btn" id="reviewSuggestBtn">Review suggested mapping</button>
+        </div>
+
+        <div class="dim-strip" id="dimStrip" role="status">
+          <span class="material-icons strip-ico">warning_amber</span>
+          <span id="stripContent"></span>
+          <button type="button" class="strip-reset" id="stripShowAll">Show all</button>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <div class="tab active">All</div>
+          <div class="tab"><span class="dot stripe"></span> Stripe Test (sandbox)</div>
+          <div class="tab"><span class="dot shopify"></span> Changolivia (Shopify)</div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="mappings" id="mappingsTable">
+              <thead>
+                <tr>
+                  <th class="col-check"><input type="checkbox" aria-label="Select all" disabled /></th>
+                  <th>Group</th>
+                  <th>Account subtype</th>
+                  <th>Payment gateway</th>
+                  <th>Integration</th>
+                  <th>Location</th>
+                  <th>Tax code</th>
+                  <th>Account</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+          <div class="pager"><span id="pagerLabel">1–14 of 14</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suggested mapping preview -->
+  <div class="modal-bg" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="modal wide">
+      <div class="modal-header">
+        <div class="modal-icon info"><span class="material-icons">auto_awesome</span></div>
+        <h2 id="previewTitle">Suggested mapping preview</h2>
+        <button type="button" class="modal-close" data-close="previewModal" aria-label="Close"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p class="preview-note">Synder has pre-mapped groups to corresponding accounts. Review and adjust these mappings as needed. No changes will take effect until you confirm by saving.</p>
+        <div style="overflow:auto;max-height:360px;border:1px solid #DFE4EC;border-radius:6px;">
+          <table class="preview-table" id="previewTable">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Account subtype</th>
+                <th>Payment gateway</th>
+                <th>Integration</th>
+                <th>Account</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outlined" id="saveGoSummariesBtn">Save and go to Summaries</button>
+        <button type="button" class="btn" id="saveAllBtn">Save all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post-save dimensions reminder -->
+  <div class="modal-bg" id="reminderModal" role="dialog" aria-modal="true" aria-labelledby="reminderTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-icon warn"><span class="material-icons">warning_amber</span></div>
+        <h2 id="reminderTitle">Tax codes and locations are still empty</h2>
+        <button type="button" class="modal-close" data-close="reminderModal" aria-label="Close"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p id="reminderBody">Suggested mapping fills accounts only. Without these, summaries post to your books without them.</p>
+        <div class="gap-list" id="gapList"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outlined" id="skipBtn">Skip for now</button>
+        <button type="button" class="btn" id="finishBtn">Finish mapping</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  const LOCATIONS = ["", "Berlin", "Stripe", "Test", "US — East", "EU — DE"];
+  const TAX_CODES = ["", "VAT 20%", "VAT 0%", "Exempt", "Out of scope", "Sales tax"];
+  const ENABLED = { location: true, tax: true, class: false };
+
+  // 14 rows matching the sketch pattern (Shopify + Stripe)
+  const SUGGESTED = {
+    1: "Accounts Receivable (A/R)",
+    2: "Accounts Receivable (A/R)",
+    3: "Shopify clearing (Synder)",
+    4: "Stripe clearing (Synder)",
+    5: "Shopify sales",
+    6: "Stripe sales",
+    7: "VAT liability",
+    8: "VAT liability",
+    9: "Shopify refunds",
+    10: "Stripe refunds",
+    11: "Shopify fees",
+    12: "Stripe fees",
+    13: "Shopify expenses",
+    14: "Stripe expenses"
+  };
+
+  function buildRows() {
+    return [
+      { id: 1, group: "Invoices", subtype: "Accounts receivable", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 2, group: "Invoices", subtype: "Accounts receivable", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 3, group: "Clearing", subtype: "Other current assets", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 4, group: "Clearing", subtype: "Other current assets", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 5, group: "Sales", subtype: "Income", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 6, group: "Sales", subtype: "Income", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 7, group: "Sales tax payable", subtype: "Other current liabilities", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 8, group: "Sales tax payable", subtype: "Other current liabilities", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 9, group: "Refunds", subtype: "Income", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 10, group: "Refunds", subtype: "Income", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 11, group: "Fees", subtype: "Expenses", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 12, group: "Fees", subtype: "Expenses", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" },
+      { id: 13, group: "Expenses", subtype: "Expenses", gateway: "Shopify", integration: "Changolivia (Shopify)", location: "", tax: "", account: "" },
+      { id: 14, group: "Expenses", subtype: "Expenses", gateway: "Stripe", integration: "Stripe Test (sandbox)", location: "", tax: "", account: "" }
+    ];
+  }
+
+  const state = {
+    variant: "A",
+    phase: "unmapped", // unmapped | mapped
+    rows: buildRows(),
+    filterStatus: "all",
+    filterGateway: "all",
+    highlightMissing: null, // null | 'any' | 'tax' | 'location'
+    showStrip: false,
+    dirty: false
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
+
+  function optionHtml(list, selected) {
+    return list.map((v) => {
+      const label = v === "" ? "Select" : v;
+      const sel = v === selected ? " selected" : "";
+      return '<option value="' + escapeHtml(v) + '"' + sel + ">" + escapeHtml(label) + "</option>";
+    }).join("");
+  }
+
+  function counts() {
+    let tax = 0, location = 0;
+    state.rows.forEach((r) => {
+      if (ENABLED.tax && !r.tax) tax++;
+      if (ENABLED.location && !r.location) location++;
+    });
+    return { tax, location };
+  }
+
+  function missingAny(r) {
+    return (ENABLED.tax && !r.tax) || (ENABLED.location && !r.location);
+  }
+
+  function isMapped(r) {
+    return !!r.account && !missingAny(r);
+  }
+
+  function filteredRows() {
+    return state.rows.filter((r) => {
+      if (state.filterGateway !== "all" && r.gateway !== state.filterGateway) return false;
+      if (state.filterStatus === "mapped" && !isMapped(r)) return false;
+      if (state.filterStatus === "not_mapped" && r.account) return false;
+      if (state.filterStatus === "missing_dimensions" && !missingAny(r)) return false;
+      if (state.filterStatus === "missing_tax" && !(ENABLED.tax && !r.tax)) return false;
+      if (state.filterStatus === "missing_location" && !(ENABLED.location && !r.location)) return false;
+      if (state.highlightMissing === "tax" && !(ENABLED.tax && !r.tax)) return false;
+      if (state.highlightMissing === "location" && !(ENABLED.location && !r.location)) return false;
+      if (state.highlightMissing === "any" && !missingAny(r)) return false;
+      return true;
+    });
+  }
+
+  function shouldHighlight(r, field) {
+    if (!state.highlightMissing) return false;
+    if (field === "tax") {
+      return !r.tax && (state.highlightMissing === "tax" || state.highlightMissing === "any");
+    }
+    if (field === "location") {
+      return !r.location && (state.highlightMissing === "location" || state.highlightMissing === "any");
+    }
+    return false;
+  }
+
+  function renderTable() {
+    const rows = filteredRows();
+    const tbody = $("tbody");
+    tbody.innerHTML = rows.map((r) => {
+      const locCls = "cell-select" + (!r.location ? " is-empty" : "") + (shouldHighlight(r, "location") ? " highlight-empty" : "");
+      const taxCls = "cell-select" + (!r.tax ? " is-empty" : "") + (shouldHighlight(r, "tax") ? " highlight-empty" : "");
+      const accCls = "cell-select" + (!r.account ? " is-empty" : "");
+      const pillCls = r.gateway === "Shopify" ? "shopify" : "stripe";
+      return (
+        '<tr data-id="' + r.id + '">' +
+          '<td class="col-check"><input type="checkbox" disabled aria-label="Select row" /></td>' +
+          '<td>' + escapeHtml(r.group) + '</td>' +
+          '<td>' + escapeHtml(r.subtype) + '</td>' +
+          '<td>' + escapeHtml(r.gateway) + '</td>' +
+          '<td><span class="integ-pill ' + pillCls + '">' + escapeHtml(r.integration) + '</span></td>' +
+          '<td><select class="' + locCls + '" data-field="location" data-id="' + r.id + '" aria-label="Location">' +
+            optionHtml(LOCATIONS, r.location) + '</select></td>' +
+          '<td><select class="' + taxCls + '" data-field="tax" data-id="' + r.id + '" aria-label="Tax code">' +
+            optionHtml(TAX_CODES, r.tax) + '</select></td>' +
+          '<td><select class="' + accCls + '" data-field="account" data-id="' + r.id + '" aria-label="Account" ' +
+            (state.phase === "unmapped" ? "" : "") + '>' +
+            '<option value="">' + (r.account ? escapeHtml(r.account) : "Select") + '</option>' +
+            (r.account ? '<option value="' + escapeHtml(r.account) + '" selected>' + escapeHtml(r.account) + '</option>' : "") +
+            Object.values(SUGGESTED).filter((v, i, a) => a.indexOf(v) === i && v !== r.account).map((v) =>
+              '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'
+            ).join("") +
+          '</select></td>' +
+        '</tr>'
+      );
+    }).join("");
+
+    const total = state.rows.length;
+    const shown = rows.length;
+    $("pagerLabel").textContent = shown ? ("1–" + shown + " of " + total) : ("0–0 of " + total);
+    updateBanner();
+    updateStrip();
+    updateSaveBtn();
+  }
+
+  function updateBanner() {
+    const unmapped = state.rows.some((r) => !r.account);
+    $("suggestBanner").classList.toggle("show", unmapped && state.phase === "unmapped");
+  }
+
+  function updateStrip() {
+    const strip = $("dimStrip");
+    const c = counts();
+    const useStrip = state.variant === "A" && state.showStrip && state.phase === "mapped" && (c.tax > 0 || c.location > 0);
+    strip.classList.toggle("show", useStrip);
+    if (!useStrip) return;
+
+    const parts = [];
+    if (c.tax > 0) {
+      parts.push('<button type="button" class="strip-link" data-filter="tax">Tax code empty on ' + c.tax + ' row' + (c.tax === 1 ? "" : "s") + '</button>');
+    }
+    if (c.location > 0) {
+      parts.push('<button type="button" class="strip-link" data-filter="location">Location empty on ' + c.location + ' row' + (c.location === 1 ? "" : "s") + '</button>');
+    }
+    $("stripContent").innerHTML = parts.join('<span class="strip-sep"> · </span>');
+  }
+
+  function updateSaveBtn() {
+    $("saveMappingsBtn").disabled = !(state.dirty && state.phase === "mapped");
+  }
+
+  function openModal(id) { $(id).classList.add("open"); }
+  function closeModal(id) { $(id).classList.remove("open"); }
+
+  function renderPreview() {
+    $("previewBody").innerHTML = state.rows.map((r) => (
+      '<tr>' +
+        '<td>' + escapeHtml(r.group) + '</td>' +
+        '<td>' + escapeHtml(r.subtype) + '</td>' +
+        '<td>' + escapeHtml(r.gateway) + '</td>' +
+        '<td>' + escapeHtml(r.integration) + '</td>' +
+        '<td><strong>' + escapeHtml(SUGGESTED[r.id]) + '</strong></td>' +
+      '</tr>'
+    )).join("");
+  }
+
+  function titleForGaps(c) {
+    const parts = [];
+    if (c.tax > 0) parts.push("Tax codes");
+    if (c.location > 0) parts.push("locations");
+    if (!parts.length) return "All set";
+    if (parts.length === 1) return parts[0] + " are still empty";
+    return parts[0] + " and " + parts[1] + " are still empty";
+  }
+
+  function renderReminder() {
+    const c = counts();
+    $("reminderTitle").textContent = titleForGaps(c);
+    $("reminderBody").textContent = "Suggested mapping fills accounts only. Without these, summaries post to your books without them.";
+    const list = $("gapList");
+    list.innerHTML = "";
+    if (c.tax > 0) {
+      list.innerHTML += '<button type="button" class="gap-row" data-filter="tax">' +
+        '<span class="left"><span class="bullet"></span>Tax codes</span>' +
+        '<span class="count">' + c.tax + ' row' + (c.tax === 1 ? "" : "s") + '</span></button>';
+    }
+    if (c.location > 0) {
+      list.innerHTML += '<button type="button" class="gap-row" data-filter="location">' +
+        '<span class="left"><span class="bullet"></span>Locations</span>' +
+        '<span class="count">' + c.location + ' row' + (c.location === 1 ? "" : "s") + '</span></button>';
+    }
+  }
+
+  function applySuggestedAccounts() {
+    // After Save all: accounts filled. Tax left empty on 6 sales/tax/invoice rows
+    // (matches sketch counts). Location left empty on all 14.
+    const taxNeeded = new Set([1, 2, 5, 6, 7, 8]); // Invoices + Sales + Sales tax payable
+    state.rows.forEach((r) => {
+      r.account = SUGGESTED[r.id];
+      if (!taxNeeded.has(r.id)) {
+        r.tax = "Out of scope"; // not needed for clearing/fees/refunds/expenses
+      }
+      // location stays ""
+    });
+    state.phase = "mapped";
+    state.dirty = false;
+  }
+
+  function afterSaveAll() {
+    closeModal("previewModal");
+    applySuggestedAccounts();
+    state.highlightMissing = null;
+    state.filterStatus = "all";
+    $("filterStatus").value = "all";
+
+    if (state.variant === "C") {
+      state.showStrip = false;
+      renderTable();
+      return;
+    }
+
+    const c = counts();
+    if (c.tax === 0 && c.location === 0) {
+      state.showStrip = false;
+      renderTable();
+      return;
+    }
+
+    renderReminder();
+    openModal("reminderModal");
+    // Strip becomes visible after modal closes for variant A
+    state.showStrip = (state.variant === "A");
+    renderTable();
+  }
+
+  function finishMapping(filter) {
+    closeModal("reminderModal");
+    if (filter === "tax" || filter === "location") {
+      state.highlightMissing = filter;
+      state.filterStatus = filter === "tax" ? "missing_tax" : "missing_location";
+      $("filterStatus").value = state.filterStatus;
+    } else {
+      state.highlightMissing = "any";
+      state.filterStatus = "missing_dimensions";
+      $("filterStatus").value = "missing_dimensions";
+    }
+    if (state.variant === "A") state.showStrip = true;
+    renderTable();
+  }
+
+  function skipForNow() {
+    closeModal("reminderModal");
+    state.highlightMissing = null;
+    if (state.variant === "A") state.showStrip = true;
+    renderTable();
+  }
+
+  function resetPrototype() {
+    state.rows = buildRows();
+    state.phase = "unmapped";
+    state.filterStatus = "all";
+    state.filterGateway = "all";
+    state.highlightMissing = null;
+    state.showStrip = false;
+    state.dirty = false;
+    $("filterStatus").value = "all";
+    $("filterGateway").value = "all";
+    closeModal("previewModal");
+    closeModal("reminderModal");
+    renderTable();
+  }
+
+  // Events
+  document.querySelectorAll(".proto-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".proto-tab").forEach((t) => {
+        t.classList.toggle("active", t === tab);
+        t.setAttribute("aria-selected", t === tab ? "true" : "false");
+      });
+      state.variant = tab.getAttribute("data-variant");
+      resetPrototype();
+    });
+  });
+
+  $("reviewSuggestBtn").addEventListener("click", () => {
+    renderPreview();
+    openModal("previewModal");
+  });
+
+  $("saveAllBtn").addEventListener("click", afterSaveAll);
+  $("saveGoSummariesBtn").addEventListener("click", afterSaveAll);
+
+  $("finishBtn").addEventListener("click", () => finishMapping("any"));
+  $("skipBtn").addEventListener("click", skipForNow);
+
+  $("gapList").addEventListener("click", (e) => {
+    const row = e.target.closest(".gap-row");
+    if (!row) return;
+    finishMapping(row.getAttribute("data-filter"));
+  });
+
+  $("dimStrip").addEventListener("click", (e) => {
+    const link = e.target.closest(".strip-link");
+    if (link) {
+      finishMapping(link.getAttribute("data-filter"));
+    }
+  });
+
+  $("stripShowAll").addEventListener("click", () => {
+    state.highlightMissing = null;
+    state.filterStatus = "all";
+    $("filterStatus").value = "all";
+    renderTable();
+  });
+
+  $("resetFiltersBtn").addEventListener("click", () => {
+    state.filterStatus = "all";
+    state.filterGateway = "all";
+    state.highlightMissing = null;
+    $("filterStatus").value = "all";
+    $("filterGateway").value = "all";
+    renderTable();
+  });
+
+  $("filterStatus").addEventListener("change", (e) => {
+    state.filterStatus = e.target.value;
+    state.highlightMissing = null;
+    if (e.target.value === "missing_tax") state.highlightMissing = "tax";
+    if (e.target.value === "missing_location") state.highlightMissing = "location";
+    if (e.target.value === "missing_dimensions") state.highlightMissing = "any";
+    renderTable();
+  });
+
+  $("filterGateway").addEventListener("change", (e) => {
+    state.filterGateway = e.target.value;
+    renderTable();
+  });
+
+  $("tbody").addEventListener("change", (e) => {
+    const sel = e.target.closest("select[data-field]");
+    if (!sel) return;
+    const id = Number(sel.getAttribute("data-id"));
+    const field = sel.getAttribute("data-field");
+    const row = state.rows.find((r) => r.id === id);
+    if (!row) return;
+    row[field] = sel.value;
+    state.dirty = true;
+    // Clear highlight for this cell once filled
+    if ((field === "tax" || field === "location") && sel.value) {
+      // re-evaluate strip / filters
+    }
+    renderTable();
+  });
+
+  document.querySelectorAll("[data-close]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-close");
+      closeModal(id);
+      if (id === "reminderModal") {
+        // Same as skip — strip stays for A
+        if (state.variant === "A") state.showStrip = true;
+        renderTable();
+      }
+    });
+  });
+
+  document.querySelectorAll(".modal-bg").forEach((bg) => {
+    bg.addEventListener("click", (e) => {
+      if (e.target === bg) {
+        closeModal(bg.id);
+        if (bg.id === "reminderModal" && state.variant === "A") {
+          state.showStrip = true;
+          renderTable();
+        }
+      }
+    });
+  });
+
+  $("saveMappingsBtn").addEventListener("click", () => {
+    state.dirty = false;
+    updateSaveBtn();
+    // If all dimensions filled, strip goes away via updateStrip
+    const c = counts();
+    if (c.tax === 0 && c.location === 0) {
+      state.showStrip = false;
+      state.highlightMissing = null;
+    }
+    renderTable();
+  });
+
+  renderTable();
+})();
+  </script>
+</body>
+</html>
