@@ -2018,7 +2018,7 @@
               </label>
             </div>
             <button type="button" class="ty-checklist-cta" id="ty-goto-checklist">
-              Go to Setup checklist <span class="material-icons-round">arrow_forward</span>
+              Go to Setup checklist
             </button>
           </div>
         </main>
@@ -2278,14 +2278,14 @@
           id: 'clearing', phase: 'self', viewOnly: 'View only until your call',
           title: 'Review your clearing account',
           desc: 'Check which account Synder will use. Something off? Add a note — your specialist changes it on the call.',
-          where: 'Go to Settings → Sales', whereHint: 'Settings → Sales',
+          where: 'Go to Settings: Sales', whereHint: 'Settings → Sales',
           note: true,
         },
         {
           id: 'core-sales', phase: 'self', viewOnly: 'View only until your call',
           title: 'Review core sales settings',
           desc: 'Check Products/Services, Taxes, and Fees. Something off? Add a note — your specialist changes it on the call.',
-          where: 'Go to Settings → Products/Services', whereHint: 'Settings → Products/Services',
+          where: 'Go to Settings: Products/Services', whereHint: 'Settings → Products/Services',
           note: true,
         },
         {
@@ -3258,7 +3258,7 @@
         const destinations = { channel: 'Organization settings', mapping: 'Mapping',
           'test-sync': state.syncMode === 'summary' ? 'Summaries' : 'Transactions' };
         const label = destinations[c.id];
-        actions = '<div class="hs-step-actions"><button type="button" class="hs-where" data-where="' + c.id + '">Go to ' + label + ' <span class="material-icons-round" aria-hidden="true">arrow_forward</span></button>' +
+        actions = '<div class="hs-step-actions"><button type="button" class="hs-where" data-where="' + c.id + '">Go to ' + label + '</button>' +
           '<button type="button" class="hs-mark" data-mark="' + c.id + '">Mark as done</button></div>';
       } else if (status === 'current') {
         const whereBtn = c.where
