@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ignat · PT Dashboard + Health check — Connection lost</title>
+<title>Ignat · PT Dashboard + Health check — A Cards / B Table</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -164,15 +164,41 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
 .cfg-sec { font-weight:700; margin:16px 0 8px; }
 
 [hidden] { display:none !important; }
+
+/* Variant B — long integrity table (from original att.html, kit-styled, ≥14px) */
+.hc-table-wrap { margin-top: 8px; overflow-x: auto; }
+.hc-table { width:100%; border-collapse:collapse; font-size:14px; background:#fff; border:1px solid var(--border-default,#DFE4EC); }
+.hc-table th { text-align:left; font-size:14px; font-weight:700; color:#1A1B24; padding:12px 14px; border-bottom:1px solid var(--border-default,#DFE4EC); background:#fff; white-space:nowrap; }
+.hc-table td { padding:12px 14px; border-bottom:1px solid #F0F2F5; color:#1A1B24; vertical-align:top; font-size:14px; line-height:20px; }
+.hc-table tr.row-main { cursor:pointer; }
+.hc-table tr.row-main:hover { background:#F9FAFB; }
+.hc-table .chev-cell { width:28px; padding-right:0; text-align:center; }
+.hc-table .chev { display:inline-block; color:#98A2B3; font-size:16px; line-height:1; transition:transform .18s ease; }
+.hc-table .chev.open { transform:rotate(90deg); color:#0053CC; }
+.hc-table tr.row-exp td { background:#F9FAFB; border-bottom:1px solid var(--border-default,#DFE4EC); }
+.hc-table .exp-box { padding:4px 0 8px; }
+.hc-table .exp-box .fl { font-weight:700; color:var(--text-secondary,#6B778C); margin:8px 0 2px; font-size:14px; }
+.hc-table .exp-box p { margin:0 0 6px; font-size:14px; }
+.hc-table .exp-box ul { margin:0 0 10px; padding-left:18px; font-size:14px; }
+.hc-table .exp-actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+.hc-table .exp-actions .act { background:none; border:none; font:inherit; font-size:14px; color:#6B778C; cursor:pointer; padding:0; }
+.hc-table .exp-actions .act:hover { color:#1A1B24; text-decoration:underline; }
+.hc-table .exp-actions .act-fix { color:#0053CC; }
+.hc-table .scope-line { color:#6B778C; font-size:14px; margin:8px 0; }
+.hc-pager { display:flex; justify-content:flex-end; gap:16px; padding:10px 4px; font-size:14px; color:#6B778C; }
+.hc-score { font-size:18px; font-weight:700; color:#1A1B24; }
+.hc-score small { font-size:14px; font-weight:400; color:#6B778C; }
+.var-a-only[hidden], .var-b-only[hidden] { display:none !important; }
+
 </style>
 </head>
 <body>
 
 <div class="proto-bar">
   <span class="name">Ignat · PT Dashboard + Health check</span>
-  <div class="seg" role="group" aria-label="State">
-    <button type="button" class="on" id="seg-lost" data-view="dash">Connection lost</button>
-    <button type="button" id="seg-trouble" data-view="trouble">Troubleshooting</button>
+  <div class="seg" role="group" aria-label="Variants">
+    <button type="button" class="on" id="seg-a" data-variant="a">A — Cards</button>
+    <button type="button" id="seg-b" data-variant="b">B — Table</button>
   </div>
 </div>
 
@@ -484,16 +510,89 @@ function findingRow(c){
     + '</button>'+body+'</div>';
 }
 
-function renderHealth(){
+function sortedChecks(){
   var order = { failed:0, marked:1, passed:2, ignored:3 };
-  var list = CHECKS.slice().sort(function(a,b){
+  return CHECKS.slice().sort(function(a,b){
     var sa=statusOf(a), sb=statusOf(b);
     if(order[sa]!==order[sb]) return order[sa]-order[sb];
     if(sa==='failed'){
-      if(a.sev!==b.sev) return a.sev==='danger'?-1:1; /* red before yellow, no rank among reds beyond that */
+      if(a.sev!==b.sev) return a.sev==='danger'?-1:1;
+      if(a.cost!==b.cost) return a.cost==='live'?-1:1;
     }
     return 0;
   });
+}
+function lastCheckedText(c){
+  if(c.cost==='live') return 'Live';
+  var st = statusOf(c);
+  if(st==='ignored' && DEMO[c.id]==='ignored') return '—';
+  return LAST_CHECK;
+}
+function periodText(c){
+  var st = statusOf(c);
+  if(st==='ignored') return '—';
+  if(c.scope==='state') return 'Current setting';
+  if(c.cost==='live') return 'Last 30 days';
+  return 'Last scheduled run';
+}
+function tableStatusPill(c){
+  var st = statusOf(c);
+  if(st==='failed') return '<span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">Needs fix · '+sevWord(c.sev)+'</span>';
+  if(st==='marked') return '<span class="status status-blue">Marked as fixed</span>';
+  if(st==='passed') return '<span class="status status-green">Passed check</span>';
+  return '<span class="status status-grey">Ignored</span>';
+}
+function hcScore(){
+  var pts = 0;
+  CHECKS.forEach(function(c){
+    var s = statusOf(c);
+    if(s==='failed' || s==='marked'){
+      pts += (c.sev==='danger' ? 8 : 4);
+    }
+  });
+  return Math.max(0, 100 - pts);
+}
+function tableExpanded(c){
+  var st = statusOf(c);
+  var body = '';
+  if(st==='ignored'){
+    body += '<p class="scope-line">'+esc(ignoreReason(c))+'</p>';
+  }
+  body += '<div class="fl">What</div><p>'+esc(c.what)+'</p>'
+    + '<div class="fl">Why it matters</div><p>'+esc(c.why)+'</p>'
+    + '<div class="fl">How to fix</div><ul>'+(c.how||[]).map(function(h){return '<li>'+esc(h)+'</li>';}).join('')+'</ul>';
+  var acts = '<div class="exp-actions">';
+  if(st==='failed'){
+    acts += '<button type="button" class="act act-fix" data-go="'+esc(c.fix)+'">'+esc(c.fix)+'</button>';
+    if(c.cost==='scheduled') acts += '<button type="button" class="act" data-mark="'+c.id+'">Mark as fixed</button>';
+    acts += '<button type="button" class="act" data-ignore="'+c.id+'">Ignore</button>';
+  } else if(st==='ignored' && !enabled[c.id]){
+    acts += '<button type="button" class="act act-fix" data-open-settings="1">Open Check settings</button>';
+  } else if(st==='ignored' && DEMO[c.id]==='ignored'){
+    acts += '<button type="button" class="act act-fix" data-go="Organization settings">Go to Organization settings</button>';
+  } else if(st==='marked'){
+    body = '<p class="scope-line">You marked this issue as fixed. The next scheduled check confirms it.</p>' + body;
+  } else if(st==='passed'){
+    body = '<p class="scope-line">No issues found.</p>' + body;
+  }
+  acts += '</div>';
+  return '<div class="exp-box">'+body+acts+'</div>';
+}
+function findingTableRow(c){
+  var st = statusOf(c);
+  var open = !!openSet[c.id];
+  var title = (st==='failed' || st==='marked') ? c.title : c.label;
+  var muted = st==='ignored' ? ' style="color:#6B778C"' : '';
+  return '<tr class="row-main" data-row="'+c.id+'"><td class="chev-cell"><span class="chev'+(open?' open':'')+'" aria-hidden="true">›</span></td>'
+    + '<td style="font-weight:700"><span'+muted+'>'+esc(title)+'</span></td>'
+    + '<td>'+esc(c.cat)+'</td>'
+    + '<td style="white-space:nowrap">'+esc(lastCheckedText(c))+'</td>'
+    + '<td style="white-space:nowrap">'+esc(periodText(c))+'</td>'
+    + '<td>'+tableStatusPill(c)+'</td></tr>'
+    + '<tr class="row-exp" id="exp-'+c.id+'"'+(open?'':' hidden')+'><td></td><td colspan="5">'+tableExpanded(c)+'</td></tr>';
+}
+function renderHealthCards(){
+  var list = sortedChecks();
   var c = countBySev();
   var html = '<p class="hc-blurb">Settings and scheduled checks for your organization. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard — they are not repeated here.</p>'
     + '<div class="hc-toolbar"><span class="hc-last">Last checked '+LAST_CHECK+' · '+c.total+' open</span><span class="spacer"></span>'
@@ -508,6 +607,29 @@ function renderHealth(){
     html += '<div class="hc-group">'+g[0]+' · '+rows.length+'</div>' + rows.map(findingRow).join('');
   });
   return html;
+}
+function renderHealthTable(){
+  /* Long-table layout from original att.html (Issue · Category · Last checked · Period · Status) */
+  var list = sortedChecks();
+  var c = countBySev();
+  var score = hcScore();
+  var html = '<p class="hc-blurb">All checks for your organization in one list. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard — they are not repeated here.</p>'
+    + '<div class="hc-toolbar">'
+    + '<span class="hc-last">Score <span class="hc-score">'+score+'<small>/100</small></span> · Last checked '+LAST_CHECK+' · '+c.total+' open</span>'
+    + '<span class="spacer"></span>'
+    + '<button type="button" class="btn btn-outlined" id="btn-run">Run check</button>'
+    + '<button type="button" class="btn btn-primary" id="btn-settings">Check settings</button></div>'
+    + '<div class="hc-table-wrap"><table class="hc-table" id="integrity-table"><thead><tr>'
+    + '<th class="chev-cell"></th><th style="width:40%">Issue</th><th style="width:11%">Category</th>'
+    + '<th style="width:12%">Last checked</th><th style="width:17%">Period</th><th>Status</th>'
+    + '</tr></thead><tbody>'
+    + list.map(findingTableRow).join('')
+    + '</tbody></table></div>'
+    + '<div class="hc-pager"><span>Rows per page: <b>50 ▾</b></span><span>|‹ &nbsp; ‹ &nbsp; ›</span></div>';
+  return html;
+}
+function renderHealth(){
+  return variant === 'b' ? renderHealthTable() : renderHealthCards();
 }
 
 function renderSyncIssues(){
@@ -567,12 +689,23 @@ function renderSpeed(){
 }
 
 var page = 'dash', tsTab = 'health';
+var variant = 'a'; /* a = Cards, b = Table (original long-table) */
 
-function writeHash(){
+function writeUrl(){
   try {
     var h = '#lost' + (page==='trouble' ? '/' + tsTab : '');
-    history.replaceState(null,'',h);
+    var q = '?v=' + variant;
+    history.replaceState(null,'', q + h);
   } catch(e){}
+}
+function writeHash(){ writeUrl(); }
+
+function setVariant(v, opts){
+  variant = (v === 'b') ? 'b' : 'a';
+  document.getElementById('seg-a').classList.toggle('on', variant==='a');
+  document.getElementById('seg-b').classList.toggle('on', variant==='b');
+  if(page==='trouble') renderTrouble();
+  if(!opts || !opts.skipUrl) writeUrl();
 }
 
 function openPage(p, tab){
@@ -582,10 +715,8 @@ function openPage(p, tab){
   document.getElementById('page-trouble').hidden = p !== 'trouble';
   document.getElementById('nav-dashboard').classList.toggle('active', p==='dash');
   document.getElementById('nav-troubleshooting').classList.toggle('active', p==='trouble');
-  document.getElementById('seg-lost').classList.toggle('on', p==='dash');
-  document.getElementById('seg-trouble').classList.toggle('on', p==='trouble');
   if(p==='trouble') renderTrouble();
-  writeHash();
+  writeUrl();
   window.scrollTo(0,0);
 }
 
@@ -671,27 +802,44 @@ document.addEventListener('click', function(e){
   if(nav){ e.preventDefault(); openPage(nav.getAttribute('data-nav'), nav.getAttribute('data-tab') || (nav.getAttribute('data-nav')==='trouble'?tsTab||'health':null)); return; }
   var tab = e.target.closest('.ts-tabs [data-tab]');
   if(tab){ tsTab = tab.getAttribute('data-tab'); renderTrouble(); writeHash(); return; }
-  var seg = e.target.closest('.proto-bar [data-view]');
-  if(seg){ openPage(seg.getAttribute('data-view'), seg.getAttribute('data-view')==='trouble'?'health':null); return; }
+  var seg = e.target.closest('.proto-bar [data-variant]');
+  if(seg){ setVariant(seg.getAttribute('data-variant')); return; }
+  var trow = e.target.closest('.hc-table tr.row-main');
+  if(trow && !e.target.closest('[data-go],[data-mark],[data-ignore],[data-open-settings]')){
+    var rid = trow.getAttribute('data-row');
+    openSet[rid] = !openSet[rid];
+    renderTrouble();
+    return;
+  }
   var g = e.target.closest('[data-go]');
   if(g){ e.preventDefault(); toast('Prototype — would open: '+g.getAttribute('data-go')); return; }
   var a = e.target.closest('a[href="#"]');
   if(a){ e.preventDefault(); toast('Prototype — would open: '+a.textContent.trim()); }
 });
 
-function parseHash(){
+function parseUrl(){
+  var params = new URLSearchParams(location.search || '');
+  var v = (params.get('v') || 'a').toLowerCase();
+  if(v !== 'a' && v !== 'b') v = 'a';
   var m = /^#lost(?:\/(health|sync|import|history|speed))?$/.exec(location.hash||'#lost');
-  return { t: m && m[1] ? m[1] : null };
+  return { v: v, t: m && m[1] ? m[1] : null };
 }
+function parseHash(){ return parseUrl(); }
 window.addEventListener('hashchange', function(){
-  var h = parseHash();
+  var h = parseUrl();
+  openPage(h.t ? 'trouble' : 'dash', h.t);
+});
+window.addEventListener('popstate', function(){
+  var h = parseUrl();
+  setVariant(h.v, { skipUrl: true });
   openPage(h.t ? 'trouble' : 'dash', h.t);
 });
 
 renderHcBlock();
-var h0 = parseHash();
+var h0 = parseUrl();
+setVariant(h0.v, { skipUrl: true });
 if(h0.t) openPage('trouble', h0.t);
-else { writeHash(); }
+else { writeUrl(); }
 </script>
 </body>
 </html>
