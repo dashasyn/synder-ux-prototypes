@@ -9,6 +9,7 @@
     Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
+    - v8: explicit role choice, neutral Create/Join, full client switcher, left-aligned directory welcome.
     - v7: portrait role and firm cards, client-directory welcome, then a simulated QuickBooks / Xero / CSV import. Firm user only.
     - v6: firm onboarding (#onboarding), client list import, firm Dashboard + setup progress. Firm user only.
     - Ctrl/Cmd+K opens the switcher; arrows + Enter + Esc work inside.
@@ -335,12 +336,47 @@
       display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 4px;
       background: #E7F0FC; color: #0053CC; font-size: 14px; line-height: 20px; font-weight: 500;
     }
-    .ob-reassure {
-      max-width: 720px; margin: 0 auto 28px; padding: 16px 18px; text-align: left;
-      background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: 8px;
+    .ob.surface { background: #fff; }
+    .ob-in.surface { max-width: 1120px; margin: 0; padding: 32px 40px 72px; }
+    .ob-in.surface h1 { text-align: left; font-size: 32px; line-height: 40px; font-weight: 500; margin: 0 0 12px; }
+    .ob-in.surface .lead, .ob-in.surface .welcome-copy { text-align: left; margin: 0 0 20px; max-width: 760px; color: #1A1B24; }
+    .welcome-copy { font-size: 16px; line-height: 24px; }
+    .books-banner {
+      display: flex; gap: 12px; align-items: flex-start; margin: 0 0 24px;
+      background: #E7F0FC; border-radius: 8px; padding: 14px 16px;
     }
-    .ob-reassure strong { display: block; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; color: #1A1B24; }
-    .ob-reassure p { margin: 0; font-size: 15px; line-height: 22px; color: #1A1B24; }
+    .books-banner .material-icons { color: #0053CC; font-size: 22px; flex-shrink: 0; }
+    .books-banner p { margin: 0; font-size: 15px; line-height: 22px; color: #1A1B24; text-align: left; }
+    .books-banner strong { font-weight: 500; }
+    .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+    .path-card {
+      display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+      border: 1px solid #DFE4EC; border-radius: 8px; background: #fff; padding: 24px;
+    }
+    .path-ico {
+      width: 40px; height: 40px; border-radius: 50%; background: #F2F6FC; color: #0053CC;
+      display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;
+    }
+    .path-ico .material-icons { font-size: 22px; }
+    .path-card h2 { margin: 0 0 8px; font-size: 18px; line-height: 24px; font-weight: 500; }
+    .path-card p { margin: 0 0 20px; font-size: 15px; line-height: 22px; color: #3E4656; }
+    .path-card .btn, .path-card .btn-outlined { margin-top: auto; }
+    .src-list { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+    .src-opt {
+      display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
+      padding: 16px 18px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      cursor: pointer; font: inherit; color: inherit;
+    }
+    .src-opt:hover { border-color: #0053CC; background: #F7FAFF; }
+    .src-opt:focus-visible { outline: 2px solid #0053CC; outline-offset: 2px; }
+    .src-opt.selected { border-color: #0053CC; box-shadow: inset 0 0 0 1px #0053CC; background: #F2F6FC; }
+    .src-ico { color: #0053CC; font-size: 24px; flex-shrink: 0; }
+    .src-h { display: block; font-size: 18px; line-height: 24px; font-weight: 500; }
+    .src-d { display: block; margin-top: 4px; font-size: 15px; line-height: 22px; color: #3E4656; }
+    .src-caveat { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .ob-in.surface .ob-field, .ob-in.surface .ob-name-row, .ob-in.surface .dir-list, .ob-in.surface .dir-empty { margin-left: 0; margin-right: 0; }
+    .ob-in.surface .ob-actions { justify-content: flex-start; }
+    .ob-in.surface .ob-quiet { margin-left: 0; text-align: left; }
     .ob-quiet { display: block; text-align: center; margin: 24px auto 0; color: #6B778C; background: none; border: none; font: inherit; font-size: 15px; line-height: 22px; cursor: pointer; }
     .ob-quiet:hover { color: #0053CC; text-decoration: underline; }
     .ob-quiet:focus-visible { outline: 2px solid #0053CC; outline-offset: 3px; border-radius: 4px; }
@@ -362,7 +398,9 @@
       .ob h1 { font-size: 24px; line-height: 32px; }
       .ob-cards.cols-4, .ob-cards.cols-3, .ob-cards.cols-2 { grid-template-columns: 1fr; max-width: 420px; }
       .ob-card { min-height: 0; padding: 24px 20px; }
-      .ob-name-row { flex-direction: column; align-items: stretch; }
+      .ob-name-row, .path-grid { flex-direction: column; align-items: stretch; }
+      .path-grid { grid-template-columns: 1fr; }
+      .ob-in.surface { padding: 24px 16px 56px; }
     }
     .ob-back { display: inline-flex; align-items: center; gap: 4px; color: #6B778C; background: none; border: none; font: inherit; font-size: 14px; cursor: pointer; margin-bottom: 16px; padding: 0; }
     .ob-back:hover { color: #0053CC; }
@@ -400,7 +438,7 @@
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v7</span>
+    <span class="brand">Firm context switcher · v8</span>
     <span class="spacer"></span>
     <div class="seg" id="modeSeg">
       <button data-m="onboarding">Onboarding</button>
@@ -543,7 +581,8 @@
 
   function defaultOb() {
     return {
-      step: 'role', role: null, firmChoice: null, source: null, firmName: 'WLS Labs',
+      step: 'role', role: null, roleChosen: false, roleNote: '', otherOpen: false,
+      firmChoice: null, firmChosen: false, source: null, firmName: 'WLS Labs',
       selected: Object.fromEntries(IMPORT_POOL.map((c) => [c.id, !c.former])),
       q: '', manual: [], manualMsg: '', setupStep: 'books', setupClientId: null
     };
@@ -557,6 +596,8 @@
           ob = Object.assign(defaultOb(), v);
           if (!Array.isArray(ob.manual)) ob.manual = [];
           IMPORT_POOL.forEach((c) => { if (typeof ob.selected[c.id] !== 'boolean') ob.selected[c.id] = !c.former; });
+          if (!v.roleChosen) ob.role = null;
+          if (!v.firmChosen) ob.firmChoice = null;
           return;
         }
       }
@@ -616,7 +657,8 @@
   }
 
   function obShell(inner, size) {
-    return `<div class="ob-in${size === 'narrow' ? ' narrow' : ''}" data-step="${esc(ob.step || 'role')}">${inner}</div>`;
+    const extra = size === 'narrow' ? ' narrow' : size === 'surface' ? ' surface' : '';
+    return `<div class="ob-in${extra}" data-step="${esc(ob.step || 'role')}">${inner}</div>`;
   }
   function obCard(o) {
     const on = !!o.selected;
@@ -632,42 +674,50 @@
     const i = $('firmNameIn');
     if (i) ob.firmName = i.value.trim() || 'WLS Labs';
   }
-  function reassure() {
-    return `<div class="ob-reassure" id="obReassure">
-      <strong>No changes to books.</strong>
-      <p>Adding a name, or importing a list, leaves every ledger as it is. Synder does not connect a ledger, does not create a client organization, and does not charge anyone. Names stay on your firm directory until you choose someone to set up.</p>
-    </div>`;
-  }
   function reviewCopy() {
     const src = ob.source;
     if (src === 'qbo' || src === 'qboa') {
-      return 'This sample stands in for customers on your firm’s own QuickBooks company. That list can include businesses that are no longer clients, so you choose who to keep. It is not a QuickBooks Online Accountant client directory, and nothing was connected.';
+      return 'Choose who to add. Former customer rows are sample cues you can leave out. These are customers from your firm’s own QuickBooks company, not an accountant client directory.';
     }
     if (src === 'xero') {
-      return 'This is a sample practice list for the Xero idea. The prototype does not contact Xero, and it does not claim an Xero HQ or Practice Manager API. Keep the names that belong on your directory.';
+      return 'Choose who to add from this sample practice list. Nothing connects to Xero.';
     }
-    return 'Demo list. No CSV was opened or parsed. Keep the names that belong on your directory.';
+    return 'Choose who to add. This sample stands in for a CSV, and no file was read.';
+  }
+  function srcOpt(src, icon, title, text, caveat) {
+    const on = ob.source === src || (src === 'qbo' && ob.source === 'qboa');
+    return `<button type="button" class="src-opt${on ? ' selected' : ''}" data-src="${src}" aria-pressed="${on ? 'true' : 'false'}">
+      <span class="material-icons src-ico" aria-hidden="true">${icon}</span>
+      <span><span class="src-h">${title}</span><span class="src-d">${text}</span><span class="src-caveat">${caveat}</span></span>
+    </button>`;
   }
   function renderOb() {
     const step = ob.step || 'role';
     let html = '';
     if (step === 'role') {
+      const cardRole = ob.roleChosen && (ob.role === 'firm' || ob.role === 'inhouse' || ob.role === 'owner') ? ob.role : null;
+      const otherOpen = !cardRole && (!!ob.otherOpen || ob.role === 'other');
+      const note = (ob.roleNote || '').trim();
+      const can = !!cardRole || (otherOpen && !!note);
       html = obShell(`
         <h1>What brings you to Synder?</h1>
-        <p class="lead">We’ll set things up for how you work.</p>
-        <div class="ob-cards cols-4">
-          ${obCard({ attr: 'data-role="firm"', selected: ob.role === 'firm', icon: 'groups', title: 'I keep books for clients', text: 'Accounting firm or freelance bookkeeper, working across many clients.' })}
-          ${obCard({ attr: 'data-role="inhouse"', selected: ob.role === 'inhouse', icon: 'apartment', title: 'I’m an accountant at one company', text: 'In-house finance or accounting for a single business.' })}
-          ${obCard({ attr: 'data-role="owner"', selected: ob.role === 'owner', icon: 'storefront', title: 'I run a business', text: 'You look after your own company’s books.' })}
-          ${obCard({ attr: 'data-role="other"', selected: ob.role === 'other', icon: 'more_horiz', title: 'Other', text: 'A different kind of setup. Continue to regular Synder.' })}
-        </div>`);
+        <p class="lead">Choose the one that fits. We’ll follow that path.</p>
+        <div class="ob-cards cols-3">
+          ${obCard({ attr: 'data-role="firm"', selected: cardRole === 'firm', icon: 'groups', title: 'I keep books for clients', text: 'Accounting firm or freelance bookkeeper, working across many clients.' })}
+          ${obCard({ attr: 'data-role="inhouse"', selected: cardRole === 'inhouse', icon: 'apartment', title: 'I’m an accountant at one company', text: 'In-house finance or accounting for a single business.' })}
+          ${obCard({ attr: 'data-role="owner"', selected: cardRole === 'owner', icon: 'storefront', title: 'I run a business', text: 'You look after your own company’s books.' })}
+        </div>
+        <button type="button" class="ob-quiet" id="obOtherOpen">Other</button>
+        ${otherOpen ? `<div class="ob-field" id="otherBox"><label for="roleNote">How would you describe your role?</label><input id="roleNote" value="${esc(ob.roleNote || '')}" autocomplete="off" /></div>` : ''}
+        <div class="ob-actions"><button type="button" class="btn" id="obRoleNext"${can ? '' : ' disabled'}>Continue</button></div>`);
     } else if (step === 'other' || step === 'inhouse' || step === 'owner') {
       const titles = { other: 'Other', inhouse: 'Accountant at one company', owner: 'I run a business' };
+      const described = step === 'other' && (ob.roleNote || '').trim() ? `You described your role as “${esc(String(ob.roleNote).trim())}”. ` : '';
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <div class="empty" style="padding-top:24px"><span class="material-icons">arrow_forward</span>
           <h2>${titles[step] || 'Continue'}</h2>
-          <p>This path isn’t part of the firm prototype. Continue to the regular Synder setup.</p>
+          <p>${described}This path isn’t part of the firm prototype. Continue to the regular Synder setup.</p>
           <button type="button" class="btn" id="obOtherCta">Continue to Synder setup</button>
           <button type="button" class="btn-text sec" id="obBack2">Back</button></div>`, 'narrow');
     } else if (step === 'firmchoice') {
@@ -676,8 +726,8 @@
         <h1>Set up your firm workspace</h1>
         <p class="lead">A firm is the place you manage every client from.</p>
         <div class="ob-cards cols-2">
-          ${obCard({ attr: 'data-choice="create"', selected: ob.firmChoice === 'create', icon: 'domain_add', pill: 'Recommended', title: 'Create a firm', text: 'A workspace for every client. You are the admin.' })}
-          ${obCard({ attr: 'data-choice="join"', selected: ob.firmChoice === 'join', icon: 'mail_outline', title: 'Join my firm’s workspace', text: 'Use an invite from a colleague, or the Firm ID they share.' })}
+          ${obCard({ attr: 'data-choice="create"', selected: !!(ob.firmChosen && ob.firmChoice === 'create'), icon: 'domain_add', title: 'Create a firm', text: 'A workspace for every client. You are the admin.' })}
+          ${obCard({ attr: 'data-choice="join"', selected: !!(ob.firmChosen && ob.firmChoice === 'join'), icon: 'mail_outline', title: 'Join my firm’s workspace', text: 'Use an invite from a colleague, or the Firm ID they share.' })}
         </div>`);
     } else if (step === 'join') {
       html = obShell(`
@@ -692,51 +742,55 @@
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <h1>Welcome to Synder</h1>
-        <p class="lead">Bring the full client list into one place for <span id="firmLive">${firm}</span>. Then choose who to set up, when you are ready.</p>
-        <div class="ob-field"><label for="firmNameIn">Firm name</label><input id="firmNameIn" value="${esc(ob.firmName || '')}" /></div>
-        ${reassure()}
-        <div class="ob-cards cols-2">
-          ${obCard({ attr: 'data-path="add"', icon: 'person_add', title: 'Add a client', text: 'Type a directory name. Setup is optional and can wait.' })}
-          ${obCard({ attr: 'data-path="import"', icon: 'playlist_add', title: 'Import client list', text: 'Bring many names in, then keep current clients and leave former ones out.' })}
+        <p class="welcome-copy">We’re glad to have ${firm} on board. Bring your clients into one place. Connect their books when you’re ready, and then you can see the state of those books here.</p>
+        <div class="books-banner" id="booksBanner">
+          <span class="material-icons" aria-hidden="true">visibility</span>
+          <p><strong>Adding a client changes nothing in their books.</strong> A name here is a directory entry. Connect books later, when you set that client up.</p>
         </div>
-        <button type="button" class="ob-quiet" id="obSkipList">Continue without a list</button>`);
+        <div class="path-grid">
+          <div class="path-card">
+            <span class="path-ico" aria-hidden="true"><span class="material-icons">person_add</span></span>
+            <h2>Add a client</h2>
+            <p>Enter a name now. You can finish setup later.</p>
+            <button type="button" class="btn" data-path="add">Add a client manually</button>
+          </div>
+          <div class="path-card">
+            <span class="path-ico" aria-hidden="true"><span class="material-icons">download</span></span>
+            <h2>Import client list</h2>
+            <p>Bring names from QuickBooks, Xero, or a CSV instead of typing them. You’ll review the list before adding anyone.</p>
+            <button type="button" class="btn-outlined" data-path="import">Import client list</button>
+          </div>
+        </div>
+        <button type="button" class="ob-quiet" id="obSkipList">Continue without a list</button>`, 'surface');
     } else if (step === 'add') {
       const rows = (ob.manual || []).map((c) => `<div class="dir-row">${av(c, true)}<span class="nm">${esc(c.name)}</span><button type="button" class="linkish" data-rm="${c.id}">Remove</button></div>`).join('');
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <h1>Add a client</h1>
-        <p class="lead">Type a name for the ${esc(ob.firmName || 'firm')} directory. This does not create an organization or connect books. You can set them up later.</p>
-        ${reassure()}
+        <p class="welcome-copy">Enter a directory name for ${esc(ob.firmName || 'your firm')}. You can finish setup later.</p>
         <div class="ob-name-row">
           <div class="ob-field"><label for="manualName">Client name</label><input id="manualName" value="${esc(ob.manualDraft || '')}" placeholder="e.g. Harbor Street Books" /></div>
           <button type="button" class="btn" id="obAddName">Add name</button>
         </div>
         ${ob.manualMsg ? `<p class="dir-empty" id="manualMsg">${esc(ob.manualMsg)}</p>` : ''}
         ${rows ? `<div class="dir-list" id="dirList">${rows}</div>` : '<p class="dir-empty" id="dirList">No directory names yet. You can continue and add them later.</p>'}
-        <div class="ob-actions"><button type="button" class="btn" id="obManualDone">Continue to my firm${ob.manual.length ? ` (${ob.manual.length})` : ''}</button></div>`, 'narrow');
+        <div class="ob-actions"><button type="button" class="btn" id="obManualDone">Continue to my firm${ob.manual.length ? ` (${ob.manual.length})` : ''}</button></div>`, 'surface');
     } else if (step === 'sources') {
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <h1>Import client list</h1>
-        <p class="lead">Pick a sample source. These are design proposals: there is no sign-in, and nothing is read from a live account. You choose which names to keep.</p>
-        ${reassure()}
-        <div class="ob-cards cols-3">
-          ${obCard({ attr: 'data-src="qbo"', selected: ob.source === 'qbo' || ob.source === 'qboa', icon: 'account_balance', title: 'QuickBooks Online', text: 'A sample of customers from your firm’s own QuickBooks company. You decide which customers are clients. This is separate from a QuickBooks Online Accountant client directory, which this prototype does not use.' })}
-          ${obCard({ attr: 'data-src="xero"', selected: ob.source === 'xero', icon: 'hub', title: 'Xero', text: 'A sample list for the practice idea. This prototype does not contact Xero, and it does not claim an Xero HQ or Practice Manager API.' })}
-          ${obCard({ attr: 'data-src="upload"', selected: ob.source === 'upload', icon: 'upload_file', title: 'Upload CSV', text: 'Demo only. No file is chosen, opened, or parsed. You review a sample list instead.' })}
-        </div>`);
+        <p class="welcome-copy">Choose where the names come from. You’ll review them before anyone is added.</p>
+        <div class="src-list">
+          ${srcOpt('qbo', 'account_balance', 'QuickBooks Online', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Not a QuickBooks Online Accountant client directory.')}
+          ${srcOpt('xero', 'hub', 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+          ${srcOpt('upload', 'upload_file', 'Upload CSV', 'Names from a spreadsheet, then the same review.', 'Demo. No file is opened or parsed.')}
+        </div>`, 'surface');
     } else if (step === 'connecting') {
-      const src = ob.source;
-      const detail = (src === 'qbo' || src === 'qboa')
-        ? 'Sample customers from the firm’s own QuickBooks company. Not an accountant client directory.'
-        : src === 'xero'
-          ? 'Sample names only. No Xero service is contacted.'
-          : 'Sample list only. Nothing is signing in.';
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <div class="ob-spin"><span class="material-icons">sync</span>
         <h2 style="margin-top:16px;font-size:20px;font-weight:500">Preparing a sample list…</h2>
-        <p class="lead">${detail} This is a design proposal. No sign-in, and no books are read or changed.</p></div>`, 'narrow');
+        <p class="welcome-copy">You’ll choose who to keep next.</p></div>`, 'narrow');
       setTimeout(() => {
         if (ob.step !== 'connecting') return;
         ob.step = 'review'; saveOb(); renderOb();
@@ -752,14 +806,10 @@
       const q = (ob.q || '').toLowerCase();
       const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
       const n = IMPORT_POOL.filter((c) => ob.selected[c.id]).length;
-      const formerN = IMPORT_POOL.filter((c) => c.former).length;
-      const currentN = IMPORT_POOL.length - formerN;
       html = obShell(`
         <button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
         <h1>Choose who to keep</h1>
-        <p class="lead">${reviewCopy()}</p>
-        ${reassure()}
-        <p class="lead" style="margin-top:-12px">Current client and Former customer are cues in this sample (${currentN} current, ${formerN} former). Leave former customers unchecked unless you still work with them. You do not have to add everyone, and you do not have to set anyone up now.</p>
+        <p class="welcome-copy">${reviewCopy()}</p>
         <div class="ob-field block"><label for="firmNameIn">Firm name</label><input id="firmNameIn" value="${esc(ob.firmName || 'WLS Labs')}" /></div>
         <div class="toolbar" style="margin-bottom:12px"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
         <div class="ob-table-wrap"><table>
@@ -771,7 +821,7 @@
         <div class="ob-actions" style="margin-top:20px">
           <button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} name${n === 1 ? '' : 's'} to my directory</button>
         </div>
-        <button type="button" class="ob-quiet" id="obSkipAdd">Continue without these names</button>`);
+        <button type="button" class="ob-quiet" id="obSkipAdd">Continue without these names</button>`, 'surface');
     } else if (step === 'joinok') {
       html = obShell(`<div class="empty"><span class="material-icons">mark_email_read</span>
         <h2>Request sent</h2>
@@ -782,6 +832,7 @@
       html = obShell(`<div class="empty"><h2>That step isn’t in this prototype</h2><button type="button" class="btn" id="obRestart">Back to start</button></div>`, 'narrow');
     }
     $('ob').innerHTML = html;
+    $('ob').classList.toggle('surface', step === 'import' || step === 'sources' || step === 'add' || step === 'review');
     bindOb();
     const h = '#onboarding' + (step && step !== 'role' ? '/' + step : '');
     if (location.hash !== h) history.replaceState(null, '', h);
@@ -798,11 +849,43 @@
     on('obBack2', () => goOnboarding(backMap[ob.step] || 'role'));
     document.querySelectorAll('[data-role]').forEach((b) => b.onclick = () => {
       ob.role = b.dataset.role;
+      ob.roleChosen = true;
+      ob.otherOpen = false;
+      saveOb();
+      renderOb();
+    });
+    on('obOtherOpen', () => {
+      ob.otherOpen = true;
+      ob.role = null;
+      ob.roleChosen = false;
+      saveOb();
+      renderOb();
+      const field = $('roleNote'); if (field) field.focus();
+    });
+    const note = $('roleNote');
+    const next = $('obRoleNext');
+    if (note && next) note.oninput = () => {
+      ob.roleNote = note.value;
+      next.disabled = !note.value.trim();
+      saveOb();
+    };
+    on('obRoleNext', () => {
+      if (ob.otherOpen) {
+        const text = (($('roleNote') && $('roleNote').value) || ob.roleNote || '').trim();
+        if (!text) return;
+        ob.roleNote = text;
+        ob.role = 'other';
+        ob.roleChosen = true;
+        goOnboarding('other');
+        return;
+      }
+      if (!ob.roleChosen) return;
       if (ob.role === 'firm') goOnboarding('firmchoice');
-      else goOnboarding(ob.role);
+      else if (ob.role === 'inhouse' || ob.role === 'owner') goOnboarding(ob.role);
     });
     document.querySelectorAll('[data-choice]').forEach((b) => b.onclick = () => {
       ob.firmChoice = b.dataset.choice;
+      ob.firmChosen = true;
       if (b.dataset.choice === 'create') goOnboarding('import');
       else goOnboarding('join');
     });
@@ -1331,16 +1414,11 @@
       html += `<div class="pop-sec">Firm</div>` + item(FIRM, 'Accounting firm', st.ctx === 'firm', 'firm');
     }
     if (s.firm) {
-      let list;
-      if (q) list = s.clients.filter((c) => !c.pending && c.name.toLowerCase().includes(q));
-      else list = (st.recent || []).map(findOrg).filter((c) => c && isClient(c.id));
-      list = list.filter((c) => !c.pending);
-      if (!q && list.length === 0) list = s.clients.filter((c) => !c.pending).slice(0, 4);
+      const list = s.clients.filter((c) => !c.pending && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
-        html += `<div class="pop-sec">${q ? 'Clients' : 'Recent clients'}</div>` +
+        html += `<div class="pop-sec">Clients</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
       }
-      if (!q && s.clients.length > list.length) html += `<button class="pop-link" data-act="allclients">All clients (${s.clients.length})</button>`;
     }
     const own = s.own.filter((o) => !q || o.name.toLowerCase().includes(q));
     if (own.length) {
