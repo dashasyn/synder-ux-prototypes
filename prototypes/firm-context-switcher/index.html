@@ -9,7 +9,7 @@
     Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
-    - Firm user only (v5). Old hashes fall back to #firm.
+    - v6: firm onboarding (#onboarding), client list import, firm Dashboard + setup progress. Firm user only.
     - Ctrl/Cmd+K opens the switcher; arrows + Enter + Esc work inside.
     - Last context remembered per scenario in localStorage.
   -->
@@ -295,12 +295,73 @@
     .kv dt { color: #6B778C; } .kv dd { margin: 0; }
     tr.rowlink { cursor: pointer; } tr.rowlink:hover td { background: #F7F8FA; }
     #stateSeg.hide { visibility: hidden; }
+    /* ── v6 onboarding ── */
+    .shell-hide .p-top, .shell-hide .p-body { display: none; }
+    .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: #F7F8FA; }
+    .shell-hide .ob { display: block; }
+    .ob-in { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .ob-in.wide { max-width: 880px; }
+    .ob h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0 0 8px; text-align: center; }
+    .ob .lead { color: #6B778C; text-align: center; margin: 0 0 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .ob-cards { display: flex; flex-direction: column; gap: 12px; max-width: 480px; margin: 0 auto; }
+    .ob-card {
+      display: flex; align-items: flex-start; gap: 14px; width: 100%; text-align: left;
+      padding: 16px 18px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      cursor: pointer; font: inherit; color: inherit;
+    }
+    .ob-card:hover { border-color: #0053CC; background: #F7FAFF; }
+    .ob-card.pri { border-color: #0053CC; box-shadow: inset 0 0 0 1px #0053CC; }
+    .ob-card .material-icons { font-size: 28px; color: #0053CC; }
+    .ob-card b { display: block; font-weight: 500; margin-bottom: 2px; }
+    .ob-card span { color: #6B778C; font-size: 13px; line-height: 18px; }
+    .ob-quiet { display: block; text-align: center; margin: 20px auto 0; color: #6B778C; background: none; border: none; font: inherit; cursor: pointer; }
+    .ob-quiet:hover { color: #0053CC; text-decoration: underline; }
+    .ob-sec { display: flex; flex-direction: column; gap: 10px; max-width: 480px; margin: 16px auto 0; }
+    .ob-sec button, .ob-sec label.file {
+      display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px;
+      background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; font: inherit; cursor: pointer; text-align: left; color: inherit;
+    }
+    .ob-sec button:hover, .ob-sec label.file:hover { background: #F7F8FA; }
+    .ob-sec .material-icons { color: #6B778C; }
+    .ob-back { display: inline-flex; align-items: center; gap: 4px; color: #6B778C; background: none; border: none; font: inherit; cursor: pointer; margin-bottom: 16px; padding: 0; }
+    .ob-back:hover { color: #0053CC; }
+    .ob-back .material-icons { font-size: 18px; }
+    .ob-field { max-width: 360px; margin: 0 auto 20px; }
+    .ob-field label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+    .ob-field input { width: 100%; height: 40px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 12px; font: inherit; }
+    .ob-actions { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
+    .ob-spin { text-align: center; padding: 64px 24px; }
+    .ob-spin .material-icons { font-size: 40px; color: #0053CC; animation: spin 1.2s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ob-table-wrap { background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; overflow: hidden; }
+    .ob-table-wrap table { width: 100%; border-collapse: collapse; }
+    .ob-table-wrap th, .ob-table-wrap td { padding: 10px 14px; border-bottom: 1px solid #EFF1F5; text-align: left; }
+    .ob-table-wrap th { font-weight: 500; color: #6B778C; font-size: 13px; }
+    .ob-table-wrap tr:last-child td { border-bottom: 0; }
+    .ob-table-wrap input[type=checkbox] { width: 16px; height: 16px; }
+    .setup-bar { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: 8px; margin-bottom: 20px; max-width: 880px; }
+    .setup-bar .bar { flex: 1; height: 8px; background: #DFE4EC; border-radius: 4px; overflow: hidden; }
+    .setup-bar .bar i { display: block; height: 100%; background: #0053CC; }
+    .setup-bar b { white-space: nowrap; }
+    .issues { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 880px; margin: 16px 0 24px; }
+    .issue { border: 1px solid #DFE4EC; border-radius: 8px; padding: 14px; }
+    .issue .n { font-size: 24px; line-height: 32px; }
+    .issue .l { color: #6B778C; font-size: 13px; }
+    .stepper { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stepper span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 13px; color: #6B778C; background: #F7F8FA; }
+    .stepper span.on { background: #F2F6FC; color: #0053CC; font-weight: 500; }
+    .stepper span.done { color: #1F8940; }
+    .draft-tag { display: inline-block; font-size: 12px; color: #CB7515; background: #FFF7F0; border: 1px solid #F3D2B3; border-radius: 4px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
   </style>
 </head>
 <body>
   <div class="proto-bar">
-    <span class="brand">Firm context switcher · v5</span>
+    <span class="brand">Firm context switcher · v6</span>
     <span class="spacer"></span>
+    <div class="seg" id="modeSeg">
+      <button data-m="onboarding">Onboarding</button>
+      <button data-m="firm">Firm workspace</button>
+    </div>
     <div class="seg hide" id="stateSeg" title="Client page state">
       <button data-cs="blocked">Blocked</button>
       <button data-cs="ready">Ready to close</button>
@@ -346,6 +407,8 @@
     <main class="p-main" id="main"></main>
   </div>
 
+  <div class="ob" id="ob"></div>
+
   <div class="scrim" id="scrim">
     <div class="modal" role="dialog" aria-modal="true" id="modal"></div>
   </div>
@@ -355,28 +418,33 @@
   /* ───────── Data ───────── */
   const FIRM = { id: 'firm', name: 'WLS Labs', firmId: '1793300370' };
   const CLIENTS = [
-    { id: 'c1',  name: 'Bluebird Bakery',          ledger: 'QuickBooks Online', pay: 'Stripe, Square',  books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c2',  name: 'Cedar & Pine Interiors',   ledger: 'Xero',              pay: 'Shopify, PayPal', books: ['yellow', '6 uncategorized'],   month: 'Oct 2026' },
-    { id: 'c3',  name: 'Delta Freight LLC',        ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['red', '3 failed syncs'],       month: 'Sep 2026' },
-    { id: 'c4',  name: 'Evergreen Landscaping',    ledger: 'QuickBooks Online', pay: 'Square',          books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c5',  name: 'Fable Coffee Roasters',    ledger: 'Xero',              pay: 'Shopify',         books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c6',  name: 'Granite Peak Dental',      ledger: null,                pay: null,              books: ['grey', 'Setup needed'],        month: null },
-    { id: 'c7',  name: 'Harbor Street Books',      ledger: 'QuickBooks Online', pay: 'Amazon, Shopify', books: ['yellow', '12 unreconciled'],   month: 'Oct 2026' },
-    { id: 'c8',  name: 'Ironwood Fitness',         ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c9',  name: 'Juniper Yoga Studio',      ledger: null,                pay: 'Stripe',          books: ['grey', 'Setup needed'],        month: null },
-    { id: 'c10', name: 'Kestrel Analytics',        ledger: 'Xero',              pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c11', name: 'Lumen Dental Lab',         ledger: 'QuickBooks Online', pay: 'PayPal',          books: ['green', 'Healthy'],            month: 'Oct 2026' },
-    { id: 'c12', name: 'Maple & Main Florist',     ledger: 'QuickBooks Online', pay: 'Square',          books: ['yellow', '4 uncategorized'],   month: 'Oct 2026' },
-    { id: 'c13', name: 'Northgate Auto Repair',    ledger: null,                pay: null,              books: ['grey', 'Setup needed'],        month: null }
+    { id: 'c1',  name: 'Bluebird Bakery',          ledger: 'QuickBooks Online', pay: 'Stripe, Square',  books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c2',  name: 'Cedar & Pine Interiors',   ledger: 'Xero',              pay: 'Shopify, PayPal', books: ['yellow', '6 uncategorized'],   month: 'Oct 2026', setup: true },
+    { id: 'c3',  name: 'Delta Freight LLC',        ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['red', '3 failed syncs'],       month: 'Sep 2026', setup: true },
+    { id: 'c4',  name: 'Evergreen Landscaping',    ledger: 'QuickBooks Online', pay: 'Square',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c5',  name: 'Fable Coffee Roasters',    ledger: 'Xero',              pay: 'Shopify',         books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c6',  name: 'Granite Peak Dental',      ledger: null,                pay: null,              books: ['grey', 'Not set up'],          month: null, setup: false },
+    { id: 'c7',  name: 'Harbor Street Books',      ledger: 'QuickBooks Online', pay: 'Amazon, Shopify', books: ['yellow', '12 unreconciled'],   month: 'Oct 2026', setup: true },
+    { id: 'c8',  name: 'Ironwood Fitness',         ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c9',  name: 'Juniper Yoga Studio',      ledger: null,                pay: 'Stripe',          books: ['grey', 'Not set up'],          month: null, setup: false },
+    { id: 'c10', name: 'Kestrel Analytics',        ledger: 'Xero',              pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c11', name: 'Lumen Dental Lab',         ledger: 'QuickBooks Online', pay: 'PayPal',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c12', name: 'Maple & Main Florist',     ledger: 'QuickBooks Online', pay: 'Square',          books: ['yellow', '4 uncategorized'],   month: 'Oct 2026', setup: true },
+    { id: 'c13', name: 'Northgate Auto Repair',    ledger: null,                pay: null,              books: ['grey', 'Not set up'],          month: null, setup: false }
   ];
+  function demoClients() {
+    return CLIENTS.map((c) => Object.assign({}, c)).concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]);
+  }
   const SCENARIOS = {
-    'firm':   { firm: true,  clients: CLIENTS.concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]),           own: [{ id: 'o1', name: 'WLS Labs Books' }] },
+    'firm':   { firm: true,  clients: demoClients(), own: [{ id: 'o1', name: 'WLS Labs Books' }] },
   };
   const PALETTE = ['#0053CC', '#1F8940', '#CB7515', '#310BB0', '#3C4EAC', '#CC2929', '#0E7C86', '#8A4FBF'];
   const FIRM_NAV = [
-    ['clients', 'people', 'Clients'], ['monthclose', 'event_available', 'Month close'],
-    ['monitoring', 'monitor_heart', 'Monitoring'], ['colleagues', 'groups', 'Colleagues'],
-    ['billing', 'receipt_long', 'Billing and licenses'], ['firmsettings', 'settings', 'Firm settings']
+    ['dashboard', 'dashboard', 'Dashboard'],
+    ['clients', 'people', 'Clients'],
+    ['colleagues', 'groups', 'Colleagues'],
+    ['billing', 'receipt_long', 'Billing and licenses'],
+    ['firmsettings', 'settings', 'Firm settings']
   ];
   const ORG_NAV = [
     ['dashboard', 'dashboard', 'Dashboard'], ['mapping', 'account_tree', 'Mapping'],
@@ -405,6 +473,329 @@
   const av = (o, sm) => o.id === 'firm'
     ? `<span class="av firm${sm ? ' sm' : ''}">${initials(o.name)}</span>`
     : `<span class="av${sm ? ' sm' : ''}" style="background:${color(o.id)}">${initials(o.name)}</span>`;
+
+  /* ───────── v6: Onboarding ───────── */
+  const EXTRA = [
+    { id: 'c15', name: 'Pinecrest Realty', ledger: null, pay: null, books: ['grey', 'Not set up'], month: null },
+    { id: 'c16', name: 'Quill & Ink Agency', ledger: null, pay: null, books: ['grey', 'Not set up'], month: null },
+    { id: 'c17', name: 'Riverbend Cafe', ledger: null, pay: null, books: ['grey', 'Not set up'], month: null },
+    { id: 'c18', name: 'Summit Peak Advisors', ledger: null, pay: null, books: ['grey', 'Not set up'], month: null },
+    { id: 'c19', name: 'Tidewater Outfitters', ledger: null, pay: null, books: ['grey', 'Not set up'], month: null }
+  ];
+  const IMPORT_POOL = CLIENTS.concat(EXTRA).map((c) => ({ id: c.id, name: c.name }));
+  const SETUP_STEPS = [
+    ['books', 'Connect books'],
+    ['integrations', 'Connect integrations'],
+    ['mode', 'Select mode'],
+    ['import', 'Import data']
+  ];
+
+  let mode = 'firm'; // 'onboarding' | 'firm'
+  let ob = null;
+
+  function defaultOb() {
+    return {
+      step: 'role', role: null, source: null, firmName: 'WLS Labs',
+      selected: Object.fromEntries(IMPORT_POOL.map((c) => [c.id, true])),
+      q: '', setupStep: 'books', setupClientId: null
+    };
+  }
+  function loadOb() {
+    try {
+      const raw = localStorage.getItem('fcs-ob-v1');
+      if (raw) { const v = JSON.parse(raw); if (v && v.step) { ob = Object.assign(defaultOb(), v); return; } }
+    } catch (e) {}
+    ob = defaultOb();
+  }
+  function saveOb() { try { localStorage.setItem('fcs-ob-v1', JSON.stringify(ob)); } catch (e) {} }
+
+  function isSetup(c) { return !!(c && c.setup); }
+  function firmClients() { return sc().clients.filter((c) => !c.pending); }
+  function setupCount() { return firmClients().filter(isSetup).length; }
+
+  function goOnboarding(step) {
+    mode = 'onboarding';
+    if (step) ob.step = step;
+    saveOb();
+    document.body.classList.add('shell-hide');
+    renderMode();
+    renderOb();
+  }
+  function goWorkspace(page, clientId) {
+    mode = 'firm';
+    document.body.classList.remove('shell-hide');
+    if (ob && ob.step !== 'done') {
+      SCENARIOS.firm.clients = demoClients();
+      FIRM.name = 'WLS Labs';
+    }
+    if (!st || ob && ob.step !== 'done') { st = defaultState(); save(); }
+    goFirm(page || (setupCount() > 0 ? 'dashboard' : 'clients'), clientId);
+    renderMode();
+  }
+  function restartOnboarding() {
+    ob = defaultOb();
+    saveOb();
+    // Reset firm clients to pre-onboarding demo? Keep demo clients for workspace play.
+    goOnboarding('role');
+  }
+  function finishOnboarding(selectedIds) {
+    const pool = IMPORT_POOL.filter((c) => selectedIds.includes(c.id));
+    const clients = pool.map((c) => ({
+      id: c.id, name: c.name, ledger: null, pay: null,
+      books: ['grey', 'Not set up'], month: null, setup: false
+    }));
+    // Keep pending request as a separate row for the Accept flow
+    clients.push({ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null });
+    SCENARIOS.firm.clients = clients;
+    FIRM.name = ob.firmName || 'WLS Labs';
+    st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: clients.filter((c) => !c.pending).slice(0, 4).map((c) => c.id) };
+    save();
+    ob.step = 'done'; saveOb();
+    goWorkspace('clients');
+  }
+
+  function renderMode() {
+    document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('active', b.dataset.m === mode));
+    const onClient = mode === 'firm' && st && st.ctx === 'firm' && st.page === 'client' && st.clientId && findOrg(st.clientId) && !findOrg(st.clientId).pending;
+    $('stateSeg').classList.toggle('hide', !onClient);
+  }
+
+  function obShell(inner, wide) {
+    return `<div class="ob-in${wide ? ' wide' : ''}">${inner}</div>`;
+  }
+  function renderOb() {
+    const step = ob.step || 'role';
+    let html = '';
+    if (step === 'role') {
+      html = obShell(`
+        <h1>What brings you to Synder?</h1>
+        <p class="lead">We’ll set things up for how you work.</p>
+        <div class="ob-cards">
+          <button class="ob-card" data-role="firm"><span class="material-icons">groups</span><div><b>I keep books for clients</b><span>Accounting firm or freelance bookkeeper</span></div></button>
+          <button class="ob-card" data-role="inhouse"><span class="material-icons">apartment</span><div><b>I’m an accountant at one company</b><span>In-house finance or accounting team</span></div></button>
+          <button class="ob-card" data-role="owner"><span class="material-icons">storefront</span><div><b>I run a business</b><span>Owner or operator looking after your own books</span></div></button>
+        </div>
+        <button class="ob-quiet" data-role="other">Something else</button>`);
+    } else if (step === 'other' || step === 'inhouse' || step === 'owner') {
+      const titles = { other: 'Something else', inhouse: 'Accountant at one company', owner: 'I run a business' };
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <div class="empty" style="padding-top:24px"><span class="material-icons">arrow_forward</span>
+          <h2>${titles[step] || 'Continue'}</h2>
+          <p>This path isn’t part of the firm prototype. Continue to the regular Synder setup.</p>
+          <button class="btn" id="obOtherCta">Continue to Synder setup</button>
+          <button class="btn-text sec" id="obBack2">Back</button></div>`);
+    } else if (step === 'firmchoice') {
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <h1>Set up your firm workspace</h1>
+        <p class="lead">A firm is the place you manage every client from.</p>
+        <div class="ob-cards">
+          <button class="ob-card pri" data-choice="create"><span class="material-icons">domain_add</span><div><b>Create a firm</b><span>Recommended. You’ll be the admin.</span></div></button>
+          <button class="ob-card" data-choice="join"><span class="material-icons">mail_outline</span><div><b>Join my firm’s workspace</b><span>You need an invite from a colleague, or the Firm ID.</span></div></button>
+        </div>`);
+    } else if (step === 'join') {
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <h1>Ask your firm admin for an invite</h1>
+        <p class="lead">Or enter the Firm ID they shared with you.</p>
+        <div class="ob-field"><label for="firmIdIn">Firm ID</label><input id="firmIdIn" placeholder="e.g. 1793300370" /></div>
+        <div class="ob-actions"><button class="btn" id="obRequest">Request access</button></div>
+        <button class="ob-quiet" id="obBack2">Back</button>`);
+    } else if (step === 'import') {
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <h1>Bring in your client list</h1>
+        <p class="lead">A read-only list of names. Nothing changes in anyone’s books, and no client is created or charged yet.</p>
+        <div class="ob-cards">
+          <button class="ob-card pri" data-src="qboa"><span class="material-icons">account_balance</span><div><b>Connect QuickBooks Online Accountant</b><span>Reads your client list only</span></div></button>
+        </div>
+        <div class="ob-sec">
+          <button data-src="xero"><span class="material-icons">hub</span><div><b>Connect Xero HQ / Practice Manager</b><span class="muted">Reads your client list only</span></div></button>
+          <button type="button" data-src="upload"><span class="material-icons">upload_file</span><div><b>Upload a file</b><span class="muted">CSV or Excel from any practice tool</span></div></button>
+        </div>
+        <button class="ob-quiet" data-src="skip">Skip, I’ll add clients one by one</button>`);
+    } else if (step === 'connecting') {
+      const label = ob.source === 'xero' ? 'Xero' : 'QuickBooks';
+      html = obShell(`<div class="ob-spin"><span class="material-icons">sync</span>
+        <h2 style="margin-top:16px">Connecting to ${label}…</h2>
+        <p class="muted">Read-only. We’re fetching client names.</p></div>`);
+      setTimeout(() => {
+        if (ob.step !== 'connecting') return;
+        // Prefill firm name from connection; skip separate firmname step
+        ob.firmName = 'WLS Labs';
+        ob.step = 'review'; saveOb(); renderOb();
+      }, 1200);
+    } else if (step === 'firmname') {
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <h1>Name your firm</h1>
+        <p class="lead">You can change this later in Firm settings.</p>
+        <div class="ob-field"><label for="firmNameIn">Firm name</label><input id="firmNameIn" value="${esc(ob.firmName || '')}" /></div>
+        <div class="ob-actions"><button class="btn" id="obNameNext">Continue</button></div>`);
+    } else if (step === 'review') {
+      const q = (ob.q || '').toLowerCase();
+      const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
+      const n = IMPORT_POOL.filter((c) => ob.selected[c.id]).length;
+      const showName = ob.source === 'upload' || ob.source === 'skip' || ob.source === 'qboa' || ob.source === 'xero';
+      // Show compact firm name confirm after QBOA/Xero connection (not a separate step)
+      const nameBlock = (ob.source === 'qboa' || ob.source === 'xero') ? `
+        <div class="ob-field" style="max-width:100%;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <label for="firmNameIn" style="margin:0;white-space:nowrap">Firm name</label>
+          <input id="firmNameIn" value="${esc(ob.firmName || 'WLS Labs')}" style="flex:1" />
+        </div>` : '';
+      html = obShell(`
+        <button class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>
+        <h1>${IMPORT_POOL.length} clients found</h1>
+        <p class="lead">Adding only creates a list. You’ll set each client up later.</p>
+        ${nameBlock}
+        <div class="toolbar" style="margin-bottom:12px"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" /></div>
+        <div class="ob-table-wrap"><table>
+          <thead><tr><th style="width:40px"><input type="checkbox" id="obAll"${n === IMPORT_POOL.length ? ' checked' : ''} /></th><th>Client</th></tr></thead>
+          <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}"${ob.selected[c.id] ? ' checked' : ''} /></td>
+            <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('')}</tbody>
+        </table></div>
+        <div class="ob-actions" style="margin-top:20px">
+          <button class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} client${n === 1 ? '' : 's'} to my firm</button>
+        </div>
+        <button class="ob-quiet" id="obSkipAdd">Skip for now</button>`, true);
+    } else if (step === 'joinok') {
+      html = obShell(`<div class="empty"><span class="material-icons">mark_email_read</span>
+        <h2>Request sent</h2>
+        <p>We’ll email you when your firm admin accepts.</p>
+        <button class="btn" id="obToFirm">Preview firm workspace</button>
+        <button class="btn-text sec" id="obRestart">Restart onboarding</button></div>`);
+    }
+    $('ob').innerHTML = html;
+    bindOb();
+    const h = '#onboarding' + (step && step !== 'role' ? '/' + step : '');
+    if (location.hash !== h) history.replaceState(null, '', h);
+    document.title = 'Onboarding — Synder (Firm context switcher)';
+  }
+  function bindOb() {
+    const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    const backMap = {
+      firmchoice: 'role', join: 'firmchoice', import: 'firmchoice', firmname: 'import',
+      review: (ob.source === 'upload' || ob.source === 'skip') ? 'firmname' : 'import',
+      other: 'role', inhouse: 'role', owner: 'role', joinok: 'join'
+    };
+    on('obBack', () => goOnboarding(typeof backMap[ob.step] === 'function' ? backMap[ob.step]() : backMap[ob.step] || 'role'));
+    on('obBack2', () => goOnboarding(backMap[ob.step] || 'role'));
+    document.querySelectorAll('[data-role]').forEach((b) => b.onclick = () => {
+      ob.role = b.dataset.role;
+      if (ob.role === 'firm') goOnboarding('firmchoice');
+      else goOnboarding(ob.role);
+    });
+    document.querySelectorAll('[data-choice]').forEach((b) => b.onclick = () => {
+      if (b.dataset.choice === 'create') goOnboarding('import');
+      else goOnboarding('join');
+    });
+    document.querySelectorAll('[data-src]').forEach((b) => b.onclick = () => {
+      ob.source = b.dataset.src;
+      if (ob.source === 'qboa' || ob.source === 'xero') goOnboarding('connecting');
+      else if (ob.source === 'upload' || ob.source === 'skip') {
+        ob.firmName = ob.firmName || 'WLS Labs';
+        goOnboarding('firmname');
+      }
+    });
+    on('obNameNext', () => {
+      const i = $('firmNameIn'); if (i) ob.firmName = i.value.trim() || 'WLS Labs';
+      if (ob.source === 'skip') {
+        // Skip path: empty list, land in firm
+        finishOnboarding([]);
+      } else goOnboarding('review');
+    });
+    on('obRequest', () => goOnboarding('joinok'));
+    on('obOtherCta', () => goWorkspace('clients'));
+    on('obToFirm', () => goWorkspace('clients'));
+    on('obRestart', () => restartOnboarding());
+    const search = $('obSearch');
+    if (search) search.oninput = () => { ob.q = search.value; saveOb(); renderOb(); const n = $('obSearch'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
+    const all = $('obAll');
+    if (all) all.onchange = () => { IMPORT_POOL.forEach((c) => { ob.selected[c.id] = all.checked; }); saveOb(); renderOb(); };
+    document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => { ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderOb(); });
+    on('obAdd', () => {
+      const i = $('firmNameIn'); if (i) ob.firmName = i.value.trim() || 'WLS Labs';
+      finishOnboarding(IMPORT_POOL.filter((c) => ob.selected[c.id]).map((c) => c.id));
+    });
+    on('obSkipAdd', () => { const i = $('firmNameIn'); if (i) ob.firmName = i.value.trim() || 'WLS Labs'; finishOnboarding([]); });
+  }
+
+  /* Firm dashboard + billing + client setup */
+  function renderFirmDashboard() {
+    const list = firmClients();
+    const done = setupCount();
+    const need = list.length - done;
+    if (done === 0) {
+      return `<div class="ph"><div><h1>Dashboard</h1></div></div>
+        <div class="empty"><span class="material-icons">checklist</span>
+          <h2>Set up your first client</h2>
+          <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
+          <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
+    }
+    const failed = list.filter((c) => (c.books[1] || '').includes('failed')).length;
+    const unre = list.filter((c) => (c.books[1] || '').includes('unreconciled')).length;
+    const uncat = list.filter((c) => (c.books[1] || '').includes('uncategorized')).length;
+    const close = list.filter((c) => c.month && isSetup(c)).length;
+    return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(FIRM.name)}</div></div>
+      <div class="ph-actions"><button class="btn" id="dashContinue">Continue setup</button></div></div>
+      <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
+        <span class="bar"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></span>
+        <span class="muted">${need} still need setup</span></div>
+      <h2 class="section-h">Needs attention</h2>
+      <div class="issues">
+        <div class="issue"><div class="n">${failed}</div><div class="l">Failed syncs</div></div>
+        <div class="issue"><div class="n">${unre}</div><div class="l">Unreconciled</div></div>
+        <div class="issue"><div class="n">${uncat}</div><div class="l">Uncategorized</div></div>
+        <div class="issue"><div class="n">${close}</div><div class="l">Open month closes</div></div>
+      </div>`;
+  }
+  function renderBilling() {
+    return `<div class="ph"><div><h1>Billing and licenses</h1></div>
+      <div class="ph-actions"><button class="btn" id="buyLic">Buy licenses</button></div></div>
+      <div class="kpis" style="max-width:720px">
+        <div class="kpi"><div class="l">Licenses owned</div><div class="v">15</div></div>
+        <div class="kpi"><div class="l">Assigned</div><div class="v">${setupCount()}</div></div>
+        <div class="kpi"><div class="l">Unassigned</div><div class="v">${Math.max(0, 15 - setupCount())}</div></div>
+      </div>
+      <div style="margin-top:20px"><button class="btn-outlined" id="assignLic">Assign licenses</button></div>
+      <p class="muted" style="margin-top:16px">Placeholder. Buy and assign details come later.</p>`;
+  }
+  function renderClientSetup() {
+    const c = findOrg(st.clientId);
+    if (!c) return placeholder('Client setup');
+    const step = st.setupStep || 'books';
+    const idx = SETUP_STEPS.findIndex((s) => s[0] === step);
+    const stepr = SETUP_STEPS.map(([k, l], i) =>
+      `<span class="${k === step ? 'on' : (i < idx ? 'done' : '')}">${i < idx ? '✓ ' : ''}${l}</span>`).join('');
+    const bodies = {
+      books: `<div class="empty"><span class="material-icons">account_balance</span>
+        <h2>Connect books <span class="draft-tag">details pending</span></h2>
+        <p>Connect QuickBooks Online or Xero for ${esc(c.name)}. Exact fields coming from the demo.</p>
+        <button class="btn" data-next="integrations">Continue</button>
+        <button class="btn-text sec" id="setupBack">Back to Clients</button></div>`,
+      integrations: `<div class="empty"><span class="material-icons">hub</span>
+        <h2>Connect integrations <span class="draft-tag">details pending</span></h2>
+        <p>Shopify, Stripe and others. Or invite the account owner to connect them.</p>
+        <button class="btn" data-next="mode">Continue</button>
+        <button class="btn-text sec" data-next="books">Back</button>
+        <button class="ob-quiet" id="inviteOwner">Invite account owner</button></div>`,
+      mode: `<div class="empty"><span class="material-icons">tune</span>
+        <h2>Select mode <span class="draft-tag">details pending</span></h2>
+        <p>Mode options aren’t locked yet. We won’t show client data until a mode is chosen.</p>
+        <button class="btn" data-next="import">Continue</button>
+        <button class="btn-text sec" data-next="integrations">Back</button></div>`,
+      import: `<div class="empty"><span class="material-icons">download</span>
+        <h2>Import data <span class="draft-tag">details pending</span></h2>
+        <p>Pull history once books and mode are set. Stub only.</p>
+        <button class="btn" id="setupDone">Finish setup</button>
+        <button class="btn-text sec" data-next="mode">Back</button></div>`
+    };
+    return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
+      <div class="ph"><div><h1>Set up ${esc(c.name)}</h1></div></div>
+      <div class="stepper">${stepr}</div>
+      ${bodies[step] || bodies.books}`;
+  }
 
   function sc() { return SCENARIOS[scenario]; }
   function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id); }
@@ -457,7 +848,7 @@
   /* ───────── Render: sidebar ───────── */
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
-    const activePage = st.ctx === 'firm' && st.page === 'client' ? 'clients' : st.page;
+    const activePage = st.ctx === 'firm' && (st.page === 'client' || st.page === 'setup') ? 'clients' : st.page;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
       `<button class="nav-i${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span>${esc(label)}${k === 'clients' ? `<span class="cnt">${sc().clients.length}</span>` : ''}</button>`
     ).join('');
@@ -476,21 +867,37 @@
   function renderClients() {
     const q = (st._q || '').toLowerCase();
     const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
-    const body = rows.map((c) => `
+    const list = firmClients();
+    const done = setupCount();
+    const bar = list.length ? `
+      <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
+        <span class="bar"><i style="width:${done / list.length * 100}%"></i></span>
+        ${done === 0 ? '<button class="btn-text" id="setupHint">Set up a client to unlock the dashboard</button>' : `<button class="btn-text" id="dashContinue">Continue setup</button>`}
+      </div>` : '';
+    const body = rows.map((c) => {
+      const status = c.pending ? ['yellow', 'Pending'] : isSetup(c) ? [c.books[0], c.books[1]] : ['grey', 'Not set up'];
+      const action = c.pending
+        ? `<button class="btn-text" data-detail="${c.id}">Review request</button>`
+        : (!isSetup(c)
+          ? `<button class="linkish" data-setup="${c.id}">Set up</button>`
+          : `<button class="btn-text" data-open="${c.id}">Open in Synder</button>`);
+      return `
       <tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button class="linkish" data-detail="${c.id}">${esc(c.name)}</button></div></td>
         <td>${c.ledger ? esc(c.ledger) : '<span class="muted">Not connected</span>'}</td>
         <td>${c.pay ? esc(c.pay) : '<span class="muted">—</span>'}</td>
-        <td><span class="status status-${c.pending ? 'yellow' : c.books[0]}">${esc(c.books[1])}</span></td>
+        <td><span class="status status-${status[0]}">${esc(status[1])}</span></td>
         <td>${c.month ? esc(c.month) : '<span class="muted">—</span>'}</td>
-        <td style="text-align:right">${c.pending ? `<button class="btn-text" data-detail="${c.id}">Review request</button>` : `<button class="btn-text" data-open="${c.id}">Open in Synder</button>`}</td>
-      </tr>`).join('');
+        <td style="text-align:right">${action}</td>
+      </tr>`;
+    }).join('');
     return `
       <div class="ph"><div><h1>Clients</h1></div>
         <div class="ph-actions"><button class="btn-outlined" id="addClient">Add client</button></div></div>
+      ${bar}
       <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
       <div class="table-wrap"><table class="table">
-        <thead><tr><th>Client</th><th>Ledger</th><th>Payment sources</th><th>Books status</th><th>Open month</th><th></th></tr></thead>
+        <thead><tr><th>Client</th><th>Ledger</th><th>Payment sources</th><th>Status</th><th>Open month</th><th></th></tr></thead>
         <tbody>${body || `<tr><td colspan="6" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
@@ -679,11 +1086,16 @@
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients') html = renderClients();
       else if (st.page === 'client') html = renderClientDetail();
+      else if (st.page === 'setup') html = renderClientSetup();
+      else if (st.page === 'dashboard') html = renderFirmDashboard();
+      else if (st.page === 'billing') html = renderBilling();
       else if (st.page === 'createorg') html = renderCreateOrg();
-      else html = placeholder(FIRM_NAV.find((n) => n[0] === st.page)[2], FIRM.name);
+      else {
+        const nav = FIRM_NAV.find((n) => n[0] === st.page);
+        html = placeholder(nav ? nav[2] : st.page, FIRM.name);
+      }
     } else {
       if (st.page === 'dashboard') html = renderDashboard();
-      else if (st.page === 'createfirm') html = renderCreateFirm();
       else if (st.page === 'createorg') html = renderCreateOrg();
       else html = placeholder(ORG_NAV.find((n) => n[0] === st.page)[2], findOrg(st.orgId).name);
     }
@@ -694,6 +1106,20 @@
     m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
     if (st.ctx === 'firm' && st.page === 'client') bindClientDetail();
     m.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => goOrg(b.dataset.open));
+    m.querySelectorAll('[data-setup]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      st.ctx = 'firm'; st.page = 'setup'; st.clientId = b.dataset.setup; st.setupStep = 'books'; save(); render();
+    });
+    m.querySelectorAll('[data-row]').forEach((tr) => {
+      const c = findOrg(tr.dataset.row);
+      if (c && !c.pending && !isSetup(c)) {
+        // unset rows open setup instead of work details
+        tr.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          st.ctx = 'firm'; st.page = 'setup'; st.clientId = c.id; st.setupStep = 'books'; save(); render();
+        };
+      }
+    });
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
@@ -701,8 +1127,26 @@
     bind('addClient', openAddClient);
     bind('dashCta', () => goOrg(st.orgId, 'settings'));
     bind('dashSec', () => goFirm('clients'));
-    
-    bind('cfSec', () => goOrg(st.orgId || sc().own[0].id, 'dashboard'));
+    bind('dashGoClients', () => goFirm('clients'));
+    bind('dashContinue', () => {
+      const next = firmClients().find((c) => !isSetup(c));
+      if (next) { st.ctx = 'firm'; st.page = 'setup'; st.clientId = next.id; st.setupStep = 'books'; save(); render(); }
+      else goFirm('clients');
+    });
+    bind('setupHint', () => {
+      const next = firmClients().find((c) => !isSetup(c));
+      if (next) { st.ctx = 'firm'; st.page = 'setup'; st.clientId = next.id; st.setupStep = 'books'; save(); render(); }
+    });
+    bind('buyLic', () => { $('buyLic').textContent = 'Coming soon'; });
+    bind('assignLic', () => { $('assignLic').textContent = 'Coming soon'; });
+    m.querySelectorAll('[data-next]').forEach((b) => b.onclick = () => { st.setupStep = b.dataset.next; save(); renderMain(); });
+    bind('setupBack', () => goFirm('clients'));
+    bind('inviteOwner', () => { $('inviteOwner').textContent = 'Invite sent (stub)'; });
+    bind('setupDone', () => {
+      const c = findOrg(st.clientId);
+      if (c) { c.setup = true; c.ledger = c.ledger || 'QuickBooks Online'; c.books = ['green', 'Healthy']; c.month = c.month || 'Oct 2026'; }
+      goFirm('clients');
+    });
     bind('coCta', () => { if (st.ctx === 'firm') goFirm('clients'); else goOrg(st.orgId, 'dashboard'); });
     const t = st.ctx === 'firm' ? (st.page === 'client' ? findOrg(st.clientId).name : FIRM.name) : findOrg(st.orgId).name;
     document.title = t + ' — Synder (Firm context switcher)';
@@ -753,7 +1197,7 @@
   }
   function act(a) {
     closePop();
-    if (a === 'firm') goFirm('clients');
+    if (a === 'firm') goFirm(setupCount() > 0 ? 'dashboard' : 'clients');
     else if (a === 'allclients') { st._q = ''; goFirm('clients'); }
     else if (a.startsWith('org:')) goOrg(a.slice(4));
     else if (a === 'createorg') { st.page = 'createorg'; save(); render(); }
@@ -795,26 +1239,46 @@
   function closeModal() { $('scrim').classList.remove('open'); }
   $('scrim').onclick = (e) => { if (e.target === $('scrim')) closeModal(); };
 
-  /* ───────── Scenario ───────── */
+  /* ───────── Scenario / mode ───────── */
   function setScenario(s, fromCta) {
-    const parts = String(s || '').split('/'); s = parts[0];
-    scenario = SCENARIOS[s] ? s : 'firm';
+    const raw = String(s || '');
+    const parts = raw.split('/');
+    const head = parts[0];
+    if (head === 'onboarding') {
+      loadOb();
+      if (parts[1]) ob.step = parts[1];
+      goOnboarding(ob.step || 'role');
+      return;
+    }
+    scenario = SCENARIOS[head] ? head : 'firm';
     load();
-    if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) { st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work'; }
+    if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
+      st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
+    } else if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) {
+      st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work';
+    }
     if (fromCta) { st = defaultState(); save(); }
+    mode = 'firm';
+    document.body.classList.remove('shell-hide');
     closePop(); render();
   }
   window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
 
   function render() {
+    if (mode === 'onboarding') { renderMode(); renderOb(); return; }
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
-    const onClient = st.ctx === 'firm' && st.page === 'client' && st.clientId && findOrg(st.clientId) && !findOrg(st.clientId).pending;
-    $('stateSeg').classList.toggle('hide', !onClient);
+    renderMode();
     document.querySelectorAll('#stateSeg button').forEach((b) => b.classList.toggle('active', b.dataset.cs === cdState));
-    const h = '#' + scenario + (st.ctx === 'firm' && st.page === 'client' && st.clientId ? '/' + st.clientId : '');
+    let h = '#' + scenario;
+    if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId;
+    else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) history.replaceState(null, '', h);
   }
   document.querySelectorAll('#stateSeg button').forEach((b) => b.onclick = () => { cdState = b.dataset.cs; render(); });
+  document.querySelectorAll('#modeSeg button').forEach((b) => b.onclick = () => {
+    if (b.dataset.m === 'onboarding') restartOnboarding();
+    else goWorkspace(setupCount() > 0 ? 'dashboard' : 'clients');
+  });
 
   /* ───────── Top bar menus ───────── */
   function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
@@ -828,7 +1292,7 @@
       `<div class="div"></div><button data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
     $('userMenu').querySelectorAll('[data-um]').forEach((b) => b.onclick = () => {
       const k = b.dataset.um;
-      if (k === 'myfirm') { closeMenus(); goFirm('clients'); }
+      if (k === 'myfirm') { closeMenus(); goFirm(setupCount() > 0 ? 'dashboard' : 'clients'); }
       else if (k === 'logout') { closeMenus(); openLogout(); }
       else goTop(k);
     });
@@ -854,7 +1318,12 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
 
   $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
-  setScenario((location.hash || '#firm').slice(1));
+  loadOb();
+  const boot = (location.hash || '#firm').slice(1);
+  if (boot.split('/')[0] === 'onboarding' || (!localStorage.getItem('fcs-ob-v1') && boot.split('/')[0] !== 'firm')) {
+    // Prefer explicit hash; otherwise stay on firm workspace for this prototype
+  }
+  setScenario(boot || 'firm');
 })();
 </script>
 </body>
