@@ -314,6 +314,25 @@
     .ob-cards { display: grid; gap: 20px; width: 100%; margin: 0; }
     .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .role-pick h1 { text-align: center; }
+    .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; width: 100%; }
+    .role-card {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+      min-height: 280px; width: 100%; padding: 24px; text-align: left;
+      background: #fff; border: 1px solid #DFE4EC; border-radius: 12px;
+      cursor: pointer; font: inherit; color: inherit;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .role-card:hover { border-color: #0053CC; background: #F7FAFF; }
+    .role-card:focus-visible { outline: 2px solid #003E99; outline-offset: 3px; }
+    .role-card.selected { border-color: #0053CC; background: #F2F6FC; box-shadow: inset 0 0 0 1px #0053CC; }
+    .role-card h2 { margin: 0; font-size: 26px; line-height: 32px; font-weight: 500; color: #1A1B24; }
+    .role-card p { margin: 0; font-size: 16px; line-height: 24px; color: #3E4656; }
+    .role-cta { margin-top: auto; display: block; width: 100%; box-sizing: border-box; text-align: center; padding: 12px 16px; border-radius: 8px; font-size: 16px; line-height: 22px; font-weight: 500; }
+    .role-cta.pri { background: #0053CC; color: #fff; }
+    .role-cta.sec { background: #fff; color: #0053CC; box-shadow: inset 0 0 0 1px #0053CC; }
+    .role-card.selected .role-cta.sec { background: #fff; }
+    @media (max-width: 800px) { .role-grid { grid-template-columns: 1fr; } }
     .ob-card {
       position: relative;
       display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
@@ -833,15 +852,24 @@
       const can = (practice && firmOk) || business;
       html = obShell(`
         ${backSlot(true)}
-        <h1>How do you use Synder?</h1>
-        <p class="lead">Choose one. Continue confirms it.</p>
-        <div class="ob-cards cols-2">
-          ${obCard({ attr: 'data-use="practice"', selected: practice, ill: ILL.firm, title: 'For my practice', text: 'I manage clients’ books.' })}
-          ${obCard({ attr: 'data-use="business"', selected: business, ill: ILL.owner, title: 'For my business', text: 'I run one business.' })}
+        <div class="role-pick">
+        <h1>Who are you setting Synder up for?</h1>
+        <div class="role-grid">
+          <button type="button" class="role-card${practice ? ' selected' : ''}" data-use="practice" aria-pressed="${practice ? 'true' : 'false'}">
+            <h2>For practices</h2>
+            <p>Accountants and bookkeepers who look after several clients.</p>
+            <span class="role-cta pri">Start as a practice</span>
+          </button>
+          <button type="button" class="role-card${business ? ' selected' : ''}" data-use="business" aria-pressed="${business ? 'true' : 'false'}">
+            <h2>For businesses</h2>
+            <p>Owners and in-house finance teams running one business.</p>
+            <span class="role-cta sec">Start as a business</span>
+          </button>
         </div>
         ${needFirm ? `<div class="ob-field firm" id="roleFirmBox"><label for="roleFirm">Firm name</label><input id="roleFirm" class="firm-name-input" value="${esc(ob.roleFirm || '')}" autocomplete="organization" /></div>` : ''}
         <button type="button" class="ob-other" id="obHaveFirm">I already have a firm</button>
-        <div class="ob-actions"><button type="button" class="btn" id="obUseNext"${can ? '' : ' disabled'}>Continue</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="obUseNext"${can ? '' : ' disabled'}>Continue</button></div>
+        </div>`);
     } else if (step === 'role-legacy') {
       const cardRole = ob.roleChosen && (ob.role === 'firm' || ob.role === 'inhouse' || ob.role === 'owner') ? ob.role : null;
       const otherOpen = !cardRole && (!!ob.otherOpen || ob.role === 'other');
@@ -881,7 +909,7 @@
     } else if (step === 'business') {
       html = obShell(`
         ${backSlot(true)}
-        <h1>For my business</h1>
+        <h1>For businesses</h1>
         <p class="lead">The usual Synder business onboarding would open here. This prototype stays on the practice path.</p>
         <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>`);
     } else if (step === 'join') {

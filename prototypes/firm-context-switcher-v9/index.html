@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firm context switcher — Synder</title>
+  <!--
+    v4: restructured firm-side Client details (Work/Profile/Billing/Firm colleagues), dev state toggle, pending client page. Deep link: #firm/c3
+    Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
+    - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
+    - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
+    - v9: one white centered onboarding shell, firm name step, pinned review action, empty directory.
+    - v8: explicit role choice, neutral Create/Join, full client switcher, left-aligned directory welcome.
+    - v7: portrait role and firm cards, client-directory welcome, then a simulated QuickBooks / Xero / CSV import. Firm user only.
+    - v6: firm onboarding (#onboarding), client list import, firm Dashboard + setup progress. Firm user only.
+    - Ctrl/Cmd+K opens the switcher; arrows + Enter + Esc work inside.
+    - Last context remembered per scenario in localStorage.
+  -->
+  <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    :root { --proto-bar-h: 48px; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { scrollbar-gutter: stable; }
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px; line-height: 20px; color: var(--text-primary, #1A1B24); background: #fff;
+    }
+
+    /* ── Dark prototype bar (name + variant switcher only) ── */
+    .proto-bar {
+      position: sticky; top: 0; z-index: 300;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      min-height: var(--proto-bar-h); padding: 8px 16px;
+      background: #111827; color: #F9FAFB;
+    }
+    .proto-bar .brand { font-size: 14px; font-weight: 500; letter-spacing: .02em; opacity: .92; white-space: nowrap; }
+    .proto-bar .spacer { flex: 1; }
+    .seg { display: inline-flex; background: rgba(255,255,255,.06); border-radius: 6px; padding: 2px; gap: 2px; }
+    .seg button {
+      appearance: none; border: none; background: transparent; color: #9CA3AF;
+      font: inherit; font-size: 14px; font-weight: 500; height: 30px; padding: 0 10px;
+      border-radius: 4px; cursor: pointer; white-space: nowrap;
+    }
+    .seg button:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .seg button.active { background: #0053CC; color: #fff; }
+
+    /* ── Product shell ── */
+    .p-top {
+      height: 56px; background: #fff; border-bottom: 1px solid #C8C7CC;
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 16px; padding: 0 20px 0 10px;
+      position: sticky; top: var(--proto-bar-h); z-index: 30;
+    }
+    .t-balance { font-size: 14px; line-height: 20px; color: #1A1B24; padding: 2px 0; box-shadow: inset 0 -2px 0 #0053CC; cursor: default; }
+    .t-balance b { color: #0053CC; font-weight: 600; }
+    .t-how { font-size: 14px; color: #0053CC; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
+    .t-how:hover { text-decoration: underline; }
+    .t-wrap { position: relative; }
+    .t-ico {
+      position: relative; height: 32px; min-width: 32px; border-radius: 6px; padding: 0 4px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0;
+      color: #0053CC; background: transparent; border: none; cursor: pointer; font-family: inherit;
+    }
+    .t-ico:hover, .t-ico[aria-expanded="true"] { background: #F2F6FC; }
+    .t-ico .material-icons { font-size: 22px; }
+    .t-ico .chev { font-size: 18px; opacity: .7; }
+    .t-badge {
+      position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 8px; background: #CC2929; color: #fff; font-size: 11px; line-height: 16px; font-weight: 500;
+    }
+    .menu {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 220px;
+      background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; padding: 6px 0;
+      box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none;
+    }
+    .menu.open { display: block; }
+    .menu button {
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 16px;
+      background: none; border: none; cursor: pointer; font: inherit; font-size: 14px; color: #1A1B24; text-align: left;
+    }
+    .menu button:hover { background: #F2F6FC; }
+    .menu .material-icons { font-size: 20px; color: #6B778C; }
+    .menu .div { height: 1px; background: #EFF1F5; margin: 6px 0; }
+    .menu .who { padding: 8px 16px 10px; border-bottom: 1px solid #EFF1F5; margin-bottom: 6px; }
+    .menu .who b { display: block; font-weight: 500; }
+    .menu .who span { color: #6B778C; }
+    .p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 56px); }
+    .p-side {
+      width: 248px; min-width: 248px; background: #F6F6F6; border-right: 1px solid #C8C7CC;
+      scrollbar-gutter: stable;
+      position: sticky; top: calc(var(--proto-bar-h) + 56px);
+      height: calc(100vh - var(--proto-bar-h) - 56px); overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .p-main { flex: 1; min-width: 0; padding: 24px 32px 48px; }
+
+    /* ── Context switcher trigger ── */
+    .ctx { position: relative; flex: 0 0 228px; width: 228px; height: 40px; display: flex; align-items: center; }
+    .t-left { display: flex; align-items: center; gap: 12px; margin-right: auto; height: 40px; }
+    .t-left #backChip:empty { display: none; }
+    .ctx-trigger {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      height: 40px; padding: 0 8px; border: 0; border-radius: 6px;
+      background: transparent; cursor: pointer; text-align: left; font: inherit; color: inherit;
+    }
+    .ctx-trigger:hover { background: #F2F6FC; }
+    .ctx-trigger[aria-expanded="true"] { background: #F2F6FC; box-shadow: inset 0 0 0 1px #DFE4EC; }
+    .ctx-trigger:focus-visible { outline: 2px solid #0053CC; outline-offset: 0; }
+    .ctx-trigger .av { width: 28px; height: 28px; font-size: 12px; }
+    .ctx-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .ctx-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ctx-cap { font-size: 12px; line-height: 16px; color: #6B778C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ctx-trigger .material-icons { font-size: 20px; color: #6B778C; }
+
+    .av {
+      width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 500; letter-spacing: .02em;
+    }
+    .av.firm { border-radius: 8px; background: #1A1B24; }
+    .av.sm { width: 24px; height: 24px; font-size: 11px; }
+    .av.sm.firm { border-radius: 6px; }
+
+    .back-chip {
+      display: inline-flex; align-items: center; gap: 4px; margin: 0; height: 28px;
+      padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #6B778C;
+      text-decoration: none; cursor: pointer; background: none; border: none; font-family: inherit;
+    }
+    .back-chip:hover { color: #0053CC; background: #F2F6FC; }
+    .back-chip .material-icons { font-size: 16px; }
+
+    /* ── Switcher popover ── */
+    .pop {
+      position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
+      width: 300px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none; overflow: hidden;
+    }
+    .pop.open { display: block; }
+    .pop-search { padding: 10px; border-bottom: 1px solid #EFF1F5; position: relative; }
+    .pop-search input { height: 36px; padding-right: 56px; }
+    .kbd {
+      position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+      font-size: 12px; color: #6B778C; border: 1px solid #DFE4EC; border-radius: 4px; padding: 0 5px; background: #F7F8FA;
+    }
+    .pop-list { max-height: 380px; overflow-y: auto; padding: 4px 0; }
+    .pop-sec { padding: 10px 14px 4px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: #6B778C; }
+    .pop-item {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 7px 14px; background: none; border: none; cursor: pointer; text-align: left;
+      font: inherit; color: #1A1B24;
+    }
+    .pop-item:hover, .pop-item.kb { background: #F2F6FC; }
+    .pop-item .t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .pop-item .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pop-item .c { font-size: 12px; line-height: 16px; color: #6B778C; }
+    .pop-item .check { font-size: 18px; color: #0053CC; }
+    .pop-link {
+      display: block; width: 100%; padding: 7px 14px 7px 48px; background: none; border: none;
+      text-align: left; cursor: pointer; font: inherit; color: #0053CC;
+    }
+    .pop-link:hover, .pop-link.kb { background: #F2F6FC; }
+    .pop-empty { padding: 16px 14px; color: #6B778C; }
+    .pop-foot { border-top: 1px solid #EFF1F5; padding: 6px 0; }
+    .pop-foot button {
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 14px;
+      background: none; border: none; cursor: pointer; font: inherit; color: #6B778C; text-align: left;
+    }
+    .pop-foot button:hover, .pop-foot button.kb { background: #F7F8FA; color: #1A1B24; }
+    .pop-foot .material-icons { font-size: 18px; width: 24px; text-align: center; }
+
+    /* ── Sidebar nav (Synder production style) ── */
+    .nav { flex: 1; }
+    .nav-i {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      min-height: 43px; padding: 0 16px; background: transparent;
+      border: none; border-bottom: 1px solid #C8C7CC; cursor: pointer;
+      font: inherit; font-size: 14px; color: #555; text-align: left;
+    }
+    .nav-i .material-icons { font-size: 22px; color: #007AFF; }
+    .nav-i:hover { background: #D9D9D9; }
+    .nav-i.active, .nav-i.active:hover { background: #007AFF; color: #fff; }
+    .nav-i.active .material-icons { color: #fff; }
+    .nav-i .cnt { margin-left: auto; font-size: 13px; color: #6B778C; }
+    .nav-i.active .cnt { color: #fff; }
+
+    /* ── Main content ── */
+    .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .ph h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0; }
+    .ph .sub { color: #6B778C; margin-top: 2px; }
+    .ph-actions { display: flex; align-items: center; gap: 12px; }
+    .crumb {
+      display: inline-flex; align-items: center; gap: 4px; color: #0053CC; cursor: pointer;
+      background: none; border: none; font: inherit; padding: 0; margin-bottom: 8px;
+    }
+    .crumb:hover { text-decoration: underline; }
+    .crumb .material-icons { font-size: 18px; }
+    .toolbar { display: flex; gap: 12px; margin-bottom: 12px; }
+    .toolbar input { max-width: 320px; }
+    .linkish { color: #0053CC; cursor: pointer; background: none; border: none; font: inherit; padding: 0; text-align: left; }
+    .linkish:hover { text-decoration: underline; }
+    .client-cell { display: flex; align-items: center; gap: 10px; }
+    .muted { color: #6B778C; }
+    .status { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap; }
+    .tbl-foot { padding: 12px 10px; color: #6B778C; }
+
+    .section-h { font-size: 20px; line-height: 28px; font-weight: 400; margin: 8px 0 12px; }
+    .empty { text-align: center; padding: 56px 24px; max-width: 460px; margin: 0 auto; }
+    .empty .material-icons { font-size: 40px; color: #B4BBCB; }
+    .empty h2 { font-size: 20px; line-height: 28px; font-weight: 500; margin: 12px 0 6px; }
+    .empty p { color: #6B778C; margin: 0 0 20px; }
+    .empty .sec { display: block; margin: 12px auto 0; }
+
+    .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 840px; }
+    .kpi { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; }
+    .kpi .l { color: #6B778C; }
+    .kpi .v { font-size: 28px; line-height: 36px; margin-top: 4px; }
+
+    /* ── Modal ── */
+    .scrim { position: fixed; inset: 0; background: rgba(26,27,36,.4); z-index: 400; display: none; align-items: center; justify-content: center; }
+    .scrim.open { display: flex; }
+    .modal { width: 440px; max-width: calc(100vw - 32px); background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+    .modal h3 { margin: 0 0 8px; font-size: 20px; line-height: 28px; font-weight: 500; }
+    .modal p { margin: 0 0 16px; color: #6B778C; }
+    .idrow { display: flex; gap: 8px; margin-bottom: 20px; }
+    .idrow input { font-size: 16px; letter-spacing: .04em; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+    /* ── v4 client details ── */
+    .cd-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+    .cd-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .cd-title h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .pager { display: inline-flex; align-items: center; gap: 2px; color: #6B778C; font-size: 13px; white-space: nowrap; }
+    .pager button { width: 28px; height: 28px; border: 0; background: none; border-radius: 4px; cursor: pointer; color: #6B778C; display: inline-flex; align-items: center; justify-content: center; }
+    .pager button:hover:not(:disabled) { background: #F2F6FC; color: #0053CC; }
+    .pager button:disabled { opacity: .35; cursor: default; }
+    .period { height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 8px; font: inherit; background: #fff; }
+    .tipwrap { position: relative; display: inline-flex; }
+    .tipwrap[data-tip]:hover::after {
+      content: attr(data-tip); position: absolute; right: 0; top: calc(100% + 6px); z-index: 70; width: 260px;
+      background: #1A1B24; color: #fff; font-size: 13px; line-height: 18px; padding: 8px 10px; border-radius: 6px; white-space: normal;
+    }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; pointer-events: none; }
+    .more { width: 36px; height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; background: #fff; cursor: pointer; color: #555; display: inline-flex; align-items: center; justify-content: center; }
+    .more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
+    .menu .danger, .menu .danger .material-icons { color: #CC2929; }
+    .wk-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; max-width: 880px; margin-bottom: 24px; }
+    .mpick { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+    .mpick select { appearance: none; border: 0; background: none; font: inherit; font-size: 20px; line-height: 28px; font-weight: 500; color: #1A1B24; padding: 0 26px 0 0; cursor: pointer; }
+    .mpick .material-icons { position: absolute; right: 0; pointer-events: none; color: #6B778C; }
+    .mpick select:focus-visible { outline: 2px solid #0053CC; border-radius: 4px; }
+    .wk-line { margin-top: 4px; color: #555; }
+    .ln-warn { color: #B35E0B; font-weight: 500; } .ln-ok { color: #1F8940; font-weight: 500; }
+    .wk-sec { max-width: 880px; margin-bottom: 28px; }
+    .sec-h { font-size: 14px; font-weight: 500; margin-bottom: 4px; display: flex; gap: 8px; }
+    .sec-h .muted { font-weight: 400; }
+    .tabs-l { display: flex; gap: 24px; }
+    .tabs { justify-content: space-between; align-items: center; }
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid #DFE4EC; margin: 12px 0 24px; }
+    .tabs button { background: none; border: 0; font: inherit; color: #555; padding: 10px 0; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
+    .tabs button.on { color: #0053CC; box-shadow: inset 0 -2px 0 #0053CC; font-weight: 500; }
+    .card { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; margin-bottom: 16px; max-width: 880px; }
+    .sum { display: flex; gap: 12px; align-items: flex-start; }
+    .sum .material-icons { font-size: 24px; }
+    .sum h3 { margin: 0; font-size: 16px; font-weight: 500; }
+    .sum ul { margin: 6px 0 0; padding-left: 18px; color: #555; }
+    .sum li { margin: 2px 0; }
+    .sum.blocked { background: #FFF7F0; border-color: #F3D2B3; } .sum.blocked > .material-icons { color: #CB7515; }
+    .sum.ready { background: #F1F9F3; border-color: #BFE3C8; } .sum.ready > .material-icons { color: #1F8940; }
+    .sum.closed > .material-icons { color: #6B778C; }
+    .chk-h { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .chk-h h2 { font-size: 16px; font-weight: 500; margin: 0; }
+    .bar { flex: 0 0 120px; height: 6px; border-radius: 3px; background: #EFF1F5; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: #1F8940; }
+    .chk { border-bottom: 1px solid #EFF1F5; }
+    .chk summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
+    .chk summary::-webkit-details-marker { display: none; }
+    .chk .ic { font-size: 20px; }
+    .ic.pass { color: #1F8940; } .ic.fail { color: #CC2929; } .ic.warn { color: #CB7515; } .ic.wait { color: #B4BBCB; }
+    .chk .nm { width: 180px; font-weight: 500; }
+    .chk .stt { flex: 1; color: #555; }
+    .chk .exp { color: #6B778C; font-size: 20px; transition: transform .15s; }
+    .chk[open] .exp { transform: rotate(180deg); }
+    .chk .det { padding: 0 0 12px 32px; color: #6B778C; }
+    textarea.note { width: 100%; min-height: 72px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 8px; font: inherit; resize: vertical; }
+    .hist summary { cursor: pointer; color: #6B778C; list-style: none; }
+    .hist summary::-webkit-details-marker { display: none; }
+    .hist table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .hist td { padding: 6px 8px 6px 0; border-top: 1px solid #EFF1F5; vertical-align: top; }
+    .hist td:first-child { color: #6B778C; white-space: nowrap; width: 130px; }
+    .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; max-width: 880px; }
+    .form label { display: flex; flex-direction: column; gap: 4px; color: #555; font-size: 13px; }
+    .form .full { grid-column: 1 / -1; }
+    .form input, .form textarea { font: inherit; font-size: 14px; color: #1A1B24; }
+    .kv { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
+    .kv dt { color: #6B778C; } .kv dd { margin: 0; }
+    tr.rowlink { cursor: pointer; } tr.rowlink:hover td { background: #F7F8FA; }
+    #stateSeg.hide { visibility: hidden; }
+    /* ── v7 onboarding: portrait cards + client directory ── */
+    .shell-hide .p-top, .shell-hide .p-body { display: none; }
+    .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: #fff; }
+    .shell-hide .ob { display: block; }
+    .ob-in { max-width: 1040px; margin: 0 auto; padding: 32px 40px 48px; }
+    .ob-in.review-fit {
+      height: calc(100vh - 50px);
+      display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;
+    }
+    .ob-back-slot { height: 28px; margin: 0 0 8px; display: flex; align-items: center; flex: 0 0 28px; }
+    .ob-in.review-fit > h1, .ob-in.review-fit > .welcome-copy, .ob-in.review-fit > .lead, .review-foot { flex: 0 0 auto; }
+    .ob h1 { font-size: 32px; line-height: 40px; font-weight: 500; margin: 0 0 12px; text-align: left; }
+    .ob .lead, .ob .welcome-copy { color: #1A1B24; text-align: left; margin: 0 0 20px; max-width: 720px; font-size: 16px; line-height: 24px; }
+    .ob-cards { display: grid; gap: 20px; width: 100%; margin: 0; }
+    .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .ob-card {
+      position: relative;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+      min-height: 328px; width: 100%; text-align: left;
+      padding: 32px 24px 28px; background: #fff; border: 1px solid #DFE4EC; border-radius: 12px;
+      cursor: pointer; font: inherit; color: inherit;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .ob-card:hover { border-color: #0053CC; background: #F7FAFF; box-shadow: 0 8px 24px rgba(0, 83, 204, .08); }
+    .ob-card:focus { outline: none; }
+    .ob-card:focus-visible { outline: 2px solid #003E99; outline-offset: 3px; }
+    .ob-card:active { background: #E7F0FC; }
+    .ob-card.selected { border-color: #0053CC; background: #F2F6FC; box-shadow: inset 0 0 0 1px #0053CC; }
+    .ob-card.selected:hover { background: #E7F0FC; }
+    .ob-card .ob-ico {
+      width: 56px; height: 56px; border-radius: 14px; background: #F2F6FC; color: #0053CC;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; overflow: hidden;
+    }
+    .ob-card.selected .ob-ico { background: #fff; }
+    .ob-card .ob-check { position: absolute; top: 16px; right: 16px; font-size: 22px; color: transparent; }
+    .ob-card.selected .ob-check { color: #0053CC; }
+    .ob-card-h { display: block; font-size: 20px; line-height: 26px; font-weight: 500; color: #1A1B24; overflow-wrap: break-word; }
+    .ob-card-p { display: block; font-size: 15px; line-height: 22px; color: #3E4656; overflow-wrap: break-word; }
+    .ob-pill {
+      display: inline-flex; align-items: center; height: 26px; padding: 0 8px; border-radius: 4px;
+      background: #E7F0FC; color: #0053CC; font-size: 14px; line-height: 20px; font-weight: 500;
+    }
+    .ob-ill { display: block; margin-bottom: 4px; }
+    .ob-ill svg { display: block; width: 128px; height: 84px; }
+    .welcome-copy { font-size: 16px; line-height: 24px; }
+    .books-banner {
+      display: flex; gap: 12px; align-items: flex-start; margin: 0 0 24px;
+      background: #E7F0FC; border-radius: 8px; padding: 14px 16px;
+    }
+    .books-banner .material-icons { color: #0053CC; font-size: 22px; flex-shrink: 0; }
+    .books-banner p { margin: 0; font-size: 15px; line-height: 22px; color: #1A1B24; text-align: left; }
+    .books-banner strong { font-weight: 500; }
+    .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+    .path-card {
+      display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+      border: 1px solid #DFE4EC; border-radius: 8px; background: #fff; padding: 24px;
+    }
+    .path-ico {
+      width: 40px; height: 40px; border-radius: 50%; background: #F2F6FC; color: #0053CC;
+      display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;
+    }
+    .path-ico .material-icons { font-size: 22px; }
+    .path-card h2 { margin: 0 0 8px; font-size: 18px; line-height: 24px; font-weight: 500; }
+    .path-card p { margin: 0 0 20px; font-size: 15px; line-height: 22px; color: #3E4656; }
+    .path-card .btn, .path-card .btn-outlined { margin-top: auto; }
+    .src-list { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
+    .src-opt {
+      display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
+      padding: 16px 18px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      cursor: pointer; font: inherit; color: inherit;
+    }
+    .src-opt:hover { border-color: #0053CC; background: #F7FAFF; }
+    .src-opt:focus-visible { outline: 2px solid #0053CC; outline-offset: 2px; }
+    .src-opt.selected { border-color: #0053CC; box-shadow: inset 0 0 0 1px #0053CC; background: #F2F6FC; }
+    .src-ico { color: #0053CC; font-size: 24px; flex-shrink: 0; }
+    .src-h { display: block; font-size: 18px; line-height: 24px; font-weight: 500; }
+    .src-d { display: block; margin-top: 4px; font-size: 15px; line-height: 22px; color: #3E4656; }
+    .src-caveat { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: #6B778C; }
+    .ob-other {
+      display: inline-block; margin: 16px 0 0; padding: 0; border: 0; background: none;
+      color: #0053CC; font: inherit; font-size: 15px; line-height: 22px; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+    }
+    .ob-other:hover { text-decoration: underline; }
+    .ob-other:focus-visible { outline: 2px solid #0053CC; outline-offset: 3px; border-radius: 4px; }
+    .ob-quiet { display: inline-block; margin: 16px 0 0; color: #6B778C; background: none; border: none; font: inherit; font-size: 15px; line-height: 22px; cursor: pointer; text-align: left; }
+    .ob-quiet:hover { color: #0053CC; text-decoration: underline; }
+    .ob-quiet:focus-visible { outline: 2px solid #0053CC; outline-offset: 3px; border-radius: 4px; }
+    .brand-logo { width: 40px; height: 40px; flex-shrink: 0; display: block; }
+    .src-file {
+      width: 40px; height: 40px; border-radius: 8px; background: #F2F6FC; color: #0053CC;
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .src-file .material-icons { font-size: 22px; }
+    .review-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; padding-bottom: 8px; }
+    .review-foot {
+      flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 12px 0 12px; background: #fff; border-top: 1px solid #DFE4EC;
+    }
+    .ob-field.firm input.firm-name-input { height: 56px; font-size: 20px; max-width: 560px; width: 100%; }
+    .ob-field.firm { max-width: 560px; margin: 8px 0 0; }
+    .ob-field.firm label { font-size: 16px; line-height: 24px; color: #1A1B24; }
+    .empty-dir { max-width: 460px; padding: 12px 0 48px; }
+    .empty-dir h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 8px 0; }
+    .empty-dir p { margin: 0 0 20px; font-size: 16px; line-height: 24px; color: #3E4656; }
+    .empty-dir .ill svg { display: block; width: 128px; height: 84px; margin-bottom: 8px; }
+    .dir-list { max-width: 560px; margin: 8px 0; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; overflow: hidden; }
+    .dir-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #EFF1F5; font-size: 15px; line-height: 22px; }
+    .dir-row:last-child { border-bottom: 0; }
+    .dir-row .nm { flex: 1; min-width: 0; }
+    .dir-empty { max-width: 560px; margin: 0 0 8px; color: #6B778C; font-size: 15px; line-height: 22px; }
+    .ob-name-row { display: flex; gap: 12px; align-items: flex-end; max-width: 560px; margin: 0 0 12px; }
+    .ob-name-row .ob-field { flex: 1; margin: 0; max-width: none; }
+    .sample-current { color: #1A1B24; }
+    .sample-former { color: #6B778C; }
+    @media (max-width: 900px) {
+      .ob-cards.cols-3 { grid-template-columns: 1fr; }
+      .path-grid, .ob-cards.cols-2 { grid-template-columns: 1fr; }
+      .ob-in, .ob-in.review-fit { padding-left: 16px; padding-right: 16px; }
+    }
+    .ob-back { display: inline-flex; align-items: center; gap: 4px; color: #6B778C; background: none; border: none; font: inherit; font-size: 14px; cursor: pointer; margin: 0; padding: 0; }
+    .ob-back:hover { color: #0053CC; }
+    .ob-back:focus-visible { outline: 2px solid #0053CC; outline-offset: 2px; border-radius: 4px; }
+    .ob-back .material-icons { font-size: 18px; }
+    .ob-field { max-width: 420px; margin: 0 0 20px; }
+    .ob-field label { display: block; font-size: 14px; line-height: 20px; color: #3E4656; margin-bottom: 6px; }
+    .ob-field input { width: 100%; height: 44px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 12px; font: inherit; font-size: 16px; }
+    .ob-field input:focus-visible { outline: 2px solid #0053CC; outline-offset: 1px; }
+    .ob-field.block { max-width: 100%; margin: 0 0 20px; }
+    .ob-actions { display: flex; justify-content: flex-start; gap: 12px; margin-top: 20px; }
+    .ob-spin { text-align: center; padding: 64px 24px; }
+    .ob-spin .material-icons { font-size: 40px; color: #0053CC; animation: spin 1.2s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ob-table-wrap { background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; overflow: hidden; }
+    .ob-table-wrap table { width: 100%; border-collapse: collapse; }
+    .ob-table-wrap th, .ob-table-wrap td { padding: 12px 14px; border-bottom: 1px solid #EFF1F5; text-align: left; font-size: 14px; line-height: 20px; }
+    .ob-table-wrap th { font-weight: 500; color: #6B778C; }
+    .ob-table-wrap tr:last-child td { border-bottom: 0; }
+    .ob-table-wrap input[type=checkbox] { width: 16px; height: 16px; }
+    .setup-bar { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: 8px; margin-bottom: 20px; max-width: 880px; }
+    .setup-bar .bar { flex: 1; height: 8px; background: #DFE4EC; border-radius: 4px; overflow: hidden; }
+    .setup-bar .bar i { display: block; height: 100%; background: #0053CC; }
+    .setup-bar b { white-space: nowrap; }
+    .issues { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 880px; margin: 16px 0 24px; }
+    .issue { border: 1px solid #DFE4EC; border-radius: 8px; padding: 14px; }
+    .issue .n { font-size: 24px; line-height: 32px; }
+    .issue .l { color: #6B778C; font-size: 13px; }
+    .stepper { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stepper span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 13px; color: #6B778C; background: #F7F8FA; }
+    .stepper span.on { background: #F2F6FC; color: #0053CC; font-weight: 500; }
+    .stepper span.done { color: #1F8940; }
+    .draft-tag { display: inline-block; font-size: 12px; color: #CB7515; background: #FFF7F0; border: 1px solid #F3D2B3; border-radius: 4px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span class="brand">Firm context switcher · v9</span>
+    <span class="spacer"></span>
+    <div class="seg" id="modeSeg">
+      <button data-m="onboarding">Onboarding</button>
+      <button data-m="firm">Firm workspace</button>
+    </div>
+    <div class="seg hide" id="stateSeg" title="Client page state">
+      <button data-cs="blocked">Blocked</button>
+      <button data-cs="ready">Ready to close</button>
+      <button data-cs="closed">Closed month</button>
+    </div>
+  </div>
+
+  <div class="p-top">
+    <div class="t-left">
+      <div class="ctx">
+        <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
+        <div class="pop" id="pop" role="dialog" aria-label="Switch firm or organization">
+          <div class="pop-search" id="popSearchWrap">
+            <input type="search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
+            <span class="kbd" id="kbdHint">Ctrl K</span>
+          </div>
+          <div class="pop-list" id="popList"></div>
+          <div class="pop-foot" id="popFoot"></div>
+        </div>
+      </div>
+      <div id="backChip"></div>
+    </div>
+    <span class="t-balance">Balance: <b>∞</b></span>
+    <button type="button" class="t-how" data-top="how">How it works?</button>
+    <button type="button" class="t-ico" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications_none</span><span class="t-badge">3</span></button>
+    <div class="t-wrap">
+      <button type="button" class="t-ico" id="helpBtn" aria-label="Help" aria-expanded="false"><span class="material-icons">help_outline</span><span class="material-icons chev">expand_more</span></button>
+      <div class="menu" id="helpMenu">
+        <button data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
+        <button data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
+      </div>
+    </div>
+    <div class="t-wrap">
+      <button type="button" class="t-ico" id="userBtn" aria-label="Account" aria-expanded="false"><span class="material-icons">account_circle</span><span class="material-icons chev">expand_more</span></button>
+      <div class="menu" id="userMenu"></div>
+    </div>
+  </div>
+
+  <div class="p-body">
+    <aside class="p-side">
+      <nav class="nav" id="nav"></nav>
+    </aside>
+    <main class="p-main" id="main"></main>
+  </div>
+
+  <div class="ob" id="ob"></div>
+
+  <div class="scrim" id="scrim">
+    <div class="modal" role="dialog" aria-modal="true" id="modal"></div>
+  </div>
+
+<script>
+(function () {
+  /* ───────── Data ───────── */
+  const FIRM = { id: 'firm', name: 'WLS Labs', firmId: '1793300370' };
+  const CLIENTS = [
+    { id: 'c1',  name: 'Bluebird Bakery',          ledger: 'QuickBooks Online', pay: 'Stripe, Square',  books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c2',  name: 'Cedar & Pine Interiors',   ledger: 'Xero',              pay: 'Shopify, PayPal', books: ['yellow', '6 uncategorized'],   month: 'Oct 2026', setup: true },
+    { id: 'c3',  name: 'Delta Freight LLC',        ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['red', '3 failed syncs'],       month: 'Sep 2026', setup: true },
+    { id: 'c4',  name: 'Evergreen Landscaping',    ledger: 'QuickBooks Online', pay: 'Square',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c5',  name: 'Fable Coffee Roasters',    ledger: 'Xero',              pay: 'Shopify',         books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c6',  name: 'Granite Peak Dental',      ledger: null,                pay: null,              books: ['grey', 'Not set up'],          month: null, setup: false },
+    { id: 'c7',  name: 'Harbor Street Books',      ledger: 'QuickBooks Online', pay: 'Amazon, Shopify', books: ['yellow', '12 unreconciled'],   month: 'Oct 2026', setup: true },
+    { id: 'c8',  name: 'Ironwood Fitness',         ledger: 'QuickBooks Online', pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c9',  name: 'Juniper Yoga Studio',      ledger: null,                pay: 'Stripe',          books: ['grey', 'Not set up'],          month: null, setup: false },
+    { id: 'c10', name: 'Kestrel Analytics',        ledger: 'Xero',              pay: 'Stripe',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c11', name: 'Lumen Dental Lab',         ledger: 'QuickBooks Online', pay: 'PayPal',          books: ['green', 'Healthy'],            month: 'Oct 2026', setup: true },
+    { id: 'c12', name: 'Maple & Main Florist',     ledger: 'QuickBooks Online', pay: 'Square',          books: ['yellow', '4 uncategorized'],   month: 'Oct 2026', setup: true },
+    { id: 'c13', name: 'Northgate Auto Repair',    ledger: null,                pay: null,              books: ['grey', 'Not set up'],          month: null, setup: false }
+  ];
+  function demoClients() {
+    return CLIENTS.map((c) => Object.assign({}, c)).concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]);
+  }
+  const SCENARIOS = {
+    'firm':   { firm: true,  clients: demoClients(), own: [{ id: 'o1', name: 'WLS Labs Books' }] },
+  };
+  const PALETTE = ['#0053CC', '#1F8940', '#CB7515', '#310BB0', '#3C4EAC', '#CC2929', '#0E7C86', '#8A4FBF'];
+  const FIRM_NAV = [
+    ['dashboard', 'dashboard', 'Dashboard'],
+    ['clients', 'people', 'Clients'],
+    ['colleagues', 'groups', 'Colleagues'],
+    ['billing', 'receipt_long', 'Billing and licenses'],
+    ['firmsettings', 'settings', 'Firm settings']
+  ];
+  const ORG_NAV = [
+    ['dashboard', 'dashboard', 'Dashboard'], ['mapping', 'account_tree', 'Mapping'],
+    ['summaries', 'summarize', 'Summaries'], ['reconciliation', 'fact_check', 'Reconciliation'],
+    ['products', 'inventory_2', 'Products and services'], ['analytics', 'insights', 'Analytics'],
+    ['revrec', 'timeline', 'Revenue recognition'], ['settings', 'settings', 'Settings']
+  ];
+  const TOP_PAGES = {
+    how: ['live_help', 'How it works?'], notifications: ['notifications_none', 'Notifications'],
+    helpcenter: ['menu_book', 'Help center'], support: ['chat_bubble_outline', 'Contact support'],
+    orgsettings: ['tune', 'Organization settings'], activity: ['history', 'Activity log'],
+    profile: ['person_outline', 'User profile'], orglist: ['list', 'List of organizations']
+  };
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+
+  /* ───────── State ───────── */
+  let scenario = 'firm';
+  let st = null;          // { ctx: 'firm'|'org', orgId, page, clientId, recent: [] }
+  let kbIndex = -1;
+  let cdState = 'blocked';
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const initials = (n) => n.replace(/&/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  const color = (id) => { let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; };
+  const av = (o, sm) => o.id === 'firm'
+    ? `<span class="av firm${sm ? ' sm' : ''}">${initials(o.name)}</span>`
+    : `<span class="av${sm ? ' sm' : ''}" style="background:${color(o.id)}">${initials(o.name)}</span>`;
+
+  /* ───────── v7: Onboarding ─────────
+     Import sources are simulated design proposals. No OAuth, sign-in, or live books.
+     QuickBooks sample = customers on the firm's own company, not a QBOA client directory.
+  */
+  const EXTRA = [
+    { id: 'c15', name: 'Pinecrest Realty' },
+    { id: 'c16', name: 'Quill & Ink Agency' },
+    { id: 'c17', name: 'Riverbend Cafe' },
+    { id: 'c18', name: 'Summit Peak Advisors' },
+    { id: 'c19', name: 'Tidewater Outfitters' }
+  ];
+  const FORMER_IDS = new Set(EXTRA.map((c) => c.id));
+  const IMPORT_POOL = CLIENTS.concat(EXTRA).map((c) => ({ id: c.id, name: c.name, former: FORMER_IDS.has(c.id) }));
+  const SETUP_STEPS = [
+    ['books', 'Connect books'],
+    ['integrations', 'Connect integrations'],
+    ['mode', 'Select mode'],
+    ['import', 'Import data']
+  ];
+
+  let mode = 'firm'; // 'onboarding' | 'firm'
+  let ob = null;
+
+  function defaultOb() {
+    return {
+      step: 'role', role: null, roleChosen: false, roleNote: '', otherOpen: false,
+      firmChoice: null, firmChosen: false, source: null, firmName: '', firmTouched: false,
+      connectedName: '', directoryReady: false, pendingEntries: [], nameFrom: 'import',
+      selected: Object.fromEntries(IMPORT_POOL.map((c) => [c.id, !c.former])),
+      q: '', manual: [], manualMsg: '', setupStep: 'books', setupClientId: null
+    };
+  }
+  function loadOb() {
+    try {
+      const raw = localStorage.getItem('fcs-ob-v1');
+      if (raw) {
+        const v = JSON.parse(raw);
+        if (v && v.step) {
+          ob = Object.assign(defaultOb(), v);
+          if (!Array.isArray(ob.manual)) ob.manual = [];
+          IMPORT_POOL.forEach((c) => { if (typeof ob.selected[c.id] !== 'boolean') ob.selected[c.id] = !c.former; });
+          if (!v.roleChosen) ob.role = null;
+          if (!v.firmChosen) ob.firmChoice = null;
+          return;
+        }
+      }
+    } catch (e) {}
+    ob = defaultOb();
+  }
+  function saveOb() { try { localStorage.setItem('fcs-ob-v1', JSON.stringify(ob)); } catch (e) {} }
+
+  function isSetup(c) { return !!(c && c.setup); }
+  function firmClients() { return sc().clients.filter((c) => !c.pending); }
+  function setupCount() { return firmClients().filter(isSetup).length; }
+
+  function goOnboarding(step) {
+    mode = 'onboarding';
+    if (step) ob.step = step;
+    saveOb();
+    document.body.classList.add('shell-hide');
+    renderMode();
+    renderOb();
+  }
+  function persistDirectory() {
+    try {
+      localStorage.setItem('fcs-dir-v1', JSON.stringify({
+        ready: !!(ob && ob.directoryReady),
+        name: FIRM.name,
+        clients: SCENARIOS.firm.clients
+      }));
+    } catch (e) {}
+  }
+  function restoreDirectory() {
+    try {
+      const raw = localStorage.getItem('fcs-dir-v1');
+      if (!raw) return;
+      const v = JSON.parse(raw);
+      if (v && v.ready && Array.isArray(v.clients)) {
+        SCENARIOS.firm.clients = v.clients;
+        if (v.name) FIRM.name = v.name;
+        if (ob) ob.directoryReady = true;
+      }
+    } catch (e) {}
+  }
+  function goWorkspace(page, clientId) {
+    mode = 'firm';
+    document.body.classList.remove('shell-hide');
+    if (!(ob && ob.directoryReady)) {
+      SCENARIOS.firm.clients = demoClients();
+      FIRM.name = 'WLS Labs';
+      try { localStorage.removeItem('fcs-dir-v1'); } catch (e) {}
+      st = defaultState(); save();
+    } else {
+      FIRM.name = (ob && ob.firmName) || FIRM.name || 'WLS Labs';
+      if (!st) { st = defaultState(); save(); }
+    }
+    goFirm(page || (setupCount() > 0 ? 'dashboard' : 'clients'), clientId);
+    renderMode();
+  }
+  function restartOnboarding() {
+    ob = defaultOb();
+    saveOb();
+    SCENARIOS.firm.clients = demoClients();
+    FIRM.name = 'WLS Labs';
+    try { localStorage.removeItem('fcs-dir-v1'); } catch (e) {}
+    goOnboarding('role');
+  }
+  function finishOnboarding(entries) {
+    const clients = (entries || []).map((c) => ({
+      id: c.id, name: c.name, ledger: null, pay: null,
+      books: ['grey', 'Not set up'], month: null, setup: false
+    }));
+    SCENARIOS.firm.clients = clients;
+    FIRM.name = ob.firmName;
+    ob.directoryReady = true;
+    ob.step = 'done';
+    st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
+    save(); saveOb(); persistDirectory();
+    goWorkspace('clients');
+  }
+
+  function renderMode() {
+    document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('active', b.dataset.m === mode));
+    const onClient = mode === 'firm' && st && st.ctx === 'firm' && st.page === 'client' && st.clientId && findOrg(st.clientId) && !findOrg(st.clientId).pending;
+    $('stateSeg').classList.toggle('hide', !onClient);
+  }
+
+  function obShell(inner, review) {
+    return `<div class="ob-in${review ? ' review-fit' : ''}" data-step="${esc(ob.step || 'role')}">${inner}</div>`;
+  }
+  function backSlot(show) {
+    return `<div class="ob-back-slot">${show ? '<button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>' : ''}</div>`;
+  }
+  const ILL = {
+    firm: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><circle cx="40" cy="34" r="8" fill="#0053CC"/><circle cx="64" cy="30" r="9" fill="#0053CC"/><circle cx="88" cy="34" r="8" fill="#7BA3E0"/><path d="M26 58c1.5-9 7-13 14-13s12.5 4 14 13" fill="#0053CC"/><path d="M50 58c1.2-10 7-15 14-15s12.8 5 14 15" fill="#0053CC"/><path d="M74 58c1.5-9 7-13 14-13s12.5 4 14 13" fill="#7BA3E0"/></svg>',
+    inhouse: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><rect x="44" y="22" width="40" height="44" rx="3" fill="#0053CC"/><rect x="50" y="28" width="8" height="7" fill="#fff"/><rect x="62" y="28" width="8" height="7" fill="#fff"/><rect x="50" y="40" width="8" height="7" fill="#fff"/><rect x="62" y="40" width="8" height="7" fill="#fff"/><rect x="58" y="52" width="12" height="14" fill="#E7F0FC"/></svg>',
+    owner: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><path d="M34 40h60l-8-12H42z" fill="#7BA3E0"/><rect x="38" y="40" width="52" height="26" rx="2" fill="#0053CC"/><rect x="58" y="50" width="12" height="16" fill="#E7F0FC"/></svg>',
+    create: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><rect x="36" y="26" width="40" height="40" rx="3" fill="#0053CC"/><rect x="42" y="32" width="8" height="6" fill="#fff"/><rect x="54" y="32" width="8" height="6" fill="#fff"/><rect x="42" y="42" width="8" height="6" fill="#fff"/><rect x="54" y="42" width="8" height="6" fill="#fff"/><circle cx="86" cy="28" r="12" fill="#2F6FE0"/><path d="M86 22v12M80 28h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+    join: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><circle cx="46" cy="34" r="8" fill="#0053CC"/><circle cx="70" cy="34" r="8" fill="#7BA3E0"/><path d="M32 58c1.6-9 7-13 14-13s12.4 4 14 13" fill="#0053CC"/><path d="M56 58c1.6-9 7-13 14-13s12.4 4 14 13" fill="#7BA3E0"/><rect x="84" y="40" width="22" height="16" rx="2" fill="#fff" stroke="#0053CC" stroke-width="2"/><path d="M84 42l11 8 11-8" fill="none" stroke="#0053CC" stroke-width="2"/></svg>',
+    empty: '<svg viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><rect x="40" y="22" width="48" height="40" rx="4" fill="#fff" stroke="#0053CC" stroke-width="2"/><path d="M48 34h32M48 42h24M48 50h18" stroke="#7BA3E0" stroke-width="2" stroke-linecap="round"/></svg>'
+  };
+  const QB_LOGO = '<svg class="brand-logo" viewBox="0 0 24 24" width="40" height="40" role="img" aria-label="QuickBooks"><path fill="#2CA01C" d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm.642 4.1335c.9554 0 1.7296.776 1.7296 1.7332v9.0667h1.6c1.614 0 2.9275-1.3156 2.9275-2.933 0-1.6173-1.3136-2.9333-2.9276-2.9333h-.6654V7.3334h.6654c2.5722 0 4.6577 2.0897 4.6577 4.667 0 2.5774-2.0855 4.6666-4.6577 4.6666H12.642zM7.9837 7.333h3.3291v12.533c-.9555 0-1.73-.7759-1.73-1.7332V9.0662H7.9837c-1.6146 0-2.9277 1.316-2.9277 2.9334 0 1.6175 1.3131 2.9333 2.9277 2.9333h.6654v1.7332h-.6654c-2.5725 0-4.6577-2.0892-4.6577-4.6665 0-2.5771 2.0852-4.6666 4.6577-4.6666Z"/></svg>';
+  const XERO_LOGO = '<svg class="brand-logo" viewBox="0 0 24 24" width="40" height="40" role="img" aria-label="Xero"><path fill="#13B5EA" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.585 14.655c-1.485 0-2.69-1.206-2.69-2.689 0-1.485 1.207-2.691 2.69-2.691 1.485 0 2.69 1.207 2.69 2.691s-1.207 2.689-2.69 2.689zM7.53 14.644c-.099 0-.192-.041-.267-.116l-2.043-2.04-2.052 2.047c-.069.068-.16.108-.258.108-.202 0-.368-.166-.368-.368 0-.099.04-.191.111-.263l2.04-2.05-2.038-2.047c-.075-.069-.113-.162-.113-.261 0-.203.166-.366.368-.366.098 0 .188.037.258.105l2.055 2.048 2.048-2.045c.069-.071.162-.108.26-.108.211 0 .375.165.375.366 0 .098-.029.188-.104.258l-2.056 2.055 2.055 2.051c.068.069.104.16.104.258 0 .202-.165.368-.365.368h-.01zm8.017-4.591c-.796.101-.882.476-.882 1.404v2.787c0 .202-.165.366-.366.366-.203 0-.367-.165-.368-.366v-4.53c0-.204.16-.366.362-.366.166 0 .316.125.346.289.27-.209.6-.317.93-.317h.105c.195 0 .359.165.359.368 0 .201-.164.352-.375.359 0 0-.09 0-.164.008l.053-.002zm-3.091 2.205H8.625c0 .019.003.037.006.057.02.105.045.211.083.31.194.531.765 1.275 1.829 1.29.33-.003.631-.086.9-.229.21-.12.391-.271.525-.428.045-.058.09-.112.12-.168.18-.229.405-.186.54-.083.164.135.18.391.045.57l-.016.016c-.21.27-.435.495-.689.66-.255.164-.525.284-.811.345-.33.09-.645.104-.975.06-1.095-.135-2.01-.93-2.28-2.01-.06-.21-.09-.42-.09-.645 0-.855.421-1.695 1.125-2.205.885-.615 2.085-.66 3-.075.63.405 1.035 1.021 1.185 1.771.075.419-.21.794-.734.81l.068-.046zm6.129-2.223c-1.064 0-1.931.865-1.931 1.931 0 1.064.866 1.931 1.931 1.931s1.931-.867 1.931-1.931c0-1.065-.866-1.933-1.931-1.933v.002zm0 2.595c-.367 0-.666-.297-.666-.666 0-.367.3-.665.666-.665.367 0 .667.299.667.665 0 .369-.3.667-.667.666zm-8.04-2.603c-.91 0-1.672.623-1.886 1.466v.03h3.776c-.203-.855-.973-1.494-1.891-1.494v-.002z"/></svg>';
+  function obCard(o) {
+    const on = !!o.selected;
+    return `<button type="button" class="ob-card${on ? ' selected' : ''}" ${o.attr} aria-pressed="${on ? 'true' : 'false'}">
+      <span class="material-icons ob-check" aria-hidden="true">check_circle</span>
+      <span class="ob-ill">${o.ill}</span>
+      <span class="ob-card-h">${o.title}</span>
+      <span class="ob-card-p">${o.text}</span>
+    </button>`;
+  }
+  function readFirmName() {
+    const i = $('firmNameIn');
+    if (i) ob.firmName = i.value.trim();
+    return ob.firmName || '';
+  }
+  function goFirmName(entries, from) {
+    ob.pendingEntries = entries || [];
+    ob.nameFrom = from || 'import';
+    if (!ob.firmTouched && !ob.firmName && ob.connectedName && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')) {
+      ob.firmName = ob.connectedName;
+    }
+    goOnboarding('firmname');
+  }
+  function reviewCopy() {
+    const src = ob.source;
+    if (src === 'qbo' || src === 'qboa') {
+      return 'Choose who to add. Former customer rows are sample cues you can leave out. These are customers from your firm’s own QuickBooks company, not an accountant client directory.';
+    }
+    if (src === 'xero') {
+      return 'Choose who to add from this sample practice list. Nothing connects to Xero.';
+    }
+    return 'Choose who to add. This sample stands in for a CSV, and no file was read.';
+  }
+  function srcOpt(src, mark, title, text, caveat) {
+    const on = ob.source === src || (src === 'qbo' && ob.source === 'qboa');
+    return `<button type="button" class="src-opt${on ? ' selected' : ''}" data-src="${src}" aria-pressed="${on ? 'true' : 'false'}">
+      ${mark}
+      <span><span class="src-h">${title}</span><span class="src-d">${text}</span><span class="src-caveat">${caveat}</span></span>
+    </button>`;
+  }
+  function renderOb() {
+    const step = ob.step || 'role';
+    let html = '';
+    if (step === 'role') {
+      const cardRole = ob.roleChosen && (ob.role === 'firm' || ob.role === 'inhouse' || ob.role === 'owner') ? ob.role : null;
+      const otherOpen = !cardRole && (!!ob.otherOpen || ob.role === 'other');
+      const note = (ob.roleNote || '').trim();
+      const can = !!cardRole || (otherOpen && !!note);
+      html = obShell(`
+        ${backSlot(false)}
+        <h1>What brings you to Synder?</h1>
+        <p class="lead">Choose the one that fits. We’ll follow that path.</p>
+        <div class="ob-cards cols-3">
+          ${obCard({ attr: 'data-role="firm"', selected: cardRole === 'firm', ill: ILL.firm, title: 'I keep books for clients', text: 'Accounting firm or freelance bookkeeper, working across many clients.' })}
+          ${obCard({ attr: 'data-role="inhouse"', selected: cardRole === 'inhouse', ill: ILL.inhouse, title: 'I’m an accountant at one company', text: 'In-house finance or accounting for a single business.' })}
+          ${obCard({ attr: 'data-role="owner"', selected: cardRole === 'owner', ill: ILL.owner, title: 'I run a business', text: 'You look after your own company’s books.' })}
+        </div>
+        <button type="button" class="ob-other" id="obOtherOpen">Other</button>
+        ${otherOpen ? `<div class="ob-field" id="otherBox"><label for="roleNote">How would you describe your role?</label><input id="roleNote" value="${esc(ob.roleNote || '')}" autocomplete="off" /></div>` : ''}
+        <div class="ob-actions"><button type="button" class="btn" id="obRoleNext"${can ? '' : ' disabled'}>Continue</button></div>`);
+    } else if (step === 'other' || step === 'inhouse' || step === 'owner') {
+      const titles = { other: 'Other', inhouse: 'Accountant at one company', owner: 'I run a business' };
+      const described = step === 'other' && (ob.roleNote || '').trim() ? `You described your role as “${esc(String(ob.roleNote).trim())}”. ` : '';
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>${titles[step] || 'Continue'}</h1>
+        <p class="lead">${described}This path isn’t part of the firm prototype. Continue to the regular Synder setup.</p>
+        <div class="ob-actions"><button type="button" class="btn" id="obOtherCta">Continue to Synder setup</button></div>`);
+    } else if (step === 'firmchoice') {
+      const canFirm = !!(ob.firmChosen && (ob.firmChoice === 'create' || ob.firmChoice === 'join'));
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Set up your firm workspace</h1>
+        <p class="lead">A firm is the place you manage every client from.</p>
+        <div class="ob-cards cols-2">
+          ${obCard({ attr: 'data-choice="create"', selected: !!(ob.firmChosen && ob.firmChoice === 'create'), ill: ILL.create, title: 'Create a firm', text: 'A workspace for every client. You are the admin.' })}
+          ${obCard({ attr: 'data-choice="join"', selected: !!(ob.firmChosen && ob.firmChoice === 'join'), ill: ILL.join, title: 'Join my firm’s workspace', text: 'Use an invite from a colleague, or the Firm ID they share.' })}
+        </div>
+        <div class="ob-actions"><button type="button" class="btn" id="obFirmNext"${canFirm ? '' : ' disabled'}>Continue</button></div>`);
+    } else if (step === 'join') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Ask your firm admin for an invite</h1>
+        <p class="lead">Or enter the Firm ID they shared with you.</p>
+        <div class="ob-field"><label for="firmIdIn">Firm ID</label><input id="firmIdIn" placeholder="e.g. 1793300370" /></div>
+        <div class="ob-actions"><button type="button" class="btn" id="obRequest">Request access</button></div>`);
+    } else if (step === 'import') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Welcome to Synder</h1>
+        <p class="welcome-copy">Bring your clients into one place. Connect their books when you’re ready, and then you can see the state of those books here.</p>
+        <div class="books-banner" id="booksBanner">
+          <span class="material-icons" aria-hidden="true">visibility</span>
+          <p><strong>Adding a client changes nothing in their books.</strong> No changes will be made to their books without permission. A name here is a directory entry until you connect books in setup.</p>
+        </div>
+        <div class="path-grid">
+          <div class="path-card">
+            <span class="path-ico" aria-hidden="true"><span class="material-icons">download</span></span>
+            <span class="ob-pill">Recommended</span>
+            <h2>Import client list</h2>
+            <p>Bring names from QuickBooks, Xero, or a CSV instead of typing them. You’ll review the list before adding anyone.</p>
+            <button type="button" class="btn" data-path="import">Import client list</button>
+          </div>
+          <div class="path-card">
+            <span class="path-ico" aria-hidden="true"><span class="material-icons">person_add</span></span>
+            <h2>Add a client</h2>
+            <p>Enter a name now. You can finish setup later.</p>
+            <button type="button" class="btn-outlined" data-path="add">Add a client manually</button>
+          </div>
+        </div>
+        <button type="button" class="ob-quiet" id="obSkipList">Continue without a list</button>`);
+    } else if (step === 'add') {
+      const rows = (ob.manual || []).map((c) => `<div class="dir-row">${av(c, true)}<span class="nm">${esc(c.name)}</span><button type="button" class="linkish" data-rm="${c.id}">Remove</button></div>`).join('');
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Add a client</h1>
+        <p class="welcome-copy">Enter a directory name. You can finish setup later. No changes will be made to their books without permission.</p>
+        <div class="ob-name-row">
+          <div class="ob-field"><label for="manualName">Client name</label><input id="manualName" value="${esc(ob.manualDraft || '')}" placeholder="e.g. Harbor Street Books" /></div>
+          <button type="button" class="btn" id="obAddName">Add name</button>
+        </div>
+        ${ob.manualMsg ? `<p class="dir-empty" id="manualMsg">${esc(ob.manualMsg)}</p>` : ''}
+        ${rows ? `<div class="dir-list" id="dirList">${rows}</div>` : '<p class="dir-empty" id="dirList">No directory names yet. You can continue and add them later.</p>'}
+        <div class="ob-actions"><button type="button" class="btn" id="obManualDone">Continue${ob.manual.length ? ` (${ob.manual.length})` : ''}</button></div>`);
+    } else if (step === 'sources') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Import client list</h1>
+        <p class="welcome-copy">Choose where the names come from. You’ll review them before anyone is added. No changes will be made to their books without permission.</p>
+        <div class="src-list">
+          ${srcOpt('qbo', QB_LOGO, 'QuickBooks Online', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Not a QuickBooks Online Accountant client directory.')}
+          ${srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+          ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'Upload CSV', 'Names from a spreadsheet, then the same review.', 'Demo. No file is opened or parsed.')}
+        </div>`);
+    } else if (step === 'connecting') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Preparing a sample list…</h1>
+        <p class="welcome-copy">You’ll choose who to keep next. No changes will be made to their books without permission.</p>`);
+      setTimeout(() => {
+        if (ob.step !== 'connecting') return;
+        ob.step = 'review'; saveOb(); renderOb();
+      }, 800);
+    } else if (step === 'firmname') {
+      const named = (ob.firmName || '').trim();
+      const hint = ob.connectedName && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')
+        ? ' Prefilled from the sample company name. Change it if you want a different firm name.'
+        : ' This name is what your team will see.';
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Name your firm</h1>
+        <p class="lead">The firm name is required.${hint}</p>
+        <div class="ob-field firm"><label for="firmNameIn">Firm name</label><input id="firmNameIn" class="firm-name-input" value="${esc(ob.firmName || '')}" autocomplete="organization" /></div>
+        <div class="ob-actions"><button type="button" class="btn" id="obNameNext"${named ? '' : ' disabled'}>Continue</button></div>`);
+    } else if (step === 'review') {
+      const q = (ob.q || '').toLowerCase();
+      const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
+      const n = IMPORT_POOL.filter((c) => ob.selected[c.id]).length;
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Choose who to keep</h1>
+        <p class="welcome-copy">${reviewCopy()}</p>
+        <div class="review-scroll">
+          <div class="toolbar" style="margin-bottom:12px"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
+          <div class="ob-table-wrap"><table>
+            <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>In this sample</th></tr></thead>
+            <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] ? ' checked' : ''} /></td>
+              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td>
+              <td class="${c.former ? 'sample-former' : 'sample-current'}">${c.former ? 'Former customer' : 'Current client'}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No names match that search.</td></tr>'}</tbody>
+          </table></div>
+        </div>
+        <div class="review-foot">
+          <button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} client${n === 1 ? '' : 's'}</button>
+          <button type="button" class="ob-quiet" id="obSkipAdd">Continue without these names</button>
+        </div>`, true);
+    } else if (step === 'joinok') {
+      html = obShell(`
+        ${backSlot(false)}
+        <h1>Request sent</h1>
+        <p class="lead">We’ll email you when your firm admin accepts.</p>
+        <div class="ob-actions"><button type="button" class="btn" id="obToFirm">Preview firm workspace</button>
+        <button type="button" class="btn-text sec" id="obRestart">Restart onboarding</button></div>`);
+    } else {
+      html = obShell(`${backSlot(false)}<h1>That step isn’t in this prototype</h1><div class="ob-actions"><button type="button" class="btn" id="obRestart">Back to start</button></div>`);
+    }
+    $('ob').innerHTML = html;
+    bindOb();
+    const h = '#onboarding' + (step && step !== 'role' ? '/' + step : '');
+    if (location.hash !== h) history.replaceState(null, '', h);
+    document.title = 'Onboarding — Synder (Firm context switcher)';
+  }
+  function bindOb() {
+    const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    const backMap = {
+      firmchoice: 'role', join: 'firmchoice', import: 'firmchoice', add: 'import', sources: 'import',
+      firmname: 'import', review: 'sources', connecting: 'sources',
+      other: 'role', inhouse: 'role', owner: 'role', joinok: 'join'
+    };
+    on('obBack', () => {
+      readFirmName();
+      if (ob.step === 'firmname') { goOnboarding(ob.nameFrom || 'import'); return; }
+      goOnboarding(backMap[ob.step] || 'role');
+    });
+    on('obBack2', () => goOnboarding(backMap[ob.step] || 'role'));
+    document.querySelectorAll('[data-role]').forEach((b) => b.onclick = () => {
+      ob.role = b.dataset.role;
+      ob.roleChosen = true;
+      ob.otherOpen = false;
+      saveOb();
+      renderOb();
+    });
+    on('obOtherOpen', () => {
+      ob.otherOpen = true;
+      ob.role = null;
+      ob.roleChosen = false;
+      saveOb();
+      renderOb();
+      const field = $('roleNote'); if (field) field.focus();
+    });
+    const note = $('roleNote');
+    const next = $('obRoleNext');
+    if (note && next) note.oninput = () => {
+      ob.roleNote = note.value;
+      next.disabled = !note.value.trim();
+      saveOb();
+    };
+    on('obRoleNext', () => {
+      if (ob.otherOpen) {
+        const text = (($('roleNote') && $('roleNote').value) || ob.roleNote || '').trim();
+        if (!text) return;
+        ob.roleNote = text;
+        ob.role = 'other';
+        ob.roleChosen = true;
+        goOnboarding('other');
+        return;
+      }
+      if (!ob.roleChosen) return;
+      if (ob.role === 'firm') goOnboarding('firmchoice');
+      else if (ob.role === 'inhouse' || ob.role === 'owner') goOnboarding(ob.role);
+    });
+    document.querySelectorAll('[data-choice]').forEach((b) => b.onclick = () => {
+      ob.firmChoice = b.dataset.choice;
+      ob.firmChosen = true;
+      saveOb();
+      renderOb();
+    });
+    on('obFirmNext', () => {
+      if (!ob.firmChosen) return;
+      if (ob.firmChoice === 'create') goOnboarding('import');
+      else if (ob.firmChoice === 'join') goOnboarding('join');
+    });
+    document.querySelectorAll('[data-path]').forEach((b) => b.onclick = () => {
+      readFirmName();
+      if (b.dataset.path === 'add') goOnboarding('add');
+      else goOnboarding('sources');
+    });
+    document.querySelectorAll('[data-src]').forEach((b) => b.onclick = () => {
+      ob.source = b.dataset.src;
+      if (ob.source === 'qbo' || ob.source === 'qboa' || ob.source === 'xero') {
+        ob.connectedName = 'WLS Labs';
+        goOnboarding('connecting');
+      } else {
+        ob.connectedName = '';
+        goOnboarding('review');
+      }
+    });
+    on('obNameNext', () => {
+      const name = readFirmName();
+      if (!name) return;
+      ob.firmTouched = true;
+      finishOnboarding(ob.pendingEntries || []);
+    });
+    on('obRequest', () => goOnboarding('joinok'));
+    on('obOtherCta', () => goWorkspace('clients'));
+    on('obToFirm', () => goWorkspace('clients'));
+    on('obRestart', () => restartOnboarding());
+    on('obSkipList', () => {
+      ob.source = 'skip';
+      ob.connectedName = '';
+      if (!ob.firmTouched) ob.firmName = '';
+      goFirmName([], 'import');
+    });
+    const firmIn = $('firmNameIn');
+    if (firmIn) firmIn.oninput = () => {
+      ob.firmTouched = true;
+      ob.firmName = firmIn.value;
+      const btn = $('obNameNext');
+      if (btn) btn.disabled = !firmIn.value.trim();
+      saveOb();
+    };
+    const manual = $('manualName');
+    const addManual = () => {
+      const name = (manual && manual.value || '').trim();
+      ob.manualDraft = '';
+      if (!name) { ob.manualMsg = 'Enter a client name.'; saveOb(); renderOb(); const again = $('manualName'); if (again) again.focus(); return; }
+      if ((ob.manual || []).some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+        ob.manualMsg = 'That name is already on the directory.'; saveOb(); renderOb(); const again = $('manualName'); if (again) again.focus(); return;
+      }
+      ob.manual.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name });
+      ob.manualMsg = '';
+      saveOb(); renderOb();
+      const again = $('manualName'); if (again) again.focus();
+    };
+    on('obAddName', addManual);
+    if (manual) manual.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); addManual(); } };
+    document.querySelectorAll('[data-rm]').forEach((b) => b.onclick = () => {
+      ob.manual = ob.manual.filter((c) => c.id !== b.dataset.rm);
+      ob.manualMsg = ''; saveOb(); renderOb();
+    });
+    on('obManualDone', () => goFirmName(ob.manual || [], 'add'));
+    const search = $('obSearch');
+    if (search) search.oninput = () => {
+      ob.q = search.value; saveOb(); renderOb();
+      const n = $('obSearch'); n.focus(); n.setSelectionRange(n.value.length, n.value.length);
+    };
+    const all = $('obAll');
+    if (all) {
+      const picked = IMPORT_POOL.filter((c) => ob.selected[c.id]).length;
+      all.checked = picked === IMPORT_POOL.length;
+      all.indeterminate = picked > 0 && picked < IMPORT_POOL.length;
+      all.onchange = () => {
+        IMPORT_POOL.forEach((c) => { ob.selected[c.id] = all.checked; });
+        saveOb(); renderOb();
+      };
+    }
+    document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => {
+      ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderOb();
+    });
+    on('obAdd', () => {
+      goFirmName(IMPORT_POOL.filter((c) => ob.selected[c.id]).map((c) => ({ id: c.id, name: c.name })), 'review');
+    });
+    on('obSkipAdd', () => goFirmName([], 'review'));
+  }
+
+  /* Firm dashboard + billing + client setup */
+  function renderFirmDashboard() {
+    const list = firmClients();
+    const done = setupCount();
+    const need = list.length - done;
+    if (done === 0) {
+      return `<div class="ph"><div><h1>Dashboard</h1></div></div>
+        <div class="empty"><span class="material-icons">checklist</span>
+          <h2>Set up your first client</h2>
+          <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
+          <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
+    }
+    const failed = list.filter((c) => (c.books[1] || '').includes('failed')).length;
+    const unre = list.filter((c) => (c.books[1] || '').includes('unreconciled')).length;
+    const uncat = list.filter((c) => (c.books[1] || '').includes('uncategorized')).length;
+    const close = list.filter((c) => c.month && isSetup(c)).length;
+    return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(FIRM.name)}</div></div>
+      <div class="ph-actions"><button class="btn" id="dashContinue">Continue setup</button></div></div>
+      <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
+        <span class="bar"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></span>
+        <span class="muted">${need} still need setup</span></div>
+      <h2 class="section-h">Needs attention</h2>
+      <div class="issues">
+        <div class="issue"><div class="n">${failed}</div><div class="l">Failed syncs</div></div>
+        <div class="issue"><div class="n">${unre}</div><div class="l">Unreconciled</div></div>
+        <div class="issue"><div class="n">${uncat}</div><div class="l">Uncategorized</div></div>
+        <div class="issue"><div class="n">${close}</div><div class="l">Open month closes</div></div>
+      </div>`;
+  }
+  function renderBilling() {
+    return `<div class="ph"><div><h1>Billing and licenses</h1></div>
+      <div class="ph-actions"><button class="btn" id="buyLic">Buy licenses</button></div></div>
+      <div class="kpis" style="max-width:720px">
+        <div class="kpi"><div class="l">Licenses owned</div><div class="v">15</div></div>
+        <div class="kpi"><div class="l">Assigned</div><div class="v">${setupCount()}</div></div>
+        <div class="kpi"><div class="l">Unassigned</div><div class="v">${Math.max(0, 15 - setupCount())}</div></div>
+      </div>
+      <div style="margin-top:20px"><button class="btn-outlined" id="assignLic">Assign licenses</button></div>
+      <p class="muted" style="margin-top:16px">Placeholder. Buy and assign details come later.</p>`;
+  }
+  function renderClientSetup() {
+    const c = findOrg(st.clientId);
+    if (!c) return placeholder('Client setup');
+    const step = st.setupStep || 'books';
+    const idx = SETUP_STEPS.findIndex((s) => s[0] === step);
+    const stepr = SETUP_STEPS.map(([k, l], i) =>
+      `<span class="${k === step ? 'on' : (i < idx ? 'done' : '')}">${i < idx ? '✓ ' : ''}${l}</span>`).join('');
+    const bodies = {
+      books: `<div class="empty"><span class="material-icons">account_balance</span>
+        <h2>Connect books <span class="draft-tag">details pending</span></h2>
+        <p>Connect QuickBooks Online or Xero for ${esc(c.name)}. Exact fields coming from the demo.</p>
+        <button class="btn" data-next="integrations">Continue</button>
+        <button class="btn-text sec" id="setupBack">Back to Clients</button></div>`,
+      integrations: `<div class="empty"><span class="material-icons">hub</span>
+        <h2>Connect integrations <span class="draft-tag">details pending</span></h2>
+        <p>Shopify, Stripe and others. Or invite the account owner to connect them.</p>
+        <button class="btn" data-next="mode">Continue</button>
+        <button class="btn-text sec" data-next="books">Back</button>
+        <button class="ob-quiet" id="inviteOwner">Invite account owner</button></div>`,
+      mode: `<div class="empty"><span class="material-icons">tune</span>
+        <h2>Select mode <span class="draft-tag">details pending</span></h2>
+        <p>Mode options aren’t locked yet. We won’t show client data until a mode is chosen.</p>
+        <button class="btn" data-next="import">Continue</button>
+        <button class="btn-text sec" data-next="integrations">Back</button></div>`,
+      import: `<div class="empty"><span class="material-icons">download</span>
+        <h2>Import data <span class="draft-tag">details pending</span></h2>
+        <p>Pull history once books and mode are set. Stub only.</p>
+        <button class="btn" id="setupDone">Finish setup</button>
+        <button class="btn-text sec" data-next="mode">Back</button></div>`
+    };
+    return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
+      <div class="ph"><div><h1>Set up ${esc(c.name)}</h1></div></div>
+      <div class="stepper">${stepr}</div>
+      ${bodies[step] || bodies.books}`;
+  }
+
+  function sc() { return SCENARIOS[scenario]; }
+  function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id); }
+  function isClient(id) { return sc().clients.some((c) => c.id === id); }
+
+  function defaultState() {
+    const s = sc();
+    if (s.firm) return { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: s.clients.slice(0, 4).map((c) => c.id) };
+    return { ctx: 'org', page: 'dashboard', orgId: s.own[0].id, clientId: null, recent: [] };
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem('fcs-v1-' + scenario);
+      if (raw) {
+        const v = JSON.parse(raw);
+        if (v && (v.ctx === 'firm' ? sc().firm : findOrg(v.orgId))) { st = v; return; }
+      }
+    } catch (e) {}
+    st = defaultState();
+  }
+  function save() { try { localStorage.setItem('fcs-v1-' + scenario, JSON.stringify(st)); } catch (e) {} }
+
+  /* ───────── Navigation ───────── */
+  function goFirm(page, clientId) {
+    if (page === 'client' && clientId !== st.clientId) st.tab = 'work';
+    st.ctx = 'firm'; st.page = page || 'clients'; st.clientId = clientId || null;
+    if (clientId) touchRecent(clientId);
+    save(); render();
+  }
+  function goOrg(orgId, page) {
+    st.ctx = 'org'; st.orgId = orgId; st.page = page || 'dashboard'; st.clientId = null;
+    if (isClient(orgId)) touchRecent(orgId);
+    save(); render();
+  }
+  function touchRecent(id) {
+    st.recent = [id].concat((st.recent || []).filter((x) => x !== id)).slice(0, 4);
+  }
+
+  /* ───────── Render: trigger + back chip ───────── */
+  function renderTrigger() {
+    let name, cap, obj;
+    if (st.ctx === 'firm') { obj = FIRM; name = FIRM.name; cap = 'Accounting firm'; }
+    else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client of ' + FIRM.name : 'Organization'; }
+    $('ctxTrigger').innerHTML = `${av(obj)}<span class="ctx-text"><span class="ctx-name">${esc(name)}</span><span class="ctx-cap">${esc(cap)}</span></span><span class="material-icons">unfold_more</span>`;
+    $('backChip').innerHTML = (st.ctx === 'org' && isClient(st.orgId))
+      ? `<button class="back-chip" id="backBtn" title="Back to firm"><span class="material-icons">arrow_back</span>${esc(FIRM.name)}</button>` : '';
+    const b = $('backBtn'); if (b) b.onclick = () => goFirm('clients');
+  }
+
+  /* ───────── Render: sidebar ───────── */
+  function renderNav() {
+    const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
+    const activePage = st.ctx === 'firm' && (st.page === 'client' || st.page === 'setup') ? 'clients' : st.page;
+    $('nav').innerHTML = items.map(([k, ic, label]) =>
+      `<button class="nav-i${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span>${esc(label)}${k === 'clients' ? `<span class="cnt">${sc().clients.length}</span>` : ''}</button>`
+    ).join('');
+    $('nav').querySelectorAll('.nav-i').forEach((b) => b.onclick = () => {
+      if (st.ctx === 'firm') goFirm(b.dataset.k); else goOrg(st.orgId, b.dataset.k);
+    });
+  }
+
+  /* ───────── Render: main ───────── */
+  function placeholder(title, sub) {
+    return `<div class="ph"><div><h1>${esc(title)}</h1>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div></div>
+      <div class="empty"><span class="material-icons">construction</span><h2>${esc(title)} isn't in this prototype</h2>
+      <p>This step only covers switching between the firm and organizations.</p></div>`;
+  }
+
+  function renderClients() {
+    if (!sc().clients.length) {
+      return `<div class="empty-dir">
+        <div class="ill">${ILL.empty}</div>
+        <h1>No clients yet</h1>
+        <p>Bring names in from a list, or add one when you are ready.</p>
+        <button type="button" class="btn" id="emptyImport">Import or add clients</button>
+        <button type="button" class="ob-quiet" id="emptyLater">Not now</button>
+      </div>`;
+    }
+    const q = (st._q || '').toLowerCase();
+    const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
+    const list = firmClients();
+    const done = setupCount();
+    const bar = list.length ? `
+      <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
+        <span class="bar"><i style="width:${done / list.length * 100}%"></i></span>
+        ${done === 0 ? '<button class="btn-text" id="setupHint">Set up a client to unlock the dashboard</button>' : `<button class="btn-text" id="dashContinue">Continue setup</button>`}
+      </div>` : '';
+    const body = rows.map((c) => {
+      const status = c.pending ? ['yellow', 'Pending'] : isSetup(c) ? [c.books[0], c.books[1]] : ['grey', 'Not set up'];
+      const action = c.pending
+        ? `<button class="btn-text" data-detail="${c.id}">Review request</button>`
+        : (!isSetup(c)
+          ? `<button class="linkish" data-setup="${c.id}">Set up</button>`
+          : `<button class="btn-text" data-open="${c.id}">Open in Synder</button>`);
+      return `
+      <tr class="rowlink" data-row="${c.id}">
+        <td><div class="client-cell">${av(c, true)}<button class="linkish" data-detail="${c.id}">${esc(c.name)}</button></div></td>
+        <td>${c.ledger ? esc(c.ledger) : '<span class="muted">Not connected</span>'}</td>
+        <td>${c.pay ? esc(c.pay) : '<span class="muted">—</span>'}</td>
+        <td><span class="status status-${status[0]}">${esc(status[1])}</span></td>
+        <td>${c.month ? esc(c.month) : '<span class="muted">—</span>'}</td>
+        <td style="text-align:right">${action}</td>
+      </tr>`;
+    }).join('');
+    return `
+      <div class="ph"><div><h1>Clients</h1></div>
+        <div class="ph-actions"><button class="btn-outlined" id="addClient">Add client</button></div></div>
+      ${bar}
+      <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Client</th><th>Ledger</th><th>Payment sources</th><th>Status</th><th>Open month</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="6" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
+      </table></div>
+      <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
+  }
+
+  /* ───────── v4: Client details (firm side) ───────── */
+  const PERIODS = ['Jul 2026', 'Aug 2026', 'Sep 2026', 'Oct 2026', 'Nov 2026'];
+  const MONTH_FULL = { Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November' };
+  const mName = (p) => MONTH_FULL[p.split(' ')[0]];
+  function cdPeriod(c) { if (!st.period || !PERIODS.includes(st.period)) st.period = c.month || 'Oct 2026'; return st.period; }
+  function cdChecks(c) {
+    const m = mName(cdPeriod(c));
+    const noLedger = !c.ledger && cdState === 'blocked';
+    const ledger = c.ledger || 'QuickBooks Online';
+    const ok = cdState !== 'blocked';
+    const W = 'Waiting for accounting connection';
+    return [
+      { k: 'acc', nm: 'Accounting connection', s: noLedger ? 'fail' : 'pass',
+        t: noLedger ? 'No accounting system connected' : 'Connected to ' + ledger,
+        a: noLedger ? ['Connect ledger', 'settings'] : null,
+        d: noLedger ? 'Syncs, mappings and reconciliation all need a connected ledger. Connect one in the client’s Settings.' : 'Last checked today.' },
+      { k: 'syn', nm: 'Syncs', s: noLedger ? 'wait' : ok ? 'pass' : 'fail',
+        t: noLedger ? W : ok ? 'All ' + m + ' syncs went through' : '16 syncs failed in ' + m,
+        a: noLedger ? null : ok ? null : ['Review failed syncs', 'dashboard'],
+        d: noLedger ? 'Checked once a ledger is connected.' : ok ? '2,318 transactions synced.' : '16 of 2,318 transactions failed. Fix or ignore them before closing.' },
+      { k: 'map', nm: 'Mappings', s: noLedger ? 'wait' : 'pass',
+        t: noLedger ? W : 'All payment sources are mapped',
+        a: null,
+        d: noLedger ? 'Checked once a ledger is connected.' : (c.pay || 'Stripe') + ' mapped to ' + ledger + ' accounts.' },
+      { k: 'rec', nm: 'Reconciliation', s: noLedger ? 'wait' : ok ? 'pass' : 'warn',
+        t: noLedger ? W : ok ? m + ' is reconciled' : 'We couldn’t read reconciliation results',
+        a: noLedger ? null : ok ? null : ['Open reconciliation', 'reconciliation'],
+        d: noLedger ? 'Checked once a ledger is connected.' : 'Transaction reconciliation is available for ' + ledger + '.' + (ok ? '' : ' Open Reconciliation to run it again.') }
+    ];
+  }
+  const ICON = { pass: 'check_circle', fail: 'error', warn: 'warning', wait: 'schedule' };
+  function cdHistory(c) {
+    const p = cdPeriod(c); const mon = p.split(' ')[0];
+    const rows = [[mon + ' 1, 09:00', 'Status changed: Not started → In progress'],
+      [mon + ' 3, 02:14', c.ledger || cdState !== 'blocked' ? 'Sync finished: 412 transactions' : 'Sync skipped: no accounting connection']];
+    if (cdState === 'blocked') rows.push([mon + ' 28, 18:40', 'Status changed: In progress → Blocked']);
+    if (cdState === 'ready') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close']);
+    if (cdState === 'closed') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close'], [mon + ' 30, 16:22', 'Status changed: Ready to close → Closed (Ignat Plot)']);
+    return rows.reverse();
+  }
+  function renderPending(c) {
+    return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
+      <div class="cd-top"><div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-yellow">Pending</span></div></div>
+      <div class="empty"><span class="material-icons">how_to_reg</span><h2>${esc(c.name)} wants to connect</h2>
+        <p>Accept to add them to your clients and get access to their books.</p>
+        <button class="btn" id="acceptBtn">Accept</button>
+        <button class="btn-text sec" id="pendBack">Back to Clients</button></div>`;
+  }
+  function renderClientDetail() {
+    const c = findOrg(st.clientId);
+    if (c.pending) return renderPending(c);
+    const list = sc().clients.filter((x) => !x.pending);
+    const i = list.findIndex((x) => x.id === c.id);
+    const p = cdPeriod(c); const m = mName(p);
+    const checks = cdChecks(c);
+    const passed = checks.filter((x) => x.s === 'pass').length;
+    const blockers = checks.filter((x) => x.s === 'fail' || x.s === 'warn');
+    const statusBadge = cdState === 'closed' ? ['grey', 'Closed'] : cdState === 'ready' ? ['green', 'Ready to close'] : ['yellow', 'Blocked'];
+    const tip = blockers.length ? 'Can’t close ' + m + ': ' + blockers.map((b) => b.t.charAt(0).toLowerCase() + b.t.slice(1)).join('; ') + '.' : '';
+    const primary = cdState === 'closed' ? '' :
+      `<span class="tipwrap"${cdState === 'blocked' ? ` data-tip="${esc(tip)}"` : ''}><button class="btn" id="closeMonth"${cdState === 'blocked' ? ' disabled' : ''}>Close month</button></span>`;
+    const tab = st.tab || 'work';
+    let body = '';
+    if (tab === 'work') {
+      const line = cdState === 'blocked'
+        ? `<span class="ln-warn">${blockers.length} blocker${blockers.length > 1 ? 's' : ''}</span> · ${blockers.map((b) => esc(b.t)).join(' · ')}`
+        : cdState === 'ready' ? '<span class="ln-ok">Ready to close</span> · all checks passed'
+        : `Closed by Ignat Plot on ${p.split(' ')[0]} 30, ${p.split(' ')[1]}`;
+      const note = (st.notes || {})[c.id + '|' + p] || '';
+      body = `
+        <div class="wk-top">
+          <div><label class="mpick"><select id="periodSel" aria-label="Month">${PERIODS.map((x) => `<option value="${x}"${x === p ? ' selected' : ''}>${mName(x)} ${x.split(' ')[1]}</option>`).join('')}</select><span class="material-icons">expand_more</span></label>
+            <div class="wk-line">${line}</div></div>
+          ${primary}
+        </div>
+        <div class="wk-sec">
+          <div class="sec-h">Checks <span class="muted">${passed} of ${checks.length} passed</span></div>
+          ${checks.map((x) => `<details class="chk"><summary><span class="material-icons ic ${x.s}">${ICON[x.s]}</span><span class="nm">${x.nm}</span><span class="stt">${esc(x.t)}</span>${x.a ? `<button class="linkish" data-fix="${x.a[1]}">${esc(x.a[0])}</button>` : ''}<span class="material-icons exp">expand_more</span></summary><div class="det">${esc(x.d)}</div></details>`).join('')}
+        </div>
+        <div class="wk-sec">
+          <div class="sec-h">Notes</div>
+          <textarea class="note" id="cdNote" placeholder="Notes for ${m}. Visible to your firm colleagues.">${esc(note)}</textarea>
+        </div>
+        <details class="wk-sec hist"><summary>History for ${m} (${cdHistory(c).length})</summary>
+          <table>${cdHistory(c).map(([t, e]) => `<tr><td>${esc(t)}</td><td>${esc(e)}</td></tr>`).join('')}</table></details>`;
+    } else if (tab === 'profile') {
+      const f = (l, v, full) => `<label${full ? ' class="full"' : ''}>${l}<input type="text" value="${esc(v)}" /></label>`;
+      body = `<div class="form">
+        ${f('Client name', c.name)}${f('Contact person', 'Jordan Lee')}
+        ${f('Email', 'jordan@' + c.name.toLowerCase().replace(/[^a-z]/g, '') + '.com')}${f('Phone', '+1 415 555 0134')}
+        ${f('Business type', 'LLC')}${f('Accounting software', c.ledger || 'Not connected')}
+        ${f('Fiscal year start', 'January')}${f('Tax ID', '84-1234567')}
+        ${f('Address', '120 Market St, San Francisco, CA', true)}
+        <label class="full">Notes<textarea class="note"></textarea></label>
+        <div class="full"><button class="btn" id="saveProfile">Save</button></div></div>`;
+    } else if (tab === 'billing') {
+      body = `<div class="card"><dl class="kv"><dt>Plan</dt><dd>Pro, billed to ${esc(FIRM.name)}</dd><dt>Price</dt><dd>$110 / month</dd><dt>Next invoice</dt><dd>Dec 1, 2026</dd><dt>License</dt><dd>1 of 15 firm licenses</dd></dl></div>`;
+    } else {
+      body = `<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+        <tr><td>Ignat Plot</td><td>ignat@wlslabs.com</td><td>Admin</td></tr>
+        <tr><td>Dasha Ivanova</td><td>dasha@wlslabs.com</td><td>Accountant</td></tr></tbody></table></div>`;
+    }
+    const T = [['work', 'Work'], ['profile', 'Profile'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
+    const pager = `<span class="pager"><button id="prevC" aria-label="Previous client"${i <= 0 ? ' disabled' : ''}><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"${i >= list.length - 1 ? ' disabled' : ''}><span class="material-icons">chevron_right</span></button></span>`;
+    return `
+      <button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
+      <div class="cd-top">
+        <div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-${statusBadge[0]}">${statusBadge[1]}</span></div>
+        <div class="cd-actions">
+          <button class="btn-text" data-open="${c.id}">Open in Synder</button>
+          <span class="t-wrap"><button class="more" id="moreBtn" aria-label="More actions" aria-expanded="false"><span class="material-icons">more_horiz</span></button>
+            <div class="menu" id="moreMenu"><button class="danger" id="removeBtn"><span class="material-icons">person_remove</span>Remove client</button></div></span>
+        </div>
+      </div>
+      <div class="tabs"><div class="tabs-l">${T.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div>${pager}</div>
+      ${body}`;
+  }
+  function bindClientDetail() {
+    const c = findOrg(st.clientId); const m = $('main');
+    const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    on('acceptBtn', () => { c.pending = false; c.books = ['grey', 'Setup needed']; goFirm('client', c.id); });
+    on('pendBack', () => goFirm('clients'));
+    if (c.pending) return;
+    const list = sc().clients.filter((x) => !x.pending); const i = list.indexOf(c);
+    on('prevC', () => goFirm('client', list[i - 1].id));
+    on('nextC', () => goFirm('client', list[i + 1].id));
+    $('periodSel').onchange = (e) => { st.period = e.target.value; save(); renderMain(); };
+    on('closeMonth', () => { cdState = 'closed'; render(); });
+    on('moreBtn', () => toggleMenu('moreBtn', 'moreMenu'));
+    on('removeBtn', () => { closeMenus(); openRemove(c); });
+    on('saveProfile', (e) => { e.target.textContent = 'Saved'; });
+    m.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { st.tab = b.dataset.tab; save(); renderMain(); });
+    m.querySelectorAll('[data-fix]').forEach((b) => b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); goOrg(c.id, b.dataset.fix); });
+    const n = $('cdNote');
+    if (n) n.oninput = () => { st.notes = st.notes || {}; st.notes[c.id + '|' + st.period] = n.value; save(); };
+  }
+  function openRemove(c) {
+    $('modal').innerHTML = `<h3>Remove ${esc(c.name)}?</h3>
+      <p>${esc(FIRM.name)} loses access to ${esc(c.name)}’s books, and the client leaves your Clients list. Their Synder organization and data stay with them. To reconnect, they’d send a new request.</p>
+      <div class="modal-actions"><button class="btn-outlined" id="cancelRm">Cancel</button><button class="btn" id="doRm" style="background:#CC2929">Remove client</button></div>`;
+    $('scrim').classList.add('open');
+    $('cancelRm').onclick = closeModal;
+    $('doRm').onclick = () => { const arr = sc().clients; arr.splice(arr.indexOf(c), 1); st.recent = (st.recent || []).filter((x) => x !== c.id); closeModal(); goFirm('clients'); };
+  }
+
+  function renderDashboard() {
+    const o = findOrg(st.orgId);
+    const c = isClient(o.id) ? o : null;
+    const kp = c && c.ledger
+      ? [['Synced in October', c.books[0] === 'red' ? '1,204' : '2,318'], ['Failed syncs', c.books[0] === 'red' ? '3' : '0'], ['Unreconciled', c.books[1].includes('unreconciled') ? '12' : '0']]
+      : [['Synced in October', '846'], ['Failed syncs', '0'], ['Unreconciled', '0']];
+    if (c && !c.ledger) {
+      return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(o.name)}</div></div></div>
+        <div class="empty"><span class="material-icons">link</span><h2>Connect a ledger</h2>
+        <p>${esc(o.name)} has no accounting system connected, so nothing syncs yet.</p>
+        <button class="btn" id="dashCta">Connect ledger</button>
+        <button class="btn-text sec" id="dashSec">Back to ${esc(FIRM.name)}</button></div>`;
+    }
+    return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(o.name)}</div></div></div>
+      <div class="kpis">${kp.map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('')}</div>`;
+  }
+
+  function renderCreateFirm() {
+    return `<div class="ph"><div><h1>Create a Firm</h1></div></div>
+      <div class="empty"><span class="material-icons">domain_add</span><h2>Work on your clients' books from one place</h2>
+      <p>A Firm lets clients connect to you and gives your team one list of every client.</p>
+      <button class="btn" id="cfCta">Create a Firm</button>
+      <button class="btn-text sec" id="cfSec">Not now</button></div>`;
+  }
+  function renderCreateOrg() {
+    return `<div class="ph"><div><h1>Create organization</h1></div></div>
+      <div class="empty"><span class="material-icons">add_business</span><h2>New organization</h2>
+      <p>Not built in this prototype. The new org would show up under My organizations.</p>
+      <button class="btn" id="coCta">Back</button></div>`;
+  }
+
+  function renderMain() {
+    let html;
+    if (TOP_PAGES[st.page]) {
+      html = placeholder(TOP_PAGES[st.page][1], st.ctx === 'firm' ? FIRM.name : findOrg(st.orgId).name);
+    } else if (st.ctx === 'firm') {
+      if (st.page === 'clients') html = renderClients();
+      else if (st.page === 'client') html = renderClientDetail();
+      else if (st.page === 'setup') html = renderClientSetup();
+      else if (st.page === 'dashboard') html = renderFirmDashboard();
+      else if (st.page === 'billing') html = renderBilling();
+      else if (st.page === 'createorg') html = renderCreateOrg();
+      else {
+        const nav = FIRM_NAV.find((n) => n[0] === st.page);
+        html = placeholder(nav ? nav[2] : st.page, FIRM.name);
+      }
+    } else {
+      if (st.page === 'dashboard') html = renderDashboard();
+      else if (st.page === 'createorg') html = renderCreateOrg();
+      else html = placeholder(ORG_NAV.find((n) => n[0] === st.page)[2], findOrg(st.orgId).name);
+    }
+    $('main').innerHTML = html;
+    const m = $('main');
+    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); goFirm('client', b.dataset.detail); });
+    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button')) goFirm('client', tr.dataset.row); });
+    m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
+    if (st.ctx === 'firm' && st.page === 'client') bindClientDetail();
+    m.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => goOrg(b.dataset.open));
+    m.querySelectorAll('[data-setup]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      st.ctx = 'firm'; st.page = 'setup'; st.clientId = b.dataset.setup; st.setupStep = 'books'; save(); render();
+    });
+    m.querySelectorAll('[data-row]').forEach((tr) => {
+      const c = findOrg(tr.dataset.row);
+      if (c && !c.pending && !isSetup(c)) {
+        // unset rows open setup instead of work details
+        tr.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          st.ctx = 'firm'; st.page = 'setup'; st.clientId = c.id; st.setupStep = 'books'; save(); render();
+        };
+      }
+    });
+    const s = $('clientSearch');
+    if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
+    const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    bind('crumbBack', () => goFirm('clients'));
+    bind('addClient', openAddClient);
+    bind('emptyImport', () => { if (ob) ob.directoryReady = true; goOnboarding('import'); });
+    bind('emptyLater', () => {});
+    bind('dashCta', () => goOrg(st.orgId, 'settings'));
+    bind('dashSec', () => goFirm('clients'));
+    bind('dashGoClients', () => goFirm('clients'));
+    bind('dashContinue', () => {
+      const next = firmClients().find((c) => !isSetup(c));
+      if (next) { st.ctx = 'firm'; st.page = 'setup'; st.clientId = next.id; st.setupStep = 'books'; save(); render(); }
+      else goFirm('clients');
+    });
+    bind('setupHint', () => {
+      const next = firmClients().find((c) => !isSetup(c));
+      if (next) { st.ctx = 'firm'; st.page = 'setup'; st.clientId = next.id; st.setupStep = 'books'; save(); render(); }
+    });
+    bind('buyLic', () => { $('buyLic').textContent = 'Coming soon'; });
+    bind('assignLic', () => { $('assignLic').textContent = 'Coming soon'; });
+    m.querySelectorAll('[data-next]').forEach((b) => b.onclick = () => { st.setupStep = b.dataset.next; save(); renderMain(); });
+    bind('setupBack', () => goFirm('clients'));
+    bind('inviteOwner', () => { $('inviteOwner').textContent = 'Invite sent (stub)'; });
+    bind('setupDone', () => {
+      const c = findOrg(st.clientId);
+      if (c) { c.setup = true; c.ledger = c.ledger || 'QuickBooks Online'; c.books = ['green', 'Healthy']; c.month = c.month || 'Oct 2026'; }
+      goFirm('clients');
+    });
+    bind('coCta', () => { if (st.ctx === 'firm') goFirm('clients'); else goOrg(st.orgId, 'dashboard'); });
+    const t = st.ctx === 'firm' ? (st.page === 'client' ? findOrg(st.clientId).name : FIRM.name) : findOrg(st.orgId).name;
+    document.title = t + ' — Synder (Firm context switcher)';
+  }
+
+  /* ───────── Switcher popover ───────── */
+  function popOpen() { return $('pop').classList.contains('open'); }
+  function openPop() {
+    $('pop').classList.add('open'); $('ctxTrigger').setAttribute('aria-expanded', 'true');
+    $('popSearch').value = ''; kbIndex = -1; renderPop();
+    const total = sc().clients.length + sc().own.length + (sc().firm ? 1 : 0);
+    $('popSearchWrap').style.display = total > 5 ? '' : 'none';
+    setTimeout(() => { if (total > 5) $('popSearch').focus(); else { kbIndex = 0; highlight(); } }, 0);
+  }
+  function closePop() { $('pop').classList.remove('open'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
+
+  function item(o, cap, current, action) {
+    return `<button class="pop-item" data-act="${action}">${av(o, true)}<span class="t"><span class="n">${esc(o.name)}</span>${cap ? `<span class="c">${esc(cap)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
+  }
+  function renderPop() {
+    const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
+    let html = '';
+    if (s.firm && (!q || FIRM.name.toLowerCase().includes(q) || 'firm'.includes(q))) {
+      html += `<div class="pop-sec">Firm</div>` + item(FIRM, 'Accounting firm', st.ctx === 'firm', 'firm');
+    }
+    if (s.firm) {
+      const list = s.clients.filter((c) => !c.pending && (!q || c.name.toLowerCase().includes(q)));
+      if (list.length) {
+        html += `<div class="pop-sec">Clients</div>` +
+          list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
+      }
+    }
+    const own = s.own.filter((o) => !q || o.name.toLowerCase().includes(q));
+    if (own.length) {
+      html += `<div class="pop-sec">My organizations</div>` + own.map((o) => item(o, null, st.ctx === 'org' && st.orgId === o.id, 'org:' + o.id)).join('');
+    }
+    if (!html) html = `<div class="pop-empty">Nothing matches “${esc(q)}”.</div>`;
+    $('popList').innerHTML = html;
+    $('popFoot').innerHTML =
+      `<button data-act="createorg"><span class="material-icons">add</span>Create organization</button>` +
+      '';
+    $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
+  }
+  function act(a) {
+    closePop();
+    if (a === 'firm') goFirm(setupCount() > 0 ? 'dashboard' : 'clients');
+    else if (a === 'allclients') { st._q = ''; goFirm('clients'); }
+    else if (a.startsWith('org:')) goOrg(a.slice(4));
+    else if (a === 'createorg') { st.page = 'createorg'; save(); render(); }
+    else if (a === 'createfirm') { st.ctx = 'org'; st.page = 'createfirm'; save(); render(); }
+    $('ctxTrigger').focus();
+  }
+  function focusables() { return Array.from($('pop').querySelectorAll('[data-act]')); }
+  function highlight() {
+    const f = focusables(); f.forEach((el, i) => el.classList.toggle('kb', i === kbIndex));
+    if (f[kbIndex]) f[kbIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  $('ctxTrigger').onclick = () => popOpen() ? closePop() : openPop();
+  $('popSearch').oninput = () => { kbIndex = 0; renderPop(); highlight(); };
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
+    if ($('scrim').classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
+    if (!popOpen()) return;
+    const f = focusables();
+    if (e.key === 'Escape') { closePop(); $('ctxTrigger').focus(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); kbIndex = Math.min(f.length - 1, kbIndex + 1); highlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); kbIndex = Math.max(0, kbIndex - 1); highlight(); }
+    else if (e.key === 'Enter' && f[kbIndex]) { e.preventDefault(); act(f[kbIndex].dataset.act); }
+  });
+  document.addEventListener('mousedown', (e) => {
+    if (popOpen() && !e.target.closest('.ctx')) closePop();
+  });
+
+  /* ───────── Add client modal ───────── */
+  function openAddClient() {
+    $('modal').innerHTML = `<h3>Add client</h3>
+      <p>Clients connect to your firm from their side. Share your Firm ID, then approve their request here in Clients.</p>
+      <div class="idrow"><input type="text" readonly value="${FIRM.firmId}" aria-label="Firm ID" /><button class="btn-outlined" id="copyId">Copy</button></div>
+      <div class="modal-actions"><button class="btn" id="doneModal">Done</button></div>`;
+    $('scrim').classList.add('open');
+    $('copyId').onclick = () => { try { navigator.clipboard.writeText(FIRM.firmId); } catch (e) {} $('copyId').textContent = 'Copied'; };
+    $('doneModal').onclick = closeModal;
+  }
+  function closeModal() { $('scrim').classList.remove('open'); }
+  $('scrim').onclick = (e) => { if (e.target === $('scrim')) closeModal(); };
+
+  /* ───────── Scenario / mode ───────── */
+  function setScenario(s, fromCta) {
+    const raw = String(s || '');
+    const parts = raw.split('/');
+    const head = parts[0];
+    if (head === 'onboarding') {
+      loadOb();
+      if (parts[1]) ob.step = parts[1];
+      goOnboarding(ob.step || 'role');
+      return;
+    }
+    scenario = SCENARIOS[head] ? head : 'firm';
+    load();
+    if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
+      st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
+    } else if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) {
+      st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work';
+    }
+    if (fromCta) { st = defaultState(); save(); }
+    mode = 'firm';
+    document.body.classList.remove('shell-hide');
+    closePop(); render();
+  }
+  window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
+
+  function render() {
+    if (mode === 'onboarding') { renderMode(); renderOb(); return; }
+    renderTrigger(); renderNav(); renderMain(); renderUserMenu();
+    renderMode();
+    document.querySelectorAll('#stateSeg button').forEach((b) => b.classList.toggle('active', b.dataset.cs === cdState));
+    let h = '#' + scenario;
+    if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId;
+    else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  document.querySelectorAll('#stateSeg button').forEach((b) => b.onclick = () => { cdState = b.dataset.cs; render(); });
+  document.querySelectorAll('#modeSeg button').forEach((b) => b.onclick = () => {
+    if (b.dataset.m === 'onboarding') restartOnboarding();
+    else goWorkspace(setupCount() > 0 ? 'dashboard' : 'clients');
+  });
+
+  /* ───────── Top bar menus ───────── */
+  function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
+  function renderUserMenu() {
+    const items = [];
+    if (sc().firm) items.push(['myfirm', 'domain', 'My firm']);
+    items.push(['orgsettings', 'tune', 'Organization settings'], ['activity', 'history', 'Activity log'],
+      ['profile', 'person_outline', 'User profile'], ['orglist', 'list', 'List of organizations']);
+    $('userMenu').innerHTML = `<div class="who"><b>Ignat Plot</b><span>ignat@wlslabs.com</span></div>` +
+      items.map(([k, ic, l]) => `<button data-um="${k}"><span class="material-icons">${ic}</span>${l}</button>`).join('') +
+      `<div class="div"></div><button data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
+    $('userMenu').querySelectorAll('[data-um]').forEach((b) => b.onclick = () => {
+      const k = b.dataset.um;
+      if (k === 'myfirm') { closeMenus(); goFirm(setupCount() > 0 ? 'dashboard' : 'clients'); }
+      else if (k === 'logout') { closeMenus(); openLogout(); }
+      else goTop(k);
+    });
+  }
+  function openLogout() {
+    $('modal').innerHTML = `<h3>Log out</h3><p>This prototype keeps you signed in, so you can keep exploring.</p>
+      <div class="modal-actions"><button class="btn" id="doneModal">OK</button></div>`;
+    $('scrim').classList.add('open'); $('doneModal').onclick = closeModal;
+  }
+  function closeMenus() {
+    const mm = $('moreMenu'); if (mm) { mm.classList.remove('open'); $('moreBtn').setAttribute('aria-expanded', 'false'); }
+    ['helpMenu', 'userMenu'].forEach((id) => $(id).classList.remove('open'));
+    ['helpBtn', 'userBtn'].forEach((id) => $(id).setAttribute('aria-expanded', 'false'));
+  }
+  function toggleMenu(btn, menu) {
+    const open = !$(menu).classList.contains('open'); closeMenus(); closePop();
+    if (open) { $(menu).classList.add('open'); $(btn).setAttribute('aria-expanded', 'true'); }
+  }
+  $('helpBtn').onclick = () => toggleMenu('helpBtn', 'helpMenu');
+  $('userBtn').onclick = () => toggleMenu('userBtn', 'userMenu');
+  document.querySelectorAll('[data-top]').forEach((b) => b.onclick = () => goTop(b.dataset.top));
+  document.addEventListener('mousedown', (e) => { if (!e.target.closest('.t-wrap')) closeMenus(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
+
+  $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
+  loadOb();
+  restoreDirectory();
+  const boot = (location.hash || '#firm').slice(1);
+  if (boot.split('/')[0] === 'onboarding' || (!localStorage.getItem('fcs-ob-v1') && boot.split('/')[0] !== 'firm')) {
+    // Prefer explicit hash; otherwise stay on firm workspace for this prototype
+  }
+  setScenario(boot || 'firm');
+})();
+</script>
+</body>
+</html>
