@@ -46,6 +46,13 @@
     }
     .seg button:hover { color: #fff; background: rgba(255,255,255,.08); }
     .seg button.active { background: #0053CC; color: #fff; }
+    .proto-reset {
+      appearance: none; border: none; background: none; margin-left: 4px;
+      color: #9CA3AF; font: inherit; font-size: 13px; font-weight: 400; line-height: 20px;
+      padding: 4px 2px; cursor: pointer;
+    }
+    .proto-reset:hover { color: #fff; text-decoration: underline; }
+    .proto-reset:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
 
     /* ── Product shell ── */
     .p-top {
@@ -494,6 +501,7 @@
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
+    <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
   <div class="p-top">
@@ -1905,6 +1913,31 @@
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
   });
+  function clearV10Storage() {
+    const drop = (store) => {
+      const keys = [];
+      for (let i = 0; i < store.length; i++) {
+        const k = store.key(i);
+        if (k && k.indexOf('v10') !== -1 && k.indexOf('fcs-') === 0) keys.push(k);
+      }
+      keys.forEach((k) => store.removeItem(k));
+    };
+    try { drop(localStorage); } catch (e) {}
+    try { drop(sessionStorage); } catch (e) {}
+  }
+  function resetPrototype() {
+    const variant = (ob && ob.variant === 'existing') ? 'existing' : 'new';
+    closePop(); closeModal(); closeMenus();
+    clearV10Storage();
+    cdState = 'blocked';
+    if (variant === 'existing') {
+      enterExisting();
+      history.replaceState(null, '', '#existing');
+    } else {
+      restartOnboarding();
+    }
+  }
+  $('protoReset').onclick = resetPrototype;
 
   /* ───────── Top bar menus ───────── */
   function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
