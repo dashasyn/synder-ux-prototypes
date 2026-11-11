@@ -516,6 +516,72 @@
     .stepper span.on { background: #F2F6FC; color: #0053CC; font-weight: 500; }
     .stepper span.done { color: #1F8940; }
     .draft-tag { display: inline-block; font-size: 12px; color: #CB7515; background: #FFF7F0; border: 1px solid #F3D2B3; border-radius: 4px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
+
+    /* Falling sparkles — exact styles from prototypes/joy-sparkles/index.html */
+    .spark-fall {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 30;
+      overflow: hidden;
+    }
+    .spark {
+      position: absolute;
+      left: var(--x, 50%);
+      top: var(--y, -12px);
+      width: var(--size, 8px);
+      height: var(--size, 8px);
+      margin-left: calc(var(--size, 8px) / -2);
+      background: var(--color, #ffd166);
+      border-radius: 2px;
+      opacity: 0;
+      transform: translate(0, 0) rotate(0deg);
+      animation: spark-fall var(--dur, 1.1s) var(--delay, 0ms) cubic-bezier(0.33, 0, 0.67, 0.4) forwards;
+      will-change: transform, opacity;
+    }
+    .spark.star {
+      clip-path: polygon(
+        50% 0%, 61% 35%, 98% 35%, 68% 57%,
+        79% 91%, 50% 70%, 21% 91%, 32% 57%,
+        2% 35%, 39% 35%
+      );
+    }
+    .spark.dot { border-radius: 50%; }
+    .spark.diamond {
+      border-radius: 2px;
+      animation-name: spark-fall-diamond;
+    }
+    @keyframes spark-fall {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) rotate(0deg) scale(0.6);
+      }
+      8% {
+        opacity: 1;
+        transform: translate(calc(var(--drift) * 0.1), 0) rotate(20deg) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--drift), var(--fall)) rotate(var(--spin)) scale(0.75);
+      }
+    }
+    @keyframes spark-fall-diamond {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) rotate(45deg) scale(0.6);
+      }
+      8% {
+        opacity: 1;
+        transform: translate(calc(var(--drift) * 0.1), 0) rotate(55deg) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--drift), var(--fall)) rotate(calc(45deg + var(--spin))) scale(0.75);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .spark { animation: none !important; display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -621,6 +687,7 @@
   let st = null;          // { ctx: 'firm'|'org', orgId, page, clientId, recent: [] }
   let kbIndex = -1;
   let cdState = 'blocked';
+  let celebrateOnClients = false;
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -780,6 +847,7 @@
     save(); saveOb(); persistDirectory();
     mode = 'firm';
     document.body.classList.remove('shell-hide');
+    celebrateOnClients = true;
     goFirm('clients');
   }
   function enterExisting() {
@@ -2061,6 +2129,49 @@
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) history.replaceState(null, '', h);
+    if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
+      celebrateOnClients = false;
+      rainSparkles();
+    }
+  }
+  /* Falling sparkles — same generator as prototypes/joy-sparkles/index.html */
+  function rainSparkles() {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    var COLORS = ["#FFD166", "#EF476F", "#06D6A0", "#118AB2", "#F4A261", "#E9C46A", "#FFFFFF", "#90E0EF"];
+    var SHAPES = ["star", "dot", "diamond"];
+    var COUNT = 96;
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+    var layer = document.createElement("div");
+    layer.className = "spark-fall";
+    layer.setAttribute("aria-hidden", "true");
+    var vh = window.innerHeight;
+    var maxDelay = 0;
+    for (var i = 0; i < COUNT; i++) {
+      var el = document.createElement("span");
+      var size = rand(5, 12);
+      var shape = SHAPES[i % SHAPES.length];
+      var delay = Math.round(rand(0, 220));
+      var dur = rand(0.95, 1.35);
+      maxDelay = Math.max(maxDelay, delay + dur * 1000);
+      el.className = "spark " + shape;
+      el.style.setProperty("--x", rand(4, 96) + "%");
+      el.style.setProperty("--y", rand(-18, 28) + "px");
+      el.style.setProperty("--fall", rand(vh * 0.55, vh * 0.92) + "px");
+      el.style.setProperty("--drift", rand(-48, 48) + "px");
+      el.style.setProperty("--spin", Math.round(rand(120, 320)) + "deg");
+      el.style.setProperty("--size", size + "px");
+      el.style.setProperty("--color", COLORS[i % COLORS.length]);
+      el.style.setProperty("--delay", delay + "ms");
+      el.style.setProperty("--dur", dur + "s");
+      layer.appendChild(el);
+    }
+    document.body.appendChild(layer);
+    window.setTimeout(function () {
+      if (layer.parentNode) layer.parentNode.removeChild(layer);
+    }, maxDelay + 80);
   }
   document.querySelectorAll('#modeSeg button').forEach((b) => b.onclick = () => {
     if (b.dataset.m === 'existing') enterExisting();
