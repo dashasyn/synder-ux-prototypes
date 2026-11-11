@@ -564,11 +564,8 @@
     { id: 'c12', name: 'Maple & Main Florist',     ledger: 'QuickBooks Online', pay: 'Square',          books: ['yellow', '4 uncategorized'],   month: 'Oct 2026', setup: true },
     { id: 'c13', name: 'Northgate Auto Repair',    ledger: null,                pay: null,              books: ['grey', 'Not set up'],          month: null, setup: false }
   ];
-  function demoClients() {
-    return CLIENTS.map((c) => Object.assign({}, c)).concat([{ id: 'c14', name: 'Oakridge Pottery', pending: true, ledger: null, pay: null, books: ['grey', 'Pending'], month: null }]);
-  }
   const SCENARIOS = {
-    'firm':   { firm: true,  clients: demoClients(), own: [{ id: 'o1', name: 'WLS Labs Books' }] },
+    'firm':   { firm: true,  clients: [], own: [] },
   };
   const PALETTE = ['#0053CC', '#1F8940', '#CB7515', '#310BB0', '#3C4EAC', '#CC2929', '#0E7C86', '#8A4FBF'];
   const FIRM_NAV = [
@@ -678,6 +675,12 @@
       }));
     } catch (e) {}
   }
+  function firmOwnOrg() {
+    return [{ id: 'o1', name: 'WLS Labs Books' }];
+  }
+  function applyOwnOrg() {
+    SCENARIOS.firm.own = (ob && ob.variant === 'existing') ? firmOwnOrg() : [];
+  }
   function restoreDirectory() {
     try {
       const raw = localStorage.getItem('fcs-dir-v10');
@@ -689,18 +692,22 @@
         if (ob) ob.directoryReady = true;
       }
     } catch (e) {}
+    applyOwnOrg();
   }
   function goWorkspace(page, clientId) {
     mode = 'firm';
     document.body.classList.remove('shell-hide');
     if (!(ob && ob.directoryReady)) {
-      SCENARIOS.firm.clients = demoClients();
-      FIRM.name = 'WLS Labs';
+      SCENARIOS.firm.clients = [];
+      applyOwnOrg();
+      FIRM.name = (ob && ob.firmName) || 'Your firm';
       try { localStorage.removeItem('fcs-dir-v10'); } catch (e) {}
-      st = defaultState(); save();
+      st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
+      save();
     } else {
-      FIRM.name = (ob && ob.firmName) || FIRM.name || 'WLS Labs';
-      if (!st) { st = defaultState(); save(); }
+      FIRM.name = (ob && ob.firmName) || FIRM.name || 'Your firm';
+      applyOwnOrg();
+      if (!st) { st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] }; save(); }
     }
     goFirm(page || 'clients', clientId);
     renderMode();
@@ -708,8 +715,9 @@
   function restartOnboarding() {
     ob = defaultOb();
     saveOb();
-    SCENARIOS.firm.clients = demoClients();
-    FIRM.name = 'WLS Labs';
+    SCENARIOS.firm.clients = [];
+    applyOwnOrg();
+    FIRM.name = 'Your firm';
     try { localStorage.removeItem('fcs-dir-v10'); } catch (e) {}
     goOnboarding('entry');
   }
@@ -739,6 +747,7 @@
     ob.step = 'done';
     FIRM.name = ob.firmName || 'Your firm';
     SCENARIOS.firm.clients = [];
+    applyOwnOrg();
     st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
     save(); saveOb(); persistDirectory();
     mode = 'firm';
@@ -755,6 +764,7 @@
     ob.firmTouched = true;
     FIRM.name = 'WLS Labs';
     SCENARIOS.firm.clients = existingClients();
+    applyOwnOrg();
     st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
     save(); saveOb(); persistDirectory();
     mode = 'firm';
@@ -1318,6 +1328,10 @@
 
   /* ───────── Render: trigger + back chip ───────── */
   function renderTrigger() {
+    if (st.ctx !== 'firm' && !findOrg(st.orgId)) {
+      st.ctx = 'firm'; st.orgId = null; st.clientId = null;
+      if (st.page === 'dashboard') st.page = 'clients';
+    }
     let name, cap, obj;
     if (st.ctx === 'firm') { obj = FIRM; name = FIRM.name; cap = 'Accounting firm'; }
     else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client of ' + FIRM.name : 'Organization'; }
@@ -1879,8 +1893,10 @@
     else if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
       st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
     } else if (parts[1] === 'dashboard') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
-    else if (parts[1] && sc().firm && findOrg(parts[1]) && isClient(parts[1])) {
+    else if (parts[1] && sc().firm && isClient(parts[1])) {
       st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work';
+    } else if (parts[1]) {
+      st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.orgId = null;
     }
     if (fromCta) { st = defaultState(); save(); }
     mode = 'firm';
@@ -1891,6 +1907,13 @@
 
   function render() {
     if (mode === 'onboarding') { renderMode(); renderOb(); return; }
+    if (st && (st.page === 'client' || st.page === 'setup' || st.page === 'preassess') && !isClient(st.clientId)) {
+      st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
+    }
+    if (st && st.ctx === 'org' && !findOrg(st.orgId)) {
+      st.ctx = 'firm'; st.orgId = null; st.clientId = null;
+      if (!st.page || st.page === 'dashboard') st.page = 'clients';
+    }
     if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
