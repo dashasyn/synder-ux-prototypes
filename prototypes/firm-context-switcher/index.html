@@ -127,7 +127,7 @@
       height: calc(100vh - var(--proto-bar-h) - 56px); overflow-y: auto;
       display: flex; flex-direction: column;
     }
-    .p-main { flex: 1; min-width: 0; padding: 24px 32px 48px; }
+    .p-main { flex: 1; min-width: 0; padding: var(--space-6) var(--space-8) var(--space-10); }
 
     /* ── Context switcher trigger ── */
     .ctx { position: relative; flex: 0 0 228px; width: 228px; height: 40px; display: flex; align-items: center; }
@@ -229,14 +229,14 @@
     }
     .crumb:hover { text-decoration: underline; }
     .crumb .material-icons { font-size: 18px; }
-    .toolbar { display: flex; gap: 12px; margin-bottom: 12px; }
+    .toolbar { display: flex; gap: var(--space-2); margin: 0 0 var(--space-4); }
     .toolbar input { max-width: 320px; }
     .linkish { color: #0053CC; cursor: pointer; background: none; border: none; font: inherit; padding: 0; text-align: left; }
     .linkish:hover { text-decoration: underline; }
     .client-cell { display: flex; align-items: center; gap: 10px; }
     .muted { color: #6B778C; }
     .status { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap; }
-    .tbl-foot { padding: 12px 10px; color: #6B778C; }
+    .tbl-foot { padding: var(--space-3) var(--space-3); color: var(--text-secondary); }
 
     .section-h { font-size: 20px; line-height: 28px; font-weight: 400; margin: 8px 0 12px; }
     .empty { text-align: center; padding: 56px 24px; max-width: 460px; margin: 0 auto; }
@@ -332,9 +332,9 @@
     #stateSeg.hide { visibility: hidden; }
     /* ── v7 onboarding: portrait cards + client directory ── */
     .shell-hide .p-top, .shell-hide .p-body { display: none; }
-    .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: #fff; }
+    .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: var(--bg-page); }
     .shell-hide .ob { display: block; }
-    .ob-in { max-width: 1040px; margin: 0 auto; padding: 32px 40px 48px; }
+    .ob-in { max-width: 1040px; margin: 0 auto; padding: var(--space-8) var(--space-8) var(--space-10); }
     .ob-in.review-fit {
       height: calc(100vh - 50px);
       display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;
@@ -348,34 +348,50 @@
     .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .role-pick h1 { text-align: center; }
-    .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; align-items: stretch; }
-    .role-head { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 32px; }
-    .kit-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; height: 100%; min-height: 300px; padding: 32px; cursor: pointer; }
-    .kit-choice .material-icons { font-size: 48px; color: var(--color-primary); }
+    .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); width: 100%; align-items: stretch; }
+    .role-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2); margin: 0 0 var(--space-8); }
+    .kit-choice { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-4); height: 100%; min-height: 300px; padding: var(--space-10) var(--space-6) var(--space-8); cursor: pointer; }
+    .kit-choice:hover { border-color: var(--color-primary); }
+    .kit-choice:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+    .kit-choice .material-icons { font-size: 56px; color: var(--color-primary); }
     .kit-choice p { margin: 0; }
     .kit-choice .btn { margin-top: auto; align-self: stretch; }
     .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
     .kit-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
     .kit-narrow .ob-field { max-width: none; }
-    .flow-col { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
+    .flow-narrow, .flow-col { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
     .flow-wide { width: 100%; max-width: none; }
-    body.center-stage .p-main { display: flex; align-items: center; justify-content: center; }
-    .bring-block { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-    .bring-block .empty-state-icon { margin: 0 0 var(--space-2); }
-    .bring-block .text-subtitle1 { margin-top: var(--space-2); }
-    .bring-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); width: 100%; margin-top: var(--space-8); }
-    .bring-tile { flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); height: auto; min-height: 120px; white-space: normal; text-align: center; width: 100%; }
-    .bring-tile svg { width: 28px; height: 28px; flex-shrink: 0; }
-    .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-    .books-opts .btn-outlined { flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; height: auto; min-height: 120px; white-space: normal; }
-    .books-opts svg { width: 40px; height: 40px; }
-    .review-page { min-height: calc(100vh - var(--proto-bar-h) - 56px - 48px); display: flex; flex-direction: column; }
-    .review-bar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: auto; padding: var(--space-3) 0; background: var(--color-white); border-top: 1px solid var(--border-default); }
-    .review-bar .ob-actions { margin: 0; }
+    .page-stack { display: flex; flex-direction: column; gap: var(--space-4); }
+    .page-stack > .text-h1, .page-stack > .text-body1, .page-head .text-h1, .page-head .text-body1 { margin: 0; }
+    .page-head { display: flex; flex-direction: column; gap: var(--space-2); }
+    .page-stack .alert, .page-stack .toolbar, .page-stack .form-field, .page-stack .ob-actions, .provider-card .ob-actions { margin: 0; }
+    .auth-screen { display: flex; flex-direction: column; gap: var(--space-4); }
+    .auth-copy { display: flex; flex-direction: column; gap: var(--space-2); }
+    .auth-logo, .auth-screen .text-h1, .auth-screen .text-body1 { margin: 0; }
+    .auth-logo { color: var(--color-primary); }
+    .auth-card { flex-direction: column; align-items: stretch; gap: var(--space-4); padding: var(--space-6); }
+    .auth-card .form-field { margin: 0; }
+    .sso-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    .sso-row .btn-outlined { width: 100%; }
+    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-6); }
+    .bring-card .text-h1, .bring-card .text-body1 { margin: 0; }
+    .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); }
+    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--color-white); flex-shrink: 0; }
+    .logo-chip svg { width: 12px; height: 12px; display: block; }
+    .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
+    .books-opts .btn-outlined { width: 100%; }
+    .books-opts svg { width: 18px; height: 18px; }
+    .pick-scroll { max-height: 420px; overflow: auto; }
+    .modal-body .text-body1 { margin: 0 0 var(--space-4); }
+    .modal-footer.spread { justify-content: space-between; align-items: center; }
+    .modal-actions { display: flex; gap: var(--space-2); }
+    .provider-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); width: 100%; }
+    .provider-card .text-h1, .provider-card .text-body1 { margin: 0; }
+    .provider-card .form-field { width: 100%; margin: 0; }
     .row-menu { position: relative; }
     .row-menu .dropdown-menu { right: 0; left: auto; }
     button.dropdown-item { background: none; border: 0; width: 100%; font: inherit; text-align: left; cursor: pointer; }
-    .flow-col .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
+    .flow-col .btn:disabled, .flow-narrow .btn:disabled, .auth-card .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
     body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
     body.provider-plain .p-body { display: block; }
     body.provider-plain .p-main { min-height: calc(100vh - var(--proto-bar-h)); display: flex; align-items: center; justify-content: center; background: var(--color-white); }
@@ -386,6 +402,7 @@
     .kit-links { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 8px; }
     .kit-screen .btn:disabled, .modal-bg .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
     .modal-bg .modal { width: 480px; max-width: calc(100vw - 32px); min-width: 0; padding: 0; border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
+    .modal-bg .modal.modal-lg { width: 960px; max-width: calc(100vw - 64px); }
     .modal-bg .modal.modal-confirm { width: 440px; max-width: 440px; }
     @media (max-width: 800px) { .role-grid { grid-template-columns: 1fr; } }
     .ob-card {
@@ -762,7 +779,7 @@
         if (v && v.step) {
           ob = Object.assign(defaultOb(), v);
           if (!Array.isArray(ob.manual)) ob.manual = [];
-          IMPORT_POOL.forEach((c) => { if (typeof ob.selected[c.id] !== 'boolean') ob.selected[c.id] = !c.former; });
+          IMPORT_POOL.forEach((c) => { if (typeof ob.selected[c.id] !== 'boolean') ob.selected[c.id] = true; });
           if (!v.roleChosen) ob.role = null;
           if (!v.firmChosen) ob.firmChoice = null;
           return;
@@ -901,7 +918,7 @@
       });
     });
     if (ob && ob.variant === 'existing') ob.banner = 'progress';
-    if (ob) { ob.directoryReady = true; ob.importNote = added.length; saveOb(); }
+    if (ob) { ob.directoryReady = true; ob.picker = false; ob.importNote = added.length; saveOb(); }
     persistDirectory();
     goFirm('clients');
   }
@@ -1001,63 +1018,61 @@
       html = renderHome();
     } else if (step === 'entry') {
       html = obShell(`
-        <div class="kit-screen">
+        <div class="kit-screen flow-narrow">
         ${backSlot(false)}
         <div class="role-head">
           <h1 class="text-h1">Who are you setting Synder up for?</h1>
           <p class="text-subtitle1">Choose the path that matches how you work.</p>
         </div>
         <div class="role-grid">
-          <div class="box box--white kit-choice" data-use="practice">
-            <span class="material-icons" aria-hidden="true">groups</span>
+          <div class="box box--white kit-choice" data-use="practice" tabindex="0">
+            <span class="material-icons" aria-hidden="true">business_center</span>
             <h2 class="text-h2">For practices</h2>
             <p class="text-body1">Manage all your clients' books in one place.</p>
-            <button type="button" class="btn">Start as a practice →</button>
+            <button type="button" class="btn">Start as a practice</button>
           </div>
-          <div class="box box--white kit-choice" data-use="business">
-            <span class="material-icons" aria-hidden="true">store</span>
+          <div class="box box--white kit-choice" data-use="business" tabindex="0">
+            <span class="material-icons" aria-hidden="true">storefront</span>
             <h2 class="text-h2">For businesses</h2>
             <p class="text-body1">Automate your own company's books.</p>
-            <button type="button" class="btn">Start as a business →</button>
+            <button type="button" class="btn">Start as a business</button>
           </div>
         </div>
         </div>`);
     } else if (step === 'signup') {
       const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
       const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
+      const google = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.3 35.1 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.2-3.5 5.7-6.6 7.1l6.3 5.3C37.4 38.3 44 33 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>';
       html = obShell(`
-        <div class="kit-screen kit-narrow">
-        <button type="button" class="page-back" id="obBack">Back</button>
-        <h1 class="synder-page-title">Set up your practice</h1>
-        <button type="button" class="btn-outlined" data-social="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.3 35.1 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.2-3.5 5.7-6.6 7.1l6.3 5.3C37.4 38.3 44 33 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>Continue with Google</button>
-        <button type="button" class="btn-outlined" data-social="qbo">${qb}Continue with QuickBooks</button>
-        <button type="button" class="btn-outlined" data-social="xero">${xero}Continue with Xero</button>
-        <div class="kit-or">or</div>
-        <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
-        <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
-        <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" /></div>
-        <div class="form-field"><label class="form-label form-label-required" for="suFirm">Firm name</label><input class="input" id="suFirm" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
-        <button type="button" class="btn" id="obSignup" disabled>Create account</button>
+        <div class="flow-narrow auth-screen">
+        <button type="button" class="btn-text" id="obBack">Back</button>
+        <p class="auth-logo text-h2">Synder</p>
+        <div class="auth-copy">
+          <h1 class="text-h1">Set up your practice</h1>
+          <p class="text-body1">This creates your firm in Synder. You'll be its admin: you add clients and invite colleagues.</p>
+        </div>
+        <div class="box box--white auth-card">
+          <div class="sso-row">
+            <button type="button" class="btn-outlined" data-social="qbo">${qb}Intuit</button>
+            <button type="button" class="btn-outlined" data-social="xero">${xero}Xero</button>
+            <button type="button" class="btn-outlined" data-social="google">${google}Google</button>
+          </div>
+          <div class="kit-or">or</div>
+          <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" /></div>
+          <button type="button" class="btn" id="obSignup" disabled>Create account</button>
+        </div>
         <div class="kit-links">
           <button type="button" class="link" id="obLogin">Already have an account? Log in</button>
           <button type="button" class="link" id="obJoinInfo">Want to join an existing firm?</button>
         </div>
         </div>
-        <div class="modal-bg" id="socialFirmModal">
-          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="socialFirmTitle">
-            <div class="modal-header" id="socialFirmTitle">Firm name</div>
-            <div class="modal-body">
-              <p>Your firm needs its own name. It is not taken from a client.</p>
-              <div class="form-field"><label class="form-label form-label-required" for="socialFirm">Firm name</label><input class="input" id="socialFirm" autocomplete="organization" /></div>
-            </div>
-            <div class="modal-footer"><button type="button" class="btn-outlined" id="socialFirmCancel">Cancel</button><button type="button" class="btn" id="socialFirmGo" disabled>Continue</button></div>
-          </div>
-        </div>
         <div class="modal-bg" id="joinModal">
-          <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
             <div class="modal-header" id="joinTitle">Join an existing firm</div>
-            <div class="modal-body">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</div>
-            <div class="modal-footer"><button type="button" class="btn" id="joinGotIt">Got it</button></div>
+            <div class="modal-body"><p class="text-body1">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</p></div>
+            <div class="modal-footer"><button type="button" class="btn-outlined" id="joinGotIt">Cancel</button></div>
           </div>
         </div>`);
     } else if (step === 'role-legacy') {
@@ -1098,17 +1113,17 @@
         <div class="ob-actions"><button type="button" class="btn" id="obFirmNext"${canFirm ? '' : ' disabled'}>Continue</button></div>`);
     } else if (step === 'business') {
       html = obShell(`
-        <div class="kit-narrow">
+        <div class="flow-narrow">
         ${backSlot(true)}
-        <h1>For businesses</h1>
+        <h1 class="text-h1">For businesses</h1>
         <p class="lead">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
         <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>
         </div>`);
     } else if (step === 'login') {
       html = obShell(`
-        <div class="kit-narrow">
+        <div class="flow-narrow auth-screen">
         ${backSlot(true)}
-        <h1>Log in</h1>
+        <h1 class="text-h1">Log in</h1>
         <div class="ob-field"><label for="liEmail">Email</label><input id="liEmail" type="email" autocomplete="username" /></div>
         <div class="ob-field"><label for="liPass">Password</label><input id="liPass" type="password" autocomplete="current-password" /></div>
         <div class="ob-actions"><button type="button" class="btn" id="liSubmit" disabled>Log in</button></div>
@@ -1181,15 +1196,19 @@
       }, 800);
     } else if (step === 'firmname') {
       const named = (ob.firmName || '').trim();
-      const hint = ob.connectedName && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')
-        ? ' Prefilled from the sample company name. Change it if you want a different firm name.'
-        : ' This name is what your team will see.';
       html = obShell(`
-        ${backSlot(true)}
-        <h1>Name your firm</h1>
-        <p class="lead">The firm name is required.${hint}</p>
-        <div class="ob-field firm"><label for="firmNameIn">Firm name</label><input id="firmNameIn" class="firm-name-input" value="${esc(ob.firmName || '')}" autocomplete="organization" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="obNameNext"${named ? '' : ' disabled'}>Continue</button></div>`);
+        <div class="flow-narrow auth-screen">
+        <button type="button" class="btn-text" id="obBack">Back</button>
+        <p class="auth-logo text-h2">Synder</p>
+        <div class="auth-copy">
+          <h1 class="text-h1">Name your firm</h1>
+          <p class="text-body1">Your team will see this name. It is not taken from a client.</p>
+        </div>
+        <div class="box box--white auth-card">
+          <div class="form-field"><label class="form-label form-label-required" for="firmNameIn">Firm name</label><input class="input" id="firmNameIn" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
+          <button type="button" class="btn" id="obNameNext"${named ? '' : ' disabled'}>Create firm</button>
+        </div>
+        </div>`);
     } else if (step === 'review') {
       const q = (ob.q || '').toLowerCase();
       const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
@@ -1246,19 +1265,19 @@
       goOnboarding(backMap[ob.step] || 'entry');
     });
     const signupReady = () => {
-      const n = $('suName'), e = $('suEmail'), p = $('suPass'), f = $('suFirm'), b = $('obSignup');
+      const n = $('suName'), e = $('suEmail'), p = $('suPass'), b = $('obSignup');
       if (n) ob.userName = n.value;
       if (e) ob.userEmail = e.value;
-      if (f) ob.firmName = f.value;
-      if (b) b.disabled = !(n && n.value.trim() && e && e.value.trim() && p && p.value && f && f.value.trim());
+      if (b) b.disabled = !(n && n.value.trim() && e && e.value.trim() && p && p.value);
     };
-    ['suName', 'suEmail', 'suPass', 'suFirm'].forEach((id) => { const el = $(id); if (el) el.oninput = signupReady; });
+    ['suName', 'suEmail', 'suPass'].forEach((id) => { const el = $(id); if (el) el.oninput = signupReady; });
     on('obSignup', () => {
-      const name = $('suName').value.trim(), email = $('suEmail').value.trim(), pass = $('suPass').value, firm = $('suFirm').value.trim();
-      if (!name || !email || !pass || !firm) return;
-      ob.userName = name; ob.userEmail = email; ob.firmName = firm; ob.firmTouched = true; ob.marketplace = false;
-      ob.use = 'practice'; ob.useChosen = true;
-      enterNewFirm();
+      const name = $('suName').value.trim(), email = $('suEmail').value.trim(), pass = $('suPass').value;
+      if (!name || !email || !pass) return;
+      ob.userName = name; ob.userEmail = email; ob.marketplace = false;
+      ob.use = 'practice'; ob.useChosen = true; ob.nameFrom = 'signup';
+      saveOb();
+      goOnboarding('firmname');
     });
     on('obLogin', () => { ob.loginFrom = 'signup'; goOnboarding('login'); });
     on('homeSignup', () => goOnboarding('entry'));
@@ -1281,35 +1300,15 @@
       saveOb();
       goOnboarding(use === 'business' ? 'business' : 'signup');
     });
-    const openSocial = () => {
-      const typed = (($('suFirm') && $('suFirm').value) || '').trim();
-      if (typed) {
-        ob.firmName = typed; ob.firmTouched = true; ob.use = 'practice'; ob.useChosen = true;
-        enterNewFirm();
-        return;
-      }
-      const modal = $('socialFirmModal');
-      if (!modal) return;
-      modal.classList.add('show');
-      const field = $('socialFirm');
-      if (field) { field.value = ''; field.focus(); }
-      const go = $('socialFirmGo');
-      if (go) go.disabled = true;
-    };
-    document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openSocial(); });
-    const socialField = $('socialFirm');
-    if (socialField) socialField.oninput = () => { const go = $('socialFirmGo'); if (go) go.disabled = !socialField.value.trim(); };
-    on('socialFirmCancel', () => { const modal = $('socialFirmModal'); if (modal) modal.classList.remove('show'); });
-    on('socialFirmGo', () => {
-      const name = ($('socialFirm') && $('socialFirm').value || '').trim();
-      if (!name) return;
-      ob.firmName = name; ob.firmTouched = true; ob.use = 'practice'; ob.useChosen = true;
-      const modal = $('socialFirmModal'); if (modal) modal.classList.remove('show');
-      enterNewFirm();
+    document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      ob.use = 'practice'; ob.useChosen = true; ob.nameFrom = 'signup';
+      saveOb();
+      goOnboarding('firmname');
     });
     on('obJoinInfo', () => { const modal = $('joinModal'); if (modal) modal.classList.add('show'); });
     on('joinGotIt', () => { const modal = $('joinModal'); if (modal) modal.classList.remove('show'); });
-    ['socialFirmModal', 'joinModal'].forEach((id) => {
+    ['joinModal'].forEach((id) => {
       const modal = $(id);
       if (modal) modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
     });
@@ -1381,6 +1380,7 @@
       const name = readFirmName();
       if (!name) return;
       ob.firmTouched = true;
+      if (ob.nameFrom === 'signup') { enterNewFirm(); return; }
       finishOnboarding(ob.pendingEntries || []);
     });
     on('obRequest', () => goOnboarding('joinok'));
@@ -1616,14 +1616,22 @@
   function showBooksModal() {
     booksToken++;
     const modal = $('booksModal');
-    const body = $('booksBody');
-    if (body) body.innerHTML = booksChoiceHtml();
-    if ($('booksClose')) $('booksClose').onclick = closeBooks;
-    if (body) body.querySelectorAll('[data-ledger]').forEach((b) => b.onclick = () => connectLedger(b.dataset.ledger));
+    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
     if (modal) {
-      modal.onclick = (e) => { if (e.target === modal) closeBooks(); };
+      modal.querySelectorAll('[data-ledger]').forEach((b) => b.onclick = () => connectLedger(b.dataset.ledger));
       modal.classList.add('show');
     }
+  }
+  function showCsvModal() {
+    const modal = $('csvModal');
+    if (modal) modal.classList.add('show');
+  }
+  function setCsvFile(file) {
+    const name = file && file.name ? file.name : '';
+    const label = $('csvFileName');
+    if (label) { label.hidden = !name; label.textContent = name; }
+    const go = $('csvGo');
+    if (go) go.disabled = !name;
   }
   let connectLoading = false;
   function connectLedger(src) {
@@ -1635,14 +1643,14 @@
   }
   function renderConnect() {
     if (connectLoading) {
-      return `<div class="flow-col"><div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Importing clients…</span></div></div>`;
+      return `<div class="flow-narrow provider-card"><div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Importing clients…</span></div></div>`;
     }
     const xero = ob && ob.source === 'xero';
     const logo = xero ? XERO_LOGO : QB_LOGO;
     const title = xero ? 'Synder wants to connect to your Xero organisation' : 'Synder wants to connect to your QuickBooks company';
     const field = xero ? 'Organisation' : 'Company';
     const go = xero ? 'Allow access' : 'Connect';
-    return `<div class="flow-col">
+    return `<div class="flow-narrow provider-card">
       ${logo}
       <h1 class="text-h1">${title}</h1>
       <div class="form-field"><label class="form-label" for="companyPick">${field}</label>
@@ -1651,30 +1659,90 @@
       <div class="ob-actions"><button type="button" class="btn" id="connectGo">${go}</button><button type="button" class="btn-outlined" id="connectCancel">Cancel</button></div>
     </div>`;
   }
-  function renderClients() {
-    if (!sc().clients.length) {
-      const qb = ledgerMark(QB_LOGO);
-      const xero = ledgerMark(XERO_LOGO);
-      return `<div class="bring-block flow-col">
-        <span class="material-icons empty-state-icon" aria-hidden="true">groups</span>
-        <h1 class="text-h1">Bring in your clients</h1>
-        <p class="text-subtitle1">Import your client list in a minute. We only copy names.</p>
-        <div class="bring-tiles">
-          <button type="button" class="btn bring-tile" id="emptyBooks"><span>${qb}${xero}</span><span>Import from QuickBooks or Xero</span></button>
-          <button type="button" class="btn-outlined bring-tile" id="emptyCsv"><span class="material-icons" aria-hidden="true">description</span><span>Import CSV</span></button>
-          <button type="button" class="btn-outlined bring-tile" id="emptyAdd"><span class="material-icons" aria-hidden="true">person_add</span><span>Add client</span></button>
+  function openPicker() {
+    if (!ob) return;
+    IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+    ob.q = '';
+    ob.picker = true;
+    saveOb();
+    goFirm('clients');
+  }
+  function pickerHtml() {
+    if (!ob || !ob.picker) return '';
+    const q = (ob.q || '').toLowerCase();
+    const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
+    const n = IMPORT_POOL.filter((c) => ob.selected[c.id] === true).length;
+    return `<div class="modal-bg show" id="pickModal">
+      <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+        <div class="modal-header" id="pickTitle">Choose clients to import</div>
+        <div class="modal-body">
+          <p class="text-body1">All ticked. Untick anyone you no longer work with.</p>
+          <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
+          <div class="pick-scroll"><table class="synder-table">
+            <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
+            <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] === true ? ' checked' : ''} /></td>
+              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="muted">No names match that search.</td></tr>'}</tbody>
+          </table></div>
+        </div>
+        <div class="modal-footer spread">
+          <span class="text-body1" id="reviewCount">${n} selected</span>
+          <div class="modal-actions"><button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Import ${n} client${n === 1 ? '' : 's'}</button></div>
         </div>
       </div>
-      <div class="modal-bg" id="booksModal">
+    </div>`;
+  }
+  function flowDialogs() {
+    const qb = ledgerMark(QB_LOGO, 18);
+    const xero = ledgerMark(XERO_LOGO, 18);
+    return `<div class="modal-bg" id="booksModal">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booksTitle">
-          <div class="modal-header" id="booksTitle">Import your client list<button type="button" class="modal-close" id="booksClose" aria-label="Close"><span class="material-icons">close</span></button></div>
-          <div class="modal-body" id="booksBody">${booksChoiceHtml()}</div>
+          <div class="modal-header" id="booksTitle">Import your client list</div>
+          <div class="modal-body" id="booksBody">
+            <p class="text-body1">You'll sign in to QuickBooks or Xero. We read your client list, then you choose who to import. Read-only. We only copy names.</p>
+            <div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
+            <div class="books-opts">
+              <button type="button" class="btn-outlined" data-ledger="qbo">${qb}QuickBooks</button>
+              <button type="button" class="btn-outlined" data-ledger="xero">${xero}Xero</button>
+            </div>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button></div>
         </div>
-      </div>`;
+      </div>
+      <div class="modal-bg" id="csvModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="csvTitle">
+          <div class="modal-header" id="csvTitle">Import CSV</div>
+          <div class="modal-body">
+            <p class="text-body1">Required column: client name. Optional columns, such as email, are ignored in this sample.</p>
+            <div class="file-upload" id="csvDrop"><span>Drop a CSV here, or</span><button type="button" class="link" id="csvBrowse">browse file</button></div>
+            <p class="form-hint">CSV files up to 5 MB.</p>
+            <p class="text-body1" id="csvFileName" hidden></p>
+            <button type="button" class="link" id="csvTemplate">Download template</button>
+            <input type="file" id="csvInput" accept=".csv,text/csv" hidden />
+          </div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="csvCancel">Cancel</button><button type="button" class="btn" id="csvGo" disabled>Continue</button></div>
+        </div>
+      </div>
+      ${pickerHtml()}`;
+  }
+  function renderClients() {
+    if (!sc().clients.length) {
+      const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 14)}</span>`;
+      const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 14)}</span>`;
+      return `<div class="flow-narrow">
+        <div class="box box--white bring-card">
+          <h1 class="text-h1">Bring in your clients</h1>
+          <p class="text-body1">Connect clients to see what Synder can do. Synder needs data to start working. Add clients one by one, or save time and import in bulk. You choose which clients to import. We won't change any data without your permission.</p>
+          <div class="bring-actions">
+            <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
+            <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
+            <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
+          </div>
+        </div>
+      </div>${flowDialogs()}`;
     }
     const banner = ob && ob.banner === 'invite'
-      ? `<div class="firm-banner" id="existBanner"><p><strong>You manage 2 clients in Synder.</strong> Bring in the rest of your client list. Read-only, no changes to books.</p><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="ob-quiet" id="bannerDismiss">Dismiss</button></div>`
-      : (ob && ob.banner === 'progress' ? `<div class="firm-banner quiet" id="existBanner"><p>${esc(clientCountLine())}. Read-only until you set a client up.</p></div>` : '');
+      ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>You manage 2 clients in Synder. Bring in the rest of your client list. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
+      : (ob && ob.banner === 'progress' ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>${esc(clientCountLine())}. Read-only until you set a client up.</span></div>` : '');
     const q = (st._q || '').toLowerCase();
     const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
     const body = rows.map((c) => {
@@ -1695,18 +1763,20 @@
     const note = ob && ob.importNote > 0
       ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="alert-close" id="importNoteClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>`
       : '';
-    return `<div class="flow-wide">
-      <h1 class="text-h1">Clients</h1>
+    return `<div class="flow-wide page-stack">
+      <div class="page-head">
+        <h1 class="text-h1">Clients</h1>
+        <p class="text-body1" id="progressLine">${esc(clientCountLine())}</p>
+      </div>
       ${banner}
       ${note}
-      <p class="text-body1" id="progressLine">${esc(clientCountLine())}</p>
       <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
       <div class="table-wrap"><table class="synder-table">
         <thead><tr><th>Client</th><th>Status</th><th></th></tr></thead>
         <tbody>${body || `<tr><td colspan="3" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>
-    </div>`;
+    </div>${flowDialogs()}`;
   }
   function renderImport() {
     return `<div class="flow-col">
@@ -1740,7 +1810,7 @@
     </div>`;
   }
   function renderAddOne() {
-    return `<div class="flow-col">
+    return `<div class="flow-narrow page-stack">
       <h1 class="text-h1">Add a client</h1>
       <div class="form-field"><label class="form-label" for="oneName">Client name</label><input class="input" id="oneName" placeholder="e.g. Harbor Street Books" /><p class="form-hint">Just the name for now. You can connect their books later.</p></div>
       <div class="ob-actions"><button type="button" class="btn" id="oneAdd" disabled>Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
@@ -1958,16 +2028,16 @@
     };
     const all = $('obAll');
     if (all) {
-      const picked = IMPORT_POOL.filter((c) => ob.selected[c.id] !== false).length;
+      const picked = IMPORT_POOL.filter((c) => ob.selected[c.id] === true).length;
       all.checked = picked === IMPORT_POOL.length;
       all.indeterminate = picked > 0 && picked < IMPORT_POOL.length;
       all.onchange = () => { IMPORT_POOL.forEach((c) => { ob.selected[c.id] = all.checked; }); saveOb(); renderMain(); };
     }
     document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => { ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderMain(); });
     const add = $('obAdd');
-    if (add) add.onclick = () => addImported(IMPORT_POOL.filter((c) => ob.selected[c.id] !== false).map((c) => ({ id: c.id, name: c.name })));
+    if (add) add.onclick = () => addImported(IMPORT_POOL.filter((c) => ob.selected[c.id] === true).map((c) => ({ id: c.id, name: c.name })));
     const cancel = $('reviewCancel');
-    if (cancel) cancel.onclick = () => goFirm('clients');
+    if (cancel) cancel.onclick = () => { if (ob) { ob.picker = false; saveOb(); } goFirm('clients'); };
   }
   function renderMain() {
     let html;
@@ -1977,7 +2047,7 @@
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
-      else if (st.page === 'review') html = renderReviewFirm();
+      else if (st.page === 'review') { if (ob) ob.picker = true; st.page = 'clients'; html = renderClients(); }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'preassess') html = renderPreassess();
       else if (st.page === 'client') html = renderClientDetail();
@@ -2014,18 +2084,11 @@
     bind('crumbBack', () => goFirm('clients'));
     bind('addClient', openAddClient);
     bind('emptyBooks', showBooksModal);
-    bind('emptyCsv', () => {
-      ob.importKind = '';
-      ob.source = 'upload';
-      IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
-      ob.q = '';
-      saveOb();
-      goFirm('review');
-    });
+    bind('emptyCsv', showCsvModal);
     bind('emptyAdd', () => goFirm('addone'));
-    bind('listImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
+    bind('listImport', showBooksModal);
     bind('listAdd', () => goFirm('addone'));
-    bind('bannerImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
+    bind('bannerImport', showBooksModal);
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
     bind('importNoteClose', () => { if (ob) { ob.importNote = 0; saveOb(); } render(); });
     m.querySelectorAll('[data-menu]').forEach((b) => b.onclick = (e) => {
@@ -2048,15 +2111,42 @@
         IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
         ob.q = '';
         saveOb();
-        goFirm('review');
+        openPicker();
       }, 1000);
     });
     m.querySelectorAll('.import-sources [data-src]').forEach((b) => b.onclick = () => {
       ob.source = b.dataset.src;
-      IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
-      ob.q = ''; saveOb(); goFirm('review');
+      openPicker();
     });
-    if (st.page === 'review') bindReviewFirm();
+    if ($('pickModal')) bindReviewFirm();
+    bind('csvCancel', () => { const modal = $('csvModal'); if (modal) modal.classList.remove('show'); });
+    bind('csvBrowse', () => { const input = $('csvInput'); if (input) input.click(); });
+    const csvInput = $('csvInput');
+    if (csvInput) csvInput.onchange = () => { if (csvInput.files && csvInput.files[0]) setCsvFile(csvInput.files[0]); };
+    const csvDrop = $('csvDrop');
+    if (csvDrop) {
+      csvDrop.addEventListener('dragover', (e) => { e.preventDefault(); csvDrop.classList.add('is-dragging'); });
+      csvDrop.addEventListener('dragleave', () => csvDrop.classList.remove('is-dragging'));
+      csvDrop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        csvDrop.classList.remove('is-dragging');
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file) setCsvFile(file);
+      });
+    }
+    bind('csvTemplate', () => {
+      const blob = new Blob(['client name\nHarbor Street Books\n'], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'synder-clients-template.csv';
+      a.click();
+      window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+    bind('csvGo', () => {
+      if ($('csvGo') && $('csvGo').disabled) return;
+      ob.source = 'upload';
+      openPicker();
+    });
     const one = $('oneName'), oneBtn = $('oneAdd');
     if (one && oneBtn) one.oninput = () => { oneBtn.disabled = !one.value.trim(); };
     bind('oneAdd', () => {
@@ -2222,7 +2312,7 @@
     if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('home'); return; }
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
     else if (parts[1] === 'connect' && ob && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')) { st.ctx = 'firm'; st.page = 'connect'; st.clientId = null; connectLoading = false; }
-    else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'review'; st.clientId = null; }
+    else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; if (ob) ob.picker = true; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'addone'; st.clientId = null; }
     else if (parts[1] === 'preassess' && parts[2] && findOrg(parts[2])) { st.ctx = 'firm'; st.page = 'preassess'; st.clientId = parts[2]; st.preState = 'upload'; }
     else if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
@@ -2256,7 +2346,7 @@
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
-    document.body.classList.toggle('center-stage', !!(st && st.page === 'clients' && !sc().clients.length));
+    document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
     if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
@@ -2278,7 +2368,7 @@
     if (reduce) return;
     var COLORS = ["#FFD166", "#EF476F", "#06D6A0", "#118AB2", "#F4A261", "#E9C46A", "#FFFFFF", "#90E0EF"];
     var SHAPES = ["star", "dot", "diamond"];
-    var COUNT = 96;
+    var COUNT = 960;
     function rand(min, max) {
       return min + Math.random() * (max - min);
     }
@@ -2291,8 +2381,8 @@
       var el = document.createElement("span");
       var size = rand(5, 12);
       var shape = SHAPES[i % SHAPES.length];
-      var delay = Math.round(rand(0, 220));
-      var dur = rand(0.95, 1.35);
+      var delay = Math.round(rand(0, 1800));
+      var dur = rand(2.8, 4.6);
       maxDelay = Math.max(maxDelay, delay + dur * 1000);
       el.className = "spark " + shape;
       el.style.setProperty("--x", rand(4, 96) + "%");
