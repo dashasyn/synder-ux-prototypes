@@ -342,18 +342,25 @@
     .ob-back-slot { height: 28px; margin: 0 0 8px; display: flex; align-items: center; flex: 0 0 28px; }
     .ob-in.review-fit > h1, .ob-in.review-fit > .welcome-copy, .ob-in.review-fit > .lead, .review-foot { flex: 0 0 auto; }
     .ob h1 { font-size: 32px; line-height: 40px; font-weight: 500; margin: 0 0 12px; text-align: left; }
+    .ob h1.text-h1 { font-size: var(--font-h1); font-weight: var(--font-h1-weight); line-height: var(--font-h1-line-height); letter-spacing: var(--font-h1-letter-spacing); margin: 0; }
     .ob .lead, .ob .welcome-copy { color: #1A1B24; text-align: left; margin: 0 0 20px; max-width: 720px; font-size: 16px; line-height: 24px; }
     .ob-cards { display: grid; gap: 20px; width: 100%; margin: 0; }
     .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .role-pick h1 { text-align: center; }
     .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; align-items: stretch; }
-    .kit-choice { flex-direction: column; align-items: flex-start; gap: 8px; height: 100%; cursor: pointer; }
-    .kit-choice .material-icons { font-size: 48px; color: var(--color-primary); }
-    .kit-choice p, .kit-choice ul { margin: 0; }
-    .kit-choice ul { padding: 0; list-style: none; }
-    .kit-choice li { font-size: 14px; line-height: 20px; color: var(--text-secondary); }
-    .kit-choice .btn { margin-top: auto; align-self: stretch; }
+    .ob-in.role-fit { max-width: none; min-height: calc(100vh - var(--proto-bar-h)); padding: 40px 48px 48px; display: flex; flex-direction: column; box-sizing: border-box; }
+    .role-head { display: flex; flex-direction: column; gap: 8px; margin: 0 0 32px; }
+    .role-fit .role-grid { flex: 1; min-height: 420px; }
+    .kit-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; height: 100%; cursor: pointer; }
+    .role-fit .kit-choice { flex-direction: row; align-items: center; gap: 32px; padding: 40px; background: var(--color-grey-5); border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+    .role-vignette { flex: 0 0 260px; align-self: stretch; min-height: 240px; background: var(--color-primary-5); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .role-mini { width: 100%; background: var(--color-white); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .role-row { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-default); }
+    .role-row .role-state { color: var(--color-primary); }
+    .role-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+    .role-copy ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .role-fit .kit-choice .btn { align-self: flex-start; margin-top: 8px; }
     .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
     .kit-narrow { max-width: 480px; }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
@@ -908,35 +915,41 @@
     if (step === 'home') {
       html = renderHome();
     } else if (step === 'entry') {
-      html = obShell(`
-        <div class="kit-screen">
-        ${backSlot(false)}
-        <h1 class="synder-page-title">Who are you setting Synder up for?</h1>
+      const vignette = (title, rows) => `<div class="role-vignette" aria-hidden="true"><div class="role-mini"><div class="text-subtitle2">${title}</div>${rows.map(([name, state]) => `<div class="role-row text-body2"><span>${name}</span><span class="role-state">${state}</span></div>`).join('')}</div></div>`;
+      html = `<div class="ob-in role-fit" data-step="entry">
+        <div class="role-head">
+          <h1 class="text-h1">Who are you setting Synder up for?</h1>
+          <p class="text-subtitle1">Choose the path that matches how you work.</p>
+        </div>
         <div class="role-grid">
-          <div class="box box--white kit-choice" data-use="practice">
-            <span class="material-icons" aria-hidden="true">groups</span>
-            <h2 class="card-title">For practices</h2>
-            <p>Accountants and bookkeepers who look after several clients.</p>
-            <ul>
-              <li>Manage all clients in one place</li>
-              <li>Import your client list</li>
-              <li>No changes to their books without permission</li>
-            </ul>
-            <button type="button" class="btn">Start as a practice</button>
+          <div class="kit-choice" data-use="practice">
+            ${vignette('Clients', [['Maple Goods', 'Ready'], ['River Studio', 'Ready'], ['Oak Dental', 'Not set up']])}
+            <div class="role-copy">
+              <h2 class="text-h2">For practices</h2>
+              <p class="text-body1">For accounting or bookkeeping practices managing clients’ books. Not for in-house finance teams.</p>
+              <ul class="text-body1">
+                <li>Manage all clients in one place</li>
+                <li>Import your client list</li>
+                <li>No changes to their books without permission</li>
+              </ul>
+              <button type="button" class="btn">Start as a practice →</button>
+            </div>
           </div>
-          <div class="box box--white kit-choice" data-use="business">
-            <span class="material-icons" aria-hidden="true">store</span>
-            <h2 class="card-title">For businesses</h2>
-            <p>Owners and in-house finance teams running one business.</p>
-            <ul>
-              <li>Sync sales, fees and payouts to your books</li>
-              <li>Reconcile at month end</li>
-              <li>See what matches before you close</li>
-            </ul>
-            <button type="button" class="btn">Start as a business</button>
+          <div class="kit-choice" data-use="business">
+            ${vignette('Transactions', [['Sale', 'Synced'], ['Fee', 'Synced'], ['Payout', 'Synced']])}
+            <div class="role-copy">
+              <h2 class="text-h2">For businesses</h2>
+              <p class="text-body1">For businesses managing their own books, including finance teams of a single company.</p>
+              <ul class="text-body1">
+                <li>Sync sales, fees and payouts to your books</li>
+                <li>Reconcile at month end</li>
+                <li>See what matches before you close</li>
+              </ul>
+              <button type="button" class="btn">Start as a business →</button>
+            </div>
           </div>
         </div>
-        </div>`);
+      </div>`;
     } else if (step === 'signup') {
       const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
       const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
