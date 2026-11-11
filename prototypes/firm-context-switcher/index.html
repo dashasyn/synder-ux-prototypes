@@ -54,6 +54,31 @@
     .proto-reset:hover { color: #fff; text-decoration: underline; }
     .proto-reset:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
 
+    /* ── Marketing home (rough synder.com) ── */
+    .shell-hide .ob:has(.home) { background: #002658; }
+    .home { min-height: calc(100vh - var(--proto-bar-h)); background: linear-gradient(#002658 72%, #1c1f23); color: #fff; }
+    .home-ann { background: #06256e; color: #fff; text-align: center; font-size: 13px; line-height: 20px; padding: 6px 16px; cursor: default; }
+    .home-nav { display: flex; align-items: center; gap: 20px; padding: 16px 28px 8px; }
+    .home-logo { height: 28px; width: auto; display: block; }
+    .home-menu { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+    .home-inert { color: #fff; font-size: 15px; line-height: 22px; cursor: default; }
+    .home-nav-end { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .home-search { font-size: 22px; color: #fff; cursor: default; }
+    .home-login, .home-fill, .home-outline { font-family: inherit; }
+    .home-login { appearance: none; background: none; border: 0; color: #fff; font-size: 15px; font-weight: 500; line-height: 22px; padding: 8px 4px; cursor: pointer; }
+    .home-login:hover { text-decoration: underline; }
+    .home-fill { appearance: none; border: 0; background: #00feb2; color: #01204f; border-radius: 8px; padding: 11px 20px; font-size: 16px; font-weight: 500; line-height: 20px; cursor: pointer; }
+    .home-fill:hover { background: #68ffd2; }
+    .home-fill.home-inert, .home-outline { cursor: default; }
+    .home-fill.home-inert:hover { background: #00feb2; }
+    .home-outline { appearance: none; background: transparent; color: #fff; border: 1px solid #fff; border-radius: 8px; padding: 10px 16px; font-size: 16px; font-weight: 500; line-height: 20px; }
+    .home-login:focus-visible, .home-fill:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .home-hero { text-align: center; padding: 56px 24px 28px; }
+    .ob .home-hero h1 { color: #fff; text-align: center; font-size: 44px; line-height: 52px; font-weight: 600; margin: 0 auto 24px; max-width: 920px; }
+    .home-points { list-style: none; margin: 0 0 28px; padding: 0; color: #fff; font-size: 18px; line-height: 28px; }
+    .home-trial { margin: 12px 0 0; color: rgba(255,255,255,.75); font-size: 14px; line-height: 20px; }
+    .home-stat { text-align: center; padding: 12px 24px 56px; font-size: 22px; line-height: 30px; font-weight: 500; }
+
     /* ── Product shell ── */
     .p-top {
       height: 56px; background: #fff; border-bottom: 1px solid #C8C7CC;
@@ -627,7 +652,7 @@
 
   function defaultOb() {
     return {
-      step: 'entry', variant: 'new', use: null, useChosen: false, marketplace: false,
+      step: 'home', variant: 'new', use: null, useChosen: false, marketplace: false, loginFrom: '',
       role: null, roleChosen: false, roleNote: '', otherOpen: false,
       firmChoice: null, firmChosen: false, source: null, firmName: '', firmTouched: false,
       connectedName: '', directoryReady: false, banner: '', pendingEntries: [], nameFrom: 'import',
@@ -719,7 +744,7 @@
     applyOwnOrg();
     FIRM.name = 'Your firm';
     try { localStorage.removeItem('fcs-dir-v10'); } catch (e) {}
-    goOnboarding('entry');
+    goOnboarding('home');
   }
   function finishOnboarding(entries) {
     const clients = (entries || []).map((c) => ({
@@ -846,11 +871,40 @@
       <span><span class="src-h">${title}</span><span class="src-d">${text}</span><span class="src-caveat">${caveat}</span></span>
     </button>`;
   }
+  function renderHome() {
+    const items = ['Products', 'Solutions', 'Integrations', 'Pricing', 'Why Synder', 'Customer Stories', 'Resources'];
+    return `<div class="home">
+      <div class="home-ann">AI For Accountants: See What AI Can Do With Your Books · Subscribe →</div>
+      <div class="home-nav">
+        <img class="home-logo" src="https://cdn.prod.website-files.com/622efc5ff4a0f4c4a8b262d5/665053f1c89712c5d8aabe90_logo-synder-white.svg" alt="Synder" />
+        <div class="home-menu">${items.map((label) => `<span class="home-inert">${label}</span>`).join('')}</div>
+        <div class="home-nav-end">
+          <span class="material-icons home-search" aria-hidden="true">search</span>
+          <button type="button" class="home-login" id="homeLogin">Log in</button>
+          <button type="button" class="home-fill" id="homeSignup">Sign up free</button>
+          <button type="button" class="home-outline home-inert">Book a demo</button>
+        </div>
+      </div>
+      <div class="home-hero">
+        <h1>Accounting Automation Software<br>for Retail, Ecommerce and SaaS</h1>
+        <ul class="home-points">
+          <li>One platform for all channels</li>
+          <li>Fast month-end close without manual work</li>
+          <li>AI insights for strategic analysis</li>
+        </ul>
+        <button type="button" class="home-fill home-inert">Book a demo</button>
+        <p class="home-trial">15-day free trial</p>
+      </div>
+      <div class="home-stat">62% of finance teams are already automating their accounting.</div>
+    </div>`;
+  }
   function renderOb() {
     let step = ob.step || 'entry';
     if (step === 'role') { step = 'entry'; ob.step = 'entry'; }
     let html = '';
-    if (step === 'entry') {
+    if (step === 'home') {
+      html = renderHome();
+    } else if (step === 'entry') {
       html = obShell(`
         ${backSlot(false)}
         <div class="role-pick">
@@ -928,8 +982,9 @@
       html = obShell(`
         ${backSlot(true)}
         <h1>Log in</h1>
-        <p class="lead">The usual Synder log in would open here. This prototype stays on the practice sign-up.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>`);
+        <div class="ob-field"><label for="liEmail">Email</label><input id="liEmail" type="email" autocomplete="username" /></div>
+        <div class="ob-field"><label for="liPass">Password</label><input id="liPass" type="password" autocomplete="current-password" /></div>
+        <div class="ob-actions"><button type="button" class="btn" id="liSubmit" disabled>Log in</button></div>`);
     } else if (step === 'join') {
       html = obShell(`
         ${backSlot(true)}
@@ -1038,7 +1093,7 @@
     }
     $('ob').innerHTML = html;
     bindOb();
-    const h = step === 'entry' ? '#onboarding' : '#onboarding/' + step;
+    const h = step === 'home' ? '#home' : (step === 'entry' ? '#onboarding' : '#onboarding/' + step);
     if (location.hash !== h) history.replaceState(null, '', h);
     document.title = 'Onboarding — Synder (Firm context switcher)';
   }
@@ -1053,9 +1108,13 @@
     on('obBack', () => {
       readFirmName();
       if (ob.step === 'firmname') { goOnboarding(ob.nameFrom || 'import'); return; }
+      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
       goOnboarding(backMap[ob.step] || 'entry');
     });
-    on('obBack2', () => goOnboarding(backMap[ob.step] || 'entry'));
+    on('obBack2', () => {
+      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
+      goOnboarding(backMap[ob.step] || 'entry');
+    });
     const signupReady = () => {
       const n = $('suName'), e = $('suEmail'), p = $('suPass'), f = $('suFirm'), b = $('obSignup');
       if (n) ob.userName = n.value;
@@ -1071,7 +1130,19 @@
       ob.use = 'practice'; ob.useChosen = true;
       enterNewFirm();
     });
-    on('obLogin', () => goOnboarding('login'));
+    on('obLogin', () => { ob.loginFrom = 'signup'; goOnboarding('login'); });
+    on('homeSignup', () => goOnboarding('entry'));
+    on('homeLogin', () => { ob.loginFrom = 'home'; goOnboarding('login'); });
+    const loginReady = () => {
+      const e = $('liEmail'), p = $('liPass'), b = $('liSubmit');
+      if (b) b.disabled = !(e && e.value.trim() && p && p.value);
+    };
+    ['liEmail', 'liPass'].forEach((id) => { const el = $(id); if (el) el.oninput = loginReady; });
+    on('liSubmit', () => {
+      const e = $('liEmail'), p = $('liPass');
+      if (!e || !p || !e.value.trim() || !p.value) return;
+      goOnboarding('entry');
+    });
     document.querySelectorAll('.role-card[data-use]').forEach((card) => card.onclick = () => {
       const use = card.dataset.use;
       if (use !== 'practice' && use !== 'business') return;
@@ -1865,6 +1936,7 @@
     const head = parts[0];
     if (!ob) loadOb();
     if (head === 'existing') { enterExisting(); return; }
+    if (head === 'home' || head === 'start') { goOnboarding('home'); return; }
     if (head === 'onboarding') {
       loadOb();
       const step = parts[1] || 'entry';
@@ -1885,7 +1957,7 @@
     }
     scenario = SCENARIOS[head] ? head : 'firm';
     load();
-    if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('entry'); return; }
+    if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('home'); return; }
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'review'; st.clientId = null; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'addone'; st.clientId = null; }
