@@ -357,15 +357,28 @@
     .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
     .kit-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
     .kit-narrow .ob-field { max-width: none; }
-    .flow-col { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
-    .flow-col.flow-wide { max-width: 880px; }
-    .p-main.fit-review .flow-col { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .bring-actions { display: flex; flex-direction: column; gap: 8px; }
-    .bring-actions .btn, .bring-actions .btn-outlined { width: 100%; }
-    .bring-actions .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .books-opts .btn-outlined { width: 100%; }
-    .books-opts .btn-outlined svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .flow-col { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
+    .flow-wide { width: 100%; max-width: none; }
+    body.center-stage .p-main { display: flex; align-items: center; justify-content: center; }
+    .bring-block { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+    .bring-block .empty-state-icon { margin: 0 0 var(--space-2); }
+    .bring-block .text-subtitle1 { margin-top: var(--space-2); }
+    .bring-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); width: 100%; margin-top: var(--space-8); }
+    .bring-tile { flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); height: auto; min-height: 120px; white-space: normal; text-align: center; width: 100%; }
+    .bring-tile svg { width: 28px; height: 28px; flex-shrink: 0; }
+    .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .books-opts .btn-outlined { flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; height: auto; min-height: 120px; white-space: normal; }
+    .books-opts svg { width: 40px; height: 40px; }
+    .review-page { min-height: calc(100vh - var(--proto-bar-h) - 56px - 48px); display: flex; flex-direction: column; }
+    .review-bar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: auto; padding: var(--space-3) 0; background: var(--color-white); border-top: 1px solid var(--border-default); }
+    .review-bar .ob-actions { margin: 0; }
+    .row-menu { position: relative; }
+    .row-menu .dropdown-menu { right: 0; left: auto; }
+    button.dropdown-item { background: none; border: 0; width: 100%; font: inherit; text-align: left; cursor: pointer; }
+    .flow-col .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
+    body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
+    body.provider-plain .p-body { display: block; }
+    body.provider-plain .p-main { min-height: calc(100vh - var(--proto-bar-h)); display: flex; align-items: center; justify-content: center; background: var(--color-white); }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
     .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
     .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
@@ -880,15 +893,15 @@
   }
   function addImported(entries) {
     const have = new Set(sc().clients.map((c) => c.id));
-    (entries || []).forEach((c) => {
-      if (have.has(c.id)) return;
+    const added = (entries || []).filter((c) => !have.has(c.id));
+    added.forEach((c) => {
       sc().clients.push({
         id: c.id, name: c.name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
         setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run'
       });
     });
     if (ob && ob.variant === 'existing') ob.banner = 'progress';
-    if (ob) { ob.directoryReady = true; saveOb(); }
+    if (ob) { ob.directoryReady = true; ob.importNote = added.length; saveOb(); }
     persistDirectory();
     goFirm('clients');
   }
@@ -1581,18 +1594,18 @@
 
   function clientCountLine() {
     const list = sc().clients.filter((c) => !c.pending);
-    const ready = list.filter((c) => c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress')).length;
-    const need = list.length - ready;
-    return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} set up · ${need} still need a ledger`;
+    const ready = list.filter((c) => c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress') || c.ledger).length;
+    return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} connected`;
   }
-  function ledgerMark(svg) {
-    return svg.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
+  function ledgerMark(svg, size) {
+    const px = size || 18;
+    return svg.replace('class="brand-logo"', `width="${px}" height="${px}" aria-hidden="true"`).replace(' width="40" height="40"', '').replace('role="img" ', '');
   }
   function booksChoiceHtml() {
     return `<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
       <div class="books-opts">
-        <button type="button" class="btn-outlined" data-ledger="qbo">${ledgerMark(QB_LOGO)}QuickBooks</button>
-        <button type="button" class="btn-outlined" data-ledger="xero">${ledgerMark(XERO_LOGO)}Xero</button>
+        <button type="button" class="btn-outlined" data-ledger="qbo">${ledgerMark(QB_LOGO, 40)}QuickBooks</button>
+        <button type="button" class="btn-outlined" data-ledger="xero">${ledgerMark(XERO_LOGO, 40)}Xero</button>
       </div>`;
   }
   function closeBooks() {
@@ -1604,10 +1617,7 @@
     booksToken++;
     const modal = $('booksModal');
     const body = $('booksBody');
-    const foot = $('booksFoot');
     if (body) body.innerHTML = booksChoiceHtml();
-    if (foot) foot.innerHTML = '<button type="button" class="btn-outlined" id="booksCancel">Cancel</button>';
-    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
     if ($('booksClose')) $('booksClose').onclick = closeBooks;
     if (body) body.querySelectorAll('[data-ledger]').forEach((b) => b.onclick = () => connectLedger(b.dataset.ledger));
     if (modal) {
@@ -1633,7 +1643,6 @@
     const field = xero ? 'Organisation' : 'Company';
     const go = xero ? 'Allow access' : 'Connect';
     return `<div class="flow-col">
-      <p class="text-caption">Prototype screen</p>
       ${logo}
       <h1 class="text-h1">${title}</h1>
       <div class="form-field"><label class="form-label" for="companyPick">${field}</label>
@@ -1646,26 +1655,20 @@
     if (!sc().clients.length) {
       const qb = ledgerMark(QB_LOGO);
       const xero = ledgerMark(XERO_LOGO);
-      return `<div class="flow-col">
+      return `<div class="bring-block flow-col">
+        <span class="material-icons empty-state-icon" aria-hidden="true">groups</span>
         <h1 class="text-h1">Bring in your clients</h1>
-        <p class="text-body1">Read-only, names only. No changes will be made to their books without permission.</p>
-        <div class="bring-actions">
-          <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
-          <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
-          <button type="button" class="btn-outlined" id="emptyAdd">Add client</button>
+        <p class="text-subtitle1">Import your client list in a minute. We only copy names.</p>
+        <div class="bring-tiles">
+          <button type="button" class="btn bring-tile" id="emptyBooks"><span>${qb}${xero}</span><span>Import from QuickBooks or Xero</span></button>
+          <button type="button" class="btn-outlined bring-tile" id="emptyCsv"><span class="material-icons" aria-hidden="true">description</span><span>Import CSV</span></button>
+          <button type="button" class="btn-outlined bring-tile" id="emptyAdd"><span class="material-icons" aria-hidden="true">person_add</span><span>Add client</span></button>
         </div>
       </div>
       <div class="modal-bg" id="booksModal">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booksTitle">
           <div class="modal-header" id="booksTitle">Import your client list<button type="button" class="modal-close" id="booksClose" aria-label="Close"><span class="material-icons">close</span></button></div>
-          <div class="modal-body" id="booksBody">
-            <div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
-            <div class="books-opts">
-              <button type="button" class="btn-outlined" data-ledger="qbo">${qb}QuickBooks</button>
-              <button type="button" class="btn-outlined" data-ledger="xero">${xero}Xero</button>
-            </div>
-          </div>
-          <div class="modal-footer" id="booksFoot"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button></div>
+          <div class="modal-body" id="booksBody">${booksChoiceHtml()}</div>
         </div>
       </div>`;
     }
@@ -1675,33 +1678,35 @@
     const q = (st._q || '').toLowerCase();
     const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
     const body = rows.map((c) => {
-      const ready = c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress');
-      const licence = c.licence || (ready ? 'Pro' : 'None');
-      const setup = c.setupState || (c.pending ? 'Pending' : ready ? 'Ready' : 'Not set up');
-      const pre = c.preassess || 'Not run';
-      const primary = ready
-        ? `<button class="btn-text" data-open="${c.id}">Open in Synder</button>`
-        : `<button class="btn" data-detail="${c.id}">Set up</button>`;
-      const quiet = `<button class="ob-quiet" data-preassess="${c.id}">${pre === 'Not run' || pre === 'Running' ? 'Check reconciliation from files' : 'View check'}</button>`;
+      const connected = c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress') || !!c.ledger;
+      const mainAct = connected
+        ? `<button type="button" class="dropdown-item" data-open="${c.id}">Open in Synder</button>`
+        : `<button type="button" class="dropdown-item" data-detail="${c.id}">Set up</button>`;
+      const preLabel = c.preassess && c.preassess !== 'Not run' && c.preassess !== 'Running' ? 'View check' : 'Check reconciliation from files';
       return `<tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button class="linkish" data-detail="${c.id}">${esc(c.name)}</button></div></td>
-        <td>${esc(licence)}</td>
-        <td>${esc(setup)}</td>
-        <td>${esc(pre)}</td>
-        <td><div class="row-actions">${primary}${quiet}</div></td>
+        <td><span class="status ${connected ? 'status-green' : 'status-grey'}">${connected ? 'Connected' : 'Not connected'}</span></td>
+        <td><div class="dropdown row-menu">
+          <button type="button" class="btn-icon" data-menu="${c.id}" aria-label="Actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button>
+          <div class="dropdown-menu" id="rowmenu-${c.id}">${mainAct}<button type="button" class="dropdown-item" data-preassess="${c.id}">${preLabel}</button></div>
+        </div></td>
       </tr>`;
     }).join('');
-    return `
-      <div class="ph"><div><h1>Clients</h1></div>
-        <div class="ph-actions"><button class="btn" id="listImport">Import client list</button><button class="btn-outlined" id="listAdd">Add one client</button></div></div>
+    const note = ob && ob.importNote > 0
+      ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="alert-close" id="importNoteClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>`
+      : '';
+    return `<div class="flow-wide">
+      <h1 class="text-h1">Clients</h1>
       ${banner}
-      <p class="progress-line" id="progressLine">${esc(clientCountLine())}</p>
+      ${note}
+      <p class="text-body1" id="progressLine">${esc(clientCountLine())}</p>
       <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th>Client</th><th>Licence</th><th>Setup</th><th>Pre-assessment</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="5" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
+      <div class="table-wrap"><table class="synder-table">
+        <thead><tr><th>Client</th><th>Status</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="3" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
       </table></div>
-      <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
+      <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>
+    </div>`;
   }
   function renderImport() {
     return `<div class="flow-col">
@@ -1719,29 +1724,25 @@
     const q = (ob.q || '').toLowerCase();
     const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
     const n = IMPORT_POOL.filter((c) => ob.selected[c.id] !== false).length;
-    return `<div class="flow-col flow-wide">
-      <div class="ph"><div><h1 class="text-h1">Choose who to keep</h1></div></div>
-      <p class="text-body1">${reviewCopy()} No changes will be made to their books without permission.</p>
-      <div class="review-scroll">
-        <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
-        <div class="ob-table-wrap"><table>
-          <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>In this sample</th></tr></thead>
-          <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] !== false ? ' checked' : ''} /></td>
-            <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td>
-            <td class="${c.former ? 'sample-former' : 'sample-current'}">${c.former ? 'Former customer' : 'Current client'}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No names match that search.</td></tr>'}</tbody>
-        </table></div>
-      </div>
-      <div class="review-foot">
-        <button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} client${n === 1 ? '' : 's'}</button>
-        <button type="button" class="ob-quiet" id="reviewCancel">Cancel</button>
+    return `<div class="flow-wide review-page">
+      <h1 class="text-h1">Choose clients to import</h1>
+      <p class="text-body1">All ticked. Untick anyone you no longer work with.</p>
+      <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
+      <div class="table-wrap"><table class="synder-table">
+        <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
+        <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] !== false ? ' checked' : ''} /></td>
+          <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="muted">No names match that search.</td></tr>'}</tbody>
+      </table></div>
+      <div class="review-bar">
+        <span class="text-body1" id="reviewCount">${n} selected</span>
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Import ${n} client${n === 1 ? '' : 's'}</button></div>
       </div>
     </div>`;
   }
   function renderAddOne() {
     return `<div class="flow-col">
-      <div class="ph"><div><h1 class="text-h1">Add a client</h1></div></div>
-      <div class="ob-field"><label for="oneName">Client name</label><input id="oneName" placeholder="e.g. Harbor Street Books" /></div>
-      <p class="text-body1">That is all we need for now. Names only. No changes will be made to their books without permission.</p>
+      <h1 class="text-h1">Add a client</h1>
+      <div class="form-field"><label class="form-label" for="oneName">Client name</label><input class="input" id="oneName" placeholder="e.g. Harbor Street Books" /><p class="form-hint">Just the name for now. You can connect their books later.</p></div>
       <div class="ob-actions"><button type="button" class="btn" id="oneAdd" disabled>Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
     </div>`;
   }
@@ -2026,6 +2027,14 @@
     bind('listAdd', () => goFirm('addone'));
     bind('bannerImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
+    bind('importNoteClose', () => { if (ob) { ob.importNote = 0; saveOb(); } render(); });
+    m.querySelectorAll('[data-menu]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const menu = $('rowmenu-' + b.dataset.menu);
+      const open = menu && menu.classList.contains('show');
+      m.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
+      if (!open && menu) menu.classList.add('show');
+    });
     bind('importCancel', () => goFirm('clients'));
     bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
     bind('connectGo', () => {
@@ -2055,7 +2064,7 @@
       if (!name) return;
       sc().clients.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' });
       if (ob && ob.variant === 'existing') ob.banner = 'progress';
-      if (ob) saveOb(); persistDirectory(); goFirm('clients');
+      if (ob) { ob.importNote = 1; saveOb(); } persistDirectory(); goFirm('clients');
     });
     bind('oneCancel', () => goFirm('clients'));
     bind('closePre', () => goFirm('clients'));
@@ -2166,6 +2175,7 @@
   });
   document.addEventListener('mousedown', (e) => {
     if (popOpen() && !e.target.closest('.ctx')) closePop();
+    if (!e.target.closest('.row-menu')) document.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
   });
 
   /* ───────── Add client modal ───────── */
@@ -2231,7 +2241,10 @@
   window.addEventListener('hashchange', () => setScenario(location.hash.slice(1)));
 
   function render() {
-    if (mode === 'onboarding') { renderMode(); renderOb(); return; }
+    if (mode === 'onboarding') {
+      document.body.classList.remove('provider-plain', 'center-stage');
+      renderMode(); renderOb(); return;
+    }
     if (st && (st.page === 'client' || st.page === 'setup' || st.page === 'preassess') && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
     }
@@ -2242,7 +2255,9 @@
     if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
-    $('main').classList.toggle('fit-review', !!(st && st.page === 'review'));
+    document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
+    document.body.classList.toggle('center-stage', !!(st && st.page === 'clients' && !sc().clients.length));
+    $('main').classList.remove('fit-review');
     let h = '#' + scenario;
     if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h += '/preassess/' + st.clientId;
