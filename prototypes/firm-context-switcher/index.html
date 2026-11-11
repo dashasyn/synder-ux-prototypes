@@ -347,20 +347,23 @@
     .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .role-pick h1 { text-align: center; }
-    .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; width: 100%; }
-    .role-card {
-      display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
-      min-height: 280px; width: 100%; padding: 24px; text-align: left;
-      background: #fff; border: 1px solid #DFE4EC; border-radius: 12px;
-      cursor: pointer; font: inherit; color: inherit;
-      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
-    }
-    .role-card:hover { border-color: #0053CC; background: #F7FAFF; }
-    .role-card h2 { margin: 0; font-size: 26px; line-height: 32px; font-weight: 500; color: #1A1B24; }
-    .role-card p { margin: 0; font-size: 16px; line-height: 24px; color: #3E4656; }
-    .role-card .btn-outlined {
-      margin-top: auto; width: 100%; box-sizing: border-box; justify-content: center;
-    }
+    .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; align-items: stretch; }
+    .kit-choice { flex-direction: column; align-items: flex-start; gap: 8px; height: 100%; cursor: pointer; }
+    .kit-choice .material-icons { font-size: 48px; color: var(--color-primary); }
+    .kit-choice p, .kit-choice ul { margin: 0; }
+    .kit-choice ul { padding: 0; list-style: none; }
+    .kit-choice li { font-size: 14px; line-height: 20px; color: var(--text-secondary); }
+    .kit-choice .btn { margin-top: auto; align-self: stretch; }
+    .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
+    .kit-narrow { max-width: 480px; }
+    .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
+    .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
+    .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
+    .kit-or::before, .kit-or::after { content: ""; flex: 1; height: 1px; background: var(--border-default); }
+    .kit-links { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 8px; }
+    .kit-screen .btn:disabled, .modal-bg .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
+    .modal-bg .modal { width: 480px; max-width: calc(100vw - 32px); min-width: 0; padding: 0; border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
+    .modal-bg .modal.modal-confirm { width: 440px; max-width: 440px; }
     @media (max-width: 800px) { .role-grid { grid-template-columns: 1fr; } }
     .ob-card {
       position: relative;
@@ -906,35 +909,71 @@
       html = renderHome();
     } else if (step === 'entry') {
       html = obShell(`
+        <div class="kit-screen">
         ${backSlot(false)}
-        <div class="role-pick">
-        <h1>Who are you setting Synder up for?</h1>
+        <h1 class="synder-page-title">Who are you setting Synder up for?</h1>
         <div class="role-grid">
-          <div class="role-card" data-use="practice">
-            <h2>For practices</h2>
+          <div class="box box--white kit-choice" data-use="practice">
+            <span class="material-icons" aria-hidden="true">groups</span>
+            <h2 class="card-title">For practices</h2>
             <p>Accountants and bookkeepers who look after several clients.</p>
-            <button type="button" class="btn-outlined">Start as a practice</button>
+            <ul>
+              <li>Manage all clients in one place</li>
+              <li>Import your client list</li>
+              <li>No changes to their books without permission</li>
+            </ul>
+            <button type="button" class="btn">Start as a practice</button>
           </div>
-          <div class="role-card" data-use="business">
-            <h2>For businesses</h2>
+          <div class="box box--white kit-choice" data-use="business">
+            <span class="material-icons" aria-hidden="true">store</span>
+            <h2 class="card-title">For businesses</h2>
             <p>Owners and in-house finance teams running one business.</p>
-            <button type="button" class="btn-outlined">Start as a business</button>
+            <ul>
+              <li>Sync sales, fees and payouts to your books</li>
+              <li>Reconcile at month end</li>
+              <li>See what matches before you close</li>
+            </ul>
+            <button type="button" class="btn">Start as a business</button>
           </div>
         </div>
         </div>`);
     } else if (step === 'signup') {
+      const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
+      const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
       html = obShell(`
-        ${backSlot(true)}
-        <h1>Set up your practice</h1>
-        <div class="ob-field"><label for="suName">Your name</label><input id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
-        <div class="ob-field"><label for="suEmail">Work email</label><input id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
-        <div class="ob-field"><label for="suPass">Password</label><input id="suPass" type="password" autocomplete="new-password" /></div>
-        <div class="ob-field firm"><label for="suFirm">Firm name</label><input id="suFirm" class="firm-name-input" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="obSignup" disabled>Create account</button></div>
-        <p class="signup-aside">or sign up with Intuit, Xero or Google, as today</p>
-        <div class="signup-links">
-          <button type="button" class="ob-quiet" id="obLogin">Already have an account? Log in</button>
-          <button type="button" class="ob-quiet" id="obHaveFirm">I already have a firm</button>
+        <div class="kit-screen kit-narrow">
+        <button type="button" class="page-back" id="obBack">Back</button>
+        <h1 class="synder-page-title">Set up your practice</h1>
+        <button type="button" class="btn-outlined" data-social="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.3 35.1 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.2-3.5 5.7-6.6 7.1l6.3 5.3C37.4 38.3 44 33 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>Continue with Google</button>
+        <button type="button" class="btn-outlined" data-social="qbo">${qb}Continue with QuickBooks</button>
+        <button type="button" class="btn-outlined" data-social="xero">${xero}Continue with Xero</button>
+        <div class="kit-or">or</div>
+        <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
+        <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
+        <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" /></div>
+        <div class="form-field"><label class="form-label form-label-required" for="suFirm">Firm name</label><input class="input" id="suFirm" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
+        <button type="button" class="btn" id="obSignup" disabled>Create account</button>
+        <div class="kit-links">
+          <button type="button" class="link" id="obLogin">Already have an account? Log in</button>
+          <button type="button" class="link" id="obJoinInfo">Want to join an existing firm?</button>
+        </div>
+        </div>
+        <div class="modal-bg" id="socialFirmModal">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="socialFirmTitle">
+            <div class="modal-header" id="socialFirmTitle">Firm name</div>
+            <div class="modal-body">
+              <p>Your firm needs its own name. It is not taken from a client.</p>
+              <div class="form-field"><label class="form-label form-label-required" for="socialFirm">Firm name</label><input class="input" id="socialFirm" autocomplete="organization" /></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn-outlined" id="socialFirmCancel">Cancel</button><button type="button" class="btn" id="socialFirmGo" disabled>Continue</button></div>
+          </div>
+        </div>
+        <div class="modal-bg" id="joinModal">
+          <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
+            <div class="modal-header" id="joinTitle">Join an existing firm</div>
+            <div class="modal-body">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</div>
+            <div class="modal-footer"><button type="button" class="btn" id="joinGotIt">Got it</button></div>
+          </div>
         </div>`);
     } else if (step === 'role-legacy') {
       const cardRole = ob.roleChosen && (ob.role === 'firm' || ob.role === 'inhouse' || ob.role === 'owner') ? ob.role : null;
@@ -1143,7 +1182,7 @@
       if (!e || !p || !e.value.trim() || !p.value) return;
       goOnboarding('entry');
     });
-    document.querySelectorAll('.role-card[data-use]').forEach((card) => card.onclick = () => {
+    document.querySelectorAll('.kit-choice[data-use]').forEach((card) => card.onclick = () => {
       const use = card.dataset.use;
       if (use !== 'practice' && use !== 'business') return;
       ob.use = use;
@@ -1151,7 +1190,38 @@
       saveOb();
       goOnboarding(use === 'business' ? 'business' : 'signup');
     });
-    on('obHaveFirm', () => goOnboarding('join'));
+    const openSocial = () => {
+      const typed = (($('suFirm') && $('suFirm').value) || '').trim();
+      if (typed) {
+        ob.firmName = typed; ob.firmTouched = true; ob.use = 'practice'; ob.useChosen = true;
+        enterNewFirm();
+        return;
+      }
+      const modal = $('socialFirmModal');
+      if (!modal) return;
+      modal.classList.add('show');
+      const field = $('socialFirm');
+      if (field) { field.value = ''; field.focus(); }
+      const go = $('socialFirmGo');
+      if (go) go.disabled = true;
+    };
+    document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openSocial(); });
+    const socialField = $('socialFirm');
+    if (socialField) socialField.oninput = () => { const go = $('socialFirmGo'); if (go) go.disabled = !socialField.value.trim(); };
+    on('socialFirmCancel', () => { const modal = $('socialFirmModal'); if (modal) modal.classList.remove('show'); });
+    on('socialFirmGo', () => {
+      const name = ($('socialFirm') && $('socialFirm').value || '').trim();
+      if (!name) return;
+      ob.firmName = name; ob.firmTouched = true; ob.use = 'practice'; ob.useChosen = true;
+      const modal = $('socialFirmModal'); if (modal) modal.classList.remove('show');
+      enterNewFirm();
+    });
+    on('obJoinInfo', () => { const modal = $('joinModal'); if (modal) modal.classList.add('show'); });
+    on('joinGotIt', () => { const modal = $('joinModal'); if (modal) modal.classList.remove('show'); });
+    ['socialFirmModal', 'joinModal'].forEach((id) => {
+      const modal = $(id);
+      if (modal) modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
+    });
     const joinIn = $('firmIdIn');
     if (joinIn) joinIn.oninput = () => { const b = $('obRequest'); if (b) b.disabled = !joinIn.value.trim(); };
     document.querySelectorAll('[data-role]').forEach((b) => b.onclick = () => {
@@ -1949,7 +2019,7 @@
         closePop(); render();
         return;
       }
-      const map = { role: 'entry', firmchoice: 'entry', firmname: 'signup', welcome: 'entry', import: 'entry', sources: 'entry', review: 'entry', add: 'entry' };
+      const map = { role: 'entry', firmchoice: 'entry', firmname: 'signup', welcome: 'entry', import: 'entry', sources: 'entry', review: 'entry', add: 'entry', join: 'signup', joinok: 'signup' };
       const next = map[step] || step;
       ob.step = ['entry', 'signup', 'business', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
       goOnboarding(ob.step);
