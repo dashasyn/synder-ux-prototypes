@@ -9,7 +9,7 @@
     Firm context switcher v2 (Ignat, Nov 4 2026): live top bar (Balance, How it works?, bell, help, user menu with My firm on top)
     - One context switcher top-left of the sidebar (replaces firm section + "CLIENT WORKSPACE" org dropdown).
     - One sidebar; contents swap fully per context (Firm nav vs Org nav). No top tabs.
-    - v10: sign-up, practice or business, Clients home, import, optional pre-assessment. No firm dashboard in this experiment.
+    - v10: practice or business first, then practice sign-up, Clients home, import, optional pre-assessment. No firm dashboard in this experiment.
     - v8: explicit role choice, neutral Create/Join, full client switcher, left-aligned directory welcome.
     - v7: portrait role and firm cards, client-directory welcome, then a simulated QuickBooks / Xero / CSV import. Firm user only.
     - v6: firm onboarding (#onboarding), client list import, firm Dashboard + setup progress. Firm user only.
@@ -406,6 +406,8 @@
     .ob-quiet { display: inline-block; margin: 16px 0 0; color: #6B778C; background: none; border: none; font: inherit; font-size: 15px; line-height: 22px; cursor: pointer; text-align: left; }
     .ob-quiet:hover { color: #0053CC; text-decoration: underline; }
     .ob-quiet:focus-visible { outline: 2px solid #0053CC; outline-offset: 3px; border-radius: 4px; }
+    .signup-aside { margin: 16px 0 0; max-width: 420px; color: #6B778C; font-size: 15px; line-height: 22px; text-align: center; }
+    .signup-links { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 420px; }
     .brand-logo { width: 40px; height: 40px; flex-shrink: 0; display: block; }
     .src-file {
       width: 40px; height: 40px; border-radius: 8px; background: #F2F6FC; color: #0053CC;
@@ -623,7 +625,7 @@
 
   function defaultOb() {
     return {
-      step: 'signup', variant: 'new', use: null, useChosen: false, marketplace: false,
+      step: 'entry', variant: 'new', use: null, useChosen: false, marketplace: false,
       role: null, roleChosen: false, roleNote: '', otherOpen: false,
       firmChoice: null, firmChosen: false, source: null, firmName: '', firmTouched: false,
       connectedName: '', directoryReady: false, banner: '', pendingEntries: [], nameFrom: 'import',
@@ -704,7 +706,7 @@
     SCENARIOS.firm.clients = demoClients();
     FIRM.name = 'WLS Labs';
     try { localStorage.removeItem('fcs-dir-v10'); } catch (e) {}
-    goOnboarding('role');
+    goOnboarding('entry');
   }
   function finishOnboarding(entries) {
     const clients = (entries || []).map((c) => ({
@@ -775,7 +777,7 @@
   }
 
   function obShell(inner, review) {
-    return `<div class="ob-in${review ? ' review-fit' : ''}" data-step="${esc(ob.step || 'role')}">${inner}</div>`;
+    return `<div class="ob-in${review ? ' review-fit' : ''}" data-step="${esc(ob.step || 'entry')}">${inner}</div>`;
   }
   function backSlot(show) {
     return `<div class="ob-back-slot">${show ? '<button type="button" class="ob-back" id="obBack"><span class="material-icons">arrow_back</span>Back</button>' : ''}</div>`;
@@ -830,28 +832,15 @@
     </button>`;
   }
   function renderOb() {
-    const step = ob.step || 'signup';
+    let step = ob.step || 'entry';
+    if (step === 'role') { step = 'entry'; ob.step = 'entry'; }
     let html = '';
-    if (step === 'signup') {
-      const ok = false;
-      html = obShell(`
-        ${backSlot(false)}
-        <h1>Set up your practice</h1>
-        <p class="lead">One form creates your account and your firm. The firm name is its own field.</p>
-        <div class="ob-field"><label for="suName">Your name</label><input id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
-        <div class="ob-field"><label for="suEmail">Work email</label><input id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
-        <div class="ob-field"><label for="suPass">Password</label><input id="suPass" type="password" autocomplete="new-password" /></div>
-        <div class="ob-field firm"><label for="suFirm">Firm name</label><input id="suFirm" class="firm-name-input" autocomplete="organization" value="${esc(ob.firmTouched ? ob.firmName : '')}" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="obSignup" disabled>Create account</button></div>
-        <button type="button" class="ob-other" id="obMarketplace">Signed up with Intuit or Xero</button>`);
-    } else if (step === 'role') {
+    if (step === 'entry') {
       const practice = ob.useChosen && ob.use === 'practice';
       const business = ob.useChosen && ob.use === 'business';
-      const needFirm = practice && !(ob.firmName || '').trim();
-      const firmOk = !needFirm || (ob.roleFirm || '').trim();
-      const can = (practice && firmOk) || business;
+      const can = practice || business;
       html = obShell(`
-        ${backSlot(true)}
+        ${backSlot(false)}
         <div class="role-pick">
         <h1>Who are you setting Synder up for?</h1>
         <div class="role-grid">
@@ -866,9 +855,21 @@
             <span class="role-cta sec">Start as a business</span>
           </button>
         </div>
-        ${needFirm ? `<div class="ob-field firm" id="roleFirmBox"><label for="roleFirm">Firm name</label><input id="roleFirm" class="firm-name-input" value="${esc(ob.roleFirm || '')}" autocomplete="organization" /></div>` : ''}
-        <button type="button" class="ob-other" id="obHaveFirm">I already have a firm</button>
         <div class="ob-actions"><button type="button" class="btn" id="obUseNext"${can ? '' : ' disabled'}>Continue</button></div>
+        </div>`);
+    } else if (step === 'signup') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Set up your practice</h1>
+        <div class="ob-field"><label for="suName">Your name</label><input id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
+        <div class="ob-field"><label for="suEmail">Work email</label><input id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
+        <div class="ob-field"><label for="suPass">Password</label><input id="suPass" type="password" autocomplete="new-password" /></div>
+        <div class="ob-field firm"><label for="suFirm">Firm name</label><input id="suFirm" class="firm-name-input" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
+        <div class="ob-actions"><button type="button" class="btn" id="obSignup" disabled>Create account</button></div>
+        <p class="signup-aside">or sign up with Intuit, Xero or Google, as today</p>
+        <div class="signup-links">
+          <button type="button" class="ob-quiet" id="obLogin">Already have an account? Log in</button>
+          <button type="button" class="ob-quiet" id="obHaveFirm">I already have a firm</button>
         </div>`);
     } else if (step === 'role-legacy') {
       const cardRole = ob.roleChosen && (ob.role === 'firm' || ob.role === 'inhouse' || ob.role === 'owner') ? ob.role : null;
@@ -910,7 +911,13 @@
       html = obShell(`
         ${backSlot(true)}
         <h1>For businesses</h1>
-        <p class="lead">The usual Synder business onboarding would open here. This prototype stays on the practice path.</p>
+        <p class="lead">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
+        <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>`);
+    } else if (step === 'login') {
+      html = obShell(`
+        ${backSlot(true)}
+        <h1>Log in</h1>
+        <p class="lead">The usual Synder log in would open here. This prototype stays on the practice sign-up.</p>
         <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>`);
     } else if (step === 'join') {
       html = obShell(`
@@ -1020,26 +1027,29 @@
     }
     $('ob').innerHTML = html;
     bindOb();
-    const h = '#onboarding' + (step && step !== 'signup' ? '/' + step : '');
+    const h = step === 'entry' ? '#onboarding' : '#onboarding/' + step;
     if (location.hash !== h) history.replaceState(null, '', h);
     document.title = 'Onboarding — Synder (Firm context switcher)';
   }
   function bindOb() {
     const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     const backMap = {
-      role: 'signup', business: 'role', join: 'role', joinok: 'join',
-      firmchoice: 'role', import: 'signup', add: 'import', sources: 'import',
+      signup: 'entry', business: 'entry', login: 'signup', join: 'signup', joinok: 'join',
+      firmchoice: 'entry', import: 'signup', add: 'import', sources: 'import',
       firmname: 'signup', review: 'sources', connecting: 'sources',
-      other: 'role', inhouse: 'role', owner: 'role'
+      other: 'entry', inhouse: 'entry', owner: 'entry'
     };
     on('obBack', () => {
       readFirmName();
       if (ob.step === 'firmname') { goOnboarding(ob.nameFrom || 'import'); return; }
-      goOnboarding(backMap[ob.step] || 'role');
+      goOnboarding(backMap[ob.step] || 'entry');
     });
-    on('obBack2', () => goOnboarding(backMap[ob.step] || 'role'));
+    on('obBack2', () => goOnboarding(backMap[ob.step] || 'entry'));
     const signupReady = () => {
       const n = $('suName'), e = $('suEmail'), p = $('suPass'), f = $('suFirm'), b = $('obSignup');
+      if (n) ob.userName = n.value;
+      if (e) ob.userEmail = e.value;
+      if (f) ob.firmName = f.value;
       if (b) b.disabled = !(n && n.value.trim() && e && e.value.trim() && p && p.value && f && f.value.trim());
     };
     ['suName', 'suEmail', 'suPass', 'suFirm'].forEach((id) => { const el = $(id); if (el) el.oninput = signupReady; });
@@ -1047,26 +1057,15 @@
       const name = $('suName').value.trim(), email = $('suEmail').value.trim(), pass = $('suPass').value, firm = $('suFirm').value.trim();
       if (!name || !email || !pass || !firm) return;
       ob.userName = name; ob.userEmail = email; ob.firmName = firm; ob.firmTouched = true; ob.marketplace = false;
-      goOnboarding('role');
+      ob.use = 'practice'; ob.useChosen = true;
+      enterNewFirm();
     });
-    on('obMarketplace', () => { ob.marketplace = true; ob.firmName = ''; ob.firmTouched = false; goOnboarding('role'); });
+    on('obLogin', () => goOnboarding('login'));
     document.querySelectorAll('[data-use]').forEach((b) => b.onclick = () => { ob.use = b.dataset.use; ob.useChosen = true; saveOb(); renderOb(); });
-    const roleFirm = $('roleFirm');
-    if (roleFirm) roleFirm.oninput = () => {
-      ob.roleFirm = roleFirm.value;
-      const btn = $('obUseNext');
-      if (btn) btn.disabled = !roleFirm.value.trim();
-      saveOb();
-    };
     on('obUseNext', () => {
       if (!ob.useChosen) return;
       if (ob.use === 'business') { goOnboarding('business'); return; }
-      if (!(ob.firmName || '').trim()) {
-        const name = ($('roleFirm') && $('roleFirm').value || ob.roleFirm || '').trim();
-        if (!name) return;
-        ob.firmName = name; ob.firmTouched = true;
-      }
-      enterNewFirm();
+      goOnboarding('signup');
     });
     on('obHaveFirm', () => goOnboarding('join'));
     const joinIn = $('firmIdIn');
@@ -1851,7 +1850,7 @@
     if (head === 'existing') { enterExisting(); return; }
     if (head === 'onboarding') {
       loadOb();
-      const step = parts[1] || 'signup';
+      const step = parts[1] || 'entry';
       const toFirm = { import: 'import', sources: 'import', review: 'review', add: 'addone' };
       if (toFirm[step] && ob.directoryReady) {
         mode = 'firm';
@@ -1861,15 +1860,15 @@
         closePop(); render();
         return;
       }
-      const map = { firmchoice: 'role', firmname: 'signup', welcome: 'signup', import: 'signup', sources: 'signup', review: 'signup', add: 'signup' };
+      const map = { role: 'entry', firmchoice: 'entry', firmname: 'signup', welcome: 'entry', import: 'entry', sources: 'entry', review: 'entry', add: 'entry' };
       const next = map[step] || step;
-      ob.step = ['signup', 'role', 'business', 'join', 'joinok'].includes(next) ? next : 'signup';
+      ob.step = ['entry', 'signup', 'business', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
       goOnboarding(ob.step);
       return;
     }
     scenario = SCENARIOS[head] ? head : 'firm';
     load();
-    if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('signup'); return; }
+    if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('entry'); return; }
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'review'; st.clientId = null; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'addone'; st.clientId = null; }
