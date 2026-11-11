@@ -355,7 +355,14 @@
     .kit-choice p { margin: 0; }
     .kit-choice .btn { margin-top: auto; align-self: stretch; }
     .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
-    .kit-narrow { max-width: 480px; }
+    .kit-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
+    .kit-narrow .ob-field { max-width: none; }
+    .flow-col { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .flow-col.flow-wide { max-width: 880px; }
+    .p-main.fit-review .flow-col { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .bring-actions { display: flex; flex-direction: column; gap: 8px; }
+    .bring-actions .btn, .bring-actions .btn-outlined { width: 100%; }
+    .bring-actions .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
     .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
     .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
@@ -1074,24 +1081,30 @@
         <div class="ob-actions"><button type="button" class="btn" id="obFirmNext"${canFirm ? '' : ' disabled'}>Continue</button></div>`);
     } else if (step === 'business') {
       html = obShell(`
+        <div class="kit-narrow">
         ${backSlot(true)}
         <h1>For businesses</h1>
         <p class="lead">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>
+        </div>`);
     } else if (step === 'login') {
       html = obShell(`
+        <div class="kit-narrow">
         ${backSlot(true)}
         <h1>Log in</h1>
         <div class="ob-field"><label for="liEmail">Email</label><input id="liEmail" type="email" autocomplete="username" /></div>
         <div class="ob-field"><label for="liPass">Password</label><input id="liPass" type="password" autocomplete="current-password" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="liSubmit" disabled>Log in</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="liSubmit" disabled>Log in</button></div>
+        </div>`);
     } else if (step === 'join') {
       html = obShell(`
+        <div class="kit-narrow">
         ${backSlot(true)}
         <h1>Join a firm</h1>
         <p class="lead">Enter the Firm ID, or the email of the firm owner. This sends a simulated request.</p>
         <div class="ob-field"><label for="firmIdIn">Firm ID or owner email</label><input id="firmIdIn" placeholder="e.g. 1793300370 or owner@firm.com" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="obRequest" disabled>Request access</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="obRequest" disabled>Request access</button></div>
+        </div>`);
     } else if (step === 'import') {
       html = obShell(`
         ${backSlot(true)}
@@ -1570,12 +1583,16 @@
   }
   function renderClients() {
     if (!sc().clients.length) {
-      return `<div class="empty-dir">
-        <div class="ill">${ILL.empty}</div>
-        <h1>Bring in your clients</h1>
-        <p>Read-only, names only. No changes will be made to their books without permission.</p>
-        <button type="button" class="btn" id="emptyImport">Import client list</button>
-        <button type="button" class="ob-quiet" id="emptyAdd">Add one client</button>
+      const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
+      const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
+      return `<div class="flow-col">
+        <h1 class="text-h1">Bring in your clients</h1>
+        <p class="text-body1">Read-only, names only. No changes will be made to their books without permission.</p>
+        <div class="bring-actions">
+          <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
+          <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
+          <button type="button" class="btn-outlined" id="emptyAdd">Add client</button>
+        </div>
       </div>`;
     }
     const banner = ob && ob.banner === 'invite'
@@ -1613,21 +1630,26 @@
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
   }
   function renderImport() {
-    return `<div class="ph"><div><h1>Import client list</h1></div></div>
-      <p class="welcome-copy">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
-      <div class="import-sources">
-        ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
-        ${srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
-        ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.')}
-      </div>
-      <div class="ob-actions"><button type="button" class="btn-text" id="importCancel">Cancel</button></div>`;
+    const ledgerOnly = ob && ob.importKind === 'ledger';
+    const sources = [
+      srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.'),
+      srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')
+    ];
+    if (!ledgerOnly) sources.push(srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.'));
+    return `<div class="flow-col">
+      <div class="ph"><div><h1 class="text-h1">Import client list</h1></div></div>
+      <p class="text-body1">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
+      <div class="import-sources">${sources.join('')}</div>
+      <div class="ob-actions"><button type="button" class="btn-text" id="importCancel">Cancel</button></div>
+    </div>`;
   }
   function renderReviewFirm() {
     const q = (ob.q || '').toLowerCase();
     const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
     const n = IMPORT_POOL.filter((c) => ob.selected[c.id] !== false).length;
-    return `<div class="ph"><div><h1>Choose who to keep</h1></div></div>
-      <p class="welcome-copy">${reviewCopy()} No changes will be made to their books without permission.</p>
+    return `<div class="flow-col flow-wide">
+      <div class="ph"><div><h1 class="text-h1">Choose who to keep</h1></div></div>
+      <p class="text-body1">${reviewCopy()} No changes will be made to their books without permission.</p>
       <div class="review-scroll">
         <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
         <div class="ob-table-wrap"><table>
@@ -1640,13 +1662,16 @@
       <div class="review-foot">
         <button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} client${n === 1 ? '' : 's'}</button>
         <button type="button" class="ob-quiet" id="reviewCancel">Cancel</button>
-      </div>`;
+      </div>
+    </div>`;
   }
   function renderAddOne() {
-    return `<div class="ph"><div><h1>Add a client</h1></div></div>
+    return `<div class="flow-col">
+      <div class="ph"><div><h1 class="text-h1">Add a client</h1></div></div>
       <div class="ob-field"><label for="oneName">Client name</label><input id="oneName" placeholder="e.g. Harbor Street Books" /></div>
-      <p class="welcome-copy">That is all we need for now. Names only. No changes will be made to their books without permission.</p>
-      <div class="ob-actions"><button type="button" class="btn" id="oneAdd" disabled>Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>`;
+      <p class="text-body1">That is all we need for now. Names only. No changes will be made to their books without permission.</p>
+      <div class="ob-actions"><button type="button" class="btn" id="oneAdd" disabled>Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
+    </div>`;
   }
   function renderPreassess() {
     const c = findOrg(st.clientId);
@@ -1914,11 +1939,19 @@
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     bind('crumbBack', () => goFirm('clients'));
     bind('addClient', openAddClient);
-    bind('emptyImport', () => goFirm('import'));
+    bind('emptyBooks', () => { ob.importKind = 'ledger'; saveOb(); goFirm('import'); });
+    bind('emptyCsv', () => {
+      ob.importKind = '';
+      ob.source = 'upload';
+      IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+      ob.q = '';
+      saveOb();
+      goFirm('review');
+    });
     bind('emptyAdd', () => goFirm('addone'));
-    bind('listImport', () => goFirm('import'));
+    bind('listImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
     bind('listAdd', () => goFirm('addone'));
-    bind('bannerImport', () => goFirm('import'));
+    bind('bannerImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
     bind('importCancel', () => goFirm('clients'));
     m.querySelectorAll('.import-sources [data-src]').forEach((b) => b.onclick = () => {
