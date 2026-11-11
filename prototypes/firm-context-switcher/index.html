@@ -363,6 +363,9 @@
     .bring-actions { display: flex; flex-direction: column; gap: 8px; }
     .bring-actions .btn, .bring-actions .btn-outlined { width: 100%; }
     .bring-actions .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .books-opts .btn-outlined { width: 100%; }
+    .books-opts .btn-outlined svg { width: 18px; height: 18px; flex-shrink: 0; }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
     .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
     .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
@@ -695,6 +698,7 @@
   let kbIndex = -1;
   let cdState = 'blocked';
   let celebrateOnClients = false;
+  let booksToken = 0;
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1581,10 +1585,59 @@
     const need = list.length - ready;
     return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} set up · ${need} still need a ledger`;
   }
+  function ledgerMark(svg) {
+    return svg.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
+  }
+  function booksChoiceHtml() {
+    return `<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
+      <div class="books-opts">
+        <button type="button" class="btn-outlined" data-ledger="qbo">${ledgerMark(QB_LOGO)}QuickBooks</button>
+        <button type="button" class="btn-outlined" data-ledger="xero">${ledgerMark(XERO_LOGO)}Xero</button>
+      </div>`;
+  }
+  function closeBooks() {
+    booksToken++;
+    const modal = $('booksModal');
+    if (modal) modal.classList.remove('show');
+  }
+  function showBooksModal() {
+    booksToken++;
+    const modal = $('booksModal');
+    const body = $('booksBody');
+    const foot = $('booksFoot');
+    if (body) body.innerHTML = booksChoiceHtml();
+    if (foot) foot.innerHTML = '<button type="button" class="btn-outlined" id="booksCancel">Cancel</button>';
+    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
+    if ($('booksClose')) $('booksClose').onclick = closeBooks;
+    if (body) body.querySelectorAll('[data-ledger]').forEach((b) => b.onclick = () => connectLedger(b.dataset.ledger));
+    if (modal) {
+      modal.onclick = (e) => { if (e.target === modal) closeBooks(); };
+      modal.classList.add('show');
+    }
+  }
+  function connectLedger(src) {
+    const token = ++booksToken;
+    const name = src === 'xero' ? 'Xero' : 'QuickBooks';
+    const body = $('booksBody');
+    const foot = $('booksFoot');
+    if (body) body.innerHTML = `<div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Connecting to ${name}…</span></div>`;
+    if (foot) foot.innerHTML = '<button type="button" class="btn-outlined" id="booksCancel">Cancel</button>';
+    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
+    window.setTimeout(() => {
+      if (token !== booksToken) return;
+      ob.source = src === 'xero' ? 'xero' : 'qbo';
+      IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+      ob.q = '';
+      saveOb();
+      const modal = $('booksModal');
+      if (modal) modal.classList.remove('show');
+      goFirm('review');
+    }, 1000);
+  }
   function renderClients() {
     if (!sc().clients.length) {
-      const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
-      const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18" aria-hidden="true"').replace(' width="40" height="40"', '').replace('role="img" ', '');
+      const qb = ledgerMark(QB_LOGO);
+      const xero = ledgerMark(XERO_LOGO);
       return `<div class="flow-col">
         <h1 class="text-h1">Bring in your clients</h1>
         <p class="text-body1">Read-only, names only. No changes will be made to their books without permission.</p>
@@ -1592,6 +1645,19 @@
           <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
           <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
           <button type="button" class="btn-outlined" id="emptyAdd">Add client</button>
+        </div>
+      </div>
+      <div class="modal-bg" id="booksModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booksTitle">
+          <div class="modal-header" id="booksTitle">Import your client list<button type="button" class="modal-close" id="booksClose" aria-label="Close"><span class="material-icons">close</span></button></div>
+          <div class="modal-body" id="booksBody">
+            <div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
+            <div class="books-opts">
+              <button type="button" class="btn-outlined" data-ledger="qbo">${qb}QuickBooks</button>
+              <button type="button" class="btn-outlined" data-ledger="xero">${xero}Xero</button>
+            </div>
+          </div>
+          <div class="modal-footer" id="booksFoot"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button></div>
         </div>
       </div>`;
     }
@@ -1630,16 +1696,14 @@
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>`;
   }
   function renderImport() {
-    const ledgerOnly = ob && ob.importKind === 'ledger';
-    const sources = [
-      srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.'),
-      srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')
-    ];
-    if (!ledgerOnly) sources.push(srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.'));
     return `<div class="flow-col">
       <div class="ph"><div><h1 class="text-h1">Import client list</h1></div></div>
       <p class="text-body1">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
-      <div class="import-sources">${sources.join('')}</div>
+      <div class="import-sources">
+        ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
+        ${srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+        ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.')}
+      </div>
       <div class="ob-actions"><button type="button" class="btn-text" id="importCancel">Cancel</button></div>
     </div>`;
   }
@@ -1939,7 +2003,7 @@
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     bind('crumbBack', () => goFirm('clients'));
     bind('addClient', openAddClient);
-    bind('emptyBooks', () => { ob.importKind = 'ledger'; saveOb(); goFirm('import'); });
+    bind('emptyBooks', showBooksModal);
     bind('emptyCsv', () => {
       ob.importKind = '';
       ob.source = 'upload';
