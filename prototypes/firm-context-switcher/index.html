@@ -1563,7 +1563,7 @@
   /* ───────── Render: sidebar ───────── */
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
-    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'dashboard'].includes(st.page) ? 'clients' : st.page;
+    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'dashboard'].includes(st.page) ? 'clients' : st.page;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
       `<button class="nav-i${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span>${esc(label)}${k === 'clients' ? `<span class="cnt">${sc().clients.length}</span>` : ''}</button>`
     ).join('');
@@ -1615,24 +1615,32 @@
       modal.classList.add('show');
     }
   }
+  let connectLoading = false;
   function connectLedger(src) {
-    const token = ++booksToken;
-    const name = src === 'xero' ? 'Xero' : 'QuickBooks';
-    const body = $('booksBody');
-    const foot = $('booksFoot');
-    if (body) body.innerHTML = `<div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Connecting to ${name}…</span></div>`;
-    if (foot) foot.innerHTML = '<button type="button" class="btn-outlined" id="booksCancel">Cancel</button>';
-    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
-    window.setTimeout(() => {
-      if (token !== booksToken) return;
-      ob.source = src === 'xero' ? 'xero' : 'qbo';
-      IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
-      ob.q = '';
-      saveOb();
-      const modal = $('booksModal');
-      if (modal) modal.classList.remove('show');
-      goFirm('review');
-    }, 1000);
+    closeBooks();
+    ob.source = src === 'xero' ? 'xero' : 'qbo';
+    connectLoading = false;
+    saveOb();
+    goFirm('connect');
+  }
+  function renderConnect() {
+    if (connectLoading) {
+      return `<div class="flow-col"><div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Importing clients…</span></div></div>`;
+    }
+    const xero = ob && ob.source === 'xero';
+    const logo = xero ? XERO_LOGO : QB_LOGO;
+    const title = xero ? 'Synder wants to connect to your Xero organisation' : 'Synder wants to connect to your QuickBooks company';
+    const field = xero ? 'Organisation' : 'Company';
+    const go = xero ? 'Allow access' : 'Connect';
+    return `<div class="flow-col">
+      <p class="text-caption">Prototype screen</p>
+      ${logo}
+      <h1 class="text-h1">${title}</h1>
+      <div class="form-field"><label class="form-label" for="companyPick">${field}</label>
+        <select class="select" id="companyPick"><option selected>${esc(FIRM.name || 'Your firm')}</option></select>
+      </div>
+      <div class="ob-actions"><button type="button" class="btn" id="connectGo">${go}</button><button type="button" class="btn-outlined" id="connectCancel">Cancel</button></div>
+    </div>`;
   }
   function renderClients() {
     if (!sc().clients.length) {
@@ -1967,6 +1975,7 @@
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'import') html = renderImport();
+      else if (st.page === 'connect') html = renderConnect();
       else if (st.page === 'review') html = renderReviewFirm();
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'preassess') html = renderPreassess();
@@ -2018,6 +2027,21 @@
     bind('bannerImport', () => { if (ob) { ob.importKind = ''; saveOb(); } goFirm('import'); });
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
     bind('importCancel', () => goFirm('clients'));
+    bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
+    bind('connectGo', () => {
+      if (connectLoading) return;
+      connectLoading = true;
+      render();
+      window.setTimeout(() => {
+        connectLoading = false;
+        if (!st || st.page !== 'connect') return;
+        ob.source = ob.source === 'xero' ? 'xero' : 'qbo';
+        IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+        ob.q = '';
+        saveOb();
+        goFirm('review');
+      }, 1000);
+    });
     m.querySelectorAll('.import-sources [data-src]').forEach((b) => b.onclick = () => {
       ob.source = b.dataset.src;
       IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
@@ -2187,6 +2211,7 @@
     load();
     if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('home'); return; }
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
+    else if (parts[1] === 'connect' && ob && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')) { st.ctx = 'firm'; st.page = 'connect'; st.clientId = null; connectLoading = false; }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'review'; st.clientId = null; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'addone'; st.clientId = null; }
     else if (parts[1] === 'preassess' && parts[2] && findOrg(parts[2])) { st.ctx = 'firm'; st.page = 'preassess'; st.clientId = parts[2]; st.preState = 'upload'; }
@@ -2222,6 +2247,7 @@
     if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h += '/preassess/' + st.clientId;
     else if (st.ctx === 'firm' && st.page === 'import') h += '/import';
+    else if (st.ctx === 'firm' && st.page === 'connect') h += '/connect';
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
