@@ -178,7 +178,8 @@
       position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
       font-size: 12px; color: #6B778C; border: 1px solid #DFE4EC; border-radius: 4px; padding: 0 5px; background: #F7F8FA;
     }
-    .pop-list { max-height: 380px; overflow-y: auto; padding: 4px 0; }
+    .pop-list { max-height: 320px; overflow-y: auto; padding: 4px 0; }
+    #popFirm { border-bottom: 1px solid var(--border-default); }
     .pop-sec { padding: 10px 14px 4px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: #6B778C; }
     .pop-item {
       display: flex; align-items: center; gap: 10px; width: 100%;
@@ -225,6 +226,7 @@
 
     .section-h { font-size: 20px; line-height: 28px; font-weight: 400; margin: 8px 0 12px; }
     .empty { text-align: center; padding: 56px 24px; max-width: 460px; margin: 0 auto; }
+    .proto-stub { min-height: calc(100vh - 180px); display: flex; align-items: center; justify-content: center; text-align: center; padding: var(--space-8); }
     .empty .material-icons { font-size: 40px; color: #B4BBCB; }
     .empty h2 { font-size: 20px; line-height: 28px; font-weight: 500; margin: 12px 0 6px; }
     .empty p { color: #6B778C; margin: 0 0 20px; }
@@ -673,6 +675,7 @@
             <input type="search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
             <span class="kbd" id="kbdHint">Ctrl K</span>
           </div>
+          <div id="popFirm"></div>
           <div class="pop-list" id="popList"></div>
           <div class="pop-foot" id="popFoot"></div>
         </div>
@@ -755,7 +758,6 @@
   let scenario = 'firm';
   let st = null;          // { ctx: 'firm'|'org', orgId, page, clientId, recent: [] }
   let kbIndex = -1;
-  let cdState = 'blocked';
   let celebrateOnClients = false;
   const SHOW_STORY = false; /* Parked: set true to bring back the How Synder works overlay. */
   let booksToken = 0;
@@ -1739,9 +1741,44 @@
     save(); render();
   }
   function openClient(id, page) {
+    const c = findOrg(id);
+    if (c && isClient(id) && clientView(c).key === 'off') {
+      if (!st || st.ctx !== 'firm' || mode === 'onboarding') {
+        st = st || { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
+        st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.orgId = null;
+        mode = 'firm';
+        document.body.classList.remove('shell-hide');
+        save(); render();
+      }
+      showNeedConnect(c);
+      return;
+    }
     st.ctx = 'org'; st.orgId = id; st.clientId = id; st.page = page || 'dashboard';
     if (isClient(id)) touchRecent(id);
     save(); render();
+  }
+  function showNeedConnect(c) {
+    const old = document.getElementById('needConnect');
+    if (old) old.remove();
+    const modal = document.createElement('div');
+    modal.id = 'needConnect';
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="needTitle">
+      <div class="modal-header" id="needTitle">Connect client</div>
+      <div class="modal-body"><p class="text-body2">Connect accounting and integrations to start working with ${esc(c.name)}.</p></div>
+      <div class="modal-footer"><button type="button" class="btn-outlined" id="needCancel">Cancel</button><button type="button" class="btn" id="needGo">Connect client</button></div>
+    </div>`;
+    document.body.appendChild(modal);
+    const close = () => modal.remove();
+    modal.querySelector('#needCancel').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+    modal.querySelector('#needGo').onclick = () => {
+      close();
+      clearLink();
+      st.connectStep = 'details';
+      st.connectPick = { accounting: [], sales: [], pay: [] };
+      goFirm('clientconnect', c.id);
+    };
   }
   function goOrg(orgId, page) {
     if (isClient(orgId)) { openClient(orgId, page === 'dashboard' ? 'dashboard' : page); return; }
@@ -1760,11 +1797,9 @@
     }
     let name, cap, obj;
     if (st.ctx === 'firm') { obj = FIRM; name = FIRM.name; cap = 'Accounting firm'; }
-    else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client of ' + FIRM.name : 'Organization'; }
+    else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client' : 'Organization'; }
     $('ctxTrigger').innerHTML = `${av(obj)}<span class="ctx-text"><span class="ctx-name">${esc(name)}</span><span class="ctx-cap">${esc(cap)}</span></span><span class="material-icons">unfold_more</span>`;
-    $('backChip').innerHTML = (st.ctx === 'org' && isClient(st.orgId))
-      ? `<button class="back-chip" id="backBtn" title="Back to firm"><span class="material-icons">arrow_back</span>${esc(FIRM.name)}</button>` : '';
-    const b = $('backBtn'); if (b) b.onclick = () => goFirm('clients');
+    $('backChip').innerHTML = '';
   }
 
   /* ───────── Render: sidebar ───────── */
@@ -1918,31 +1953,39 @@
   const syncArmed = {};
   function clearLink() {
     if (linkTimer) { clearTimeout(linkTimer); linkTimer = 0; }
-    if (linkTick) { clearInterval(linkTick); linkTick = 0; }
+    if (linkTick) { cancelAnimationFrame(linkTick); linkTick = 0; }
   }
   function armLink() {
     if (linkTimer || !st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
-    let pct = 8;
-    linkTick = setInterval(() => {
-      pct = Math.min(100, pct + 16);
+    const start = performance.now();
+    const dur = 4000;
+    const frame = (now) => {
+      if (!st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
+      const t = Math.min(1, (now - start) / dur);
       const fill = document.getElementById('linkFill');
-      if (fill) fill.style.width = pct + '%';
-      if (pct >= 100) { clearInterval(linkTick); linkTick = 0; }
-    }, 220);
+      if (fill) { fill.style.transition = 'none'; fill.style.width = (t * 100) + '%'; }
+      if (t < 1) linkTick = requestAnimationFrame(frame);
+    };
+    linkTick = requestAnimationFrame(frame);
     linkTimer = setTimeout(() => {
       linkTimer = 0;
       if (!st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
       finishClientConnect();
-    }, 1500);
+    }, dur);
   }
+  const LOGO_FILES = {
+    Stripe: 'logos/stripe.svg', PayPal: 'logos/paypal.svg', Square: 'logos/square.svg',
+    Amazon: 'logos/amazon.svg', eBay: 'logos/ebay.svg', Shopify: 'logos/shopify.svg',
+    Etsy: 'logos/etsy.svg', WooCommerce: 'logos/woocommerce.svg', Sage: 'logos/sage.svg',
+    NetSuite: 'logos/netsuite.svg', GoCardless: 'logos/gocardless.svg', 'Authorize.Net': 'logos/authorizenet.svg'
+  };
   function brandMark(name, size) {
     const px = size || 18;
     if (name === 'QuickBooks' || name === 'QuickBooks Desktop') return ledgerMark(QB_LOGO, px);
     if (name === 'Xero') return ledgerMark(XERO_LOGO, px);
-    const colors = { Stripe: '#635BFF', PayPal: '#003087', Square: '#111111', Amazon: '#FF9900', Shopify: '#96BF48', eBay: '#E53238', Etsy: '#F1641E', WooCommerce: '#7F54B3', Sage: '#00D639', NetSuite: '#1A3E6E', GoCardless: '#1C3D5A', 'Authorize.Net': '#1E4B8F' };
-    const fill = colors[name] || '#6B778C';
-    const letter = String(name || '?').replace(/[^A-Za-z]/g, '').slice(0, 1).toUpperCase();
-    return `<svg width="${px}" height="${px}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="${fill}"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="#fff" font-family="Roboto,sans-serif">${letter}</text></svg>`;
+    const file = LOGO_FILES[name];
+    if (file) return `<img src="${file}" width="${px}" height="${px}" alt="" />`;
+    return '';
   }
   function tipChip(kind, label, tip) {
     return `<span class="tooltip-wrap"><span class="status status-${kind}" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
@@ -2064,7 +2107,7 @@
       const what = names.length ? names.join(' and ') : 'the selected integrations';
       body = `<div class="connect-copy"><h1 class="text-h1">Connect</h1>
         <div class="link-wait"><span class="spinner" aria-hidden="true"></span><p class="text-body1">Connecting ${esc(what)}…</p></div></div>
-        <div class="progress" role="progressbar" aria-label="Connecting"><div class="progress-fill" id="linkFill" style="width:8%"></div></div>
+        <div class="progress" role="progressbar" aria-label="Connecting" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="linkFill" style="width:0%"></div></div>
         <div class="ob-actions"><button type="button" class="btn-outlined" id="connectLeave">Cancel</button></div>`;
     } else {
       body = `<div class="connect-copy"><h1 class="text-h1">Provide your client's basic info</h1>
@@ -2278,234 +2321,8 @@
       <div class="ob-actions"><button type="button" class="btn" id="oneAdd">Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
     </div>`;
   }
-  function renderPreassess() {
-    const c = findOrg(st.clientId);
-    if (!c) return placeholder('Pre-assessment');
-    const state = st.preState || 'upload';
-    if (state === 'running') {
-      return `<div class="ph"><div><h1>Pre-assessment: ${esc(c.name)}</h1></div></div>
-        <p class="welcome-copy">Comparing the sample files. Nothing is written to the ledger.</p>`;
-    }
-    if (state === 'result' && c.preassessDetail) {
-      const d = c.preassessDetail;
-      return `<div class="ph"><div><h1>Pre-assessment: ${esc(c.name)}</h1></div></div>
-        <p class="welcome-copy"><strong>${esc(d.summary)}</strong></p>
-        <p class="welcome-copy">Period: ${esc(d.period)}. Sources: ${esc(d.sources)}. Files: ${esc(d.files)}.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="openRecon">Open reconciliation</button><button type="button" class="btn-text" id="closePre">Close</button></div>`;
-    }
-    return `<div class="ph"><div><h1>Pre-assessment: ${esc(c.name)}</h1></div></div>
-      <p class="welcome-copy">Compare what the payment platform says with what is in the books. Nothing is written to the ledger. Demo only: files are not uploaded or parsed.</p>
-      <div class="ob-field"><label>Source reports</label><p class="muted">Stripe balance and payouts, for October 2026.</p></div>
-      <div class="ob-field"><label>Ledger export</label><p class="muted">Clearing account export for the same period.</p></div>
-      <div class="ob-actions"><button type="button" class="btn" id="runPre">Run check</button><button type="button" class="btn-text" id="closePre">Cancel</button></div>`;
-  }
-
-  /* ───────── v4: Client details (firm side) ───────── */
-  const PERIODS = ['Jul 2026', 'Aug 2026', 'Sep 2026', 'Oct 2026', 'Nov 2026'];
-  const MONTH_FULL = { Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October', Nov: 'November' };
-  const mName = (p) => MONTH_FULL[p.split(' ')[0]];
-  function cdPeriod(c) { if (!st.period || !PERIODS.includes(st.period)) st.period = c.month || 'Oct 2026'; return st.period; }
-  function cdChecks(c) {
-    const m = mName(cdPeriod(c));
-    const noLedger = !c.ledger && cdState === 'blocked';
-    const ledger = c.ledger || 'QuickBooks Online';
-    const ok = cdState !== 'blocked';
-    const W = 'Waiting for accounting connection';
-    return [
-      { k: 'acc', nm: 'Accounting connection', s: noLedger ? 'fail' : 'pass',
-        t: noLedger ? 'No accounting system connected' : 'Connected to ' + ledger,
-        a: noLedger ? ['Connect client', 'settings'] : null,
-        d: noLedger ? 'Syncs, mappings and reconciliation all need connected books. Connect them in the client’s Settings.' : 'Last checked today.' },
-      { k: 'syn', nm: 'Syncs', s: noLedger ? 'wait' : ok ? 'pass' : 'fail',
-        t: noLedger ? W : ok ? 'All ' + m + ' syncs went through' : '16 syncs failed in ' + m,
-        a: noLedger ? null : ok ? null : ['Review failed syncs', 'dashboard'],
-        d: noLedger ? 'Checked once books are connected.' : ok ? '2,318 transactions synced.' : '16 of 2,318 transactions failed. Fix or ignore them before closing.' },
-      { k: 'map', nm: 'Mappings', s: noLedger ? 'wait' : 'pass',
-        t: noLedger ? W : 'All payment sources are mapped',
-        a: null,
-        d: noLedger ? 'Checked once books are connected.' : (c.pay || 'Stripe') + ' mapped to ' + ledger + ' accounts.' },
-      { k: 'rec', nm: 'Reconciliation', s: noLedger ? 'wait' : ok ? 'pass' : 'warn',
-        t: noLedger ? W : ok ? m + ' is reconciled' : 'We couldn’t read reconciliation results',
-        a: noLedger ? null : ok ? null : ['Open reconciliation', 'reconciliation'],
-        d: noLedger ? 'Checked once books are connected.' : 'Transaction reconciliation is available for ' + ledger + '.' + (ok ? '' : ' Open Reconciliation to run it again.') }
-    ];
-  }
-  const ICON = { pass: 'check_circle', fail: 'error', warn: 'warning', wait: 'schedule' };
-  function cdHistory(c) {
-    const p = cdPeriod(c); const mon = p.split(' ')[0];
-    const rows = [[mon + ' 1, 09:00', 'Status changed: Not started → In progress'],
-      [mon + ' 3, 02:14', c.ledger || cdState !== 'blocked' ? 'Sync finished: 412 transactions' : 'Sync skipped: no accounting connection']];
-    if (cdState === 'blocked') rows.push([mon + ' 28, 18:40', 'Status changed: In progress → Blocked']);
-    if (cdState === 'ready') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close']);
-    if (cdState === 'closed') rows.push([mon + ' 30, 10:05', 'Status changed: Blocked → Ready to close'], [mon + ' 30, 16:22', 'Status changed: Ready to close → Closed (Ignat Plot)']);
-    return rows.reverse();
-  }
-  function renderPending(c) {
-    return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
-      <div class="cd-top"><div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-yellow">Pending</span></div></div>
-      <div class="empty"><span class="material-icons">how_to_reg</span><h2>${esc(c.name)} wants to connect</h2>
-        <p>Accept to add them to your clients and get access to their books.</p>
-        <button class="btn" id="acceptBtn">Accept</button>
-        <button class="btn-text sec" id="pendBack">Back to Clients</button></div>`;
-  }
-  function renderClientDetail() {
-    const c = findOrg(st.clientId);
-    if (c.pending) return renderPending(c);
-    const list = sc().clients.filter((x) => !x.pending);
-    const i = list.findIndex((x) => x.id === c.id);
-    const p = cdPeriod(c); const m = mName(p);
-    const checks = cdChecks(c);
-    const passed = checks.filter((x) => x.s === 'pass').length;
-    const blockers = checks.filter((x) => x.s === 'fail' || x.s === 'warn');
-    const statusBadge = cdState === 'closed' ? ['grey', 'Closed'] : cdState === 'ready' ? ['green', 'Ready to close'] : ['yellow', 'Blocked'];
-    const tip = blockers.length ? 'Can’t close ' + m + ': ' + blockers.map((b) => b.t.charAt(0).toLowerCase() + b.t.slice(1)).join('; ') + '.' : '';
-    const primary = cdState === 'closed' ? '' :
-      `<button class="btn" id="closeMonth">Close month</button>`;
-    const tab = st.tab || 'work';
-    let body = '';
-    if (tab === 'work') {
-      const line = cdState === 'blocked'
-        ? `<span class="ln-warn">${blockers.length} blocker${blockers.length > 1 ? 's' : ''}</span> · ${blockers.map((b) => esc(b.t)).join(' · ')}`
-        : cdState === 'ready' ? '<span class="ln-ok">Ready to close</span> · all checks passed'
-        : `Closed by Ignat Plot on ${p.split(' ')[0]} 30, ${p.split(' ')[1]}`;
-      const note = (st.notes || {})[c.id + '|' + p] || '';
-      body = `
-        <div class="wk-top">
-          <div><label class="mpick"><select id="periodSel" aria-label="Month">${PERIODS.map((x) => `<option value="${x}"${x === p ? ' selected' : ''}>${mName(x)} ${x.split(' ')[1]}</option>`).join('')}</select><span class="material-icons">expand_more</span></label>
-            <div class="wk-line">${line}</div></div>
-          ${primary}
-        </div>
-        <div class="wk-sec">
-          <div class="sec-h">Checks <span class="muted">${passed} of ${checks.length} passed</span></div>
-          ${checks.map((x) => `<details class="chk"><summary><span class="material-icons ic ${x.s}">${ICON[x.s]}</span><span class="nm">${x.nm}</span><span class="stt">${esc(x.t)}</span>${x.a ? `<button class="linkish" data-fix="${x.a[1]}">${esc(x.a[0])}</button>` : ''}<span class="material-icons exp">expand_more</span></summary><div class="det">${esc(x.d)}</div></details>`).join('')}
-        </div>
-        <div class="wk-sec">
-          <div class="sec-h">Notes</div>
-          <textarea class="note" id="cdNote" placeholder="Notes for ${m}. Visible to your firm colleagues.">${esc(note)}</textarea>
-        </div>
-        <details class="wk-sec hist"><summary>History for ${m} (${cdHistory(c).length})</summary>
-          <table>${cdHistory(c).map(([t, e]) => `<tr><td>${esc(t)}</td><td>${esc(e)}</td></tr>`).join('')}</table></details>`;
-    } else if (tab === 'profile') {
-      const f = (l, v, full) => `<label${full ? ' class="full"' : ''}>${l}<input type="text" value="${esc(v)}" /></label>`;
-      body = `<div class="form">
-        ${f('Client name', c.name)}${f('Contact person', 'Jordan Lee')}
-        ${f('Email', 'jordan@' + c.name.toLowerCase().replace(/[^a-z]/g, '') + '.com')}${f('Phone', '+1 415 555 0134')}
-        ${f('Business type', 'LLC')}${f('Accounting software', c.ledger || 'Not connected')}
-        ${f('Fiscal year start', 'January')}${f('Tax ID', '84-1234567')}
-        ${f('Address', '120 Market St, San Francisco, CA', true)}
-        <label class="full">Notes<textarea class="note"></textarea></label>
-        <div class="full"><button class="btn" id="saveProfile">Save</button></div></div>`;
-    } else if (tab === 'billing') {
-      body = `<div class="card"><dl class="kv"><dt>Plan</dt><dd>Pro, billed to ${esc(FIRM.name)}</dd><dt>Price</dt><dd>$110 / month</dd><dt>Next invoice</dt><dd>Dec 1, 2026</dd><dt>License</dt><dd>1 of 15 firm licenses</dd></dl></div>`;
-    } else {
-      body = `<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
-        <tr><td>Ignat Plot</td><td>ignat@wlslabs.com</td><td>Admin</td></tr>
-        <tr><td>Dasha Ivanova</td><td>dasha@wlslabs.com</td><td>Accountant</td></tr></tbody></table></div>`;
-    }
-    const T = [['work', 'Work'], ['profile', 'Profile'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
-    const pager = `<span class="pager"><button id="prevC" aria-label="Previous client"><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"><span class="material-icons">chevron_right</span></button></span>`;
-    return `
-      <button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
-      ${(c.setupState === 'Ready' || c.setup) ? '' : `<div class="setup-calls"><h2>Finish setting up this client</h2>
-        <div class="call"><div><b>Connect client.</b> QuickBooks, Xero, and the rest.</div><button type="button" class="btn" data-stub="books">Connect client</button></div>
-        <div class="call"><div><b>Connect payment sources.</b> Stripe, PayPal, Shopify, and others.</div><button type="button" class="btn-outlined" data-stub="integrations">Connect</button></div>
-        <div class="call"><div><b>Select a mode.</b> Summary or per transaction.</div><button type="button" class="btn-outlined" data-stub="mode">Select</button></div>
-      </div>`}
-      <div class="cd-top">
-        <div class="cd-title"><h1>${esc(c.name)}</h1><span class="status status-${statusBadge[0]}">${statusBadge[1]}</span></div>
-        <div class="cd-actions">
-          <button class="btn-text" data-open="${c.id}">Open in Synder</button>
-          <span class="t-wrap"><button class="more" id="moreBtn" aria-label="More actions" aria-expanded="false"><span class="material-icons">more_horiz</span></button>
-            <div class="menu" id="moreMenu"><button class="danger" id="removeBtn"><span class="material-icons">person_remove</span>Remove client</button></div></span>
-        </div>
-      </div>
-      <div class="tabs"><div class="tabs-l">${T.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div>${pager}</div>
-      ${body}`;
-  }
-  function bindClientDetail() {
-    const c = findOrg(st.clientId); const m = $('main');
-    const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
-    on('acceptBtn', () => { c.pending = false; c.books = ['grey', 'Setup needed']; goFirm('client', c.id); });
-    on('pendBack', () => goFirm('clients'));
-    if (c.pending) return;
-    const list = sc().clients.filter((x) => !x.pending); const i = list.indexOf(c);
-    on('prevC', () => goFirm('client', list[i - 1].id));
-    on('nextC', () => goFirm('client', list[i + 1].id));
-    $('periodSel').onchange = (e) => { st.period = e.target.value; save(); renderMain(); };
-    on('closeMonth', () => { cdState = 'closed'; render(); });
-    on('moreBtn', () => toggleMenu('moreBtn', 'moreMenu'));
-    on('removeBtn', () => { closeMenus(); openRemove(c); });
-    on('saveProfile', (e) => { e.target.textContent = 'Saved'; });
-    m.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { st.tab = b.dataset.tab; save(); renderMain(); });
-    m.querySelectorAll('[data-fix]').forEach((b) => b.onclick = (e) => { e.preventDefault(); e.stopPropagation(); goOrg(c.id, b.dataset.fix); });
-    m.querySelectorAll('[data-stub]').forEach((b) => b.onclick = () => { st.page = 'setup'; st.setupStep = b.dataset.stub; st.clientId = c.id; save(); render(); });
-    const n = $('cdNote');
-    if (n) n.oninput = () => { st.notes = st.notes || {}; st.notes[c.id + '|' + st.period] = n.value; save(); };
-  }
-  function openRemove(c) {
-    $('modal').innerHTML = `<h3>Remove ${esc(c.name)}?</h3>
-      <p>${esc(FIRM.name)} loses access to ${esc(c.name)}’s books, and the client leaves your Clients list. Their Synder organization and data stay with them. To reconnect, they’d send a new request.</p>
-      <div class="modal-actions"><button class="btn-outlined" id="cancelRm">Cancel</button><button class="btn" id="doRm" style="background:#CC2929">Remove client</button></div>`;
-    $('scrim').classList.add('open');
-    $('cancelRm').onclick = closeModal;
-    $('doRm').onclick = () => { const arr = sc().clients; arr.splice(arr.indexOf(c), 1); st.recent = (st.recent || []).filter((x) => x !== c.id); closeModal(); goFirm('clients'); };
-  }
-
-  function dashNumbers(c) {
-    const v = clientView(c);
-    const issues = v.issues || [];
-    const unre = issues.filter((i) => i.key === 'unreconciled').reduce((n, i) => n + ((i.periods && i.periods.length) || 1), 0);
-    const uncat = issues.filter((i) => i.key === 'uncategorized').reduce((n, i) => n + (i.count || 0), 0);
-    const reconnect = issues.filter((i) => i.key === 'reconnect').length;
-    return { unre, uncat, reconnect, syncing: v.key === 'syncing' ? 1 : 0, off: v.key === 'off' };
-  }
-  function renderClientDetails(c) {
-    const v = clientView(c);
-    const period = v.period || c.month || 'Oct 2026';
-    const checks = v.key === 'off'
-      ? [{ s: 'fail', nm: 'Accounting connection', t: 'No books connected' }]
-      : v.key === 'syncing'
-        ? [{ s: 'wait', nm: 'Syncs', t: 'Syncing ' + (v.accounting || 'books') }]
-        : [
-          { s: 'pass', nm: 'Accounting connection', t: 'Connected to ' + (v.accounting || 'books') },
-          { s: (v.issues || []).some((i) => i.key === 'reconnect') ? 'fail' : 'pass', nm: 'Integrations', t: (c.integrations || []).join(', ') || 'None connected' },
-          { s: (v.issues || []).some((i) => i.key === 'unreconciled') ? 'warn' : 'pass', nm: 'Reconciliation', t: (v.issues || []).some((i) => i.key === 'unreconciled') ? v.tip : period + ' is reconciled' },
-          { s: (v.issues || []).some((i) => i.key === 'uncategorized') ? 'warn' : 'pass', nm: 'Categories', t: (v.issues || []).some((i) => i.key === 'uncategorized') ? v.tip : 'Nothing uncategorized' }
-        ];
-    return `<div class="card"><p class="text-body2">${esc(v.tip)}</p>
-      ${checks.map((x) => `<p class="text-body2"><span class="status status-${x.s === 'pass' ? 'green' : x.s === 'fail' ? 'red' : 'yellow'}">${esc(x.nm)}</span> ${esc(x.t)}</p>`).join('')}
-      <h2 class="text-h2">Profile</h2>
-      <p class="text-body2">${esc(c.name)} · ${esc(companyName(c))}</p>
-      <h2 class="text-h2">Assigned colleagues</h2>
-      <p class="text-body2">Ignat Plot, Admin · Dasha Ivanova, Accountant. Invite more from Colleagues.</p>
-      <h2 class="text-h2">Month close</h2>
-      <p class="text-body2">Period ${esc(period)}. ${esc(v.label)}.</p>
-      <p class="form-error-msg" id="closeExplain" hidden></p>
-      <button type="button" class="btn" id="closeMonth">Close month</button></div>`;
-  }
-  function renderDashboard() {
-    const o = findOrg(st.orgId);
-    const c = o && isClient(o.id) ? o : null;
-    if (!c) {
-      return `<div class="ph"><div><h1 class="text-h1">Dashboard</h1></div></div><p class="text-body1">Organization overview.</p>`;
-    }
-    const v = clientView(c);
-    const n = dashNumbers(c);
-    const tab = st.page === 'details' ? 'details' : 'dashboard';
-    const tabs = `<div class="tabs"><button type="button" class="tab${tab === 'dashboard' ? ' active' : ''}" data-ctab="dashboard">Overview</button><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-ctab="details">Client details</button></div>`;
-    if (tab === 'details') {
-      return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body1">${issueChip(c)}</p></div></div>${tabs}${renderClientDetails(c)}`;
-    }
-    if (v.key === 'off') {
-      return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1></div></div>${tabs}
-        <div class="empty"><span class="material-icons">link</span><h2 class="text-h2">Connect client</h2>
-        <p class="text-body1">${esc(c.name)} has no books connected, so nothing syncs yet.</p>
-        <button class="btn" id="dashCta">Connect client</button>
-        <button class="btn-text sec" id="dashSec">Back to ${esc(FIRM.name)}</button></div>`;
-    }
-    const kp = [['Unreconciled periods', String(n.unre)], ['Uncategorized', String(n.uncat)], ['Reconnect needed', String(n.reconnect)]];
-    return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body1">${issueChip(c)}</p></div></div>${tabs}
-      <div class="kpis">${kp.map(([l, val]) => `<div class="kpi"><div class="l text-body2">${l}</div><div class="v text-h1">${val}</div></div>`).join('')}</div>`;
+  function renderClientStub() {
+    return `<div class="proto-stub"><p class="text-body1">This screen is not part of this prototype.</p></div>`;
   }
 
   function renderCreateFirm() {
@@ -2568,8 +2385,6 @@
       else if (st.page === 'clientconnect') html = renderClientConnect();
       else if (st.page === 'review') { if (ob) ob.picker = true; st.page = 'clients'; html = renderClients(); }
       else if (st.page === 'addone') html = renderAddOne();
-      else if (st.page === 'preassess') html = renderPreassess();
-      else if (st.page === 'client') html = renderClientDetail();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
       else if (st.page === 'createorg') html = renderCreateOrg();
@@ -2578,9 +2393,12 @@
         html = placeholder(nav ? nav[2] : st.page, FIRM.name);
       }
     } else {
-      if (st.page === 'dashboard' || st.page === 'details') html = renderDashboard();
+      if (isClient(st.orgId)) html = renderClientStub();
       else if (st.page === 'createorg') html = renderCreateOrg();
-      else html = placeholder(ORG_NAV.find((n) => n[0] === st.page)[2], findOrg(st.orgId).name);
+      else {
+        const nav = ORG_NAV.find((n) => n[0] === st.page);
+        html = placeholder(nav ? nav[2] : st.page, findOrg(st.orgId).name);
+      }
     }
     $('main').innerHTML = html;
     const m = $('main');
@@ -2614,10 +2432,6 @@
     m.querySelectorAll('[data-setup]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       st.ctx = 'firm'; st.page = 'setup'; st.clientId = b.dataset.setup; st.setupStep = 'books'; save(); render();
-    });
-    m.querySelectorAll('[data-preassess]').forEach((b) => b.onclick = (e) => {
-      e.stopPropagation();
-      st.ctx = 'firm'; st.page = 'preassess'; st.clientId = b.dataset.preassess; st.preState = 'upload'; save(); render();
     });
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
@@ -2735,20 +2549,6 @@
       if (ob) { ob.importNote = 0; ob.importKind = ''; saveOb(); } persistDirectory(); goFirm('clients');
     });
     bind('oneCancel', closeAddModal);
-    bind('closePre', () => goFirm('clients'));
-    bind('openRecon', () => { const id = st.clientId; goOrg(id, 'reconciliation'); });
-    bind('runPre', () => {
-      const c = findOrg(st.clientId);
-      if (!c) return;
-      c.preassess = 'Running'; st.preState = 'running'; save(); render();
-      setTimeout(() => {
-        const issues = c.name.length % 2 === 0;
-        c.preassess = issues ? 'Issues found' : 'Reconciled';
-        c.preassessDetail = { period: 'October 2026', sources: 'Stripe', files: 'Balance report, Payouts report, clearing account export', summary: issues ? "3 payouts don't match" : 'Matched' };
-        persistDirectory();
-        if (st.page === 'preassess' && st.clientId === c.id) { st.preState = 'result'; render(); }
-      }, 600);
-    });
     bind('dashCta', () => {
       clearLink();
       st.connectStep = 'details';
@@ -2799,10 +2599,11 @@
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
-    let html = '';
-    if (s.firm && (!q || FIRM.name.toLowerCase().includes(q) || 'firm'.includes(q))) {
-      html += `<div class="pop-sec">Firm</div>` + item(FIRM, 'Accounting firm', st.ctx === 'firm', 'firm');
+    const firm = $('popFirm');
+    if (firm) {
+      firm.innerHTML = s.firm ? item(FIRM, 'Accounting firm', st.ctx === 'firm', 'firm') : '';
     }
+    let html = '';
     if (s.firm) {
       const list = s.clients.filter((c) => !c.pending && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
@@ -2854,6 +2655,8 @@
     if (joinOpen && joinOpen.classList.contains('show') && e.key === 'Escape') { e.preventDefault(); joinOpen.classList.remove('show'); return; }
     const demoOpen = document.getElementById('demoModal');
     if (demoOpen && e.key === 'Escape') { e.preventDefault(); demoOpen.remove(); return; }
+    const needOpen = document.getElementById('needConnect');
+    if (needOpen && e.key === 'Escape') { e.preventDefault(); needOpen.remove(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
     if ($('scrim').classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
     if (!popOpen()) return;
@@ -2891,12 +2694,11 @@
       scenario = 'firm';
       load();
       if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
       if (findOrg(parts[1]) && isClient(parts[1])) {
-        st.ctx = 'org'; st.orgId = parts[1]; st.clientId = parts[1];
-        st.page = parts[2] === 'details' ? 'details' : 'dashboard';
-        mode = 'firm';
-        document.body.classList.remove('shell-hide');
-        closePop(); render();
+        const page = parts[2] || 'dashboard';
+        openClient(parts[1], page);
         return;
       }
       goFirm('clients');
@@ -2933,7 +2735,6 @@
     }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; if (ob) ob.picker = true; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.openAdd = true; }
-    else if (parts[1] === 'preassess') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     else if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
       st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
     } else if (parts[1] === 'dashboard') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
@@ -2955,7 +2756,7 @@
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && (st.page === 'client' || st.page === 'setup' || st.page === 'preassess') && !isClient(st.clientId)) {
+    if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
     }
     if (st && st.ctx === 'org' && !findOrg(st.orgId)) {
@@ -2971,7 +2772,7 @@
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
-    if (st.ctx === 'org' && isClient(st.orgId)) h = '#client/' + st.orgId + (st.page === 'details' ? '/details' : '');
+    if (st.ctx === 'org' && isClient(st.orgId)) h = '#client/' + st.orgId + (st.page && st.page !== 'dashboard' ? '/' + st.page : '');
     else if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
     else if (st.ctx === 'firm' && st.page === 'import') h += '/import';
     else if (st.ctx === 'firm' && st.page === 'connect') h += '/connect';
@@ -3184,7 +2985,6 @@
     const variant = (ob && ob.variant === 'existing') ? 'existing' : 'new';
     closePop(); closeModal(); closeMenus();
     clearV10Storage();
-    cdState = 'blocked';
     if (variant === 'existing') {
       enterExisting();
     } else {
