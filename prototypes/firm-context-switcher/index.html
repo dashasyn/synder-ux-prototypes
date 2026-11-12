@@ -406,6 +406,23 @@
     .kit-screen .btn:disabled, .modal-bg .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
     .modal-bg .modal { width: 480px; max-width: calc(100vw - 32px); min-width: 0; padding: 0; border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
     .modal-bg .modal.modal-lg { width: 960px; max-width: calc(100vw - 64px); }
+    .modal-bg .modal.story-modal { width: 720px; max-width: calc(100vw - 64px); }
+    .story-top { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-6) 0; }
+    .story-bars { display: flex; gap: var(--space-1); flex: 1; padding-top: 10px; }
+    .story-bars .progress { flex: 1; }
+    .story-fill.is-done { width: 100%; transition: none; }
+    .story-fill.is-run { width: 0; transition: width 5s linear; }
+    .story-stage { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); padding: var(--space-8) var(--space-8) var(--space-4); min-height: 280px; }
+    .story-stage .text-h2, .story-stage .text-body1, .story-stage .text-subtitle1 { margin: 0; }
+    .story-hit { position: absolute; top: 0; bottom: 0; width: 50%; padding: 0; border: 0; background: transparent; cursor: pointer; z-index: 1; }
+    .story-stage > :not(.story-hit) { pointer-events: none; }
+    .story-hit.left { left: 0; }
+    .story-hit.right { right: 0; }
+    .story-icon { width: 72px; height: 72px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--color-primary-10); color: var(--color-primary); }
+    .story-icon .material-icons { font-size: 36px; }
+    .story-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
+    .story-reopen { margin: var(--space-4) 0 0; text-align: center; }
+    @media (prefers-reduced-motion: reduce) { .story-fill { transition: none !important; } }
     .modal-bg .modal.modal-confirm { width: 440px; max-width: 440px; }
     @media (max-width: 800px) { .role-grid { grid-template-columns: 1fr; } }
     .ob-card {
@@ -771,7 +788,8 @@
       firmChoice: null, firmChosen: false, source: null, firmName: '', firmTouched: false,
       connectedName: '', directoryReady: false, banner: '', pendingEntries: [], nameFrom: 'import',
       selected: Object.fromEntries(IMPORT_POOL.map((c) => [c.id, true])),
-      q: '', manual: [], manualMsg: '', setupStep: 'books', setupClientId: null
+      q: '', manual: [], manualMsg: '', setupStep: 'books', setupClientId: null,
+      storySeen: false, storyPending: false
     };
   }
   function loadOb() {
@@ -888,6 +906,8 @@
     SCENARIOS.firm.clients = [];
     applyOwnOrg();
     st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
+    ob.storyPending = true;
+    ob.storySeen = false;
     save(); saveOb(); persistDirectory();
     mode = 'firm';
     document.body.classList.remove('shell-hide');
@@ -1747,6 +1767,7 @@
             <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
           </div>
         </div>
+        <p class="story-reopen text-body1"><button type="button" class="link" id="howWorks">How Synder works</button></p>
       </div>${flowDialogs()}`;
     }
     const banner = ob && ob.banner === 'invite'
@@ -2101,6 +2122,7 @@
     bind('crumbBack', () => goFirm('clients'));
     bind('addClient', openAddClient);
     bind('emptyBooks', showBooksModal);
+    bind('howWorks', () => openStory());
     bind('emptyCsv', showCsvModal);
     bind('emptyAdd', () => goFirm('addone'));
     bind('listImport', showBooksModal);
@@ -2271,6 +2293,12 @@
   $('ctxTrigger').onclick = () => popOpen() ? closePop() : openPop();
   $('popSearch').oninput = () => { kbIndex = 0; renderPop(); highlight(); };
   document.addEventListener('keydown', (e) => {
+    if (document.getElementById('storyModal')) {
+      if (e.key === 'Escape') { e.preventDefault(); closeStory(false); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); storyGo(storyIndex + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); storyGo(storyIndex - 1); }
+      return;
+    }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
     if ($('scrim').classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
     if (!popOpen()) return;
@@ -2376,13 +2404,124 @@
     if (location.hash !== h) history.replaceState(null, '', h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
       celebrateOnClients = false;
-      rainSparkles();
-    }
+      rainSparkles(maybeAutoStory);
+    } else maybeAutoStory();
   }
   /* Falling sparkles — same generator as prototypes/joy-sparkles/index.html */
-  function rainSparkles() {
+  const STORY = [
+    { icon: 'cloud_download', kicker: 'Import', title: 'Bring in your data', body: 'Synder needs data to work. Connect sales platforms, payment processors and the client’s books. More sources, better results.', chips: ['Stripe', 'Shopify', 'PayPal'] },
+    { icon: 'tune', kicker: 'Customize', title: 'Shape it your way', body: 'Rules, mappings and groups apply the right accounts, products and locations to every transaction.', chips: ['Smart rules', 'Mappings', 'MCP'] },
+    { icon: 'sync_alt', kicker: 'Sync or export', title: 'Send it anywhere', body: 'Sync clean data to QuickBooks or Xero, or export it as CSV.', chips: ['QuickBooks', 'Xero', 'CSV'] },
+    { icon: 'fact_check', kicker: 'Reconcile', title: 'Know it all adds up', body: 'Synder compares the books with your sources and confirms everything matches.', chips: ['Checked'] }
+  ];
+  let storyIndex = 0;
+  let storyTimer = null;
+  let storyDeadline = 0;
+  let storyRemain = 5000;
+  function storyReduce() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  function stopStoryTimer() { if (storyTimer) { clearTimeout(storyTimer); storyTimer = null; } }
+  function maybeAutoStory() {
+    if (document.getElementById('storyModal')) return;
+    if (!ob || ob.variant === 'existing' || ob.storySeen || !ob.storyPending) return;
+    if (mode !== 'firm' || !st || st.page !== 'clients' || sc().clients.length) return;
+    openStory();
+  }
+  function openStory() { storyIndex = 0; renderStory(); }
+  function closeStory(andImport) {
+    stopStoryTimer();
+    const modal = document.getElementById('storyModal');
+    if (modal) modal.remove();
+    if (ob) { ob.storySeen = true; ob.storyPending = false; saveOb(); }
+    if (andImport) showBooksModal();
+  }
+  function storyGo(next) {
+    if (next < 0) return;
+    if (next >= STORY.length) { closeStory(true); return; }
+    storyIndex = next;
+    renderStory();
+  }
+  function armStory(ms, advance) {
+    stopStoryTimer();
+    storyRemain = ms;
+    storyDeadline = Date.now() + ms;
+    storyTimer = setTimeout(() => { if (advance) storyGo(storyIndex + 1); }, ms);
+  }
+  function storyFillPct(fill) {
+    if (!fill || !fill.parentElement) return 0;
+    const parent = fill.parentElement.getBoundingClientRect().width;
+    if (!parent) return 0;
+    return Math.min(100, (fill.getBoundingClientRect().width / parent) * 100);
+  }
+  function renderStory() {
+    stopStoryTimer();
+    let modal = document.getElementById('storyModal');
+    if (!modal) { modal = document.createElement('div'); document.body.appendChild(modal); }
+    const s = STORY[storyIndex];
+    const last = storyIndex === STORY.length - 1;
+    const reduce = storyReduce();
+    const bars = STORY.map((_, i) => {
+      const cls = i < storyIndex || (i === storyIndex && reduce) ? 'is-done' : (i === storyIndex ? 'is-run' : '');
+      return `<div class="progress" aria-hidden="true"><div class="progress-fill story-fill ${cls}"></div></div>`;
+    }).join('');
+    const chips = s.chips.map((c) => `<span class="info-chip">${esc(c)}</span>`).join('');
+    modal.id = 'storyModal';
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal story-modal" role="dialog" aria-modal="true" aria-labelledby="storyTitle">
+      <div class="story-top">
+        <div class="story-bars">${bars}</div>
+        <button type="button" class="btn-text" id="storySkip">Skip</button>
+      </div>
+      <div class="story-stage">
+        <button type="button" class="story-hit left" id="storyHitBack" aria-label="Back"></button>
+        <button type="button" class="story-hit right" id="storyHitNext" aria-label="Next"></button>
+        <span class="story-icon" aria-hidden="true"><span class="material-icons">${s.icon}</span></span>
+        <p class="text-subtitle1">${esc(s.kicker)}</p>
+        <h2 class="text-h2" id="storyTitle">${esc(s.title)}</h2>
+        <p class="text-body1">${esc(s.body)}</p>
+        <div class="story-chips">${chips}</div>
+        <p class="text-caption">Step ${storyIndex + 1} of ${STORY.length}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outlined" id="storyBack"${storyIndex === 0 ? ' hidden' : ''}>Back</button>
+        <button type="button" class="btn" id="storyNext">${last ? 'Connect your first client' : 'Next'}</button>
+      </div>
+    </div>`;
+    const box = modal.querySelector('.story-modal');
+    modal.querySelector('#storySkip').onclick = () => closeStory(false);
+    modal.querySelector('#storyBack').onclick = () => storyGo(storyIndex - 1);
+    modal.querySelector('#storyNext').onclick = () => storyGo(storyIndex + 1);
+    modal.querySelector('#storyHitBack').onclick = () => storyGo(storyIndex - 1);
+    modal.querySelector('#storyHitNext').onclick = () => storyGo(storyIndex + 1);
+    if (!reduce) {
+      const fill = modal.querySelector('.story-fill.is-run');
+      if (fill) requestAnimationFrame(() => { fill.style.width = '100%'; });
+      armStory(5000, !last);
+      box.addEventListener('mouseenter', () => {
+        if (!storyTimer) return;
+        storyRemain = Math.max(200, storyDeadline - Date.now());
+        stopStoryTimer();
+        const live = modal.querySelector('.story-fill.is-run');
+        if (live) {
+          const pct = storyFillPct(live);
+          live.style.transition = 'none';
+          live.style.width = pct + '%';
+        }
+      });
+      box.addEventListener('mouseleave', () => {
+        if (storyTimer || storyReduce()) return;
+        const live = modal.querySelector('.story-fill.is-run');
+        if (live) {
+          live.style.transition = `width ${storyRemain}ms linear`;
+          requestAnimationFrame(() => { live.style.width = '100%'; });
+        }
+        armStory(storyRemain, storyIndex < STORY.length - 1);
+      });
+      if (box.matches(':hover')) box.dispatchEvent(new MouseEvent('mouseenter'));
+    }
+  }
+  function rainSparkles(done) {
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    if (reduce) { if (done) done(); return; }
     var COLORS = ["#FFFFFF", "#FFF6C2", "#FFE45C", "#9AD0FF", "#7EE0FF", "#B9F6CA", "#FFD6E8"];
     var SHAPES = ["star", "dot", "diamond"];
     var COUNT = 240;
@@ -2417,6 +2556,7 @@
     document.body.appendChild(layer);
     window.setTimeout(function () {
       if (layer.parentNode) layer.parentNode.removeChild(layer);
+      if (done) done();
     }, maxDelay + 80);
   }
   document.querySelectorAll('#modeSeg button').forEach((b) => b.onclick = () => {
