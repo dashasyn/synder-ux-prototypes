@@ -1830,9 +1830,7 @@
     linkTimer = setTimeout(() => {
       linkTimer = 0;
       if (!st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
-      st.connectStep = 'done';
-      save();
-      render();
+      finishClientConnect();
     }, 1500);
   }
   function clientConnected(c) { return !!(c && (c.connected || c.accounting)); }
@@ -1908,8 +1906,9 @@
   function renderClientConnect() {
     const c = findOrg(st.clientId);
     if (!c) return renderClients();
+    if (st.connectStep === 'done') st.connectStep = 'linking';
     const step = st.connectStep || 'details';
-    const active = step === 'linking' || step === 'done' ? 'connect' : step;
+    const active = step === 'linking' ? 'connect' : step;
     const tabs = [['details', 'Client details'], ['integrations', 'Select integrations'], ['connect', 'Connect']];
     const tabHtml = `<div class="connect-tabs">${tabs.map(([id, label]) => `<span class="text-body2${id === active ? ' on' : ''}">${label}</span>`).join('')}</div>`;
     const site = String(c.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com';
@@ -1936,12 +1935,6 @@
       body = `<div class="connect-copy"><h1 class="text-h1">Connect</h1>
         <div class="link-wait"><span class="spinner" aria-hidden="true"></span><p class="text-body1">Connecting QuickBooks and Stripe…</p></div></div>
         <div class="progress" role="progressbar" aria-label="Connecting"><div class="progress-fill" style="width:70%"></div></div>`;
-    } else if (step === 'done') {
-      const pill = (n, label, kind) => `<span class="box box--white"><span class="status status-${kind}">${n}</span><span class="text-body2">${label}</span></span>`;
-      body = `<div class="flow-pills" aria-hidden="true">${pill(1, 'Import data', 'green')}<span class="text-body2">→</span>${pill(2, 'Customize', 'blue')}<span class="text-body2">→</span>${pill(3, 'Sync to books', 'blue')}<span class="text-body2">→</span>${pill(4, 'Reconcile', 'blue')}</div>
-        <div class="connect-copy"><h1 class="text-h1">Client connected</h1>
-        <p class="text-body1">Import data → Customize → Sync to books → Reconcile. Four steps. One accurate result.</p></div>
-        <div class="ob-actions"><button type="button" class="btn" id="connectDone">Go to clients</button></div>`;
     } else {
       body = `<div class="connect-copy"><h1 class="text-h1">Provide your client's basic info</h1>
         <p class="text-body1">This sets how Synder works for this client.</p></div>
@@ -2453,7 +2446,6 @@
       save();
       render();
     });
-    bind('connectDone', finishClientConnect);
     armLink();
     bind('connectGo', () => {
       if (connectLoading) return;
