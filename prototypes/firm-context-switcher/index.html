@@ -16,6 +16,7 @@
     - Ctrl/Cmd+K opens the switcher; arrows + Enter + Esc work inside.
     - Last context remembered per scenario in localStorage.
   -->
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -219,10 +220,8 @@
     .nav-i.active .cnt { color: #fff; }
 
     /* ── Main content ── */
-    .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-    .ph h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0; }
-    .ph .sub { color: #6B778C; margin-top: 2px; }
-    .ph-actions { display: flex; align-items: center; gap: 12px; }
+    .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+    .ph-actions { display: flex; align-items: center; gap: var(--space-3); }
     .crumb {
       display: inline-flex; align-items: center; gap: 4px; color: #0053CC; cursor: pointer;
       background: none; border: none; font: inherit; padding: 0; margin-bottom: 8px;
@@ -231,12 +230,9 @@
     .crumb .material-icons { font-size: 18px; }
     .toolbar { display: flex; gap: var(--space-2); margin: 0 0 var(--space-4); }
     .toolbar input { max-width: 320px; }
-    .linkish { color: #0053CC; cursor: pointer; background: none; border: none; font: inherit; padding: 0; text-align: left; }
+    .linkish { cursor: pointer; background: none; border: none; font: inherit; padding: 0; text-align: left; }
     .linkish:hover { text-decoration: underline; }
-    .client-cell { display: flex; align-items: center; gap: 10px; }
-    .muted { color: #6B778C; }
-    .status { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 14px; white-space: nowrap; }
-    .tbl-foot { padding: var(--space-3) var(--space-3); color: var(--text-secondary); }
+    .client-cell { display: flex; align-items: center; gap: var(--space-2); }
 
     .section-h { font-size: 20px; line-height: 28px; font-weight: 400; margin: 8px 0 12px; }
     .empty { text-align: center; padding: 56px 24px; max-width: 460px; margin: 0 auto; }
@@ -253,29 +249,25 @@
     /* ── Modal ── */
     .scrim { position: fixed; inset: 0; background: rgba(26,27,36,.4); z-index: 400; display: none; align-items: center; justify-content: center; }
     .scrim.open { display: flex; }
-    .modal { width: 440px; max-width: calc(100vw - 32px); background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 12px 32px rgba(0,0,0,.2); }
-    .modal h3 { margin: 0 0 8px; font-size: 20px; line-height: 28px; font-weight: 500; }
-    .modal p { margin: 0 0 16px; color: #6B778C; }
-    .idrow { display: flex; gap: 8px; margin-bottom: 20px; }
+    .scrim > .modal { width: 440px; max-width: calc(100vw - 32px); }
+    .idrow { display: flex; gap: 8px; }
     .idrow input { font-size: 16px; letter-spacing: .04em; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
     /* ── v4 client details ── */
     .cd-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
     .cd-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .cd-title h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd-title h1 { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cd-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .pager { display: inline-flex; align-items: center; gap: 2px; color: #6B778C; font-size: 13px; white-space: nowrap; }
     .pager button { width: 28px; height: 28px; border: 0; background: none; border-radius: 4px; cursor: pointer; color: #6B778C; display: inline-flex; align-items: center; justify-content: center; }
     .pager button:hover:not(:disabled) { background: #F2F6FC; color: #0053CC; }
     .pager button:disabled { opacity: .35; cursor: default; }
     .period { height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 8px; font: inherit; background: #fff; }
-    .tipwrap { position: relative; display: inline-flex; }
     .tipwrap[data-tip]:hover::after {
       content: attr(data-tip); position: absolute; right: 0; top: calc(100% + 6px); z-index: 70; width: 260px;
       background: #1A1B24; color: #fff; font-size: 13px; line-height: 18px; padding: 8px 10px; border-radius: 6px; white-space: normal;
     }
-    .btn[disabled] { opacity: .5; cursor: not-allowed; pointer-events: none; }
-    .more { width: 36px; height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; background: #fff; cursor: pointer; color: #555; display: inline-flex; align-items: center; justify-content: center; }
+    .tipwrap { position: relative; display: inline-flex; }
     .more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
     .menu .danger, .menu .danger .material-icons { color: #CC2929; }
     .wk-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; max-width: 880px; margin-bottom: 24px; }
@@ -341,22 +333,19 @@
     }
     .ob-back-slot { height: 28px; margin: 0 0 8px; display: flex; align-items: center; flex: 0 0 28px; }
     .ob-in.review-fit > h1, .ob-in.review-fit > .welcome-copy, .ob-in.review-fit > .lead, .review-foot { flex: 0 0 auto; }
-    .ob h1 { font-size: 32px; line-height: 40px; font-weight: 500; margin: 0 0 12px; text-align: left; }
-    .ob h1.text-h1 { font-size: var(--font-h1); font-weight: var(--font-h1-weight); line-height: var(--font-h1-line-height); letter-spacing: var(--font-h1-letter-spacing); margin: 0; }
-    .ob .lead, .ob .welcome-copy { color: #1A1B24; text-align: left; margin: 0 0 20px; max-width: 720px; font-size: 16px; line-height: 24px; }
-    .ob-cards { display: grid; gap: 20px; width: 100%; margin: 0; }
-    .ob-cards.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .role-pick h1 { text-align: center; }
+    .ob-cards { display: grid; gap: var(--space-5); width: 100%; margin: 0; }
     .ob-cards.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .role-pick h1 { text-align: center; }
     .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); width: 100%; align-items: stretch; }
     .role-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2); margin: 0 0 var(--space-8); }
-    .kit-choice { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-4); height: 100%; min-height: 300px; padding: var(--space-10) var(--space-6) var(--space-8); cursor: pointer; }
+    .kit-choice { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-4); height: 100%; min-height: 280px; cursor: pointer; }
     .kit-choice:hover { border-color: var(--color-primary); }
     .kit-choice:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-    .kit-choice .material-icons { font-size: 56px; color: var(--color-primary); }
+    .kit-choice .material-icons { font-size: 56px; }
     .kit-choice p { margin: 0; }
     .kit-choice .btn { margin-top: auto; align-self: stretch; }
-    .ob .kit-screen .synder-page-title { font-size: 28px; line-height: 36px; font-weight: 400; text-align: left; margin: 0 0 24px; color: var(--text-primary); }
+    .ob .kit-screen .synder-page-title { text-align: left; margin: 0 0 var(--space-6); }
     .kit-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
     .kit-narrow .ob-field { max-width: none; }
     .flow-narrow, .flow-col { width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; }
@@ -368,7 +357,7 @@
     .auth-screen { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
     .auth-screen > .btn-text { align-self: flex-start; }
     .auth-logo { display: block; width: 168px; height: auto; margin: 0; }
-    .auth-card { width: 100%; flex-direction: column; align-items: stretch; gap: var(--space-4); padding: var(--space-6); }
+    .auth-card { width: 100%; flex-direction: column; align-items: stretch; gap: var(--space-4); }
     .auth-card .text-h1, .auth-card .text-body1 { margin: 0; }
     .auth-card .form-field { margin: 0; }
     .auth-card > .btn { width: 100%; }
@@ -376,7 +365,7 @@
     .auth-foot { margin: 0; text-align: center; }
     .sso-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
     .sso-row .btn-outlined { width: 100%; }
-    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-6); }
+    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
     .bring-card .text-h1, .bring-card .text-body1 { margin: 0; }
     .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); }
     .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-white); box-shadow: 0 0 0 1px var(--color-white); flex-shrink: 0; }
@@ -385,12 +374,11 @@
     .books-opts .btn-outlined { width: 100%; }
     .books-opts svg { width: 18px; height: 18px; }
     .pick-scroll { max-height: 420px; overflow: auto; }
-    .modal-body .text-body1, .modal-body .text-body2, .modal-bg .modal .text-body2 { margin: 0 0 var(--space-4); color: var(--text-primary); }
+    .modal-body .text-body1, .modal-body .text-body2 { margin: 0 0 var(--space-4); }
     .ledger-list { display: flex; flex-direction: column; gap: var(--space-2); }
     .ledger-card { display: flex; align-items: center; gap: var(--space-4); width: 100%; text-align: left; cursor: pointer; padding: var(--space-4); font: inherit; color: inherit; }
     .ledger-card.selected { border-color: var(--color-primary); background: var(--bg-row-selected); }
     .ledger-card .text-subtitle2, .ledger-card .text-body2 { display: block; margin: 0; }
-    .auth-foot .link { font-size: inherit; line-height: inherit; }
     .modal-footer.spread { justify-content: space-between; align-items: center; }
     .modal-actions { display: flex; gap: var(--space-2); }
     .provider-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); width: 100%; }
@@ -399,8 +387,7 @@
     .row-menu { position: relative; }
     .row-menu .dropdown-menu { right: 0; left: auto; }
     button.dropdown-item { background: none; border: 0; width: 100%; font: inherit; text-align: left; cursor: pointer; }
-    .flow-col .btn:disabled, .flow-narrow .btn:disabled, .auth-card .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
-    body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
+    .row-menu .dropdown-menu { right: 0; left: auto; }
     body.provider-plain .p-body { display: block; }
     body.provider-plain .p-main { min-height: calc(100vh - var(--proto-bar-h)); display: flex; align-items: center; justify-content: center; background: var(--color-white); }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
@@ -408,8 +395,9 @@
     .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
     .kit-or::before, .kit-or::after { content: ""; flex: 1; height: 1px; background: var(--border-default); }
     .kit-links { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 8px; }
-    .kit-screen .btn:disabled, .modal-bg .btn:disabled { opacity: 1; background: var(--color-grey-10); color: var(--color-grey-50); }
-    .modal-bg .modal { width: 480px; max-width: calc(100vw - 32px); min-width: 0; padding: 0; border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
+    button.dropdown-item { width: 100%; text-align: left; cursor: pointer; background: none; border: 0; font: inherit; }
+    .modal-bg .modal { width: min(480px, calc(100vw - 32px)); max-width: 480px; }
+    body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
     .modal-bg .modal.modal-lg { width: 960px; max-width: calc(100vw - 64px); }
     .modal-bg .modal.story-modal { width: 720px; max-width: calc(100vw - 64px); }
     .story-top { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-6) 0; }
@@ -459,7 +447,7 @@
     }
     .ob-ill { display: block; margin-bottom: 4px; }
     .ob-ill svg { display: block; width: 128px; height: 84px; }
-    .welcome-copy { font-size: 16px; line-height: 24px; }
+    .src-d { display: block; margin-top: var(--space-1); }
     .books-banner {
       display: flex; gap: 12px; align-items: flex-start; margin: 0 0 24px;
       background: #E7F0FC; border-radius: 8px; padding: 14px 16px;
@@ -1789,7 +1777,7 @@
           <p class="form-error-msg" id="pickError" hidden>Choose at least one client</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd">Import ${n} client${n === 1 ? '' : 's'}</button>
+          <button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd">${n > 0 ? `Import ${n} client${n === 1 ? '' : 's'}` : 'Import clients'}</button>
         </div>
       </div>
     </div>`;
@@ -1855,7 +1843,7 @@
         : `<button type="button" class="dropdown-item" data-detail="${c.id}">Set up</button>`;
       const preLabel = c.preassess && c.preassess !== 'Not run' && c.preassess !== 'Running' ? 'View check' : 'Check reconciliation from files';
       return `<tr class="rowlink" data-row="${c.id}">
-        <td><div class="client-cell">${av(c, true)}<button class="linkish" data-detail="${c.id}">${esc(c.name)}</button></div></td>
+        <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-detail="${c.id}">${esc(c.name)}</button></div></td>
         <td><span class="status ${connected ? 'status-green' : 'status-grey'}">${connected ? 'Connected' : 'Not connected'}</span></td>
         <td><div class="dropdown row-menu">
           <button type="button" class="btn-icon" data-menu="${c.id}" aria-label="Actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button>
