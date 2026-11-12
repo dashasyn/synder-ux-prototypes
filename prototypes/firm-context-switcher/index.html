@@ -39,7 +39,6 @@
     }
     .proto-bar .brand { font-size: 14px; font-weight: 500; letter-spacing: .02em; opacity: .92; white-space: nowrap; }
     .proto-bar .spacer { flex: 1; }
-    .proto-bar .seg-label { opacity: .75; white-space: nowrap; }
     .seg { display: inline-flex; background: rgba(255,255,255,.06); border-radius: 6px; padding: 2px; gap: 2px; }
     .seg button {
       appearance: none; border: none; background: transparent; color: #9CA3AF;
@@ -369,9 +368,8 @@
     .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-4); padding: var(--space-10); }
     .bring-card .text-h2, .bring-card .text-body1 { margin: 0; }
     .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
-    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-white); box-shadow: 0 0 0 2px var(--color-white); flex-shrink: 0; }
-    .btn-outlined .logo-chip { box-shadow: 0 0 0 2px var(--border-default); }
-    .logo-chip svg { width: 22px; height: 22px; display: block; }
+    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: 1px solid #fff; border-radius: 50%; background: #fff; box-shadow: none; overflow: hidden; flex-shrink: 0; line-height: 0; }
+    .logo-chip svg { width: 24px; height: 24px; max-width: none; display: block; flex-shrink: 0; }
     .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
     .books-opts .btn-outlined { width: 100%; }
     .books-opts svg { width: 18px; height: 18px; }
@@ -675,11 +673,6 @@
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
-    <span class="seg-label">Import button</span>
-    <div class="seg" id="importSeg">
-      <button data-btn="blue" type="button">Blue</button>
-      <button data-btn="white" type="button">White</button>
-    </div>
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
@@ -830,25 +823,11 @@
   ];
 
   let mode = 'firm'; // 'onboarding' | 'firm'
-  let importBtn = 'blue';
-  function readImportBtn() {
-    importBtn = new URLSearchParams(location.search).get('btn') === 'white' ? 'white' : 'blue';
-  }
   function writeLocation(hash) {
     const url = new URL(location.href);
-    if (importBtn === 'white') url.searchParams.set('btn', 'white');
-    else url.searchParams.delete('btn');
+    url.searchParams.delete('btn');
     const next = url.pathname + url.search + (hash || '');
     if (location.pathname + location.search + location.hash !== next) history.replaceState(null, '', next);
-  }
-  function syncImportSeg() {
-    document.querySelectorAll('#importSeg button').forEach((b) => b.classList.toggle('active', b.dataset.btn === importBtn));
-  }
-  function setImportBtn(next) {
-    importBtn = next === 'white' ? 'white' : 'blue';
-    writeLocation(location.hash);
-    syncImportSeg();
-    if (mode !== 'onboarding') renderMain();
   }
   let ob = null;
 
@@ -2062,7 +2041,6 @@
   }
   function renderClients() {
     if (!sc().clients.length) {
-      const booksClass = importBtn === 'white' ? 'btn-outlined' : 'btn';
       const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 22)}</span>`;
       const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 22)}</span>`;
       return `<div class="flow-narrow">
@@ -2070,7 +2048,7 @@
           <h2 class="text-h2">Let’s start by bringing in your clients.</h2>
           <p class="text-body1">Connect your clients so Synder can start working for you. Import in bulk or add them one by one. Importing only copies client names.</p>
           <div class="bring-actions">
-            <button type="button" class="${booksClass}" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
+            <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
             <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
             <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
           </div>
@@ -2734,7 +2712,6 @@
   function render() {
     if (mode === 'onboarding') {
       document.body.classList.remove('provider-plain', 'wizard-plain', 'center-stage');
-      syncImportSeg();
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
@@ -2748,7 +2725,6 @@
     if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
-    syncImportSeg();
     if (st && st.openAdd) { st.openAdd = false; showAddModal(); }
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
     document.body.classList.toggle('wizard-plain', !!(st && st.page === 'clientconnect'));
@@ -2948,7 +2924,6 @@
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
   });
-  document.querySelectorAll('#importSeg button').forEach((b) => b.onclick = () => setImportBtn(b.dataset.btn));
   function clearV10Storage() {
     const drop = (store) => {
       const keys = [];
@@ -3013,8 +2988,8 @@
 
   $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
   loadOb();
-  readImportBtn();
   restoreDirectory();
+  writeLocation(location.hash);
   const boot = (location.hash || '#firm').slice(1);
   if (boot.split('/')[0] === 'onboarding' || (!localStorage.getItem('fcs-ob-v10') && boot.split('/')[0] !== 'firm')) {
     // Prefer explicit hash; otherwise stay on firm workspace for this prototype
