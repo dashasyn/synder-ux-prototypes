@@ -2398,18 +2398,23 @@
     if (!html) html = `<div class="pop-empty">Nothing matches “${esc(q)}”.</div>`;
     $('popList').innerHTML = html;
     $('popFoot').innerHTML =
-      `<button data-act="createorg"><span class="material-icons">add</span>Create organization</button>` +
+      `<button data-act="createorg"><span class="material-icons">add</span>Add client</button>` +
       '';
     $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
   }
   function act(a) {
     closePop();
+    let keepFocus = false;
     if (a === 'firm') goFirm('clients');
     else if (a === 'allclients') { st._q = ''; goFirm('clients'); }
     else if (a.startsWith('org:')) goOrg(a.slice(4));
-    else if (a === 'createorg') { st.page = 'createorg'; save(); render(); }
+    else if (a === 'createorg') { openManualAdd(); keepFocus = true; }
     else if (a === 'createfirm') { st.ctx = 'org'; st.page = 'createfirm'; save(); render(); }
-    $('ctxTrigger').focus();
+    if (!keepFocus) $('ctxTrigger').focus();
+  }
+  function openManualAdd() {
+    if ($('addModal')) showAddModal();
+    else { st.ctx = 'firm'; st.page = 'clients'; st.openAdd = true; save(); render(); }
   }
   function focusables() { return Array.from($('pop').querySelectorAll('[data-act]')); }
   function highlight() {
