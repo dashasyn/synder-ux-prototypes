@@ -39,6 +39,7 @@
     }
     .proto-bar .brand { font-size: 14px; font-weight: 500; letter-spacing: .02em; opacity: .92; white-space: nowrap; }
     .proto-bar .spacer { flex: 1; }
+    .proto-bar .seg-label { opacity: .75; white-space: nowrap; }
     .seg { display: inline-flex; background: rgba(255,255,255,.06); border-radius: 6px; padding: 2px; gap: 2px; }
     .seg button {
       appearance: none; border: none; background: transparent; color: #9CA3AF;
@@ -365,10 +366,11 @@
     .auth-foot { margin: 0; text-align: center; }
     .sso-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
     .sso-row .btn-outlined { width: 100%; }
-    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
-    .bring-card .text-h1, .bring-card .text-body1 { margin: 0; }
-    .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); }
-    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-white); box-shadow: 0 0 0 1px var(--color-white); flex-shrink: 0; }
+    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-4); padding: var(--space-10); }
+    .bring-card .text-h2, .bring-card .text-body1 { margin: 0; }
+    .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-white); box-shadow: 0 0 0 2px var(--color-white); flex-shrink: 0; }
+    .btn-outlined .logo-chip { box-shadow: 0 0 0 2px var(--border-default); }
     .logo-chip svg { width: 22px; height: 22px; display: block; }
     .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
     .books-opts .btn-outlined { width: 100%; }
@@ -645,6 +647,11 @@
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
+    <span class="seg-label">Import button</span>
+    <div class="seg" id="importSeg">
+      <button data-btn="blue" type="button">Blue</button>
+      <button data-btn="white" type="button">White</button>
+    </div>
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
@@ -795,6 +802,26 @@
   ];
 
   let mode = 'firm'; // 'onboarding' | 'firm'
+  let importBtn = 'blue';
+  function readImportBtn() {
+    importBtn = new URLSearchParams(location.search).get('btn') === 'white' ? 'white' : 'blue';
+  }
+  function writeLocation(hash) {
+    const url = new URL(location.href);
+    if (importBtn === 'white') url.searchParams.set('btn', 'white');
+    else url.searchParams.delete('btn');
+    const next = url.pathname + url.search + (hash || '');
+    if (location.pathname + location.search + location.hash !== next) history.replaceState(null, '', next);
+  }
+  function syncImportSeg() {
+    document.querySelectorAll('#importSeg button').forEach((b) => b.classList.toggle('active', b.dataset.btn === importBtn));
+  }
+  function setImportBtn(next) {
+    importBtn = next === 'white' ? 'white' : 'blue';
+    writeLocation(location.hash);
+    syncImportSeg();
+    if (mode !== 'onboarding') renderMain();
+  }
   let ob = null;
 
   function defaultOb() {
@@ -1284,7 +1311,7 @@
     $('ob').innerHTML = html;
     bindOb();
     const h = step === 'home' ? '#home' : (step === 'entry' ? '#onboarding' : '#onboarding/' + step);
-    if (location.hash !== h) history.replaceState(null, '', h);
+    if (location.hash !== h) writeLocation(h);
     document.title = 'Onboarding — Synder (Firm context switcher)';
   }
   function bindOb() {
@@ -1714,6 +1741,17 @@
     const modal = $('csvModal');
     if (modal) modal.classList.add('show');
   }
+  function showAddModal() {
+    const modal = $('addModal');
+    const input = $('oneName');
+    if (input) { input.value = ''; fieldClear(input); }
+    if (modal) modal.classList.add('show');
+    if (input) input.focus();
+  }
+  function closeAddModal() {
+    const modal = $('addModal');
+    if (modal) modal.classList.remove('show');
+  }
   function setCsvFile(file) {
     const name = file && file.name ? file.name : '';
     const label = $('csvFileName');
@@ -1801,9 +1839,9 @@
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="csvTitle">
           <div class="modal-header" id="csvTitle">Import CSV</div>
           <div class="modal-body">
-            <p class="text-body2">Required column: client name. Optional columns, such as email, are ignored in this sample.</p>
+            <p class="text-body2">Import a CSV with the list of your client names.</p>
             <div class="file-upload" id="csvDrop"><span>Drop a CSV here, or</span><button type="button" class="link" id="csvBrowse">browse file</button></div>
-            <p class="form-hint">CSV files up to 5 MB.</p>
+            <p class="form-hint">CSV, up to 5 MB.</p>
             <p class="form-error-msg" id="csvError" hidden>Choose a CSV file</p>
             <p class="text-body2" id="csvFileName" hidden></p>
             <button type="button" class="link" id="csvTemplate">Download template</button>
@@ -1812,18 +1850,32 @@
           <div class="modal-footer"><button type="button" class="btn-outlined" id="csvCancel">Cancel</button><button type="button" class="btn" id="csvGo">Continue</button></div>
         </div>
       </div>
+      <div class="modal-bg" id="addModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+          <div class="modal-header" id="addTitle">Add client manually</div>
+          <div class="modal-body">
+            <div class="form-field">
+              <label class="form-label form-label-required" for="oneName">Client name</label>
+              <input class="input" id="oneName" autocomplete="off" />
+              <p class="form-hint">Just the name for now. You can connect their books later.</p>
+            </div>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="oneCancel">Cancel</button><button type="button" class="btn" id="oneAdd">Add client</button></div>
+        </div>
+      </div>
       ${pickerHtml()}`;
   }
   function renderClients() {
     if (!sc().clients.length) {
+      const booksClass = importBtn === 'white' ? 'btn-outlined' : 'btn';
       const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 22)}</span>`;
       const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 22)}</span>`;
       return `<div class="flow-narrow">
         <div class="box box--white bring-card">
-          <h1 class="text-h1">Bring in your clients</h1>
-          <p class="text-body1">Connect clients to see what Synder can do. Synder needs data to start working. Add clients one by one, or save time and import in bulk. You choose which clients to import. We won't change any data without your permission.</p>
+          <h2 class="text-h2">Let’s start by bringing in your clients.</h2>
+          <p class="text-body1">Connect your clients so Synder can start working for you. Import in bulk or add them one by one. Importing only copies client names.</p>
           <div class="bring-actions">
-            <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
+            <button type="button" class="${booksClass}" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
             <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
             <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
           </div>
@@ -2190,9 +2242,9 @@
     bind('emptyBooks', showBooksModal);
     bind('howWorks', () => openStory());
     bind('emptyCsv', showCsvModal);
-    bind('emptyAdd', () => goFirm('addone'));
+    bind('emptyAdd', showAddModal);
     bind('listImport', showBooksModal);
-    bind('listAdd', () => goFirm('addone'));
+    bind('listAdd', showAddModal);
     bind('bannerImport', showBooksModal);
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
     bind('importNoteClose', () => { if (ob) { ob.importNote = 0; saveOb(); } render(); });
@@ -2265,11 +2317,12 @@
       const input = $('oneName');
       const name = (input && input.value || '').trim();
       if (!name) { fieldError(input, 'Required'); return; }
+      closeAddModal();
       sc().clients.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' });
       if (ob && ob.variant === 'existing') ob.banner = 'progress';
       if (ob) { ob.importNote = 1; saveOb(); } persistDirectory(); goFirm('clients');
     });
-    bind('oneCancel', () => goFirm('clients'));
+    bind('oneCancel', closeAddModal);
     bind('closePre', () => goFirm('clients'));
     bind('openRecon', () => { const id = st.clientId; goOrg(id, 'reconciliation'); });
     bind('runPre', () => {
@@ -2432,7 +2485,7 @@
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
     else if (parts[1] === 'connect' && ob && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')) { st.ctx = 'firm'; st.page = 'connect'; st.clientId = null; connectLoading = false; }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; if (ob) ob.picker = true; }
-    else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'addone'; st.clientId = null; }
+    else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.openAdd = true; }
     else if (parts[1] === 'preassess' && parts[2] && findOrg(parts[2])) { st.ctx = 'firm'; st.page = 'preassess'; st.clientId = parts[2]; st.preState = 'upload'; }
     else if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
       st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
@@ -2452,6 +2505,7 @@
   function render() {
     if (mode === 'onboarding') {
       document.body.classList.remove('provider-plain', 'center-stage');
+      syncImportSeg();
       renderMode(); renderOb(); return;
     }
     if (st && (st.page === 'client' || st.page === 'setup' || st.page === 'preassess') && !isClient(st.clientId)) {
@@ -2464,6 +2518,8 @@
     if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
+    syncImportSeg();
+    if (st && st.openAdd) { st.openAdd = false; showAddModal(); }
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
@@ -2475,7 +2531,7 @@
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
-    if (location.hash !== h) history.replaceState(null, '', h);
+    if (location.hash !== h) writeLocation(h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
       celebrateOnClients = false;
       rainSparkles(maybeAutoStory);
@@ -2638,6 +2694,7 @@
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
   });
+  document.querySelectorAll('#importSeg button').forEach((b) => b.onclick = () => setImportBtn(b.dataset.btn));
   function clearV10Storage() {
     const drop = (store) => {
       const keys = [];
@@ -2657,7 +2714,7 @@
     cdState = 'blocked';
     if (variant === 'existing') {
       enterExisting();
-      history.replaceState(null, '', '#existing');
+      writeLocation('#existing');
     } else {
       restartOnboarding();
     }
@@ -2703,6 +2760,7 @@
 
   $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
   loadOb();
+  readImportBtn();
   restoreDirectory();
   const boot = (location.hash || '#firm').slice(1);
   if (boot.split('/')[0] === 'onboarding' || (!localStorage.getItem('fcs-ob-v10') && boot.split('/')[0] !== 'firm')) {
