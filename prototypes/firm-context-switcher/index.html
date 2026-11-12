@@ -379,13 +379,18 @@
     .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-6); }
     .bring-card .text-h1, .bring-card .text-body1 { margin: 0; }
     .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); }
-    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--color-white); flex-shrink: 0; }
-    .logo-chip svg { width: 12px; height: 12px; display: block; }
+    .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-white); box-shadow: 0 0 0 1px var(--color-white); flex-shrink: 0; }
+    .logo-chip svg { width: 22px; height: 22px; display: block; }
     .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
     .books-opts .btn-outlined { width: 100%; }
     .books-opts svg { width: 18px; height: 18px; }
     .pick-scroll { max-height: 420px; overflow: auto; }
-    .modal-body .text-body1 { margin: 0 0 var(--space-4); }
+    .modal-body .text-body1, .modal-body .text-body2, .modal-bg .modal .text-body2 { margin: 0 0 var(--space-4); color: var(--text-primary); }
+    .ledger-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .ledger-card { display: flex; align-items: center; gap: var(--space-4); width: 100%; text-align: left; cursor: pointer; padding: var(--space-4); font: inherit; color: inherit; }
+    .ledger-card.selected { border-color: var(--color-primary); background: var(--bg-row-selected); }
+    .ledger-card .text-subtitle2, .ledger-card .text-body2 { display: block; margin: 0; }
+    .auth-foot .link { font-size: inherit; line-height: inherit; }
     .modal-footer.spread { justify-content: space-between; align-items: center; }
     .modal-actions { display: flex; gap: var(--space-2); }
     .provider-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); width: 100%; }
@@ -748,9 +753,32 @@
   let kbIndex = -1;
   let cdState = 'blocked';
   let celebrateOnClients = false;
+  const SHOW_STORY = false; /* Parked: set true to bring back the How Synder works overlay. */
   let booksToken = 0;
 
   const $ = (id) => document.getElementById(id);
+  function fieldError(input, msg) {
+    if (!input) return;
+    input.classList.add('error');
+    input.setAttribute('aria-invalid', 'true');
+    const box = input.closest('.form-field') || input.parentElement;
+    let err = box.querySelector('.form-error-msg');
+    if (!err) {
+      err = document.createElement('p');
+      err.className = 'form-error-msg';
+      box.appendChild(err);
+    }
+    err.hidden = false;
+    err.textContent = msg || 'Required';
+  }
+  function fieldClear(input) {
+    if (!input) return;
+    input.classList.remove('error');
+    input.removeAttribute('aria-invalid');
+    const box = input.closest('.form-field') || input.parentElement;
+    const err = box && box.querySelector('.form-error-msg');
+    if (err) err.hidden = true;
+  }
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const initials = (n) => n.replace(/&/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   const color = (id) => { let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; };
@@ -1068,7 +1096,6 @@
       html = obShell(`
         <div class="flow-narrow">
         <div class="auth-screen">
-        <button type="button" class="btn-text" id="obBack">Back</button>
         <img class="auth-logo" src="synder-logo.svg" alt="Synder" />
         <div class="box box--white auth-card">
           <h1 class="text-h1">Set up your practice</h1>
@@ -1079,19 +1106,20 @@
             <button type="button" class="btn-outlined" data-social="google">${google}Google</button>
           </div>
           <hr class="auth-rule" />
-          <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || '')}" /></div>
-          <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || '')}" /></div>
-          <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" /></div>
-          <button type="button" class="btn" id="obSignup" disabled>Create account</button>
-          <p class="auth-foot text-body1">Already have an account? <button type="button" class="link" id="obLogin">Log in</button></p>
+          <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || 'Ada North')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || 'ada@northwindbookkeeping.com')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" value="${esc(ob.demoPass || 'Bookkeeping1')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="suFirm">Firm name</label><input class="input" id="suFirm" autocomplete="organization" value="${esc(ob.firmName || 'Northwind Bookkeeping')}" /></div>
+          <button type="button" class="btn" id="obSignup">Create account</button>
+          <p class="auth-foot text-body2">Already have an account? <button type="button" class="link" id="obLogin">Log in</button></p>
         </div>
-        <p class="auth-foot text-body1">Joining your firm's existing Synder account? <button type="button" class="link" id="obJoinInfo">Join a firm</button></p>
+        <p class="auth-foot text-body2">Joining your firm's existing Synder account? <button type="button" class="link" id="obJoinInfo">Join a firm</button></p>
         </div>
         </div>
         <div class="modal-bg" id="joinModal">
           <div class="modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
             <div class="modal-header" id="joinTitle">Join a firm</div>
-            <div class="modal-body"><p class="text-body1">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</p></div>
+            <div class="modal-body"><p class="text-body2">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</p></div>
             <div class="modal-footer"><button type="button" class="btn-outlined" id="joinGotIt">Cancel</button><button type="button" class="btn" id="joinOk">OK</button></div>
           </div>
         </div>`);
@@ -1136,7 +1164,7 @@
         <div class="flow-narrow">
         ${backSlot(true)}
         <h1 class="text-h1">For businesses</h1>
-        <p class="lead">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
+        <p class="text-body1">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
         <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>
         </div>`);
     } else if (step === 'login') {
@@ -1147,10 +1175,10 @@
         <img class="auth-logo" src="synder-logo.svg" alt="Synder" />
         <div class="box box--white auth-card">
           <h1 class="text-h1">Log in</h1>
-          <div class="form-field"><label class="form-label" for="liEmail">Email</label><input class="input" id="liEmail" type="email" autocomplete="username" placeholder="email@email.com" /></div>
-          <div class="form-field"><label class="form-label" for="liPass">Password</label><input class="input" id="liPass" type="password" autocomplete="current-password" /></div>
-          <button type="button" class="btn" id="liSubmit" disabled>Log in</button>
-          <p class="auth-foot text-body1">Do not have an account? <button type="button" class="link" id="liSignup">Sign up</button></p>
+          <div class="form-field"><label class="form-label form-label-required" for="liEmail">Email</label><input class="input" id="liEmail" type="email" autocomplete="username" value="${esc(ob.userEmail || 'ada@northwindbookkeeping.com')}" /></div>
+          <div class="form-field"><label class="form-label form-label-required" for="liPass">Password</label><input class="input" id="liPass" type="password" autocomplete="current-password" value="Bookkeeping1" /></div>
+          <button type="button" class="btn" id="liSubmit">Log in</button>
+          <p class="auth-foot text-body2">Do not have an account? <button type="button" class="link" id="liSignup">Sign up</button></p>
         </div>
         </div>
         </div>`);
@@ -1221,7 +1249,6 @@
         ob.step = 'review'; saveOb(); renderOb();
       }, 800);
     } else if (step === 'firmname') {
-      const named = (ob.firmName || '').trim();
       html = obShell(`
         <div class="flow-narrow">
         <div class="auth-screen">
@@ -1230,8 +1257,8 @@
         <div class="box box--white auth-card">
           <h1 class="text-h1">Name your firm</h1>
           <p class="text-body1">Your team will see this name. It is not taken from a client.</p>
-          <div class="form-field"><label class="form-label form-label-required" for="firmNameIn">Firm name</label><input class="input" id="firmNameIn" autocomplete="organization" value="${esc(ob.firmName || '')}" /></div>
-          <button type="button" class="btn" id="obNameNext"${named ? '' : ' disabled'}>Create firm</button>
+          <div class="form-field"><label class="form-label form-label-required" for="firmNameIn">Firm name</label><input class="input" id="firmNameIn" autocomplete="organization" value="${esc((ob.firmName || '').trim() || 'Northwind Bookkeeping')}" /></div>
+          <button type="button" class="btn" id="obNameNext">Create firm</button>
         </div>
         </div>
         </div>`);
@@ -1290,32 +1317,52 @@
       if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
       goOnboarding(backMap[ob.step] || 'entry');
     });
-    const signupReady = () => {
-      const n = $('suName'), e = $('suEmail'), p = $('suPass'), b = $('obSignup');
-      if (n) ob.userName = n.value;
-      if (e) ob.userEmail = e.value;
-      if (b) b.disabled = !(n && n.value.trim() && e && e.value.trim() && p && p.value);
-    };
-    ['suName', 'suEmail', 'suPass'].forEach((id) => { const el = $(id); if (el) el.oninput = signupReady; });
+    ['suName', 'suEmail', 'suPass', 'suFirm'].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.oninput = () => {
+        fieldClear(el);
+        if (id === 'suName') ob.userName = el.value;
+        if (id === 'suEmail') ob.userEmail = el.value;
+        if (id === 'suPass') ob.demoPass = el.value;
+        if (id === 'suFirm') ob.firmName = el.value;
+      };
+    });
     on('obSignup', () => {
-      const name = $('suName').value.trim(), email = $('suEmail').value.trim(), pass = $('suPass').value;
-      if (!name || !email || !pass) return;
-      ob.userName = name; ob.userEmail = email; ob.marketplace = false;
-      ob.use = 'practice'; ob.useChosen = true; ob.nameFrom = 'signup';
-      saveOb();
-      goOnboarding('firmname');
+      const name = $('suName'), email = $('suEmail'), pass = $('suPass'), firm = $('suFirm');
+      let bad = false;
+      [name, email, pass, firm].forEach((el) => fieldClear(el));
+      if (!name || !name.value.trim()) { fieldError(name, 'Required'); bad = true; }
+      if (!email || !email.value.trim()) { fieldError(email, 'Required'); bad = true; }
+      if (!pass || !pass.value) { fieldError(pass, 'Required'); bad = true; }
+      if (!firm || !firm.value.trim()) { fieldError(firm, 'Required'); bad = true; }
+      if (bad) return;
+      ob.userName = name.value.trim();
+      ob.userEmail = email.value.trim();
+      ob.demoPass = pass.value;
+      ob.firmName = firm.value.trim();
+      ob.firmTouched = true;
+      ob.marketplace = false;
+      ob.use = 'practice';
+      ob.useChosen = true;
+      enterNewFirm();
     });
     on('obLogin', () => { ob.loginFrom = 'signup'; goOnboarding('login'); });
     on('homeSignup', () => goOnboarding('entry'));
     on('homeLogin', () => { ob.loginFrom = 'home'; goOnboarding('login'); });
     const loginReady = () => {
-      const e = $('liEmail'), p = $('liPass'), b = $('liSubmit');
-      if (b) b.disabled = !(e && e.value.trim() && p && p.value);
+      fieldClear($('liEmail'));
+      fieldClear($('liPass'));
     };
     ['liEmail', 'liPass'].forEach((id) => { const el = $(id); if (el) el.oninput = loginReady; });
     on('liSubmit', () => {
       const e = $('liEmail'), p = $('liPass');
-      if (!e || !p || !e.value.trim() || !p.value) return;
+      let bad = false;
+      fieldClear(e); fieldClear(p);
+      if (!e || !e.value.trim()) { fieldError(e, 'Required'); bad = true; }
+      if (!p || !p.value) { fieldError(p, 'Required'); bad = true; }
+      if (bad) return;
+      ob.userEmail = e.value.trim();
       goOnboarding('entry');
     });
     on('liSignup', () => goOnboarding('signup'));
@@ -1329,6 +1376,8 @@
     });
     document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
+      const typed = ($('suFirm') && $('suFirm').value || '').trim();
+      if (typed) ob.firmName = typed;
       ob.use = 'practice'; ob.useChosen = true; ob.nameFrom = 'signup';
       saveOb();
       goOnboarding('firmname');
@@ -1406,8 +1455,11 @@
       }
     });
     on('obNameNext', () => {
-      const name = readFirmName();
-      if (!name) return;
+      const input = $('firmNameIn');
+      const name = input ? input.value.trim() : readFirmName();
+      if (!name) { fieldError(input, 'Required'); return; }
+      fieldClear(input);
+      ob.firmName = name;
       ob.firmTouched = true;
       if (ob.nameFrom === 'signup') { enterNewFirm(); return; }
       finishOnboarding(ob.pendingEntries || []);
@@ -1424,10 +1476,9 @@
     });
     const firmIn = $('firmNameIn');
     if (firmIn) firmIn.oninput = () => {
+      fieldClear(firmIn);
       ob.firmTouched = true;
       ob.firmName = firmIn.value;
-      const btn = $('obNameNext');
-      if (btn) btn.disabled = !firmIn.value.trim();
       saveOb();
     };
     const manual = $('manualName');
@@ -1642,12 +1693,32 @@
     const modal = $('booksModal');
     if (modal) modal.classList.remove('show');
   }
+  let booksPick = '';
   function showBooksModal() {
     booksToken++;
+    booksPick = '';
     const modal = $('booksModal');
-    if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
+    const err = $('booksError');
+    if (err) err.hidden = true;
     if (modal) {
-      modal.querySelectorAll('[data-ledger]').forEach((b) => b.onclick = () => connectLedger(b.dataset.ledger));
+      modal.querySelectorAll('.ledger-card').forEach((card) => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-checked', 'false');
+        card.onclick = () => {
+          booksPick = card.dataset.ledger;
+          modal.querySelectorAll('.ledger-card').forEach((other) => {
+            const on = other === card;
+            other.classList.toggle('selected', on);
+            other.setAttribute('aria-checked', on ? 'true' : 'false');
+          });
+          if (err) err.hidden = true;
+        };
+      });
+      if ($('booksCancel')) $('booksCancel').onclick = closeBooks;
+      if ($('booksGo')) $('booksGo').onclick = () => {
+        if (!booksPick) { if (err) err.hidden = false; return; }
+        connectLedger(booksPick);
+      };
       modal.classList.add('show');
     }
   }
@@ -1659,8 +1730,12 @@
     const name = file && file.name ? file.name : '';
     const label = $('csvFileName');
     if (label) { label.hidden = !name; label.textContent = name; }
-    const go = $('csvGo');
-    if (go) go.disabled = !name;
+    const err = $('csvError');
+    const zone = $('csvDrop');
+    if (name) {
+      if (err) err.hidden = true;
+      if (zone) zone.classList.remove('is-error');
+    }
   }
   let connectLoading = false;
   function connectLedger(src) {
@@ -1705,58 +1780,56 @@
       <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
         <div class="modal-header" id="pickTitle">Choose clients to import</div>
         <div class="modal-body">
-          <p class="text-body1">All ticked. Untick anyone you no longer work with.</p>
           <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
           <div class="pick-scroll"><table class="synder-table">
-            <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
-            <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] === true ? ' checked' : ''} /></td>
-              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="muted">No matches.</td></tr>'}</tbody>
+            <thead><tr><th style="width:40px"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
+            <tbody>${list.map((c) => `<tr><td><input class="checkbox" type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] === true ? ' checked' : ''} /></td>
+              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No matches.</td></tr>'}</tbody>
           </table></div>
+          <p class="form-error-msg" id="pickError" hidden>Choose at least one client</p>
         </div>
-        <div class="modal-footer spread">
-          <span class="text-body1" id="reviewCount">${n} selected</span>
-          <div class="modal-actions"><button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Import ${n} client${n === 1 ? '' : 's'}</button></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd">Import ${n} client${n === 1 ? '' : 's'}</button>
         </div>
       </div>
     </div>`;
   }
   function flowDialogs() {
-    const qb = ledgerMark(QB_LOGO, 18);
-    const xero = ledgerMark(XERO_LOGO, 18);
     return `<div class="modal-bg" id="booksModal">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="booksTitle">
           <div class="modal-header" id="booksTitle">Import your client list</div>
           <div class="modal-body" id="booksBody">
-            <p class="text-body1">You'll sign in to QuickBooks or Xero. We read your client list, then you choose who to import. Read-only. We only copy names.</p>
-            <div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
-            <div class="books-opts">
-              <button type="button" class="btn-outlined" data-ledger="qbo">${qb}QuickBooks</button>
-              <button type="button" class="btn-outlined" data-ledger="xero">${xero}Xero</button>
+            <p class="text-body2">You'll sign in to QuickBooks or Xero. We read your client list, then you choose who to import. Read-only. We only copy names.</p>
+            <div class="ledger-list" role="radiogroup" aria-label="Accounting provider">
+              <button type="button" class="box box--white ledger-card" data-ledger="qbo" role="radio" aria-checked="false">${ledgerMark(QB_LOGO, 40)}<span><span class="text-subtitle2">QuickBooks Online</span><span class="text-body2">Import your customer list</span></span></button>
+              <button type="button" class="box box--white ledger-card" data-ledger="xero" role="radio" aria-checked="false">${ledgerMark(XERO_LOGO, 40)}<span><span class="text-subtitle2">Xero</span><span class="text-body2">Import contacts from one or more organisations</span></span></button>
             </div>
+            <p class="form-error-msg" id="booksError" hidden>Choose QuickBooks or Xero</p>
           </div>
-          <div class="modal-footer"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button></div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button><button type="button" class="btn" id="booksGo">Import clients</button></div>
         </div>
       </div>
       <div class="modal-bg" id="csvModal">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="csvTitle">
           <div class="modal-header" id="csvTitle">Import CSV</div>
           <div class="modal-body">
-            <p class="text-body1">Required column: client name. Optional columns, such as email, are ignored in this sample.</p>
+            <p class="text-body2">Required column: client name. Optional columns, such as email, are ignored in this sample.</p>
             <div class="file-upload" id="csvDrop"><span>Drop a CSV here, or</span><button type="button" class="link" id="csvBrowse">browse file</button></div>
             <p class="form-hint">CSV files up to 5 MB.</p>
-            <p class="text-body1" id="csvFileName" hidden></p>
+            <p class="form-error-msg" id="csvError" hidden>Choose a CSV file</p>
+            <p class="text-body2" id="csvFileName" hidden></p>
             <button type="button" class="link" id="csvTemplate">Download template</button>
             <input type="file" id="csvInput" accept=".csv,text/csv" hidden />
           </div>
-          <div class="modal-footer"><button type="button" class="btn-outlined" id="csvCancel">Cancel</button><button type="button" class="btn" id="csvGo" disabled>Continue</button></div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="csvCancel">Cancel</button><button type="button" class="btn" id="csvGo">Continue</button></div>
         </div>
       </div>
       ${pickerHtml()}`;
   }
   function renderClients() {
     if (!sc().clients.length) {
-      const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 14)}</span>`;
-      const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 14)}</span>`;
+      const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 22)}</span>`;
+      const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 22)}</span>`;
       return `<div class="flow-narrow">
         <div class="box box--white bring-card">
           <h1 class="text-h1">Bring in your clients</h1>
@@ -1767,7 +1840,7 @@
             <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
           </div>
         </div>
-        <p class="story-reopen text-body1"><button type="button" class="link" id="howWorks">How Synder works</button></p>
+        ${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}
       </div>${flowDialogs()}`;
     }
     const banner = ob && ob.banner === 'invite'
@@ -1842,8 +1915,8 @@
   function renderAddOne() {
     return `<div class="flow-narrow page-stack">
       <h1 class="text-h1">Add a client</h1>
-      <div class="form-field"><label class="form-label" for="oneName">Client name</label><input class="input" id="oneName" placeholder="e.g. Harbor Street Books" /><p class="form-hint">Just the name for now. You can connect their books later.</p></div>
-      <div class="ob-actions"><button type="button" class="btn" id="oneAdd" disabled>Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
+      <div class="form-field"><label class="form-label form-label-required" for="oneName">Client name</label><input class="input" id="oneName" placeholder="e.g. Harbor Street Books" /><p class="form-hint">Just the name for now. You can connect their books later.</p></div>
+      <div class="ob-actions"><button type="button" class="btn" id="oneAdd">Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
     </div>`;
   }
   function renderPreassess() {
@@ -2063,7 +2136,6 @@
       const picked = rows.filter((c) => ob.selected[c.id] === true).length;
       all.checked = rows.length > 0 && picked === rows.length;
       all.indeterminate = picked > 0 && picked < rows.length;
-      all.disabled = rows.length === 0;
       all.onchange = () => {
         const query = (ob.q || '').toLowerCase();
         IMPORT_POOL.filter((c) => !query || c.name.toLowerCase().includes(query)).forEach((c) => { ob.selected[c.id] = all.checked; });
@@ -2073,7 +2145,13 @@
     }
     document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => { ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderMain(); });
     const add = $('obAdd');
-    if (add) add.onclick = () => addImported(IMPORT_POOL.filter((c) => ob.selected[c.id] === true).map((c) => ({ id: c.id, name: c.name })));
+    if (add) add.onclick = () => {
+      const chosen = IMPORT_POOL.filter((c) => ob.selected[c.id] === true);
+      const err = $('pickError');
+      if (!chosen.length) { if (err) err.hidden = false; return; }
+      if (err) err.hidden = true;
+      addImported(chosen.map((c) => ({ id: c.id, name: c.name })));
+    };
     const cancel = $('reviewCancel');
     if (cancel) cancel.onclick = () => { if (ob) { ob.picker = false; saveOb(); } goFirm('clients'); };
   }
@@ -2182,15 +2260,23 @@
       window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
     bind('csvGo', () => {
-      if ($('csvGo') && $('csvGo').disabled) return;
+      const named = $('csvFileName') && !$('csvFileName').hidden && ($('csvFileName').textContent || '').trim();
+      const err = $('csvError');
+      if (!named) {
+        if (err) err.hidden = false;
+        const zone = $('csvDrop');
+        if (zone) zone.classList.add('is-error');
+        return;
+      }
       ob.source = 'upload';
       openPicker();
     });
-    const one = $('oneName'), oneBtn = $('oneAdd');
-    if (one && oneBtn) one.oninput = () => { oneBtn.disabled = !one.value.trim(); };
+    const one = $('oneName');
+    if (one) one.oninput = () => fieldClear(one);
     bind('oneAdd', () => {
-      const name = ($('oneName').value || '').trim();
-      if (!name) return;
+      const input = $('oneName');
+      const name = (input && input.value || '').trim();
+      if (!name) { fieldError(input, 'Required'); return; }
       sc().clients.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' });
       if (ob && ob.variant === 'existing') ob.banner = 'progress';
       if (ob) { ob.importNote = 1; saveOb(); } persistDirectory(); goFirm('clients');
@@ -2421,6 +2507,7 @@
   function storyReduce() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   function stopStoryTimer() { if (storyTimer) { clearTimeout(storyTimer); storyTimer = null; } }
   function maybeAutoStory() {
+    if (!SHOW_STORY) return;
     if (document.getElementById('storyModal')) return;
     if (!ob || ob.variant === 'existing' || ob.storySeen || !ob.storyPending) return;
     if (mode !== 'firm' || !st || st.page !== 'clients' || sc().clients.length) return;
