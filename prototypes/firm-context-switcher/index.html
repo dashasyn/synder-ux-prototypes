@@ -541,7 +541,9 @@
     .ob-quiet:focus-visible { outline: 2px solid #0053CC; outline-offset: 3px; border-radius: 4px; }
     .signup-aside { margin: 16px 0 0; max-width: 420px; color: #6B778C; font-size: 15px; line-height: 22px; text-align: center; }
     .signup-links { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 420px; }
-    .brand-logo { width: 40px; height: 40px; flex-shrink: 0; display: block; }
+    /* Kit .integration-logo is 20px. These keep the prototype's 18px rows and 40px cards. */
+    img.integration-logo.logo-sm { width: 18px; height: 18px; }
+    img.integration-logo.logo-lg { width: 40px; height: 40px; }
     .src-file {
       width: 40px; height: 40px; border-radius: var(--radius-sm); background: #F2F6FC; color: #0053CC;
       display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -1090,8 +1092,6 @@
     join: '<svg class="ob-ill-svg" viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><circle cx="46" cy="34" r="8" fill="#0053CC"/><circle cx="70" cy="34" r="8" fill="#7BA3E0"/><path d="M32 58c1.6-9 7-13 14-13s12.4 4 14 13" fill="#0053CC"/><path d="M56 58c1.6-9 7-13 14-13s12.4 4 14 13" fill="#7BA3E0"/><rect x="84" y="40" width="22" height="16" rx="2" fill="#fff" stroke="#0053CC" stroke-width="2"/><path d="M84 42l11 8 11-8" fill="none" stroke="#0053CC" stroke-width="2"/></svg>',
     empty: '<svg viewBox="0 0 128 84" aria-hidden="true"><rect x="4" y="10" width="120" height="64" rx="14" fill="#F2F6FC"/><rect x="40" y="22" width="48" height="40" rx="4" fill="#fff" stroke="#0053CC" stroke-width="2"/><path d="M48 34h32M48 42h24M48 50h18" stroke="#7BA3E0" stroke-width="2" stroke-linecap="round"/></svg>'
   };
-  const QB_LOGO = '<svg class="brand-logo" viewBox="0 0 24 24" width="40" height="40" role="img" aria-label="QuickBooks"><path fill="#2CA01C" d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm.642 4.1335c.9554 0 1.7296.776 1.7296 1.7332v9.0667h1.6c1.614 0 2.9275-1.3156 2.9275-2.933 0-1.6173-1.3136-2.9333-2.9276-2.9333h-.6654V7.3334h.6654c2.5722 0 4.6577 2.0897 4.6577 4.667 0 2.5774-2.0855 4.6666-4.6577 4.6666H12.642zM7.9837 7.333h3.3291v12.533c-.9555 0-1.73-.7759-1.73-1.7332V9.0662H7.9837c-1.6146 0-2.9277 1.316-2.9277 2.9334 0 1.6175 1.3131 2.9333 2.9277 2.9333h.6654v1.7332h-.6654c-2.5725 0-4.6577-2.0892-4.6577-4.6665 0-2.5771 2.0852-4.6666 4.6577-4.6666Z"/></svg>';
-  const XERO_LOGO = '<svg class="brand-logo" viewBox="0 0 24 24" width="40" height="40" role="img" aria-label="Xero"><path fill="#13B5EA" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.585 14.655c-1.485 0-2.69-1.206-2.69-2.689 0-1.485 1.207-2.691 2.69-2.691 1.485 0 2.69 1.207 2.69 2.691s-1.207 2.689-2.69 2.689zM7.53 14.644c-.099 0-.192-.041-.267-.116l-2.043-2.04-2.052 2.047c-.069.068-.16.108-.258.108-.202 0-.368-.166-.368-.368 0-.099.04-.191.111-.263l2.04-2.05-2.038-2.047c-.075-.069-.113-.162-.113-.261 0-.203.166-.366.368-.366.098 0 .188.037.258.105l2.055 2.048 2.048-2.045c.069-.071.162-.108.26-.108.211 0 .375.165.375.366 0 .098-.029.188-.104.258l-2.056 2.055 2.055 2.051c.068.069.104.16.104.258 0 .202-.165.368-.365.368h-.01zm8.017-4.591c-.796.101-.882.476-.882 1.404v2.787c0 .202-.165.366-.366.366-.203 0-.367-.165-.368-.366v-4.53c0-.204.16-.366.362-.366.166 0 .316.125.346.289.27-.209.6-.317.93-.317h.105c.195 0 .359.165.359.368 0 .201-.164.352-.375.359 0 0-.09 0-.164.008l.053-.002zm-3.091 2.205H8.625c0 .019.003.037.006.057.02.105.045.211.083.31.194.531.765 1.275 1.829 1.29.33-.003.631-.086.9-.229.21-.12.391-.271.525-.428.045-.058.09-.112.12-.168.18-.229.405-.186.54-.083.164.135.18.391.045.57l-.016.016c-.21.27-.435.495-.689.66-.255.164-.525.284-.811.345-.33.09-.645.104-.975.06-1.095-.135-2.01-.93-2.28-2.01-.06-.21-.09-.42-.09-.645 0-.855.421-1.695 1.125-2.205.885-.615 2.085-.66 3-.075.63.405 1.035 1.021 1.185 1.771.075.419-.21.794-.734.81l.068-.046zm6.129-2.223c-1.064 0-1.931.865-1.931 1.931 0 1.064.866 1.931 1.931 1.931s1.931-.867 1.931-1.931c0-1.065-.866-1.933-1.931-1.933v.002zm0 2.595c-.367 0-.666-.297-.666-.666 0-.367.3-.665.666-.665.367 0 .667.299.667.665 0 .369-.3.667-.667.666zm-8.04-2.603c-.91 0-1.672.623-1.886 1.466v.03h3.776c-.203-.855-.973-1.494-1.891-1.494v-.002z"/></svg>';
   function obCard(o) {
     const on = !!o.selected;
     return `<button type="button" class="ob-card${on ? ' selected' : ''}" ${o.attr} aria-pressed="${on ? 'true' : 'false'}">
@@ -1159,8 +1159,8 @@
     </div>`;
   }
   function socialButtons() {
-    const qb = QB_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
-    const xero = XERO_LOGO.replace('class="brand-logo"', 'width="18" height="18"').replace(' width="40" height="40"', '');
+    const qb = brandMark('QuickBooks', 18);
+    const xero = brandMark('Xero', 18);
     const google = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.8 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.3 35.1 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.2-3.5 5.7-6.6 7.1l6.3 5.3C37.4 38.3 44 33 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>';
     return `<div class="sso-row">
       <button type="button" class="btn-outlined" data-social="qbo">${qb}Intuit</button>
@@ -1337,8 +1337,8 @@
         <h1>Import client list</h1>
         <p class="welcome-copy">Choose where the names come from. You’ll review them before anyone is added. No changes will be made to their books without permission.</p>
         <div class="src-list">
-          ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
-          ${srcOpt('xero', XERO_LOGO, 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+          ${srcOpt('qbo', brandMark('QuickBooks', 40), 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
+          ${srcOpt('xero', brandMark('Xero', 40), 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
           ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'Upload CSV', 'Names from a spreadsheet, then the same review.', 'Demo. No file is opened or parsed.')}
         </div>`);
     } else if (step === 'connecting') {
@@ -1950,15 +1950,11 @@
     const ready = list.filter((c) => clientView(c).key !== 'off').length;
     return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} connected`;
   }
-  function ledgerMark(svg, size) {
-    const px = size || 18;
-    return svg.replace('class="brand-logo"', `width="${px}" height="${px}" aria-hidden="true"`).replace(' width="40" height="40"', '').replace('role="img" ', '');
-  }
   function booksChoiceHtml() {
     return `<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Read-only. We only copy client names — no changes to your books.</span></div>
       <div class="books-opts">
-        <button type="button" class="btn-outlined" data-ledger="qbo">${ledgerMark(QB_LOGO, 40)}QuickBooks</button>
-        <button type="button" class="btn-outlined" data-ledger="xero">${ledgerMark(XERO_LOGO, 40)}Xero</button>
+        <button type="button" class="btn-outlined" data-ledger="qbo">${brandMark('QuickBooks', 40)}QuickBooks</button>
+        <button type="button" class="btn-outlined" data-ledger="xero">${brandMark('Xero', 40)}Xero</button>
       </div>`;
   }
   function closeBooks() {
@@ -2047,19 +2043,31 @@
       finishClientConnect();
     }, dur);
   }
+  const KIT_LOGOS = 'https://dashasyn.github.io/synder-prototypes/ui-kit/logos/';
   const LOGO_FILES = {
-    Stripe: 'logos/stripe.svg', PayPal: 'logos/paypal.svg', Square: 'logos/square.svg',
-    Amazon: 'logos/amazon.svg', eBay: 'logos/ebay.svg', Shopify: 'logos/shopify.svg',
-    Etsy: 'logos/etsy.svg', WooCommerce: 'logos/woocommerce.svg', Sage: 'logos/sage.svg',
-    NetSuite: 'logos/netsuite.svg', GoCardless: 'logos/gocardless.svg', 'Authorize.Net': 'logos/authorizenet.svg'
+    QuickBooks: 'quickbooks-square.svg',
+    'QuickBooks Online': 'quickbooks-square.svg',
+    'QuickBooks Desktop': 'quickbooks-desktop-full.svg',
+    Xero: 'xero-square.svg',
+    Stripe: 'stripe-square.svg',
+    PayPal: 'paypal-square.svg',
+    Square: 'square-square.svg',
+    Amazon: 'amazon-square.svg',
+    eBay: 'ebay-square.svg',
+    Shopify: 'shopify-square.svg',
+    Etsy: 'etsy-square.svg',
+    WooCommerce: 'woo-square.svg',
+    Sage: 'sage-square.svg',
+    NetSuite: 'net-suite-square.svg',
+    GoCardless: 'gocardless-square.svg',
+    'Authorize.Net': 'authorize-square.svg'
   };
   function brandMark(name, size) {
     const px = size || 18;
-    if (name === 'QuickBooks' || name === 'QuickBooks Desktop') return ledgerMark(QB_LOGO, px);
-    if (name === 'Xero') return ledgerMark(XERO_LOGO, px);
     const file = LOGO_FILES[name];
-    if (file) return `<img src="${file}" width="${px}" height="${px}" alt="" />`;
-    return '';
+    if (!file) return '';
+    const cls = px >= 32 ? 'integration-logo logo-lg' : 'integration-logo logo-sm';
+    return `<img class="${cls}" src="${KIT_LOGOS}${file}" width="${px}" height="${px}" alt="" />`;
   }
   function tipChip(kind, label, tip) {
     return `<span class="tooltip-wrap"><span class="status status-${kind}" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
@@ -2238,7 +2246,7 @@
   }
   function renderConnect() {
     const xero = ob && ob.source === 'xero';
-    const logo = xero ? XERO_LOGO : QB_LOGO;
+    const logo = brandMark(xero ? 'Xero' : 'QuickBooks', 40);
     const title = xero ? 'Synder wants to connect to your Xero organisation' : 'Synder wants to connect to your QuickBooks company';
     const field = xero ? 'Organisation' : 'Company';
     const go = xero ? 'Allow access' : 'Connect';
@@ -2347,8 +2355,8 @@
           <div class="modal-body" id="booksBody">
             <p class="text-body2">You'll sign in to QuickBooks or Xero. We read your client list, then you choose who to import. Read-only. We only copy names.</p>
             <div class="ledger-list" role="radiogroup" aria-label="Accounting provider">
-              <button type="button" class="box box--white ledger-card" data-ledger="qbo" role="radio" aria-checked="false">${ledgerMark(QB_LOGO, 40)}<span><span class="text-subtitle2">QuickBooks</span><span class="text-body2">Import your client companies</span></span></button>
-              <button type="button" class="box box--white ledger-card" data-ledger="xero" role="radio" aria-checked="false">${ledgerMark(XERO_LOGO, 40)}<span><span class="text-subtitle2">Xero</span><span class="text-body2">Import your client organisations</span></span></button>
+              <button type="button" class="box box--white ledger-card" data-ledger="qbo" role="radio" aria-checked="false">${brandMark('QuickBooks', 40)}<span><span class="text-subtitle2">QuickBooks</span><span class="text-body2">Import your client companies</span></span></button>
+              <button type="button" class="box box--white ledger-card" data-ledger="xero" role="radio" aria-checked="false">${brandMark('Xero', 40)}<span><span class="text-subtitle2">Xero</span><span class="text-body2">Import your client organisations</span></span></button>
             </div>
             <p class="form-error-msg" id="booksError" hidden>Choose QuickBooks or Xero</p>
           </div>
@@ -2386,7 +2394,7 @@
       ${pickerHtml()}`;
   }
   function bringChoices() {
-    const logos = `<span class="logo-line">${ledgerMark(QB_LOGO, 40)}${ledgerMark(XERO_LOGO, 40)}</span>`;
+    const logos = `<span class="logo-line">${brandMark('QuickBooks', 40)}${brandMark('Xero', 40)}</span>`;
     return `<div class="bring-stage">
       <h1 class="text-h1">Let’s start by bringing in your clients.</h1>
       <p class="text-body1 text-secondary">Import in bulk or add them one by one. Importing only copies client names.</p>
@@ -2546,8 +2554,8 @@
       <div class="ph"><div><h1 class="text-h1">Import client list</h1></div></div>
       <p class="text-body1">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
       <div class="import-sources">
-        ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
-        ${srcOpt('xero', XERO_LOGO, 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+        ${srcOpt('qbo', brandMark('QuickBooks', 40), 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
+        ${srcOpt('xero', brandMark('Xero', 40), 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
         ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.')}
       </div>
       <div class="ob-actions"><button type="button" class="btn-text" id="importCancel">Cancel</button></div>
