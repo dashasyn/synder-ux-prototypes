@@ -375,8 +375,6 @@
     .bring-stage .text-h1, .bring-stage .text-body1, .bring-choice .text-h2, .bring-choice .text-body2 { margin: 0; }
     .bring-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); width: 100%; }
     .bring-choice { flex-direction: column; align-items: stretch; gap: var(--space-3); padding: var(--space-6); text-align: center; }
-    .bring-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); }
-    .bring-choice .info-chip { position: static; width: max-content; max-width: max-content; margin: 0; flex: 0 0 auto; align-self: center; }
     .bring-mark { display: flex; align-items: center; justify-content: center; min-height: 40px; }
     .bring-choice .logo-line { justify-content: center; }
     .bring-choice .btn, .bring-choice .btn-outlined { width: 100%; margin-top: auto; }
@@ -425,8 +423,12 @@
     .connect-main .progress { margin-top: var(--space-4); max-width: 360px; }
     .tooltip-wrap:focus-within .tooltip { opacity: 1; }
     .clients-table { overflow: visible; }
-    .clients-table table.synder-table tbody td { height: 68px; padding-top: var(--space-4); padding-bottom: var(--space-4); }
-    .status-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+    .clients-table table.synder-table tbody td { height: 68px; padding-top: var(--space-2); padding-bottom: var(--space-2); }
+    .status-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-4); }
+    .detail-block { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+    .detail-block .text-h2, .detail-block p { margin: 0; }
+    .detail-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); width: 100%; }
+    .detail-list li { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
     .stat-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-5); cursor: pointer; text-align: left; font: inherit; color: inherit; }
     .stat-card.on { box-shadow: inset 0 -2px 0 var(--text-primary); }
     .logo-line, .logo-stack { display: inline-flex; align-items: center; gap: var(--space-2); }
@@ -560,7 +562,8 @@
     .setup-calls h2 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
     .setup-calls .call { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #D6E4F7; }
     .setup-calls .call div { flex: 1; font-size: 14px; line-height: 20px; }
-    .row-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .row-actions { display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: var(--space-2); flex-wrap: nowrap; }
+    .row-actions .btn { flex: 0 0 auto; white-space: nowrap; }
     .import-sources { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
     .ob-field.firm input.firm-name-input { height: 56px; font-size: 20px; max-width: 560px; width: 100%; }
     .ob-field.firm { max-width: 560px; margin: 8px 0 0; }
@@ -962,34 +965,37 @@
   }
   function existingClients() {
     const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up' };
-    const on = (accounting, integrations, issues) => ({
+    const on = (accounting, integrations, issues, licence) => ({
       connected: true, accounting, integrations, issues, syncing: false, ledger: accounting, pay: (integrations[0] || null),
       books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'today at 9:14 AM',
-      setup: true, licence: 'Pro', setupState: 'Ready'
+      setup: true, licence: licence || 'Pro', setupState: 'Ready'
     });
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
     const src = (acct, name) => acct + ' · ' + name;
     return [
-      Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', four.slice(), [])),
-      Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC' }, on('QuickBooks', four.slice(), [
+      Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', ['Stripe'], [], 'Essential')),
+      Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC', extraFails: [
+        { name: 'Missing payouts', short: 'Missing payouts', detail: '3 payouts' },
+        { name: 'Unmatched fees', short: 'Unmatched fees', detail: 'Stripe fees' }
+      ] }, on('QuickBooks', four.slice(), [
         { key: 'unreconciled', periods: ['Aug 2026', 'Sep 2026'], source: src('QuickBooks', 'Tidewater Dental LLC') },
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Tidewater Dental LLC') }
-      ])),
+      ], 'Pro')),
       Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [
         { key: 'reconnect', source: 'QuickBooks', books: true }
-      ])),
+      ], 'Premium')),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
-      Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon'], [])),
+      Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
       Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
       Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square', 'WooCommerce'], [
         { key: 'reconnect', source: 'Stripe' },
         { key: 'reconnect', source: 'PayPal' }
-      ])),
+      ], 'Pro')),
       Object.assign({ id: 'e8', name: 'Kestrel Analytics' }, off),
-      Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify', 'Etsy'], [
-        { key: 'uncategorized', count: 8, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
-      ])),
-      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC', invite: { email: 'owner@fablecoffee.com', message: '', sent: '12 Nov 2026' } }, on('Xero', [], []))
+      Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
+        { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
+      ], 'Premium')),
+      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC', invite: { email: 'owner@fablecoffee.com', message: '', sent: '12 Nov 2026' } }, on('Xero', [], [], 'Essential'))
     ];
   }
   function enterNewFirm() {
@@ -1677,21 +1683,19 @@
           <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
           <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
     }
-    const failed = list.filter((c) => clientView(c).key === 'reconnect').length;
-    const unre = list.filter((c) => (clientView(c).issues || []).some((i) => i.key === 'unreconciled')).length;
-    const uncat = list.filter((c) => (clientView(c).issues || []).some((i) => i.key === 'uncategorized')).length;
-    const close = list.filter((c) => c.month && isSetup(c)).length;
+    const counts = statusCounts(list);
     return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(FIRM.name)}</div></div>
       <div class="ph-actions"><button class="btn" id="dashContinue">Continue setup</button></div></div>
       <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
         <span class="bar"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></span>
         <span class="muted">${need} still need setup</span></div>
-      <h2 class="section-h">Needs attention</h2>
+      <h2 class="section-h">Clients</h2>
       <div class="issues">
-        <div class="issue"><div class="n">${failed}</div><div class="l">Failed syncs</div></div>
-        <div class="issue"><div class="n">${unre}</div><div class="l">Unreconciled</div></div>
-        <div class="issue"><div class="n">${uncat}</div><div class="l">Uncategorized</div></div>
-        <div class="issue"><div class="n">${close}</div><div class="l">Open month closes</div></div>
+        <div class="issue"><div class="n">${counts.good}</div><div class="l">All good</div></div>
+        <div class="issue"><div class="n">${counts.checks}</div><div class="l">Checks not passed</div></div>
+        <div class="issue"><div class="n">${counts.lost}</div><div class="l">Connection lost</div></div>
+        <div class="issue"><div class="n">${counts.off}</div><div class="l">Not set up</div></div>
+        <div class="issue"><div class="n">${counts.waiting}</div><div class="l">Waiting for owner</div></div>
       </div>`;
   }
   function renderBilling() {
@@ -1769,6 +1773,14 @@
     if (clientId) touchRecent(clientId);
     save(); render();
   }
+  function openDetails(id) {
+    st.ctx = 'firm';
+    st.page = 'clientdetail';
+    st.clientId = id;
+    st.orgId = null;
+    save();
+    render();
+  }
   function openClient(id, page) {
     const c = findOrg(id);
     if (c && isClient(id) && clientView(c).key === 'off') {
@@ -1834,9 +1846,10 @@
   /* ───────── Render: sidebar ───────── */
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
-    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard'].includes(st.page) ? 'clients' : (st.page === 'details' ? 'dashboard' : st.page);
+    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail'].includes(st.page) ? 'clients' : (st.page === 'details' ? 'dashboard' : st.page);
+    const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
-      `<button class="sidebar-item${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span><span class="sidebar-item-label">${esc(label)}</span>${k === 'clients' ? `<span class="sidebar-badge">${sc().clients.length}</span>` : ''}</button>`
+      `<button class="sidebar-item${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span><span class="sidebar-item-label">${esc(label)}</span>${k === 'clients' ? `<span class="sidebar-badge">${clientN}</span>` : ''}</button>`
     ).join('');
     $('nav').querySelectorAll('.sidebar-item').forEach((b) => b.onclick = () => {
       if (st.ctx === 'firm') goFirm(b.dataset.k); else goOrg(st.orgId, b.dataset.k);
@@ -1861,47 +1874,75 @@
     const n = normName(entry && entry.name);
     return sc().clients.some((c) => c.id === entry.id || normName(c.name) === n);
   }
-  const ISSUE_RANK = { reconnect: 0, unreconciled: 1, uncategorized: 2 };
-  function issueSentence(issue) {
-    if (!issue) return '';
-    if (issue.key === 'reconnect') return (issue.source || 'A source') + ' needs to be reconnected.';
-    if (issue.key === 'unreconciled') return (issue.periods || []).join(', ') + ' not reconciled in ' + (issue.source || 'the books') + '.';
-    if (issue.key === 'uncategorized') return (issue.count || 0) + ' uncategorized transactions in ' + (issue.source || 'the books') + '.';
-    return '';
+  const HEALTH_EXTRA = [
+    'Duplicate sales', 'Missing payouts', 'Unmatched fees', 'Open refunds',
+    'Tax mismatches', 'Unapplied payments', 'Deposit gaps', 'Invoice sync',
+    'Product mapping', 'Customer mapping', 'Discount mismatches', 'Shipping mismatches',
+    'Gift card balances', 'Chargebacks', 'Pending captures', 'Currency mismatches',
+    'Location mapping', 'Class mapping', 'Delayed payouts', 'Partial refunds'
+  ];
+  function licenseLabel(c) {
+    const lic = (c && (c.licence || c.license)) || '';
+    if (!lic || lic === 'None' || lic === 'Not assigned') return { text: 'Not assigned', secondary: true };
+    return { text: lic, secondary: false };
+  }
+  function healthModel(c) {
+    if (!c || !c.accounting || !(c.connected || c.setup)) return null;
+    const names = ['Uncategorized transactions', 'Unreconciled periods'].concat((c.integrations && c.integrations.length) ? HEALTH_EXTRA : []);
+    const failed = [];
+    const periodDetail = (periods) => {
+      const list = (periods || []).filter(Boolean).map(String);
+      const years = list.map((p) => (p.match(/\d{4}$/) || [])[0]);
+      if (list.length > 1 && years.every((y) => y && y === years[0])) {
+        return list.map((p) => p.replace(/\s*\d{4}$/, '')).join(', ') + ' ' + years[0];
+      }
+      return list.join(', ');
+    };
+    (c.issues || []).forEach((issue) => {
+      if (issue.key === 'unreconciled') failed.push({ name: 'Unreconciled periods', short: 'Unreconciled', detail: periodDetail(issue.periods) });
+      else if (issue.key === 'uncategorized') failed.push({ name: 'Uncategorized transactions', short: 'Uncategorized', detail: (issue.count || 0) + ' transactions' });
+    });
+    (c.extraFails || []).forEach((f) => {
+      if (f && f.name) failed.push({ name: f.name, short: f.short || f.name, detail: f.detail || '' });
+    });
+    const seen = new Set();
+    const unique = failed.filter((f) => names.indexOf(f.name) >= 0 && !seen.has(f.name) && seen.add(f.name));
+    return { total: names.length, passed: names.length - unique.length, failed: unique, names };
   }
   function clientView(c) {
-    const empty = { key: 'off', label: 'Not connected', kind: 'grey', tip: 'Connect accounting and integrations to start syncing.', extra: 0, issues: [], accounting: '', period: '' };
-    if (!c) return empty;
-    const acct = c.accounting ? (c.accounting + ' · ' + companyName(c)) : '';
-    if (c.syncing) {
-      return { key: 'syncing', label: 'Syncing', kind: 'blue', tip: 'Synder is reading ' + (acct || 'the books') + '.', extra: 0, issues: [], accounting: acct, period: c.month || 'Oct 2026' };
-    }
-    if (!(c.connected || c.accounting)) return empty;
+    const empty = { key: 'off', label: 'Not set up', kind: 'grey', tip: 'Connect accounting to start working with this client.', health: null, accounting: '', issues: [] };
+    if (!c || !c.accounting || !(c.connected || c.setup)) return empty;
+    const health = healthModel(c);
+    const acct = c.accounting;
+    const issues = Array.isArray(c.issues) ? c.issues : [];
     if (c.invite && c.invite.email && !(c.integrations && c.integrations.length)) {
-      return { key: 'waiting', label: 'Waiting for owner', kind: 'grey', tip: 'Invite sent to ' + c.invite.email + ' on ' + c.invite.sent + '.', extra: 0, issues: [], accounting: acct, period: c.month || 'Oct 2026' };
+      return { key: 'waiting', label: 'Waiting for owner', kind: 'blue', tip: 'Invite sent to ' + c.invite.email + ' on ' + c.invite.sent + '.', health, accounting: acct, issues };
     }
-    const issues = (Array.isArray(c.issues) ? c.issues.slice() : []).sort((a, b) => (ISSUE_RANK[a.key] ?? 9) - (ISSUE_RANK[b.key] ?? 9));
-    const period = c.month || 'Oct 2026';
-    const checked = c.checked || 'today at 9:14 AM';
-    if (!issues.length) {
-      return { key: 'good', label: 'All good · ' + period, kind: 'green', tip: 'Every check passed for ' + period + ' in ' + acct + '. Last checked ' + checked + '.', extra: 0, issues: [], accounting: acct, period, checked };
+    const lostInteg = lostIntegrations(c);
+    if (booksLost(c) || lostInteg.length) {
+      const bits = [];
+      if (booksLost(c)) bits.push(acct + ' disconnected');
+      if (lostInteg.length) bits.push(lostInteg.map((i) => i.source).join(', ') + ' lost connection');
+      return { key: 'lost', label: 'Connection lost', kind: 'red', tip: bits.join('. ') + '.', health, accounting: acct, issues };
     }
-    const names = { reconnect: 'Reconnect needed', unreconciled: 'Unreconciled', uncategorized: 'Uncategorized' };
-    const kinds = { reconnect: 'red', unreconciled: 'yellow', uncategorized: 'yellow' };
-    const top = issues[0];
-    const extra = issues.length - 1;
-    return { key: top.key, label: names[top.key] + (extra ? ' +' + extra : ''), kind: kinds[top.key] || 'yellow', tip: issues.map(issueSentence).join(' '), extra, issues, accounting: acct, period };
+    if (health && health.failed.length) {
+      return { key: 'checks', label: 'Checks not passed', kind: 'yellow', tip: health.failed.map((f) => f.short + ': ' + f.detail).join('; '), health, accounting: acct, issues };
+    }
+    const passed = health ? health.passed + ' of ' + health.total + ' checks passed.' : 'All checks passed.';
+    return { key: 'good', label: 'All good', kind: 'green', tip: passed, health, accounting: acct, issues };
   }
   function needsAttention(c) {
     const k = clientView(c).key;
-    return k === 'syncing' || k === 'reconnect' || k === 'unreconciled' || k === 'uncategorized';
+    return k === 'checks' || k === 'lost';
   }
   function statusCounts(list) {
+    const key = (c) => clientView(c).key;
     return {
-      attention: list.filter(needsAttention).length,
-      off: list.filter((c) => clientView(c).key === 'off').length,
-      waiting: list.filter((c) => clientView(c).key === 'waiting').length,
-      good: list.filter((c) => clientView(c).key === 'good').length
+      good: list.filter((c) => key(c) === 'good').length,
+      checks: list.filter((c) => key(c) === 'checks').length,
+      lost: list.filter((c) => key(c) === 'lost').length,
+      off: list.filter((c) => key(c) === 'off').length,
+      waiting: list.filter((c) => key(c) === 'waiting').length
     };
   }
   function clientCountLine() {
@@ -2032,23 +2073,39 @@
   function acctCell(c) {
     const v = clientView(c);
     if (v.key === 'off' || !c.accounting) return '<span class="text-body2">—</span>';
-    const lost = booksLost(c) ? `<span class="text-body2 text-error">Connection lost</span><button type="button" class="link" data-reconnect="${c.id}">Reconnect</button>` : '';
-    return `<div class="cell-stack"><span class="logo-line">${brandMark(c.accounting, 18)}<span class="text-body2">${esc(companyName(c))}</span></span>${lost}</div>`;
+    const state = booksLost(c)
+      ? '<span class="text-body2 text-error">Disconnected</span>'
+      : '<span class="text-body2 text-secondary">Connected</span>';
+    return `<div class="cell-stack"><span class="logo-line">${brandMark(c.accounting, 18)}<span class="text-body2">${esc(c.accounting)}</span></span>${state}</div>`;
   }
   function integCell(c) {
     const v = clientView(c);
     if (v.key === 'off') return '<span class="text-body2">—</span>';
-    if (c.invite && c.invite.email && !(c.integrations && c.integrations.length)) {
-      return `<div class="cell-stack"><span class="tooltip-wrap"><span class="text-body2" tabindex="0">Invite sent · waiting for owner</span><span class="tooltip" role="tooltip">${esc(c.invite.email)} · sent ${esc(c.invite.sent)}</span></span><button type="button" class="link" data-resend="${c.id}">Resend</button></div>`;
+    if (v.key === 'waiting') {
+      return `<div class="cell-stack"><span class="tooltip-wrap"><span class="text-body2 text-secondary" tabindex="0">Waiting for owner</span><span class="tooltip" role="tooltip">${esc(c.invite.email)} · sent ${esc(c.invite.sent)}</span></span></div>`;
     }
     const list = (c && c.integrations) || [];
     if (!list.length) return '<span class="text-body2">—</span>';
-    const extra = list.length - 1;
-    const label = extra > 0 ? list[0] + ' +' + extra : list[0];
-    const logos = list.slice(0, 3).map((name) => brandMark(name, 18)).join('');
     const lost = lostIntegrations(c);
-    const problem = lost.length ? `<span class="cell-subtext">${lost.length} lost connection</span>` : '';
-    return `<div class="cell-stack"><span class="tooltip-wrap"><span class="logo-line" tabindex="0"><span class="logo-stack">${logos}</span><span class="text-body2">${esc(label)}</span></span><span class="tooltip" role="tooltip">${esc(list.join(', '))}</span></span>${problem}</div>`;
+    const state = lost.length
+      ? `<span class="text-body2 text-error">${lost.length} lost connection</span>`
+      : `<span class="text-body2 text-secondary">${list.length} connected</span>`;
+    const tip = esc(list.join(', '));
+    if (list.length === 1) {
+      return `<div class="cell-stack"><span class="tooltip-wrap"><span class="logo-line" tabindex="0">${brandMark(list[0], 18)}<span class="text-body2">${esc(list[0])}</span></span><span class="tooltip" role="tooltip">${tip}</span></span>${state}</div>`;
+    }
+    const shown = list.slice(0, 4);
+    const more = list.length - shown.length;
+    const logos = shown.map((name) => brandMark(name, 18)).join('');
+    const extra = more > 0 ? `<span class="text-body2">+${more}</span>` : '';
+    return `<div class="cell-stack"><span class="tooltip-wrap"><span class="logo-line" tabindex="0"><span class="logo-stack">${logos}</span>${extra}</span><span class="tooltip" role="tooltip">${tip}</span></span>${state}</div>`;
+  }
+  function healthCell(c) {
+    const health = clientView(c).health;
+    if (!health) return '<span class="text-body2">—</span>';
+    const label = health.passed + ' of ' + health.total + ' passed';
+    const tip = health.failed.length ? health.failed.map((f) => f.short + ': ' + f.detail).join('; ') : 'All checks passed';
+    return `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function issueChip(c) {
     const v = clientView(c);
@@ -2103,6 +2160,7 @@
         c.books = ['grey', 'Waiting for owner'];
       }
       c.invite = { email: value, message: note, sent: '12 Nov 2026' };
+      delete c.fresh;
       persistDirectory();
       close();
       clearLink();
@@ -2126,9 +2184,32 @@
       c.setupState = 'Ready';
       c.month = c.month || 'Oct 2026';
       c.books = ['blue', 'Syncing'];
+      delete c.fresh;
       persistDirectory();
     }
     goFirm('clients');
+  }
+  function cancelConnect() {
+    clearLink();
+    const c = st && st.clientId && findOrg(st.clientId);
+    if (c && c.fresh) {
+      sc().clients = sc().clients.filter((x) => x.id !== c.id);
+      persistDirectory();
+    }
+    goFirm('clients');
+  }
+  function startAddClient() {
+    const id = 'm' + Math.random().toString(36).slice(2, 8);
+    sc().clients.push({
+      id, name: '', fresh: true, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
+      setup: false, licence: 'None', setupState: 'Not set up', connected: false, accounting: null,
+      integrations: [], issues: [], syncing: false
+    });
+    clearLink();
+    st.connectStep = 'details';
+    st.connectPick = { accounting: [], sales: [], pay: [] };
+    st.ctx = 'firm';
+    goFirm('clientconnect', id);
   }
   function settleSync(id) {
     const cur = findOrg(id);
@@ -2149,17 +2230,13 @@
   }
   function connectLedger(src) {
     closeBooks();
+    if (!ob) return;
     ob.source = src === 'xero' ? 'xero' : 'qbo';
     connectLoading = false;
     saveOb();
-    goFirm('connect');
+    openPicker();
   }
   function renderConnect() {
-    if (connectLoading) {
-      const sk = '<div class="skeleton" style="height:20px;width:70%"></div>';
-      const row = `<tr><td>${sk}</td><td>${sk}</td><td>${sk}</td></tr>`;
-      return `<div class="flow-wide page-stack"><h1 class="text-h1">Importing clients</h1><p class="text-body1">Reading the client list. Nothing is written to their books.</p><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Accounting</th><th>Status</th></tr></thead><tbody>${row}${row}${row}${row}</tbody></table></div></div>`;
-    }
     const xero = ob && ob.source === 'xero';
     const logo = xero ? XERO_LOGO : QB_LOGO;
     const title = xero ? 'Synder wants to connect to your Xero organisation' : 'Synder wants to connect to your QuickBooks company';
@@ -2316,7 +2393,7 @@
       <div class="bring-cards">
         <div class="box box--white bring-choice">
           <span class="bring-mark">${logos}</span>
-          <div class="bring-title"><h2 class="text-h2">From QuickBooks or Xero</h2><span class="info-chip">Recommended</span></div>
+          <h2 class="text-h2">From QuickBooks or Xero</h2>
           <p class="text-body2">Pick the clients you manage in QuickBooks or Xero and bring them in at once.</p>
           <button type="button" class="btn" id="emptyBooks">Import clients</button>
         </div>
@@ -2336,7 +2413,8 @@
     </div>`;
   }
   function renderClients() {
-    if (!sc().clients.length) {
+    const listed = sc().clients.filter((c) => !c.fresh);
+    if (!listed.length) {
       return `<div class="bring-wrap">${bringChoices()}${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}</div>${flowDialogs()}`;
     }
     const showInvite = ob && ob.banner === 'invite' && ob.welcomeSeen && !ob.welcomePending;
@@ -2347,29 +2425,33 @@
         ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
         : '');
     const q = (st._q || '').toLowerCase();
-    const searched = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
+    const searched = listed.filter((c) => c.name.toLowerCase().includes(q));
     const counts = statusCounts(searched);
     const filter = st.listFilter || 'all';
     let rows = searched.filter((c) => {
       const k = clientView(c).key;
-      if (filter === 'attention') return needsAttention(c);
+      if (filter === 'checks') return k === 'checks';
+      if (filter === 'lost') return k === 'lost';
       if (filter === 'off') return k === 'off';
       if (filter === 'waiting') return k === 'waiting';
       if (filter === 'good') return k === 'good';
       return true;
     });
-    const rank = { reconnect: 0, unreconciled: 1, uncategorized: 2, syncing: 3, off: 4, waiting: 5, good: 6 };
+    const rank = { lost: 0, checks: 1, waiting: 2, off: 3, good: 4 };
     if ((st.listSort || 'name') === 'status') rows = rows.slice().sort((a, b) => (rank[clientView(a).key] ?? 9) - (rank[clientView(b).key] ?? 9) || a.name.localeCompare(b.name));
     const statCard = (key, label, n) => `<button type="button" class="box box--white stat-card${filter === key ? ' on' : ''}" data-filter="${key}" aria-pressed="${filter === key ? 'true' : 'false'}"><span class="text-h1">${n}</span><span class="text-body2">${label}</span></button>`;
     const body = rows.map((c) => {
-      const off = clientView(c).key === 'off';
-      const connectBtn = off ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>` : '';
+      const view = clientView(c);
+      const lic = licenseLabel(c);
+      const connectBtn = view.key === 'off' ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>` : '';
       return `<tr class="rowlink" data-row="${c.id}">
-        <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-detail="${c.id}">${esc(c.name)}</button></div></td>
+        <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-see="${c.id}">${esc(c.name)}</button></div></td>
+        <td><span class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</span></td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
+        <td>${healthCell(c)}</td>
         <td>${issueChip(c)}</td>
-        <td><div class="row-actions">${connectBtn}</div></td>
+        <td><div class="row-actions">${connectBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -2384,21 +2466,72 @@
       </div>
       ${banner}
       <div class="status-cards">
-        ${statCard('attention', 'Needs attention', counts.attention)}
-        ${statCard('off', 'Not connected', counts.off)}
-        ${statCard('waiting', 'Waiting for owner', counts.waiting)}
         ${statCard('good', 'All good', counts.good)}
+        ${statCard('checks', 'Checks not passed', counts.checks)}
+        ${statCard('lost', 'Connection lost', counts.lost)}
+        ${statCard('off', 'Not set up', counts.off)}
+        ${statCard('waiting', 'Waiting for owner', counts.waiting)}
       </div>
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
         <select class="select" id="clientSort" aria-label="Sort clients"><option value="name"${(st.listSort || 'name') === 'name' ? ' selected' : ''}>Name</option><option value="status"${st.listSort === 'status' ? ' selected' : ''}>Status</option></select>
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Client</th><th>Accounting</th><th>Integrations</th><th>Status</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="5" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Status</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="7" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
+  }
+  function renderClientDetail() {
+    const c = findOrg(st.clientId);
+    if (!c || !isClient(c.id)) return renderClients();
+    const view = clientView(c);
+    const lic = licenseLabel(c);
+    const off = view.key === 'off';
+    let accounting = '<p class="text-body2">—</p>';
+    if (!off && c.accounting) {
+      const state = booksLost(c)
+        ? '<span class="text-body2 text-error">Disconnected</span>'
+        : '<span class="text-body2 text-secondary">Connected</span>';
+      const company = c.company ? `<span class="text-body2 text-secondary">${esc(companyName(c))}</span>` : '';
+      accounting = `<div class="cell-stack"><span class="logo-line">${brandMark(c.accounting, 18)}<span class="text-body2">${esc(c.accounting)}</span></span>${company}${state}</div>`;
+    }
+    let integrations = '<p class="text-body2">—</p>';
+    if (view.key === 'waiting' && c.invite) {
+      integrations = `<p class="text-body2">Waiting for owner</p><p class="text-body2 text-secondary">${esc(c.invite.email)} · sent ${esc(c.invite.sent)}</p><button type="button" class="link" data-resend="${c.id}">Resend</button>`;
+    } else if (c.integrations && c.integrations.length) {
+      const lostNames = {};
+      lostIntegrations(c).forEach((i) => { lostNames[i.source] = true; });
+      integrations = `<ul class="detail-list">${c.integrations.map((name) => {
+        const state = lostNames[name]
+          ? '<span class="text-body2 text-error">Lost connection</span>'
+          : '<span class="text-body2 text-secondary">Connected</span>';
+        return `<li>${brandMark(name, 18)}<span class="text-body2">${esc(name)}</span>${state}</li>`;
+      }).join('')}</ul>`;
+    }
+    let health = '<p class="text-body2">—</p>';
+    if (view.health) {
+      const failed = {};
+      view.health.failed.forEach((f) => { failed[f.name] = f; });
+      const items = view.health.names.map((name) => {
+        const f = failed[name];
+        if (f) return `<li><span class="text-body2">${esc(name)}</span><span class="text-body2 text-error">Failed${f.detail ? ' · ' + esc(f.detail) : ''}</span></li>`;
+        return `<li><span class="text-body2">${esc(name)}</span><span class="text-body2 text-secondary">Passed</span></li>`;
+      }).join('');
+      health = `<p class="text-body2">${view.health.passed} of ${view.health.total} passed</p><ul class="detail-list">${items}</ul>`;
+    }
+    const action = off
+      ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>`
+      : `<button type="button" class="btn" id="detailGo">Go to client</button>`;
+    return `<div class="flow-wide page-stack">
+      <button type="button" class="link" id="backClients">Back to Clients</button>
+      <div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1></div><div class="ph-actions">${action}</div></div>
+      <section class="detail-block"><h2 class="text-h2">License</h2><p class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</p></section>
+      <section class="detail-block"><h2 class="text-h2">Accounting</h2>${accounting}</section>
+      <section class="detail-block"><h2 class="text-h2">Integrations</h2>${integrations}</section>
+      <section class="detail-block"><h2 class="text-h2">Health checks</h2>${health}</section>
+    </div>`;
   }
   function renderBringIn() {
     return `<div class="connect-shell">
@@ -2505,6 +2638,7 @@
       html = placeholder(TOP_PAGES[st.page][1], st.ctx === 'firm' ? FIRM.name : findOrg(st.orgId).name);
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
+      else if (st.page === 'clientdetail') html = renderClientDetail();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
       else if (st.page === 'clientconnect') html = renderClientConnect();
@@ -2528,7 +2662,8 @@
     }
     $('main').innerHTML = html;
     const m = $('main');
-    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.detail); });
+    m.querySelectorAll('[data-see]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.see); });
+    m.querySelectorAll('[data-goto]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.goto); });
     m.querySelectorAll('[data-connect]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       clearLink();
@@ -2536,7 +2671,7 @@
       st.connectPick = { accounting: [], sales: [], pay: [] };
       goFirm('clientconnect', b.dataset.connect);
     });
-    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button, a, input, select, label')) openClient(tr.dataset.row); });
+    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button, a, input, select, label')) openDetails(tr.dataset.row); });
     m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
     m.querySelectorAll('[data-ctab]').forEach((b) => b.onclick = () => { st.page = b.dataset.ctab; save(); render(); });
     m.querySelectorAll('[data-filter]').forEach((b) => b.onclick = () => {
@@ -2600,8 +2735,10 @@
     });
     bind('importCancel', () => goFirm('clients'));
     bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
-    bind('connectX', () => { clearLink(); goFirm('clients'); });
-    bind('connectLeave', () => { clearLink(); goFirm('clients'); });
+    bind('connectX', cancelConnect);
+    bind('connectLeave', cancelConnect);
+    bind('backClients', () => goFirm('clients'));
+    bind('detailGo', () => { if (st.clientId) openClient(st.clientId); });
     bind('bringCancel', () => goFirm('clients'));
     bind('inviteOwner', () => {
       const pick = st.connectPick || { accounting: [] };
@@ -2627,7 +2764,18 @@
       goFirm('clients');
     });
     bind('connectNext', () => {
-      if ((st.connectStep || 'details') === 'details') { st.connectStep = 'integrations'; save(); render(); return; }
+      if ((st.connectStep || 'details') === 'details') {
+        const input = $('ccName');
+        const name = (input && input.value || '').trim();
+        if (!name) { fieldError(input, 'Required'); return; }
+        const current = findOrg(st.clientId);
+        if (current) current.name = name;
+        fieldClear(input);
+        st.connectStep = 'integrations';
+        save();
+        render();
+        return;
+      }
       const pick = st.connectPick || { accounting: [] };
       if (!pick.accounting.length) { const err = $('intError'); if (err) err.hidden = false; return; }
       clearLink();
@@ -2637,18 +2785,9 @@
     });
     armLink();
     bind('connectGo', () => {
-      if (connectLoading) return;
-      connectLoading = true;
-      render();
-      window.setTimeout(() => {
-        connectLoading = false;
-        if (!st || st.page !== 'connect') return;
-        ob.source = ob.source === 'xero' ? 'xero' : 'qbo';
-        IMPORT_POOL.forEach((c) => { ob.selected[c.id] = !alreadyInFirm(c); });
-        ob.q = '';
-        saveOb();
-        openPicker();
-      }, 1000);
+      connectLoading = false;
+      if (ob) ob.source = ob.source === 'xero' ? 'xero' : 'qbo';
+      openPicker();
     });
     m.querySelectorAll('.import-sources [data-src]').forEach((b) => b.onclick = () => {
       ob.source = b.dataset.src;
@@ -2751,7 +2890,7 @@
     }
     let html = '';
     if (s.firm) {
-      const list = s.clients.filter((c) => !c.pending && (!q || c.name.toLowerCase().includes(q)));
+      const list = s.clients.filter((c) => !c.pending && !c.fresh && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
         html += `<div class="pop-sec">Clients</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
@@ -2774,7 +2913,7 @@
     if (a === 'firm') goFirm('clients');
     else if (a === 'allclients') { st._q = ''; goFirm('clients'); }
     else if (a.startsWith('org:')) goOrg(a.slice(4));
-    else if (a === 'createorg') { st.ctx = 'firm'; st.page = 'bringin'; st.clientId = null; save(); render(); }
+    else if (a === 'createorg') startAddClient();
     else if (a === 'createfirm') { st.ctx = 'org'; st.page = 'createfirm'; save(); render(); }
     if (!keepFocus) $('ctxTrigger').focus();
   }
@@ -2838,6 +2977,24 @@
     const parts = raw.split('/');
     const head = parts[0];
     if (!ob) loadOb();
+    if (head === 'clients') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      if (parts[1] && isClient(parts[1])) {
+        st.ctx = 'firm';
+        st.page = 'clientdetail';
+        st.clientId = parts[1];
+        st.orgId = null;
+        closePop();
+        render();
+        return;
+      }
+      goFirm('clients');
+      return;
+    }
     if (head === 'client' && parts[1]) {
       scenario = 'firm';
       load();
@@ -2905,6 +3062,7 @@
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
+    if (st && st.page === 'clientdetail' && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
     }
@@ -2929,6 +3087,7 @@
     else if (st.ctx === 'firm' && st.page === 'bringin') h += '/bringin';
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
+    else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId;
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
