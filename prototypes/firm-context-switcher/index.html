@@ -392,6 +392,31 @@
     .row-menu .dropdown-menu { right: 0; left: auto; }
     body.provider-plain .p-body { display: block; }
     body.provider-plain .p-main { min-height: calc(100vh - var(--proto-bar-h)); display: flex; align-items: center; justify-content: center; background: var(--color-white); }
+    body.wizard-plain .p-top, body.wizard-plain .p-side { display: none; }
+    body.wizard-plain .p-body { display: block; }
+    body.wizard-plain .p-main { padding: 0; min-height: calc(100vh - var(--proto-bar-h)); background: var(--color-white); }
+    .connect-shell { display: flex; min-height: calc(100vh - var(--proto-bar-h)); }
+    .connect-side { width: 220px; flex-shrink: 0; background: var(--bg-page); padding: var(--space-6); }
+    .connect-main { flex: 1; position: relative; padding: var(--space-8) var(--space-10) var(--space-10); }
+    .connect-form { max-width: 720px; }
+    .connect-x { position: absolute; top: var(--space-4); right: var(--space-4); }
+    .connect-tabs { display: flex; gap: var(--space-6); margin-bottom: var(--space-6); }
+    .connect-tabs span { padding-bottom: var(--space-2); }
+    .connect-tabs .on { box-shadow: inset 0 -2px 0 var(--color-primary); }
+    .connect-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .integ-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .integ-row .box { width: auto; align-items: center; gap: var(--space-2); }
+    .connect-copy, .connect-section { display: flex; flex-direction: column; gap: var(--space-2); }
+    .connect-section { margin-top: var(--space-4); }
+    .connect-main .ob-actions { justify-content: space-between; }
+    .flow-pills { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+    .flow-pills .box { width: auto; align-items: center; gap: var(--space-2); }
+    .link-wait { display: flex; align-items: center; gap: var(--space-3); }
+    .connect-main .progress { margin-top: var(--space-4); max-width: 360px; }
+    .tooltip-wrap:focus-within .tooltip { opacity: 1; }
+    .clients-table { overflow: visible; }
+    .clients-table .tooltip { top: auto; bottom: calc(100% + 8px); }
+    .row-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
     .kit-narrow > .btn, .kit-narrow > .btn-outlined { width: 100%; margin-bottom: 8px; }
     .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
     .kit-or { display: flex; align-items: center; gap: 12px; margin: 8px 0 16px; color: var(--text-secondary); font-size: 14px; line-height: 20px; }
@@ -939,9 +964,24 @@
     goWorkspace('clients');
   }
   function existingClients() {
+    const off = { connected: false, accounting: null, integrations: [], issue: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' };
+    const on = (accounting, integrations, issue, issueTip) => ({
+      connected: true, accounting, integrations, issue, issueTip, ledger: accounting, pay: integrations[0] || null,
+      books: issue === 'good' ? ['green', 'Healthy'] : ['yellow', 'Needs review'], month: 'Oct 2026',
+      setup: true, licence: 'Pro', setupState: 'Ready', preassess: 'Not run'
+    });
+    const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
     return [
-      { id: 'e1', name: 'Harbor Coffee Co', ledger: 'QuickBooks Online', pay: 'Stripe', books: ['green', 'Healthy'], month: 'Oct 2026', setup: true, licence: 'Pro', setupState: 'Ready', preassess: 'Not run' },
-      { id: 'e2', name: 'Tidewater Dental', ledger: 'Xero', pay: 'Stripe', books: ['green', 'Healthy'], month: 'Oct 2026', setup: true, licence: 'Pro', setupState: 'Ready', preassess: 'Not run' }
+      Object.assign({ id: 'e1', name: 'Harbor Coffee Co' }, on('QuickBooks', four.slice(), 'good', 'Books reconciled, nothing uncategorized.')),
+      Object.assign({ id: 'e2', name: 'Tidewater Dental' }, on('QuickBooks', four.slice(), 'unreconciled', '2 periods not reconciled: Aug, Sep 2026')),
+      Object.assign({ id: 'e3', name: 'Northline Outfitters' }, on('QuickBooks', four.slice(), 'uncategorized', '14 uncategorized transactions in QuickBooks')),
+      Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
+      Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon'], 'good', 'Books reconciled, nothing uncategorized.')),
+      Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
+      Object.assign({ id: 'e7', name: 'Juniper Yoga' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square', 'WooCommerce'], 'unreconciled', '1 period not reconciled: Sep 2026')),
+      Object.assign({ id: 'e8', name: 'Kestrel Analytics' }, off),
+      Object.assign({ id: 'e9', name: 'Lumen Dental Lab' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify', 'Etsy'], 'uncategorized', '8 uncategorized transactions in QuickBooks')),
+      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters' }, on('Xero', ['Stripe', 'Shopify', 'Amazon', 'eBay'], 'good', 'Books reconciled, nothing uncategorized.'))
     ];
   }
   function enterNewFirm() {
@@ -1729,7 +1769,7 @@
 
   function clientCountLine() {
     const list = sc().clients.filter((c) => !c.pending);
-    const ready = list.filter((c) => c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress') || c.ledger).length;
+    const ready = list.filter((c) => c.connected || c.accounting).length;
     return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} connected`;
   }
   function ledgerMark(svg, size) {
@@ -1804,6 +1844,56 @@
     }
   }
   let connectLoading = false;
+  let linkTimer = 0;
+  function clearLink() { if (linkTimer) { clearTimeout(linkTimer); linkTimer = 0; } }
+  function armLink() {
+    if (linkTimer || !st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
+    linkTimer = setTimeout(() => {
+      linkTimer = 0;
+      if (!st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
+      st.connectStep = 'done';
+      save();
+      render();
+    }, 1500);
+  }
+  function clientConnected(c) { return !!(c && (c.connected || c.accounting)); }
+  function tipChip(kind, label, tip) {
+    return `<span class="tooltip-wrap"><span class="status status-${kind}" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+  }
+  function acctCell(c) {
+    if (!clientConnected(c)) return '<span class="text-body2">—</span>';
+    const name = c.accounting || 'QuickBooks';
+    return tipChip('blue', name, name + ' is connected.');
+  }
+  function integCell(c) {
+    const list = (c && c.integrations) || [];
+    if (!clientConnected(c) || !list.length) return '<span class="text-body2">—</span>';
+    const label = list.length === 1 ? list[0] : `${list[0]} +${list.length - 1} more`;
+    return tipChip('blue', label, list.join(', '));
+  }
+  function issueChip(c) {
+    if (c.issue === 'unreconciled') return tipChip('yellow', 'Unreconciled', c.issueTip || '2 periods not reconciled: Aug, Sep 2026');
+    if (c.issue === 'uncategorized') return tipChip('yellow', 'Uncategorized', c.issueTip || '14 uncategorized transactions in QuickBooks');
+    return tipChip('green', 'All good', c.issueTip || 'Books reconciled, nothing uncategorized.');
+  }
+  function finishClientConnect() {
+    clearLink();
+    const c = findOrg(st.clientId);
+    if (c) {
+      c.connected = true;
+      c.accounting = 'QuickBooks';
+      c.integrations = ['Stripe'];
+      c.issue = 'unreconciled';
+      c.issueTip = '2 periods not reconciled: Aug, Sep 2026';
+      c.ledger = 'QuickBooks';
+      c.pay = 'Stripe';
+      c.setup = true;
+      c.setupState = 'Ready';
+      c.books = ['yellow', 'Needs review'];
+      persistDirectory();
+    }
+    goFirm('clients');
+  }
   function connectLedger(src) {
     closeBooks();
     ob.source = src === 'xero' ? 'xero' : 'qbo';
@@ -1827,6 +1917,71 @@
         <select class="select" id="companyPick"><option selected>${esc(FIRM.name || 'Your firm')}</option></select>
       </div>
       <div class="ob-actions"><button type="button" class="btn" id="connectGo">${go}</button><button type="button" class="btn-outlined" id="connectCancel">Cancel</button></div>
+    </div>`;
+  }
+  function integTile(name, on, logo) {
+    const mark = logo === 'qb' ? ledgerMark(QB_LOGO, 22) : logo === 'xero' ? ledgerMark(XERO_LOGO, 22) : '';
+    return `<span class="box box--white ledger-card${on ? ' selected' : ''}">${mark}<span class="text-body2">${esc(name)}</span></span>`;
+  }
+  function integSection(title, tiles) {
+    return `<div class="connect-section"><h2 class="text-subtitle1">${esc(title)}</h2><div class="integ-row">${tiles}</div></div>`;
+  }
+  function renderClientConnect() {
+    const c = findOrg(st.clientId);
+    if (!c) return renderClients();
+    const step = st.connectStep || 'details';
+    const active = step === 'linking' || step === 'done' ? 'connect' : step;
+    const tabs = [['details', 'Client details'], ['integrations', 'Select integrations'], ['connect', 'Connect']];
+    const tabHtml = `<div class="connect-tabs">${tabs.map(([id, label]) => `<span class="text-body2${id === active ? ' on' : ''}">${label}</span>`).join('')}</div>`;
+    const site = String(c.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com';
+    let body = '';
+    if (step === 'integrations') {
+      body = `<div class="connect-copy"><h1 class="text-h1">Select the integrations you would like to connect</h1></div>
+        ${integSection('Accounting system', [
+          integTile('QuickBooks', true, 'qb'),
+          integTile('Xero', false, 'xero'),
+          integTile('Sage', false),
+          integTile('NetSuite', false),
+          integTile('QuickBooks Desktop', false)
+        ].join(''))}
+        ${integSection('Sales integrations', ['Amazon', 'eBay', 'Shopify', 'Etsy', 'WooCommerce'].map((n) => integTile(n, false)).join(''))}
+        ${integSection('Payment integrations', [
+          integTile('Stripe', true),
+          integTile('PayPal', false),
+          integTile('Square', false),
+          integTile('GoCardless', false),
+          integTile('Authorize.Net', false)
+        ].join(''))}
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
+    } else if (step === 'linking') {
+      body = `<div class="connect-copy"><h1 class="text-h1">Connect</h1>
+        <div class="link-wait"><span class="spinner" aria-hidden="true"></span><p class="text-body1">Connecting QuickBooks and Stripe…</p></div></div>
+        <div class="progress" role="progressbar" aria-label="Connecting"><div class="progress-fill" style="width:70%"></div></div>`;
+    } else if (step === 'done') {
+      const pill = (n, label, kind) => `<span class="box box--white"><span class="status status-${kind}">${n}</span><span class="text-body2">${label}</span></span>`;
+      body = `<div class="flow-pills" aria-hidden="true">${pill(1, 'Import data', 'green')}<span class="text-body2">→</span>${pill(2, 'Customize', 'blue')}<span class="text-body2">→</span>${pill(3, 'Sync to books', 'blue')}<span class="text-body2">→</span>${pill(4, 'Reconcile', 'blue')}</div>
+        <div class="connect-copy"><h1 class="text-h1">Client connected</h1>
+        <p class="text-body1">Import data → Customize → Sync to books → Reconcile. Four steps. One accurate result.</p></div>
+        <div class="ob-actions"><button type="button" class="btn" id="connectDone">Go to clients</button></div>`;
+    } else {
+      body = `<div class="connect-copy"><h1 class="text-h1">Provide your client's basic info</h1>
+        <p class="text-body1">This sets how Synder works for this client.</p></div>
+        <div class="form-field"><label class="form-label form-label-required" for="ccName">Client name</label><input class="input" id="ccName" value="${esc(c.name)}" /></div>
+        <div class="form-field"><label class="form-label" for="ccSite">What's your business website?</label><input class="input" id="ccSite" value="${esc(site)}" /></div>
+        <div class="connect-pair">
+          <div class="form-field"><label class="form-label form-label-required" for="ccZone">Time zone</label><select class="select" id="ccZone"><option selected>America/New_York</option></select></div>
+          <div class="form-field"><label class="form-label form-label-required" for="ccCountry">Country</label><select class="select" id="ccCountry"><option selected>United States</option></select></div>
+        </div>
+        <div class="form-field"><label class="form-label form-label-required" for="ccIndustry">Industry</label><select class="select" id="ccIndustry"><option selected>Retail</option></select></div>
+        <div class="form-field"><label class="form-label form-label-required" for="ccYears">How long has your client been in business?</label><select class="select" id="ccYears"><option selected>3–5 years</option></select></div>
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
+    }
+    return `<div class="connect-shell">
+      <aside class="connect-side"><img class="auth-logo" src="synder-logo.svg" alt="Synder" /></aside>
+      <div class="connect-main">
+        <button type="button" class="btn-icon connect-x" id="connectX" aria-label="Close"><span class="material-icons">close</span></button>
+        <div class="connect-form">${tabHtml}${body}</div>
+      </div>
     </div>`;
   }
   function openPicker() {
@@ -1924,23 +2079,26 @@
       </div>${flowDialogs()}`;
     }
     const banner = ob && ob.banner === 'invite'
-      ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>You manage 2 clients in Synder. Bring in the rest of your client list. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
+      ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>You manage ${sc().clients.length} clients in Synder. Bring in the rest of your client list. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
       : (ob && ob.banner === 'progress' ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>${esc(clientCountLine())}. Read-only until you set a client up.</span></div>` : '');
     const q = (st._q || '').toLowerCase();
     const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
     const body = rows.map((c) => {
-      const connected = c.setupState === 'Ready' || (c.setup && c.setupState !== 'Not set up' && c.setupState !== 'In progress') || !!c.ledger;
-      const mainAct = connected
-        ? `<button type="button" class="dropdown-item" data-open="${c.id}">Open in Synder</button>`
-        : `<button type="button" class="dropdown-item" data-detail="${c.id}">Set up</button>`;
+      const connected = clientConnected(c);
       const preLabel = c.preassess && c.preassess !== 'Not run' && c.preassess !== 'Running' ? 'View check' : 'Check reconciliation from files';
+      const menu = connected
+        ? `<button type="button" class="dropdown-item" data-open="${c.id}">Open</button>`
+        : `<button type="button" class="dropdown-item" data-detail="${c.id}">Set up</button><button type="button" class="dropdown-item" data-preassess="${c.id}">${preLabel}</button>`;
+      const connectBtn = connected ? '' : `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`;
       return `<tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-detail="${c.id}">${esc(c.name)}</button></div></td>
-        <td><span class="status ${connected ? 'status-green' : 'status-grey'}">${connected ? 'Connected' : 'Not connected'}</span></td>
-        <td><div class="dropdown row-menu">
+        <td>${acctCell(c)}</td>
+        <td>${integCell(c)}</td>
+        <td>${connected ? issueChip(c) : tipChip('grey', 'Not connected', 'Connect accounting and integrations to start syncing.')}</td>
+        <td><div class="row-actions">${connectBtn}<div class="dropdown row-menu">
           <button type="button" class="btn-icon" data-menu="${c.id}" aria-label="Actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button>
-          <div class="dropdown-menu" id="rowmenu-${c.id}">${mainAct}<button type="button" class="dropdown-item" data-preassess="${c.id}">${preLabel}</button></div>
-        </div></td>
+          <div class="dropdown-menu" id="rowmenu-${c.id}">${menu}</div>
+        </div></div></td>
       </tr>`;
     }).join('');
     const note = ob && ob.importNote > 0
@@ -1954,9 +2112,9 @@
       ${banner}
       ${note}
       <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table">
-        <thead><tr><th>Client</th><th>Status</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="3" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
+      <div class="table-wrap clients-table"><table class="synder-table">
+          <thead><tr><th>Client</th><th>Accounting</th><th>Integrations</th><th>Status</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="5" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>
     </div>${flowDialogs()}`;
@@ -2243,6 +2401,7 @@
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
+      else if (st.page === 'clientconnect') html = renderClientConnect();
       else if (st.page === 'review') { if (ob) ob.picker = true; st.page = 'clients'; html = renderClients(); }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'preassess') html = renderPreassess();
@@ -2262,6 +2421,12 @@
     $('main').innerHTML = html;
     const m = $('main');
     m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); goFirm('client', b.dataset.detail); });
+    m.querySelectorAll('[data-connect]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      clearLink();
+      st.connectStep = 'details';
+      goFirm('clientconnect', b.dataset.connect);
+    });
     m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button')) goFirm('client', tr.dataset.row); });
     m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
     if (st.ctx === 'firm' && st.page === 'client') bindClientDetail();
@@ -2297,6 +2462,21 @@
     });
     bind('importCancel', () => goFirm('clients'));
     bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
+    bind('connectX', () => { clearLink(); goFirm('clients'); });
+    bind('connectBack', () => {
+      if (st.connectStep === 'integrations') { st.connectStep = 'details'; save(); render(); return; }
+      clearLink();
+      goFirm('clients');
+    });
+    bind('connectNext', () => {
+      if ((st.connectStep || 'details') === 'details') { st.connectStep = 'integrations'; save(); render(); return; }
+      clearLink();
+      st.connectStep = 'linking';
+      save();
+      render();
+    });
+    bind('connectDone', finishClientConnect);
+    armLink();
     bind('connectGo', () => {
       if (connectLoading) return;
       connectLoading = true;
@@ -2529,6 +2709,10 @@
     if (!(ob && ob.directoryReady) && !parts[1]) { goOnboarding('home'); return; }
     if (parts[1] === 'import') { st.ctx = 'firm'; st.page = 'import'; st.clientId = null; }
     else if (parts[1] === 'connect' && ob && (ob.source === 'qbo' || ob.source === 'xero' || ob.source === 'qboa')) { st.ctx = 'firm'; st.page = 'connect'; st.clientId = null; connectLoading = false; }
+    else if (parts[1] === 'clientconnect' && parts[2] && findOrg(parts[2])) {
+      st.ctx = 'firm'; st.page = 'clientconnect'; st.clientId = parts[2];
+      st.connectStep = parts[3] || st.connectStep || 'details';
+    }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; if (ob) ob.picker = true; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.openAdd = true; }
     else if (parts[1] === 'preassess' && parts[2] && findOrg(parts[2])) { st.ctx = 'firm'; st.page = 'preassess'; st.clientId = parts[2]; st.preState = 'upload'; }
@@ -2549,10 +2733,11 @@
 
   function render() {
     if (mode === 'onboarding') {
-      document.body.classList.remove('provider-plain', 'center-stage');
+      document.body.classList.remove('provider-plain', 'wizard-plain', 'center-stage');
       syncImportSeg();
       renderMode(); renderOb(); return;
     }
+    if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
     if (st && (st.page === 'client' || st.page === 'setup' || st.page === 'preassess') && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
     }
@@ -2566,6 +2751,7 @@
     syncImportSeg();
     if (st && st.openAdd) { st.openAdd = false; showAddModal(); }
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
+    document.body.classList.toggle('wizard-plain', !!(st && st.page === 'clientconnect'));
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
@@ -2573,6 +2759,7 @@
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h += '/preassess/' + st.clientId;
     else if (st.ctx === 'firm' && st.page === 'import') h += '/import';
     else if (st.ctx === 'firm' && st.page === 'connect') h += '/connect';
+    else if (st.ctx === 'firm' && st.page === 'clientconnect' && st.clientId) h += '/clientconnect/' + st.clientId + '/' + (st.connectStep || 'details');
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
