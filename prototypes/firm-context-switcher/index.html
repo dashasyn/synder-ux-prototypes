@@ -122,12 +122,12 @@
     .menu .who span { color: #6B778C; }
     .p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 56px); }
     .p-side {
-      width: 248px; min-width: 248px; background: #F6F6F6; border-right: 1px solid #C8C7CC;
-      scrollbar-gutter: stable;
       position: sticky; top: calc(var(--proto-bar-h) + 56px);
-      height: calc(100vh - var(--proto-bar-h) - 56px); overflow-y: auto;
-      display: flex; flex-direction: column;
+      height: calc(100vh - var(--proto-bar-h) - 56px);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      background: var(--bg-sidebar);
     }
+    .p-side .sidebar { height: 100%; overflow-y: auto; }
     .p-main { flex: 1; min-width: 0; padding: var(--space-6) var(--space-8) var(--space-10); }
 
     /* ── Context switcher trigger ── */
@@ -205,9 +205,7 @@
     .pop-foot button:hover, .pop-foot button.kb { background: #F7F8FA; color: #1A1B24; }
     .pop-foot .material-icons { font-size: 18px; width: 24px; text-align: center; }
 
-    /* ── Sidebar nav uses the kit sidebar item ── */
     .nav, #nav { flex: 1; }
-    .sidebar-item { width: 100%; border: 0; border-bottom: 1px solid var(--border-default); background: transparent; cursor: pointer; text-align: left; font: inherit; }
 
     /* ── Main content ── */
     .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
@@ -355,9 +353,13 @@
     .auth-foot { margin: 0; text-align: center; }
     .sso-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
     .sso-row .btn-outlined { width: 100%; }
-    .bring-card { flex-direction: column; align-items: flex-start; gap: var(--space-4); padding: var(--space-10); }
-    .bring-card .text-h2, .bring-card .text-body1 { margin: 0; }
-    .bring-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+    .bring-wrap { display: flex; justify-content: center; }
+    .bring-stage { width: min(960px, 100%); display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; }
+    .bring-stage .text-h1, .bring-stage .text-body1, .bring-choice .text-h2, .bring-choice .text-body2 { margin: 0; }
+    .bring-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); width: 100%; }
+    .bring-choice { flex-direction: column; align-items: stretch; gap: var(--space-3); padding: var(--space-6); text-align: center; }
+    .bring-choice .logo-line { justify-content: center; }
+    .bring-choice .btn, .bring-choice .btn-outlined { width: 100%; margin-top: auto; }
     .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: 1px solid #fff; border-radius: 50%; background: #fff; box-shadow: none; overflow: hidden; flex-shrink: 0; line-height: 0; }
     .logo-chip svg { width: 24px; height: 24px; max-width: none; display: block; flex-shrink: 0; }
     .books-opts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
@@ -404,7 +406,7 @@
     .tooltip-wrap:focus-within .tooltip { opacity: 1; }
     .clients-table { overflow: visible; }
     .clients-table table.synder-table tbody td { height: 68px; padding-top: var(--space-4); padding-bottom: var(--space-4); }
-    .status-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+    .status-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
     .stat-card { flex-direction: column; align-items: flex-start; gap: var(--space-2); padding: var(--space-5); cursor: pointer; text-align: left; font: inherit; color: inherit; }
     .stat-card.on { box-shadow: inset 0 -2px 0 var(--text-primary); }
     .logo-line, .logo-stack { display: inline-flex; align-items: center; gap: var(--space-2); }
@@ -1878,6 +1880,7 @@
     return {
       attention: list.filter(needsAttention).length,
       off: list.filter((c) => clientView(c).key === 'off').length,
+      waiting: list.filter((c) => clientView(c).key === 'waiting').length,
       good: list.filter((c) => clientView(c).key === 'good').length
     };
   }
@@ -2285,22 +2288,34 @@
       </div>
       ${pickerHtml()}`;
   }
+  function bringChoices() {
+    const logos = `<span class="logo-line">${ledgerMark(QB_LOGO, 40)}${ledgerMark(XERO_LOGO, 40)}</span>`;
+    return `<div class="bring-stage">
+      <h1 class="text-h1">Let’s start by bringing in your clients.</h1>
+      <p class="text-body1 text-secondary">Import in bulk or add them one by one. Importing only copies client names.</p>
+      <div class="bring-cards">
+        <div class="box box--white bring-choice">
+          ${logos}
+          <h2 class="text-h2">From QuickBooks or Xero</h2>
+          <p class="text-body2">Pick the clients you manage in QuickBooks or Xero and bring them in at once.</p>
+          <button type="button" class="btn" id="emptyBooks">Import clients</button>
+        </div>
+        <div class="box box--white bring-choice">
+          <h2 class="text-h2">From a CSV file</h2>
+          <p class="text-body2">Upload a list of client names from your practice tool.</p>
+          <button type="button" class="btn-outlined" id="emptyCsv">Upload CSV</button>
+        </div>
+        <div class="box box--white bring-choice">
+          <h2 class="text-h2">One by one</h2>
+          <p class="text-body2">Type a client's name. You can add details later.</p>
+          <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
+        </div>
+      </div>
+    </div>`;
+  }
   function renderClients() {
     if (!sc().clients.length) {
-      const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 22)}</span>`;
-      const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 22)}</span>`;
-      return `<div class="flow-narrow">
-        <div class="box box--white bring-card">
-          <h2 class="text-h2">Let’s start by bringing in your clients.</h2>
-          <p class="text-body1">Connect your clients so Synder can start working for you. Import in bulk or add them one by one. Importing only copies client names.</p>
-          <div class="bring-actions">
-            <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
-            <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
-            <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
-          </div>
-        </div>
-        ${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}
-      </div>${flowDialogs()}`;
+      return `<div class="bring-wrap">${bringChoices()}${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}</div>${flowDialogs()}`;
     }
     const showInvite = ob && ob.banner === 'invite' && ob.welcomeSeen && !ob.welcomePending;
     const showImport = ob && ob.importKind === 'list' && ob.importNote > 0;
@@ -2317,6 +2332,7 @@
       const k = clientView(c).key;
       if (filter === 'attention') return needsAttention(c);
       if (filter === 'off') return k === 'off';
+      if (filter === 'waiting') return k === 'waiting';
       if (filter === 'good') return k === 'good';
       return true;
     });
@@ -2348,6 +2364,7 @@
       <div class="status-cards">
         ${statCard('attention', 'Needs attention', counts.attention)}
         ${statCard('off', 'Not connected', counts.off)}
+        ${statCard('waiting', 'Waiting for owner', counts.waiting)}
         ${statCard('good', 'All good', counts.good)}
       </div>
       <div class="toolbar">
@@ -2362,20 +2379,11 @@
     </div>${flowDialogs()}`;
   }
   function renderBringIn() {
-    const qb = `<span class="logo-chip">${ledgerMark(QB_LOGO, 22)}</span>`;
-    const xero = `<span class="logo-chip">${ledgerMark(XERO_LOGO, 22)}</span>`;
     return `<div class="connect-shell">
       <aside class="connect-side"><img class="auth-logo" src="synder-logo.svg" alt="Synder" /></aside>
-      <div class="connect-main"><div class="connect-form">
-        <h1 class="text-h1">Add a client</h1>
-        <p class="text-body1">Import in bulk or add them one by one. Importing only copies client names.</p>
-        <div class="bring-actions">
-          <button type="button" class="btn" id="emptyBooks">${qb}${xero}Import from QuickBooks or Xero</button>
-          <button type="button" class="btn-outlined" id="emptyCsv">Import CSV</button>
-          <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
-        </div>
+      <div class="connect-main"><div class="bring-wrap">${bringChoices()}</div>
         <div class="ob-actions"><button type="button" class="btn-outlined" id="bringCancel">Cancel</button></div>
-      </div></div>
+      </div>
     </div>${flowDialogs()}`;
   }
   function renderImport() {
