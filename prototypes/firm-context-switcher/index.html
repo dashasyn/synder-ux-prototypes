@@ -106,7 +106,7 @@
     }
     .menu {
       position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 220px;
-      background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; padding: 6px 0;
+      background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm); padding: 6px 0;
       box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none;
     }
     .menu.open { display: block; }
@@ -153,7 +153,7 @@
       display: inline-flex; align-items: center; justify-content: center;
       color: #fff; font-size: 13px; font-weight: 500; letter-spacing: .02em;
     }
-    .av.firm { border-radius: 8px; background: #1A1B24; }
+    .av.firm { border-radius: var(--radius-sm); background: #1A1B24; }
     .av.sm { width: 24px; height: 24px; font-size: 11px; }
     .av.sm.firm { border-radius: 6px; }
 
@@ -168,7 +168,7 @@
     /* ── Switcher popover ── */
     .pop {
       position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
-      width: 300px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      width: 300px; background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm);
       box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none; overflow: hidden;
     }
     .pop.open { display: block; }
@@ -204,20 +204,9 @@
     .pop-foot button:hover, .pop-foot button.kb { background: #F7F8FA; color: #1A1B24; }
     .pop-foot .material-icons { font-size: 18px; width: 24px; text-align: center; }
 
-    /* ── Sidebar nav (Synder production style) ── */
-    .nav { flex: 1; }
-    .nav-i {
-      display: flex; align-items: center; gap: 8px; width: 100%;
-      min-height: 43px; padding: 0 16px; background: transparent;
-      border: none; border-bottom: 1px solid #C8C7CC; cursor: pointer;
-      font: inherit; font-size: 14px; color: #555; text-align: left;
-    }
-    .nav-i .material-icons { font-size: 22px; color: #007AFF; }
-    .nav-i:hover { background: #D9D9D9; }
-    .nav-i.active, .nav-i.active:hover { background: #007AFF; color: #fff; }
-    .nav-i.active .material-icons { color: #fff; }
-    .nav-i .cnt { margin-left: auto; font-size: 13px; color: #6B778C; }
-    .nav-i.active .cnt { color: #fff; }
+    /* ── Sidebar nav uses the kit sidebar item ── */
+    .nav, #nav { flex: 1; }
+    .sidebar-item { width: 100%; border: 0; border-bottom: 1px solid var(--border-default); background: transparent; cursor: pointer; text-align: left; font: inherit; }
 
     /* ── Main content ── */
     .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
@@ -242,14 +231,14 @@
     .empty .sec { display: block; margin: 12px auto 0; }
 
     .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 840px; }
-    .kpi { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; }
+    .kpi { border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 16px; }
     .kpi .l { color: #6B778C; }
     .kpi .v { font-size: 28px; line-height: 36px; margin-top: 4px; }
 
     /* ── Modal ── */
     .scrim { position: fixed; inset: 0; background: rgba(26,27,36,.4); z-index: 400; display: none; align-items: center; justify-content: center; }
     .scrim.open { display: flex; }
-    .scrim > .modal { width: 440px; max-width: calc(100vw - 32px); }
+    .scrim > .modal { width: min(560px, calc(100vw - 32px)); max-width: 560px; }
     .idrow { display: flex; gap: 8px; }
     .idrow input { font-size: 16px; letter-spacing: .04em; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
@@ -275,7 +264,7 @@
     .mpick select { appearance: none; border: 0; background: none; font: inherit; font-size: 20px; line-height: 28px; font-weight: 500; color: #1A1B24; padding: 0 26px 0 0; cursor: pointer; }
     .mpick .material-icons { position: absolute; right: 0; pointer-events: none; color: #6B778C; }
     .mpick select:focus-visible { outline: 2px solid #0053CC; border-radius: 4px; }
-    .wk-line { margin-top: 4px; color: #555; }
+    .wk-line { margin-top: 4px; color: var(--text-secondary); }
     .ln-warn { color: #B35E0B; font-weight: 500; } .ln-ok { color: #1F8940; font-weight: 500; }
     .wk-sec { max-width: 880px; margin-bottom: 28px; }
     .sec-h { font-size: 14px; font-weight: 500; margin-bottom: 4px; display: flex; gap: 8px; }
@@ -283,13 +272,12 @@
     .tabs-l { display: flex; gap: 24px; }
     .tabs { justify-content: space-between; align-items: center; }
     .tabs { display: flex; gap: 24px; border-bottom: 1px solid #DFE4EC; margin: 12px 0 24px; }
-    .tabs button { background: none; border: 0; font: inherit; color: #555; padding: 10px 0; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; }
-    .tabs button.on { color: #0053CC; box-shadow: inset 0 -2px 0 #0053CC; font-weight: 500; }
-    .card { border: 1px solid #DFE4EC; border-radius: 8px; padding: 16px; margin-bottom: 16px; max-width: 880px; }
+    .tabs button { background: none; border: 0; cursor: pointer; }
+    .card { border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; max-width: 880px; }
     .sum { display: flex; gap: 12px; align-items: flex-start; }
     .sum .material-icons { font-size: 24px; }
     .sum h3 { margin: 0; font-size: 16px; font-weight: 500; }
-    .sum ul { margin: 6px 0 0; padding-left: 18px; color: #555; }
+    .sum ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-secondary); }
     .sum li { margin: 2px 0; }
     .sum.blocked { background: #FFF7F0; border-color: #F3D2B3; } .sum.blocked > .material-icons { color: #CB7515; }
     .sum.ready { background: #F1F9F3; border-color: #BFE3C8; } .sum.ready > .material-icons { color: #1F8940; }
@@ -304,7 +292,7 @@
     .chk .ic { font-size: 20px; }
     .ic.pass { color: #1F8940; } .ic.fail { color: #CC2929; } .ic.warn { color: #CB7515; } .ic.wait { color: #B4BBCB; }
     .chk .nm { width: 180px; font-weight: 500; }
-    .chk .stt { flex: 1; color: #555; }
+    .chk .stt { flex: 1; color: var(--text-secondary); }
     .chk .exp { color: #6B778C; font-size: 20px; transition: transform .15s; }
     .chk[open] .exp { transform: rotate(180deg); }
     .chk .det { padding: 0 0 12px 32px; color: #6B778C; }
@@ -315,7 +303,7 @@
     .hist td { padding: 6px 8px 6px 0; border-top: 1px solid #EFF1F5; vertical-align: top; }
     .hist td:first-child { color: #6B778C; white-space: nowrap; width: 130px; }
     .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; max-width: 880px; }
-    .form label { display: flex; flex-direction: column; gap: 4px; color: #555; font-size: 13px; }
+    .form label { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary); font-size: 13px; }
     .form .full { grid-column: 1 / -1; }
     .form input, .form textarea { font: inherit; font-size: 14px; color: #1A1B24; }
     .kv { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; }
@@ -424,7 +412,7 @@
     .modal-bg .modal { width: min(480px, calc(100vw - 32px)); max-width: 480px; }
     body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
     .modal-bg .modal.modal-lg { width: 960px; max-width: calc(100vw - 64px); }
-    .modal-bg .modal.story-modal { width: 720px; max-width: calc(100vw - 64px); }
+    .modal-bg .modal.story-modal { width: min(560px, calc(100vw - 64px)); max-width: 560px; }
     .story-top { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-6) 0; }
     .story-bars { display: flex; gap: var(--space-1); flex: 1; padding-top: 10px; }
     .story-bars .progress { flex: 1; }
@@ -444,7 +432,7 @@
     .story-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
     .story-reopen { margin: var(--space-4) 0 0; text-align: center; }
     @media (prefers-reduced-motion: reduce) { .story-fill { transition: none !important; } }
-    .modal-bg .modal.modal-confirm { width: 440px; max-width: 440px; }
+    .modal-bg .modal.modal-confirm { width: min(560px, calc(100vw - 64px)); max-width: 560px; }
     @media (max-width: 800px) { .role-grid { grid-template-columns: 1fr; } }
     .ob-card {
       position: relative;
@@ -478,7 +466,7 @@
     .src-d { display: block; margin-top: var(--space-1); }
     .books-banner {
       display: flex; gap: 12px; align-items: flex-start; margin: 0 0 24px;
-      background: #E7F0FC; border-radius: 8px; padding: 14px 16px;
+      background: #E7F0FC; border-radius: var(--radius-sm); padding: 14px 16px;
     }
     .books-banner .material-icons { color: #0053CC; font-size: 22px; flex-shrink: 0; }
     .books-banner p { margin: 0; font-size: 15px; line-height: 22px; color: #1A1B24; text-align: left; }
@@ -486,7 +474,7 @@
     .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
     .path-card {
       display: flex; flex-direction: column; align-items: flex-start; text-align: left;
-      border: 1px solid #DFE4EC; border-radius: 8px; background: #fff; padding: 24px;
+      border: 1px solid #DFE4EC; border-radius: var(--radius-sm); background: #fff; padding: 24px;
     }
     .path-ico {
       width: 40px; height: 40px; border-radius: 50%; background: #F2F6FC; color: #0053CC;
@@ -499,7 +487,7 @@
     .src-list { display: flex; flex-direction: column; gap: 12px; max-width: 720px; }
     .src-opt {
       display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
-      padding: 16px 18px; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px;
+      padding: 16px 18px; background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm);
       cursor: pointer; font: inherit; color: inherit;
     }
     .src-opt:hover { border-color: #0053CC; background: #F7FAFF; }
@@ -523,7 +511,7 @@
     .signup-links { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 420px; }
     .brand-logo { width: 40px; height: 40px; flex-shrink: 0; display: block; }
     .src-file {
-      width: 40px; height: 40px; border-radius: 8px; background: #F2F6FC; color: #0053CC;
+      width: 40px; height: 40px; border-radius: var(--radius-sm); background: #F2F6FC; color: #0053CC;
       display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .src-file .material-icons { font-size: 22px; }
@@ -535,10 +523,10 @@
     .p-main.fit-review { display: flex; flex-direction: column; height: calc(100vh - 50px - 56px); overflow: hidden; box-sizing: border-box; padding-bottom: 0; }
     .p-main.fit-review .review-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; }
     .progress-line { margin: 0 0 16px; font-size: 15px; line-height: 22px; color: #3E4656; }
-    .firm-banner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 16px; background: #E7F0FC; border-radius: 8px; margin: 0 0 16px; }
+    .firm-banner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 16px; background: #E7F0FC; border-radius: var(--radius-sm); margin: 0 0 16px; }
     .firm-banner p { margin: 0; flex: 1; min-width: 220px; font-size: 15px; line-height: 22px; }
     .firm-banner.quiet { background: #F7F8FA; }
-    .setup-calls { border: 1px solid #D6E4F7; background: #F2F6FC; border-radius: 8px; padding: 14px 16px; margin: 0 0 16px; max-width: 880px; }
+    .setup-calls { border: 1px solid #D6E4F7; background: #F2F6FC; border-radius: var(--radius-sm); padding: 14px 16px; margin: 0 0 16px; max-width: 880px; }
     .setup-calls h2 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
     .setup-calls .call { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #D6E4F7; }
     .setup-calls .call div { flex: 1; font-size: 14px; line-height: 20px; }
@@ -551,7 +539,7 @@
     .empty-dir h1 { font-size: 28px; line-height: 36px; font-weight: 400; margin: 8px 0; }
     .empty-dir p { margin: 0 0 20px; font-size: 16px; line-height: 24px; color: #3E4656; }
     .empty-dir .ill svg { display: block; width: 128px; height: 84px; margin-bottom: 8px; }
-    .dir-list { max-width: 560px; margin: 8px 0; background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; overflow: hidden; }
+    .dir-list { max-width: 560px; margin: 8px 0; background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm); overflow: hidden; }
     .dir-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #EFF1F5; font-size: 15px; line-height: 22px; }
     .dir-row:last-child { border-bottom: 0; }
     .dir-row .nm { flex: 1; min-width: 0; }
@@ -578,23 +566,23 @@
     .ob-spin { text-align: center; padding: 64px 24px; }
     .ob-spin .material-icons { font-size: 40px; color: #0053CC; animation: spin 1.2s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .ob-table-wrap { background: #fff; border: 1px solid #DFE4EC; border-radius: 8px; overflow: hidden; }
+    .ob-table-wrap { background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm); overflow: hidden; }
     .ob-table-wrap table { width: 100%; border-collapse: collapse; }
     .ob-table-wrap th, .ob-table-wrap td { padding: 12px 14px; border-bottom: 1px solid #EFF1F5; text-align: left; font-size: 14px; line-height: 20px; }
     .ob-table-wrap th { font-weight: 500; color: #6B778C; }
     .ob-table-wrap tr:last-child td { border-bottom: 0; }
     .ob-table-wrap input[type=checkbox] { width: 16px; height: 16px; }
-    .setup-bar { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: 8px; margin-bottom: 20px; max-width: 880px; }
+    .setup-bar { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: var(--radius-sm); margin-bottom: 20px; max-width: 880px; }
     .setup-bar .bar { flex: 1; height: 8px; background: #DFE4EC; border-radius: 4px; overflow: hidden; }
     .setup-bar .bar i { display: block; height: 100%; background: #0053CC; }
     .setup-bar b { white-space: nowrap; }
     .issues { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 880px; margin: 16px 0 24px; }
-    .issue { border: 1px solid #DFE4EC; border-radius: 8px; padding: 14px; }
+    .issue { border: 1px solid #DFE4EC; border-radius: var(--radius-sm); padding: 14px; }
     .issue .n { font-size: 24px; line-height: 32px; }
     .issue .l { color: #6B778C; font-size: 13px; }
     .stepper { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
     .stepper span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 13px; color: #6B778C; background: #F7F8FA; }
-    .stepper span.on { background: #F2F6FC; color: #0053CC; font-weight: 500; }
+    .stepper span.on { background: var(--color-primary-5); color: var(--color-primary); font-weight: 400; }
     .stepper span.done { color: #1F8940; }
     .draft-tag { display: inline-block; font-size: 12px; color: #CB7515; background: #FFF7F0; border: 1px solid #F3D2B3; border-radius: 4px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
 
@@ -709,7 +697,7 @@
 
   <div class="p-body">
     <aside class="p-side">
-      <nav class="nav" id="nav"></nav>
+      <nav class="sidebar" id="nav"></nav>
     </aside>
     <main class="p-main" id="main"></main>
   </div>
@@ -943,24 +931,34 @@
     goWorkspace('clients');
   }
   function existingClients() {
-    const off = { connected: false, accounting: null, integrations: [], issue: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' };
-    const on = (accounting, integrations, issue, issueTip) => ({
-      connected: true, accounting, integrations, issue, issueTip, ledger: accounting, pay: integrations[0] || null,
-      books: issue === 'good' ? ['green', 'Healthy'] : ['yellow', 'Needs review'], month: 'Oct 2026',
-      setup: true, licence: 'Pro', setupState: 'Ready', preassess: 'Not run'
+    const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up' };
+    const on = (accounting, integrations, issues) => ({
+      connected: true, accounting, integrations, issues, syncing: false, ledger: accounting, pay: (integrations[0] || null),
+      books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'today at 9:14 AM',
+      setup: true, licence: 'Pro', setupState: 'Ready'
     });
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
+    const src = (acct, name) => acct + ' · ' + name;
     return [
-      Object.assign({ id: 'e1', name: 'Harbor Coffee Co' }, on('QuickBooks', four.slice(), 'good', 'Books reconciled, nothing uncategorized.')),
-      Object.assign({ id: 'e2', name: 'Tidewater Dental' }, on('QuickBooks', four.slice(), 'unreconciled', '2 periods not reconciled: Aug, Sep 2026')),
-      Object.assign({ id: 'e3', name: 'Northline Outfitters' }, on('QuickBooks', four.slice(), 'uncategorized', '14 uncategorized transactions in QuickBooks')),
+      Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', four.slice(), [])),
+      Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC' }, on('QuickBooks', four.slice(), [
+        { key: 'unreconciled', periods: ['Aug 2026', 'Sep 2026'], source: src('QuickBooks', 'Tidewater Dental LLC') },
+        { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Tidewater Dental LLC') }
+      ])),
+      Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [
+        { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Northline Outfitters LLC') }
+      ])),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
-      Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon'], 'good', 'Books reconciled, nothing uncategorized.')),
+      Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon'], [])),
       Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
-      Object.assign({ id: 'e7', name: 'Juniper Yoga' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square', 'WooCommerce'], 'unreconciled', '1 period not reconciled: Sep 2026')),
+      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square', 'WooCommerce'], [
+        { key: 'reconnect', source: 'Stripe' }
+      ])),
       Object.assign({ id: 'e8', name: 'Kestrel Analytics' }, off),
-      Object.assign({ id: 'e9', name: 'Lumen Dental Lab' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify', 'Etsy'], 'uncategorized', '8 uncategorized transactions in QuickBooks')),
-      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters' }, on('Xero', ['Stripe', 'Shopify', 'Amazon', 'eBay'], 'good', 'Books reconciled, nothing uncategorized.'))
+      Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify', 'Etsy'], [
+        { key: 'uncategorized', count: 8, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
+      ])),
+      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC' }, on('Xero', ['Stripe', 'Shopify', 'Amazon', 'eBay'], []))
     ];
   }
   function enterNewFirm() {
@@ -988,6 +986,8 @@
     ob.directoryReady = false;
     ob.firmName = 'WLS Labs';
     ob.firmTouched = true;
+    ob.userEmail = 'ignat@wlslabs.com';
+    ob.demoPass = 'Bookkeeping1';
     FIRM.name = 'WLS Labs';
     SCENARIOS.firm.clients = existingClients();
     applyOwnOrg();
@@ -1021,13 +1021,15 @@
     const have = new Set(sc().clients.map((c) => c.id));
     const added = (entries || []).filter((c) => !have.has(c.id));
     added.forEach((c) => {
+      if (alreadyInFirm(c)) return;
       sc().clients.push({
         id: c.id, name: c.name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
-        setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run'
+        setup: false, licence: 'None', setupState: 'Not set up', connected: false, integrations: [], issues: [], syncing: false
       });
     });
-    if (ob && ob.variant === 'existing') ob.banner = 'progress';
-    if (ob) { ob.directoryReady = true; ob.picker = false; ob.importNote = added.length; saveOb(); }
+    const fresh = sc().clients.filter((c) => added.some((a) => a.id === c.id));
+    if (ob && ob.variant === 'existing' && ob.banner === 'invite') ob.banner = 'invite';
+    if (ob) { ob.directoryReady = true; ob.picker = false; ob.importNote = fresh.length; ob.importKind = 'list'; saveOb(); }
     persistDirectory();
     goFirm('clients');
   }
@@ -1078,7 +1080,7 @@
   function reviewCopy() {
     const src = ob.source;
     if (src === 'qbo' || src === 'qboa') {
-      return 'Choose who to add. Everything starts ticked. Untick anyone you no longer work with. These names are customers from your firm’s own QuickBooks company.';
+      return 'Choose who to add. Everything starts ticked. Untick anyone you no longer work with. These names are client companies from your firm’s own QuickBooks company.';
     }
     if (src === 'xero') {
       return 'Choose who to add from this sample practice list. Nothing connects to Xero.';
@@ -1103,7 +1105,7 @@
           <span class="material-icons home-search" aria-hidden="true">search</span>
           <button type="button" class="home-login" id="homeLogin">Log in</button>
           <button type="button" class="home-fill" id="homeSignup">Sign up free</button>
-          <button type="button" class="home-outline home-inert">Book a demo</button>
+          <button type="button" class="home-outline" id="homeDemoNav">Book a demo</button>
         </div>
       </div>
       <div class="home-hero">
@@ -1113,7 +1115,7 @@
           <li>Fast month-end close without manual work</li>
           <li>AI insights for strategic analysis</li>
         </ul>
-        <button type="button" class="home-fill home-inert">Book a demo</button>
+        <button type="button" class="home-fill" id="homeDemo">Book a demo</button>
         <p class="home-trial">15-day free trial</p>
       </div>
       <div class="home-stat">62% of finance teams are already automating their accounting.</div>
@@ -1180,8 +1182,8 @@
         <div class="modal-bg" id="joinModal">
           <div class="modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
             <div class="modal-header" id="joinTitle">Join a firm</div>
-            <div class="modal-body"><p class="text-body2">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</p></div>
-            <div class="modal-footer"><button type="button" class="btn-outlined" id="joinGotIt">Cancel</button><button type="button" class="btn" id="joinOk">OK</button></div>
+            <div class="modal-body"><p class="text-body2">To join a firm, ask a firm admin to invite you from Colleagues. You'll get an email with a link to join.</p></div>
+            <div class="modal-footer"><button type="button" class="btn" id="joinGotIt">Got it</button></div>
           </div>
         </div>`);
     } else if (step === 'role-legacy') {
@@ -1200,7 +1202,7 @@
         </div>
         <button type="button" class="ob-other" id="obOtherOpen">Other</button>
         ${otherOpen ? `<div class="ob-field" id="otherBox"><label for="roleNote">How would you describe your role?</label><input id="roleNote" value="${esc(ob.roleNote || '')}" autocomplete="off" /></div>` : ''}
-        <div class="ob-actions"><button type="button" class="btn" id="obRoleNext"${can ? '' : ' disabled'}>Continue</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="obRoleNext">Continue</button></div>`);
     } else if (step === 'other' || step === 'inhouse' || step === 'owner') {
       const titles = { other: 'Other', inhouse: 'Accountant at one company', owner: 'I run a business' };
       const described = step === 'other' && (ob.roleNote || '').trim() ? `You described your role as “${esc(String(ob.roleNote).trim())}”. ` : '';
@@ -1219,14 +1221,14 @@
           ${obCard({ attr: 'data-choice="create"', selected: !!(ob.firmChosen && ob.firmChoice === 'create'), ill: ILL.create, title: 'Create a firm', text: 'A workspace for every client. You are the admin.' })}
           ${obCard({ attr: 'data-choice="join"', selected: !!(ob.firmChosen && ob.firmChoice === 'join'), ill: ILL.join, title: 'Join my firm’s workspace', text: 'Use an invite from a colleague, or the Firm ID they share.' })}
         </div>
-        <div class="ob-actions"><button type="button" class="btn" id="obFirmNext"${canFirm ? '' : ' disabled'}>Continue</button></div>`);
+        <div class="ob-actions"><button type="button" class="btn" id="obFirmNext">Continue</button></div>`);
     } else if (step === 'business') {
       html = obShell(`
         <div class="flow-narrow">
         ${backSlot(true)}
-        <h1 class="text-h1">For businesses</h1>
-        <p class="text-body1">The default Synder business sign-up and onboarding would open here. This prototype stays on the practice path.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="obBack2">Back</button></div>
+        <h1 class="text-h1">Set up Synder for your business</h1>
+        <p class="text-body1">This is the business path. Next you’ll connect the company’s books.</p>
+        <div class="ob-actions"><button type="button" class="btn" id="obBizNext">Continue</button><button type="button" class="btn-outlined" id="obBack2">Back</button></div>
         </div>`);
     } else if (step === 'login') {
       html = obShell(`
@@ -1251,7 +1253,8 @@
         <h1>Join a firm</h1>
         <p class="lead">Enter the Firm ID, or the email of the firm owner. This sends a simulated request.</p>
         <div class="ob-field"><label for="firmIdIn">Firm ID or owner email</label><input id="firmIdIn" placeholder="e.g. 1793300370 or owner@firm.com" /></div>
-        <div class="ob-actions"><button type="button" class="btn" id="obRequest" disabled>Request access</button></div>
+        <div class="ob-field"><p class="form-error-msg" id="joinReqError" hidden>Required</p></div>
+        <div class="ob-actions"><button type="button" class="btn" id="obRequest">Request access</button></div>
         </div>`);
     } else if (step === 'import') {
       html = obShell(`
@@ -1297,8 +1300,8 @@
         <h1>Import client list</h1>
         <p class="welcome-copy">Choose where the names come from. You’ll review them before anyone is added. No changes will be made to their books without permission.</p>
         <div class="src-list">
-          ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
-          ${srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+          ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
+          ${srcOpt('xero', XERO_LOGO, 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
           ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'Upload CSV', 'Names from a spreadsheet, then the same review.', 'Demo. No file is opened or parsed.')}
         </div>`);
     } else if (step === 'connecting') {
@@ -1338,13 +1341,22 @@
             <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>In this sample</th></tr></thead>
             <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] ? ' checked' : ''} /></td>
               <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td>
-              <td class="${c.former ? 'sample-former' : 'sample-current'}">${c.former ? 'Former customer' : 'Current client'}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No names match that search.</td></tr>'}</tbody>
+              <td class="${c.former ? 'sample-former' : 'sample-current'}">${c.former ? 'Former client' : 'Current client'}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No names match that search.</td></tr>'}</tbody>
           </table></div>
         </div>
         <div class="review-foot">
-          <button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Add ${n} client${n === 1 ? '' : 's'}</button>
+          <button type="button" class="btn" id="obAdd">${n ? `Add ${n} client${n === 1 ? '' : 's'}` : 'Add clients'}</button>
           <button type="button" class="ob-quiet" id="obSkipAdd">Continue without these names</button>
         </div>`, true);
+    } else if (step === 'bizbooks') {
+      html = obShell(`
+        <div class="flow-narrow">
+        ${backSlot(true)}
+        <h1 class="text-h1">Connect your books</h1>
+        <p class="text-body1">Synder for businesses would connect QuickBooks or Xero for this company next.</p>
+        <div class="ob-actions"><button type="button" class="btn" id="obBizDone">Continue</button><button type="button" class="btn-outlined" id="obBack">Back</button></div>
+        <p class="form-error-msg" id="bizNote" hidden>This continues in Synder for businesses.</p>
+        </div>`);
     } else if (step === 'joinok') {
       html = obShell(`
         ${backSlot(true)}
@@ -1366,7 +1378,7 @@
   function bindOb() {
     const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     const backMap = {
-      signup: 'entry', business: 'entry', login: 'signup', join: 'signup', joinok: 'join',
+      signup: 'entry', business: 'entry', bizbooks: 'business', login: 'signup', join: 'signup', joinok: 'join',
       firmchoice: 'entry', import: 'signup', add: 'import', sources: 'import',
       firmname: 'signup', review: 'sources', connecting: 'sources',
       other: 'entry', inhouse: 'entry', owner: 'entry'
@@ -1398,7 +1410,9 @@
       [name, email, pass, firm].forEach((el) => fieldClear(el));
       if (!name || !name.value.trim()) { fieldError(name, 'Required'); bad = true; }
       if (!email || !email.value.trim()) { fieldError(email, 'Required'); bad = true; }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { fieldError(email, 'Enter a valid email'); bad = true; }
       if (!pass || !pass.value) { fieldError(pass, 'Required'); bad = true; }
+      else if (pass.value.length < 8) { fieldError(pass, 'Use at least 8 characters'); bad = true; }
       if (!firm || !firm.value.trim()) { fieldError(firm, 'Required'); bad = true; }
       if (bad) return;
       ob.userName = name.value.trim();
@@ -1465,7 +1479,29 @@
       if (modal) modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
     });
     const joinIn = $('firmIdIn');
-    if (joinIn) joinIn.oninput = () => { const b = $('obRequest'); if (b) b.disabled = !joinIn.value.trim(); };
+    on('obRequest', () => {
+      const input = $('firmIdIn');
+      const err = $('joinReqError');
+      if (!input || !input.value.trim()) { if (err) err.hidden = false; if (input) input.focus(); return; }
+      if (err) err.hidden = true;
+      goOnboarding('joinok');
+    });
+    on('obBizNext', () => goOnboarding('bizbooks'));
+    on('obBizDone', () => { const note = $('bizNote'); if (note) note.hidden = false; });
+    const showDemo = () => {
+      let modal = document.getElementById('demoModal');
+      if (modal) modal.remove();
+      modal = document.createElement('div');
+      modal.id = 'demoModal';
+      modal.className = 'modal-bg show';
+      modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="demoTitle"><div class="modal-header" id="demoTitle">Book a demo</div><div class="modal-body"><p class="text-body2">Thanks. A Synder specialist will email you to set a time.</p></div><div class="modal-footer"><button type="button" class="btn-outlined" id="demoCancel">Cancel</button></div></div>`;
+      document.body.appendChild(modal);
+      const close = () => modal.remove();
+      modal.querySelector('#demoCancel').onclick = close;
+      modal.onclick = (e) => { if (e.target === modal) close(); };
+    };
+    on('homeDemo', showDemo);
+    on('homeDemoNav', showDemo);
     document.querySelectorAll('[data-role]').forEach((b) => b.onclick = () => {
       ob.role = b.dataset.role;
       ob.roleChosen = true;
@@ -1485,20 +1521,19 @@
     const next = $('obRoleNext');
     if (note && next) note.oninput = () => {
       ob.roleNote = note.value;
-      next.disabled = !note.value.trim();
       saveOb();
     };
     on('obRoleNext', () => {
       if (ob.otherOpen) {
         const text = (($('roleNote') && $('roleNote').value) || ob.roleNote || '').trim();
-        if (!text) return;
+        if (!text) { fieldError($('roleNote'), 'Required'); return; }
         ob.roleNote = text;
         ob.role = 'other';
         ob.roleChosen = true;
         goOnboarding('other');
         return;
       }
-      if (!ob.roleChosen) return;
+      if (!ob.roleChosen) { const box = document.querySelector('.ob-actions'); if (box && !document.getElementById('roleNeed')) { const p = document.createElement('p'); p.id = 'roleNeed'; p.className = 'form-error-msg'; p.textContent = 'Required'; box.before(p); } return; }
       if (ob.role === 'firm') goOnboarding('firmchoice');
       else if (ob.role === 'inhouse' || ob.role === 'owner') goOnboarding(ob.role);
     });
@@ -1509,7 +1544,7 @@
       renderOb();
     });
     on('obFirmNext', () => {
-      if (!ob.firmChosen) return;
+      if (!ob.firmChosen) { const box = document.querySelector('.ob-actions'); if (box && !document.getElementById('firmNeed')) { const p = document.createElement('p'); p.id = 'firmNeed'; p.className = 'form-error-msg'; p.textContent = 'Required'; box.before(p); } return; }
       if (ob.firmChoice === 'create') goOnboarding('import');
       else if (ob.firmChoice === 'join') goOnboarding('join');
     });
@@ -1611,9 +1646,9 @@
           <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
           <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
     }
-    const failed = list.filter((c) => (c.books[1] || '').includes('failed')).length;
-    const unre = list.filter((c) => (c.books[1] || '').includes('unreconciled')).length;
-    const uncat = list.filter((c) => (c.books[1] || '').includes('uncategorized')).length;
+    const failed = list.filter((c) => clientView(c).key === 'reconnect').length;
+    const unre = list.filter((c) => (clientView(c).issues || []).some((i) => i.key === 'unreconciled')).length;
+    const uncat = list.filter((c) => (clientView(c).issues || []).some((i) => i.key === 'uncategorized')).length;
     const close = list.filter((c) => c.month && isSetup(c)).length;
     return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(FIRM.name)}</div></div>
       <div class="ph-actions"><button class="btn" id="dashContinue">Continue setup</button></div></div>
@@ -1703,9 +1738,14 @@
     if (clientId) touchRecent(clientId);
     save(); render();
   }
+  function openClient(id, page) {
+    st.ctx = 'org'; st.orgId = id; st.clientId = id; st.page = page || 'dashboard';
+    if (isClient(id)) touchRecent(id);
+    save(); render();
+  }
   function goOrg(orgId, page) {
+    if (isClient(orgId)) { openClient(orgId, page === 'dashboard' ? 'dashboard' : page); return; }
     st.ctx = 'org'; st.orgId = orgId; st.page = page || 'dashboard'; st.clientId = null;
-    if (isClient(orgId)) touchRecent(orgId);
     save(); render();
   }
   function touchRecent(id) {
@@ -1730,11 +1770,11 @@
   /* ───────── Render: sidebar ───────── */
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
-    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'dashboard'].includes(st.page) ? 'clients' : st.page;
+    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard'].includes(st.page) ? 'clients' : (st.page === 'details' ? 'dashboard' : st.page);
     $('nav').innerHTML = items.map(([k, ic, label]) =>
-      `<button class="nav-i${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span>${esc(label)}${k === 'clients' ? `<span class="cnt">${sc().clients.length}</span>` : ''}</button>`
+      `<button class="sidebar-item${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span><span class="sidebar-item-label">${esc(label)}</span>${k === 'clients' ? `<span class="sidebar-badge">${sc().clients.length}</span>` : ''}</button>`
     ).join('');
-    $('nav').querySelectorAll('.nav-i').forEach((b) => b.onclick = () => {
+    $('nav').querySelectorAll('.sidebar-item').forEach((b) => b.onclick = () => {
       if (st.ctx === 'firm') goFirm(b.dataset.k); else goOrg(st.orgId, b.dataset.k);
     });
   }
@@ -1746,9 +1786,59 @@
       <p>This step only covers switching between the firm and organizations.</p></div>`;
   }
 
+  function companyName(c) {
+    if (!c) return '';
+    if (c.company) return c.company;
+    const n = c.name || 'Client';
+    return /LLC|Inc|Ltd|Co\b/.test(n) ? n : n + ' LLC';
+  }
+  function normName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+  function alreadyInFirm(entry) {
+    const n = normName(entry && entry.name);
+    return sc().clients.some((c) => c.id === entry.id || normName(c.name) === n);
+  }
+  const ISSUE_RANK = { reconnect: 0, unreconciled: 1, uncategorized: 2 };
+  function issueSentence(issue) {
+    if (!issue) return '';
+    if (issue.key === 'reconnect') return (issue.source || 'A source') + ' needs to be reconnected.';
+    if (issue.key === 'unreconciled') return (issue.periods || []).join(', ') + ' not reconciled in ' + (issue.source || 'the books') + '.';
+    if (issue.key === 'uncategorized') return (issue.count || 0) + ' uncategorized transactions in ' + (issue.source || 'the books') + '.';
+    return '';
+  }
+  function clientView(c) {
+    const empty = { key: 'off', label: 'Not connected', kind: 'grey', tip: 'Connect accounting and integrations to start syncing.', extra: 0, issues: [], accounting: '', period: '' };
+    if (!c) return empty;
+    const acct = c.accounting ? (c.accounting + ' · ' + companyName(c)) : '';
+    if (c.syncing) {
+      return { key: 'syncing', label: 'Syncing', kind: 'blue', tip: 'Synder is reading ' + (acct || 'the books') + '.', extra: 0, issues: [], accounting: acct, period: c.month || 'Oct 2026' };
+    }
+    if (!(c.connected || c.accounting)) return empty;
+    const issues = (Array.isArray(c.issues) ? c.issues.slice() : []).sort((a, b) => (ISSUE_RANK[a.key] ?? 9) - (ISSUE_RANK[b.key] ?? 9));
+    const period = c.month || 'Oct 2026';
+    const checked = c.checked || 'today at 9:14 AM';
+    if (!issues.length) {
+      return { key: 'good', label: 'All good · ' + period, kind: 'green', tip: 'Every check passed for ' + period + ' in ' + acct + '. Last checked ' + checked + '.', extra: 0, issues: [], accounting: acct, period, checked };
+    }
+    const names = { reconnect: 'Reconnect needed', unreconciled: 'Unreconciled', uncategorized: 'Uncategorized' };
+    const kinds = { reconnect: 'red', unreconciled: 'yellow', uncategorized: 'yellow' };
+    const top = issues[0];
+    const extra = issues.length - 1;
+    return { key: top.key, label: names[top.key] + (extra ? ' +' + extra : ''), kind: kinds[top.key] || 'yellow', tip: issues.map(issueSentence).join(' '), extra, issues, accounting: acct, period };
+  }
+  function needsAttention(c) {
+    const k = clientView(c).key;
+    return k === 'syncing' || k === 'reconnect' || k === 'unreconciled' || k === 'uncategorized';
+  }
+  function statusCounts(list) {
+    return {
+      attention: list.filter(needsAttention).length,
+      off: list.filter((c) => clientView(c).key === 'off').length,
+      good: list.filter((c) => clientView(c).key === 'good').length
+    };
+  }
   function clientCountLine() {
     const list = sc().clients.filter((c) => !c.pending);
-    const ready = list.filter((c) => c.connected || c.accounting).length;
+    const ready = list.filter((c) => clientView(c).key !== 'off').length;
     return `${list.length} client${list.length === 1 ? '' : 's'} · ${ready} connected`;
   }
   function ledgerMark(svg, size) {
@@ -1824,52 +1914,97 @@
   }
   let connectLoading = false;
   let linkTimer = 0;
-  function clearLink() { if (linkTimer) { clearTimeout(linkTimer); linkTimer = 0; } }
+  let linkTick = 0;
+  const syncArmed = {};
+  function clearLink() {
+    if (linkTimer) { clearTimeout(linkTimer); linkTimer = 0; }
+    if (linkTick) { clearInterval(linkTick); linkTick = 0; }
+  }
   function armLink() {
     if (linkTimer || !st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
+    let pct = 8;
+    linkTick = setInterval(() => {
+      pct = Math.min(100, pct + 16);
+      const fill = document.getElementById('linkFill');
+      if (fill) fill.style.width = pct + '%';
+      if (pct >= 100) { clearInterval(linkTick); linkTick = 0; }
+    }, 220);
     linkTimer = setTimeout(() => {
       linkTimer = 0;
       if (!st || st.page !== 'clientconnect' || st.connectStep !== 'linking') return;
       finishClientConnect();
     }, 1500);
   }
-  function clientConnected(c) { return !!(c && (c.connected || c.accounting)); }
+  function brandMark(name, size) {
+    const px = size || 18;
+    if (name === 'QuickBooks' || name === 'QuickBooks Desktop') return ledgerMark(QB_LOGO, px);
+    if (name === 'Xero') return ledgerMark(XERO_LOGO, px);
+    const colors = { Stripe: '#635BFF', PayPal: '#003087', Square: '#111111', Amazon: '#FF9900', Shopify: '#96BF48', eBay: '#E53238', Etsy: '#F1641E', WooCommerce: '#7F54B3', Sage: '#00D639', NetSuite: '#1A3E6E', GoCardless: '#1C3D5A', 'Authorize.Net': '#1E4B8F' };
+    const fill = colors[name] || '#6B778C';
+    const letter = String(name || '?').replace(/[^A-Za-z]/g, '').slice(0, 1).toUpperCase();
+    return `<svg width="${px}" height="${px}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="${fill}"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="#fff" font-family="Roboto,sans-serif">${letter}</text></svg>`;
+  }
   function tipChip(kind, label, tip) {
     return `<span class="tooltip-wrap"><span class="status status-${kind}" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function acctCell(c) {
-    if (!clientConnected(c)) return '<span class="text-body2">—</span>';
-    const name = c.accounting || 'QuickBooks';
-    return tipChip('blue', name, name + ' is connected.');
+    const v = clientView(c);
+    if (!v.accounting) return '<span class="text-body2">—</span>';
+    return tipChip('blue', v.accounting, v.accounting + ' is connected.');
   }
   function integCell(c) {
+    const v = clientView(c);
     const list = (c && c.integrations) || [];
-    if (!clientConnected(c) || !list.length) return '<span class="text-body2">—</span>';
-    const label = list.length === 1 ? list[0] : `${list[0]} +${list.length - 1} more`;
-    return tipChip('blue', label, list.join(', '));
+    if (v.key === 'off' || !list.length) return '<span class="text-body2">—</span>';
+    const more = list.length - 1;
+    const label = more > 0 ? list[0] + ' +' + more + ' more' : list[0];
+    return `<span class="tooltip-wrap"><span class="chip-input" tabindex="0">${brandMark(list[0], 18)}<span>${esc(label)}</span></span><span class="tooltip" role="tooltip">${esc(list.join(', '))}</span></span>`;
   }
   function issueChip(c) {
-    if (c.issue === 'unreconciled') return tipChip('yellow', 'Unreconciled', c.issueTip || '2 periods not reconciled: Aug, Sep 2026');
-    if (c.issue === 'uncategorized') return tipChip('yellow', 'Uncategorized', c.issueTip || '14 uncategorized transactions in QuickBooks');
-    return tipChip('green', 'All good', c.issueTip || 'Books reconciled, nothing uncategorized.');
+    const v = clientView(c);
+    return tipChip(v.kind, v.label, v.tip);
+  }
+  function pickedNames() {
+    const pick = st.connectPick || { accounting: [], sales: [], pay: [] };
+    return pick.accounting.concat(pick.sales || [], pick.pay || []);
   }
   function finishClientConnect() {
     clearLink();
     const c = findOrg(st.clientId);
-    if (c) {
+    const pick = st.connectPick || { accounting: [], sales: [], pay: [] };
+    if (c && pick.accounting.length) {
       c.connected = true;
-      c.accounting = 'QuickBooks';
-      c.integrations = ['Stripe'];
-      c.issue = 'unreconciled';
-      c.issueTip = '2 periods not reconciled: Aug, Sep 2026';
-      c.ledger = 'QuickBooks';
-      c.pay = 'Stripe';
+      c.syncing = true;
+      c.accounting = pick.accounting[0];
+      c.integrations = (pick.sales || []).concat(pick.pay || []);
+      c.issues = [];
+      c.company = companyName(c);
+      c.ledger = c.accounting;
+      c.pay = c.integrations[0] || null;
       c.setup = true;
       c.setupState = 'Ready';
-      c.books = ['yellow', 'Needs review'];
+      c.month = c.month || 'Oct 2026';
+      c.books = ['blue', 'Syncing'];
       persistDirectory();
     }
     goFirm('clients');
+  }
+  function settleSync(id) {
+    const cur = findOrg(id);
+    if (!cur || !cur.syncing) return;
+    cur.syncing = false;
+    const src = (cur.accounting || 'QuickBooks') + ' · ' + companyName(cur);
+    cur.issues = [{ key: 'unreconciled', periods: ['Aug 2026', 'Sep 2026'], source: src }];
+    cur.books = ['yellow', 'Needs review'];
+    cur.month = cur.month || 'Oct 2026';
+    persistDirectory();
+    if (mode !== 'onboarding') render();
+  }
+  function watchSync() {
+    if (!sc || !sc().clients) return;
+    sc().clients.forEach((c) => {
+      if (c.syncing && !syncArmed[c.id]) syncArmed[c.id] = setTimeout(() => { delete syncArmed[c.id]; settleSync(c.id); }, 1600);
+    });
   }
   function connectLedger(src) {
     closeBooks();
@@ -1880,7 +2015,9 @@
   }
   function renderConnect() {
     if (connectLoading) {
-      return `<div class="flow-narrow provider-card"><div class="alert alert-info"><span class="spinner" aria-hidden="true"></span><span>Importing clients…</span></div></div>`;
+      const sk = '<div class="skeleton" style="height:20px;width:70%"></div>';
+      const row = `<tr><td>${sk}</td><td>${sk}</td><td>${sk}</td></tr>`;
+      return `<div class="flow-wide page-stack"><h1 class="text-h1">Importing clients</h1><p class="text-body1">Reading the client list. Nothing is written to their books.</p><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Accounting</th><th>Status</th></tr></thead><tbody>${row}${row}${row}${row}</tbody></table></div></div>`;
     }
     const xero = ob && ob.source === 'xero';
     const logo = xero ? XERO_LOGO : QB_LOGO;
@@ -1896,9 +2033,10 @@
       <div class="ob-actions"><button type="button" class="btn" id="connectGo">${go}</button><button type="button" class="btn-outlined" id="connectCancel">Cancel</button></div>
     </div>`;
   }
-  function integTile(name, on, logo) {
-    const mark = logo === 'qb' ? ledgerMark(QB_LOGO, 22) : logo === 'xero' ? ledgerMark(XERO_LOGO, 22) : '';
-    return `<span class="box box--white ledger-card${on ? ' selected' : ''}">${mark}<span class="text-body2">${esc(name)}</span></span>`;
+  function integTile(group, name) {
+    const pick = st.connectPick || { accounting: [], sales: [], pay: [] };
+    const on = (pick[group] || []).indexOf(name) >= 0;
+    return `<button type="button" class="box box--white ledger-card${on ? ' selected' : ''}" data-pick="${group}:${name}" aria-pressed="${on ? 'true' : 'false'}">${brandMark(name, 18)}<span class="text-body2">${esc(name)}</span></button>`;
   }
   function integSection(title, tiles) {
     return `<div class="connect-section"><h2 class="text-subtitle1">${esc(title)}</h2><div class="integ-row">${tiles}</div></div>`;
@@ -1906,59 +2044,51 @@
   function renderClientConnect() {
     const c = findOrg(st.clientId);
     if (!c) return renderClients();
+    if (!st.connectPick) st.connectPick = { accounting: [], sales: [], pay: [] };
     if (st.connectStep === 'done') st.connectStep = 'linking';
     const step = st.connectStep || 'details';
     const active = step === 'linking' ? 'connect' : step;
     const tabs = [['details', 'Client details'], ['integrations', 'Select integrations'], ['connect', 'Connect']];
-    const tabHtml = `<div class="connect-tabs">${tabs.map(([id, label]) => `<span class="text-body2${id === active ? ' on' : ''}">${label}</span>`).join('')}</div>`;
+    const tabHtml = `<div class="tabs">${tabs.map(([id, label]) => `<button type="button" class="tab${id === active ? ' active' : ''}">${label}</button>`).join('')}</div>`;
     const site = String(c.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com';
+    const names = pickedNames();
     let body = '';
     if (step === 'integrations') {
       body = `<div class="connect-copy"><h1 class="text-h1">Select the integrations you would like to connect</h1></div>
-        ${integSection('Accounting system', [
-          integTile('QuickBooks', true, 'qb'),
-          integTile('Xero', false, 'xero'),
-          integTile('Sage', false),
-          integTile('NetSuite', false),
-          integTile('QuickBooks Desktop', false)
-        ].join(''))}
-        ${integSection('Sales integrations', ['Amazon', 'eBay', 'Shopify', 'Etsy', 'WooCommerce'].map((n) => integTile(n, false)).join(''))}
-        ${integSection('Payment integrations', [
-          integTile('Stripe', true),
-          integTile('PayPal', false),
-          integTile('Square', false),
-          integTile('GoCardless', false),
-          integTile('Authorize.Net', false)
-        ].join(''))}
+        ${integSection('Accounting system', ['QuickBooks', 'Xero', 'Sage', 'NetSuite', 'QuickBooks Desktop'].map((n) => integTile('accounting', n)).join(''))}
+        ${integSection('Sales integrations', ['Amazon', 'eBay', 'Shopify', 'Etsy', 'WooCommerce'].map((n) => integTile('sales', n)).join(''))}
+        ${integSection('Payment integrations', ['Stripe', 'PayPal', 'Square', 'GoCardless', 'Authorize.Net'].map((n) => integTile('pay', n)).join(''))}
+        <p class="form-error-msg" id="intError" hidden>Required</p>
         <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
     } else if (step === 'linking') {
+      const what = names.length ? names.join(' and ') : 'the selected integrations';
       body = `<div class="connect-copy"><h1 class="text-h1">Connect</h1>
-        <div class="link-wait"><span class="spinner" aria-hidden="true"></span><p class="text-body1">Connecting QuickBooks and Stripe…</p></div></div>
-        <div class="progress" role="progressbar" aria-label="Connecting"><div class="progress-fill" style="width:70%"></div></div>`;
+        <div class="link-wait"><span class="spinner" aria-hidden="true"></span><p class="text-body1">Connecting ${esc(what)}…</p></div></div>
+        <div class="progress" role="progressbar" aria-label="Connecting"><div class="progress-fill" id="linkFill" style="width:8%"></div></div>
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectLeave">Cancel</button></div>`;
     } else {
       body = `<div class="connect-copy"><h1 class="text-h1">Provide your client's basic info</h1>
         <p class="text-body1">This sets how Synder works for this client.</p></div>
         <div class="form-field"><label class="form-label form-label-required" for="ccName">Client name</label><input class="input" id="ccName" value="${esc(c.name)}" /></div>
-        <div class="form-field"><label class="form-label" for="ccSite">What's your business website?</label><input class="input" id="ccSite" value="${esc(site)}" /></div>
+        <div class="form-field"><label class="form-label" for="ccSite">Client website</label><input class="input" id="ccSite" value="${esc(site)}" /></div>
         <div class="connect-pair">
-          <div class="form-field"><label class="form-label form-label-required" for="ccZone">Time zone</label><select class="select" id="ccZone"><option selected>America/New_York</option></select></div>
+          <div class="form-field"><label class="form-label form-label-required" for="ccZone">Time zone</label><select class="select" id="ccZone"><option selected>Eastern Time (New York)</option></select></div>
           <div class="form-field"><label class="form-label form-label-required" for="ccCountry">Country</label><select class="select" id="ccCountry"><option selected>United States</option></select></div>
         </div>
         <div class="form-field"><label class="form-label form-label-required" for="ccIndustry">Industry</label><select class="select" id="ccIndustry"><option selected>Retail</option></select></div>
         <div class="form-field"><label class="form-label form-label-required" for="ccYears">How long has your client been in business?</label><select class="select" id="ccYears"><option selected>3–5 years</option></select></div>
-        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectLeave">Cancel</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
     }
     return `<div class="connect-shell">
       <aside class="connect-side"><img class="auth-logo" src="synder-logo.svg" alt="Synder" /></aside>
       <div class="connect-main">
-        <button type="button" class="btn-icon connect-x" id="connectX" aria-label="Close"><span class="material-icons">close</span></button>
         <div class="connect-form">${tabHtml}${body}</div>
       </div>
     </div>`;
   }
   function openPicker() {
     if (!ob) return;
-    IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+    IMPORT_POOL.forEach((c) => { ob.selected[c.id] = !alreadyInFirm(c); });
     ob.q = '';
     ob.picker = true;
     saveOb();
@@ -1968,7 +2098,7 @@
     if (!ob || !ob.picker) return '';
     const q = (ob.q || '').toLowerCase();
     const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
-    const n = IMPORT_POOL.filter((c) => ob.selected[c.id] === true).length;
+    const n = IMPORT_POOL.filter((c) => ob.selected[c.id] === true && !alreadyInFirm(c)).length;
     return `<div class="modal-bg show" id="pickModal">
       <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
         <div class="modal-header" id="pickTitle">Choose clients to import</div>
@@ -1976,8 +2106,11 @@
           <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
           <div class="pick-scroll"><table class="synder-table">
             <thead><tr><th style="width:40px"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
-            <tbody>${list.map((c) => `<tr><td><input class="checkbox" type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] === true ? ' checked' : ''} /></td>
-              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No matches.</td></tr>'}</tbody>
+            <tbody>${list.map((c) => {
+              const have = alreadyInFirm(c);
+              return `<tr><td><input class="checkbox" type="checkbox" data-cid="${c.id}" data-have="${have ? '1' : '0'}" aria-label="${esc(c.name)}"${have ? '' : (ob.selected[c.id] === true ? ' checked' : '')} /></td>
+              <td><div class="client-cell">${av(c, true)}<span class="${have ? 'text-body2' : ''}">${esc(c.name)}</span>${have ? '<span class="status status-grey">Already in your firm</span>' : ''}</div></td></tr>`;
+            }).join('') || '<tr><td colspan="2" class="text-body2">No matches.</td></tr>'}</tbody>
           </table></div>
           <p class="form-error-msg" id="pickError" hidden>Choose at least one client</p>
         </div>
@@ -1994,8 +2127,8 @@
           <div class="modal-body" id="booksBody">
             <p class="text-body2">You'll sign in to QuickBooks or Xero. We read your client list, then you choose who to import. Read-only. We only copy names.</p>
             <div class="ledger-list" role="radiogroup" aria-label="Accounting provider">
-              <button type="button" class="box box--white ledger-card" data-ledger="qbo" role="radio" aria-checked="false">${ledgerMark(QB_LOGO, 40)}<span><span class="text-subtitle2">QuickBooks Online</span><span class="text-body2">Import your customer list</span></span></button>
-              <button type="button" class="box box--white ledger-card" data-ledger="xero" role="radio" aria-checked="false">${ledgerMark(XERO_LOGO, 40)}<span><span class="text-subtitle2">Xero</span><span class="text-body2">Import contacts from one or more organisations</span></span></button>
+              <button type="button" class="box box--white ledger-card" data-ledger="qbo" role="radio" aria-checked="false">${ledgerMark(QB_LOGO, 40)}<span><span class="text-subtitle2">QuickBooks</span><span class="text-body2">Import your client companies</span></span></button>
+              <button type="button" class="box box--white ledger-card" data-ledger="xero" role="radio" aria-checked="false">${ledgerMark(XERO_LOGO, 40)}<span><span class="text-subtitle2">Xero</span><span class="text-body2">Import your client organisations</span></span></button>
             </div>
             <p class="form-error-msg" id="booksError" hidden>Choose QuickBooks or Xero</p>
           </div>
@@ -2049,45 +2182,62 @@
         ${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}
       </div>${flowDialogs()}`;
     }
-    const banner = ob && ob.banner === 'invite'
-      ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>You manage ${sc().clients.length} clients in Synder. Bring in the rest of your client list. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
-      : (ob && ob.banner === 'progress' ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>${esc(clientCountLine())}. Read-only until you set a client up.</span></div>` : '');
+    const showInvite = ob && ob.banner === 'invite' && ob.welcomeSeen && !ob.welcomePending;
+    const showImport = ob && ob.importKind === 'list' && ob.importNote > 0;
+    const banner = showImport
+      ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="btn-text" id="importNoteClose">Dismiss</button></div>`
+      : (showInvite
+        ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
+        : '');
     const q = (st._q || '').toLowerCase();
-    const rows = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
+    const searched = sc().clients.filter((c) => c.name.toLowerCase().includes(q));
+    const counts = statusCounts(searched);
+    const filter = st.listFilter || 'all';
+    let rows = searched.filter((c) => {
+      const k = clientView(c).key;
+      if (filter === 'attention') return needsAttention(c);
+      if (filter === 'off') return k === 'off';
+      if (filter === 'good') return k === 'good';
+      return true;
+    });
+    const rank = { reconnect: 0, unreconciled: 1, uncategorized: 2, syncing: 3, off: 4, good: 5 };
+    if ((st.listSort || 'name') === 'status') rows = rows.slice().sort((a, b) => (rank[clientView(a).key] ?? 9) - (rank[clientView(b).key] ?? 9) || a.name.localeCompare(b.name));
+    const filtBtn = (key, label, n) => `<button type="button" class="${filter === key ? 'btn' : 'btn-outlined'}" data-filter="${key}" aria-pressed="${filter === key ? 'true' : 'false'}">${label} <span class="tab-count">${n}</span></button>`;
     const body = rows.map((c) => {
-      const connected = clientConnected(c);
-      const preLabel = c.preassess && c.preassess !== 'Not run' && c.preassess !== 'Running' ? 'View check' : 'Check reconciliation from files';
-      const menu = connected
-        ? `<button type="button" class="dropdown-item" data-open="${c.id}">Open</button>`
-        : `<button type="button" class="dropdown-item" data-detail="${c.id}">Set up</button><button type="button" class="dropdown-item" data-preassess="${c.id}">${preLabel}</button>`;
-      const connectBtn = connected ? '' : `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`;
+      const off = clientView(c).key === 'off';
+      const connectBtn = off ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>` : '';
       return `<tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-detail="${c.id}">${esc(c.name)}</button></div></td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
-        <td>${connected ? issueChip(c) : tipChip('grey', 'Not connected', 'Connect accounting and integrations to start syncing.')}</td>
-        <td><div class="row-actions">${connectBtn}<div class="dropdown row-menu">
-          <button type="button" class="btn-icon" data-menu="${c.id}" aria-label="Actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button>
-          <div class="dropdown-menu" id="rowmenu-${c.id}">${menu}</div>
-        </div></div></td>
+        <td>${issueChip(c)}</td>
+        <td><div class="row-actions">${connectBtn}</div></td>
       </tr>`;
     }).join('');
-    const note = ob && ob.importNote > 0
-      ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="alert-close" id="importNoteClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>`
-      : '';
     return `<div class="flow-wide page-stack">
-      <div class="page-head">
-        <h1 class="text-h1">Clients</h1>
-        <p class="text-body1" id="progressLine">${esc(clientCountLine())}</p>
+      <div class="ph">
+        <div class="page-head">
+          <h1 class="text-h1">Clients</h1>
+          <p class="text-body1" id="progressLine">${esc(clientCountLine())}</p>
+        </div>
+        <div class="ph-actions">
+          <button type="button" class="btn-outlined" id="listImport">Import clients</button>
+          <button type="button" class="btn-outlined" id="listAdd">Add client</button>
+        </div>
       </div>
       ${banner}
-      ${note}
-      <div class="toolbar"><input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" /></div>
+      <div class="toolbar">
+        <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
+        ${filtBtn('attention', 'Needs attention', counts.attention)}
+        ${filtBtn('off', 'Not connected', counts.off)}
+        ${filtBtn('good', 'All good', counts.good)}
+        <select class="select" id="clientSort" aria-label="Sort clients"><option value="name"${(st.listSort || 'name') === 'name' ? ' selected' : ''}>Name</option><option value="status"${st.listSort === 'status' ? ' selected' : ''}>Status</option></select>
+      </div>
       <div class="table-wrap clients-table"><table class="synder-table">
           <thead><tr><th>Client</th><th>Accounting</th><th>Integrations</th><th>Status</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="5" class="muted">No clients match “${esc(st._q)}”.</td></tr>`}</tbody>
+        <tbody>${body || `<tr><td colspan="5" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
-      <div class="tbl-foot">${rows.length} of ${sc().clients.length} clients</div>
+      <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
   }
   function renderImport() {
@@ -2095,8 +2245,8 @@
       <div class="ph"><div><h1 class="text-h1">Import client list</h1></div></div>
       <p class="text-body1">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
       <div class="import-sources">
-        ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Customers from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
-        ${srcOpt('xero', XERO_LOGO, 'Xero', 'Practice names, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
+        ${srcOpt('qbo', QB_LOGO, 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
+        ${srcOpt('xero', XERO_LOGO, 'Xero', 'Import your client organisations, instead of typing them one by one.', 'Sample list. This prototype does not connect to Xero.')}
         ${srcOpt('upload', '<span class="src-file" aria-hidden="true"><span class="material-icons">description</span></span>', 'CSV or Excel', 'Names from a spreadsheet. Only the client name is used.', 'Demo. No file is opened or parsed.')}
       </div>
       <div class="ob-actions"><button type="button" class="btn-text" id="importCancel">Cancel</button></div>
@@ -2117,7 +2267,7 @@
       </table></div>
       <div class="review-bar">
         <span class="text-body1" id="reviewCount">${n} selected</span>
-        <div class="ob-actions"><button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd"${n ? '' : ' disabled'}>Import ${n} client${n === 1 ? '' : 's'}</button></div>
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="reviewCancel">Cancel</button><button type="button" class="btn" id="obAdd">${n ? `Import ${n} client${n === 1 ? '' : 's'}` : 'Import clients'}</button></div>
       </div>
     </div>`;
   }
@@ -2164,20 +2314,20 @@
     return [
       { k: 'acc', nm: 'Accounting connection', s: noLedger ? 'fail' : 'pass',
         t: noLedger ? 'No accounting system connected' : 'Connected to ' + ledger,
-        a: noLedger ? ['Connect ledger', 'settings'] : null,
-        d: noLedger ? 'Syncs, mappings and reconciliation all need a connected ledger. Connect one in the client’s Settings.' : 'Last checked today.' },
+        a: noLedger ? ['Connect client', 'settings'] : null,
+        d: noLedger ? 'Syncs, mappings and reconciliation all need connected books. Connect them in the client’s Settings.' : 'Last checked today.' },
       { k: 'syn', nm: 'Syncs', s: noLedger ? 'wait' : ok ? 'pass' : 'fail',
         t: noLedger ? W : ok ? 'All ' + m + ' syncs went through' : '16 syncs failed in ' + m,
         a: noLedger ? null : ok ? null : ['Review failed syncs', 'dashboard'],
-        d: noLedger ? 'Checked once a ledger is connected.' : ok ? '2,318 transactions synced.' : '16 of 2,318 transactions failed. Fix or ignore them before closing.' },
+        d: noLedger ? 'Checked once books are connected.' : ok ? '2,318 transactions synced.' : '16 of 2,318 transactions failed. Fix or ignore them before closing.' },
       { k: 'map', nm: 'Mappings', s: noLedger ? 'wait' : 'pass',
         t: noLedger ? W : 'All payment sources are mapped',
         a: null,
-        d: noLedger ? 'Checked once a ledger is connected.' : (c.pay || 'Stripe') + ' mapped to ' + ledger + ' accounts.' },
+        d: noLedger ? 'Checked once books are connected.' : (c.pay || 'Stripe') + ' mapped to ' + ledger + ' accounts.' },
       { k: 'rec', nm: 'Reconciliation', s: noLedger ? 'wait' : ok ? 'pass' : 'warn',
         t: noLedger ? W : ok ? m + ' is reconciled' : 'We couldn’t read reconciliation results',
         a: noLedger ? null : ok ? null : ['Open reconciliation', 'reconciliation'],
-        d: noLedger ? 'Checked once a ledger is connected.' : 'Transaction reconciliation is available for ' + ledger + '.' + (ok ? '' : ' Open Reconciliation to run it again.') }
+        d: noLedger ? 'Checked once books are connected.' : 'Transaction reconciliation is available for ' + ledger + '.' + (ok ? '' : ' Open Reconciliation to run it again.') }
     ];
   }
   const ICON = { pass: 'check_circle', fail: 'error', warn: 'warning', wait: 'schedule' };
@@ -2210,7 +2360,7 @@
     const statusBadge = cdState === 'closed' ? ['grey', 'Closed'] : cdState === 'ready' ? ['green', 'Ready to close'] : ['yellow', 'Blocked'];
     const tip = blockers.length ? 'Can’t close ' + m + ': ' + blockers.map((b) => b.t.charAt(0).toLowerCase() + b.t.slice(1)).join('; ') + '.' : '';
     const primary = cdState === 'closed' ? '' :
-      `<span class="tipwrap"${cdState === 'blocked' ? ` data-tip="${esc(tip)}"` : ''}><button class="btn" id="closeMonth"${cdState === 'blocked' ? ' disabled' : ''}>Close month</button></span>`;
+      `<button class="btn" id="closeMonth">Close month</button>`;
     const tab = st.tab || 'work';
     let body = '';
     if (tab === 'work') {
@@ -2253,11 +2403,11 @@
         <tr><td>Dasha Ivanova</td><td>dasha@wlslabs.com</td><td>Accountant</td></tr></tbody></table></div>`;
     }
     const T = [['work', 'Work'], ['profile', 'Profile'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
-    const pager = `<span class="pager"><button id="prevC" aria-label="Previous client"${i <= 0 ? ' disabled' : ''}><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"${i >= list.length - 1 ? ' disabled' : ''}><span class="material-icons">chevron_right</span></button></span>`;
+    const pager = `<span class="pager"><button id="prevC" aria-label="Previous client"><span class="material-icons">chevron_left</span></button>${i + 1} of ${list.length}<button id="nextC" aria-label="Next client"><span class="material-icons">chevron_right</span></button></span>`;
     return `
       <button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
       ${(c.setupState === 'Ready' || c.setup) ? '' : `<div class="setup-calls"><h2>Finish setting up this client</h2>
-        <div class="call"><div><b>Connect the ledger.</b> QuickBooks, Xero, and the rest.</div><button type="button" class="btn" data-stub="books">Connect</button></div>
+        <div class="call"><div><b>Connect client.</b> QuickBooks, Xero, and the rest.</div><button type="button" class="btn" data-stub="books">Connect client</button></div>
         <div class="call"><div><b>Connect payment sources.</b> Stripe, PayPal, Shopify, and others.</div><button type="button" class="btn-outlined" data-stub="integrations">Connect</button></div>
         <div class="call"><div><b>Select a mode.</b> Summary or per transaction.</div><button type="button" class="btn-outlined" data-stub="mode">Select</button></div>
       </div>`}
@@ -2301,21 +2451,61 @@
     $('doRm').onclick = () => { const arr = sc().clients; arr.splice(arr.indexOf(c), 1); st.recent = (st.recent || []).filter((x) => x !== c.id); closeModal(); goFirm('clients'); };
   }
 
+  function dashNumbers(c) {
+    const v = clientView(c);
+    const issues = v.issues || [];
+    const unre = issues.filter((i) => i.key === 'unreconciled').reduce((n, i) => n + ((i.periods && i.periods.length) || 1), 0);
+    const uncat = issues.filter((i) => i.key === 'uncategorized').reduce((n, i) => n + (i.count || 0), 0);
+    const reconnect = issues.filter((i) => i.key === 'reconnect').length;
+    return { unre, uncat, reconnect, syncing: v.key === 'syncing' ? 1 : 0, off: v.key === 'off' };
+  }
+  function renderClientDetails(c) {
+    const v = clientView(c);
+    const period = v.period || c.month || 'Oct 2026';
+    const checks = v.key === 'off'
+      ? [{ s: 'fail', nm: 'Accounting connection', t: 'No books connected' }]
+      : v.key === 'syncing'
+        ? [{ s: 'wait', nm: 'Syncs', t: 'Syncing ' + (v.accounting || 'books') }]
+        : [
+          { s: 'pass', nm: 'Accounting connection', t: 'Connected to ' + (v.accounting || 'books') },
+          { s: (v.issues || []).some((i) => i.key === 'reconnect') ? 'fail' : 'pass', nm: 'Integrations', t: (c.integrations || []).join(', ') || 'None connected' },
+          { s: (v.issues || []).some((i) => i.key === 'unreconciled') ? 'warn' : 'pass', nm: 'Reconciliation', t: (v.issues || []).some((i) => i.key === 'unreconciled') ? v.tip : period + ' is reconciled' },
+          { s: (v.issues || []).some((i) => i.key === 'uncategorized') ? 'warn' : 'pass', nm: 'Categories', t: (v.issues || []).some((i) => i.key === 'uncategorized') ? v.tip : 'Nothing uncategorized' }
+        ];
+    return `<div class="card"><p class="text-body2">${esc(v.tip)}</p>
+      ${checks.map((x) => `<p class="text-body2"><span class="status status-${x.s === 'pass' ? 'green' : x.s === 'fail' ? 'red' : 'yellow'}">${esc(x.nm)}</span> ${esc(x.t)}</p>`).join('')}
+      <h2 class="text-h2">Profile</h2>
+      <p class="text-body2">${esc(c.name)} · ${esc(companyName(c))}</p>
+      <h2 class="text-h2">Assigned colleagues</h2>
+      <p class="text-body2">Ignat Plot, Admin · Dasha Ivanova, Accountant. Invite more from Colleagues.</p>
+      <h2 class="text-h2">Month close</h2>
+      <p class="text-body2">Period ${esc(period)}. ${esc(v.label)}.</p>
+      <p class="form-error-msg" id="closeExplain" hidden></p>
+      <button type="button" class="btn" id="closeMonth">Close month</button></div>`;
+  }
   function renderDashboard() {
     const o = findOrg(st.orgId);
-    const c = isClient(o.id) ? o : null;
-    const kp = c && c.ledger
-      ? [['Synced in October', c.books[0] === 'red' ? '1,204' : '2,318'], ['Failed syncs', c.books[0] === 'red' ? '3' : '0'], ['Unreconciled', c.books[1].includes('unreconciled') ? '12' : '0']]
-      : [['Synced in October', '846'], ['Failed syncs', '0'], ['Unreconciled', '0']];
-    if (c && !c.ledger) {
-      return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(o.name)}</div></div></div>
-        <div class="empty"><span class="material-icons">link</span><h2>Connect a ledger</h2>
-        <p>${esc(o.name)} has no accounting system connected, so nothing syncs yet.</p>
-        <button class="btn" id="dashCta">Connect ledger</button>
+    const c = o && isClient(o.id) ? o : null;
+    if (!c) {
+      return `<div class="ph"><div><h1 class="text-h1">Dashboard</h1></div></div><p class="text-body1">Organization overview.</p>`;
+    }
+    const v = clientView(c);
+    const n = dashNumbers(c);
+    const tab = st.page === 'details' ? 'details' : 'dashboard';
+    const tabs = `<div class="tabs"><button type="button" class="tab${tab === 'dashboard' ? ' active' : ''}" data-ctab="dashboard">Overview</button><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-ctab="details">Client details</button></div>`;
+    if (tab === 'details') {
+      return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body1">${issueChip(c)}</p></div></div>${tabs}${renderClientDetails(c)}`;
+    }
+    if (v.key === 'off') {
+      return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1></div></div>${tabs}
+        <div class="empty"><span class="material-icons">link</span><h2 class="text-h2">Connect client</h2>
+        <p class="text-body1">${esc(c.name)} has no books connected, so nothing syncs yet.</p>
+        <button class="btn" id="dashCta">Connect client</button>
         <button class="btn-text sec" id="dashSec">Back to ${esc(FIRM.name)}</button></div>`;
     }
-    return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(o.name)}</div></div></div>
-      <div class="kpis">${kp.map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('')}</div>`;
+    const kp = [['Unreconciled periods', String(n.unre)], ['Uncategorized', String(n.uncat)], ['Reconnect needed', String(n.reconnect)]];
+    return `<div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body1">${issueChip(c)}</p></div></div>${tabs}
+      <div class="kpis">${kp.map(([l, val]) => `<div class="kpi"><div class="l text-body2">${l}</div><div class="v text-h1">${val}</div></div>`).join('')}</div>`;
   }
 
   function renderCreateFirm() {
@@ -2341,21 +2531,24 @@
     const all = $('obAll');
     if (all) {
       const q = (ob.q || '').toLowerCase();
-      const rows = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
+      const rows = IMPORT_POOL.filter((c) => (!q || c.name.toLowerCase().includes(q)) && !alreadyInFirm(c));
       const picked = rows.filter((c) => ob.selected[c.id] === true).length;
       all.checked = rows.length > 0 && picked === rows.length;
       all.indeterminate = picked > 0 && picked < rows.length;
       all.onchange = () => {
         const query = (ob.q || '').toLowerCase();
-        IMPORT_POOL.filter((c) => !query || c.name.toLowerCase().includes(query)).forEach((c) => { ob.selected[c.id] = all.checked; });
+        IMPORT_POOL.filter((c) => !query || c.name.toLowerCase().includes(query)).forEach((c) => { if (!alreadyInFirm(c)) ob.selected[c.id] = all.checked; });
         saveOb();
         renderMain();
       };
     }
-    document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => { ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderMain(); });
+    document.querySelectorAll('[data-cid]').forEach((cb) => cb.onchange = () => {
+      if (cb.dataset.have === '1') { cb.checked = false; const err = $('pickError'); if (err) { err.hidden = false; err.textContent = 'Already in your firm'; } return; }
+      ob.selected[cb.dataset.cid] = cb.checked; saveOb(); renderMain();
+    });
     const add = $('obAdd');
     if (add) add.onclick = () => {
-      const chosen = IMPORT_POOL.filter((c) => ob.selected[c.id] === true);
+      const chosen = IMPORT_POOL.filter((c) => ob.selected[c.id] === true && !alreadyInFirm(c));
       const err = $('pickError');
       if (!chosen.length) { if (err) err.hidden = false; return; }
       if (err) err.hidden = true;
@@ -2385,22 +2578,38 @@
         html = placeholder(nav ? nav[2] : st.page, FIRM.name);
       }
     } else {
-      if (st.page === 'dashboard') html = renderDashboard();
+      if (st.page === 'dashboard' || st.page === 'details') html = renderDashboard();
       else if (st.page === 'createorg') html = renderCreateOrg();
       else html = placeholder(ORG_NAV.find((n) => n[0] === st.page)[2], findOrg(st.orgId).name);
     }
     $('main').innerHTML = html;
     const m = $('main');
-    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); goFirm('client', b.dataset.detail); });
+    m.querySelectorAll('[data-detail]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.detail); });
     m.querySelectorAll('[data-connect]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       clearLink();
       st.connectStep = 'details';
+      st.connectPick = { accounting: [], sales: [], pay: [] };
       goFirm('clientconnect', b.dataset.connect);
     });
-    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button')) goFirm('client', tr.dataset.row); });
+    m.querySelectorAll('[data-row]').forEach((tr) => tr.onclick = (e) => { if (!e.target.closest('button, a, input, select, label')) openClient(tr.dataset.row); });
     m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
-    if (st.ctx === 'firm' && st.page === 'client') bindClientDetail();
+    m.querySelectorAll('[data-ctab]').forEach((b) => b.onclick = () => { st.page = b.dataset.ctab; save(); render(); });
+    m.querySelectorAll('[data-filter]').forEach((b) => b.onclick = () => { st.listFilter = b.dataset.filter; save(); renderMain(); });
+    const sort = $('clientSort');
+    if (sort) sort.onchange = () => { st.listSort = sort.value; save(); renderMain(); };
+    m.querySelectorAll('[data-pick]').forEach((b) => b.onclick = () => {
+      const parts = b.dataset.pick.split(':');
+      const group = parts[0];
+      const name = parts.slice(1).join(':');
+      if (!st.connectPick) st.connectPick = { accounting: [], sales: [], pay: [] };
+      const arr = st.connectPick[group] || [];
+      const i = arr.indexOf(name);
+      if (i >= 0) arr.splice(i, 1); else arr.push(name);
+      st.connectPick[group] = arr;
+      const err = $('intError'); if (err) err.hidden = true;
+      save(); render();
+    });
     m.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => goOrg(b.dataset.open));
     m.querySelectorAll('[data-setup]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
@@ -2413,6 +2622,17 @@
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    bind('closeMonth', () => {
+      const c = findOrg(st.orgId || st.clientId);
+      const v = c ? clientView(c) : null;
+      const explain = $('closeExplain');
+      if (!c || !v || v.key !== 'good') {
+        if (explain) { explain.hidden = false; explain.textContent = (v && v.tip) || 'Close month is waiting until the books are all good.'; }
+        return;
+      }
+      c.closedMonth = v.period || 'Oct 2026';
+      if (explain) { explain.hidden = false; explain.textContent = 'Closed ' + c.closedMonth + '.'; }
+    });
     bind('crumbBack', () => goFirm('clients'));
     bind('addClient', openAddClient);
     bind('emptyBooks', showBooksModal);
@@ -2434,6 +2654,7 @@
     bind('importCancel', () => goFirm('clients'));
     bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
     bind('connectX', () => { clearLink(); goFirm('clients'); });
+    bind('connectLeave', () => { clearLink(); goFirm('clients'); });
     bind('connectBack', () => {
       if (st.connectStep === 'integrations') { st.connectStep = 'details'; save(); render(); return; }
       clearLink();
@@ -2441,6 +2662,8 @@
     });
     bind('connectNext', () => {
       if ((st.connectStep || 'details') === 'details') { st.connectStep = 'integrations'; save(); render(); return; }
+      const pick = st.connectPick || { accounting: [] };
+      if (!pick.accounting.length) { const err = $('intError'); if (err) err.hidden = false; return; }
       clearLink();
       st.connectStep = 'linking';
       save();
@@ -2455,7 +2678,7 @@
         connectLoading = false;
         if (!st || st.page !== 'connect') return;
         ob.source = ob.source === 'xero' ? 'xero' : 'qbo';
-        IMPORT_POOL.forEach((c) => { ob.selected[c.id] = true; });
+        IMPORT_POOL.forEach((c) => { ob.selected[c.id] = !alreadyInFirm(c); });
         ob.q = '';
         saveOb();
         openPicker();
@@ -2508,9 +2731,8 @@
       const name = (input && input.value || '').trim();
       if (!name) { fieldError(input, 'Required'); return; }
       closeAddModal();
-      sc().clients.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', preassess: 'Not run' });
-      if (ob && ob.variant === 'existing') ob.banner = 'progress';
-      if (ob) { ob.importNote = 1; saveOb(); } persistDirectory(); goFirm('clients');
+      sc().clients.push({ id: 'm' + Math.random().toString(36).slice(2, 8), name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up', connected: false, integrations: [], issues: [], syncing: false });
+      if (ob) { ob.importNote = 0; ob.importKind = ''; saveOb(); } persistDirectory(); goFirm('clients');
     });
     bind('oneCancel', closeAddModal);
     bind('closePre', () => goFirm('clients'));
@@ -2527,7 +2749,12 @@
         if (st.page === 'preassess' && st.clientId === c.id) { st.preState = 'result'; render(); }
       }, 600);
     });
-    bind('dashCta', () => goOrg(st.orgId, 'settings'));
+    bind('dashCta', () => {
+      clearLink();
+      st.connectStep = 'details';
+      st.connectPick = { accounting: [], sales: [], pay: [] };
+      st.ctx = 'firm'; st.page = 'clientconnect'; st.clientId = st.orgId; save(); render();
+    });
     bind('dashSec', () => goFirm('clients'));
     bind('dashGoClients', () => goFirm('clients'));
     bind('dashContinue', () => {
@@ -2561,12 +2788,14 @@
     $('popSearch').value = ''; kbIndex = -1; renderPop();
     const total = sc().clients.length + sc().own.length + (sc().firm ? 1 : 0);
     $('popSearchWrap').style.display = total > 5 ? '' : 'none';
-    setTimeout(() => { if (total > 5) $('popSearch').focus(); else { kbIndex = 0; highlight(); } }, 0);
+    setTimeout(() => { kbIndex = 0; highlight(); if (total > 5) $('popSearch').focus(); }, 0);
   }
   function closePop() { $('pop').classList.remove('open'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
 
   function item(o, cap, current, action) {
-    return `<button class="pop-item" data-act="${action}">${av(o, true)}<span class="t"><span class="n">${esc(o.name)}</span>${cap ? `<span class="c">${esc(cap)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
+    const mark = isClient(o.id) ? `<span class="status status-${clientView(o).kind}" aria-label="${esc(clientView(o).label)}">●</span>` : '';
+    const sub = isClient(o.id) ? clientView(o).label : cap;
+    return `<button class="pop-item" data-act="${action}">${mark}${av(o, true)}<span class="t"><span class="n">${esc(o.name)}</span>${sub ? `<span class="c">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
@@ -2621,6 +2850,10 @@
       else if (e.key === 'ArrowLeft') { e.preventDefault(); storyGo(storyIndex - 1); }
       return;
     }
+    const joinOpen = document.getElementById('joinModal');
+    if (joinOpen && joinOpen.classList.contains('show') && e.key === 'Escape') { e.preventDefault(); joinOpen.classList.remove('show'); return; }
+    const demoOpen = document.getElementById('demoModal');
+    if (demoOpen && e.key === 'Escape') { e.preventDefault(); demoOpen.remove(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
     if ($('scrim').classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
     if (!popOpen()) return;
@@ -2654,6 +2887,21 @@
     const parts = raw.split('/');
     const head = parts[0];
     if (!ob) loadOb();
+    if (head === 'client' && parts[1]) {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      if (findOrg(parts[1]) && isClient(parts[1])) {
+        st.ctx = 'org'; st.orgId = parts[1]; st.clientId = parts[1];
+        st.page = parts[2] === 'details' ? 'details' : 'dashboard';
+        mode = 'firm';
+        document.body.classList.remove('shell-hide');
+        closePop(); render();
+        return;
+      }
+      goFirm('clients');
+      return;
+    }
     if (head === 'existing') { enterExisting(); return; }
     if (head === 'home' || head === 'start') { goOnboarding('home'); return; }
     if (head === 'onboarding') {
@@ -2670,7 +2918,7 @@
       }
       const map = { role: 'entry', firmchoice: 'entry', firmname: 'signup', welcome: 'entry', import: 'entry', sources: 'entry', review: 'entry', add: 'entry', join: 'signup', joinok: 'signup' };
       const next = map[step] || step;
-      ob.step = ['entry', 'signup', 'business', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
+      ob.step = ['entry', 'signup', 'business', 'bizbooks', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
       goOnboarding(ob.step);
       return;
     }
@@ -2685,12 +2933,12 @@
     }
     else if (parts[1] === 'review') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; if (ob) ob.picker = true; }
     else if (parts[1] === 'add') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.openAdd = true; }
-    else if (parts[1] === 'preassess' && parts[2] && findOrg(parts[2])) { st.ctx = 'firm'; st.page = 'preassess'; st.clientId = parts[2]; st.preState = 'upload'; }
+    else if (parts[1] === 'preassess') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     else if (parts[1] === 'setup' && parts[2] && findOrg(parts[2])) {
       st.ctx = 'firm'; st.page = 'setup'; st.clientId = parts[2]; st.setupStep = parts[3] || 'books';
     } else if (parts[1] === 'dashboard') { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     else if (parts[1] && sc().firm && isClient(parts[1])) {
-      st.ctx = 'firm'; st.page = 'client'; st.clientId = parts[1]; st.tab = 'work';
+      st.ctx = 'org'; st.orgId = parts[1]; st.clientId = parts[1]; st.page = 'dashboard';
     } else if (parts[1]) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; st.orgId = null;
     }
@@ -2723,8 +2971,8 @@
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
-    if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
-    else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h += '/preassess/' + st.clientId;
+    if (st.ctx === 'org' && isClient(st.orgId)) h = '#client/' + st.orgId + (st.page === 'details' ? '/details' : '');
+    else if (st.ctx === 'firm' && st.page === 'setup' && st.clientId) h += '/setup/' + st.clientId + (st.setupStep ? '/' + st.setupStep : '');
     else if (st.ctx === 'firm' && st.page === 'import') h += '/import';
     else if (st.ctx === 'firm' && st.page === 'connect') h += '/connect';
     else if (st.ctx === 'firm' && st.page === 'clientconnect' && st.clientId) h += '/clientconnect/' + st.clientId + '/' + (st.connectStep || 'details');
@@ -2737,6 +2985,9 @@
       rainSparkles(maybeAutoStory);
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
+    if (mode !== 'onboarding') watchSync();
+    const bal = document.querySelector('.t-balance');
+    if (bal) bal.hidden = !(st && st.ctx === 'org');
   }
   function showFirmWelcome() {
     if (document.getElementById('firmWelcome')) return;
@@ -2757,6 +3008,7 @@
       ob.welcomePending = false;
       saveOb();
       modal.remove();
+      render();
     };
   }
   /* Falling sparkles — same generator as prototypes/joy-sparkles/index.html */
