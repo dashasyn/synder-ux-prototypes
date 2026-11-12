@@ -1064,15 +1064,15 @@
           <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" /></div>
           <button type="button" class="btn" id="obSignup" disabled>Create account</button>
           <p class="auth-foot text-body1">Already have an account? <button type="button" class="link" id="obLogin">Log in</button></p>
-          <p class="auth-foot"><button type="button" class="link" id="obJoinInfo">Want to join an existing firm?</button></p>
         </div>
+        <p class="auth-foot text-body1">Joining your firm's existing Synder account? <button type="button" class="link" id="obJoinInfo">Join a firm</button></p>
         </div>
         </div>
         <div class="modal-bg" id="joinModal">
           <div class="modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle">
-            <div class="modal-header" id="joinTitle">Join an existing firm</div>
+            <div class="modal-header" id="joinTitle">Join a firm</div>
             <div class="modal-body"><p class="text-body1">To join a firm, ask your firm admin to invite you. They can add you from Firm settings &gt; Colleagues. You'll get an email with a link to join.</p></div>
-            <div class="modal-footer"><button type="button" class="btn-outlined" id="joinGotIt">Cancel</button></div>
+            <div class="modal-footer"><button type="button" class="btn-outlined" id="joinGotIt">Cancel</button><button type="button" class="btn" id="joinOk">OK</button></div>
           </div>
         </div>`);
     } else if (step === 'role-legacy') {
@@ -1314,7 +1314,9 @@
       goOnboarding('firmname');
     });
     on('obJoinInfo', () => { const modal = $('joinModal'); if (modal) modal.classList.add('show'); });
-    on('joinGotIt', () => { const modal = $('joinModal'); if (modal) modal.classList.remove('show'); });
+    const closeJoin = () => { const modal = $('joinModal'); if (modal) modal.classList.remove('show'); };
+    on('joinGotIt', closeJoin);
+    on('joinOk', closeJoin);
     ['joinModal'].forEach((id) => {
       const modal = $(id);
       if (modal) modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
@@ -2383,7 +2385,7 @@
     if (reduce) return;
     var COLORS = ["#FFFFFF", "#FFF6C2", "#FFE45C", "#9AD0FF", "#7EE0FF", "#B9F6CA", "#FFD6E8"];
     var SHAPES = ["star", "dot", "diamond"];
-    var COUNT = 180;
+    var COUNT = 240;
     function rand(min, max) {
       return min + Math.random() * (max - min);
     }
@@ -2394,10 +2396,11 @@
     var maxDelay = 0;
     for (var i = 0; i < COUNT; i++) {
       var el = document.createElement("span");
-      var size = rand(3, 7);
+      var second = i >= 160;
+      var size = second ? rand(2.5, 5) : rand(3, 7);
       var shape = SHAPES[i % SHAPES.length];
-      var delay = Math.round(rand(0, 280));
-      var dur = rand(0.65, 1.15);
+      var delay = second ? Math.round(rand(950, 1300)) : Math.round(rand(0, 320));
+      var dur = second ? rand(0.55, 0.8) : rand(0.75, 1.1);
       maxDelay = Math.max(maxDelay, delay + dur * 1000);
       el.className = "spark " + shape;
       el.style.setProperty("--x", rand(8, 92) + "%");
