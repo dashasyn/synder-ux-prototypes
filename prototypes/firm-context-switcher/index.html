@@ -375,7 +375,9 @@
     .bring-stage .text-h1, .bring-stage .text-body1, .bring-choice .text-h2, .bring-choice .text-body2 { margin: 0; }
     .bring-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); width: 100%; }
     .bring-choice { flex-direction: column; align-items: stretch; gap: var(--space-3); padding: var(--space-6); text-align: center; }
-    .bring-badge-row { display: flex; justify-content: flex-end; align-items: center; min-height: 28px; width: 100%; }
+    .bring-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); }
+    .bring-choice .info-chip { position: static; width: max-content; max-width: max-content; margin: 0; flex: 0 0 auto; align-self: center; }
+    .bring-mark { display: flex; align-items: center; justify-content: center; min-height: 40px; }
     .bring-choice .logo-line { justify-content: center; }
     .bring-choice .btn, .bring-choice .btn-outlined { width: 100%; margin-top: auto; }
     .logo-chip { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: 1px solid #fff; border-radius: 50%; background: #fff; box-shadow: none; overflow: hidden; flex-shrink: 0; line-height: 0; }
@@ -2313,20 +2315,19 @@
       <p class="text-body1 text-secondary">Import in bulk or add them one by one. Importing only copies client names.</p>
       <div class="bring-cards">
         <div class="box box--white bring-choice">
-          <div class="bring-badge-row"><span class="info-chip">Recommended</span></div>
-          ${logos}
-          <h2 class="text-h2">From QuickBooks or Xero</h2>
+          <span class="bring-mark">${logos}</span>
+          <div class="bring-title"><h2 class="text-h2">From QuickBooks or Xero</h2><span class="info-chip">Recommended</span></div>
           <p class="text-body2">Pick the clients you manage in QuickBooks or Xero and bring them in at once.</p>
           <button type="button" class="btn" id="emptyBooks">Import clients</button>
         </div>
         <div class="box box--white bring-choice">
-          <div class="bring-badge-row"></div>
+          <span class="bring-mark"></span>
           <h2 class="text-h2">From a CSV file</h2>
           <p class="text-body2">Upload a list of client names from your practice tool.</p>
           <button type="button" class="btn-outlined" id="emptyCsv">Upload CSV</button>
         </div>
         <div class="box box--white bring-choice">
-          <div class="bring-badge-row"></div>
+          <span class="bring-mark"></span>
           <h2 class="text-h2">One by one</h2>
           <p class="text-body2">Type a client's name. You can add details later.</p>
           <button type="button" class="btn-outlined" id="emptyAdd">Add client manually</button>
