@@ -1825,6 +1825,17 @@
     const a = c && c.firmLic;
     return !!(a && (a.plan || a.rules || a.invoicing || a.users));
   }
+  function licensesLeftLine() {
+    return loadLicenseStock().map((item) => {
+      const left = item.total - licUsed(item.id);
+      const group = LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group;
+      if (group === 'plan') return left + ' of ' + item.total + ' ' + licName(item.id) + ' licenses left';
+      if (group === 'rules') return left + ' Smart Rules';
+      if (group === 'invoicing') return left + ' Invoicing';
+      if (group === 'users') return left + ' additional user' + (left === 1 ? '' : 's');
+      return left + ' ' + licName(item.id);
+    }).join(' · ');
+  }
   function assignedText(a) {
     if (!hasFirmLic({ firmLic: a })) return 'No assigned licenses';
     const bits = [];
@@ -1927,6 +1938,7 @@
         <button type="button" class="btn" id="licApply">Apply</button>
         <button type="button" class="btn-outlined" id="licReset">Reset filters</button>
       </div>
+      <p class="text-body2">${esc(licensesLeftLine())}</p>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th class="sortable sorted${licUi.sort === 'desc' ? ' desc' : ''}" id="licSortName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
@@ -1957,7 +1969,7 @@
     const invRows = buy.inv.map((row, i) => `<div class="logo-line"><select class="select" data-buy-inv="${i}" aria-label="Invoicing"><option value="">Select</option>${invs.map((key) => `<option value="${key}"${row.key === key ? ' selected' : ''}>${esc(licName(key))} $${buyPrice(key)}/mo</option>`).join('')}</select>${buyStepper('inv:' + i, row.qty, '')}<button type="button" class="link" data-buy-del="inv:${i}">Delete</button></div>`).join('');
     const revOptions = ['', 'rev10', 'rev50', 'revMore'].map((key) => `<option value="${key}"${buy.rev === key ? ' selected' : ''}>${key ? esc(licName(key)) : 'Monthly subscriptions'}</option>`).join('');
     const coreCard = `<div class="box box--white page-stack"><h2 class="text-h2">Synder Core</h2><span class="status status-blue">Current subscription</span><p class="text-body2">from $${buyPrice('core')} month</p>${buy.yearly ? '<p class="text-body2">Billed yearly</p>' : ''}<h2 class="text-subtitle1">Plans ${helpIcon('<p class="text-body2">Pack licenses, then single licenses. A volume discount applies to the plan subtotal only.</p>')}</h2><p class="text-body2">up to 3,000 sync credits/month + <button type="button" class="link" data-stub>Essential plan features</button></p>${buyStepper('corePack', buy.corePack, 'Synder Core $' + buyPrice('core') + '/mo')}${buyStepper('coreSingle', buy.coreSingle, 'Synder Core single $' + buyPrice('coreSingle') + '/mo')}${discount ? '<p class="text-body2">Discount - ' + discount + '%</p>' : ''}<h2 class="text-subtitle1">Additional users</h2>${buyStepper('users', buy.users, 'Additional users $' + buyPrice('users') + '/mo')}<h2 class="text-subtitle1">Smart Rules</h2>${ruleRows}<button type="button" class="link" data-buy-add="rules">+ Add more</button><h2 class="text-subtitle1">Invoicing</h2>${invRows}<button type="button" class="link" data-buy-add="inv">+ Add more</button><h2 class="text-subtitle1">Revenue recognition</h2><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><select class="select" id="buyRev" aria-label="Monthly subscriptions">${revOptions}</select><p class="text-body2">${buy.rev ? '$' + buyPrice(buy.rev) + '/mo per subscription' : ''}</p><div><button type="button" class="btn" id="coreUpdate">Update</button></div></div>`;
-    const advCard = `<div class="box box--white page-stack"><h2 class="text-h2">Synder Advanced</h2><p class="text-body2">from $${buyPrice('advanced')} month</p>${buy.yearly ? '<p class="text-body2">Billed yearly</p>' : ''}<h2 class="text-subtitle1">Plans</h2><p class="text-body2">up to 20,000 sync credits/month + <button type="button" class="link" data-stub>Pro plan features</button></p><div><button type="button" class="btn" id="advSubscribe">Subscribe</button></div></div>`;
+    const advCard = `<div class="box box--white page-stack"><h2 class="text-h2">Synder Advanced</h2><p class="text-body2">from $${buyPrice('advanced')} month</p>${buy.yearly ? '<p class="text-body2">Billed yearly</p>' : ''}<h2 class="text-subtitle1">Plans</h2><p class="text-body2">up to 20,000 sync credits/month + <button type="button" class="link" data-stub>Pro plan features</button></p><p class="text-body2">Synder Advanced $${buyPrice('advanced')}/mo</p><p class="text-body2">Synder Advanced single $${buyPrice('advSingle')}/mo</p><h2 class="text-subtitle1">Additional users</h2><p class="text-body2">Additional users $${buyPrice('users')}/mo</p><h2 class="text-subtitle1">Smart Rules</h2><p class="text-body2">Smart Rules up to 3, up to 5, up to 10, up to 30, up to 100</p><h2 class="text-subtitle1">Invoicing</h2><p class="text-body2">Invoicing up to 20, up to 50, up to 200, up to 1,000</p><h2 class="text-subtitle1">Revenue recognition</h2><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><p class="text-body2">up to 10K, up to 50K, above 50K</p><div><button type="button" class="btn" id="advSubscribe">Subscribe</button></div></div>`;
     return `<div class="page-stack">
       <p class="text-body2">Placeholder prices for this prototype.</p>
       <div class="logo-line"><span class="text-body2">Billing period</span><div class="btn-joined"><button type="button" class="${buy.yearly ? 'btn-outlined' : 'btn'}" id="payMonthly">Pay monthly</button><button type="button" class="${buy.yearly ? 'btn' : 'btn-outlined'}" id="payYearly">Pay yearly</button></div><span class="status status-green">20% OFF</span></div>
@@ -2019,14 +2031,15 @@
     });
     const empty = (v) => !v.plan && !v.rules && !v.invoicing && !v.users;
     modal.querySelector('#chDelete').onclick = () => {
-      const v = read();
-      const err = modal.querySelector('#chError');
-      if (!empty(v)) { err.hidden = false; err.textContent = 'To unassign all licenses, first unselect every assigned license above'; return; }
-      c.firmLic = null;
-      persistDirectory();
-      close();
-      showKitToast('Licenses unassigned.');
-      render();
+      const ask = dialogShell('Unassign all licenses', `<p class="text-body2">Unassign all licenses from ${esc(c.name)}?</p>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="chUnassign">Unassign</button>`);
+      ask.modal.querySelector('#chUnassign').onclick = () => {
+        c.firmLic = null;
+        persistDirectory();
+        ask.close();
+        close();
+        showKitToast('Licenses unassigned.');
+        render();
+      };
     };
     modal.querySelector('#chUpdate').onclick = () => {
       const v = read();
