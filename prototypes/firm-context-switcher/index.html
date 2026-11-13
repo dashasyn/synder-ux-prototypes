@@ -2119,41 +2119,40 @@
   function pendingIntegrations(c) {
     return (c.issues || []).filter((i) => i.key === 'pending' && i.source);
   }
-  function stateDot(tone) {
-    const color = tone === 'green' ? 'text-success' : (tone === 'yellow' ? 'text-warning' : (tone === 'red' ? 'text-error' : 'text-secondary'));
-    return `<span class="material-icons ${color}" aria-hidden="true">circle</span>`;
+  function statusChip(kind, label) {
+    return `<span class="status status-${kind}">${esc(label)}</span>`;
   }
-  function dotLine(tone, label, tip) {
-    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${stateDot(tone)}<span class="text-body2">${esc(label)}</span></span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+  function chipKind(tone) {
+    return tone === 'green' ? 'green' : (tone === 'yellow' ? 'yellow' : (tone === 'red' ? 'red' : 'grey'));
   }
   function acctCell(c) {
     if (isOffClient(c)) return '<span class="text-body2 text-secondary">Not connected</span>';
     const down = booksLost(c);
     const status = down ? 'Disconnected' : 'Connected';
-    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${brandMark(c.accounting, 18)}${stateDot(down ? 'yellow' : 'green')}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${brandMark(c.accounting, 18)}${statusChip(down ? 'yellow' : 'green', status)}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
   }
   function integCell(c) {
     if (isOffClient(c)) return '<span class="text-body2 text-secondary">No integrations</span>';
-    if (isWaitingClient(c)) return dotLine('grey', 'Waiting for owner', c.invite.email + ' · sent ' + c.invite.sent);
+    if (isWaitingClient(c)) return `<span class="tooltip-wrap"><span tabindex="0">${statusChip('grey', 'Waiting for owner')}</span><span class="tooltip" role="tooltip">${esc(c.invite.email + ' · sent ' + c.invite.sent)}</span></span>`;
     const list = (c && c.integrations) || [];
     if (!list.length) return '<span class="text-body2 text-secondary">No integrations</span>';
     const lost = lostIntegrations(c);
     const pending = pendingIntegrations(c);
-    const parts = [];
-    if (lost.length) parts.push(lost.length + ' connection lost');
-    if (pending.length) parts.push(pending.length + ' pending');
-    const label = parts.length ? parts.join(' · ') : (list.length + ' connected');
-    const tone = lost.length ? 'red' : (pending.length ? 'yellow' : 'green');
+    let chips = '';
+    if (lost.length && pending.length) chips = statusChip('red', lost.length + ' connection lost') + statusChip('yellow', '+' + pending.length + ' pending');
+    else if (lost.length) chips = statusChip('red', lost.length + ' connection lost');
+    else if (pending.length) chips = statusChip('yellow', pending.length === 1 ? 'Pending' : pending.length + ' pending');
+    else chips = statusChip('green', list.length + ' connected');
     const tip = list.map((name) => {
       const state = lost.some((i) => i.source === name) ? 'Connection lost' : (pending.some((i) => i.source === name) ? 'Pending' : 'Connected');
       return name + ' · ' + state;
     }).join('; ');
-    return dotLine(tone, label, tip);
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
     const summary = healthSummary(c);
     const tip = !summary.total ? 'Not checked yet' : (summary.failed.length ? summary.failed.map((f) => f.name).join('; ') : 'All checks passed');
-    return dotLine(summary.tone, summary.label, tip);
+    return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(chipKind(summary.tone), summary.label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function issueChip(c) {
     const v = clientView(c);
@@ -2560,12 +2559,37 @@
     return clientAccess.filter((a) => a.personId === personId).map((a) => Object.assign({ client: findOrg(a.clientId) }, a)).filter((a) => a.client && !a.client.fresh);
   }
   function listedClients() { return sc().clients.filter((c) => !c.fresh && c.name); }
-  function roleTip(label, tip) {
-    return `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+  function helpIcon(tipHtml) {
+    return `<span class="tooltip-wrap"><span class="help-icon" tabindex="0" role="img" aria-label="Help">help_outline</span><span class="tooltip" role="tooltip">${tipHtml}</span></span>`;
   }
-  function fieldLabel(text, tip) {
-    const mark = tip ? ` ${roleTip('', tip).replace('<span class="text-body2" tabindex="0"></span>', '<span class="material-icons" tabindex="0">info</span>')}` : '';
-    return `<label class="form-label form-label-required">${esc(text)}${mark}</label>`;
+  function headedTip(pairs) {
+    return pairs.map(([title, body]) => `<p class="text-body2"><b>${esc(title)}</b><br>${esc(body)}</p>`).join('');
+  }
+  function fieldLabel(forId, text, tipHtml) {
+    return `<label class="form-label form-label-required" for="${forId}">${esc(text)} ${helpIcon(tipHtml)}</label>`;
+  }
+  function clientRoleTip() { return headedTip([['Manager', CLIENT_ROLE_MANAGER], ['Member', CLIENT_ROLE_MEMBER]]); }
+  function firmRoleTip() { return headedTip([['Admin', FIRM_ROLE_ADMIN], ['Firm Colleague', FIRM_ROLE_COLLEAGUE]]); }
+  function pagerState(key) {
+    if (!st.pagers) st.pagers = {};
+    if (!st.pagers[key]) st.pagers[key] = { size: 25, page: 0 };
+    return st.pagers[key];
+  }
+  function paginate(key, list) {
+    const state = pagerState(key);
+    const size = [10, 25, 50].indexOf(state.size) >= 0 ? state.size : 25;
+    const pages = Math.max(1, Math.ceil(list.length / size));
+    let page = state.page || 0;
+    if (page > pages - 1) page = pages - 1;
+    if (page < 0) page = 0;
+    state.page = page;
+    state.size = size;
+    const start = page * size;
+    const from = list.length ? start + 1 : 0;
+    const to = Math.min(list.length, start + size);
+    const range = list.length ? from + '–' + to + ' of ' + list.length : '0 of 0';
+    const html = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select data-page-size="${key}" aria-label="Rows per page">${[10, 25, 50].map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-arrows"><button type="button" data-page-prev="${key}" aria-label="Previous page"><span class="material-icons">chevron_left</span></button><button type="button" data-page-next="${key}" aria-label="Next page"><span class="material-icons">chevron_right</span></button></span></div>`;
+    return { slice: list.slice(start, start + size), html };
   }
   function ensureWork(c) {
     if (typeof c.monthIndex !== 'number') c.monthIndex = 2;
@@ -2591,20 +2615,24 @@
     if (!c || !c.accounting) return [];
     const pay = { Stripe: 1, PayPal: 1, Square: 1, GoCardless: 1, 'Authorize.Net': 1 };
     const lost = {};
+    const pending = {};
     lostIntegrations(c).forEach((i) => { lost[i.source] = true; });
+    pendingIntegrations(c).forEach((i) => { pending[i.source] = true; });
     const company = companyName(c);
     const rows = [{
       name: company + ' (' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online') + ')',
       type: (c.accounting === 'Xero' ? 'XERO' : 'INTUIT') + ' · Accounting',
-      connected: !booksLost(c),
+      chip: booksLost(c) ? 'yellow' : 'green',
+      label: booksLost(c) ? 'Disconnected' : 'Connected',
       logo: c.accounting
     }];
     (c.integrations || []).forEach((name) => {
+      const chip = lost[name] ? 'red' : (pending[name] ? 'yellow' : 'green');
+      const label = lost[name] ? 'Connection lost' : (pending[name] ? 'Pending' : 'Connected');
       rows.push({
         name: company + ' (' + name + ')',
         type: name.toUpperCase() + ' · ' + (pay[name] ? 'Payment platform' : 'Sales platform'),
-        connected: !lost[name],
-        logo: name
+        chip, label, logo: name
       });
     });
     return rows;
@@ -2675,7 +2703,7 @@
     const tabs = [['work', 'Work'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
     const tabHtml = `<div class="tabs">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}">${label}</button>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
-      <button type="button" class="link" id="backClients">Back to Clients</button>
+      <a class="page-back" id="backClients" href="#clients">Back to clients</a>
       <div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><span class="status status-${view.kind}">${esc(view.label)}</span></div><div class="ph-actions">${action}</div></div>
       <section class="detail-block"><h2 class="text-h2">License</h2><p class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</p></section>
       <section class="detail-block"><h2 class="text-h2">Accounting</h2>${accounting}</section>
@@ -2729,7 +2757,7 @@
     const connections = off ? '' : connectionRows(c).map((row) => `<div class="page-stack">
       <p class="text-body2 logo-line">${brandMark(row.logo, 18)}<span>${esc(row.name)}</span></p>
       <p class="text-body2 text-secondary">${esc(row.type)}</p>
-      <p class="text-body2${row.connected ? '' : ' text-error'}">${row.connected ? 'Connected' : 'Disconnected'}</p>
+      <p class="text-body2">${statusChip(row.chip, row.label)}</p>
     </div>`).join('');
     const done = c.firmChecks.filter((chk) => chk.done).length;
     const closeItems = off
@@ -2763,7 +2791,7 @@
         <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
       </div>
       <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2>${(() => { const summary = healthSummary(c); const fails = summary.failed.map((f) => `<p class="text-body2">${esc(f.name)}${f.detail ? ' · ' + esc(f.detail) : ''}</p>`).join(''); return `<p class="text-body2 logo-line">${stateDot(summary.tone)}<span>${esc(summary.label)}</span></p>${fails}`; })()}<button type="button" class="link" data-stub>Health history</button></div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2>${(() => { const summary = healthSummary(c); const fails = summary.failed.map((f) => `<p class="text-body2">${esc(f.name)}${f.detail ? ' · ' + esc(f.detail) : ''}</p>`).join(''); return `<p class="text-body2">${statusChip(chipKind(summary.tone), summary.label)}</p>${fails}`; })()}<button type="button" class="link" data-stub>Health history</button></div>
       <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th></th></tr></thead>
         <tbody><tr><td>${esc(month.label)}</td><td>${esc(c.monthStatus)}</td><td>${done}/${c.firmChecks.length}</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr>
@@ -2779,30 +2807,39 @@
   function clientColleaguesTab(c) {
     const q = (st.clientColQ || '').toLowerCase();
     const rows = accessForClient(c.id).filter((a) => !q || a.person.name.toLowerCase().includes(q));
-    const body = rows.map((a) => `<tr><td>${esc(a.person.name)}${a.person.firmRole === 'admin' ? ' <span class="status status-grey">Admin</span>' : ''}</td><td>${esc(a.role)}</td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
+    const page = paginate('clientCols', rows);
+    const body = page.slice.map((a) => `<tr><td>${esc(a.person.name)}${a.person.firmRole === 'admin' ? ' <span class="status status-grey">Admin</span>' : ''}</td><td>${esc(a.role)}</td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
     return `<div class="page-stack">
-      <div class="toolbar"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /></div>
+      <div class="ph"><div class="toolbar"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /></div><div class="ph-actions"><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div></div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>
-      <div class="pagination"><span class="page-info">Rows per page: 25</span></div>
-      <div><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div>
+      ${page.html}
     </div>`;
   }
   function renderColleagues() {
     const q = (st.colQ || '').toLowerCase();
     const rows = firmPeople.filter((p) => !q || p.name.toLowerCase().includes(q));
-    const body = rows.map((p) => {
+    const page = paginate('colleagues', rows);
+    const body = page.slice.map((p) => {
       const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
       const admin = p.firmRole === 'admin' ? ' (admin)' : '';
+      const open = p.status === 'active';
       const items = p.status === 'invited'
         ? `<button type="button" class="dropdown-item" data-remove-person="${p.id}">Remove</button>`
         : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button><button type="button" class="dropdown-item" data-remove-person="${p.id}">Remove</button>`;
-      return `<tr><td>${esc(p.name)}</td><td>${esc(p.email)}</td><td>${status}${admin}</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
+      return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${p.id}"` : ''}><td>${esc(p.name)}</td><td>${esc(p.email)}</td><td>${status}${admin}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
     }).join('') || '<tr><td colspan="4" class="text-body2">No colleagues match.</td></tr>';
     return `<div class="flow-wide page-stack">
-      <div class="ph"><div><h1 class="text-h1">Colleagues</h1></div><div class="ph-actions"><button type="button" class="btn-outlined" id="firmDetails">Firm details</button><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
+      <div class="ph"><div><h1 class="text-h1">Colleagues</h1></div><div class="ph-actions"><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody>${body}</tbody></table></div>
-      <div class="pagination"><span class="page-info">Rows per page: 25</span></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th class="text-right"></th></tr></thead><tbody>${body}</tbody></table></div>
+      ${page.html}
+    </div>`;
+  }
+  function renderFirmSettings() {
+    return `<div class="flow-wide page-stack">
+      <h1 class="text-h1">Firm settings</h1>
+      <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
+      <div><button type="button" class="btn" id="firmNameSave">Save</button></div>
     </div>`;
   }
   function renderColleague() {
@@ -2810,23 +2847,38 @@
     if (!p) return renderColleagues();
     const tab = st.colleagueTab || 'details';
     const tabs = `<div class="tabs"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients">Clients</button></div>`;
+    const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
     let body = '';
     if (tab === 'clients') {
-      const rows = accessForPerson(p.id).map((a) => `<tr><td>${esc(a.client.name)}</td><td>${esc(a.role)}</td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No clients assigned.</td></tr>';
-      body = `<div class="page-stack"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client name</th><th>Role in the client</th></tr></thead><tbody>${rows}</tbody></table></div><div><button type="button" class="btn" id="addPersonClient">Add a client</button></div></div>`;
-    } else if (p.self) {
-      body = `<div class="page-stack"><p class="text-body2">${esc(p.name)}</p><p class="text-body2">Admin</p><p class="text-body2">${esc(SELF_ROLE_HINT)}</p><p class="text-body2">${esc(p.email)}</p></div>`;
+      const assigned = accessForPerson(p.id);
+      const page = paginate('personClients', assigned);
+      const rows = page.slice.map((a) => `<tr><td>${esc(a.client.name)}</td><td>${esc(a.role)}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="ac-${a.clientId}" aria-label="Actions for ${esc(a.client.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-ac-${a.clientId}"><button type="button" class="dropdown-item" data-drop-client="${p.id}:${a.clientId}">Remove</button></div></div></td></tr>`).join('') || '<tr><td colspan="3" class="text-body2">No clients assigned.</td></tr>';
+      body = `<div class="page-stack">
+        <div class="ph"><div></div><div class="ph-actions"><button type="button" class="btn" id="addPersonClient">Add a client</button></div></div>
+        <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client name</th><th>Role in the client</th><th class="text-right"></th></tr></thead><tbody>${rows}</tbody></table></div>
+        ${page.html}
+      </div>`;
+    } else if (p.self || p.status === 'invited') {
+      const roleName = p.firmRole === 'admin' ? 'Admin' : 'Firm Colleague';
+      body = `<div class="page-stack">
+        <div class="form-field"><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
+        <div class="form-field"><span class="form-label">Role in the Firm ${helpIcon(firmRoleTip())}</span><p class="text-body2">${esc(roleName)}</p></div>
+        ${p.self ? `<p class="text-body2">${esc(SELF_ROLE_HINT)}</p>` : ''}
+        <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
+      </div>`;
     } else {
-      body = `<div class="page-stack"><p class="text-body2">${esc(p.name)}</p>
-        <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label>
+      body = `<div class="page-stack">
+        <div class="form-field"><label class="form-label form-label-required" for="colName">Name</label><input class="input" id="colName" data-required="1" value="${esc(p.name)}" /></div>
+        <div class="form-field">${fieldLabel('firmRole', 'Role in the Firm', firmRoleTip())}
           <select class="select" id="firmRole"><option value="admin"${p.firmRole === 'admin' ? ' selected' : ''}>Admin</option><option value="colleague"${p.firmRole !== 'admin' ? ' selected' : ''}>Firm Colleague</option></select>
         </div>
-        <p class="text-body2">${roleTip('Admin', FIRM_ROLE_ADMIN)} ${roleTip('Firm Colleague', FIRM_ROLE_COLLEAGUE)}</p>
-        <p class="text-body2">${esc(p.email)}</p></div>`;
+        <div class="form-field"><label class="form-label form-label-required" for="colEmail">Email</label><input class="input" id="colEmail" type="email" data-required="1" value="${esc(p.email)}" /></div>
+        <div><button type="button" class="btn" id="saveColleague">Save</button></div>
+      </div>`;
     }
     return `<div class="flow-wide page-stack">
-      <button type="button" class="link" id="backColleagues">Back to Colleagues</button>
-      <div class="ph"><div><h1 class="text-h1">${esc(p.name)}</h1></div><div class="ph-actions"><button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button></div></div>
+      <a class="page-back" id="backColleagues" href="#colleagues">Back to colleagues</a>
+      <div class="ph"><div><h1 class="text-h1">${esc(p.name)}</h1><p class="text-body2">${esc(p.email)}</p>${status}</div><div class="ph-actions"><button type="button" class="btn btn-danger" id="removeColleague">Remove colleague</button></div></div>
       ${tabs}${body}
     </div>`;
   }
@@ -2834,7 +2886,7 @@
     const c = findOrg(st.clientId);
     if (!c || !isClient(c.id)) return renderClients();
     return `<div class="flow-wide page-stack">
-      <button type="button" class="link" id="backClients">Back to Clients</button>
+      <a class="page-back" id="backClients" href="#clients">Back to clients</a>
       <h1 class="text-h1">Health check</h1>
       <p class="text-body1">${esc(c.name)}</p>
       <p class="text-body1 text-center">This screen is not part of this prototype.</p>
@@ -2957,6 +3009,7 @@
       else if (st.page === 'billing') html = renderBilling();
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
+      else if (st.page === 'firmsettings') html = renderFirmSettings();
       else if (st.page === 'createorg') html = renderCreateOrg();
       else {
         const nav = FIRM_NAV.find((n) => n[0] === st.page);
@@ -3262,8 +3315,51 @@
       renderMain();
     });
     bindClick('addFirmColleague', openAddFirmColleague);
-    bindClick('firmDetails', openFirmDetails);
+    bindClick('firmNameSave', () => {
+      const input = $('firmNameEdit');
+      const name = (input && input.value || '').trim();
+      if (!name) { fieldError(input, 'Required'); return; }
+      FIRM.name = name;
+      render();
+    });
     bindClick('addColleague', openAddColleague);
+    bindClick('saveColleague', () => {
+      const person = findPerson(st.colleagueId);
+      const name = $('colName');
+      const email = $('colEmail');
+      let bad = false;
+      [name, email].forEach((el) => { if (!el || !(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      if (bad || !person) return;
+      person.name = name.value.trim();
+      person.email = email.value.trim();
+      if ($('firmRole')) person.firmRole = $('firmRole').value;
+      renderMain();
+    });
+    m.querySelectorAll('[data-person]').forEach((tr) => tr.onclick = (e) => {
+      if (e.target.closest('button, a, input, select, label, .dropdown-menu')) return;
+      openColleague(tr.dataset.person);
+    });
+    m.querySelectorAll('[data-page-size]').forEach((sel) => sel.onchange = () => {
+      const state = pagerState(sel.dataset.pageSize);
+      state.size = Number(sel.value);
+      state.page = 0;
+      renderMain();
+    });
+    m.querySelectorAll('[data-page-prev]').forEach((b) => b.onclick = () => {
+      const state = pagerState(b.dataset.pagePrev);
+      if (state.page > 0) { state.page -= 1; renderMain(); }
+    });
+    m.querySelectorAll('[data-page-next]').forEach((b) => b.onclick = () => {
+      const state = pagerState(b.dataset.pageNext);
+      state.page += 1;
+      renderMain();
+    });
+    m.querySelectorAll('[data-drop-client]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const parts = b.dataset.dropClient.split(':');
+      clientAccess = clientAccess.filter((a) => !(a.personId === parts[0] && a.clientId === parts[1]));
+      renderMain();
+    });
     bindClick('backColleagues', () => goFirm('colleagues'));
     bindClick('removeColleague', () => { const p = findPerson(st.colleagueId); if (p) confirmRemove(p); });
     bindClick('addPersonClient', openAddPersonClient);
@@ -3304,9 +3400,8 @@
     const body = `<p class="text-body2">Your colleague will receive an email invitation to join your Firm. Please, fill out all of the required fields.</p>
       <div class="form-field"><label class="form-label form-label-required" for="newColName">Name</label><input class="input" id="newColName" data-required="1" /></div>
       <div class="form-field"><label class="form-label form-label-required" for="newColEmail">Email</label><input class="input" id="newColEmail" type="email" data-required="1" /></div>
-      <div class="form-field"><label class="form-label form-label-required">Assign client ${roleTip('info', ASSIGN_CLIENT_TIP).replace('>info<', '><span class="material-icons">info</span><')}</label><select class="select" id="newColClient" data-required="1"><option value="">Select…</option>${options}</select></div>
-      <div class="form-field"><label class="form-label form-label-required" for="newColRole">Role in the client</label><select class="select" id="newColRole"><option value="Member" selected>Member</option><option value="Manager">Manager</option></select></div>
-      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+      <div class="form-field">${fieldLabel('newColClient', 'Assign client', '<p class="text-body2">' + esc(ASSIGN_CLIENT_TIP) + '</p>')}<select class="select" id="newColClient" data-required="1"><option value="">Select…</option>${options}</select></div>
+      <div class="form-field">${fieldLabel('newColRole', 'Role in the client', clientRoleTip())}<select class="select" id="newColRole"><option value="Member" selected>Member</option><option value="Manager">Manager</option></select></div>`;
     const { modal, close } = dialogShell('Add colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="sendInvite">Send invitation</button>`);
     modal.querySelector('#sendInvite').onclick = () => {
       const name = modal.querySelector('#newColName');
@@ -3329,8 +3424,7 @@
     accessForClient(c.id).forEach((a) => { taken[a.personId] = true; });
     const options = firmPeople.filter((p) => p.status === 'active' && !taken[p.id]).map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
     const body = `<div class="form-field"><label class="form-label form-label-required" for="afName">Colleague name</label><select class="select" id="afName" data-required="1"><option value="">Select…</option>${options}</select></div>
-      <div class="form-field"><label class="form-label form-label-required" for="afRole">Role in the client</label><select class="select" id="afRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>
-      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+      <div class="form-field">${fieldLabel('afRole', 'Role in the client', clientRoleTip())}<select class="select" id="afRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>`;
     const { modal, close } = dialogShell('Add Firm colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="afAdd">Add colleague</button>`);
     modal.querySelector('#afAdd').onclick = () => {
       const name = modal.querySelector('#afName');
@@ -3350,8 +3444,7 @@
     accessForPerson(p.id).forEach((a) => { have[a.clientId] = true; });
     const options = listedClients().filter((c) => !have[c.id]).map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
     const body = `<div class="form-field"><label class="form-label form-label-required" for="apClient">Client name</label><select class="select" id="apClient" data-required="1"><option value="">Select…</option>${options}</select></div>
-      <div class="form-field"><label class="form-label form-label-required" for="apRole">Role in the client</label><select class="select" id="apRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>
-      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+      <div class="form-field">${fieldLabel('apRole', 'Role in the client', clientRoleTip())}<select class="select" id="apRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>`;
     const { modal, close } = dialogShell('Add a client', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="apAdd">Add client</button>`);
     modal.querySelector('#apAdd').onclick = () => {
       const client = modal.querySelector('#apClient');
