@@ -1836,6 +1836,30 @@
       return left + ' ' + licName(item.id);
     }).join(' · ');
   }
+  function firmLicCell(c) {
+    if (c.firmLic && c.firmLic.plan) return `<span class="text-body2">${esc(licName(c.firmLic.plan))}</span>`;
+    if (missingFirmLicense(c)) return '<span class="status status-red">No license</span>';
+    return '<span class="status status-grey">No license</span>';
+  }
+  function goBuyLicenses() {
+    st.ctx = 'firm';
+    st.page = 'buylicenses';
+    st.clientId = null;
+    save();
+    render();
+  }
+  function openAssignmentsFor(id) {
+    licUi.draft.license = id;
+    licUi.draft.q = '';
+    licUi.draft.type = '';
+    licUi.applied = { q: '', type: '', license: id };
+    st.billTab = 'assignments';
+    st.page = 'billing';
+    st.ctx = 'firm';
+    if (st.pagers && st.pagers.licAssign) st.pagers.licAssign.page = 0;
+    save();
+    render();
+  }
   function assignedText(a) {
     if (!hasFirmLic({ firmLic: a })) return 'No assigned licenses';
     const bits = [];
@@ -1880,28 +1904,32 @@
         <div><button type="button" class="btn" id="bookCall">Book a call</button></div>
       </div>`;
     }
+    const tab = st.billTab === 'assignments' ? 'assignments' : 'licenses';
+    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'licenses' ? ' active' : ''}" data-bill-tab="licenses" role="tab">Licenses</button><button type="button" class="tab${tab === 'assignments' ? ' active' : ''}" data-bill-tab="assignments" role="tab">Assignments</button></div>`;
     const rows = loadLicenseStock().map((item) => {
       const used = licUsed(item.id);
-      return `<tr><td>${esc(licName(item.id))}</td><td>${item.total}</td><td>${used}</td><td>${item.total - used}</td></tr>`;
+      return `<tr><td>${esc(licName(item.id))}</td><td>${item.total}</td><td><button type="button" class="link" data-used-lic="${item.id}">${used}</button></td><td>${item.total - used}</td></tr>`;
     }).join('');
-    return `<div class="flow-wide page-stack">
-      <div class="ph"><div class="page-head"><h1 class="text-h1">Billing and licenses</h1></div><div class="ph-actions"><button type="button" class="btn" id="manageLicenses">Manage licenses</button></div></div>
+    const licenses = `<div class="page-stack">
+      <div class="ph"><div></div><div class="ph-actions"><button type="button" class="btn" id="buyLicenses">Buy licenses</button></div></div>
       <p class="text-body2">Current billing period: Oct 1, 2026 – Oct 31, 2026</p>
       <h2 class="text-h2">Purchased licenses</h2>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+    return `<div class="flow-wide page-stack">
+      <h1 class="text-h1">Billing and licenses</h1>
+      ${tabs}
+      ${tab === 'assignments' ? renderAssignLicenses() : licenses}
     </div>`;
   }
   function licClients() {
     return (sc().clients || []).filter((c) => !c.fresh && c.name);
   }
-  function renderManageLicenses() {
-    const tab = st.licTab === 'buy' ? 'buy' : 'assign';
-    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'assign' ? ' active' : ''}" data-lic-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab${tab === 'buy' ? ' active' : ''}" data-lic-tab="buy" role="tab">Buy licenses</button></div>`;
+  function renderBuyPage() {
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backBilling" href="#billing">Back to billing</a>
-      <h1 class="text-h1">Manage licenses</h1>
-      ${tabs}
-      ${tab === 'buy' ? renderBuyLicenses() : renderAssignLicenses()}
+      <h1 class="text-h1">Buy licenses</h1>
+      ${renderBuyLicenses()}
     </div>`;
   }
   function renderAssignLicenses() {
@@ -1914,7 +1942,9 @@
       if (applied.license === 'none' && hasFirmLic(c)) return false;
       if (applied.license && applied.license !== 'none') {
         const a = c.firmLic || {};
-        if (a.plan !== applied.license && a.rules !== applied.license && a.invoicing !== applied.license) return false;
+        const group = LIC_CATALOG[applied.license] && LIC_CATALOG[applied.license].group;
+        if (group === 'users') { if (!(a.users > 0)) return false; }
+        else if (a.plan !== applied.license && a.rules !== applied.license && a.invoicing !== applied.license) return false;
       }
       return true;
     });
@@ -1938,6 +1968,7 @@
         <button type="button" class="btn" id="licApply">Apply</button>
         <button type="button" class="btn-outlined" id="licReset">Reset filters</button>
       </div>
+      ${applied.license ? `<p class="text-body2"><span class="status status-blue">${esc(applied.license === 'none' ? 'None' : licName(applied.license))}</span></p>` : ''}
       <p class="text-body2">${esc(licensesLeftLine())}</p>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th class="sortable sorted${licUi.sort === 'desc' ? ' desc' : ''}" id="licSortName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
@@ -1979,18 +2010,29 @@
   function openAssignDialog(id) {
     const c = findOrg(id);
     if (!c) return;
-    const plans = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'plan' && licLeft(item.id) > 0);
-    const rules = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'rules' && licLeft(item.id) > 0);
-    const inv = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'invoicing' && licLeft(item.id) > 0);
-    const opt = (item) => `<option value="${item.id}">${esc(licName(item.id))} (${licLeft(item.id)} licenses available)</option>`;
+    const ids = (group) => Object.keys(LIC_CATALOG).filter((id) => LIC_CATALOG[id].group === group);
+    const opt = (id) => `<option value="${id}">${esc(licName(id))} (${licLeft(id) > 0 ? licLeft(id) + ' licenses available' : '0 available'})</option>`;
+    const none = '<p class="form-error-msg" id="asNone" hidden>No licenses left <button type="button" class="link" data-go-buy>Buy licenses</button></p>';
     const { modal, close } = dialogShell('Assign licenses to ' + c.name, `<div class="page-stack">
-      <div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">Select a license</option>${plans.map(opt).join('')}</select></div>
-      <div class="form-field"><label class="form-label" for="asRules">Rules</label><select class="select" id="asRules"><option value="">Select</option>${rules.map(opt).join('')}</select></div>
-      <div class="form-field"><label class="form-label" for="asInv">Invoicing</label><select class="select" id="asInv"><option value="">Select</option>${inv.map(opt).join('')}</select></div>
-      <div class="form-field"><label class="form-label" for="asUsers">Additional users (${licLeft('users')} licenses available)</label><input class="input" id="asUsers" type="number" min="0" value="0" /></div>
+      <div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">Select a license</option>${ids('plan').map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asRules">Rules</label><select class="select" id="asRules"><option value="">Select</option>${ids('rules').map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asInv">Invoicing</label><select class="select" id="asInv"><option value="">Select</option>${ids('invoicing').map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asUsers">Additional users (${Math.max(0, licLeft('users'))} licenses available)</label><input class="input" id="asUsers" type="number" min="0" value="0" /></div>
       <div class="form-field"><label class="form-label" for="asRev">Revenue recognition subscriptions (0 monthly subscriptions available)</label><input class="input" id="asRev" placeholder="Monthly subscriptions" /></div>
+      ${none}
       <p class="form-error-msg" id="asError" hidden></p>
     </div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="asGo">Assign</button>`);
+    const showNone = (on) => { const el = modal.querySelector('#asNone'); el.hidden = !on; };
+    const refreshNone = () => {
+      const plan = modal.querySelector('#asPlan').value;
+      const rulesId = modal.querySelector('#asRules').value;
+      const invId = modal.querySelector('#asInv').value;
+      const users = Math.max(0, parseInt(modal.querySelector('#asUsers').value, 10) || 0);
+      showNone((plan && licLeft(plan) <= 0) || (rulesId && licLeft(rulesId) <= 0) || (invId && licLeft(invId) <= 0) || users > Math.max(0, licLeft('users')));
+    };
+    ['#asPlan', '#asRules', '#asInv'].forEach((sel) => { modal.querySelector(sel).onchange = refreshNone; });
+    modal.querySelector('#asUsers').oninput = refreshNone;
+    modal.querySelector('[data-go-buy]').onclick = () => { close(); goBuyLicenses(); };
     modal.querySelector('#asGo').onclick = () => {
       const plan = modal.querySelector('#asPlan').value;
       const rulesId = modal.querySelector('#asRules').value;
@@ -1999,8 +2041,8 @@
       const err = modal.querySelector('#asError');
       const picked = plan || rulesId || invId || users;
       if (!picked) { err.hidden = false; err.textContent = 'Required'; return; }
+      if ((plan && licLeft(plan) <= 0) || (rulesId && licLeft(rulesId) <= 0) || (invId && licLeft(invId) <= 0) || users > Math.max(0, licLeft('users'))) { showNone(true); return; }
       if (!plan && (rulesId || invId || users)) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
-      if (users > licLeft('users')) { err.hidden = false; err.textContent = 'Required'; return; }
       c.firmLic = { plan: plan, rules: rulesId, invoicing: invId, users: users };
       persistDirectory();
       close();
@@ -2013,16 +2055,33 @@
     if (!c || !c.firmLic) return;
     const current = c.firmLic;
     const choices = (group, currentId) => {
-      const rows = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === group && (licLeft(item.id) > 0 || item.id === currentId));
-      return '<option value="">Unassign</option>' + rows.map((item) => `<option value="${item.id}"${item.id === currentId ? ' selected' : ''}>${esc(licName(item.id))}${item.id === currentId ? ' (current)' : ' (' + licLeft(item.id) + ' licenses available)'}</option>`).join('');
+      const ids = Object.keys(LIC_CATALOG).filter((id) => LIC_CATALOG[id].group === group);
+      return '<option value="">Unassign</option>' + ids.map((id) => {
+        const currentPick = id === currentId;
+        const avail = licLeft(id) > 0 ? licLeft(id) + ' licenses available' : '0 available';
+        return `<option value="${id}"${currentPick ? ' selected' : ''}>${esc(licName(id))}${currentPick ? ' (current)' : ' (' + avail + ')'}</option>`;
+      }).join('');
     };
     const { modal, close } = dialogShell('Update licenses for ' + c.name, `<div class="page-stack">
       <div class="form-field"><label class="form-label" for="chPlan">Plan</label><select class="select" id="chPlan">${choices('plan', current.plan || '')}</select></div>
       <div class="form-field"><label class="form-label" for="chRules">Rules</label><select class="select" id="chRules">${choices('rules', current.rules || '')}</select></div>
       <div class="form-field"><label class="form-label" for="chInv">Invoicing</label><select class="select" id="chInv">${choices('invoicing', current.invoicing || '')}</select></div>
-      <div class="form-field"><label class="form-label" for="chUsers">Additional users (${licLeft('users')} licenses available)</label><input class="input" id="chUsers" type="number" min="0" value="${current.users || 0}" /></div>
+      <div class="form-field"><label class="form-label" for="chUsers">Additional users (${Math.max(0, licLeft('users'))} licenses available)</label><input class="input" id="chUsers" type="number" min="0" value="${current.users || 0}" /></div>
+      <p class="form-error-msg" id="chNone" hidden>No licenses left <button type="button" class="link" data-go-buy>Buy licenses</button></p>
       <p class="form-error-msg" id="chError" hidden></p>
     </div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn-outlined" id="chDelete">Delete</button><button type="button" class="btn" id="chUpdate">Update</button>`);
+    const showNone = (on) => { modal.querySelector('#chNone').hidden = !on; };
+    const refreshNone = () => {
+      const plan = modal.querySelector('#chPlan').value;
+      const rules = modal.querySelector('#chRules').value;
+      const inv = modal.querySelector('#chInv').value;
+      const users = Math.max(0, parseInt(modal.querySelector('#chUsers').value, 10) || 0);
+      const over = (id, held) => id && id !== held && licLeft(id) <= 0;
+      showNone(over(plan, current.plan) || over(rules, current.rules) || over(inv, current.invoicing) || users > (current.users || 0) + Math.max(0, licLeft('users')));
+    };
+    ['#chPlan', '#chRules', '#chInv'].forEach((sel) => { modal.querySelector(sel).onchange = refreshNone; });
+    modal.querySelector('#chUsers').oninput = refreshNone;
+    modal.querySelector('[data-go-buy]').onclick = () => { close(); goBuyLicenses(); };
     const read = () => ({
       plan: modal.querySelector('#chPlan').value,
       rules: modal.querySelector('#chRules').value,
@@ -2044,6 +2103,8 @@
     modal.querySelector('#chUpdate').onclick = () => {
       const v = read();
       const err = modal.querySelector('#chError');
+      const over = (id, held) => id && id !== held && licLeft(id) <= 0;
+      if (over(v.plan, current.plan) || over(v.rules, current.rules) || over(v.invoicing, current.invoicing) || v.users > (current.users || 0) + Math.max(0, licLeft('users'))) { showNone(true); return; }
       if (!v.plan && (v.rules || v.invoicing || v.users)) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
       c.firmLic = empty(v) ? null : v;
       persistDirectory();
@@ -2063,7 +2124,8 @@
       if (users) users.total = Math.max(licUsed('users'), buy.users);
       saveLicenseStock();
       close();
-      st.licTab = 'assign';
+      st.page = 'billing';
+      st.billTab = 'assignments';
       showKitToast('Subscription successfully updated.');
       render();
     };
@@ -2234,7 +2296,7 @@
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
     if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
-    if (st.page === 'managelicenses') activePage = 'billing';
+    if (st.page === 'buylicenses') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
@@ -2303,6 +2365,8 @@
   function isWaitingClient(c) { return !isOffClient(c) && !!(c.invite && c.invite.email && !(c.integrations && c.integrations.length)); }
   function hasLostConnection(c) { return !isOffClient(c) && (booksLost(c) || lostIntegrations(c).length > 0); }
   function hasHealthIssues(c) { const h = isOffClient(c) ? null : healthModel(c); return !!(h && h.failed.length); }
+  function missingFirmLicense(c) { return !isWaitingClient(c) && !hasFirmLic(c); }
+  function hasListedIssue(c) { return hasHealthIssues(c) || missingFirmLicense(c); }
   function issueCountLabel(n) { return n === 1 ? '1 issue found' : n + ' issues found'; }
   function healthSummary(c) {
     if (isOffClient(c)) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
@@ -2338,7 +2402,7 @@
   function statusCounts(list) {
     return {
       all: list.length,
-      issues: list.filter(hasHealthIssues).length,
+      issues: list.filter(hasListedIssue).length,
       lost: list.filter(hasLostConnection).length,
       waiting: list.filter(isWaitingClient).length,
       off: list.filter(isOffClient).length
@@ -3215,7 +3279,7 @@
     const counts = statusCounts(searched);
     const filter = st.listFilter || 'all';
     let rows = searched.filter((c) => {
-      if (filter === 'issues') return hasHealthIssues(c);
+      if (filter === 'issues') return hasListedIssue(c);
       if (filter === 'lost') return hasLostConnection(c);
       if (filter === 'waiting') return isWaitingClient(c);
       if (filter === 'off') return isOffClient(c);
@@ -3237,11 +3301,12 @@
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td><span class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</span></td>
+        <td>${firmLicCell(c)}</td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
         <td>${healthCell(c)}</td>
         <td>${reconCell(c)}</td>
-        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
+        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button>${hasFirmLic(c) ? `<button type="button" class="dropdown-item" data-lic-change="${c.id}">Change license</button>` : `<button type="button" class="dropdown-item" data-lic-assign="${c.id}">Assign license</button>`}<button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -3267,8 +3332,8 @@
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="7" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr><th>Name</th><th>Plan</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="8" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
@@ -3767,7 +3832,7 @@
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
-      else if (st.page === 'managelicenses') html = renderManageLicenses();
+      else if (st.page === 'buylicenses') html = renderBuyPage();
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
       else if (st.page === 'firmsettings') html = renderFirmSettings();
@@ -4023,9 +4088,10 @@
       history.replaceState(null, '', url.pathname + url.search + location.hash);
       render();
     });
-    bindClick('manageLicenses', () => { st.licTab = 'assign'; st.page = 'managelicenses'; save(); render(); });
-    bindClick('backBilling', () => goFirm('billing'));
-    m.querySelectorAll('[data-lic-tab]').forEach((b) => b.onclick = () => { st.licTab = b.dataset.licTab; save(); render(); });
+    bindClick('buyLicenses', () => goBuyLicenses());
+    bindClick('backBilling', () => { st.billTab = 'licenses'; goFirm('billing'); });
+    m.querySelectorAll('[data-bill-tab]').forEach((b) => b.onclick = () => { st.billTab = b.dataset.billTab; save(); render(); });
+    m.querySelectorAll('[data-used-lic]').forEach((b) => b.onclick = () => openAssignmentsFor(b.dataset.usedLic));
     m.querySelectorAll('[data-lic-assign]').forEach((b) => b.onclick = () => openAssignDialog(b.dataset.licAssign));
     m.querySelectorAll('[data-lic-change]').forEach((b) => b.onclick = () => openChangeDialog(b.dataset.licChange));
     m.querySelectorAll('[data-remove-client]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); tryRemoveClient(b.dataset.removeClient); });
@@ -4436,8 +4502,8 @@
       mode = 'firm';
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
-      st.page = (parts[1] === 'assign' || parts[1] === 'buy' || parts[1] === 'manage') ? 'managelicenses' : 'billing';
-      st.licTab = parts[1] === 'buy' ? 'buy' : 'assign';
+      if (parts[1] === 'buy') st.page = 'buylicenses';
+      else { st.page = 'billing'; st.billTab = (parts[1] === 'assignments' || parts[1] === 'assign') ? 'assignments' : 'licenses'; }
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -4551,7 +4617,7 @@
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
-    document.body.classList.toggle('wizard-plain', !!(st && (st.page === 'clientconnect' || st.page === 'bringin' || st.page === 'managelicenses')));
+    document.body.classList.toggle('wizard-plain', !!(st && (st.page === 'clientconnect' || st.page === 'bringin' || st.page === 'buylicenses')));
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
@@ -4568,7 +4634,8 @@
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && st.page === 'managelicenses') h = '#billing/' + (st.licTab === 'buy' ? 'buy' : 'assign');
+    else if (st.ctx === 'firm' && st.page === 'buylicenses') h = '#billing/buy';
+    else if (st.ctx === 'firm' && st.page === 'billing' && st.billTab === 'assignments') h = '#billing/assignments';
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
