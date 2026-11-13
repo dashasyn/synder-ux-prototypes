@@ -846,13 +846,16 @@
   ];
 
   let mode = 'firm'; // 'onboarding' | 'firm'
-  function writeLocation(hash) {
+  function writeLocation(hash, push) {
     const url = new URL(location.href);
     url.searchParams.delete('btn');
     const next = url.pathname + url.search + (hash || '');
-    if (location.pathname + location.search + location.hash !== next) history.replaceState(null, '', next);
+    if (location.pathname + location.search + location.hash === next) return;
+    if (push) history.pushState(null, '', next);
+    else history.replaceState(null, '', next);
   }
   let ob = null;
+  let obHashStep = null;
 
   function defaultOb() {
     return {
@@ -1068,13 +1071,7 @@
     modal.className = 'modal-bg show';
     modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bizStopTitle"><div class="modal-header" id="bizStopTitle">Synder</div><div class="modal-body"><p class="text-body2">This screen is not part of this prototype.</p></div><div class="modal-footer"><button type="button" class="btn-outlined" id="bizStopCancel">Cancel</button></div></div>`;
     document.body.appendChild(modal);
-    const close = () => {
-      modal.remove();
-      ob.use = null;
-      ob.loginFrom = '';
-      saveOb();
-      goOnboarding('entry');
-    };
+    const close = () => modal.remove();
     modal.querySelector('#bizStopCancel').onclick = close;
     modal.onclick = (e) => { if (e.target === modal) close(); };
   }
@@ -1264,14 +1261,14 @@
       const titles = { other: 'Other', inhouse: 'Accountant at one company', owner: 'I run a business' };
       const described = step === 'other' && (ob.roleNote || '').trim() ? `You described your role as “${esc(String(ob.roleNote).trim())}”. ` : '';
       html = obShell(`
-        ${backSlot(true)}
+        ${backSlot(false)}
         <h1>${titles[step] || 'Continue'}</h1>
         <p class="lead">${described}This path isn’t part of the firm prototype. Continue to the regular Synder setup.</p>
         <div class="ob-actions"><button type="button" class="btn" id="obOtherCta">Continue to Synder setup</button></div>`);
     } else if (step === 'firmchoice') {
       const canFirm = !!(ob.firmChosen && (ob.firmChoice === 'create' || ob.firmChoice === 'join'));
       html = obShell(`
-        ${backSlot(true)}
+        ${backSlot(false)}
         <h1>Set up your firm workspace</h1>
         <p class="lead">A firm is the place you manage every client from.</p>
         <div class="ob-cards cols-2">
@@ -1291,7 +1288,6 @@
           <div class="form-field"><label class="form-label form-label-required" for="liEmail">Email</label><input class="input" id="liEmail" type="email" autocomplete="username" value="${esc(ob.userEmail || 'ada@northwindbookkeeping.com')}" /></div>
           <div class="form-field"><label class="form-label form-label-required" for="liPass">Password</label><input class="input" id="liPass" type="password" autocomplete="current-password" value="${esc(ob.demoPass || 'Bookkeeping1')}" /></div>
           <button type="button" class="btn" id="liSubmit">Log in</button>
-          ${ob.loginFrom === 'role' ? '<button type="button" class="btn-outlined" id="loginCancel">Cancel</button>' : ''}
           <p class="auth-foot text-body2">Don't have an account? <button type="button" class="link" id="liSignup">Sign up</button></p>
         </div>
         </div>
@@ -1410,25 +1406,29 @@
     }
     $('ob').innerHTML = html;
     bindOb();
-    const h = ob && ob.variant === 'existing' && step === 'login'
+    const existingLogin = ob && ob.variant === 'existing' && step === 'login';
+    const h = existingLogin
       ? '#existing'
-      : (step === 'home' ? '#home' : (step === 'entry' ? '#onboarding' : '#onboarding/' + step));
-    if (location.hash !== h) writeLocation(h);
+      : (step === 'home' ? '#home' : (step === 'entry' ? '#onboarding/entry' : '#onboarding/' + step));
+    if (location.hash !== h) writeLocation(h, obHashStep && obHashStep !== step && !existingLogin);
+    obHashStep = step;
     document.title = 'Onboarding — Synder (Firm context switcher)';
   }
   function bindOb() {
     const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     const backMap = {
-      signup: 'entry', login: 'signup', join: 'signup', joinok: 'join',
-      firmchoice: 'entry', import: 'signup', add: 'import', sources: 'import',
-      firmname: 'signup', review: 'sources', connecting: 'sources',
-      other: 'entry', inhouse: 'entry', owner: 'entry'
+      login: 'signup', join: 'signup', joinok: 'join',
+      import: 'signup', add: 'import', sources: 'import',
+      firmname: 'signup', review: 'sources', connecting: 'sources'
     };
     on('obBack', () => {
       readFirmName();
+      if (ob.step === 'login' && ob.loginFrom === 'role') return;
       if (ob.step === 'firmname') { goOnboarding(ob.nameFrom || 'import'); return; }
-      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : (ob.loginFrom === 'role' ? 'entry' : 'signup')); return; }
-      goOnboarding(backMap[ob.step] || 'entry');
+      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
+      const dest = backMap[ob.step];
+      if (!dest || dest === 'entry') return;
+      goOnboarding(dest);
     });
     ['suName', 'suEmail', 'suPass', 'suFirm'].forEach((id) => {
       const el = $(id);
@@ -1526,7 +1526,6 @@
       if (err) err.hidden = true;
       goOnboarding('joinok');
     });
-    on('loginCancel', () => { ob.use = null; ob.loginFrom = ''; saveOb(); goOnboarding('entry'); });
     const showDemo = () => {
       let modal = document.getElementById('demoModal');
       if (modal) modal.remove();
