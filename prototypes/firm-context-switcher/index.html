@@ -1722,13 +1722,358 @@
         <div class="issue"><div class="n">${counts.off}</div><div class="l">Not set up</div></div>
       </div>`;
   }
+  const LIC_CATALOG = {
+    core: { name: 'Synder Core', group: 'plan' },
+    advanced: { name: 'Synder Advanced', group: 'plan' },
+    rules3: { name: 'Smart Rules up to 3', group: 'rules' },
+    rules5: { name: 'Smart Rules up to 5', group: 'rules' },
+    rules10: { name: 'Smart Rules up to 10', group: 'rules' },
+    rules30: { name: 'Smart Rules up to 30', group: 'rules' },
+    rules100: { name: 'Smart Rules up to 100', group: 'rules' },
+    inv20: { name: 'Invoicing up to 20', group: 'invoicing' },
+    inv50: { name: 'Invoicing up to 50', group: 'invoicing' },
+    inv200: { name: 'Invoicing up to 200', group: 'invoicing' },
+    inv1000: { name: 'Invoicing up to 1,000', group: 'invoicing' },
+    users: { name: 'Additional users', group: 'users' },
+    rev10: { name: 'Revenue recognition up to 10K', group: 'revrec' },
+    rev50: { name: 'Revenue recognition up to 50K', group: 'revrec' },
+    revMore: { name: 'Revenue recognition above 50K', group: 'revrec' }
+  };
+  const LIC_PRICE = {
+    yearly: { core: 39, coreSingle: 47, advanced: 119, advSingle: 143, users: 12, rules3: 9, rules5: 15, rules10: 25, rules30: 49, rules100: 99, inv20: 19, inv50: 39, inv200: 79, inv1000: 149, rev10: 29, rev50: 59, revMore: 99 },
+    monthly: { core: 49, coreSingle: 59, advanced: 149, advSingle: 179, users: 15, rules3: 12, rules5: 19, rules10: 31, rules30: 61, rules100: 124, inv20: 24, inv50: 49, inv200: 99, inv1000: 186, rev10: 36, rev50: 74, revMore: 124 }
+  };
+  const FIRM_LIC_SEED = {
+    e1: { plan: 'core', rules: 'rules10', invoicing: 'inv50', users: 1 },
+    e2: { plan: 'core', rules: 'rules10', users: 1 },
+    e3: { plan: 'core', users: 1 },
+    e4: null,
+    e5: { plan: 'core', rules: 'rules10', users: 1 },
+    e6: { plan: 'core' },
+    e7: { plan: 'core' },
+    e8: { plan: 'core' },
+    e9: { plan: 'core' },
+    e10: null,
+    e11: { plan: 'core' },
+    e12: { plan: 'core' },
+    e13: { plan: 'core' },
+    e14: { plan: 'core' },
+    e15: { plan: 'core' },
+    e16: { plan: 'core' }
+  };
+  let licenseStock = null;
+  let buyDraft = null;
+  let licUi = { draft: { q: '', type: '', license: '' }, applied: { q: '', type: '', license: '' }, sort: 'asc' };
+  function defaultLicenseStock() {
+    return [
+      { id: 'core', total: 20 },
+      { id: 'rules10', total: 5 },
+      { id: 'inv50', total: 3 },
+      { id: 'users', total: 5 }
+    ];
+  }
+  function resetLicenseDemo() {
+    licenseStock = defaultLicenseStock();
+    buyDraft = null;
+    licUi = { draft: { q: '', type: '', license: '' }, applied: { q: '', type: '', license: '' }, sort: 'asc' };
+    try { localStorage.removeItem('fcs-lic-stock'); } catch (e) {}
+  }
+  function loadLicenseStock() {
+    if (licenseStock) return licenseStock;
+    try {
+      const raw = localStorage.getItem('fcs-lic-stock');
+      if (raw) licenseStock = JSON.parse(raw);
+    } catch (e) {}
+    if (!licenseStock) licenseStock = defaultLicenseStock();
+    return licenseStock;
+  }
+  function saveLicenseStock() {
+    try { localStorage.setItem('fcs-lic-stock', JSON.stringify(licenseStock)); } catch (e) {}
+  }
+  function ensureFirmLic() {
+    (sc().clients || []).forEach((c) => {
+      if (!c || c.firmLic !== undefined || !Object.prototype.hasOwnProperty.call(FIRM_LIC_SEED, c.id)) return;
+      c.firmLic = FIRM_LIC_SEED[c.id] ? Object.assign({}, FIRM_LIC_SEED[c.id]) : null;
+    });
+    loadLicenseStock();
+  }
+  function billingMode() {
+    const q = new URLSearchParams(location.search).get('billing');
+    if (q === 'pitch' || q === 'empty') return 'pitch';
+    if (q === 'error') return 'error';
+    return 'ready';
+  }
+  function licName(id) { return (LIC_CATALOG[id] && LIC_CATALOG[id].name) || id; }
+  function licUsed(id) {
+    const group = LIC_CATALOG[id] && LIC_CATALOG[id].group;
+    let n = 0;
+    (sc().clients || []).forEach((c) => {
+      const a = c.firmLic;
+      if (!a) return;
+      if (group === 'plan' && a.plan === id) n += 1;
+      else if (group === 'rules' && a.rules === id) n += 1;
+      else if (group === 'invoicing' && a.invoicing === id) n += 1;
+      else if (group === 'users' && id === 'users') n += a.users || 0;
+    });
+    return n;
+  }
+  function licLeft(id) {
+    const row = loadLicenseStock().find((item) => item.id === id);
+    return row ? row.total - licUsed(id) : 0;
+  }
+  function hasFirmLic(c) {
+    const a = c && c.firmLic;
+    return !!(a && (a.plan || a.rules || a.invoicing || a.users));
+  }
+  function assignedText(a) {
+    if (!hasFirmLic({ firmLic: a })) return 'No assigned licenses';
+    const bits = [];
+    if (a.plan) bits.push('1 license from ' + licName(a.plan));
+    if (a.rules) bits.push(licName(a.rules) + ' × 1');
+    if (a.invoicing) bits.push(licName(a.invoicing) + ' × 1');
+    if (a.users) bits.push('Additional users × ' + a.users);
+    return bits.join(', ');
+  }
+  function showKitToast(message) {
+    let stack = document.getElementById('preToasts');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.id = 'preToasts';
+      stack.className = 'synder-toast-stack';
+      document.body.appendChild(stack);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'synder-toast synder-toast-success';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `<span class="material-icons">check_circle</span><span>${esc(message)}</span><button type="button" class="synder-toast-close" aria-label="Dismiss"><span class="material-icons">close</span></button>`;
+    stack.appendChild(toast);
+    const kill = () => toast.remove();
+    toast.querySelector('button').onclick = kill;
+    setTimeout(kill, 5000);
+  }
   function renderBilling() {
-    return `<div class="flow-narrow page-stack">
-      <h1 class="text-h1">License-Based Pricing</h1>
-      <p class="text-body1">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p>
-      <p class="text-body1">Book a call to learn more about how license-based pricing works…</p>
-      <div><button type="button" class="btn" id="bookCall">Book a call</button></div>
+    const mode = billingMode();
+    if (mode === 'error') {
+      return `<div class="flow-wide page-stack">
+        <h1 class="text-h1">Billing and licenses is unavailable</h1>
+        <p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p>
+        <div><button type="button" class="btn" id="billRetry">Try again</button></div>
+      </div>`;
+    }
+    if (mode === 'pitch') {
+      return `<div class="flow-narrow page-stack">
+        <h1 class="text-h1">License-Based Pricing</h1>
+        <p class="text-body1">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p>
+        <p class="text-body2">Plans available to this firm: Synder Core, Synder Advanced.</p>
+        <p class="text-body1">Book a call to learn more about how license-based pricing works…</p>
+        <div><button type="button" class="btn" id="bookCall">Book a call</button></div>
+      </div>`;
+    }
+    const rows = loadLicenseStock().map((item) => {
+      const used = licUsed(item.id);
+      return `<tr><td>${esc(licName(item.id))}</td><td>${item.total}</td><td>${used}</td><td>${item.total - used}</td></tr>`;
+    }).join('');
+    return `<div class="flow-wide page-stack">
+      <div class="ph"><div class="page-head"><h1 class="text-h1">Billing and licenses</h1></div><div class="ph-actions"><button type="button" class="btn" id="manageLicenses">Manage licenses</button></div></div>
+      <p class="text-body2">Current billing period: Oct 1, 2026 – Oct 31, 2026</p>
+      <h2 class="text-h2">Purchased licenses</h2>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>${rows}</tbody></table></div>
     </div>`;
+  }
+  function licClients() {
+    return (sc().clients || []).filter((c) => !c.fresh && c.name);
+  }
+  function renderManageLicenses() {
+    const tab = st.licTab === 'buy' ? 'buy' : 'assign';
+    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'assign' ? ' active' : ''}" data-lic-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab${tab === 'buy' ? ' active' : ''}" data-lic-tab="buy" role="tab">Buy licenses</button></div>`;
+    return `<div class="flow-wide page-stack">
+      <a class="page-back" id="backBilling" href="#billing">Back to billing</a>
+      <h1 class="text-h1">Manage licenses</h1>
+      ${tabs}
+      ${tab === 'buy' ? renderBuyLicenses() : renderAssignLicenses()}
+    </div>`;
+  }
+  function renderAssignLicenses() {
+    const applied = licUi.applied;
+    let rows = licClients().filter((c) => {
+      if (applied.q && c.name.toLowerCase().indexOf(applied.q) < 0) return false;
+      const pending = isWaitingClient(c);
+      if (applied.type === 'active' && pending) return false;
+      if (applied.type === 'pending' && !pending) return false;
+      if (applied.license === 'none' && hasFirmLic(c)) return false;
+      if (applied.license && applied.license !== 'none') {
+        const a = c.firmLic || {};
+        if (a.plan !== applied.license && a.rules !== applied.license && a.invoicing !== applied.license) return false;
+      }
+      return true;
+    });
+    rows.sort((a, b) => a.name.localeCompare(b.name) * (licUi.sort === 'desc' ? -1 : 1));
+    const page = paginate('licAssign', rows, [10, 25, 50, 100]);
+    const body = page.slice.map((c) => {
+      const pending = isWaitingClient(c);
+      const action = pending
+        ? '<span class="status status-grey">Pending</span>'
+        : (hasFirmLic(c)
+          ? `<button type="button" class="btn-outlined" data-lic-change="${c.id}">Change</button>`
+          : `<button type="button" class="btn-outlined" data-lic-assign="${c.id}">Assign</button>`);
+      return `<tr><td>${esc(c.name)}</td><td><span class="text-body2">${esc(assignedText(c.firmLic))}</span></td><td class="text-right">${action}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" class="text-body2">No clients found</td></tr>';
+    const licenseOptions = '<option value="">License</option><option value="none"' + (licUi.draft.license === 'none' ? ' selected' : '') + '>None</option>' + loadLicenseStock().map((item) => `<option value="${item.id}"${licUi.draft.license === item.id ? ' selected' : ''}>${esc(licName(item.id))}</option>`).join('');
+    return `<div class="page-stack">
+      <div class="toolbar">
+        <input type="search" class="input-search" id="licSearch" placeholder="Search..." value="${esc(licUi.draft.q)}" />
+        <select class="select" id="licType" aria-label="Type"><option value="">Type</option><option value="active"${licUi.draft.type === 'active' ? ' selected' : ''}>Active client</option><option value="pending"${licUi.draft.type === 'pending' ? ' selected' : ''}>Pending invitation</option></select>
+        <select class="select" id="licKind" aria-label="License">${licenseOptions}</select>
+        <button type="button" class="btn" id="licApply">Apply</button>
+        <button type="button" class="btn-outlined" id="licReset">Reset filters</button>
+      </div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="sortable sorted${licUi.sort === 'desc' ? ' desc' : ''}" id="licSortName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+      ${page.html}
+    </div>`;
+  }
+  function buyPrice(key) {
+    const book = buyDraft && buyDraft.yearly ? LIC_PRICE.yearly : LIC_PRICE.monthly;
+    return book[key] || 0;
+  }
+  function ensureBuy() {
+    if (!buyDraft) buyDraft = { yearly: true, corePack: 20, coreSingle: 0, users: 5, rules: [{ key: 'rules10', qty: 5 }], inv: [{ key: 'inv50', qty: 3 }], rev: '' };
+    return buyDraft;
+  }
+  function planDiscount(qty) {
+    if (qty >= 20) return 20;
+    if (qty >= 10) return 10;
+    if (qty >= 3) return 5;
+    return 0;
+  }
+  function buyStepper(key, qty, label) {
+    return `<div class="logo-line"><button type="button" class="btn-outlined" data-buy="${key}" data-dir="-1" aria-label="Decrease">−</button><span class="text-body2">${qty}</span><button type="button" class="btn-outlined" data-buy="${key}" data-dir="1" aria-label="Increase">+</button><span class="text-body2">${esc(label)}</span></div>`;
+  }
+  function renderBuyLicenses() {
+    const buy = ensureBuy();
+    const discount = planDiscount(buy.corePack + buy.coreSingle);
+    const rules = ['rules3', 'rules5', 'rules10', 'rules30', 'rules100'];
+    const invs = ['inv20', 'inv50', 'inv200', 'inv1000'];
+    const ruleRows = buy.rules.map((row, i) => `<div class="logo-line"><select class="select" data-buy-rule="${i}" aria-label="Smart Rules"><option value="">Select</option>${rules.map((key) => `<option value="${key}"${row.key === key ? ' selected' : ''}>${esc(licName(key))} $${buyPrice(key)}/mo</option>`).join('')}</select>${buyStepper('rule:' + i, row.qty, '')}<button type="button" class="link" data-buy-del="rule:${i}">Delete</button></div>`).join('');
+    const invRows = buy.inv.map((row, i) => `<div class="logo-line"><select class="select" data-buy-inv="${i}" aria-label="Invoicing"><option value="">Select</option>${invs.map((key) => `<option value="${key}"${row.key === key ? ' selected' : ''}>${esc(licName(key))} $${buyPrice(key)}/mo</option>`).join('')}</select>${buyStepper('inv:' + i, row.qty, '')}<button type="button" class="link" data-buy-del="inv:${i}">Delete</button></div>`).join('');
+    const revOptions = ['', 'rev10', 'rev50', 'revMore'].map((key) => `<option value="${key}"${buy.rev === key ? ' selected' : ''}>${key ? esc(licName(key)) : 'Monthly subscriptions'}</option>`).join('');
+    const coreCard = `<div class="box box--white page-stack"><h2 class="text-h2">Synder Core</h2><span class="status status-blue">Current subscription</span><p class="text-body2">from $${buyPrice('core')} month</p>${buy.yearly ? '<p class="text-body2">Billed yearly</p>' : ''}<h2 class="text-subtitle1">Plans ${helpIcon('<p class="text-body2">Pack licenses, then single licenses. A volume discount applies to the plan subtotal only.</p>')}</h2><p class="text-body2">up to 3,000 sync credits/month + <button type="button" class="link" data-stub>Essential plan features</button></p>${buyStepper('corePack', buy.corePack, 'Synder Core $' + buyPrice('core') + '/mo')}${buyStepper('coreSingle', buy.coreSingle, 'Synder Core single $' + buyPrice('coreSingle') + '/mo')}${discount ? '<p class="text-body2">Discount - ' + discount + '%</p>' : ''}<h2 class="text-subtitle1">Additional users</h2>${buyStepper('users', buy.users, 'Additional users $' + buyPrice('users') + '/mo')}<h2 class="text-subtitle1">Smart Rules</h2>${ruleRows}<button type="button" class="link" data-buy-add="rules">+ Add more</button><h2 class="text-subtitle1">Invoicing</h2>${invRows}<button type="button" class="link" data-buy-add="inv">+ Add more</button><h2 class="text-subtitle1">Revenue recognition</h2><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><select class="select" id="buyRev" aria-label="Monthly subscriptions">${revOptions}</select><p class="text-body2">${buy.rev ? '$' + buyPrice(buy.rev) + '/mo per subscription' : ''}</p><div><button type="button" class="btn" id="coreUpdate">Update</button></div></div>`;
+    const advCard = `<div class="box box--white page-stack"><h2 class="text-h2">Synder Advanced</h2><p class="text-body2">from $${buyPrice('advanced')} month</p>${buy.yearly ? '<p class="text-body2">Billed yearly</p>' : ''}<h2 class="text-subtitle1">Plans</h2><p class="text-body2">up to 20,000 sync credits/month + <button type="button" class="link" data-stub>Pro plan features</button></p><div><button type="button" class="btn" id="advSubscribe">Subscribe</button></div></div>`;
+    return `<div class="page-stack">
+      <p class="text-body2">Placeholder prices for this prototype.</p>
+      <div class="logo-line"><span class="text-body2">Billing period</span><div class="btn-joined"><button type="button" class="${buy.yearly ? 'btn-outlined' : 'btn'}" id="payMonthly">Pay monthly</button><button type="button" class="${buy.yearly ? 'btn' : 'btn-outlined'}" id="payYearly">Pay yearly</button></div><span class="status status-green">20% OFF</span></div>
+      <div class="connect-pair">${coreCard}${advCard}</div>
+    </div>`;
+  }
+  function openAssignDialog(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const plans = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'plan' && licLeft(item.id) > 0);
+    const rules = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'rules' && licLeft(item.id) > 0);
+    const inv = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === 'invoicing' && licLeft(item.id) > 0);
+    const opt = (item) => `<option value="${item.id}">${esc(licName(item.id))} (${licLeft(item.id)} licenses available)</option>`;
+    const { modal, close } = dialogShell('Assign licenses to ' + c.name, `<div class="page-stack">
+      <div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">Select a license</option>${plans.map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asRules">Rules</label><select class="select" id="asRules"><option value="">Select</option>${rules.map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asInv">Invoicing</label><select class="select" id="asInv"><option value="">Select</option>${inv.map(opt).join('')}</select></div>
+      <div class="form-field"><label class="form-label" for="asUsers">Additional users (${licLeft('users')} licenses available)</label><input class="input" id="asUsers" type="number" min="0" value="0" /></div>
+      <div class="form-field"><label class="form-label" for="asRev">Revenue recognition subscriptions (0 monthly subscriptions available)</label><input class="input" id="asRev" placeholder="Monthly subscriptions" /></div>
+      <p class="form-error-msg" id="asError" hidden></p>
+    </div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="asGo">Assign</button>`);
+    modal.querySelector('#asGo').onclick = () => {
+      const plan = modal.querySelector('#asPlan').value;
+      const rulesId = modal.querySelector('#asRules').value;
+      const invId = modal.querySelector('#asInv').value;
+      const users = Math.max(0, parseInt(modal.querySelector('#asUsers').value, 10) || 0);
+      const err = modal.querySelector('#asError');
+      const picked = plan || rulesId || invId || users;
+      if (!picked) { err.hidden = false; err.textContent = 'Required'; return; }
+      if (!plan && (rulesId || invId || users)) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
+      if (users > licLeft('users')) { err.hidden = false; err.textContent = 'Required'; return; }
+      c.firmLic = { plan: plan, rules: rulesId, invoicing: invId, users: users };
+      persistDirectory();
+      close();
+      showKitToast('Licenses updated.');
+      render();
+    };
+  }
+  function openChangeDialog(id) {
+    const c = findOrg(id);
+    if (!c || !c.firmLic) return;
+    const current = c.firmLic;
+    const choices = (group, currentId) => {
+      const rows = loadLicenseStock().filter((item) => LIC_CATALOG[item.id] && LIC_CATALOG[item.id].group === group && (licLeft(item.id) > 0 || item.id === currentId));
+      return '<option value="">Unassign</option>' + rows.map((item) => `<option value="${item.id}"${item.id === currentId ? ' selected' : ''}>${esc(licName(item.id))}${item.id === currentId ? ' (current)' : ' (' + licLeft(item.id) + ' licenses available)'}</option>`).join('');
+    };
+    const { modal, close } = dialogShell('Update licenses for ' + c.name, `<div class="page-stack">
+      <div class="form-field"><label class="form-label" for="chPlan">Plan</label><select class="select" id="chPlan">${choices('plan', current.plan || '')}</select></div>
+      <div class="form-field"><label class="form-label" for="chRules">Rules</label><select class="select" id="chRules">${choices('rules', current.rules || '')}</select></div>
+      <div class="form-field"><label class="form-label" for="chInv">Invoicing</label><select class="select" id="chInv">${choices('invoicing', current.invoicing || '')}</select></div>
+      <div class="form-field"><label class="form-label" for="chUsers">Additional users (${licLeft('users')} licenses available)</label><input class="input" id="chUsers" type="number" min="0" value="${current.users || 0}" /></div>
+      <p class="form-error-msg" id="chError" hidden></p>
+    </div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn-outlined" id="chDelete">Delete</button><button type="button" class="btn" id="chUpdate">Update</button>`);
+    const read = () => ({
+      plan: modal.querySelector('#chPlan').value,
+      rules: modal.querySelector('#chRules').value,
+      invoicing: modal.querySelector('#chInv').value,
+      users: Math.max(0, parseInt(modal.querySelector('#chUsers').value, 10) || 0)
+    });
+    const empty = (v) => !v.plan && !v.rules && !v.invoicing && !v.users;
+    modal.querySelector('#chDelete').onclick = () => {
+      const v = read();
+      const err = modal.querySelector('#chError');
+      if (!empty(v)) { err.hidden = false; err.textContent = 'To unassign all licenses, first unselect every assigned license above'; return; }
+      c.firmLic = null;
+      persistDirectory();
+      close();
+      showKitToast('Licenses unassigned.');
+      render();
+    };
+    modal.querySelector('#chUpdate').onclick = () => {
+      const v = read();
+      const err = modal.querySelector('#chError');
+      if (!v.plan && (v.rules || v.invoicing || v.users)) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
+      c.firmLic = empty(v) ? null : v;
+      persistDirectory();
+      close();
+      showKitToast(empty(v) ? 'Licenses unassigned.' : 'Licenses updated.');
+      render();
+    };
+  }
+  function openPlanUpdate() {
+    const buy = ensureBuy();
+    const total = buy.corePack * buyPrice('core') + buy.coreSingle * buyPrice('coreSingle');
+    const { modal, close } = dialogShell('Plan update', `<div class="page-stack"><p class="text-body2">Your needs are changing and Synder is able to keep up and make sure you get the best value for money!</p><p class="text-body2">You will pay now: $${total} USD + Stripe taxes</p><p class="text-body2">Note: Not a penny will be missed! In case you have unused balance Synder is using it to prorate the subscription.</p></div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">Update plan</button>`);
+    modal.querySelector('#planGo').onclick = () => {
+      const row = loadLicenseStock().find((item) => item.id === 'core');
+      if (row) row.total = Math.max(licUsed('core'), buy.corePack + buy.coreSingle);
+      const users = loadLicenseStock().find((item) => item.id === 'users');
+      if (users) users.total = Math.max(licUsed('users'), buy.users);
+      saveLicenseStock();
+      close();
+      st.licTab = 'assign';
+      showKitToast('Subscription successfully updated.');
+      render();
+    };
+  }
+  function openBigMove() {
+    const { modal, close } = dialogShell('Big move ahead - we\'ve got you', `<p class="text-body2">Moving between Core and Advanced isn't a one-click switch - it's a chance to reshape how Synder works for your firm. Your Synder Specialist will help you map your plans, clients, and features so you walk away with the best possible setup.</p>`, `<button type="button" class="btn-outlined" data-cancel>Close</button><button type="button" class="btn" id="bookSpec">Schedule time with my Synder Specialist</button>`);
+    modal.querySelector('#bookSpec').onclick = () => { close(); showNotPart(); };
+  }
+  function tryRemoveClient(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    if (hasFirmLic(c)) {
+      dialogShell('Remove client', '<p class="text-body2">Unassign license from the client before removing.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button>');
+      return;
+    }
+    const { modal, close } = dialogShell('Remove client', `<p class="text-body2">Remove ${esc(c.name)} from the firm?</p>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="doRemoveClient">Remove</button>`);
+    modal.querySelector('#doRemoveClient').onclick = () => {
+      sc().clients = sc().clients.filter((item) => item.id !== c.id);
+      clientAccess = clientAccess.filter((a) => a.clientId !== c.id);
+      persistDirectory();
+      close();
+      render();
+    };
   }
   function renderClientSetup() {
     const c = findOrg(st.clientId);
@@ -1876,6 +2221,7 @@
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
     if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
+    if (st.page === 'managelicenses') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
@@ -2882,7 +3228,7 @@
         <td>${integCell(c)}</td>
         <td>${healthCell(c)}</td>
         <td>${reconCell(c)}</td>
-        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button></div></div></div></td>
+        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -2958,14 +3304,15 @@
   }
   function clientRoleTip() { return headedTip([['Manager', CLIENT_ROLE_MANAGER], ['Member', CLIENT_ROLE_MEMBER]]); }
   function firmRoleTip() { return headedTip([['Admin', FIRM_ROLE_ADMIN], ['Firm Colleague', FIRM_ROLE_COLLEAGUE]]); }
-  function pagerState(key) {
+  function pagerState(key, initial) {
     if (!st.pagers) st.pagers = {};
-    if (!st.pagers[key]) st.pagers[key] = { size: 25, page: 0 };
+    if (!st.pagers[key]) st.pagers[key] = { size: initial || 25, page: 0 };
     return st.pagers[key];
   }
-  function paginate(key, list) {
-    const state = pagerState(key);
-    const size = [10, 25, 50].indexOf(state.size) >= 0 ? state.size : 25;
+  function paginate(key, list, sizes) {
+    const opts = sizes || [10, 25, 50];
+    const state = pagerState(key, sizes ? opts[0] : 25);
+    const size = opts.indexOf(state.size) >= 0 ? state.size : opts[0];
     const pages = Math.max(1, Math.ceil(list.length / size));
     let page = state.page || 0;
     if (page > pages - 1) page = pages - 1;
@@ -2976,7 +3323,7 @@
     const from = list.length ? start + 1 : 0;
     const to = Math.min(list.length, start + size);
     const range = list.length ? from + '–' + to + ' of ' + list.length : '0 of 0';
-    const html = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select data-page-size="${key}" aria-label="Rows per page">${[10, 25, 50].map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-arrows"><button type="button" data-page-prev="${key}" aria-label="Previous page"><span class="material-icons">chevron_left</span></button><button type="button" data-page-next="${key}" aria-label="Next page"><span class="material-icons">chevron_right</span></button></span></div>`;
+    const html = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select data-page-size="${key}" aria-label="Rows per page">${opts.map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-arrows"><button type="button" data-page-prev="${key}" aria-label="Previous page"><span class="material-icons">chevron_left</span></button><button type="button" data-page-next="${key}" aria-label="Next page"><span class="material-icons">chevron_right</span></button></span></div>`;
     return { slice: list.slice(start, start + size), html };
   }
   function ensureWork(c) {
@@ -3188,10 +3535,11 @@
     </div>`;
   }
   function clientBillingTab(c) {
-    const row = billingRow(c);
-    if (!row) return '<p class="text-body2">No license assigned.</p>';
-    return `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Synder product</th><th>Billing plan</th><th>Addons</th><th>Renewal date</th><th>Syncs amount renewal</th></tr></thead>
-      <tbody><tr><td>${esc(row.product)}</td><td>${esc(row.plan)}</td><td>${esc(row.addons)}</td><td>${esc(row.renewal)}</td><td>${esc(row.syncs)}</td></tr></tbody></table></div>`;
+    const text = assignedText(c.firmLic);
+    if (!hasFirmLic(c)) {
+      return `<div class="page-stack"><p class="text-body2">No assigned licenses</p><div><button type="button" class="link" data-lic-assign="${c.id}">Assign</button></div></div>`;
+    }
+    return `<div class="page-stack"><p class="text-body2">${esc(text)}</p><div><button type="button" class="link" data-lic-change="${c.id}">Change</button></div></div>`;
   }
   function clientColleaguesTab(c) {
     const q = (st.clientColQ || '').toLowerCase();
@@ -3406,6 +3754,7 @@
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
+      else if (st.page === 'managelicenses') html = renderManageLicenses();
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
       else if (st.page === 'firmsettings') html = renderFirmSettings();
@@ -3655,6 +4004,67 @@
     if (clientCol) clientCol.oninput = () => { st.clientColQ = clientCol.value; rerender('clientColSearch'); };
     const bindClick = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     bindClick('bookCall', showNotPart);
+    bindClick('billRetry', () => {
+      const url = new URL(location.href);
+      url.searchParams.delete('billing');
+      history.replaceState(null, '', url.pathname + url.search + location.hash);
+      render();
+    });
+    bindClick('manageLicenses', () => { st.licTab = 'assign'; st.page = 'managelicenses'; save(); render(); });
+    bindClick('backBilling', () => goFirm('billing'));
+    m.querySelectorAll('[data-lic-tab]').forEach((b) => b.onclick = () => { st.licTab = b.dataset.licTab; save(); render(); });
+    m.querySelectorAll('[data-lic-assign]').forEach((b) => b.onclick = () => openAssignDialog(b.dataset.licAssign));
+    m.querySelectorAll('[data-lic-change]').forEach((b) => b.onclick = () => openChangeDialog(b.dataset.licChange));
+    m.querySelectorAll('[data-remove-client]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); tryRemoveClient(b.dataset.removeClient); });
+    bindClick('licApply', () => {
+      licUi.draft.q = ($('licSearch') && $('licSearch').value || '').trim().toLowerCase();
+      licUi.draft.type = $('licType') ? $('licType').value : '';
+      licUi.draft.license = $('licKind') ? $('licKind').value : '';
+      licUi.applied = Object.assign({}, licUi.draft);
+      if (st.pagers && st.pagers.licAssign) st.pagers.licAssign.page = 0;
+      renderMain();
+    });
+    bindClick('licReset', () => {
+      licUi.draft = { q: '', type: '', license: '' };
+      licUi.applied = { q: '', type: '', license: '' };
+      if (st.pagers && st.pagers.licAssign) st.pagers.licAssign.page = 0;
+      renderMain();
+    });
+    const licSort = $('licSortName');
+    if (licSort) licSort.onclick = () => { licUi.sort = licUi.sort === 'desc' ? 'asc' : 'desc'; renderMain(); };
+    bindClick('payMonthly', () => { ensureBuy().yearly = false; renderMain(); });
+    bindClick('payYearly', () => { ensureBuy().yearly = true; renderMain(); });
+    bindClick('coreUpdate', openPlanUpdate);
+    bindClick('advSubscribe', openBigMove);
+    const buyRev = $('buyRev');
+    if (buyRev) buyRev.onchange = () => { ensureBuy().rev = buyRev.value; renderMain(); };
+    m.querySelectorAll('[data-buy]').forEach((b) => b.onclick = () => {
+      const buy = ensureBuy();
+      const dir = Number(b.dataset.dir);
+      const key = b.dataset.buy;
+      const bump = (obj, field, min) => { obj[field] = Math.max(min, (obj[field] || 0) + dir); };
+      if (key === 'corePack') bump(buy, 'corePack', 1);
+      else if (key === 'coreSingle') bump(buy, 'coreSingle', 0);
+      else if (key === 'users') bump(buy, 'users', 0);
+      else if (key.indexOf('rule:') === 0) { const row = buy.rules[Number(key.slice(5))]; if (row) row.qty = Math.max(1, row.qty + dir); }
+      else if (key.indexOf('inv:') === 0) { const row = buy.inv[Number(key.slice(4))]; if (row) row.qty = Math.max(1, row.qty + dir); }
+      renderMain();
+    });
+    m.querySelectorAll('[data-buy-rule]').forEach((sel) => sel.onchange = () => { ensureBuy().rules[Number(sel.dataset.buyRule)].key = sel.value; renderMain(); });
+    m.querySelectorAll('[data-buy-inv]').forEach((sel) => sel.onchange = () => { ensureBuy().inv[Number(sel.dataset.buyInv)].key = sel.value; renderMain(); });
+    m.querySelectorAll('[data-buy-add]').forEach((b) => b.onclick = () => {
+      const buy = ensureBuy();
+      if (b.dataset.buyAdd === 'rules') buy.rules.push({ key: '', qty: 1 });
+      else buy.inv.push({ key: '', qty: 1 });
+      renderMain();
+    });
+    m.querySelectorAll('[data-buy-del]').forEach((b) => b.onclick = () => {
+      const buy = ensureBuy();
+      const parts = b.dataset.buyDel.split(':');
+      const list = parts[0] === 'rule' ? buy.rules : buy.inv;
+      list.splice(Number(parts[1]), 1);
+      renderMain();
+    });
     bindClick('monthPrev', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex -= 1; renderMain(); });
     bindClick('monthNext', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex += 1; renderMain(); });
     bindClick('markReview', () => { const c = findOrg(st.clientId); if (!c) return; c.monthStatus = 'In review'; renderMain(); });
@@ -4013,7 +4423,8 @@
       mode = 'firm';
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
-      st.page = 'billing';
+      st.page = (parts[1] === 'assign' || parts[1] === 'buy' || parts[1] === 'manage') ? 'managelicenses' : 'billing';
+      st.licTab = parts[1] === 'buy' ? 'buy' : 'assign';
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -4127,7 +4538,7 @@
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
     renderMode();
     document.body.classList.toggle('provider-plain', !!(st && st.page === 'connect'));
-    document.body.classList.toggle('wizard-plain', !!(st && (st.page === 'clientconnect' || st.page === 'bringin')));
+    document.body.classList.toggle('wizard-plain', !!(st && (st.page === 'clientconnect' || st.page === 'bringin' || st.page === 'managelicenses')));
     document.body.classList.remove('center-stage');
     $('main').classList.remove('fit-review');
     let h = '#' + scenario;
@@ -4144,6 +4555,7 @@
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
+    else if (st.ctx === 'firm' && st.page === 'managelicenses') h = '#billing/' + (st.licTab === 'buy' ? 'buy' : 'assign');
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
@@ -4152,7 +4564,7 @@
       rainSparkles(maybeAutoStory);
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
-    if (mode !== 'onboarding') { ensurePreSeeds(); armPreTimers(); watchSync(); }
+    if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); armPreTimers(); watchSync(); }
     const bal = document.querySelector('.t-balance');
     if (bal) bal.hidden = !(st && st.ctx === 'org');
   }
