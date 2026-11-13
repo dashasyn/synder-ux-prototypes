@@ -2862,9 +2862,6 @@
       if (filter === 'off') return isOffClient(c);
       return true;
     });
-    const rank = { lost: 0, checks: 1, waiting: 2, off: 3, good: 4 };
-    if ((st.listSort || 'name') === 'status') rows = rows.slice().sort((a, b) => (rank[clientView(a).key] ?? 9) - (rank[clientView(b).key] ?? 9) || a.name.localeCompare(b.name));
-    const statCard = (key, label, n) => `<button type="button" class="box box--white stat-card${filter === key ? ' on' : ''}" data-filter="${key}" aria-pressed="${filter === key ? 'true' : 'false'}"><span class="text-h1">${n}</span><span class="text-body2">${label}</span></button>`;
     const body = rows.map((c) => {
       const lic = licenseLabel(c);
       const off = isOffClient(c);
@@ -2909,7 +2906,6 @@
       </div>
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
-        <select class="select" id="clientSort" aria-label="Sort clients"><option value="name"${(st.listSort || 'name') === 'name' ? ' selected' : ''}>Name</option><option value="status"${st.listSort === 'status' ? ' selected' : ''}>Status</option></select>
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
           <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
@@ -3241,7 +3237,9 @@
     const p = findPerson(st.colleagueId);
     if (!p) return renderColleagues();
     const tab = st.colleagueTab || 'details';
-    const assigned = accessForPerson(p.id);
+    const assigned = p.firmRole === 'admin'
+      ? listedClients().map((c) => ({ client: c, clientId: c.id, role: 'Admin', locked: true }))
+      : accessForPerson(p.id).map((a) => Object.assign({ locked: false }, a));
     const locked = !!(p.self || p.status === 'invited');
     const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details" role="tab" aria-selected="${tab === 'details'}">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients" role="tab" aria-selected="${tab === 'clients'}">Clients <span class="status status-grey">${assigned.length}</span></button></div>`;
     const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
@@ -3249,9 +3247,13 @@
     let body = '';
     if (tab === 'clients') {
       const page = paginate('personClients', assigned);
-      const rows = page.slice.map((a) => `<tr class="row-clickable" data-row="${a.clientId}" tabindex="0"><td><span class="text-body2">${esc(a.client.name)}</span></td><td><span class="text-body2">${esc(a.role)}</span></td><td>${acctCell(a.client)}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="ac-${a.clientId}" aria-label="Actions for ${esc(a.client.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-ac-${a.clientId}"><button type="button" class="dropdown-item" data-change-role="${p.id}:${a.clientId}">Change role</button><button type="button" class="dropdown-item" data-drop-client="${p.id}:${a.clientId}">Unassign</button></div></div></td></tr>`).join('') || '<tr><td colspan="4" class="text-body2">No clients assigned.</td></tr>';
+      const rows = page.slice.map((a) => {
+        const menu = a.locked ? '' : `<td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="ac-${a.clientId}" aria-label="Actions for ${esc(a.client.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-ac-${a.clientId}"><button type="button" class="dropdown-item" data-change-role="${p.id}:${a.clientId}">Change role</button><button type="button" class="dropdown-item" data-drop-client="${p.id}:${a.clientId}">Unassign</button></div></div></td>`;
+        return `<tr class="row-clickable" data-row="${a.clientId}" tabindex="0"><td><span class="text-body2">${esc(a.client.name)}</span></td><td><span class="text-body2">${esc(a.role)}</span></td><td>${acctCell(a.client)}</td>${a.locked ? '<td></td>' : menu}</tr>`;
+      }).join('') || '<tr><td colspan="4" class="text-body2">No clients assigned.</td></tr>';
+      const assign = p.firmRole === 'admin' ? '' : '<button type="button" class="btn-outlined" id="addPersonClient">+ Assign client</button>';
       body = `<div class="page-stack">
-        <div class="ph"><div></div><div class="ph-actions"><button type="button" class="btn-outlined" id="addPersonClient">+ Assign client</button></div></div>
+        <div class="ph"><div></div><div class="ph-actions">${assign}</div></div>
         <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Role in the client</th><th>Accounting status</th><th class="text-right"></th></tr></thead><tbody>${rows}</tbody></table></div>
         ${page.html}
       </div>`;
@@ -3446,8 +3448,6 @@
       st.listFilter = b.dataset.filter || 'all';
       save(); renderMain();
     });
-    const sort = $('clientSort');
-    if (sort) sort.onchange = () => { st.listSort = sort.value; save(); renderMain(); };
     m.querySelectorAll('[data-pick]').forEach((b) => b.onclick = () => {
       const parts = b.dataset.pick.split(':');
       const group = parts[0];
