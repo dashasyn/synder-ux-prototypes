@@ -1039,6 +1039,10 @@
   }
   function finishExistingLogin() {
     if (!ob) ob = defaultOb();
+    if (ob.use === 'business' || ob.loginFrom === 'role') {
+      showBusinessStop();
+      return;
+    }
     ob.variant = 'existing';
     ob.directoryReady = true;
     ob.banner = 'invite';
@@ -1055,6 +1059,24 @@
     document.body.classList.remove('shell-hide');
     celebrateOnClients = false;
     goFirm('clients');
+  }
+  function showBusinessStop() {
+    const old = document.getElementById('bizStop');
+    if (old) old.remove();
+    const modal = document.createElement('div');
+    modal.id = 'bizStop';
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bizStopTitle"><div class="modal-header" id="bizStopTitle">Synder</div><div class="modal-body"><p class="text-body2">This screen is not part of this prototype.</p></div><div class="modal-footer"><button type="button" class="btn-outlined" id="bizStopCancel">Cancel</button></div></div>`;
+    document.body.appendChild(modal);
+    const close = () => {
+      modal.remove();
+      ob.use = null;
+      ob.loginFrom = '';
+      saveOb();
+      goOnboarding('entry');
+    };
+    modal.querySelector('#bizStopCancel').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
   }
   function addImported(entries) {
     const have = new Set(sc().clients.map((c) => c.id));
@@ -1257,14 +1279,6 @@
           ${obCard({ attr: 'data-choice="join"', selected: !!(ob.firmChosen && ob.firmChoice === 'join'), ill: ILL.join, title: 'Join my firm’s workspace', text: 'Use an invite from a colleague, or the Firm ID they share.' })}
         </div>
         <div class="ob-actions"><button type="button" class="btn" id="obFirmNext">Continue</button></div>`);
-    } else if (step === 'business') {
-      html = obShell(`
-        <div class="flow-narrow">
-        ${backSlot(true)}
-        <h1 class="text-h1">Set up Synder for your business</h1>
-        <p class="text-body1">This is the business path. Next you’ll connect the company’s books.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="obBizNext">Continue</button><button type="button" class="btn-outlined" id="obBack2">Back</button></div>
-        </div>`);
     } else if (step === 'login') {
       html = obShell(`
         <div class="flow-narrow">
@@ -1277,6 +1291,7 @@
           <div class="form-field"><label class="form-label form-label-required" for="liEmail">Email</label><input class="input" id="liEmail" type="email" autocomplete="username" value="${esc(ob.userEmail || 'ada@northwindbookkeeping.com')}" /></div>
           <div class="form-field"><label class="form-label form-label-required" for="liPass">Password</label><input class="input" id="liPass" type="password" autocomplete="current-password" value="${esc(ob.demoPass || 'Bookkeeping1')}" /></div>
           <button type="button" class="btn" id="liSubmit">Log in</button>
+          ${ob.loginFrom === 'role' ? '<button type="button" class="btn-outlined" id="loginCancel">Cancel</button>' : ''}
           <p class="auth-foot text-body2">Don't have an account? <button type="button" class="link" id="liSignup">Sign up</button></p>
         </div>
         </div>
@@ -1383,15 +1398,6 @@
           <button type="button" class="btn" id="obAdd">${n ? `Add ${n} client${n === 1 ? '' : 's'}` : 'Add clients'}</button>
           <button type="button" class="ob-quiet" id="obSkipAdd">Continue without these names</button>
         </div>`, true);
-    } else if (step === 'bizbooks') {
-      html = obShell(`
-        <div class="flow-narrow">
-        ${backSlot(true)}
-        <h1 class="text-h1">Connect your books</h1>
-        <p class="text-body1">Synder for businesses would connect QuickBooks or Xero for this company next.</p>
-        <div class="ob-actions"><button type="button" class="btn" id="obBizDone">Continue</button><button type="button" class="btn-outlined" id="obBack">Back</button></div>
-        <p class="form-error-msg" id="bizNote" hidden>This continues in Synder for businesses.</p>
-        </div>`);
     } else if (step === 'joinok') {
       html = obShell(`
         ${backSlot(true)}
@@ -1413,7 +1419,7 @@
   function bindOb() {
     const on = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     const backMap = {
-      signup: 'entry', business: 'entry', bizbooks: 'business', login: 'signup', join: 'signup', joinok: 'join',
+      signup: 'entry', login: 'signup', join: 'signup', joinok: 'join',
       firmchoice: 'entry', import: 'signup', add: 'import', sources: 'import',
       firmname: 'signup', review: 'sources', connecting: 'sources',
       other: 'entry', inhouse: 'entry', owner: 'entry'
@@ -1421,11 +1427,7 @@
     on('obBack', () => {
       readFirmName();
       if (ob.step === 'firmname') { goOnboarding(ob.nameFrom || 'import'); return; }
-      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
-      goOnboarding(backMap[ob.step] || 'entry');
-    });
-    on('obBack2', () => {
-      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : 'signup'); return; }
+      if (ob.step === 'login') { goOnboarding(ob.loginFrom === 'home' ? 'home' : (ob.loginFrom === 'role' ? 'entry' : 'signup')); return; }
       goOnboarding(backMap[ob.step] || 'entry');
     });
     ['suName', 'suEmail', 'suPass', 'suFirm'].forEach((id) => {
@@ -1493,8 +1495,16 @@
       if (use !== 'practice' && use !== 'business') return;
       ob.use = use;
       ob.useChosen = true;
+      if (use === 'business') {
+        ob.loginFrom = 'role';
+        ob.userEmail = 'ignat@wlslabs.com';
+        ob.demoPass = 'Bookkeeping1';
+        saveOb();
+        goOnboarding('login');
+        return;
+      }
       saveOb();
-      goOnboarding(use === 'business' ? 'business' : 'signup');
+      goOnboarding('signup');
     });
     document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
@@ -1516,8 +1526,7 @@
       if (err) err.hidden = true;
       goOnboarding('joinok');
     });
-    on('obBizNext', () => goOnboarding('bizbooks'));
-    on('obBizDone', () => { const note = $('bizNote'); if (note) note.hidden = false; });
+    on('loginCancel', () => { ob.use = null; ob.loginFrom = ''; saveOb(); goOnboarding('entry'); });
     const showDemo = () => {
       let modal = document.getElementById('demoModal');
       if (modal) modal.remove();
@@ -3390,6 +3399,8 @@
     if (demoOpen && e.key === 'Escape') { e.preventDefault(); demoOpen.remove(); return; }
     const needOpen = document.getElementById('needConnect');
     if (needOpen && e.key === 'Escape') { e.preventDefault(); needOpen.remove(); return; }
+    const bizStop = document.getElementById('bizStop');
+    if (bizStop && e.key === 'Escape') { e.preventDefault(); const btn = document.getElementById('bizStopCancel'); if (btn) btn.click(); return; }
     const inviteOpen = document.getElementById('inviteModal');
     if (inviteOpen && e.key === 'Escape') { e.preventDefault(); inviteOpen.remove(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
@@ -3509,7 +3520,7 @@
       }
       const map = { role: 'entry', firmchoice: 'entry', firmname: 'signup', welcome: 'entry', import: 'entry', sources: 'entry', review: 'entry', add: 'entry', join: 'signup', joinok: 'signup' };
       const next = map[step] || step;
-      ob.step = ['entry', 'signup', 'business', 'bizbooks', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
+      ob.step = ['entry', 'signup', 'login', 'join', 'joinok'].includes(next) ? next : 'entry';
       goOnboarding(ob.step);
       return;
     }
