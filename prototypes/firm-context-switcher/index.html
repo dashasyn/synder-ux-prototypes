@@ -987,13 +987,13 @@
         { key: 'unreconciled', periods: ['Aug 2026', 'Sep 2026'], source: src('QuickBooks', 'Tidewater Dental LLC') },
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Tidewater Dental LLC') }
       ], 'Pro')),
-      Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [
+      Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC', pre: { status: 'done', outcome: 'ok', platform: 'Stripe', period: 'Oct 2026' } }, on('QuickBooks', four.slice(), [
         { key: 'reconnect', source: 'QuickBooks', books: true }
       ], 'Premium')),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
       Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
-      Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
-      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
+      Object.assign({ id: 'e6', name: 'Maple Street Bakery', pre: { status: 'running', outcome: 'gap', platform: 'PayPal', period: 'Oct 2026', silent: true, startedAt: Date.now() } }, off),
+      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC', pre: { status: 'done', outcome: 'gap', platform: 'Stripe', period: 'Oct 2026' } }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
         { key: 'reconnect', source: 'Stripe' },
         { key: 'reconnect', source: 'PayPal' }
       ], 'Pro')),
@@ -2164,6 +2164,344 @@
     const tip = !summary.total ? 'Not checked yet' : (summary.failed.length ? summary.failed.map((f) => f.name).join('; ') : 'All checks passed');
     return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(chipKind(summary.tone), summary.label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
+  function fullyConnected(c) {
+    if (isOffClient(c) || booksLost(c) || isWaitingClient(c)) return false;
+    const list = (c && c.integrations) || [];
+    if (!list.length) return false;
+    return !lostIntegrations(c).length && !pendingIntegrations(c).length;
+  }
+  function reconCell(c) {
+    if (fullyConnected(c)) {
+      return '<div class="cell-stack"><span class="text-body2 text-secondary">Not run</span><button type="button" class="btn-outlined" data-stub>Open in Synder</button></div>';
+    }
+    const pre = c.pre;
+    if (pre && pre.status === 'running') return '<span class="text-body2">Running…</span>';
+    if (pre && pre.status === 'done') {
+      const chip = pre.outcome === 'ok' ? statusChip('green', 'Reconciled') : statusChip('red', 'Not reconciled');
+      return `<div class="cell-stack">${chip}<span class="cell-subtext">${esc(pre.period || '')}</span><button type="button" class="btn-outlined" data-pre-view="${c.id}">View result</button></div>`;
+    }
+    return `<div class="cell-stack"><span class="text-body2 text-secondary">Not run</span><button type="button" class="btn-outlined" data-pre-run="${c.id}">Run pre-assessment</button></div>`;
+  }
+  function preMenuItem(c) {
+    if (fullyConnected(c) || (c.pre && c.pre.status === 'running')) return '';
+    if (c.pre && c.pre.status === 'done') return `<button type="button" class="dropdown-item" data-pre-view="${c.id}">View pre-assessment</button>`;
+    return `<button type="button" class="dropdown-item" data-pre-run="${c.id}">Run pre-assessment</button>`;
+  }
+  function preWorkBlock(c) {
+    let body;
+    if (fullyConnected(c)) body = '<p class="text-body2 text-secondary">Not run</p><div><button type="button" class="btn-outlined" data-stub>Open in Synder</button></div>';
+    else if (c.pre && c.pre.status === 'running') body = '<p class="text-body2">Running…</p>';
+    else if (c.pre && c.pre.status === 'done') {
+      const chip = c.pre.outcome === 'ok' ? statusChip('green', 'Reconciled') : statusChip('red', 'Not reconciled');
+      body = `<p class="text-body2">${chip}</p><p class="text-body2 text-secondary">${esc(c.pre.platform)} · ${esc(c.pre.period)}</p><div><button type="button" class="btn-outlined" data-pre-view="${c.id}">View result</button></div>`;
+    } else body = '<p class="text-body2 text-secondary">Not run</p><div><button type="button" class="btn-outlined" data-pre-run="' + c.id + '">Run pre-assessment</button></div>';
+    return `<div class="box box--white page-stack"><h2 class="text-h2">Pre-assessment</h2>${body}</div>`;
+  }
+  const PRE_PLATFORMS = ['Stripe', 'PayPal', 'Shopify', 'Square'];
+  const PRE_PERIODS = ['Oct 2026', 'Sep 2026', 'Aug 2026', 'Jul 2026', 'Jun 2026', 'May 2026'];
+  const preTimers = {};
+  function ensurePreSeeds() {
+    const seeds = {
+      e3: { status: 'done', outcome: 'ok', platform: 'Stripe', period: 'Oct 2026' },
+      e6: { status: 'running', outcome: 'gap', platform: 'PayPal', period: 'Oct 2026', silent: true, startedAt: Date.now() },
+      e7: { status: 'done', outcome: 'gap', platform: 'Stripe', period: 'Oct 2026' }
+    };
+    (sc().clients || []).forEach((c) => {
+      if (c && !c.pre && seeds[c.id]) c.pre = Object.assign({}, seeds[c.id]);
+    });
+  }
+  function armPreTimers() {
+    (sc().clients || []).forEach((c) => {
+      if (!c.pre || c.pre.status !== 'running' || preTimers[c.id]) return;
+      if (!c.pre.startedAt) c.pre.startedAt = Date.now();
+      const wait = Math.max(0, 3000 - (Date.now() - c.pre.startedAt));
+      preTimers[c.id] = setTimeout(() => {
+        delete preTimers[c.id];
+        const current = findOrg(c.id);
+        if (!current || !current.pre || current.pre.status !== 'running') return;
+        const silent = !!current.pre.silent;
+        current.pre.status = 'done';
+        current.pre.outcome = current.pre.outcome === 'ok' ? 'ok' : 'gap';
+        delete current.pre.silent;
+        persistDirectory();
+        if (!silent) showPreToast(current);
+        const show = st && (st.page === 'clients' || st.page === 'dashboard' || ((st.page === 'clientdetail' || st.page === 'preassess') && st.clientId === current.id));
+        if (show && mode !== 'onboarding') render();
+      }, wait);
+    });
+  }
+  function showPreToast(c) {
+    let stack = document.getElementById('preToasts');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.id = 'preToasts';
+      stack.className = 'synder-toast-stack';
+      document.body.appendChild(stack);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'synder-toast synder-toast-success';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `<span class="material-icons">check_circle</span><span>Pre-assessment ready for ${esc(c.name)}</span><button type="button" class="synder-toast-close" data-pre-toast="${c.id}">View result</button><button type="button" class="synder-toast-close" data-pre-dismiss aria-label="Dismiss"><span class="material-icons">close</span></button>`;
+    stack.appendChild(toast);
+    const kill = () => toast.remove();
+    toast.querySelector('[data-pre-dismiss]').onclick = kill;
+    toast.querySelector('[data-pre-toast]').onclick = () => { kill(); openPreassessment(c.id); };
+    setTimeout(kill, 5000);
+  }
+  function openPreassessment(id) {
+    st.ctx = 'firm';
+    st.page = 'preassess';
+    st.clientId = id;
+    st.preTab = 'matched';
+    st.orgId = null;
+    save();
+    render();
+  }
+  function booksUploadCopy(c, period) {
+    const books = c && c.accounting === 'Xero' ? 'Xero' : (c && c.accounting ? 'QuickBooks' : 'QuickBooks or Xero');
+    return 'Books: ' + books + " 'Transaction detail by account' for the clearing account for " + period + '.';
+  }
+  function platformUploadCopy(platform) {
+    if (platform === 'Stripe') return "Stripe: 'Balance change from activity' report and 'Payouts' report. Stripe needs both files.";
+    if (platform === 'PayPal') return "PayPal: 'Activity download (CSV)'.";
+    if (platform === 'Shopify') return "Shopify: 'Payouts' export.";
+    return "Square: 'Transactions' CSV.";
+  }
+  function samplePreFiles(platform) {
+    const books = { name: 'transaction-detail-by-account.csv', label: 'Books report' };
+    if (platform === 'Stripe') return [books, { name: 'stripe-balance-change.csv', label: 'Stripe balance report' }, { name: 'stripe-payouts.csv', label: 'Stripe payouts report' }];
+    if (platform === 'PayPal') return [books, { name: 'paypal-activity-download.csv', label: 'PayPal activity' }];
+    if (platform === 'Shopify') return [books, { name: 'shopify-payouts.csv', label: 'Shopify payouts' }];
+    return [books, { name: 'square-transactions.csv', label: 'Square transactions' }];
+  }
+  function detectPreLabel(name, platform, existing) {
+    const n = String(name || '').toLowerCase();
+    if (/book|quickbooks|xero|transaction detail|clearing/.test(n)) return 'Books report';
+    if (platform === 'Stripe' && /payout/.test(n)) return 'Stripe payouts report';
+    if (platform === 'Stripe' && /balance|activity/.test(n)) return 'Stripe balance report';
+    if (platform === 'PayPal' || /paypal/.test(n)) return 'PayPal activity';
+    if (platform === 'Shopify' || /shopify/.test(n)) return 'Shopify payouts';
+    if (platform === 'Square' || /square/.test(n)) return 'Square transactions';
+    const labels = existing.map((f) => f.label);
+    if (labels.indexOf('Books report') < 0) return 'Books report';
+    if (platform === 'Stripe' && labels.indexOf('Stripe balance report') < 0) return 'Stripe balance report';
+    if (platform === 'Stripe' && labels.indexOf('Stripe payouts report') < 0) return 'Stripe payouts report';
+    if (platform === 'PayPal') return 'PayPal activity';
+    if (platform === 'Shopify') return 'Shopify payouts';
+    return 'Square transactions';
+  }
+  function preFileGap(platform, files) {
+    const labels = files.map((f) => f.label);
+    if (labels.indexOf('Books report') < 0) return 'We also need the books report';
+    if (platform === 'Stripe' && labels.indexOf('Stripe balance report') < 0) return 'We also need the Stripe balance report';
+    if (platform === 'Stripe' && labels.indexOf('Stripe payouts report') < 0) return 'We also need the Stripe Payouts report';
+    if (platform === 'PayPal' && labels.indexOf('PayPal activity') < 0) return 'We also need the PayPal Activity download';
+    if (platform === 'Shopify' && labels.indexOf('Shopify payouts') < 0) return 'We also need the Shopify Payouts export';
+    if (platform === 'Square' && labels.indexOf('Square transactions') < 0) return 'We also need the Square Transactions CSV';
+    return '';
+  }
+  let preDraft = null;
+  function paintPreDialog() {
+    const modal = document.getElementById('preModal');
+    const c = preDraft && findOrg(preDraft.id);
+    if (!modal || !c) return;
+    const logo = modal.querySelector('#preLogo');
+    if (logo) logo.innerHTML = brandMark(preDraft.platform, 18);
+    const suggest = modal.querySelector('#preSuggest');
+    if (suggest) suggest.innerHTML = `<p class="text-body2">${esc(booksUploadCopy(c, preDraft.period))}</p><p class="text-body2">${esc(platformUploadCopy(preDraft.platform))}</p>`;
+    const list = modal.querySelector('#preFiles');
+    if (list) {
+      list.innerHTML = preDraft.files.map((f, i) => `<div class="logo-line"><span class="text-body2">${esc(f.name)}</span><span class="text-body2 text-secondary">${esc(f.label)}</span><button type="button" class="link" data-pre-remove="${i}">Remove</button></div>`).join('');
+      list.querySelectorAll('[data-pre-remove]').forEach((b) => b.onclick = () => {
+        preDraft.files.splice(Number(b.dataset.preRemove), 1);
+        const err = modal.querySelector('#preFileError');
+        if (err) err.hidden = true;
+        const zone = modal.querySelector('#preDrop');
+        if (zone) zone.classList.remove('is-error');
+        paintPreDialog();
+      });
+    }
+  }
+  function openPreDialog(id) {
+    const c = findOrg(id);
+    if (!c || fullyConnected(c)) return;
+    const old = document.getElementById('preModal');
+    if (old) old.remove();
+    const platform = c.pre && PRE_PLATFORMS.indexOf(c.pre.platform) >= 0 ? c.pre.platform : (PRE_PLATFORMS.indexOf((c.integrations || [])[0]) >= 0 ? c.integrations[0] : 'Stripe');
+    const period = c.pre && PRE_PERIODS.indexOf(c.pre.period) >= 0 ? c.pre.period : 'Oct 2026';
+    preDraft = { id, platform, period, files: [] };
+    const modal = document.createElement('div');
+    modal.id = 'preModal';
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="preTitle">
+      <div class="modal-header" id="preTitle">Check how ${esc(c.name)} reconciles</div>
+      <div class="modal-body page-stack">
+        <p class="text-body2">Upload one report from the books and one from the payment platform. We compare them and show what doesn't match. Nothing is changed in the books.</p>
+        <div class="form-field"><label class="form-label" for="prePlatform">Platform</label><div class="logo-line"><span id="preLogo"></span><select class="select" id="prePlatform">${PRE_PLATFORMS.map((name) => `<option value="${name}"${name === platform ? ' selected' : ''}>${name}</option>`).join('')}</select></div></div>
+        <div class="form-field"><label class="form-label" for="prePeriod">Period</label><select class="select" id="prePeriod">${PRE_PERIODS.map((name) => `<option${name === period ? ' selected' : ''}>${name}</option>`).join('')}</select></div>
+        <div class="box box--white page-stack" id="preSuggest"></div>
+        <div class="file-upload" id="preDrop"><span>Drop CSV, Excel, or PDF files here, or</span><button type="button" class="link" id="preSamples">Use sample files</button></div>
+        <div class="page-stack" id="preFiles"></div>
+        <p class="form-error-msg" id="preFileError" hidden></p>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn-outlined" id="preCancel">Cancel</button><button type="button" class="btn" id="preAnalyze">Analyze</button></div>
+    </div>`;
+    document.body.appendChild(modal);
+    const close = () => { modal.remove(); preDraft = null; };
+    modal.querySelector('#preCancel').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+    modal.querySelector('#prePlatform').onchange = (e) => { preDraft.platform = e.target.value; paintPreDialog(); };
+    modal.querySelector('#prePeriod').onchange = (e) => { preDraft.period = e.target.value; paintPreDialog(); };
+    const addSamples = () => {
+      preDraft.files = samplePreFiles(preDraft.platform).map((f) => Object.assign({}, f));
+      const err = modal.querySelector('#preFileError');
+      if (err) err.hidden = true;
+      modal.querySelector('#preDrop').classList.remove('is-error');
+      paintPreDialog();
+    };
+    modal.querySelector('#preSamples').onclick = addSamples;
+    const zone = modal.querySelector('#preDrop');
+    zone.onclick = (e) => { if (e.target.closest('button')) return; addSamples(); };
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('is-dragging'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('is-dragging'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('is-dragging');
+      const dropped = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+      if (!dropped.length) { addSamples(); return; }
+      dropped.forEach((file) => {
+        preDraft.files.push({ name: file.name, label: detectPreLabel(file.name, preDraft.platform, preDraft.files) });
+      });
+      paintPreDialog();
+    });
+    modal.querySelector('#preAnalyze').onclick = () => {
+      const gap = preFileGap(preDraft.platform, preDraft.files);
+      const err = modal.querySelector('#preFileError');
+      if (gap) {
+        err.hidden = false;
+        err.textContent = gap;
+        zone.classList.add('is-error');
+        return;
+      }
+      const client = findOrg(preDraft.id);
+      if (!client) { close(); return; }
+      client.pre = {
+        status: 'running',
+        outcome: client.pre && client.pre.outcome === 'ok' ? 'ok' : 'gap',
+        platform: preDraft.platform,
+        period: preDraft.period,
+        startedAt: Date.now()
+      };
+      if (preTimers[client.id]) clearTimeout(preTimers[client.id]);
+      delete preTimers[client.id];
+      persistDirectory();
+      close();
+      if (st && st.page === 'preassess' && st.clientId === client.id) goFirm('clients');
+      else render();
+    };
+    paintPreDialog();
+  }
+  function usd(n) {
+    if (n == null) return '—';
+    const neg = n < 0;
+    const parts = Math.abs(n).toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '-$' : '$') + parts[0] + '.' + parts[1];
+  }
+  function preStory(c) {
+    const pre = c.pre || {};
+    const platform = pre.platform || 'Stripe';
+    const period = pre.period || 'Oct 2026';
+    const ok = pre.outcome === 'ok';
+    if (ok) {
+      return {
+        ok, platform, period,
+        totals: [
+          ['Total in ' + platform, 48220],
+          ['Total in books', 48220],
+          ['Difference', 0],
+          ['Matched', '186 of 186']
+        ],
+        fixes: [],
+        note: 'Everything matches for ' + period + '.',
+        counts: { matched: 186, books: 0, platform: 0, differs: 0 }
+      };
+    }
+    return {
+      ok, platform, period,
+      totals: [
+        ['Total in ' + platform, 18640],
+        ['Total in books', 14908.60],
+        ['Difference', 3731.40],
+        ['Matched', '412 of 431']
+      ],
+      fixes: [
+        '3 ' + platform + ' payouts from Oct 12–18 are not in the books ($4,210.00). Record them or connect ' + platform + ' so Synder adds them.',
+        platform + ' fees are booked as income, not as an expense. Move $612.40 to Merchant fees.',
+        'One refund ($89.00) is recorded twice.',
+        'A $42.10 adjustment on Oct 28 is in ' + platform + ' and not in the books.'
+      ],
+      note: '',
+      counts: { matched: 412, books: 12, platform: 4, differs: 3 }
+    };
+  }
+  function preTableRows(story, tab) {
+    const n = story.counts[tab] || 0;
+    const platform = story.platform;
+    const rows = [];
+    for (let i = 0; i < n; i++) {
+      if (tab === 'books' && i < 3) {
+        rows.push({ date: 'Oct ' + [12, 15, 18][i] + ', 2026', desc: platform + ' payout', left: [1540, 1420, 1250][i], right: null });
+        continue;
+      }
+      if (tab === 'differs' && i === 0) {
+        rows.push({ date: 'Oct 20, 2026', desc: platform + ' fee', left: -612.4, right: 612.4 });
+        continue;
+      }
+      if (tab === 'differs' && i === 1) {
+        rows.push({ date: 'Oct 22, 2026', desc: 'Refund', left: -89, right: -178 });
+        continue;
+      }
+      const day = (i % 28) + 1;
+      const amt = Math.round((40 + (i * 17) % 800) * 100) / 100;
+      const date = 'Oct ' + day + ', 2026';
+      if (tab === 'matched') rows.push({ date, desc: 'Card payment', left: amt, right: amt });
+      else if (tab === 'books') rows.push({ date, desc: platform + ' payout', left: amt, right: null });
+      else if (tab === 'platform') rows.push({ date, desc: 'Bank deposit', left: null, right: amt });
+      else rows.push({ date, desc: 'Adjustment', left: amt, right: Math.round((amt - 18.5) * 100) / 100 });
+    }
+    return rows;
+  }
+  function renderPreassessment() {
+    const c = findOrg(st.clientId);
+    if (!c || !c.pre || c.pre.status !== 'done') { st.page = 'clients'; st.clientId = null; return renderClients(); }
+    const story = preStory(c);
+    const tab = ['matched', 'books', 'platform', 'differs'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
+    const tabs = [
+      ['matched', 'Matched', story.counts.matched],
+      ['books', 'Missing in books', story.counts.books],
+      ['platform', 'Missing in ' + story.platform, story.counts.platform],
+      ['differs', 'Amount differs', story.counts.differs]
+    ];
+    const rows = preTableRows(story, tab);
+    const page = paginate('pre-' + c.id + '-' + tab, rows);
+    const diffOf = (row) => row.left == null ? row.right : (row.right == null ? row.left : Math.round((row.left - row.right) * 100) / 100);
+    const body = page.slice.map((row) => `<tr><td>${esc(row.date)}</td><td>${esc(row.desc)}</td><td>${usd(row.left)}</td><td>${usd(row.right)}</td><td>${usd(diffOf(row))}</td></tr>`).join('') || '<tr><td colspan="5" class="text-body2">Nothing in this group.</td></tr>';
+    const cards = story.totals.map(([label, value]) => `<div class="box box--white cell-stack"><span class="text-h2">${typeof value === 'number' ? usd(value) : esc(value)}</span><span class="text-body2 text-secondary">${esc(label)}</span></div>`).join('');
+    const chip = story.ok ? statusChip('green', 'Reconciled') : statusChip('red', 'Not reconciled');
+    const fixes = story.ok
+      ? `<p class="text-body2">${esc(story.note)}</p>`
+      : `<div class="page-stack"><h2 class="text-h2">What to fix</h2>${story.fixes.map((line, i) => `<p class="text-body2">${i + 1}. ${esc(line)}</p>`).join('')}</div>`;
+    return `<div class="flow-wide page-stack">
+      <a class="page-back" id="backClients" href="#clients">Back to clients</a>
+      <div class="ph"><div class="page-head"><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body2 logo-line">${brandMark(story.platform, 18)}<span>${esc(story.platform)} · ${esc(story.period)}</span></p>${chip}</div><div class="ph-actions"><button type="button" class="btn-outlined" id="preAgain">Run again</button><button type="button" class="btn" id="preConnect">Connect to fix this</button></div></div>
+      <div class="status-cards">${cards}</div>
+      ${fixes}
+      <div class="tabs">${tabs.map(([id, label, n]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-pre-tab="${id}">${esc(label)} (${n})</button>`).join('')}</div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Description</th><th>Amount in ${esc(story.platform)}</th><th>Amount in books</th><th>Difference</th></tr></thead><tbody>${body}</tbody></table></div>
+      ${page.html}
+    </div>`;
+  }
   function issueChip(c) {
     const v = clientView(c);
     return tipChip(v.kind, v.label, v.tip);
@@ -2514,7 +2852,8 @@
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
         <td>${healthCell(c)}</td>
-        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button></div></div></div></td>
+        <td>${reconCell(c)}</td>
+        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -2541,8 +2880,8 @@
         <select class="select" id="clientSort" aria-label="Sort clients"><option value="name"${(st.listSort || 'name') === 'name' ? ' selected' : ''}>Name</option><option value="status"${st.listSort === 'status' ? ' selected' : ''}>Status</option></select>
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="6" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="7" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
@@ -2813,6 +3152,7 @@
       </div>
       <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
       <div class="box box--white page-stack"><h2 class="text-h2">Health</h2>${(() => { const summary = healthSummary(c); const fails = summary.failed.map((f) => `<p class="text-body2">${esc(f.name)}${f.detail ? ' · ' + esc(f.detail) : ''}</p>`).join(''); return `<p class="text-body2">${statusChip(chipKind(summary.tone), summary.label)}</p>${fails}`; })()}<button type="button" class="link" data-stub>Health history</button></div>
+      ${preWorkBlock(c)}
       <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th></th></tr></thead>
         <tbody><tr><td>${esc(month.label)}</td><td>${esc(c.monthStatus)}</td><td>${done}/${c.firmChecks.length}</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr>
@@ -3023,6 +3363,7 @@
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'clientdetail') html = renderClientDetail();
       else if (st.page === 'clienthealth') html = renderClientHealth();
+      else if (st.page === 'preassess') html = renderPreassessment();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
       else if (st.page === 'clientconnect') html = renderClientConnect();
@@ -3051,6 +3392,15 @@
     const m = $('main');
     m.querySelectorAll('[data-see]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.see); });
     m.querySelectorAll('[data-goto]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.goto); });
+    m.querySelectorAll('[data-pre-run]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreDialog(b.dataset.preRun); });
+    m.querySelectorAll('[data-pre-view]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreassessment(b.dataset.preView); });
+    m.querySelectorAll('[data-pre-tab]').forEach((b) => b.onclick = () => {
+      st.preTab = b.dataset.preTab;
+      const state = pagerState('pre-' + st.clientId + '-' + st.preTab);
+      state.page = 0;
+      save();
+      renderMain();
+    });
     m.querySelectorAll('[data-health]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       st.ctx = 'firm'; st.page = 'clienthealth'; st.clientId = b.dataset.health; st.orgId = null;
@@ -3133,6 +3483,14 @@
     bind('connectLeave', cancelConnect);
     bind('backClients', () => goFirm('clients'));
     bind('detailGo', () => { if (st.clientId) openClient(st.clientId); });
+    bind('preAgain', () => { if (st.clientId) openPreDialog(st.clientId); });
+    bind('preConnect', () => {
+      if (!st.clientId) return;
+      clearLink();
+      st.connectStep = 'details';
+      st.connectPick = { accounting: [], sales: [], pay: [] };
+      goFirm('clientconnect', st.clientId);
+    });
     bind('bringCancel', () => goFirm('clients'));
     bind('inviteOwner', () => {
       const pick = st.connectPick || { accounting: [] };
@@ -3649,6 +4007,8 @@
         st.orgId = null;
         if (parts[2] === 'health') {
           st.page = 'clienthealth';
+        } else if (parts[2] === 'pre-assessment') {
+          st.page = 'preassess';
         } else {
           st.page = 'clientdetail';
           st.detailTab = parts[2] === 'billing' || parts[2] === 'colleagues' ? parts[2] : 'work';
@@ -3727,7 +4087,7 @@
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
@@ -3754,6 +4114,7 @@
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'clienthealth' && st.clientId) h = '#clients/' + st.clientId + '/health';
+    else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
@@ -3765,7 +4126,7 @@
       rainSparkles(maybeAutoStory);
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
-    if (mode !== 'onboarding') watchSync();
+    if (mode !== 'onboarding') { ensurePreSeeds(); armPreTimers(); watchSync(); }
     const bal = document.querySelector('.t-balance');
     if (bal) bal.hidden = !(st && st.ctx === 'org');
   }
