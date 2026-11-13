@@ -770,7 +770,7 @@
   const FIRM_NAV = [
     ['clients', 'people', 'Clients'],
     ['colleagues', 'groups', 'Colleagues'],
-    ['billing', 'receipt_long', 'Billing and licences'],
+    ['billing', 'receipt_long', 'Billing and licenses'],
     ['firmsettings', 'settings', 'Firm settings']
   ];
   const ORG_NAV = [
@@ -1692,15 +1692,12 @@
       </div>`;
   }
   function renderBilling() {
-    return `<div class="ph"><div><h1>Billing and licenses</h1></div>
-      <div class="ph-actions"><button class="btn" id="buyLic">Buy licenses</button></div></div>
-      <div class="kpis" style="max-width:720px">
-        <div class="kpi"><div class="l">Licenses owned</div><div class="v">15</div></div>
-        <div class="kpi"><div class="l">Assigned</div><div class="v">${setupCount()}</div></div>
-        <div class="kpi"><div class="l">Unassigned</div><div class="v">${Math.max(0, 15 - setupCount())}</div></div>
-      </div>
-      <div style="margin-top:20px"><button class="btn-outlined" id="assignLic">Assign licenses</button></div>
-      <p class="muted" style="margin-top:16px">Placeholder. Buy and assign details come later.</p>`;
+    return `<div class="flow-narrow page-stack">
+      <h1 class="text-h1">License-Based Pricing</h1>
+      <p class="text-body1">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p>
+      <p class="text-body1">Book a call to learn more about how license-based pricing works…</p>
+      <div><button type="button" class="btn" id="bookCall">Book a call</button></div>
+    </div>`;
   }
   function renderClientSetup() {
     const c = findOrg(st.clientId);
@@ -1770,6 +1767,8 @@
     st.ctx = 'firm';
     st.page = 'clientdetail';
     st.clientId = id;
+    st.detailTab = 'work';
+    st.profileEdit = false;
     st.orgId = null;
     save();
     render();
@@ -1839,7 +1838,9 @@
   /* ───────── Render: sidebar ───────── */
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
-    const activePage = st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail'].includes(st.page) ? 'clients' : (st.page === 'details' ? 'dashboard' : st.page);
+    let activePage = st.page === 'details' ? 'dashboard' : st.page;
+    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail'].includes(st.page)) activePage = 'clients';
+    if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
       `<button class="sidebar-item${k === activePage ? ' active' : ''}" data-k="${k}"><span class="material-icons">${ic}</span><span class="sidebar-item-label">${esc(label)}</span>${k === 'clients' ? `<span class="sidebar-badge">${clientN}</span>` : ''}</button>`
@@ -2484,6 +2485,109 @@
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
   }
+  const WORK_MONTHS = [
+    { label: 'August 2026', short: 'August' },
+    { label: 'September 2026', short: 'September' },
+    { label: 'October 2026', short: 'October' },
+    { label: 'November 2026', short: 'November' }
+  ];
+  const FIRM_ROLE_ADMIN = 'Invite/remove colleagues to/from the Firm\'s colleagues list. Invite/remove clients to/from the Firm\'s clients list. Appoint other colleagues to be Firm Admins. Have access to any connected client with the Manager permissions.';
+  const FIRM_ROLE_COLLEAGUE = 'Have access to the clients assigned to them by the Firm Admin. Not be able to manage Firm details or colleagues. Have the view access to all of the colleagues\' details without the editing rights.';
+  const CLIENT_ROLE_MANAGER = 'Edit client\'s organization details. Connect/disconnect integrations (eCommerce platforms and payment providers). Have full control over the synchronization process and settings.';
+  const CLIENT_ROLE_MEMBER = 'View client\'s organization details. Adjust synchronization settings. Synchronize transactions in the client\'s books.';
+  const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question.';
+  const SELF_ROLE_HINT = 'You can\'t change the role for yourself. Please ask another Firm admins to do that for you if needed.';
+  let firmPeople = [
+    { id: 'p1', name: 'Ignat Plot', email: 'ignat@wlslabs.com', status: 'active', firmRole: 'admin', self: true },
+    { id: 'p2', name: 'Maya Chen', email: 'maya.chen@wlslabs.com', status: 'active', firmRole: 'colleague' },
+    { id: 'p3', name: 'Owen Brooks', email: 'owen.brooks@wlslabs.com', status: 'active', firmRole: 'colleague' },
+    { id: 'p4', name: 'Priya Shah', email: 'priya.shah@wlslabs.com', status: 'invited', firmRole: 'colleague' }
+  ];
+  let clientAccess = [
+    { personId: 'p1', clientId: 'e1', role: 'Manager' },
+    { personId: 'p2', clientId: 'e1', role: 'Member' },
+    { personId: 'p2', clientId: 'e2', role: 'Manager' },
+    { personId: 'p3', clientId: 'e5', role: 'Member' },
+    { personId: 'p1', clientId: 'e3', role: 'Manager' }
+  ];
+  function findPerson(id) { return firmPeople.find((p) => p.id === id); }
+  function accessForClient(clientId) {
+    return clientAccess.filter((a) => a.clientId === clientId).map((a) => Object.assign({ person: findPerson(a.personId) }, a)).filter((a) => a.person);
+  }
+  function accessForPerson(personId) {
+    return clientAccess.filter((a) => a.personId === personId).map((a) => Object.assign({ client: findOrg(a.clientId) }, a)).filter((a) => a.client && !a.client.fresh);
+  }
+  function listedClients() { return sc().clients.filter((c) => !c.fresh && c.name); }
+  function roleTip(label, tip) {
+    return `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+  }
+  function fieldLabel(text, tip) {
+    const mark = tip ? ` ${roleTip('', tip).replace('<span class="text-body2" tabindex="0"></span>', '<span class="material-icons" tabindex="0">info</span>')}` : '';
+    return `<label class="form-label form-label-required">${esc(text)}${mark}</label>`;
+  }
+  function ensureWork(c) {
+    if (typeof c.monthIndex !== 'number') c.monthIndex = 2;
+    c.monthIndex = Math.max(0, Math.min(WORK_MONTHS.length - 1, c.monthIndex));
+    if (!c.monthStatus) c.monthStatus = 'Open';
+    if (!Array.isArray(c.firmChecks)) {
+      c.firmChecks = [
+        { id: 'bank', label: 'Bank statements received', done: false, note: '', required: false },
+        { id: 'owner', label: 'Owner review done', done: false, note: '', required: false }
+      ];
+    }
+    if (!Array.isArray(c.monthNotes)) c.monthNotes = [];
+    return WORK_MONTHS[c.monthIndex];
+  }
+  function billingRow(c) {
+    const lic = licenseLabel(c);
+    if (lic.secondary) return null;
+    const dates = { Essential: ['06/30/2027', '08/31/2026'], Pro: ['09/30/2027', '11/30/2026'], Premium: ['12/31/2027', '02/28/2027'] };
+    const pair = dates[lic.text] || ['09/30/2027', '11/30/2026'];
+    return { product: 'Synder Sync', plan: lic.text, addons: 'Yearly', renewal: pair[0], syncs: pair[1] };
+  }
+  function connectionRows(c) {
+    if (!c || !c.accounting) return [];
+    const pay = { Stripe: 1, PayPal: 1, Square: 1, GoCardless: 1, 'Authorize.Net': 1 };
+    const lost = {};
+    lostIntegrations(c).forEach((i) => { lost[i.source] = true; });
+    const company = companyName(c);
+    const rows = [{
+      name: company + ' (' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online') + ')',
+      type: (c.accounting === 'Xero' ? 'XERO' : 'INTUIT') + ' · Accounting',
+      connected: !booksLost(c),
+      logo: c.accounting
+    }];
+    (c.integrations || []).forEach((name) => {
+      rows.push({
+        name: company + ' (' + name + ')',
+        type: name.toUpperCase() + ' · ' + (pay[name] ? 'Payment platform' : 'Sales platform'),
+        connected: !lost[name],
+        logo: name
+      });
+    });
+    return rows;
+  }
+  function showNotPart() {
+    const old = document.getElementById('notPart');
+    if (old) old.remove();
+    const modal = document.createElement('div');
+    modal.id = 'notPart';
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="notPartTitle"><div class="modal-header" id="notPartTitle">Synder</div><div class="modal-body"><p class="text-body2">This screen is not part of this prototype.</p></div><div class="modal-footer"><button type="button" class="btn-outlined" id="notPartCancel">Cancel</button></div></div>`;
+    document.body.appendChild(modal);
+    const close = () => modal.remove();
+    modal.querySelector('#notPartCancel').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+  }
+  function watchRequired(root) {
+    if (!root) return;
+    root.querySelectorAll('[data-required]').forEach((el) => {
+      el.addEventListener('blur', () => {
+        if (!(el.value || '').trim()) fieldError(el, 'Required');
+        else fieldClear(el);
+      });
+    });
+  }
   function renderClientDetail() {
     const c = findOrg(st.clientId);
     if (!c || !isClient(c.id)) return renderClients();
@@ -2525,13 +2629,163 @@
     const action = off
       ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>`
       : `<button type="button" class="btn" id="detailGo">Go to client</button>`;
+    const tab = st.detailTab || 'work';
+    const tabs = [['work', 'Work'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
+    const tabHtml = `<div class="tabs">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}">${label}</button>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
       <button type="button" class="link" id="backClients">Back to Clients</button>
-      <div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1></div><div class="ph-actions">${action}</div></div>
+      <div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><span class="status status-${view.kind}">${esc(view.label)}</span></div><div class="ph-actions">${action}</div></div>
       <section class="detail-block"><h2 class="text-h2">License</h2><p class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</p></section>
       <section class="detail-block"><h2 class="text-h2">Accounting</h2>${accounting}</section>
       <section class="detail-block"><h2 class="text-h2">Integrations</h2>${integrations}</section>
       <section class="detail-block"><h2 class="text-h2">Health checks</h2>${health}</section>
+      ${tabHtml}
+      ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
+    </div>`;
+  }
+  function clientWorkTab(c, off) {
+    const month = ensureWork(c);
+    const profile = c.firmProfile;
+    let details = '';
+    if (st.profileEdit) {
+      const p = profile || {};
+      const input = (id, label, value, ph) => `<div class="form-field"><label class="form-label" for="${id}">${label}</label><input class="input" id="${id}" value="${esc(value || '')}" placeholder="${esc(ph || '')}" /></div>`;
+      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2>
+        ${input('pdContact', 'Contact name', p.contact, '')}
+        ${input('pdEmail', 'Contact email', p.email, '')}
+        ${input('pdPhone', 'Phone', p.phone, '')}
+        ${input('pdEntity', 'Entity type', p.entity, 'LLC (S-corp election)')}
+        ${input('pdFiscal', 'Fiscal year end', p.fiscal, 'MM-DD, e.g. 12-31')}
+        ${input('pdDeadline', 'Close deadline', p.deadline, '10th business day')}
+        ${input('pdRef', 'Firm reference', p.reference, '')}
+        ${input('pdServices', 'Services', p.services, 'Add a service, e.g. Bookkeeping')}
+        ${input('pdTags', 'Tags', p.tags, 'Type to search or add')}
+        <div class="form-field"><label class="form-label" for="pdNotes">Working notes</label><textarea class="input" id="pdNotes" placeholder="What the firm should know about this client, whatever the month">${esc(p.notes || '')}</textarea></div>
+        <h2 class="text-subtitle1">From Synder</h2>
+        <p class="text-body2">${esc(c.name)}</p>
+        <p class="text-body2">Client of the firm since October 2026</p>
+        <p class="text-body2">${c.accounting ? 'Accounting connected in Synder' : 'Accounting is not connected in Synder'}</p>
+        <div class="modal-actions"><button type="button" class="btn-outlined" id="profileCancel">Cancel</button><button type="button" class="btn" id="profileSave">Save client details</button></div>
+      </div>`;
+    } else if (!profile) {
+      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2><p class="text-body2">No client details yet</p><div><button type="button" class="btn" id="addProfile">Add client details</button></div></div>`;
+    } else {
+      const lines = [['Contact name', profile.contact], ['Contact email', profile.email], ['Phone', profile.phone], ['Entity type', profile.entity], ['Fiscal year end', profile.fiscal], ['Close deadline', profile.deadline], ['Firm reference', profile.reference], ['Services', profile.services], ['Tags', profile.tags], ['Working notes', profile.notes]];
+      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2>${lines.map(([k, v]) => `<p class="text-body2"><span class="text-secondary">${k}. </span>${esc(v || '—')}</p>`).join('')}
+        <h2 class="text-subtitle1">From Synder</h2>
+        <p class="text-body2">${esc(c.name)}</p>
+        <p class="text-body2">Client of the firm since October 2026</p>
+        <p class="text-body2">${c.accounting ? 'Accounting connected in Synder' : 'Accounting is not connected in Synder'}</p></div>`;
+    }
+    const checks = c.firmChecks.map((chk) => `<div class="page-stack">
+      <span class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><label for="chk-${chk.id}">${esc(chk.label)}${chk.required ? ' (Required to close)' : ''}</label></span>
+      ${chk.note ? `<p class="text-body2">${esc(chk.note)}</p>` : ''}
+      <div class="form-field"><label class="form-label" for="note-${chk.id}">Add note</label><input class="input" id="note-${chk.id}" data-check-note="${chk.id}" /></div>
+      <div><button type="button" class="btn-outlined" data-save-note="${chk.id}">Add note</button></div>
+    </div>`).join('');
+    const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('') || '<p class="text-body2 text-secondary">No notes yet.</p>';
+    const connections = off ? '' : connectionRows(c).map((row) => `<div class="page-stack">
+      <p class="text-body2 logo-line">${brandMark(row.logo, 18)}<span>${esc(row.name)}</span></p>
+      <p class="text-body2 text-secondary">${esc(row.type)}</p>
+      <p class="text-body2${row.connected ? '' : ' text-error'}">${row.connected ? 'Connected' : 'Disconnected'}</p>
+    </div>`).join('');
+    const done = c.firmChecks.filter((chk) => chk.done).length;
+    const closeItems = off
+      ? ['Syncs', 'Reconciliation', 'Daily summaries', 'Mappings', 'Revenue recognition'].map((name) => `<p class="text-body2">${name}: Not set up for this client</p>`).join('')
+      : `<p class="text-body2">Syncs: 62 syncs finished, none failed <span class="text-secondary">Passed</span></p>
+        <p class="text-body2">Reconciliation: Not set up for this client</p>
+        <p class="text-body2">Daily summaries: Not set up for this client</p>
+        <p class="text-body2">Mappings: Not set up for this client</p>
+        <p class="text-body2">Revenue recognition: Not set up for this client</p>
+        <button type="button" class="link" data-stub>Reconciliation runs</button>`;
+    return `<div class="page-stack">
+      <div class="toolbar">
+        <button type="button" class="btn-outlined" id="monthPrev">Previous month</button>
+        <span class="text-h2">${esc(month.label)}</span>
+        <span class="status status-blue">${esc(c.monthStatus)}</span>
+        <button type="button" class="btn-outlined" id="monthNext">Next month</button>
+        <button type="button" class="btn-outlined" id="markReview">Mark in review</button>
+        <button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>
+      </div>
+      <p class="form-error-msg" id="closeNeed" hidden>Required</p>
+      ${details}
+      <div class="box box--white page-stack"><h2 class="text-h2">Firm checks</h2>${checks}
+        <div class="form-field"><label class="form-label" for="newCheck">Add a check for this client only</label><input class="input" id="newCheck" data-required="1" /></div>
+        <span class="checkbox-wrap"><input class="checkbox" type="checkbox" id="newCheckRequired"><label for="newCheckRequired">Required to close</label></span>
+        <div><button type="button" class="btn" id="addCheck">Add check</button></div>
+      </div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Notes for ${esc(month.short)}</h2>
+        ${notes}
+        <div class="form-field"><label class="form-label" for="monthNote">Note for ${esc(month.short)}</label><input class="input" id="monthNote" data-required="1" placeholder="Write a note for ${esc(month.short)}…" /></div>
+        <div class="form-field"><label class="form-label" for="notePeriod">Period</label><select class="select" id="notePeriod"><option selected>The whole of ${esc(month.short)}</option></select></div>
+        <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
+      </div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2><p class="text-body2">Synder has not checked this client yet.</p><button type="button" class="link" data-stub>Health history</button></div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th></th></tr></thead>
+        <tbody><tr><td>${esc(month.label)}</td><td>${esc(c.monthStatus)}</td><td>${done}/${c.firmChecks.length}</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr>
+        <tr><td>September 2026</td><td>Open</td><td>0/2</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr></tbody></table></div>
+    </div>`;
+  }
+  function clientBillingTab(c) {
+    const row = billingRow(c);
+    if (!row) return '<p class="text-body2">No license assigned.</p>';
+    return `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Synder product</th><th>Billing plan</th><th>Addons</th><th>Renewal date</th><th>Syncs amount renewal</th></tr></thead>
+      <tbody><tr><td>${esc(row.product)}</td><td>${esc(row.plan)}</td><td>${esc(row.addons)}</td><td>${esc(row.renewal)}</td><td>${esc(row.syncs)}</td></tr></tbody></table></div>`;
+  }
+  function clientColleaguesTab(c) {
+    const q = (st.clientColQ || '').toLowerCase();
+    const rows = accessForClient(c.id).filter((a) => !q || a.person.name.toLowerCase().includes(q));
+    const body = rows.map((a) => `<tr><td>${esc(a.person.name)}${a.person.firmRole === 'admin' ? ' <span class="status status-grey">Admin</span>' : ''}</td><td>${esc(a.role)}</td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
+    return `<div class="page-stack">
+      <div class="toolbar"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="pagination"><span class="page-info">Rows per page: 25</span></div>
+      <div><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div>
+    </div>`;
+  }
+  function renderColleagues() {
+    const q = (st.colQ || '').toLowerCase();
+    const rows = firmPeople.filter((p) => !q || p.name.toLowerCase().includes(q));
+    const body = rows.map((p) => {
+      const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
+      const admin = p.firmRole === 'admin' ? ' (admin)' : '';
+      const items = p.status === 'invited'
+        ? `<button type="button" class="dropdown-item" data-remove-person="${p.id}">Remove</button>`
+        : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button><button type="button" class="dropdown-item" data-remove-person="${p.id}">Remove</button>`;
+      return `<tr><td>${esc(p.name)}</td><td>${esc(p.email)}</td><td>${status}${admin}</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
+    }).join('') || '<tr><td colspan="4" class="text-body2">No colleagues match.</td></tr>';
+    return `<div class="flow-wide page-stack">
+      <div class="ph"><div><h1 class="text-h1">Colleagues</h1></div><div class="ph-actions"><button type="button" class="btn-outlined" id="firmDetails">Firm details</button><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
+      <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="pagination"><span class="page-info">Rows per page: 25</span></div>
+    </div>`;
+  }
+  function renderColleague() {
+    const p = findPerson(st.colleagueId);
+    if (!p) return renderColleagues();
+    const tab = st.colleagueTab || 'details';
+    const tabs = `<div class="tabs"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients">Clients</button></div>`;
+    let body = '';
+    if (tab === 'clients') {
+      const rows = accessForPerson(p.id).map((a) => `<tr><td>${esc(a.client.name)}</td><td>${esc(a.role)}</td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No clients assigned.</td></tr>';
+      body = `<div class="page-stack"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client name</th><th>Role in the client</th></tr></thead><tbody>${rows}</tbody></table></div><div><button type="button" class="btn" id="addPersonClient">Add a client</button></div></div>`;
+    } else if (p.self) {
+      body = `<div class="page-stack"><p class="text-body2">${esc(p.name)}</p><p class="text-body2">Admin</p><p class="text-body2">${esc(SELF_ROLE_HINT)}</p><p class="text-body2">${esc(p.email)}</p></div>`;
+    } else {
+      body = `<div class="page-stack"><p class="text-body2">${esc(p.name)}</p>
+        <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label>
+          <select class="select" id="firmRole"><option value="admin"${p.firmRole === 'admin' ? ' selected' : ''}>Admin</option><option value="colleague"${p.firmRole !== 'admin' ? ' selected' : ''}>Firm Colleague</option></select>
+        </div>
+        <p class="text-body2">${roleTip('Admin', FIRM_ROLE_ADMIN)} ${roleTip('Firm Colleague', FIRM_ROLE_COLLEAGUE)}</p>
+        <p class="text-body2">${esc(p.email)}</p></div>`;
+    }
+    return `<div class="flow-wide page-stack">
+      <button type="button" class="link" id="backColleagues">Back to Colleagues</button>
+      <div class="ph"><div><h1 class="text-h1">${esc(p.name)}</h1></div><div class="ph-actions"><button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button></div></div>
+      ${tabs}${body}
     </div>`;
   }
   function renderBringIn() {
@@ -2648,6 +2902,8 @@
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
+      else if (st.page === 'colleagues') html = renderColleagues();
+      else if (st.page === 'colleague') html = renderColleague();
       else if (st.page === 'createorg') html = renderCreateOrg();
       else {
         const nav = FIRM_NAV.find((n) => n[0] === st.page);
@@ -2866,6 +3122,197 @@
     bind('coCta', () => { if (st.ctx === 'firm') goFirm('clients'); else goOrg(st.orgId, 'dashboard'); });
     const t = st.ctx === 'firm' ? (st.page === 'client' ? findOrg(st.clientId).name : FIRM.name) : findOrg(st.orgId).name;
     document.title = t + ' — Synder (Firm context switcher)';
+    bindFirmPages();
+  }
+  function bindFirmPages() {
+    const m = $('main');
+    if (!m) return;
+    watchRequired(m);
+    const rerender = (id) => {
+      renderMain();
+      const el = $(id);
+      if (el) { el.focus(); if (el.setSelectionRange) el.setSelectionRange(el.value.length, el.value.length); }
+    };
+    m.querySelectorAll('[data-detail-tab]').forEach((b) => b.onclick = () => { st.detailTab = b.dataset.detailTab; save(); render(); });
+    m.querySelectorAll('[data-col-tab]').forEach((b) => b.onclick = () => { st.colleagueTab = b.dataset.colTab; save(); render(); });
+    m.querySelectorAll('[data-stub]').forEach((b) => b.onclick = (e) => { e.preventDefault(); showNotPart(); });
+    m.querySelectorAll('[data-check]').forEach((box) => box.onchange = () => {
+      const c = findOrg(st.clientId);
+      const chk = c && c.firmChecks.find((item) => item.id === box.dataset.check);
+      if (chk) chk.done = box.checked;
+    });
+    m.querySelectorAll('[data-save-note]').forEach((b) => b.onclick = () => {
+      const input = document.getElementById('note-' + b.dataset.saveNote);
+      if (!input || !(input.value || '').trim()) { fieldError(input, 'Required'); return; }
+      const c = findOrg(st.clientId);
+      const chk = c && c.firmChecks.find((item) => item.id === b.dataset.saveNote);
+      if (chk) chk.note = input.value.trim();
+      renderMain();
+    });
+    const colSearch = $('colSearch');
+    if (colSearch) colSearch.oninput = () => { st.colQ = colSearch.value; rerender('colSearch'); };
+    const clientCol = $('clientColSearch');
+    if (clientCol) clientCol.oninput = () => { st.clientColQ = clientCol.value; rerender('clientColSearch'); };
+    const bindClick = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    bindClick('bookCall', showNotPart);
+    bindClick('monthPrev', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex -= 1; renderMain(); });
+    bindClick('monthNext', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex += 1; renderMain(); });
+    bindClick('markReview', () => { const c = findOrg(st.clientId); if (!c) return; c.monthStatus = 'In review'; renderMain(); });
+    bindClick('closeMonthBtn', () => {
+      const c = findOrg(st.clientId);
+      const need = $('closeNeed');
+      if (!c) return;
+      ensureWork(c);
+      if (c.firmChecks.some((chk) => chk.required && !chk.done)) { if (need) need.hidden = false; return; }
+      c.monthStatus = 'Closed';
+      renderMain();
+    });
+    bindClick('addProfile', () => { st.profileEdit = true; renderMain(); });
+    bindClick('profileCancel', () => { st.profileEdit = false; renderMain(); });
+    bindClick('profileSave', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      c.firmProfile = {
+        contact: ($('pdContact').value || '').trim(), email: ($('pdEmail').value || '').trim(), phone: ($('pdPhone').value || '').trim(),
+        entity: ($('pdEntity').value || '').trim(), fiscal: ($('pdFiscal').value || '').trim(), deadline: ($('pdDeadline').value || '').trim(),
+        reference: ($('pdRef').value || '').trim(), services: ($('pdServices').value || '').trim(), tags: ($('pdTags').value || '').trim(),
+        notes: ($('pdNotes').value || '').trim()
+      };
+      st.profileEdit = false;
+      renderMain();
+    });
+    bindClick('addCheck', () => {
+      const input = $('newCheck');
+      const name = (input && input.value || '').trim();
+      if (!name) { fieldError(input, 'Required'); return; }
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      ensureWork(c);
+      c.firmChecks.push({ id: 'k' + Date.now(), label: name, done: false, note: '', required: !!($('newCheckRequired') && $('newCheckRequired').checked) });
+      renderMain();
+    });
+    bindClick('addMonthNote', () => {
+      const input = $('monthNote');
+      const text = (input && input.value || '').trim();
+      if (!text) { fieldError(input, 'Required'); return; }
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const month = ensureWork(c);
+      c.monthNotes.push({ month: month.label, text, period: ($('notePeriod') && $('notePeriod').value) || ('The whole of ' + month.short) });
+      renderMain();
+    });
+    bindClick('addFirmColleague', openAddFirmColleague);
+    bindClick('firmDetails', openFirmDetails);
+    bindClick('addColleague', openAddColleague);
+    bindClick('backColleagues', () => goFirm('colleagues'));
+    bindClick('removeColleague', () => { const p = findPerson(st.colleagueId); if (p) confirmRemove(p); });
+    bindClick('addPersonClient', openAddPersonClient);
+    const role = $('firmRole');
+    if (role) role.onchange = () => { const p = findPerson(st.colleagueId); if (p && !p.self) { p.firmRole = role.value; renderMain(); } };
+    m.querySelectorAll('[data-open-person]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openColleague(b.dataset.openPerson); });
+    m.querySelectorAll('[data-remove-person]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); const p = findPerson(b.dataset.removePerson); if (p) confirmRemove(p); });
+  }
+  function openColleague(id) {
+    st.ctx = 'firm'; st.page = 'colleague'; st.colleagueId = id; st.colleagueTab = 'details'; st.clientId = null;
+    save(); render();
+  }
+  function dialogShell(title, body, footerHtml) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-bg show';
+    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true"><div class="modal-header">${title}</div><div class="modal-body">${body}</div><div class="modal-footer">${footerHtml}</div></div>`;
+    document.body.appendChild(modal);
+    const close = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+    const cancel = modal.querySelector('[data-cancel]');
+    if (cancel) cancel.onclick = close;
+    watchRequired(modal);
+    return { modal, close };
+  }
+  function openFirmDetails() {
+    const { modal, close } = dialogShell('Firm details', `<div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="firmNameSave">Save</button>`);
+    modal.querySelector('#firmNameSave').onclick = () => {
+      const input = modal.querySelector('#firmNameEdit');
+      const name = (input.value || '').trim();
+      if (!name) { fieldError(input, 'Required'); return; }
+      FIRM.name = name;
+      close();
+      render();
+    };
+  }
+  function openAddColleague() {
+    const options = listedClients().map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    const body = `<p class="text-body2">Your colleague will receive an email invitation to join your Firm. Please, fill out all of the required fields.</p>
+      <div class="form-field"><label class="form-label form-label-required" for="newColName">Name</label><input class="input" id="newColName" data-required="1" /></div>
+      <div class="form-field"><label class="form-label form-label-required" for="newColEmail">Email</label><input class="input" id="newColEmail" type="email" data-required="1" /></div>
+      <div class="form-field"><label class="form-label form-label-required">Assign client ${roleTip('info', ASSIGN_CLIENT_TIP).replace('>info<', '><span class="material-icons">info</span><')}</label><select class="select" id="newColClient" data-required="1"><option value="">Select…</option>${options}</select></div>
+      <div class="form-field"><label class="form-label form-label-required" for="newColRole">Role in the client</label><select class="select" id="newColRole"><option value="Member" selected>Member</option><option value="Manager">Manager</option></select></div>
+      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+    const { modal, close } = dialogShell('Add colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="sendInvite">Send invitation</button>`);
+    modal.querySelector('#sendInvite').onclick = () => {
+      const name = modal.querySelector('#newColName');
+      const email = modal.querySelector('#newColEmail');
+      const client = modal.querySelector('#newColClient');
+      let bad = false;
+      [name, email, client].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      if (bad) return;
+      const id = 'p' + Date.now();
+      firmPeople.push({ id, name: name.value.trim(), email: email.value.trim(), status: 'invited', firmRole: 'colleague' });
+      clientAccess.push({ personId: id, clientId: client.value, role: modal.querySelector('#newColRole').value || 'Member' });
+      close();
+      renderMain();
+    };
+  }
+  function openAddFirmColleague() {
+    const c = findOrg(st.clientId);
+    if (!c) return;
+    const taken = {};
+    accessForClient(c.id).forEach((a) => { taken[a.personId] = true; });
+    const options = firmPeople.filter((p) => p.status === 'active' && !taken[p.id]).map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+    const body = `<div class="form-field"><label class="form-label form-label-required" for="afName">Colleague name</label><select class="select" id="afName" data-required="1"><option value="">Select…</option>${options}</select></div>
+      <div class="form-field"><label class="form-label form-label-required" for="afRole">Role in the client</label><select class="select" id="afRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>
+      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+    const { modal, close } = dialogShell('Add Firm colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="afAdd">Add colleague</button>`);
+    modal.querySelector('#afAdd').onclick = () => {
+      const name = modal.querySelector('#afName');
+      const role = modal.querySelector('#afRole');
+      let bad = false;
+      [name, role].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      if (bad) return;
+      clientAccess.push({ personId: name.value, clientId: c.id, role: role.value });
+      close();
+      renderMain();
+    };
+  }
+  function openAddPersonClient() {
+    const p = findPerson(st.colleagueId);
+    if (!p) return;
+    const have = {};
+    accessForPerson(p.id).forEach((a) => { have[a.clientId] = true; });
+    const options = listedClients().filter((c) => !have[c.id]).map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    const body = `<div class="form-field"><label class="form-label form-label-required" for="apClient">Client name</label><select class="select" id="apClient" data-required="1"><option value="">Select…</option>${options}</select></div>
+      <div class="form-field"><label class="form-label form-label-required" for="apRole">Role in the client</label><select class="select" id="apRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>
+      <p class="text-body2">${roleTip('Manager', CLIENT_ROLE_MANAGER)} ${roleTip('Member', CLIENT_ROLE_MEMBER)}</p>`;
+    const { modal, close } = dialogShell('Add a client', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="apAdd">Add client</button>`);
+    modal.querySelector('#apAdd').onclick = () => {
+      const client = modal.querySelector('#apClient');
+      const role = modal.querySelector('#apRole');
+      let bad = false;
+      [client, role].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      if (bad) return;
+      clientAccess.push({ personId: p.id, clientId: client.value, role: role.value });
+      close();
+      renderMain();
+    };
+  }
+  function confirmRemove(person) {
+    const { modal, close } = dialogShell('Remove colleague', `<p class="text-body2">Remove ${esc(person.name)} from the firm? Their client assignments are removed too.</p>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="confirmRemove">Remove</button>`);
+    modal.querySelector('#confirmRemove').onclick = () => {
+      firmPeople = firmPeople.filter((p) => p.id !== person.id);
+      clientAccess = clientAccess.filter((a) => a.personId !== person.id);
+      close();
+      if (st.page === 'colleague' && st.colleagueId === person.id) goFirm('colleagues');
+      else renderMain();
+    };
   }
 
   /* ───────── Switcher popover ───────── */
@@ -2978,6 +3425,41 @@
     const parts = raw.split('/');
     const head = parts[0];
     if (!ob) loadOb();
+    if (head === 'colleagues') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      st.ctx = 'firm';
+      st.orgId = null;
+      st.clientId = null;
+      if (parts[1] && findPerson(parts[1])) {
+        st.page = 'colleague';
+        st.colleagueId = parts[1];
+        st.colleagueTab = parts[2] === 'clients' ? 'clients' : 'details';
+      } else {
+        st.page = 'colleagues';
+        st.colleagueId = null;
+      }
+      closePop();
+      render();
+      return;
+    }
+    if (head === 'billing') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      st.ctx = 'firm';
+      st.page = 'billing';
+      st.clientId = null;
+      st.orgId = null;
+      closePop();
+      render();
+      return;
+    }
     if (head === 'clients') {
       scenario = 'firm';
       load();
@@ -2988,6 +3470,7 @@
         st.ctx = 'firm';
         st.page = 'clientdetail';
         st.clientId = parts[1];
+        st.detailTab = parts[2] === 'billing' || parts[2] === 'colleagues' ? parts[2] : 'work';
         st.orgId = null;
         closePop();
         render();
@@ -3064,6 +3547,7 @@
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'clientdetail' && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
     }
@@ -3088,7 +3572,10 @@
     else if (st.ctx === 'firm' && st.page === 'bringin') h += '/bringin';
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
-    else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId;
+    else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
+    else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
+    else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
+    else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing';
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
