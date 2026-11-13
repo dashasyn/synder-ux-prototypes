@@ -859,7 +859,7 @@
 
   function defaultOb() {
     return {
-      step: 'home', variant: 'new', use: null, useChosen: false, marketplace: false, loginFrom: '',
+      step: 'home', variant: 'new', use: null, useChosen: false, marketplace: false, loginFrom: '', firmBooks: '',
       role: null, roleChosen: false, roleNote: '', otherOpen: false,
       firmChoice: null, firmChosen: false, source: null, firmName: '', firmTouched: false,
       connectedName: '', directoryReady: false, banner: '', pendingEntries: [], nameFrom: 'import',
@@ -962,6 +962,8 @@
     }));
     SCENARIOS.firm.clients = clients;
     FIRM.name = ob.firmName;
+    if (ob.source === 'xero') ob.firmBooks = 'xero';
+    else if (ob.source === 'qbo' || ob.source === 'qboa') ob.firmBooks = 'qbo';
     ob.directoryReady = true;
     ob.step = 'done';
     st = { ctx: 'firm', page: 'clients', orgId: null, clientId: null, recent: [] };
@@ -978,7 +980,7 @@
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
     const src = (acct, name) => acct + ' · ' + name;
     return [
-      Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', ['Stripe'], [], 'Essential')),
+      Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify'], [], 'Essential')),
       Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC', extraFails: [
         { name: 'Missing payouts', short: 'Missing payouts', detail: '3 payouts' },
         { name: 'Unmatched fees', short: 'Unmatched fees', detail: 'Stripe fees' }
@@ -992,7 +994,7 @@
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
       Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
       Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
-      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square', 'WooCommerce'], [
+      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
         { key: 'reconnect', source: 'Stripe' },
         { key: 'reconnect', source: 'PayPal' }
       ], 'Pro')),
@@ -1000,11 +1002,30 @@
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
       ], 'Premium')),
-      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC', invite: { email: 'owner@fablecoffee.com', message: '', sent: '12 Nov 2026' } }, on('Xero', [], [], 'Essential'))
+      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC', invite: { email: 'owner@fablecoffee.com', message: '', sent: '12 Nov 2026' } }, on('Xero', [], [], 'Essential')),
+      Object.assign({ id: 'e11', name: 'Pinecrest Realty', company: 'Pinecrest Realty LLC' }, on('Xero', ['Stripe', 'Shopify'], [
+        { key: 'pending', source: 'Shopify' }
+      ], 'Pro')),
+      Object.assign({ id: 'e12', name: 'Quill & Ink Agency', company: 'Quill & Ink Agency LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
+        { key: 'reconnect', source: 'Stripe' },
+        { key: 'pending', source: 'PayPal' }
+      ], 'Essential')),
+      Object.assign({ id: 'e13', name: 'Riverbend Cafe', company: 'Riverbend Cafe LLC' }, on('Xero', [], [], 'Essential')),
+      Object.assign({ id: 'e14', name: 'Summit Peak Advisors', company: 'Summit Peak Advisors LLC', extraFails: [
+        { name: 'Duplicate sales', short: 'Duplicate sales', detail: '6 orders' },
+        { name: 'Missing payouts', short: 'Missing payouts', detail: '2 payouts' },
+        { name: 'Open refunds', short: 'Open refunds', detail: '1 refund' }
+      ] }, on('QuickBooks', ['Stripe', 'Amazon'], [], 'Pro')),
+      Object.assign({ id: 'e15', name: 'Oak & Iron Supply', company: 'Oak & Iron Supply LLC' }, on('QuickBooks', ['Stripe'], [
+        { key: 'reconnect', source: 'QuickBooks', books: true },
+        { key: 'uncategorized', count: 6, source: src('QuickBooks', 'Oak & Iron Supply LLC') }
+      ], 'Premium')),
+      Object.assign({ id: 'e16', name: 'Bluebird Bakery', company: 'Bluebird Bakery LLC' }, on('QuickBooks', four.slice(), [], 'Pro'))
     ];
   }
   function enterNewFirm() {
     ob.variant = 'new';
+    ob.firmBooks = '';
     ob.directoryReady = true;
     ob.banner = '';
     ob.step = 'done';
@@ -1030,6 +1051,7 @@
     ob.firmTouched = true;
     ob.userEmail = 'ignat@wlslabs.com';
     ob.demoPass = 'Bookkeeping1';
+    ob.firmBooks = 'qbo';
     FIRM.name = 'WLS Labs';
     SCENARIOS.firm.clients = existingClients();
     applyOwnOrg();
@@ -1087,7 +1109,11 @@
     });
     const fresh = sc().clients.filter((c) => added.some((a) => a.id === c.id));
     if (ob && ob.variant === 'existing' && ob.banner === 'invite') ob.banner = 'invite';
-    if (ob) { ob.directoryReady = true; ob.picker = false; ob.importNote = fresh.length; ob.importKind = 'list'; saveOb(); }
+    if (ob) {
+      if (ob.source === 'xero') ob.firmBooks = 'xero';
+      else if (ob.source === 'qbo' || ob.source === 'qboa') ob.firmBooks = 'qbo';
+      ob.directoryReady = true; ob.picker = false; ob.importNote = fresh.length; ob.importKind = 'list'; saveOb();
+    }
     persistDirectory();
     goFirm('clients');
   }
@@ -1692,11 +1718,11 @@
         <span class="muted">${need} still need setup</span></div>
       <h2 class="section-h">Clients</h2>
       <div class="issues">
-        <div class="issue"><div class="n">${counts.good}</div><div class="l">All good</div></div>
-        <div class="issue"><div class="n">${counts.checks}</div><div class="l">Checks not passed</div></div>
+        <div class="issue"><div class="n">${counts.all}</div><div class="l">All clients</div></div>
+        <div class="issue"><div class="n">${counts.issues}</div><div class="l">Issues found</div></div>
         <div class="issue"><div class="n">${counts.lost}</div><div class="l">Connection lost</div></div>
-        <div class="issue"><div class="n">${counts.off}</div><div class="l">Not set up</div></div>
         <div class="issue"><div class="n">${counts.waiting}</div><div class="l">Waiting for owner</div></div>
+        <div class="issue"><div class="n">${counts.off}</div><div class="l">Not set up</div></div>
       </div>`;
   }
   function renderBilling() {
@@ -1847,7 +1873,7 @@
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
-    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail'].includes(st.page)) activePage = 'clients';
+    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
@@ -1881,7 +1907,8 @@
     'Tax mismatches', 'Unapplied payments', 'Deposit gaps', 'Invoice sync',
     'Product mapping', 'Customer mapping', 'Discount mismatches', 'Shipping mismatches',
     'Gift card balances', 'Chargebacks', 'Pending captures', 'Currency mismatches',
-    'Location mapping', 'Class mapping', 'Delayed payouts', 'Partial refunds'
+    'Location mapping', 'Class mapping', 'Delayed payouts', 'Partial refunds',
+    'Payout matching', 'Order sync'
   ];
   function licenseLabel(c) {
     const lic = (c && (c.licence || c.license)) || '';
@@ -1911,13 +1938,26 @@
     const unique = failed.filter((f) => names.indexOf(f.name) >= 0 && !seen.has(f.name) && seen.add(f.name));
     return { total: names.length, passed: names.length - unique.length, failed: unique, names };
   }
+  function isOffClient(c) { return !c || !c.accounting || !(c.connected || c.setup); }
+  function isWaitingClient(c) { return !isOffClient(c) && !!(c.invite && c.invite.email && !(c.integrations && c.integrations.length)); }
+  function hasLostConnection(c) { return !isOffClient(c) && (booksLost(c) || lostIntegrations(c).length > 0); }
+  function hasHealthIssues(c) { const h = isOffClient(c) ? null : healthModel(c); return !!(h && h.failed.length); }
+  function issueCountLabel(n) { return n === 1 ? '1 issue found' : n + ' issues found'; }
+  function healthSummary(c) {
+    if (isOffClient(c)) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
+    const health = healthModel(c);
+    if (!health) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
+    if (health.failed.length) return { label: issueCountLabel(health.failed.length), tone: 'red', failed: health.failed, total: health.total, passed: health.passed };
+    return { label: health.passed + ' of ' + health.total + ' passed', tone: 'green', failed: [], total: health.total, passed: health.passed };
+  }
   function clientView(c) {
     const empty = { key: 'off', label: 'Not set up', kind: 'grey', tip: 'Connect accounting to start working with this client.', health: null, accounting: '', issues: [] };
-    if (!c || !c.accounting || !(c.connected || c.setup)) return empty;
+    if (isOffClient(c)) return empty;
     const health = healthModel(c);
     const acct = c.accounting;
     const issues = Array.isArray(c.issues) ? c.issues : [];
-    if (c.invite && c.invite.email && !(c.integrations && c.integrations.length)) {
+    const summary = healthSummary(c);
+    if (isWaitingClient(c)) {
       return { key: 'waiting', label: 'Waiting for owner', kind: 'blue', tip: 'Invite sent to ' + c.invite.email + ' on ' + c.invite.sent + '.', health, accounting: acct, issues };
     }
     const lostInteg = lostIntegrations(c);
@@ -1927,24 +1967,20 @@
       if (lostInteg.length) bits.push(lostInteg.map((i) => i.source).join(', ') + ' lost connection');
       return { key: 'lost', label: 'Connection lost', kind: 'red', tip: bits.join('. ') + '.', health, accounting: acct, issues };
     }
-    if (health && health.failed.length) {
-      return { key: 'checks', label: 'Checks not passed', kind: 'yellow', tip: health.failed.map((f) => f.short + ': ' + f.detail).join('; '), health, accounting: acct, issues };
+    if (summary.failed.length) {
+      return { key: 'checks', label: summary.label, kind: 'red', tip: summary.failed.map((f) => f.short + ': ' + f.detail).join('; '), health, accounting: acct, issues };
     }
-    const passed = health ? health.passed + ' of ' + health.total + ' checks passed.' : 'All checks passed.';
-    return { key: 'good', label: 'All good', kind: 'green', tip: passed, health, accounting: acct, issues };
+    return { key: 'good', label: 'All good', kind: 'green', tip: summary.label, health, accounting: acct, issues };
   }
-  function needsAttention(c) {
-    const k = clientView(c).key;
-    return k === 'checks' || k === 'lost';
-  }
+  function firmBooksConnected() { return !!(ob && (ob.firmBooks === 'qbo' || ob.firmBooks === 'xero')); }
+  function needsAttention(c) { return hasHealthIssues(c) || hasLostConnection(c); }
   function statusCounts(list) {
-    const key = (c) => clientView(c).key;
     return {
-      good: list.filter((c) => key(c) === 'good').length,
-      checks: list.filter((c) => key(c) === 'checks').length,
-      lost: list.filter((c) => key(c) === 'lost').length,
-      off: list.filter((c) => key(c) === 'off').length,
-      waiting: list.filter((c) => key(c) === 'waiting').length
+      all: list.length,
+      issues: list.filter(hasHealthIssues).length,
+      lost: list.filter(hasLostConnection).length,
+      waiting: list.filter(isWaitingClient).length,
+      off: list.filter(isOffClient).length
     };
   }
   function clientCountLine() {
@@ -2080,42 +2116,44 @@
   function lostIntegrations(c) {
     return (c.issues || []).filter((i) => i.key === 'reconnect' && !i.books && i.source && i.source !== c.accounting);
   }
+  function pendingIntegrations(c) {
+    return (c.issues || []).filter((i) => i.key === 'pending' && i.source);
+  }
+  function stateDot(tone) {
+    const color = tone === 'green' ? 'text-success' : (tone === 'yellow' ? 'text-warning' : (tone === 'red' ? 'text-error' : 'text-secondary'));
+    return `<span class="material-icons ${color}" aria-hidden="true">circle</span>`;
+  }
+  function dotLine(tone, label, tip) {
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${stateDot(tone)}<span class="text-body2">${esc(label)}</span></span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+  }
   function acctCell(c) {
-    const v = clientView(c);
-    if (v.key === 'off' || !c.accounting) return '<span class="text-body2">—</span>';
-    const state = booksLost(c)
-      ? '<span class="text-body2 text-error">Disconnected</span>'
-      : '<span class="text-body2 text-secondary">Connected</span>';
-    return `<div class="cell-stack"><span class="logo-line">${brandMark(c.accounting, 18)}<span class="text-body2">${esc(c.accounting)}</span></span>${state}</div>`;
+    if (isOffClient(c)) return '<span class="text-body2 text-secondary">Not connected</span>';
+    const down = booksLost(c);
+    const status = down ? 'Disconnected' : 'Connected';
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${brandMark(c.accounting, 18)}${stateDot(down ? 'yellow' : 'green')}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
   }
   function integCell(c) {
-    const v = clientView(c);
-    if (v.key === 'off') return '<span class="text-body2">—</span>';
-    if (v.key === 'waiting') {
-      return `<div class="cell-stack"><span class="tooltip-wrap"><span class="text-body2 text-secondary" tabindex="0">Waiting for owner</span><span class="tooltip" role="tooltip">${esc(c.invite.email)} · sent ${esc(c.invite.sent)}</span></span></div>`;
-    }
+    if (isOffClient(c)) return '<span class="text-body2 text-secondary">No integrations</span>';
+    if (isWaitingClient(c)) return dotLine('grey', 'Waiting for owner', c.invite.email + ' · sent ' + c.invite.sent);
     const list = (c && c.integrations) || [];
-    if (!list.length) return '<span class="text-body2">—</span>';
+    if (!list.length) return '<span class="text-body2 text-secondary">No integrations</span>';
     const lost = lostIntegrations(c);
-    const state = lost.length
-      ? `<span class="text-body2 text-error">${lost.length} lost connection</span>`
-      : `<span class="text-body2 text-secondary">${list.length} connected</span>`;
-    const tip = esc(list.join(', '));
-    if (list.length === 1) {
-      return `<div class="cell-stack"><span class="tooltip-wrap"><span class="logo-line" tabindex="0">${brandMark(list[0], 18)}<span class="text-body2">${esc(list[0])}</span></span><span class="tooltip" role="tooltip">${tip}</span></span>${state}</div>`;
-    }
-    const shown = list.slice(0, 4);
-    const more = list.length - shown.length;
-    const logos = shown.map((name) => brandMark(name, 18)).join('');
-    const extra = more > 0 ? `<span class="text-body2">+${more}</span>` : '';
-    return `<div class="cell-stack"><span class="tooltip-wrap"><span class="logo-line" tabindex="0"><span class="logo-stack">${logos}</span>${extra}</span><span class="tooltip" role="tooltip">${tip}</span></span>${state}</div>`;
+    const pending = pendingIntegrations(c);
+    const parts = [];
+    if (lost.length) parts.push(lost.length + ' connection lost');
+    if (pending.length) parts.push(pending.length + ' pending');
+    const label = parts.length ? parts.join(' · ') : (list.length + ' connected');
+    const tone = lost.length ? 'red' : (pending.length ? 'yellow' : 'green');
+    const tip = list.map((name) => {
+      const state = lost.some((i) => i.source === name) ? 'Connection lost' : (pending.some((i) => i.source === name) ? 'Pending' : 'Connected');
+      return name + ' · ' + state;
+    }).join('; ');
+    return dotLine(tone, label, tip);
   }
   function healthCell(c) {
-    const health = clientView(c).health;
-    if (!health) return '<span class="text-body2">—</span>';
-    const label = health.passed + ' of ' + health.total + ' passed';
-    const tip = health.failed.length ? health.failed.map((f) => f.short + ': ' + f.detail).join('; ') : 'All checks passed';
-    return `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+    const summary = healthSummary(c);
+    const tip = !summary.total ? 'Not checked yet' : (summary.failed.length ? summary.failed.map((f) => f.name).join('; ') : 'All checks passed');
+    return dotLine(summary.tone, summary.label, tip);
   }
   function issueChip(c) {
     const v = clientView(c);
@@ -2362,7 +2400,7 @@
             </div>
             <p class="form-error-msg" id="booksError" hidden>Choose QuickBooks or Xero</p>
           </div>
-          <div class="modal-footer"><button type="button" class="btn-outlined" id="booksCancel">Cancel</button><button type="button" class="btn" id="booksGo">Import clients</button></div>
+          <div class="modal-footer"><button type="button" class="btn-outlined" id="booksCsv">Upload CSV</button><button type="button" class="btn-outlined" id="booksCancel">Cancel</button><button type="button" class="btn" id="booksGo">Import clients</button></div>
         </div>
       </div>
       <div class="modal-bg" id="csvModal">
@@ -2432,36 +2470,31 @@
     const banner = showImport
       ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="btn-text" id="importNoteClose">Dismiss</button></div>`
       : (showInvite
-        ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span><button type="button" class="btn" id="bannerImport">Import client list</button><button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
+        ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span>${firmBooksConnected() ? '' : '<button type="button" class="btn" id="bannerImport">Import client list</button>'}<button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
         : '');
     const q = (st._q || '').toLowerCase();
     const searched = listed.filter((c) => c.name.toLowerCase().includes(q));
     const counts = statusCounts(searched);
     const filter = st.listFilter || 'all';
     let rows = searched.filter((c) => {
-      const k = clientView(c).key;
-      if (filter === 'checks') return k === 'checks';
-      if (filter === 'lost') return k === 'lost';
-      if (filter === 'off') return k === 'off';
-      if (filter === 'waiting') return k === 'waiting';
-      if (filter === 'good') return k === 'good';
+      if (filter === 'issues') return hasHealthIssues(c);
+      if (filter === 'lost') return hasLostConnection(c);
+      if (filter === 'waiting') return isWaitingClient(c);
+      if (filter === 'off') return isOffClient(c);
       return true;
     });
     const rank = { lost: 0, checks: 1, waiting: 2, off: 3, good: 4 };
     if ((st.listSort || 'name') === 'status') rows = rows.slice().sort((a, b) => (rank[clientView(a).key] ?? 9) - (rank[clientView(b).key] ?? 9) || a.name.localeCompare(b.name));
     const statCard = (key, label, n) => `<button type="button" class="box box--white stat-card${filter === key ? ' on' : ''}" data-filter="${key}" aria-pressed="${filter === key ? 'true' : 'false'}"><span class="text-h1">${n}</span><span class="text-body2">${label}</span></button>`;
     const body = rows.map((c) => {
-      const view = clientView(c);
       const lic = licenseLabel(c);
-      const connectBtn = view.key === 'off' ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>` : '';
       return `<tr class="rowlink" data-row="${c.id}">
         <td><div class="client-cell">${av(c, true)}<button type="button" class="link" data-see="${c.id}">${esc(c.name)}</button></div></td>
         <td><span class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</span></td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
         <td>${healthCell(c)}</td>
-        <td>${issueChip(c)}</td>
-        <td><div class="row-actions">${connectBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button></div></div></div></td>
+        <td><div class="row-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button><button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -2470,25 +2503,26 @@
           <h1 class="text-h1">Clients</h1>
         </div>
         <div class="ph-actions">
-          <button type="button" class="btn-outlined" id="listImport">Import clients</button>
+          ${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}
           <button type="button" class="btn-outlined" id="listAdd">Add client</button>
+          <button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>
         </div>
       </div>
       ${banner}
       <div class="status-cards">
-        ${statCard('good', 'All good', counts.good)}
-        ${statCard('checks', 'Checks not passed', counts.checks)}
+        ${statCard('all', 'All clients', counts.all)}
+        ${statCard('issues', 'Issues found', counts.issues)}
         ${statCard('lost', 'Connection lost', counts.lost)}
-        ${statCard('off', 'Not set up', counts.off)}
         ${statCard('waiting', 'Waiting for owner', counts.waiting)}
+        ${statCard('off', 'Not set up', counts.off)}
       </div>
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
         <select class="select" id="clientSort" aria-label="Sort clients"><option value="name"${(st.listSort || 'name') === 'name' ? ' selected' : ''}>Name</option><option value="status"${st.listSort === 'status' ? ' selected' : ''}>Status</option></select>
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Status</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="7" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr><th>Name</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="6" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
@@ -2729,7 +2763,7 @@
         <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
       </div>
       <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2><p class="text-body2">Synder has not checked this client yet.</p><button type="button" class="link" data-stub>Health history</button></div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2>${(() => { const summary = healthSummary(c); const fails = summary.failed.map((f) => `<p class="text-body2">${esc(f.name)}${f.detail ? ' · ' + esc(f.detail) : ''}</p>`).join(''); return `<p class="text-body2 logo-line">${stateDot(summary.tone)}<span>${esc(summary.label)}</span></p>${fails}`; })()}<button type="button" class="link" data-stub>Health history</button></div>
       <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th></th></tr></thead>
         <tbody><tr><td>${esc(month.label)}</td><td>${esc(c.monthStatus)}</td><td>${done}/${c.firmChecks.length}</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr>
@@ -2794,6 +2828,16 @@
       <button type="button" class="link" id="backColleagues">Back to Colleagues</button>
       <div class="ph"><div><h1 class="text-h1">${esc(p.name)}</h1></div><div class="ph-actions"><button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button></div></div>
       ${tabs}${body}
+    </div>`;
+  }
+  function renderClientHealth() {
+    const c = findOrg(st.clientId);
+    if (!c || !isClient(c.id)) return renderClients();
+    return `<div class="flow-wide page-stack">
+      <button type="button" class="link" id="backClients">Back to Clients</button>
+      <h1 class="text-h1">Health check</h1>
+      <p class="text-body1">${esc(c.name)}</p>
+      <p class="text-body1 text-center">This screen is not part of this prototype.</p>
     </div>`;
   }
   function renderBringIn() {
@@ -2902,6 +2946,7 @@
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'clientdetail') html = renderClientDetail();
+      else if (st.page === 'clienthealth') html = renderClientHealth();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
       else if (st.page === 'clientconnect') html = renderClientConnect();
@@ -2929,6 +2974,11 @@
     const m = $('main');
     m.querySelectorAll('[data-see]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.see); });
     m.querySelectorAll('[data-goto]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.goto); });
+    m.querySelectorAll('[data-health]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      st.ctx = 'firm'; st.page = 'clienthealth'; st.clientId = b.dataset.health; st.orgId = null;
+      save(); render();
+    });
     m.querySelectorAll('[data-connect]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       clearLink();
@@ -2988,6 +3038,8 @@
     bind('emptyAdd', showAddModal);
     bind('listImport', showBooksModal);
     bind('listAdd', showAddModal);
+    bind('listCsv', showCsvModal);
+    bind('booksCsv', () => { closeBooks(); showCsvModal(); });
     bind('bannerImport', showBooksModal);
     bind('bannerDismiss', () => { if (ob) { ob.banner = ''; saveOb(); } render(); });
     bind('importNoteClose', () => { if (ob) { ob.importNote = 0; saveOb(); } render(); });
@@ -3480,8 +3532,13 @@
         st.ctx = 'firm';
         st.page = 'clientdetail';
         st.clientId = parts[1];
-        st.detailTab = parts[2] === 'billing' || parts[2] === 'colleagues' ? parts[2] : 'work';
         st.orgId = null;
+        if (parts[2] === 'health') {
+          st.page = 'clienthealth';
+        } else {
+          st.page = 'clientdetail';
+          st.detailTab = parts[2] === 'billing' || parts[2] === 'colleagues' ? parts[2] : 'work';
+        }
         closePop();
         render();
         return;
@@ -3556,7 +3613,7 @@
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && st.page === 'clientdetail' && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
@@ -3582,6 +3639,7 @@
     else if (st.ctx === 'firm' && st.page === 'bringin') h += '/bringin';
     else if (st.ctx === 'firm' && st.page === 'review') h += '/review';
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
+    else if (st.ctx === 'firm' && st.page === 'clienthealth' && st.clientId) h = '#clients/' + st.clientId + '/health';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
