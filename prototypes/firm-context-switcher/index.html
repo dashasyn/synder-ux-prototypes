@@ -1182,17 +1182,17 @@
           <h1 class="text-h1">Who are you setting Synder up for?</h1>
         </div>
         <div class="role-grid">
-          <div class="box box--white kit-choice" data-use="practice" tabindex="0">
-            <span class="material-icons" aria-hidden="true">business_center</span>
-            <h2 class="text-h2">For practices</h2>
-            <p class="text-body1">Accountants and bookkeepers who look after several clients.</p>
-            <button type="button" class="btn">Start as a practice</button>
-          </div>
           <div class="box box--white kit-choice" data-use="business" tabindex="0">
             <span class="material-icons" aria-hidden="true">storefront</span>
             <h2 class="text-h2">For businesses</h2>
             <p class="text-body1">Owners and in-house finance teams running one business.</p>
             <button type="button" class="btn">Start as a business</button>
+          </div>
+          <div class="box box--white kit-choice" data-use="practice" tabindex="0">
+            <span class="material-icons" aria-hidden="true">business_center</span>
+            <h2 class="text-h2">For practices</h2>
+            <p class="text-body1">Accountants and bookkeepers who look after several clients.</p>
+            <button type="button" class="btn">Start as a practice</button>
           </div>
         </div>
         </div>`);
@@ -1204,8 +1204,6 @@
         <div class="box box--white auth-card">
           <h1 class="text-h1">Set up your practice</h1>
           <p class="text-body1">This creates your firm in Synder. You'll be its admin: you add clients and invite colleagues.</p>
-          ${socialButtons()}
-          <hr class="auth-rule" />
           <div class="form-field"><label class="form-label form-label-required" for="suName">Your name</label><input class="input" id="suName" autocomplete="name" value="${esc(ob.userName || 'Ada North')}" /></div>
           <div class="form-field"><label class="form-label form-label-required" for="suEmail">Work email</label><input class="input" id="suEmail" type="email" autocomplete="email" value="${esc(ob.userEmail || 'ada@northwindbookkeeping.com')}" /></div>
           <div class="form-field"><label class="form-label form-label-required" for="suPass">Password</label><input class="input" id="suPass" type="password" autocomplete="new-password" value="${esc(ob.demoPass || 'Bookkeeping1')}" /></div>
@@ -1500,12 +1498,7 @@
     });
     document.querySelectorAll('[data-social]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
-      if (ob.step === 'login') { finishExistingLogin(); return; }
-      const typed = ($('suFirm') && $('suFirm').value || '').trim();
-      if (typed) ob.firmName = typed;
-      ob.use = 'practice'; ob.useChosen = true; ob.nameFrom = 'signup';
-      saveOb();
-      goOnboarding('firmname');
+      finishExistingLogin();
     });
     on('obJoinInfo', () => { const modal = $('joinModal'); if (modal) modal.classList.add('show'); });
     const closeJoin = () => { const modal = $('joinModal'); if (modal) modal.classList.remove('show'); };
