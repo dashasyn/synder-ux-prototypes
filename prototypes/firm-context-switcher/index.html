@@ -31,7 +31,7 @@ body {
     }
 /* ── Dark prototype bar (name + variant switcher only) ── */
 .proto-bar {
-      position: sticky; top: 0; z-index: 300;
+      position: sticky; top: 0; z-index: 90;
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
       min-height: var(--proto-bar-h); padding: 8px 16px;
       background: #111827; color: #F9FAFB;
@@ -1751,8 +1751,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     ['ess', 'pro', 'max'].forEach((id) => {
       const qty = plans[id] || 0;
       if (id === pack.tier) {
-        const packed = Math.min(pack.qty, qty);
-        total += packed * pack.each + Math.max(0, qty - pack.qty) * (book[id] || 0);
+        const packs = Math.floor(qty / pack.qty);
+        const rest = qty % pack.qty;
+        total += packs * pack.total + rest * (book[id] || 0);
       } else total += qty * (book[id] || 0);
     });
     return total;
@@ -1918,7 +1919,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return '<p class="text-body2">' + familyName(s.family) + ' · ' + periodWord(s) + ' · Next charge ' + usd(chargeMonthly(s)) + ' on ' + NEXT_CHARGE + '</p>';
   }
   function emptyLicences() {
-    return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
+    return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlanEmpty">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
   }
   function renderBilling() {
     const mode = billingMode();
@@ -1931,197 +1932,199 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (mode === 'error') body = '<p class="text-body2">Billing and licenses is unavailable. The licenses of this firm could not be loaded. Check the connection and try again.</p>';
     else if (view === 'clients') body = renderBillClients();
     else body = (mode === 'empty' ? emptyLicences() : moneySummary() + renderLicenceTable());
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', action) + (mode === 'error' ? '' : tabs) + body + '</div>';
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', action) + (mode === 'error' ? '' : tabs) + body + '</div>' + (st.plansOpen ? buyOverlay() : '');
   }
-  function familyCard(family, current) {
-    const pack = PACK[family];
-    const tiers = family === 'advanced' ? ['ess', 'pro', 'max'] : ['ess', 'pro'];
-    const lines = tiers.map((id) => '<p class="text-body2">' + tierName(id) + ' · ' + TIER_CREDITS[id] + ', plus ' + tierName(id) + ' plan features. Single ' + usd(TIER_SINGLE[family][id]) + '.</p>').join('');
-    const compare = family === 'advanced' ? '<p class="text-body2">Essential $72 instead of $80 (save 10%)</p><p class="text-body2">Pro $184 instead of $200 (save 8%)</p><p class="text-body2">Pro Max and Revenue recognition only on Advanced</p>' : '';
-    const who = family === 'advanced' ? 'For clients that need more sync credits, Pro Max, or revenue recognition.' : 'For clients that stay on Essential or Pro.';
-    const chip = current ? '<span class="status status-green">Current plan</span>' : '';
-    const actionLabel = billingMode() === 'pitch' && family === 'core' ? 'Choose Core' : 'Switch to ' + familyName(family);
-    const action = current ? '' : '<div><button type="button" class="btn" data-switch-family="' + family + '">' + actionLabel + '</button></div>';
-    return '<div class="card flex-1 page-stack"><h2 class="text-h2">' + familyName(family) + '</h2>' + chip + '<p class="text-body2">' + who + '</p><p class="text-body2">Pack: ' + pack.qty + ' ' + tierName(pack.tier) + ' licences · ' + usd(pack.each) + ' each</p>' + lines + compare + action + '</div>';
+  function moneyLabel(n) {
+    const v = Math.round((Number(n) || 0) * 100) / 100;
+    if (Math.abs(v - Math.round(v)) < 0.001) return '$' + Math.round(v).toLocaleString('en-US');
+    return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  function stepper(key, qty, label) {
-    return '<div class="logo-line"><button type="button" class="btn-icon btn-icon--bordered" data-plan-step="' + key + '" data-dir="-1" aria-label="Fewer ' + esc(label) + '"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-plan-step="' + key + '" data-dir="1" aria-label="More ' + esc(label) + '"><span class="material-icons">add</span></button><span class="text-body2">' + esc(label) + '</span></div>';
+  function emptyCard() {
+    return { packs: 0, singles: { ess: 0, pro: 0, max: 0 }, users: 0, rules: '', inv: '', rev: '' };
+  }
+  function blankPlanDraft(state) {
+    const draft = { period: (state && state.period) || 'month', cards: { core: emptyCard(), advanced: emptyCard() }, showErr: {} };
+    if (!state || !state.family || !draft.cards[state.family]) return draft;
+    const card = draft.cards[state.family];
+    const pack = PACK[state.family];
+    const owned = (state.plans && state.plans[pack.tier]) || 0;
+    card.packs = Math.floor(owned / pack.qty);
+    card.singles = { ess: (state.plans && state.plans.ess) || 0, pro: (state.plans && state.plans.pro) || 0, max: (state.plans && state.plans.max) || 0 };
+    card.singles[pack.tier] = Math.max(0, card.singles[pack.tier] - card.packs * pack.qty);
+    card.users = state.users || 0;
+    card.rules = Object.keys(state.rules || {}).find((id) => state.rules[id] > 0) || '';
+    card.inv = Object.keys(state.inv || {}).find((id) => state.inv[id] > 0) || '';
+    card.rev = (state.rev || 0) > 0 ? String(state.rev) : '';
+    return draft;
+  }
+  function ensurePlanDraft() {
+    if (!planDraft || !planDraft.cards) planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
+    return planDraft;
   }
   function openBuyPlans() {
     planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
-    st.page = 'buyplans';
+    st.plansOpen = true;
+    st.page = 'billing';
     st.ctx = 'firm';
     save();
     render();
   }
-  function blankPlanDraft(state) {
-    if (!state || !state.family) return { family: null, period: 'month', packs: 0, singles: { ess: 0, pro: 0, max: 0 }, rules: {}, inv: {}, users: 0, rev: 0 };
-    const pack = PACK[state.family];
-    const owned = state.plans[pack.tier] || 0;
-    const packs = Math.floor(owned / pack.qty);
-    const singles = { ess: state.plans.ess || 0, pro: state.plans.pro || 0, max: state.plans.max || 0 };
-    singles[pack.tier] = Math.max(0, singles[pack.tier] - packs * pack.qty);
-    return { family: state.family, period: state.period || 'month', packs: packs, singles: singles, rules: Object.assign({}, state.rules), inv: Object.assign({}, state.inv), users: state.users || 0, rev: state.rev || 0 };
-  }
-  function draftFactor(d) { return d && d.period === 'year' ? 0.8 : 1; }
-  function draftTierQty(d, id) {
-    if (!d || !d.family) return d && d.singles ? (d.singles[id] || 0) : 0;
-    let n = (d.singles && d.singles[id]) || 0;
-    if (PACK[d.family].tier === id) n += (d.packs || 0) * PACK[d.family].qty;
-    return n;
-  }
-  function draftAsState(d) {
-    return { family: d.family, period: d.period, plans: { ess: draftTierQty(d, 'ess'), pro: draftTierQty(d, 'pro'), max: draftTierQty(d, 'max') }, rules: d.rules, inv: d.inv, users: d.users, rev: d.rev };
-  }
-  function draftMonthly(d) { return d && d.family ? chargeMonthly(draftAsState(d)) : 0; }
-  function draftSavings(d) {
-    if (!d || !d.family || !d.packs) return 0;
-    const pack = PACK[d.family];
-    return d.packs * pack.qty * (TIER_SINGLE[d.family][pack.tier] - pack.each) * draftFactor(d);
-  }
-  function draftEmpty(d) {
-    if (!d || !d.family) return true;
-    if (d.packs || d.users || d.rev) return false;
-    if (['ess', 'pro', 'max'].some((id) => d.singles[id])) return false;
-    return Object.keys(d.rules).some((id) => d.rules[id]) || Object.keys(d.inv).some((id) => d.inv[id]) ? false : true;
-  }
-  function draftMatches(d) {
-    const s = loadLicenseState();
-    if (!s.family || !d.family) return false;
-    const next = draftAsState(d);
-    return d.period === (s.period || 'month') && next.plans.ess === (s.plans.ess || 0) && next.plans.pro === (s.plans.pro || 0) && next.plans.max === (s.plans.max || 0) && next.users === (s.users || 0) && next.rev === (s.rev || 0) && JSON.stringify(next.rules) === JSON.stringify(s.rules) && JSON.stringify(next.inv) === JSON.stringify(s.inv);
-  }
-  function money(n) { return Math.round((Number(n) || 0) * 100) / 100; }
-  function cfgStep(key, dir) {
-    const d = planDraft;
-    const snapshot = JSON.stringify(d);
-    const apply = (cur, set) => { const next = cur + dir; if (next < 0) return false; set(next); return true; };
-    if (key === 'packs') apply(d.packs || 0, (n) => { d.packs = n; });
-    else if (key === 'users') apply(d.users || 0, (n) => { d.users = n; });
-    else if (key === 'rev') apply(d.rev || 0, (n) => { d.rev = n; });
-    else if (key.indexOf('single:') === 0) { const id = key.slice(7); apply(d.singles[id] || 0, (n) => { d.singles[id] = n; }); }
-    else if (key.indexOf('rules:') === 0) { const id = key.slice(6); if (!d.rules[id] && dir > 0) d.rules[id] = 0; apply(d.rules[id] || 0, (n) => { d.rules[id] = n; }); }
-    else if (key.indexOf('inv:') === 0) { const id = key.slice(4); apply(d.inv[id] || 0, (n) => { d.inv[id] = n; }); }
-    const tooLow = (d.family && ['ess', 'pro', 'max'].some((id) => draftTierQty(d, id) < licUsed(id))) || Object.keys(d.rules).some((id) => (d.rules[id] || 0) < licUsed(id)) || Object.keys(d.inv).some((id) => (d.inv[id] || 0) < licUsed(id)) || (d.users || 0) < licUsed('users') || (d.rev || 0) < licUsed('rev');
-    if (tooLow) {
-      const back = JSON.parse(snapshot);
-      d.packs = back.packs; d.singles = back.singles; d.rules = back.rules; d.inv = back.inv; d.users = back.users; d.rev = back.rev;
-      openFreeUp();
-    }
-  }
-  function openFreeUp() {
-    const { modal, close } = dialogShell('Free up licenses', '<p class="text-body2">Free up licenses before reducing your total</p>', '<button type="button" class="btn-outlined" data-cancel>Close</button><button type="button" class="btn" id="freeGo">Take me there</button>');
-    modal.querySelector('#freeGo').onclick = () => {
-      close();
-      st.page = 'billing';
-      st.billView = 'clients';
-      render();
-    };
-  }
-  function applyPlanDraft(d) {
-    const next = draftAsState(d);
-    licenseState = { demo: 'subscribed', subscribed: true, family: d.family, period: d.period, plans: next.plans, rules: {}, inv: {}, users: d.users || 0, rev: d.rev || 0 };
-    Object.keys(d.rules).forEach((id) => { if (d.rules[id]) licenseState.rules[id] = d.rules[id]; });
-    Object.keys(d.inv).forEach((id) => { if (d.inv[id]) licenseState.inv[id] = d.inv[id]; });
-    saveLicenseState();
-  }
-  function submitPlan() {
-    const d = planDraft;
-    const err = document.getElementById('planErr');
-    const fresh = billingMode() === 'empty';
-    if (fresh && draftEmpty(d)) { if (err) { err.hidden = false; err.textContent = 'Required'; } return; }
-    if (!fresh && draftMatches(d)) { if (err) { err.hidden = false; err.textContent = 'Change a quantity first.'; } return; }
-    const over = ['ess', 'pro', 'max'].some((id) => draftTierQty(d, id) < licUsed(id)) || Object.keys(d.rules).some((id) => (d.rules[id] || 0) < licUsed(id)) || Object.keys(d.inv).some((id) => (d.inv[id] || 0) < licUsed(id)) || (d.users || 0) < licUsed('users');
-    if (over) { openFreeUp(); return; }
-    if (!fresh) {
-      const amount = Math.max(0, prorate(draftMonthly(d) - chargeMonthly(loadLicenseState())));
-      const { modal, close } = dialogShell('Plan update', '<p class="text-body2">You pay now ' + usd(amount) + ' + taxes. This covers the ' + DAYS_LEFT + ' days left in this period.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">Update plan</button>');
-      modal.querySelector('#planGo').onclick = () => { applyPlanDraft(d); close(); showKitToast('Licences updated'); st.page = 'billing'; render(); };
-      return;
-    }
-    applyPlanDraft(d);
-    showKitToast('Licences updated');
-    st.page = 'billing';
-    st.billView = 'licences';
+  function closeBuyPlans() {
+    st.plansOpen = false;
     render();
   }
-  function planColumn(family) {
-    const d = planDraft;
-    const existing = billingMode() !== 'empty';
-    const current = existing && loadLicenseState().family === family;
-    const picked = d.family === family;
+  function addonMap(family, bucket, id) {
+    if (!id) return {};
+    const s = loadLicenseState();
+    const owned = s.family === family && s[bucket] ? (s[bucket][id] || 0) : 0;
+    return { [id]: owned > 0 ? owned : 1 };
+  }
+  function revCount(family, card) {
+    const n = Number(card.rev) || 0;
+    if (!n) return 0;
+    const s = loadLicenseState();
+    if (s.family === family && Number(s.rev) === n) return s.rev;
+    return n;
+  }
+  function cardStock(family, card) {
     const pack = PACK[family];
-    const factor = draftFactor(d);
-    const from = usd(pack.each * factor);
-    const who = family === 'core' ? 'Firms with mostly small clients' : 'Firms with growing or high-volume clients';
-    const chip = current ? '<span class="status status-green">Current plan</span>' : (picked && !existing ? '<span class="status status-green">Selected</span>' : '');
-    let action = '';
-    if (existing && !current) action = '<button type="button" class="btn" data-switch-family="' + family + '">Switch to ' + familyName(family) + '</button>';
-    else if (!existing) action = '<button type="button" class="btn" data-pick-family="' + family + '">' + (picked ? 'Selected' : 'Choose ' + familyName(family)) + '</button>';
-    const checks = family === 'core'
-      ? '<p class="text-body2">✓ Pack of 5 Essential licences</p><p class="text-body2">✓ Essential and Pro</p><p class="text-body2">✓ 3,000 or 20,000 sync credits/month</p>'
-      : '<p class="text-body2">✓ Pack of 5 Pro licences</p><p class="text-body2">✓ Essential, Pro and Pro Max</p><p class="text-body2">✓ Revenue recognition</p><p class="text-body2">✓ Up to 40,000 sync credits/month</p>';
-    return '<div class="card flex-1 page-stack"><h2 class="text-h2">' + familyName(family) + '</h2>' + chip + '<p class="text-body2">Best for ' + who + '</p><p class="stat-value">' + tierName(pack.tier) + ' from ' + from + '</p><p class="text-secondary">per client / month</p>' + checks + action + '</div>';
+    const plans = { ess: card.singles.ess || 0, pro: card.singles.pro || 0, max: card.singles.max || 0 };
+    plans[pack.tier] += (card.packs || 0) * pack.qty;
+    return { plans: plans, rules: addonMap(family, 'rules', card.rules), inv: addonMap(family, 'inv', card.inv), users: card.users || 0, rev: revCount(family, card) };
   }
-  function compareTable() {
-    const rows = [
-      ['Essential', '$80', 'Essential $80 → $72 (save 10%)'],
-      ['Pro', '$200', 'Pro $200 → $184 (save 8%)'],
-      ['Pro Max', '—', '$384'],
-      ['Revenue recognition', '—', 'Included'],
-      ['Pack included', '5 Essential · $360', '5 Pro · $632'],
-      ['Sync credits', 'Essential 3,000 · Pro 20,000', 'Essential 3,000 · Pro 20,000 · Pro Max 40,000']
-    ];
-    return '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th>Core</th><th>Advanced</th></tr></thead><tbody>' + rows.map((row) => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td>' + row[2] + '</td></tr>').join('') + '</tbody></table></div><p class="text-body2">Pro Max and Revenue recognition only on Advanced.</p>';
+  function cardAsState(family, card) {
+    const stock = cardStock(family, card);
+    return { family: family, period: planDraft.period, plans: stock.plans, rules: stock.rules, inv: stock.inv, users: stock.users, rev: stock.rev };
   }
-  function cfgRow(key, name, desc, price, qty, total) {
-    return '<tr><td>' + name + '<span class="cell-subtext">' + desc + '</span></td><td>' + usd(price) + '</td><td><div class="logo-line"><button type="button" class="btn-icon btn-icon--bordered" data-cfg="' + key + '" data-dir="-1" aria-label="Fewer"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-cfg="' + key + '" data-dir="1" aria-label="More"><span class="material-icons">add</span></button></div></td><td class="col-amount">' + usd(total) + '</td></tr>';
+  function cardMonthly(family, card) { return chargeMonthly(cardAsState(family, card)); }
+  function sameMap(a, b) {
+    const keys = Object.keys(a || {}).concat(Object.keys(b || {}));
+    return keys.every((id) => ((a && a[id]) || 0) === ((b && b[id]) || 0));
   }
-  function configureTable(d) {
-    if (!d.family) return '';
-    const factor = draftFactor(d);
-    const pack = PACK[d.family];
-    const tiers = d.family === 'advanced' ? ['ess', 'pro', 'max'] : ['ess', 'pro'];
-    let rows = cfgRow('packs', 'Pack of 5 ' + tierName(pack.tier), '5 licences at the pack price', pack.each * factor, d.packs || 0, (d.packs || 0) * pack.total * factor);
-    tiers.forEach((id) => {
-      const price = TIER_SINGLE[d.family][id] * factor;
-      rows += cfgRow('single:' + id, tierName(id), TIER_CREDITS[id], price, d.singles[id] || 0, (d.singles[id] || 0) * price);
-    });
-    RULE_SIZES.forEach((item) => {
-      const qty = d.rules[item[0]] || 0;
-      const price = ADDON_PRICE[item[0]] * factor;
-      rows += cfgRow('rules:' + item[0], item[1], 'Example add-on', price, qty, qty * price);
-    });
-    INV_SIZES.forEach((item) => {
-      const qty = d.inv[item[0]] || 0;
-      const price = ADDON_PRICE[item[0]] * factor;
-      rows += cfgRow('inv:' + item[0], item[1], 'Example add-on', price, qty, qty * price);
-    });
-    const userPrice = 24 * factor;
-    rows += cfgRow('users', 'Additional users', 'Extra person on a client', userPrice, d.users || 0, (d.users || 0) * userPrice);
-    if (d.family === 'advanced') {
-      const revPrice = ADDON_PRICE.rev * factor;
-      rows += cfgRow('rev', 'Revenue recognition', 'Monthly subscriptions to split across clients', revPrice, d.rev || 0, (d.rev || 0) * revPrice);
+  function cardMatches(family, card) {
+    const s = loadLicenseState();
+    if (!s.family || s.family !== family) return false;
+    const next = cardStock(family, card);
+    return planDraft.period === (s.period || 'month') && next.plans.ess === (s.plans.ess || 0) && next.plans.pro === (s.plans.pro || 0) && next.plans.max === (s.plans.max || 0) && next.users === (s.users || 0) && next.rev === (s.rev || 0) && sameMap(next.rules, s.rules) && sameMap(next.inv, s.inv);
+  }
+  function belowUsed(family, card) {
+    const s = loadLicenseState();
+    if (!s.family || s.family !== family) return false;
+    const next = cardStock(family, card);
+    if (['ess', 'pro', 'max'].some((id) => (next.plans[id] || 0) < licUsed(id))) return true;
+    if (next.users < licUsed('users') || next.rev < licUsed('rev')) return true;
+    const ruleIds = Object.keys(s.rules || {}).concat(Object.keys(next.rules));
+    if (ruleIds.some((id) => (next.rules[id] || 0) < licUsed(id))) return true;
+    const invIds = Object.keys(s.inv || {}).concat(Object.keys(next.inv));
+    return invIds.some((id) => (next.inv[id] || 0) < licUsed(id));
+  }
+  function licenceCount(card) {
+    return (card.packs || 0) + ['ess', 'pro', 'max'].reduce((n, id) => n + (card.singles[id] || 0), 0);
+  }
+  function rerenderPlans() {
+    const body = document.querySelector('.overlay-body');
+    const top = body ? body.scrollTop : 0;
+    renderMain();
+    const next = document.querySelector('.overlay-body');
+    if (next) next.scrollTop = top;
+  }
+  function stepCard(family, key, dir) {
+    const card = planDraft.cards[family];
+    const prev = JSON.stringify(card);
+    const set = (n) => {
+      if (key === 'packs') card.packs = n;
+      else if (key === 'users') card.users = n;
+      else card.singles[key] = n;
+    };
+    const cur = key === 'packs' ? (card.packs || 0) : (key === 'users' ? (card.users || 0) : (card.singles[key] || 0));
+    if (cur + dir < 0) return;
+    set(cur + dir);
+    if (belowUsed(family, card)) {
+      const back = JSON.parse(prev);
+      card.packs = back.packs; card.singles = back.singles; card.users = back.users; card.rules = back.rules; card.inv = back.inv; card.rev = back.rev;
+      openFreeUp();
+      return;
     }
-    return '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Price</th><th>Quantity</th><th class="col-amount">Total</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    planDraft.showErr[family] = '';
   }
-  function orderCard(d) {
-    const fresh = billingMode() === 'empty';
-    const month = draftMonthly(d);
-    const save = draftSavings(d);
-    const due = fresh ? (d.period === 'year' ? month * 12 : month) : Math.max(0, prorate(month - chargeMonthly(loadLicenseState())));
-    const lines = [];
-    if (d.family && d.packs) lines.push('<p class="text-body2">Pack × ' + d.packs + '</p>');
-    ['ess', 'pro', 'max'].forEach((id) => { if (d.singles[id]) lines.push('<p class="text-body2">' + tierName(id) + ' × ' + d.singles[id] + '</p>'); });
-    if (d.users) lines.push('<p class="text-body2">Additional users × ' + d.users + '</p>');
-    return '<div class="card page-stack"><h2 class="text-subtitle1">Order summary</h2>' + (lines.join('') || '<p class="text-body2">Nothing selected</p>') + (save ? '<p class="text-body2">Volume discount −' + usd(save) + '</p>' : '') + '<p class="text-body2">Per month ' + usd(month) + '</p><p class="text-body2">Per year ' + usd(month * 12) + '</p><p class="text-body2">You pay now ' + usd(due) + ' + taxes</p><button type="button" class="btn" id="planSubscribe">' + (fresh ? 'Subscribe' : 'Update plan') + '</button><p class="form-error-msg" id="planErr" hidden></p></div>';
+  function usePack(family) {
+    const card = planDraft.cards[family];
+    const tier = PACK[family].tier;
+    if ((card.singles[tier] || 0) < 5) return;
+    card.packs = (card.packs || 0) + 1;
+    card.singles[tier] -= 5;
+    planDraft.showErr[family] = '';
   }
-  function renderBuyPlansPage() {
-    if (!planDraft) planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
-    const d = planDraft;
-    const period = '<div class="d-flex gap-16"><div class="tabs" role="tablist"><button type="button" class="tab' + (d.period !== 'year' ? ' active' : '') + '" data-period="month" role="tab">Monthly</button><button type="button" class="tab' + (d.period === 'year' ? ' active' : '') + '" data-period="year" role="tab">Yearly</button></div><span class="status status-green">Save 20%</span></div>';
-    const configure = orderCard(d) + (d.family ? '<h2 class="text-h2">Configure</h2>' + configureTable(d) : '');
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing">Billing</a>' + pageHeader('Choose a plan for your firm', '', 'You buy licences once and assign them to clients.') + period + '<div class="d-flex gap-16">' + planColumn('core') + planColumn('advanced') + '</div><h2 class="text-h2">Compare</h2>' + compareTable() + configure + '<p class="text-caption">Example prices. Plan prices match the production screen. Smart Rules, Invoicing and revenue recognition amounts are examples.</p></div>';
+  function applyCard(family, card) {
+    const next = cardAsState(family, card);
+    const mode = billingMode();
+    licenseState = { demo: mode === 'active' ? 'active' : 'subscribed', subscribed: true, family: family, period: planDraft.period, plans: next.plans, rules: next.rules, inv: next.inv, users: next.users, rev: next.rev };
+    saveLicenseState();
+  }
+  function submitPlan(family) {
+    const card = planDraft.cards[family];
+    if (!licenceCount(card)) { planDraft.showErr[family] = 'empty'; rerenderPlans(); return; }
+    const current = loadLicenseState().family === family && billingMode() !== 'empty';
+    if (current && cardMatches(family, card)) { planDraft.showErr[family] = 'same'; rerenderPlans(); return; }
+    if (belowUsed(family, card)) { openFreeUp(); return; }
+    const finish = () => {
+      applyCard(family, card);
+      st.plansOpen = false;
+      st.page = 'billing';
+      st.billView = 'licences';
+      showKitToast('Licences updated');
+      render();
+    };
+    if (!current) { finish(); return; }
+    const amount = Math.max(0, prorate(cardMonthly(family, card) - chargeMonthly(loadLicenseState())));
+    const { modal, close } = dialogShell('Plan update', '<p class="text-body2">You pay now ' + usd(amount) + ' + taxes. This covers the ' + DAYS_LEFT + ' days left in this period.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">Update plan</button>');
+    modal.querySelector('#planGo').onclick = () => { close(); finish(); };
+  }
+  function planChecks(family) {
+    const lines = family === 'core'
+      ? ['Essential up to 3,000 syncs/mo per client', 'Pro up to 20,000 syncs/mo', 'Smart Rules and Invoicing add-ons']
+      : ['Everything in Core at about 10% less per licence', 'Pro Max up to 40,000 syncs/mo', 'Revenue recognition'];
+    return lines.map((line) => '<div class="d-flex align-center gap-8"><span class="material-icons icon-sm">check</span><span class="text-body2">' + line + '</span></div>').join('');
+  }
+  function qtyRow(family, key, name, price, qty) {
+    return '<div class="d-flex align-center gap-12"><span class="text-body2 flex-1">' + name + '</span><span class="text-body2 text-secondary">' + moneyLabel(price) + '/mo</span><div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-step="' + family + '" data-key="' + key + '" data-dir="-1" aria-label="Fewer ' + name + '"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-step="' + family + '" data-key="' + key + '" data-dir="1" aria-label="More ' + name + '"><span class="material-icons">add</span></button></div></div>';
+  }
+  function addonSelect(family, kind, label, options, value) {
+    const opts = '<option value="">None</option>' + options.map((item) => '<option value="' + item[0] + '"' + (String(value) === String(item[0]) ? ' selected' : '') + '>' + item[1] + '</option>').join('');
+    return '<div class="form-field"><label class="form-label" for="' + kind + '-' + family + '">' + label + '</label><select class="select" id="' + kind + '-' + family + '" data-addon="' + family + '" data-kind="' + kind + '">' + opts + '</select></div>';
+  }
+  function buyCard(family) {
+    const d = ensurePlanDraft();
+    const factor = d.period === 'year' ? 0.8 : 1;
+    const pack = PACK[family];
+    const locked = family === 'advanced' && billingMode() === 'active' && loadLicenseState().family === 'core';
+    const who = family === 'core' ? 'Best for firms with smaller clients.' : 'Best for growing clients and revenue recognition.';
+    const head = '<h2 class="text-h2">' + familyName(family) + '</h2><p class="text-body2">' + who + '</p><p class="text-h2">from ' + moneyLabel(pack.total * factor) + ' /month</p><p class="text-caption">Pack of 5 ' + tierName(pack.tier) + ' licences</p><p class="text-subtitle2">What\'s inside</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>';
+    if (locked) {
+      return '<div class="card flex-1 d-flex flex-col gap-16">' + head + '<p class="text-body2">Switching to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined w-full" id="bookAdvanced">Book a call</button></div>';
+    }
+    const card = d.cards[family];
+    const tiers = family === 'advanced' ? [['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']] : [['ess', 'Essential'], ['pro', 'Pro']];
+    let rows = qtyRow(family, 'packs', 'Pack (5 ' + tierName(pack.tier) + ')', pack.total * factor, card.packs || 0);
+    tiers.forEach((item) => { rows += qtyRow(family, item[0], item[1], TIER_SINGLE[family][item[0]] * factor, card.singles[item[0]] || 0); });
+    rows += qtyRow(family, 'users', 'Firm additional user', 24 * factor, card.users || 0);
+    const err = d.showErr[family] === 'empty' ? '<div class="form-error-msg">Add at least one licence or pack to subscribe.</div>' : '';
+    const hint = (card.singles[pack.tier] || 0) >= 5 ? '<p class="text-body2">A pack of 5 is cheaper: ' + moneyLabel(pack.each * factor) + ' per licence. <button type="button" class="link" data-use-pack="' + family + '">Use pack</button></p>' : '';
+    const ruleOpts = RULE_SIZES.map((item) => [item[0], 'Up to ' + item[0].replace('rules', '') + ' rules · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
+    const invOpts = INV_SIZES.map((item) => [item[0], 'Up to ' + item[1].replace('Invoicing up to ', '') + ' invoices · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
+    const revOpts = [['1', '1 subscription · ' + moneyLabel(2 * factor) + '/mo'], ['10', '10 subscriptions · ' + moneyLabel(20 * factor) + '/mo'], ['50', '50 subscriptions · ' + moneyLabel(100 * factor) + '/mo']];
+    let addons = addonSelect(family, 'rules', 'Smart Rules', ruleOpts, card.rules) + addonSelect(family, 'inv', 'Invoicing', invOpts, card.inv);
+    if (family === 'advanced') addons += addonSelect(family, 'rev', 'Revenue recognition', revOpts, card.rev);
+    const current = billingMode() !== 'empty' && loadLicenseState().family === family;
+    const same = d.showErr[family] === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '';
+    const total = '<p class="text-body2 text-bold">Total ' + moneyLabel(cardMonthly(family, card)) + ' /month</p><button type="button" class="btn w-full" data-subscribe="' + family + '">' + (current ? 'Update plan' : 'Subscribe') + '</button>' + same;
+    return '<div class="card flex-1 d-flex flex-col gap-16">' + head + '<p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-8">' + rows + '</div>' + err + hint + '<p class="text-subtitle2">Add-ons</p>' + addons + total + '</div>';
+  }
+  function buyOverlay() {
+    const d = ensurePlanDraft();
+    const monthOn = d.period !== 'year';
+    const period = '<div class="btn-joined" role="group" aria-label="Billing period"><button type="button" class="' + (monthOn ? 'btn' : 'btn-outlined') + '" data-period="month" aria-pressed="' + (monthOn ? 'true' : 'false') + '">Monthly</button><button type="button" class="' + (monthOn ? 'btn-outlined' : 'btn') + '" data-period="year" aria-pressed="' + (monthOn ? 'false' : 'true') + '">Yearly</button></div>';
+    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"><button type="button" class="btn-outlined" id="closeBuy">Cancel</button></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16">' + buyCard('core') + buyCard('advanced') + '</div><p class="text-caption">Example prices.</p></div></div></div>';
   }
   function openBuyMore(id, opts) {
     opts = opts || {};
@@ -4008,7 +4011,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
-      else if (st.page === 'buyplans') html = renderBuyPlansPage();
+      else if (st.page === 'buyplans') { st.page = 'billing'; st.plansOpen = true; html = renderBilling(); }
       else if (st.page === 'buylicenses') { st.page = 'billing'; html = renderBilling(); }
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
@@ -4267,14 +4270,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     });
     bindClick('buyPlans', openBuyPlans);
     bindClick('choosePlan', openBuyPlans);
-    bindClick('backBilling', () => { st.page = 'billing'; st.billView = 'licences'; render(); });
-    bindClick('planSubscribe', submitPlan);
+    bindClick('choosePlanEmpty', openBuyPlans);
+    bindClick('closeBuy', closeBuyPlans);
+    bindClick('bookAdvanced', showNotPart);
     m.querySelectorAll('[data-bill-view]').forEach((b) => b.onclick = () => { st.billView = b.dataset.billView; render(); });
     m.querySelectorAll('[data-buy-one]').forEach((b) => b.onclick = () => openBuyMore(b.dataset.buyOne));
-    m.querySelectorAll('[data-switch-family]').forEach((b) => b.onclick = () => openBigMove());
-    m.querySelectorAll('[data-pick-family]').forEach((b) => b.onclick = () => { if (planDraft) { planDraft.family = b.dataset.pickFamily; renderMain(); } });
-    m.querySelectorAll('[data-period]').forEach((b) => b.onclick = () => { if (planDraft) { planDraft.period = b.dataset.period; renderMain(); } });
-    m.querySelectorAll('[data-cfg]').forEach((b) => b.onclick = () => { cfgStep(b.dataset.cfg, Number(b.dataset.dir)); renderMain(); });
+    m.querySelectorAll('[data-period]').forEach((b) => b.onclick = () => { if (planDraft) { planDraft.period = b.dataset.period; rerenderPlans(); } });
+    m.querySelectorAll('[data-step]').forEach((b) => b.onclick = () => { stepCard(b.dataset.step, b.dataset.key, Number(b.dataset.dir)); rerenderPlans(); });
+    m.querySelectorAll('[data-use-pack]').forEach((b) => b.onclick = () => { usePack(b.dataset.usePack); rerenderPlans(); });
+    m.querySelectorAll('[data-subscribe]').forEach((b) => b.onclick = () => submitPlan(b.dataset.subscribe));
+    m.querySelectorAll('[data-addon]').forEach((el) => el.onchange = () => {
+      const card = planDraft.cards[el.dataset.addon];
+      const prev = card[el.dataset.kind];
+      card[el.dataset.kind] = el.value;
+      if (belowUsed(el.dataset.addon, card)) { card[el.dataset.kind] = prev; openFreeUp(); }
+      planDraft.showErr[el.dataset.addon] = '';
+      rerenderPlans();
+    });
     m.querySelectorAll('[data-bill-filter]').forEach((b) => b.onclick = () => {
       st.billTab = b.dataset.billFilter;
       if (st.pagers && st.pagers.billClients) st.pagers.billClients.page = 0;
@@ -4644,8 +4656,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       mode = 'firm';
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
-      st.page = parts[1] === 'plans' ? 'buyplans' : 'billing';
-      st.billView = parts[1] === 'clients' ? 'clients' : 'licences';
+      st.page = 'billing';
+      st.plansOpen = parts[1] === 'plans';
+      if (parts[1] === 'clients') st.billView = 'clients';
+      else if (parts[1] !== 'plans') st.billView = 'licences';
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -4756,6 +4770,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
     if (st && (st.openAdd || st.page === 'addone')) { st.openAdd = false; st.page = 'clients'; startAddClient(); return; }
+    if (st && st.page !== 'billing' && st.page !== 'buyplans') st.plansOpen = false;
     ensureFirmLic();
     if (!st || st.page !== 'billing') closeSideSheet();
     renderTrigger(); renderNav(); renderMain(); renderUserMenu();
@@ -4778,7 +4793,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && st.page === 'buyplans') h = '#billing/plans';
+    else if (st.ctx === 'firm' && st.page === 'billing' && st.plansOpen) h = '#billing/plans';
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.billView === 'clients' ? '/clients' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
