@@ -1689,15 +1689,14 @@
     const done = setupCount();
     const need = list.length - done;
     if (done === 0) {
-      return `<div class="ph"><div><h1>Dashboard</h1></div></div>
+      return `<div class="flow-wide page-stack">${pageHeader('Dashboard')}
         <div class="empty"><span class="material-icons">checklist</span>
           <h2>Set up your first client</h2>
           <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
           <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
     }
     const counts = statusCounts(list);
-    return `<div class="ph"><div><h1>Dashboard</h1><div class="sub">${esc(FIRM.name)}</div></div>
-      <div class="ph-actions"><button class="btn" id="dashContinue">Continue setup</button></div></div>
+    return `<div class="flow-wide page-stack">${pageHeader('Dashboard', '<button class="btn" id="dashContinue">Continue setup</button>', esc(FIRM.name))}
       <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
         <span class="bar"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></span>
         <span class="muted">${need} still need setup</span></div>
@@ -2015,25 +2014,29 @@
     return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Licence</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
   }
   function periodWord(state) { return state && state.period === 'year' ? 'Yearly' : 'Monthly'; }
+  function pageHeader(title, actions, subtitle) {
+    return '<div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">' + title + '</h1>' + (subtitle ? '<p class="synder-page-subtitle">' + subtitle + '</p>' : '') + '</div>' + (actions ? '<div class="synder-page-actions">' + actions + '</div>' : '') + '</div>';
+  }
   function moneySummary() {
     const s = loadLicenseState();
     if (!s.family) return '';
-    return '<p class="text-body2">' + familyName(s.family) + ' · ' + periodWord(s) + ' · Next charge ' + usd(chargeMonthly(s)) + ' on ' + NEXT_CHARGE + ' <button type="button" class="link" id="buyPlans">Buy plans</button></p>';
+    return '<p class="text-body2">' + familyName(s.family) + ' · ' + periodWord(s) + ' · Next charge ' + usd(chargeMonthly(s)) + ' on ' + NEXT_CHARGE + '</p>';
   }
   function emptyLicences() {
-    return '<div class="page-stack"><h1 class="text-h1">No licences yet</h1><p class="text-body2">You buy licences once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlan">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
+    return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
   }
   function renderBilling() {
     const mode = billingMode();
-    if (mode === 'error') {
-      return '<div class="flow-wide page-stack"><h1 class="text-h1">Billing and licenses is unavailable</h1><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><div><button type="button" class="btn" id="billRetry">Try again</button></div></div>';
-    }
     const view = st.billView === 'clients' ? 'clients' : 'licences';
+    const action = mode === 'error'
+      ? '<button type="button" class="btn" id="billRetry">Try again</button>'
+      : (mode === 'empty' ? '<button type="button" class="btn" id="choosePlan">Choose a plan</button>' : '<button type="button" class="btn" id="buyPlans">Buy plans</button>');
     const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (view === 'licences' ? ' active' : '') + '" data-bill-view="licences" role="tab">Licences</button><button type="button" class="tab' + (view === 'clients' ? ' active' : '') + '" data-bill-view="clients" role="tab">Clients</button></div>';
-    const head = view === 'clients' || mode !== 'empty' ? '<h1 class="text-h1">Billing and licenses</h1>' : '';
-    const summary = mode === 'empty' ? '' : moneySummary();
-    const body = view === 'clients' ? renderBillClients() : (mode === 'empty' ? emptyLicences() : renderLicenceTable());
-    return '<div class="flow-wide page-stack">' + head + summary + tabs + body + '</div>';
+    let body = '';
+    if (mode === 'error') body = '<p class="text-body2">Billing and licenses is unavailable. The licenses of this firm could not be loaded. Check the connection and try again.</p>';
+    else if (view === 'clients') body = renderBillClients();
+    else body = (mode === 'empty' ? emptyLicences() : moneySummary() + renderLicenceTable());
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', action) + (mode === 'error' ? '' : tabs) + body + '</div>';
   }
   function familyCard(family, current) {
     const pack = PACK[family];
@@ -2223,7 +2226,7 @@
     const d = planDraft;
     const period = '<div class="d-flex gap-16"><div class="tabs" role="tablist"><button type="button" class="tab' + (d.period !== 'year' ? ' active' : '') + '" data-period="month" role="tab">Monthly</button><button type="button" class="tab' + (d.period === 'year' ? ' active' : '') + '" data-period="year" role="tab">Yearly</button></div><span class="status status-green">Save 20%</span></div>';
     const configure = d.family ? '<div class="d-flex gap-16"><div class="flex-1 page-stack"><h2 class="text-h2">Configure</h2>' + configureTable(d) + '</div>' + orderCard(d) + '</div>' : orderCard(d);
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing">Billing</a><h1 class="text-h1">Choose a plan for your firm</h1><p class="text-body2">You buy licences once and assign them to clients.</p>' + period + '<div class="d-flex gap-16">' + planColumn('core') + planColumn('advanced') + '</div><h2 class="text-h2">Compare</h2>' + compareTable() + configure + '<p class="text-caption">Example prices. Plan prices match the production screen. Smart Rules, Invoicing and revenue recognition amounts are examples.</p></div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing">Billing</a>' + pageHeader('Choose a plan for your firm', '', 'You buy licences once and assign them to clients.') + period + '<div class="d-flex gap-16">' + planColumn('core') + planColumn('advanced') + '</div><h2 class="text-h2">Compare</h2>' + compareTable() + configure + '<p class="text-caption">Example prices. Plan prices match the production screen. Smart Rules, Invoicing and revenue recognition amounts are examples.</p></div>';
   }
   function openBuyMore(id, opts) {
     opts = opts || {};
@@ -2464,7 +2467,7 @@
         <button class="btn-text sec" data-next="mode">Back</button></div>`
     };
     return `<button class="crumb" id="crumbBack"><span class="material-icons">arrow_back</span>Clients</button>
-      <div class="ph"><div><h1>Set up ${esc(c.name)}</h1></div></div>
+      ${pageHeader('Set up ' + esc(c.name))}
       <div class="stepper">${stepr}</div>
       ${bodies[step] || bodies.books}`;
   }
@@ -3251,7 +3254,7 @@
       : `<div class="page-stack"><h2 class="text-h2">What to fix</h2>${story.fixes.map((line, i) => `<p class="text-body2">${i + 1}. ${esc(line)}</p>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="#clients">Back to clients</a>
-      <div class="ph"><div class="page-head"><h1 class="text-h1">${esc(c.name)}</h1><p class="text-body2 logo-line">${brandMark(story.books, 18)}${brandMark(story.platform, 18)}<span>${esc(story.books)} and ${esc(story.platform)} · ${esc(story.period)}</span></p>${chip}</div><div class="ph-actions"><button type="button" class="btn-outlined" id="preAgain">Run again</button><button type="button" class="btn" id="preConnect">Connect to fix this</button></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(c.name)}</h1>${chip}</div><p class="synder-page-subtitle logo-line">${brandMark(story.books, 18)}${brandMark(story.platform, 18)}<span>${esc(story.books)} and ${esc(story.platform)} · ${esc(story.period)}</span></p></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="preAgain">Run again</button><button type="button" class="btn" id="preConnect">Connect to fix this</button></div></div>
       <div class="status-cards">${cards}</div>
       ${fixes}
       <div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Connect ${esc(story.books)} and ${esc(story.platform)}, and Synder will reconcile this automatically every day. <button type="button" class="link" id="preAlertConnect">Connect</button></span></div>
@@ -3600,16 +3603,7 @@
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      <div class="ph">
-        <div class="page-head">
-          <h1 class="text-h1">Clients</h1>
-        </div>
-        <div class="ph-actions">
-          ${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}
-          <button type="button" class="btn-outlined" id="listAdd">Add client</button>
-          <button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>
-        </div>
-      </div>
+      ${pageHeader('Clients', `${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}<button type="button" class="btn-outlined" id="listAdd">Add client</button><button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>`)}
       ${banner}
       <div class="tabs" role="tablist">
         <button type="button" class="tab${filter === 'all' ? ' active' : ''}" data-filter="all" role="tab" aria-selected="${filter === 'all'}">All clients <span class="status status-grey">${counts.all}</span></button>
@@ -3807,7 +3801,7 @@
     const tabHtml = `<div class="tabs">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}">${label}</button>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="#clients">Back to clients</a>
-      <div class="ph"><div><h1 class="text-h1">${esc(c.name)}</h1><span class="status status-${view.kind}">${esc(view.label)}</span></div><div class="ph-actions">${action}</div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(c.name)}</h1><span class="status status-${view.kind}">${esc(view.label)}</span></div></div><div class="synder-page-actions">${action}</div></div>
       <section class="detail-block"><h2 class="text-h2">License</h2><p class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</p></section>
       <section class="detail-block"><h2 class="text-h2">Accounting</h2>${accounting}</section>
       <section class="detail-block"><h2 class="text-h2">Integrations</h2>${integrations}</section>
@@ -3934,7 +3928,7 @@
       return `<tr class="row-clickable" data-person="${p.id}" tabindex="0"><td><span class="text-body2">${esc(p.name)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td>${status}${admin}</td><td><span class="text-body2">${count}</span></td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
     }).join('') || '<tr><td colspan="5" class="text-body2">No colleagues match.</td></tr>';
     return `<div class="flow-wide page-stack">
-      <div class="ph"><div><h1 class="text-h1">Colleagues</h1></div><div class="ph-actions"><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
+      ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Clients</th><th class="text-right"></th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
@@ -3942,7 +3936,7 @@
   }
   function renderFirmSettings() {
     return `<div class="flow-wide page-stack">
-      <h1 class="text-h1">Firm settings</h1>
+      ${pageHeader('Firm settings')}
       <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
       <div><button type="button" class="btn" id="firmNameSave">Save</button></div>
     </div>`;
@@ -3991,7 +3985,7 @@
     }
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backColleagues" href="#colleagues">Back to colleagues</a>
-      <div class="ph"><div class="page-head"><h1 class="text-h1">${esc(p.name)}</h1><p class="text-body2">${esc(p.email)} · ${esc(colleagueRoleName(p))}</p>${status}</div><div class="ph-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="col-${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-col-${p.id}">${menu}</div></div></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(p.name)}</h1>${status}</div><p class="synder-page-subtitle">${esc(p.email)} · ${esc(colleagueRoleName(p))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="col-${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-col-${p.id}">${menu}</div></div></div></div>
       ${tabs}${body}
     </div>`;
   }
@@ -4000,8 +3994,7 @@
     if (!c || !isClient(c.id)) return renderClients();
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="#clients">Back to clients</a>
-      <h1 class="text-h1">Health check</h1>
-      <p class="text-body1">${esc(c.name)}</p>
+      ${pageHeader('Health check', '', esc(c.name))}
       <p class="text-body1 text-center">This screen is not part of this prototype.</p>
     </div>`;
   }
@@ -4015,7 +4008,7 @@
   }
   function renderImport() {
     return `<div class="flow-col">
-      <div class="ph"><div><h1 class="text-h1">Import client list</h1></div></div>
+      ${pageHeader('Import client list')}
       <p class="text-body1">Choose where the names come from. You’ll review them before anyone is added. Read-only, names only. No changes will be made to their books without permission.</p>
       <div class="import-sources">
         ${srcOpt('qbo', brandMark('QuickBooks', 40), 'QuickBooks', 'Client companies from your firm’s own QuickBooks company. You choose which names to keep.', 'Sample list. Nothing is signed in.')}
@@ -4030,8 +4023,7 @@
     const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
     const n = IMPORT_POOL.filter((c) => ob.selected[c.id] !== false).length;
     return `<div class="flow-wide review-page">
-      <h1 class="text-h1">Choose clients to import</h1>
-      <p class="text-body1">All ticked. Untick anyone you no longer work with.</p>
+      ${pageHeader('Choose clients to import', '', 'All ticked. Untick anyone you no longer work with.')}
       <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
       <div class="table-wrap"><table class="synder-table">
         <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
@@ -4046,7 +4038,7 @@
   }
   function renderAddOne() {
     return `<div class="flow-narrow page-stack">
-      <h1 class="text-h1">Add a client</h1>
+      ${pageHeader('Add a client')}
       <div class="form-field"><label class="form-label form-label-required" for="oneName">Client name</label><input class="input" id="oneName" placeholder="e.g. Harbor Street Books" /><p class="form-hint">Just the name for now. You can connect their books later.</p></div>
       <div class="ob-actions"><button type="button" class="btn" id="oneAdd">Add client</button><button type="button" class="btn-text" id="oneCancel">Cancel</button></div>
     </div>`;
@@ -4056,14 +4048,14 @@
   }
 
   function renderCreateFirm() {
-    return `<div class="ph"><div><h1>Create a Firm</h1></div></div>
+    return `${pageHeader('Create a Firm')}
       <div class="empty"><span class="material-icons">domain_add</span><h2>Work on your clients' books from one place</h2>
       <p>A Firm lets clients connect to you and gives your team one list of every client.</p>
       <button class="btn" id="cfCta">Create a Firm</button>
       <button class="btn-text sec" id="cfSec">Not now</button></div>`;
   }
   function renderCreateOrg() {
-    return `<div class="ph"><div><h1>Create organization</h1></div></div>
+    return `${pageHeader('Create organization')}
       <div class="empty"><span class="material-icons">add_business</span><h2>New organization</h2>
       <p>Not built in this prototype. The new org would show up under My organizations.</p>
       <button class="btn" id="coCta">Back</button></div>`;
