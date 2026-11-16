@@ -1925,35 +1925,190 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const tabs = [['colleagues', 'Colleagues'], ['clients', 'Clients'], ['billing', 'Billing and licenses']];
     return '<div class="tabs" role="tablist">' + tabs.map((item) => '<button type="button" class="tab' + (active === item[0] ? ' active' : '') + '" data-firm-tab="' + item[0] + '" role="tab">' + item[1] + '</button>').join('') + '</div>';
   }
-  const PLACEHOLDER_LICENCES = [
-    { id: 'core-pack', name: 'Core pack · 5 Essential', balance: 2, price: 360 },
-    { id: 'core-single', name: 'Core Essential', balance: 1, price: 80 },
-    { id: 'adv-pack', name: 'Advanced pack · 5 Pro', balance: 0, price: 632 },
-    { id: 'rules', name: 'Smart Rules up to 10', balance: 3, price: 40 }
-  ];
-  function renderBilling() {
-    if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><button type="button" class="btn" id="revealLicences">Book a call</button></div><p class="text-caption">Placeholder empty state. Production copy for the licences table follows.</p></div>';
-    }
-    const rows = PLACEHOLDER_LICENCES.map((row) => '<tr><td><span class="text-body2">' + row.name + '</span></td><td><span class="text-body2">' + row.balance + ' left</span></td><td class="text-right"><button type="button" class="link" data-assign-lic="' + row.id + '">Assign</button></td></tr>').join('');
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openBuyLicenses">Buy licenses</button>') + firmSectionTabs('billing') + '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Balance</th><th class="text-right"></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="text-caption">Placeholder licence names, balances, and prices.</p></div>';
+  const EXAMPLE_PRICE = { corePack: 360, coreEss: 80, corePro: 200, advPack: 632, advEss: 72, advPro: 184, advMax: 384, user: 24, rev: 2, rules: { rules3: 15, rules5: 25, rules10: 40, rules30: 70, rules100: 120 }, inv: { inv20: 20, inv50: 45, inv200: 90, inv1000: 160 } };
+  const RULE_OPTS = [['rules3', 'Up to 3'], ['rules5', 'Up to 5'], ['rules10', 'Up to 10'], ['rules30', 'Up to 30'], ['rules100', 'Up to 100']];
+  const INV_OPTS = [['inv20', 'Up to 20'], ['inv50', 'Up to 50'], ['inv200', 'Up to 200'], ['inv1000', 'Up to 1,000']];
+  let licenseBook = { family: 'core', period: 'month', periodLabel: 'Nov 1, 2026 – Nov 30, 2026', plans: { ess: 5, pro: 2, max: 0 }, rules: { rules10: 5 }, inv: { inv50: 2 }, users: 4, rev: 10 };
+  let clientLicenses = { e1: { plan: 'ess', rules: 'rules10', rulesQty: 1, inv: '', invQty: 0, users: 1, rev: 0 } };
+  function licenseName(id) {
+    if (id === 'ess') return 'Essential';
+    if (id === 'pro') return 'Pro';
+    if (id === 'max') return 'Pro Max';
+    if (id === 'users') return 'Additional users';
+    if (id === 'rev') return 'Revenue recognition';
+    const rule = RULE_OPTS.find((item) => item[0] === id);
+    if (rule) return 'Smart Rules ' + rule[1].toLowerCase();
+    const inv = INV_OPTS.find((item) => item[0] === id);
+    if (inv) return 'Invoicing ' + inv[1].toLowerCase();
+    return id;
   }
-  function renderBuyLicensesPage() {
-    const annual = st.buyPeriod === 'annual';
-    const factor = annual ? 0.8 : 1;
-    if (!st.buyQty) st.buyQty = {};
-    const lines = PLACEHOLDER_LICENCES.map((row) => {
-      const qty = st.buyQty[row.id] || 0;
-      const price = Math.round(row.price * factor * 100) / 100;
-      return '<div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + row.name + '</p><p class="text-caption">Placeholder · $' + price + ' each</p></div><div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-buy-qty="' + row.id + '" data-dir="-1" aria-label="Fewer"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-buy-qty="' + row.id + '" data-dir="1" aria-label="More"><span class="material-icons">add</span></button></div></div>';
-    }).join('');
-    const qty = PLACEHOLDER_LICENCES.reduce((n, row) => n + (st.buyQty[row.id] || 0), 0);
-    const raw = PLACEHOLDER_LICENCES.reduce((n, row) => n + (st.buyQty[row.id] || 0) * row.price * factor, 0);
-    const discount = qty >= 5 ? 10 : 0;
-    const total = Math.round(raw * (1 - discount / 100) * 100) / 100;
-    const period = '<div class="tabs" role="tablist"><button type="button" class="tab' + (annual ? '' : ' active') + '" data-buy-period="month" role="tab">Monthly</button><button type="button" class="tab' + (annual ? ' active' : '') + '" data-buy-period="annual" role="tab">Annual <span class="status status-green">20% OFF</span></button></div>';
-    const need = st.buyNeed ? '<div class="form-error-msg">Add at least one licence.</div>' : '';
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing">Billing and licenses</a>' + pageHeader('Buy licenses', '', 'Placeholder catalogue. Production names and prices will replace these.') + period + lines + '<div class="card page-stack"><h2 class="text-h2">Order</h2>' + (discount ? '<p class="text-body2">Discount - ' + discount + '%</p>' : '<p class="text-body2">Discount - 0%</p>') + '<p class="text-h2">$' + total + (annual ? ' / year' : ' / month') + '</p>' + need + '<button type="button" class="btn" id="confirmPurchase">Buy licenses</button></div></div>';
+  function licenseUsedMap() {
+    const used = { ess: 0, pro: 0, max: 0, users: 0, rev: 0, rules: {}, inv: {} };
+    Object.keys(clientLicenses).forEach((id) => {
+      const row = clientLicenses[id];
+      if (!row) return;
+      if (row.plan) used[row.plan] += 1;
+      if (row.rules && row.rulesQty) used.rules[row.rules] = (used.rules[row.rules] || 0) + row.rulesQty;
+      if (row.inv && row.invQty) used.inv[row.inv] = (used.inv[row.inv] || 0) + row.invQty;
+      used.users += row.users || 0;
+      used.rev += row.rev || 0;
+    });
+    return used;
+  }
+  function licenseLeft(id) {
+    const used = licenseUsedMap();
+    if (id === 'users') return (licenseBook.users || 0) - used.users;
+    if (id === 'rev') return (licenseBook.rev || 0) - used.rev;
+    if (String(id).indexOf('rules') === 0) return (licenseBook.rules[id] || 0) - (used.rules[id] || 0);
+    if (String(id).indexOf('inv') === 0) return (licenseBook.inv[id] || 0) - (used.inv[id] || 0);
+    return (licenseBook.plans[id] || 0) - (used[id] || 0);
+  }
+  function purchasedRows() {
+    const used = licenseUsedMap();
+    const rows = [];
+    ['ess', 'pro', 'max'].forEach((id) => { if (licenseBook.plans[id]) rows.push([licenseName(id), licenseBook.plans[id], used[id] || 0]); });
+    Object.keys(licenseBook.rules).forEach((id) => { if (licenseBook.rules[id]) rows.push([licenseName(id), licenseBook.rules[id], used.rules[id] || 0]); });
+    Object.keys(licenseBook.inv).forEach((id) => { if (licenseBook.inv[id]) rows.push([licenseName(id), licenseBook.inv[id], used.inv[id] || 0]); });
+    if (licenseBook.users) rows.push(['Additional users', licenseBook.users, used.users]);
+    if (licenseBook.rev) rows.push(['Revenue recognition', licenseBook.rev, used.rev]);
+    return rows;
+  }
+  function renderBilling() {
+    if (billingMode() === 'error') {
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
+    }
+    if (!st.licencesOn) {
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><button type="button" class="btn" id="revealLicences">Book a call</button></div></div>';
+    }
+    const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[1] - row[2]) + '</td></tr>').join('');
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + firmSectionTabs('billing') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><h2 class="text-h2">Purchased licenses</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+  }
+  function assignedSummary(row) {
+    if (!row || !row.plan) return 'No assigned licenses';
+    const bits = ['1 license from ' + (licenseBook.family === 'advanced' ? 'Synder Advanced' : 'Synder Core')];
+    bits.push(licenseName(row.plan) + ' × 1');
+    if (row.rules && row.rulesQty) bits.push(licenseName(row.rules) + ' × ' + row.rulesQty);
+    if (row.inv && row.invQty) bits.push(licenseName(row.inv) + ' × ' + row.invQty);
+    if (row.users) bits.push('Additional users × ' + row.users);
+    if (row.rev) bits.push('Revenue recognition × ' + row.rev);
+    return bits.join(', ');
+  }
+  function renderAssignTab() {
+    const applied = st.licApplied || { q: '', type: '', license: '' };
+    let list = listedClients().filter((c) => {
+      const row = clientLicenses[c.id];
+      const pending = isWaitingClient(c);
+      if (applied.type === 'pending' && !pending) return false;
+      if (applied.type === 'active' && pending) return false;
+      if (applied.license === 'none' && row && row.plan) return false;
+      if (applied.license && applied.license !== 'none') {
+        if (!row) return false;
+        if (applied.license === 'users') { if (!row.users) return false; }
+        else if (applied.license === 'rev') { if (!row.rev) return false; }
+        else if (String(applied.license).indexOf('rules') === 0) { if (row.rules !== applied.license) return false; }
+        else if (String(applied.license).indexOf('inv') === 0) { if (row.inv !== applied.license) return false; }
+        else if (row.plan !== applied.license) return false;
+      }
+      const q = (applied.q || '').toLowerCase();
+      return !q || c.name.toLowerCase().indexOf(q) >= 0;
+    });
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    if (st.assignSort === 'desc') list.reverse();
+    const page = paginate('assignClients', list, [10, 25, 50, 100]);
+    const body = page.slice.map((c) => {
+      const pending = isWaitingClient(c);
+      const summary = assignedSummary(clientLicenses[c.id]);
+      const action = pending ? '<span class="status status-yellow">Pending</span>' : '<button type="button" class="btn-outlined" data-lic-action="' + c.id + '">' + (clientLicenses[c.id] && clientLicenses[c.id].plan ? 'Change' : 'Assign') + '</button>';
+      return '<tr><td><span class="text-body2">' + esc(c.name) + '</span></td><td><span class="text-body2">' + summary + '</span></td><td class="text-right">' + action + '</td></tr>';
+    }).join('') || '<tr><td colspan="3" class="text-body2">No clients found</td></tr>';
+    const planOpts = [['', 'License'], ['none', 'None'], ['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']].concat(RULE_OPTS.map((item) => [item[0], 'Smart Rules ' + item[1].toLowerCase()])).concat(INV_OPTS.map((item) => [item[0], 'Invoicing ' + item[1].toLowerCase()]));
+    const sel = (id, opts, value) => '<select class="select" id="' + id + '">' + opts.map((item) => '<option value="' + item[0] + '"' + (value === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') + '</select>';
+    const sortCls = 'sortable sorted' + (st.assignSort === 'desc' ? ' desc' : '');
+    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client'], ['pending', 'Pending invitation']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+  }
+  function exampleDiscountPct(count) {
+    if (count >= 50) return 15;
+    if (count >= 25) return 10;
+    if (count >= 10) return 5;
+    return 0;
+  }
+  function ensureBuyDraft() {
+    if (st.licBuy) return st.licBuy;
+    const blank = () => ({ pack: 0, ess: 0, pro: 0, max: 0, users: 0, rules: [{ id: '', qty: 0 }], inv: [{ id: '', qty: 0 }], rev: 0 });
+    const draft = { period: licenseBook.period || 'month', core: blank(), advanced: blank(), msg: '' };
+    const card = draft[licenseBook.family] || draft.core;
+    card.pack = 1;
+    card.ess = Math.max(0, (licenseBook.plans.ess || 0) - 5);
+    card.pro = licenseBook.plans.pro || 0;
+    card.max = licenseBook.plans.max || 0;
+    card.users = licenseBook.users || 0;
+    card.rev = licenseBook.rev || 0;
+    const rules = Object.keys(licenseBook.rules || {}).filter((id) => licenseBook.rules[id]);
+    const inv = Object.keys(licenseBook.inv || {}).filter((id) => licenseBook.inv[id]);
+    if (rules.length) card.rules = rules.map((id) => ({ id: id, qty: licenseBook.rules[id] }));
+    if (inv.length) card.inv = inv.map((id) => ({ id: id, qty: licenseBook.inv[id] }));
+    st.licBuy = draft;
+    return draft;
+  }
+  function planLicenseCount(card) { return (card.pack || 0) * 5 + (card.ess || 0) + (card.pro || 0) + (card.max || 0); }
+  function planSubtotal(family, card, factor) {
+    const pack = family === 'advanced' ? EXAMPLE_PRICE.advPack : EXAMPLE_PRICE.corePack;
+    const ess = family === 'advanced' ? EXAMPLE_PRICE.advEss : EXAMPLE_PRICE.coreEss;
+    const pro = family === 'advanced' ? EXAMPLE_PRICE.advPro : EXAMPLE_PRICE.corePro;
+    return (card.pack || 0) * pack * factor + (card.ess || 0) * ess * factor + (card.pro || 0) * pro * factor + (card.max || 0) * EXAMPLE_PRICE.advMax * factor;
+  }
+  function addonSubtotal(card, factor) {
+    let n = (card.users || 0) * EXAMPLE_PRICE.user * factor + (card.rev || 0) * EXAMPLE_PRICE.rev * factor;
+    (card.rules || []).forEach((row) => { if (row.id && row.qty) n += row.qty * (EXAMPLE_PRICE.rules[row.id] || 0) * factor; });
+    (card.inv || []).forEach((row) => { if (row.id && row.qty) n += row.qty * (EXAMPLE_PRICE.inv[row.id] || 0) * factor; });
+    return n;
+  }
+  function cardTotal(family, card, factor) {
+    const count = planLicenseCount(card);
+    const pct = exampleDiscountPct(count);
+    return { pct: pct, total: planSubtotal(family, card, factor) * (1 - pct / 100) + addonSubtotal(card, factor) };
+  }
+  function stepPair(key, qty) {
+    return '<div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-lic-step="' + key + '" data-dir="-1" aria-label="Fewer"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-lic-step="' + key + '" data-dir="1" aria-label="More"><span class="material-icons">add</span></button></div>';
+  }
+  function renderBuyTab() {
+    const draft = ensureBuyDraft();
+    const yearly = draft.period === 'year';
+    const factor = yearly ? 0.8 : 1;
+    const hidden = licenseBook.period === 'year' ? '' : '<div class="tabs" role="tablist"><button type="button" class="tab' + (yearly ? '' : ' active') + '" data-buy-period="month" role="tab">Pay monthly</button><button type="button" class="tab' + (yearly ? ' active' : '') + '" data-buy-period="year" role="tab">Pay yearly <span class="status status-green">20% OFF</span></button></div>';
+    const cards = ['core', 'advanced'].map((family) => renderPriceCard(family, draft, factor, yearly)).join('');
+    const msg = draft.msg ? '<div class="form-error-msg">' + draft.msg + '</div>' : '';
+    return hidden + '<p class="text-body2">Billing period</p>' + '<div class="d-flex gap-16">' + cards + '</div>' + msg + '<p class="text-caption">Example prices and discount tiers.</p>';
+  }
+  function renderPriceCard(family, draft, factor, yearly) {
+    const card = draft[family];
+    const current = licenseBook.family === family;
+    const from = family === 'advanced' ? EXAMPLE_PRICE.advPack / 5 : EXAMPLE_PRICE.corePack / 5;
+    const packPrice = family === 'advanced' ? EXAMPLE_PRICE.advPack : EXAMPLE_PRICE.corePack;
+    const ess = family === 'advanced' ? EXAMPLE_PRICE.advEss : EXAMPLE_PRICE.coreEss;
+    const pro = family === 'advanced' ? EXAMPLE_PRICE.advPro : EXAMPLE_PRICE.corePro;
+    const who = family === 'core' ? 'up to 3,000 sync credits/month + ' : 'up to 20,000 sync credits/month + ';
+    const feature = family === 'core' ? 'Essential plan features' : 'Pro plan features';
+    const count = planLicenseCount(card);
+    const priced = cardTotal(family, card, factor);
+    const badge = current ? '<span class="status status-green">Current subscription</span>' : '';
+    let singles = '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Essential ' + moneyLabel(ess * factor) + '/mo</span>' + stepPair(family + ':ess', card.ess || 0) + '</div>';
+    singles += '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Pro ' + moneyLabel(pro * factor) + '/mo</span>' + stepPair(family + ':pro', card.pro || 0) + '</div>';
+    if (family === 'advanced') singles += '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Pro Max ' + moneyLabel(EXAMPLE_PRICE.advMax * factor) + '/mo</span>' + stepPair(family + ':max', card.max || 0) + '</div><p class="text-body2">up to 40,000 sync credits/month + <button type="button" class="link" data-stub>Pro Max plan features</button></p>';
+    const rules = (card.rules || []).map((row, i) => addonLine(family, 'rules', i, row, RULE_OPTS, EXAMPLE_PRICE.rules, factor)).join('');
+    const inv = (card.inv || []).map((row, i) => addonLine(family, 'inv', i, row, INV_OPTS, EXAMPLE_PRICE.inv, factor)).join('');
+    const button = '<button type="button" class="' + (current ? 'btn' : 'btn-outlined') + '" data-plan-update="' + family + '">' + (licenseBook.family ? 'Update' : 'Subscribe') + '</button>';
+    return '<div class="card flex-1 d-flex flex-col gap-12"><h2 class="text-h2">' + (family === 'advanced' ? 'Synder Advanced' : 'Synder Core') + '</h2>' + badge + '<p class="text-subtitle1">from ' + moneyLabel(from * factor) + ' month</p>' + (yearly ? '<p class="text-body2">Billed yearly</p>' : '') + '<p class="text-subtitle2">Plans ' + helpIcon('<p class="text-body2">Sync credits included with each plan.</p>') + '</p><p class="text-body2">' + who + '<button type="button" class="link" data-stub>' + feature + '</button></p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Pack ' + moneyLabel(packPrice * factor) + '/mo</span>' + stepPair(family + ':pack', card.pack || 0) + '</div>' + singles + '<p class="text-body2">Discount - ' + priced.pct + '%</p><p class="text-subtitle2">Additional users</p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + moneyLabel(EXAMPLE_PRICE.user * factor) + '/mo</span>' + stepPair(family + ':users', card.users || 0) + '</div><p class="text-subtitle2">Smart Rules</p>' + rules + '<button type="button" class="link" data-add-addon="' + family + ':rules">+ Add more</button><p class="text-subtitle2">Invoicing</p>' + inv + '<button type="button" class="link" data-add-addon="' + family + ':inv">+ Add more</button><p class="text-subtitle2">Revenue recognition</p><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><input class="input" data-rev="' + family + '" placeholder="Monthly subscriptions" value="' + (card.rev || '') + '"><p class="text-caption">' + moneyLabel(EXAMPLE_PRICE.rev * factor) + '/mo per subscription</p><p class="text-body2">You will pay now: ' + moneyLabel(priced.total) + '</p>' + button + '</div>';
+  }
+  function addonLine(family, kind, index, row, opts, prices, factor) {
+    const price = row.id ? moneyLabel((prices[row.id] || 0) * factor) + '/mo' : '';
+    const options = '<option value="">Select</option>' + opts.map((item) => '<option value="' + item[0] + '"' + (row.id === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('');
+    return '<div class="d-flex align-center gap-8"><select class="select" data-addon-size="' + family + ':' + kind + ':' + index + '" aria-label="' + kind + '">' + options + '</select><span class="text-body2">' + price + '</span>' + stepPair(family + ':' + kind + ':' + index, row.qty || 0) + '<button type="button" class="btn-icon" data-del-addon="' + family + ':' + kind + ':' + index + '" aria-label="Delete"><span class="material-icons">close</span></button></div>';
+  }
+  function renderManageLicenses() {
+    const tab = st.manageTab === 'buy' ? 'buy' : 'assign';
+    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (tab === 'assign' ? ' active' : '') + '" data-manage-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab' + (tab === 'buy' ? ' active' : '') + '" data-manage-tab="buy" role="tab">Buy licenses</button></div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -2566,7 +2721,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
     if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
-    if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses') activePage = 'billing';
+    if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses' || st.page === 'manage') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
@@ -4086,7 +4241,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
-      else if (st.page === 'buyplans' || st.page === 'buylicenses') html = renderBuyLicensesPage();
+      else if (st.page === 'manage' || st.page === 'buyplans' || st.page === 'buylicenses') html = renderManageLicenses();
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
       else if (st.page === 'firmsettings') html = renderFirmSettings();
@@ -4458,36 +4613,49 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
     m.querySelectorAll('[data-firm-tab]').forEach((b) => b.onclick = () => goFirm(b.dataset.firmTab));
     bindClick('revealLicences', () => { st.licencesOn = true; render(); });
-    bindClick('openBuyLicenses', () => { st.page = 'buylicenses'; render(); });
+    bindClick('openManage', () => { st.page = 'manage'; st.manageTab = 'assign'; st.licencesOn = true; render(); });
     bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
-    m.querySelectorAll('[data-buy-period]').forEach((b) => b.onclick = () => { st.buyPeriod = b.dataset.buyPeriod; renderMain(); });
-    m.querySelectorAll('[data-buy-qty]').forEach((b) => b.onclick = () => {
-      if (!st.buyQty) st.buyQty = {};
-      const id = b.dataset.buyQty;
-      st.buyQty[id] = Math.max(0, (st.buyQty[id] || 0) + Number(b.dataset.dir));
-      st.buyNeed = false;
+    m.querySelectorAll('[data-manage-tab]').forEach((b) => b.onclick = () => { st.manageTab = b.dataset.manageTab; render(); });
+    m.querySelectorAll('[data-buy-period]').forEach((b) => b.onclick = () => { ensureBuyDraft().period = b.dataset.buyPeriod; renderMain(); });
+    m.querySelectorAll('[data-lic-step]').forEach((b) => b.onclick = () => stepLicense(b.dataset.licStep, Number(b.dataset.dir)));
+    m.querySelectorAll('[data-addon-size]').forEach((el) => el.onchange = () => {
+      const parts = el.dataset.addonSize.split(':');
+      ensureBuyDraft()[parts[0]][parts[1]][Number(parts[2])].id = el.value;
       renderMain();
     });
-    bindClick('confirmPurchase', () => {
-      const qty = PLACEHOLDER_LICENCES.reduce((n, row) => n + ((st.buyQty && st.buyQty[row.id]) || 0), 0);
-      if (!qty) { st.buyNeed = true; renderMain(); return; }
-      const annual = st.buyPeriod === 'annual';
-      const factor = annual ? 0.8 : 1;
-      const raw = PLACEHOLDER_LICENCES.reduce((n, row) => n + ((st.buyQty[row.id] || 0) * row.price * factor), 0);
-      const discount = qty >= 5 ? 10 : 0;
-      const total = Math.round(raw * (1 - discount / 100) * 100) / 100;
-      const { modal, close } = dialogShell('Confirm purchase', '<p class="text-body2">Placeholder order. ' + qty + ' licence' + (qty === 1 ? '' : 's') + ', ' + (annual ? 'billed annually' : 'billed monthly') + '. Charged $' + total + ' + taxes.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="doPurchase">Buy licenses</button>');
-      modal.querySelector('#doPurchase').onclick = () => {
-        PLACEHOLDER_LICENCES.forEach((row) => { row.balance += (st.buyQty[row.id] || 0); });
-        st.buyQty = {};
-        close();
-        st.page = 'billing';
-        st.licencesOn = true;
-        showKitToast('Licences updated');
-        render();
-      };
+    m.querySelectorAll('[data-add-addon]').forEach((b) => b.onclick = () => {
+      const parts = b.dataset.addAddon.split(':');
+      ensureBuyDraft()[parts[0]][parts[1]].push({ id: '', qty: 0 });
+      renderMain();
     });
-    m.querySelectorAll('[data-assign-lic]').forEach((b) => b.onclick = () => openAssignPlaceholder(b.dataset.assignLic));
+    m.querySelectorAll('[data-del-addon]').forEach((b) => b.onclick = () => {
+      const parts = b.dataset.delAddon.split(':');
+      ensureBuyDraft()[parts[0]][parts[1]].splice(Number(parts[2]), 1);
+      renderMain();
+    });
+    m.querySelectorAll('[data-rev]').forEach((el) => el.onchange = () => {
+      const n = parseInt(el.value, 10);
+      ensureBuyDraft()[el.dataset.rev].rev = el.value === '' || !isFinite(n) ? 0 : Math.max(0, n);
+      renderMain();
+    });
+    m.querySelectorAll('[data-plan-update]').forEach((b) => b.onclick = () => submitLicensePlan(b.dataset.planUpdate));
+    bindClick('licApply', () => {
+      st.licApplied = { q: ($('licSearch') && $('licSearch').value) || '', type: ($('licType') && $('licType').value) || '', license: ($('licLicense') && $('licLicense').value) || '' };
+      if (st.pagers && st.pagers.assignClients) st.pagers.assignClients.page = 0;
+      renderMain();
+    });
+    bindClick('licReset', () => {
+      st.licApplied = { q: '', type: '', license: '' };
+      if (st.pagers && st.pagers.assignClients) st.pagers.assignClients.page = 0;
+      renderMain();
+    });
+    const sortAssign = $('sortAssignName');
+    if (sortAssign) sortAssign.onclick = () => { st.assignSort = st.assignSort === 'desc' ? 'asc' : 'desc'; renderMain(); };
+    m.querySelectorAll('[data-lic-action]').forEach((b) => b.onclick = () => {
+      const row = clientLicenses[b.dataset.licAction];
+      if (row && row.plan) openChangeLicenses(b.dataset.licAction);
+      else openAssignLicenses(b.dataset.licAction);
+    });
     bindClick('removeThisClient', () => { if (st.clientId) tryRemoveClient(st.clientId); });
     bindClick('tagFilterBtn', openTagFilter);
     bindClick('openMonth', () => { st.openMonth = !!($('openMonth') && $('openMonth').checked); renderMain(); });
@@ -4569,19 +4737,117 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     watchRequired(modal);
     return { modal, close };
   }
-  function openAssignPlaceholder(id) {
-    const row = PLACEHOLDER_LICENCES.find((item) => item.id === id);
-    if (!row) return;
-    const options = listedClients().map((c) => '<option value="' + c.id + '">' + esc(c.name) + '</option>').join('');
-    const list = PLACEHOLDER_LICENCES.map((item) => '<p class="text-body2">' + item.name + ' · ' + item.balance + ' left</p>').join('');
-    const { modal, close } = dialogShell('Assign', '<p class="text-body2">Placeholder assign dialog.</p>' + list + '<div class="form-field"><label class="form-label form-label-required" for="assignClient">Client</label><select class="select" id="assignClient" data-required="1"><option value="">Select…</option>' + options + '</select></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="assignGo">Assign</button>');
-    modal.querySelector('#assignGo').onclick = () => {
-      const client = modal.querySelector('#assignClient');
-      if (!client.value) { fieldError(client, 'Required'); return; }
-      if (row.balance < 1) { fieldError(client, 'None left'); return; }
-      row.balance -= 1;
+  function stepLicense(key, dir) {
+    const draft = ensureBuyDraft();
+    const parts = key.split(':');
+    const card = draft[parts[0]];
+    draft.msg = '';
+    if (parts[1] === 'rules' || parts[1] === 'inv') {
+      const row = card[parts[1]][Number(parts[2])];
+      if (!row) return;
+      row.qty = Math.max(0, (row.qty || 0) + dir);
+    } else if (parts[1] === 'pack' && dir < 0 && (card.pack || 0) <= 1 && licenseBook.family === parts[0]) {
+      draft.msg = 'Pack quantity can\'t be lower than 1.';
+    } else {
+      card[parts[1]] = Math.max(0, (card[parts[1]] || 0) + dir);
+    }
+    renderMain();
+  }
+  function draftFits(family, card) {
+    const next = { ess: (card.pack || 0) * 5 + (card.ess || 0), pro: card.pro || 0, max: card.max || 0, users: card.users || 0, rev: card.rev || 0, rules: {}, inv: {} };
+    (card.rules || []).forEach((row) => { if (row.id && row.qty) next.rules[row.id] = (next.rules[row.id] || 0) + row.qty; });
+    (card.inv || []).forEach((row) => { if (row.id && row.qty) next.inv[row.id] = (next.inv[row.id] || 0) + row.qty; });
+    const used = licenseUsedMap();
+    if (next.ess < used.ess || next.pro < used.pro || next.max < used.max || next.users < used.users || next.rev < used.rev) return false;
+    if (Object.keys(used.rules).some((id) => (next.rules[id] || 0) < used.rules[id])) return false;
+    if (Object.keys(used.inv).some((id) => (next.inv[id] || 0) < used.inv[id])) return false;
+    return next;
+  }
+  function applyDraft(family, card) {
+    const next = draftFits(family, card);
+    licenseBook.family = family;
+    licenseBook.period = ensureBuyDraft().period;
+    licenseBook.plans = { ess: next.ess, pro: next.pro, max: next.max };
+    licenseBook.users = next.users;
+    licenseBook.rev = next.rev;
+    licenseBook.rules = next.rules;
+    licenseBook.inv = next.inv;
+    st.licBuy = null;
+  }
+  function submitLicensePlan(family) {
+    const draft = ensureBuyDraft();
+    const card = draft[family];
+    if (licenseBook.family && family !== licenseBook.family) {
+      const { modal } = dialogShell('Big move ahead - we\'ve got you', '<p class="text-body2">Moving between Core and Advanced isn\'t a one-click switch - it\'s a chance to reshape how Synder works for your firm. Your Synder Specialist will help you map your plans, clients, and features so you walk away with the best possible setup.</p>', '<button type="button" class="btn-outlined" data-cancel>Close</button><button type="button" class="btn" id="bookSpec">Schedule time with my Synder Specialist</button>');
+      modal.querySelector('#bookSpec').onclick = () => { modal.remove(); showNotPart(); };
+      return;
+    }
+    if (!draftFits(family, card)) { draft.msg = 'Not enough licenses for clients who already have them.'; renderMain(); return; }
+    const factor = draft.period === 'year' ? 0.8 : 1;
+    const total = moneyLabel(cardTotal(family, card, factor).total) + ' USD';
+    const { modal, close } = dialogShell('Plan update', '<p class="text-body2">Your needs are changing and Synder is able to keep up and make sure you get the best value for money!</p><p class="text-body2">You will pay now: ' + total + ' + Stripe taxes</p><p class="text-body2">Note: Not a penny will be missed! In case you have unused balance Synder is using it to prorate the subscription.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">Update plan</button>');
+    modal.querySelector('#planGo').onclick = () => {
+      applyDraft(family, card);
       close();
-      showKitToast('Licence assigned');
+      st.page = 'manage';
+      st.manageTab = 'assign';
+      showKitToast('Subscription successfully updated.');
+      render();
+    };
+  }
+  function licenseChoices(kind, current) {
+    const ids = kind === 'plan' ? ['ess', 'pro', 'max'] : (kind === 'rules' ? RULE_OPTS.map((item) => item[0]) : INV_OPTS.map((item) => item[0]));
+    return ids.filter((id) => licenseLeft(id) > 0 || id === current).map((id) => {
+      const label = id === current ? licenseName(id) + ' (current)' : licenseName(id) + ' (' + licenseLeft(id) + ' licenses available)';
+      return '<option value="' + id + '"' + (id === current ? ' selected' : '') + '>' + label + '</option>';
+    }).join('');
+  }
+  function openAssignLicenses(clientId) {
+    const client = findOrg(clientId);
+    if (!client) return;
+    const body = '<div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">Select a license</option>' + licenseChoices('plan', '') + '</select></div><div class="form-field"><label class="form-label" for="asRules">Rules</label><select class="select" id="asRules"><option value="">Select</option>' + licenseChoices('rules', '') + '</select></div><div class="form-field"><label class="form-label" for="asInv">Invoicing</label><select class="select" id="asInv"><option value="">Select</option>' + licenseChoices('inv', '') + '</select></div><div class="form-field"><label class="form-label" for="asUsers">Additional users (' + licenseLeft('users') + ' licenses available)</label><input class="input" id="asUsers" type="number" min="0" value="0"></div><div class="form-field"><label class="form-label" for="asRev">Revenue recognition subscriptions (' + licenseLeft('rev') + ' monthly subscriptions available)</label><input class="input" id="asRev" placeholder="Monthly subscriptions"></div><div class="form-error-msg" id="asErr" hidden></div>';
+    const { modal, close } = dialogShell('Assign licenses to ' + esc(client.name), body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="asGo">Assign</button>');
+    modal.querySelector('.modal').classList.add('modal-md');
+    modal.querySelector('#asGo').onclick = () => {
+      const plan = modal.querySelector('#asPlan').value;
+      const rules = modal.querySelector('#asRules').value;
+      const inv = modal.querySelector('#asInv').value;
+      const users = Math.max(0, parseInt(modal.querySelector('#asUsers').value, 10) || 0);
+      const rev = Math.max(0, parseInt(modal.querySelector('#asRev').value, 10) || 0);
+      const err = modal.querySelector('#asErr');
+      if (!plan) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
+      if ((rules && licenseLeft(rules) < 1) || (inv && licenseLeft(inv) < 1) || users > licenseLeft('users') || rev > licenseLeft('rev') || licenseLeft(plan) < 1) { err.hidden = false; err.textContent = 'Not enough licenses left.'; return; }
+      clientLicenses[clientId] = { plan: plan, rules: rules, rulesQty: rules ? 1 : 0, inv: inv, invQty: inv ? 1 : 0, users: users, rev: rev };
+      close();
+      showKitToast('Licenses updated.');
+      renderMain();
+    };
+  }
+  function openChangeLicenses(clientId) {
+    const client = findOrg(clientId);
+    const row = clientLicenses[clientId];
+    if (!client || !row) return;
+    const body = '<div class="form-field"><label class="form-label" for="chPlan">Plan</label><select class="select" id="chPlan"><option value="">Unassign</option>' + licenseChoices('plan', row.plan) + '</select></div><div class="form-field"><label class="form-label" for="chRules">Rules</label><select class="select" id="chRules"><option value="">Unassign</option>' + licenseChoices('rules', row.rules) + '</select></div><div class="form-field"><label class="form-label" for="chInv">Invoicing</label><select class="select" id="chInv"><option value="">Unassign</option>' + licenseChoices('inv', row.inv) + '</select></div><div class="form-field"><label class="form-label" for="chUsers">Additional users</label><input class="input" id="chUsers" type="number" min="0" value="' + (row.users || 0) + '"></div><div class="form-field"><label class="form-label" for="chRev">Revenue recognition subscriptions</label><input class="input" id="chRev" placeholder="Unassigned" value="' + (row.rev || '') + '"></div><div class="form-error-msg" id="chErr" hidden></div>';
+    const { modal, close } = dialogShell('Update licenses for ' + esc(client.name), body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn-outlined" id="chDelete">Delete</button><button type="button" class="btn" id="chUpdate">Update</button>');
+    modal.querySelector('.modal').classList.add('modal-md');
+    const read = () => ({ plan: modal.querySelector('#chPlan').value, rules: modal.querySelector('#chRules').value, inv: modal.querySelector('#chInv').value, users: Math.max(0, parseInt(modal.querySelector('#chUsers').value, 10) || 0), rev: Math.max(0, parseInt(modal.querySelector('#chRev').value, 10) || 0) });
+    modal.querySelector('#chDelete').onclick = () => {
+      const form = read();
+      const err = modal.querySelector('#chErr');
+      if (form.plan || form.rules || form.inv || form.users || form.rev) { err.hidden = false; err.textContent = 'To unassign all licenses, first unselect every assigned license above'; return; }
+      delete clientLicenses[clientId];
+      close();
+      showKitToast('Licenses unassigned.');
+      renderMain();
+    };
+    modal.querySelector('#chUpdate').onclick = () => {
+      const form = read();
+      const err = modal.querySelector('#chErr');
+      if (!form.plan && (form.rules || form.inv || form.users || form.rev)) { err.hidden = false; err.textContent = 'Select a main plan or remove the other license assignments.'; return; }
+      if (!form.plan) { delete clientLicenses[clientId]; close(); showKitToast('Licenses unassigned.'); renderMain(); return; }
+      clientLicenses[clientId] = { plan: form.plan, rules: form.rules, rulesQty: form.rules ? 1 : 0, inv: form.inv, invQty: form.inv ? 1 : 0, users: form.users, rev: form.rev };
+      close();
+      showKitToast('Licenses updated.');
       renderMain();
     };
   }
@@ -4890,8 +5156,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
       st.plansOpen = false;
-      if (parts[1] === 'buy' || parts[1] === 'plans') st.page = 'buylicenses';
-      else { st.page = 'billing'; st.licencesOn = parts[1] === 'licences'; }
+      if (parts[1] === 'manage' || parts[1] === 'buy' || parts[1] === 'plans') {
+        st.page = 'manage';
+        st.manageTab = (parts[1] === 'buy' || parts[1] === 'plans' || parts[2] === 'buy') ? 'buy' : 'assign';
+        st.licencesOn = true;
+      } else { st.page = 'billing'; st.licencesOn = parts[1] === 'licences'; }
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -5025,7 +5294,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && (st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/buy';
+    else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage' + (st.manageTab === 'buy' || st.page === 'buylicenses' || st.page === 'buyplans' ? '/buy' : '');
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.licencesOn ? '/licences' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
