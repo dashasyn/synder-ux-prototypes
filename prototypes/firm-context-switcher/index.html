@@ -3835,11 +3835,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { slice: list.slice(start, start + size), html };
   }
   function ensureWork(c) {
-    if (typeof c.monthIndex !== 'number') c.monthIndex = 2;
+    if (typeof c.monthIndex !== 'number') c.monthIndex = 3;
     c.monthIndex = Math.max(0, Math.min(WORK_MONTHS.length - 1, c.monthIndex));
     if (!c.monthStatus) c.monthStatus = 'Open';
     if (!Array.isArray(c.firmChecks)) {
       c.firmChecks = [
+        { id: 'tax', label: 'Sales tax filed', done: false, note: '', required: true },
         { id: 'bank', label: 'Bank statements received', done: false, note: '', required: false },
         { id: 'owner', label: 'Owner review done', done: false, note: '', required: false }
       ];
@@ -3949,87 +3950,75 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
     </div>`;
   }
-  function clientWorkTab(c, off) {
+  function clientWorkTab(c) {
     const month = ensureWork(c);
-    const profile = c.firmProfile;
+    const missing = c.firmChecks.filter((chk) => chk.required && !chk.done);
+    const reqLink = missing.length ? `<button type="button" class="link" id="requiredLeft">${missing.length} required check${missing.length === 1 ? '' : 's'} remaining</button>` : '';
+    const monthChip = c.monthStatus === 'Closed' ? 'green' : (c.monthStatus === 'In review' ? 'yellow' : 'grey');
     let details = '';
     if (st.profileEdit) {
-      const p = profile || {};
+      const p = c.firmProfile || {};
       const input = (id, label, value, ph) => `<div class="form-field"><label class="form-label" for="${id}">${label}</label><input class="input" id="${id}" value="${esc(value || '')}" placeholder="${esc(ph || '')}" /></div>`;
-      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2>
-        ${input('pdContact', 'Contact name', p.contact, '')}
-        ${input('pdEmail', 'Contact email', p.email, '')}
-        ${input('pdPhone', 'Phone', p.phone, '')}
-        ${input('pdEntity', 'Entity type', p.entity, 'LLC (S-corp election)')}
-        ${input('pdFiscal', 'Fiscal year end', p.fiscal, 'MM-DD, e.g. 12-31')}
-        ${input('pdDeadline', 'Close deadline', p.deadline, '10th business day')}
-        ${input('pdRef', 'Firm reference', p.reference, '')}
-        ${input('pdServices', 'Services', p.services, 'Add a service, e.g. Bookkeeping')}
-        ${input('pdTags', 'Tags', p.tags, 'Type to search or add')}
-        <div class="form-field"><label class="form-label" for="pdNotes">Working notes</label><textarea class="input" id="pdNotes" placeholder="What the firm should know about this client, whatever the month">${esc(p.notes || '')}</textarea></div>
-        <h2 class="text-subtitle1">From Synder</h2>
-        <p class="text-body2">${esc(c.name)}</p>
-        <p class="text-body2">Client of the firm since October 2026</p>
-        <p class="text-body2">${c.accounting ? 'Accounting connected in Synder' : 'Accounting is not connected in Synder'}</p>
-        <div class="modal-actions"><button type="button" class="btn-outlined" id="profileCancel">Cancel</button><button type="button" class="btn" id="profileSave">Save client details</button></div>
-      </div>`;
-    } else if (!profile) {
-      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2><p class="text-body2">No client details yet.</p><p class="text-body2">Owner: Dasha</p><div><button type="button" class="btn" id="addProfile">Add client details</button></div></div>`;
+      details = `<div class="page-stack">${input('pdContact', 'Contact name', p.contact, '')}${input('pdEmail', 'Contact email', p.email, '')}${input('pdPhone', 'Phone', p.phone, '')}<div class="d-flex gap-8"><button type="button" class="btn-outlined" id="profileCancel">Cancel</button><button type="button" class="btn" id="profileSave">Save client details</button></div></div>`;
+    } else if (!c.firmProfile) {
+      details = `<p class="text-body2">No client details yet. <button type="button" class="link" id="addProfile">Add client details</button></p>`;
     } else {
-      const lines = [['Contact name', profile.contact], ['Contact email', profile.email], ['Phone', profile.phone], ['Entity type', profile.entity], ['Fiscal year end', profile.fiscal], ['Close deadline', profile.deadline], ['Firm reference', profile.reference], ['Services', profile.services], ['Tags', profile.tags], ['Working notes', profile.notes]];
-      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2>${lines.map(([k, v]) => `<p class="text-body2"><span class="text-secondary">${k}. </span>${esc(v || '—')}</p>`).join('')}
-        <h2 class="text-subtitle1">From Synder</h2>
-        <p class="text-body2">${esc(c.name)}</p>
-        <p class="text-body2">Client of the firm since October 2026</p>
-        <p class="text-body2">${c.accounting ? 'Accounting connected in Synder' : 'Accounting is not connected in Synder'}</p></div>`;
+      details = `<p class="text-body2">${esc(c.firmProfile.contact || c.name)}. <button type="button" class="link" id="addProfile">Add client details</button></p>`;
     }
-    const checks = c.firmChecks.map((chk) => `<div class="page-stack">
-      <span class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><label for="chk-${chk.id}">${esc(chk.label)}${chk.required ? ' (Required to close)' : ''}</label></span>
-      ${chk.note ? `<p class="text-body2">${esc(chk.note)}</p>` : ''}
-      <div class="form-field"><label class="form-label" for="note-${chk.id}">Add note</label><input class="input" id="note-${chk.id}" data-check-note="${chk.id}" /></div>
-      <div><button type="button" class="btn-outlined" data-save-note="${chk.id}">Add note</button></div>
-    </div>`).join('');
-    const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('') || '<p class="text-body2 text-secondary">No notes yet.</p>';
-    const prodConnections = [
-      ['Changolivia (Shopify)', 'Payment platform', 'Disconnected', 'yellow', 'Shopify'],
-      ['Synder test (Stripe)', 'Payment platform', 'Connected', 'green', 'Stripe'],
-      ['mzkt.by (Stripe)', 'Payment platform', 'Disconnected', 'yellow', 'Stripe'],
-      ['Sandbox Company_US_1 (QuickBooks Online)', 'Accounting', 'Connected', 'green', 'QuickBooks']
-    ];
-    const connections = prodConnections.map((row) => `<div class="page-stack"><p class="text-body2 logo-line">${brandMark(row[4], 18)}<span>${esc(row[0])}</span></p><p class="text-body2 text-secondary">${esc(row[1])}</p><p class="text-body2">${statusChip(row[3], row[2])}</p></div>`).join('');
-    const closeItems = `<p class="text-body2">Syncs: 62 syncs finished, none failed <span class="status status-green">Passed</span></p>
-        <p class="text-body2">Reconciliation: Not set up for this client</p>
-        <p class="text-body2">Daily summaries: Not set up for this client</p>
-        <p class="text-body2">Mappings: Not set up for this client</p>
-        <p class="text-body2">Revenue recognition: Not set up for this client</p>`;
-    const monthChip = c.monthStatus === 'Closed' ? 'green' : (c.monthStatus === 'In review' ? 'yellow' : 'grey');
+    const checks = c.firmChecks.map((chk) => `<div class="page-stack"><span class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><label for="chk-${chk.id}">${esc(chk.label)}</label></span><button type="button" class="link" data-note-open="${chk.id}">Add note</button>${chk.required ? '<p class="text-caption">Required to close</p>' : ''}${chk.note ? `<p class="text-body2">${esc(chk.note)}</p>` : ''}${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="btn-outlined" data-save-note="${chk.id}">Add note</button>` : ''}</div>`).join('');
+    const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('');
+    const connections = c.accounting
+      ? connectionRows(c).map((row) => `<div class="d-flex align-center justify-between gap-8"><p class="text-body2">${brandMark(row.logo, 18)} ${esc(row.name)}</p><span class="status status-${row.chip}">${esc(row.label)}</span></div>`).join('')
+      : '<p class="text-body2">The client has no accounting connection in Synder, so its month close checks do not apply.</p>';
+    const closeRow = (title, desc, chip, kind, extra) => `<div class="d-flex align-center justify-between gap-16"><div><p class="text-body2">${title}</p><p class="text-caption">${desc}</p>${extra || ''}</div><span class="status status-${kind}">${chip}</span></div>`;
     return `<div class="page-stack">
-      <p class="text-body2">Checking close eligibility</p>
-      <div class="toolbar">
-        <button type="button" class="btn-outlined" id="monthPrev">Previous month</button>
-        <span class="text-h2">${esc(month.label)}</span>
-        <span class="status status-${monthChip}">${esc(c.monthStatus || 'Open')}</span>
-        <button type="button" class="btn-outlined" id="monthNext">Next month</button>
-        <button type="button" class="btn-outlined" id="markReview">Mark in review</button>
-        <button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>
+      <div class="d-flex align-center justify-between gap-16 flex-wrap">
+        <div class="d-flex align-center gap-8">
+          <button type="button" class="btn-icon" id="monthPrev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button>
+          <span class="text-h2">${esc(month.label)}</span>
+          <button type="button" class="btn-icon" id="monthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>
+          <span class="status status-${monthChip}">${esc(c.monthStatus || 'Open')}</span>
+        </div>
+        <div class="d-flex align-center gap-8 flex-wrap">
+          <button type="button" class="btn-outlined" id="markReview">Mark in review</button>
+          ${reqLink}
+          <button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>
+          <button type="button" class="link" id="nextClient">Next client ›</button>
+        </div>
       </div>
-      <p class="form-error-msg" id="closeNeed" hidden>Required</p>
+      <p class="form-error-msg" id="closeNeed" hidden></p>
       ${details}
-      <div class="box box--white page-stack"><h2 class="text-h2">Firm checks</h2>${checks}
-        <div class="form-field"><label class="form-label" for="newCheck">Add a check for this client only</label><input class="input" id="newCheck" data-required="1" /></div>
-        <span class="checkbox-wrap"><input class="checkbox" type="checkbox" id="newCheckRequired"><label for="newCheckRequired">Required to close</label></span>
-        <div><button type="button" class="btn" id="addCheck">Add check</button></div>
+      <div class="d-flex gap-16">
+        <div class="flex-1 page-stack">
+          <h2 class="text-h2">Firm checks</h2>
+          ${checks}
+          <div class="d-flex align-center gap-8 flex-wrap">
+            <input class="input" id="newCheck" placeholder="Add a check for this client only">
+            <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="newCheckRequired"> Required to close</label>
+            <button type="button" class="btn-outlined" id="addCheck">Add check</button>
+          </div>
+          <h2 class="text-h2">Notes for ${esc(month.short)}</h2>
+          ${notes}
+          <input class="input" id="monthNote" placeholder="Write a note for ${esc(month.short)}...">
+          <select class="select" id="notePeriod"><option selected>The whole of ${esc(month.short)}</option></select>
+          <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
+        </div>
+        <div class="flex-1 page-stack">
+          <h2 class="text-h2">Synder evidence</h2>
+          <h2 class="text-subtitle1">Connections</h2>
+          ${connections}
+          <h2 class="text-subtitle1">Health</h2>
+          <p class="text-body2">Synder has not checked this client yet.</p>
+          <details class="accordion"><summary class="accordion-summary">Health history</summary><div class="accordion-body"><p class="text-body2">Not set up for this client yet.</p></div></details>
+          <h2 class="text-subtitle1">Month close checks</h2>
+          ${closeRow('Syncs', '8 failed and 0 rolled back syncs in the period', 'Failed', 'red')}
+          ${closeRow('Reconciliation', 'Not set up for this client', 'Not set up for this client', 'grey', '<details class="accordion"><summary class="accordion-summary">Reconciliation runs</summary><div class="accordion-body"><p class="text-body2">Not set up for this client yet.</p></div></details>')}
+          ${closeRow('Daily summaries', 'Not set up for this client yet.', 'Not set up for this client', 'grey')}
+          ${closeRow('Mappings', 'Not set up for this client yet.', 'Not set up for this client', 'grey')}
+          ${closeRow('Revenue recognition', 'Not set up for this client yet.', 'Not set up for this client', 'grey')}
+        </div>
       </div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Notes for ${esc(month.short)}</h2>
-        ${notes}
-        <div class="form-field"><label class="form-label" for="monthNote">Note for ${esc(month.short)}</label><input class="input" id="monthNote" data-required="1" placeholder="Write a note for ${esc(month.short)}…" /></div>
-        <div class="form-field"><label class="form-label" for="notePeriod">Period</label><select class="select" id="notePeriod"><option selected>The whole of ${esc(month.short)}</option></select></div>
-        <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
-      </div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2><p class="text-body2">Synder has not checked this client yet.</p><button type="button" class="link" data-stub>Health history</button></div>
-      ${preWorkBlock(c)}
-      <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
+      <h2 class="text-h2">Timeline</h2>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th></tr></thead>
         <tbody><tr><td>November 2026</td><td><span class="status status-grey">Open</span></td><td>0/2</td><td>—</td><td>—</td><td>—</td></tr>
         <tr><td>October 2026</td><td><span class="status status-grey">Open</span></td><td>0/2</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
@@ -4550,12 +4539,31 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('monthPrev', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex -= 1; renderMain(); });
     bindClick('monthNext', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex += 1; renderMain(); });
     bindClick('markReview', () => { const c = findOrg(st.clientId); if (!c) return; c.monthStatus = 'In review'; renderMain(); });
+    bindClick('requiredLeft', () => {
+      const c = findOrg(st.clientId);
+      const need = $('closeNeed');
+      if (!c || !need) return;
+      const missing = c.firmChecks.filter((chk) => chk.required && !chk.done);
+      need.hidden = false;
+      need.textContent = missing.map((chk) => chk.label).join(', ') + (missing.length === 1 ? ' is still required to close.' : ' are still required to close.');
+    });
+    bindClick('nextClient', () => {
+      const list = listedClients();
+      const i = list.findIndex((item) => item.id === st.clientId);
+      const next = list[(i + 1) % list.length];
+      if (next) openDetails(next.id);
+    });
+    m.querySelectorAll('[data-note-open]').forEach((b) => b.onclick = () => { st.openNote = st.openNote === b.dataset.noteOpen ? '' : b.dataset.noteOpen; renderMain(); });
     bindClick('closeMonthBtn', () => {
       const c = findOrg(st.clientId);
       const need = $('closeNeed');
       if (!c) return;
       ensureWork(c);
-      if (c.firmChecks.some((chk) => chk.required && !chk.done)) { if (need) need.hidden = false; return; }
+      const missing = c.firmChecks.filter((chk) => chk.required && !chk.done);
+      if (missing.length) {
+        if (need) { need.hidden = false; need.textContent = missing.map((chk) => chk.label).join(', ') + (missing.length === 1 ? ' is still required to close.' : ' are still required to close.'); }
+        return;
+      }
       c.monthStatus = 'Closed';
       renderMain();
     });
