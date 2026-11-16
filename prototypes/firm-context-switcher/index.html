@@ -3783,10 +3783,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   const SELF_ROLE_HINT = 'You can\'t change the role for yourself. Please ask another Firm admins to do that for you if needed.';
   let firmPeople = [
     { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'admin', self: true },
-    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'colleague' }
+    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'colleague' },
+    { id: 'p3', name: 'Alex Kim', email: 'alex.kim@example.com', status: 'active', firmRole: 'colleague' }
   ];
   let clientAccess = [
-    { personId: 'p1', clientId: 'e1', role: 'Manager' }
+    { personId: 'p1', clientId: 'e1', role: 'Manager' },
+    { personId: 'p3', clientId: 'e1', role: 'Member' }
   ];
   let firmTags = [{ id: 'monthly', name: 'Monthly close', used: 0 }];
   let firmChecklist = [
@@ -4024,18 +4026,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <tr><td>October 2026</td><td><span class="status status-grey">Open</span></td><td>0/2</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
     </div>`;
   }
-  function clientBillingTab(c) {
-    return `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Balance</th></tr></thead><tbody><tr><td><span class="text-body2">Placeholder licence for ${esc(c.name)}</span></td><td><span class="text-body2">Not assigned</span></td></tr></tbody></table></div><p class="text-caption">Placeholder until the production billing tab copy arrives.</p>`;
+  function clientBillingTab() {
+    return `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Synder product</th><th>Billing plan</th><th>Addons</th><th>Renewal date</th><th>Syncs amount renewal</th></tr></thead><tbody><tr><td><span class="text-body2">Synder Sync</span></td><td><span class="text-body2">Pro, Yearly</span></td><td><span class="text-body2">—</span></td><td><span class="text-body2">09/30/2027</span></td><td><span class="text-body2">11/30/2026</span></td></tr></tbody></table></div>`;
   }
   function clientColleaguesTab(c) {
     const q = (st.clientColQ || '').toLowerCase();
     const rows = accessForClient(c.id).filter((a) => !q || a.person.name.toLowerCase().includes(q));
-    const page = paginate('clientCols', rows);
+    const page = paginate('clientFirmCols', rows, [25, 50, 100]);
     const body = page.slice.map((a) => {
-      const open = a.person.status === 'active';
-      return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${a.person.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(a.person.name)}</span>${a.person.firmRole === 'admin' ? ' <span class="status status-grey">Admin</span>' : ''}</td><td><span class="text-body2">${esc(a.role)}</span></td></tr>`;
+      const admin = a.person.firmRole === 'admin';
+      const name = `<span class="text-body2">${esc(a.person.name)}</span>${admin ? ' <span class="text-body2">(admin)</span>' : ''}`;
+      const role = admin
+        ? `<span class="text-body2">${esc(a.role || 'Manager')}</span>`
+        : `<select class="select" data-client-role="${a.personId}" aria-label="Role in the client for ${esc(a.person.name)}"><option value="Manager"${a.role === 'Manager' ? ' selected' : ''}>Manager</option><option value="Member"${a.role !== 'Manager' ? ' selected' : ''}>Member</option></select>`;
+      const action = admin ? '' : `<button type="button" class="btn-icon" data-unassign-firm="${a.personId}" aria-label="Unassign ${esc(a.person.name)} from this client"><span class="material-icons">close</span></button>`;
+      return `<tr><td>${name}</td><td><div class="d-flex align-center justify-between gap-8">${role}${action}</div></td></tr>`;
     }).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
-    return `<div class="page-stack"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Colleague</th><th>Role in the client</th></tr></thead><tbody>${body || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>'}</tbody></table></div><p class="text-caption">Placeholder until the production Firm colleagues tab copy arrives.</p></div>`;
+    return `<div class="page-stack"><div class="d-flex align-center gap-8"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}</div>`;
   }
   function renderColleagues() {
     const q = (st.colQ || '').toLowerCase();
@@ -4602,6 +4609,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMain();
     });
     bindClick('addFirmColleague', openAddFirmColleague);
+    m.querySelectorAll('[data-client-role]').forEach((sel) => sel.onchange = () => {
+      const row = clientAccess.find((a) => a.personId === sel.dataset.clientRole && a.clientId === st.clientId);
+      if (row) row.role = sel.value;
+    });
+    m.querySelectorAll('[data-unassign-firm]').forEach((b) => b.onclick = () => {
+      const person = findPerson(b.dataset.unassignFirm);
+      if (!person) return;
+      const { modal, close } = dialogShell('Unassign ' + esc(person.name) + ' from this client', '<p class="text-body2">They will lose access to this client.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="doUnassign">Unassign</button>');
+      modal.querySelector('#doUnassign').onclick = () => {
+        clientAccess = clientAccess.filter((a) => !(a.personId === person.id && a.clientId === st.clientId));
+        close();
+        renderMain();
+      };
+    });
     bindClick('firmNameSave', () => {
       const input = $('firmNameEdit');
       const name = (input && input.value || '').trim();
@@ -4961,9 +4982,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!c) return;
     const taken = {};
     accessForClient(c.id).forEach((a) => { taken[a.personId] = true; });
-    const options = firmPeople.filter((p) => p.status === 'active' && !taken[p.id]).map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
-    const body = `<div class="form-field"><label class="form-label form-label-required" for="afName">Colleague name</label><select class="select" id="afName" data-required="1"><option value="">Select…</option>${options}</select></div>
-      <div class="form-field">${fieldLabel('afRole', 'Role in the client', clientRoleTip())}<select class="select" id="afRole" data-required="1"><option value="">Select…</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>`;
+    const available = firmPeople.filter((p) => p.status === 'active' && !taken[p.id]);
+    const nameField = available.length
+      ? `<select class="select" id="afName"><option value="">Select...</option>${available.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select>`
+      : `<p class="text-body2">Every colleague who has accepted their invitation is already assigned to this client.</p><input id="afName" value="" hidden>`;
+    const body = `<div class="form-field"><label class="form-label form-label-required" for="afName">Colleague name</label>${nameField}</div>
+      <div class="form-field"><label class="form-label form-label-required" for="afRole">Role in the client</label><select class="select" id="afRole"><option value="">Select...</option><option value="Manager">Manager</option><option value="Member">Member</option></select></div>`;
     const { modal, close } = dialogShell('Add Firm colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="afAdd">Add colleague</button>`);
     modal.querySelector('#afAdd').onclick = () => {
       const name = modal.querySelector('#afName');
