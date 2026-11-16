@@ -1939,27 +1939,41 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (Math.abs(v - Math.round(v)) < 0.001) return '$' + Math.round(v).toLocaleString('en-US');
     return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  function emptyCard() {
-    return { packs: 0, singles: { ess: 0, pro: 0, max: 0 }, users: 0, rules: '', inv: '', rev: '' };
+  function emptyOrder() {
+    return { ess: 0, pro: 0, max: 0, users: 0, rules: '', rulesQty: 0, inv: '', invQty: 0, rev: '', revQty: 0 };
+  }
+  function draftSnap(d) {
+    return JSON.stringify({ period: d.period, family: d.family, orders: d.orders });
   }
   function blankPlanDraft(state) {
-    const draft = { period: (state && state.period) || 'month', cards: { core: emptyCard(), advanced: emptyCard() }, showErr: {} };
-    if (!state || !state.family || !draft.cards[state.family]) return draft;
-    const card = draft.cards[state.family];
-    const pack = PACK[state.family];
-    const owned = (state.plans && state.plans[pack.tier]) || 0;
-    card.packs = Math.floor(owned / pack.qty);
-    card.singles = { ess: (state.plans && state.plans.ess) || 0, pro: (state.plans && state.plans.pro) || 0, max: (state.plans && state.plans.max) || 0 };
-    card.singles[pack.tier] = Math.max(0, card.singles[pack.tier] - card.packs * pack.qty);
-    card.users = state.users || 0;
-    card.rules = Object.keys(state.rules || {}).find((id) => state.rules[id] > 0) || '';
-    card.inv = Object.keys(state.inv || {}).find((id) => state.inv[id] > 0) || '';
-    card.rev = (state.rev || 0) > 0 ? String(state.rev) : '';
+    const draft = { period: (state && state.period) || 'month', family: (state && state.family) || 'core', orders: { core: emptyOrder(), advanced: emptyOrder() }, showErr: '' };
+    if (state && state.family && draft.orders[state.family]) {
+      const order = draft.orders[state.family];
+      order.ess = (state.plans && state.plans.ess) || 0;
+      order.pro = (state.plans && state.plans.pro) || 0;
+      order.max = (state.plans && state.plans.max) || 0;
+      order.users = state.users || 0;
+      const ruleId = Object.keys(state.rules || {}).find((id) => state.rules[id] > 0) || '';
+      order.rules = ruleId;
+      order.rulesQty = ruleId ? state.rules[ruleId] : 0;
+      const invId = Object.keys(state.inv || {}).find((id) => state.inv[id] > 0) || '';
+      order.inv = invId;
+      order.invQty = invId ? state.inv[invId] : 0;
+      if ((state.rev || 0) > 0) {
+        order.rev = String(state.rev);
+        order.revQty = 1;
+      }
+    }
+    draft.baseline = draftSnap(draft);
     return draft;
   }
   function ensurePlanDraft() {
-    if (!planDraft || !planDraft.cards) planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
+    if (!planDraft || !planDraft.orders) planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
     return planDraft;
+  }
+  function planDirty() {
+    const d = ensurePlanDraft();
+    return draftSnap(d) !== d.baseline;
   }
   function openBuyPlans() {
     planDraft = blankPlanDraft(billingMode() === 'empty' ? null : loadLicenseState());
@@ -1970,47 +1984,51 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     render();
   }
   function closeBuyPlans() {
+    if (planDirty()) {
+      const { modal } = dialogShell('Discard your changes?', '<p class="text-body2">Your order has changes that have not been saved.</p>', '<button type="button" class="btn-outlined" data-cancel>Keep editing</button><button type="button" class="btn-outlined" id="discardOrder">Discard</button>');
+      modal.querySelector('#discardOrder').onclick = () => { modal.remove(); st.plansOpen = false; render(); };
+      return;
+    }
     st.plansOpen = false;
     render();
   }
-  function addonMap(family, bucket, id) {
-    if (!id) return {};
-    const s = loadLicenseState();
-    const owned = s.family === family && s[bucket] ? (s[bucket][id] || 0) : 0;
-    return { [id]: owned > 0 ? owned : 1 };
+  function advancedLocked() {
+    return billingMode() === 'active' && loadLicenseState().family === 'core';
   }
-  function revCount(family, card) {
-    const n = Number(card.rev) || 0;
-    if (!n) return 0;
-    const s = loadLicenseState();
-    if (s.family === family && Number(s.rev) === n) return s.rev;
-    return n;
+  function selectedOrder() {
+    const d = ensurePlanDraft();
+    return d.orders[d.family] || d.orders.core;
   }
-  function cardStock(family, card) {
-    const pack = PACK[family];
-    const plans = { ess: card.singles.ess || 0, pro: card.singles.pro || 0, max: card.singles.max || 0 };
-    plans[pack.tier] += (card.packs || 0) * pack.qty;
-    return { plans: plans, rules: addonMap(family, 'rules', card.rules), inv: addonMap(family, 'inv', card.inv), users: card.users || 0, rev: revCount(family, card) };
+  function orderStock(family, order) {
+    const plans = { ess: order.ess || 0, pro: order.pro || 0, max: order.max || 0 };
+    const rules = {};
+    const inv = {};
+    if (order.rules && (order.rulesQty || 0) > 0) rules[order.rules] = order.rulesQty;
+    if (order.inv && (order.invQty || 0) > 0) inv[order.inv] = order.invQty;
+    const rev = family === 'advanced' && order.rev && (order.revQty || 0) > 0 ? Number(order.rev) * order.revQty : 0;
+    return { plans: plans, rules: rules, inv: inv, users: order.users || 0, rev: rev };
   }
-  function cardAsState(family, card) {
-    const stock = cardStock(family, card);
+  function orderState(family, order) {
+    const stock = orderStock(family, order);
     return { family: family, period: planDraft.period, plans: stock.plans, rules: stock.rules, inv: stock.inv, users: stock.users, rev: stock.rev };
   }
-  function cardMonthly(family, card) { return chargeMonthly(cardAsState(family, card)); }
+  function orderMonthly(family, order) { return chargeMonthly(orderState(family, order)); }
   function sameMap(a, b) {
     const keys = Object.keys(a || {}).concat(Object.keys(b || {}));
     return keys.every((id) => ((a && a[id]) || 0) === ((b && b[id]) || 0));
   }
-  function cardMatches(family, card) {
+  function orderMatches() {
     const s = loadLicenseState();
-    if (!s.family || s.family !== family) return false;
-    const next = cardStock(family, card);
-    return planDraft.period === (s.period || 'month') && next.plans.ess === (s.plans.ess || 0) && next.plans.pro === (s.plans.pro || 0) && next.plans.max === (s.plans.max || 0) && next.users === (s.users || 0) && next.rev === (s.rev || 0) && sameMap(next.rules, s.rules) && sameMap(next.inv, s.inv);
+    const d = ensurePlanDraft();
+    if (!s.family || billingMode() === 'empty' || d.family !== s.family) return false;
+    if (d.period !== (s.period || 'month')) return false;
+    const next = orderStock(d.family, d.orders[d.family]);
+    return next.plans.ess === (s.plans.ess || 0) && next.plans.pro === (s.plans.pro || 0) && next.plans.max === (s.plans.max || 0) && next.users === (s.users || 0) && next.rev === (s.rev || 0) && sameMap(next.rules, s.rules) && sameMap(next.inv, s.inv);
   }
-  function belowUsed(family, card) {
+  function belowUsed(family, order) {
     const s = loadLicenseState();
     if (!s.family || s.family !== family) return false;
-    const next = cardStock(family, card);
+    const next = orderStock(family, order);
     if (['ess', 'pro', 'max'].some((id) => (next.plans[id] || 0) < licUsed(id))) return true;
     if (next.users < licUsed('users') || next.rev < licUsed('rev')) return true;
     const ruleIds = Object.keys(s.rules || {}).concat(Object.keys(next.rules));
@@ -2018,113 +2036,160 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const invIds = Object.keys(s.inv || {}).concat(Object.keys(next.inv));
     return invIds.some((id) => (next.inv[id] || 0) < licUsed(id));
   }
-  function licenceCount(card) {
-    return (card.packs || 0) + ['ess', 'pro', 'max'].reduce((n, id) => n + (card.singles[id] || 0), 0);
+  function licenceCount(order) {
+    return (order.ess || 0) + (order.pro || 0) + (order.max || 0);
   }
-  function rerenderPlans() {
+  function rerenderPlans(focusKey) {
     const body = document.querySelector('.overlay-body');
     const top = body ? body.scrollTop : 0;
     renderMain();
     const next = document.querySelector('.overlay-body');
     if (next) next.scrollTop = top;
+    if (focusKey) {
+      const el = document.querySelector('[data-qty-input="' + focusKey + '"]');
+      if (el) el.focus();
+    }
   }
-  function stepCard(family, key, dir) {
-    const card = planDraft.cards[family];
-    const prev = JSON.stringify(card);
-    const set = (n) => {
-      if (key === 'packs') card.packs = n;
-      else if (key === 'users') card.users = n;
-      else card.singles[key] = n;
-    };
-    const cur = key === 'packs' ? (card.packs || 0) : (key === 'users' ? (card.users || 0) : (card.singles[key] || 0));
-    if (cur + dir < 0) return;
-    set(cur + dir);
-    if (belowUsed(family, card)) {
-      const back = JSON.parse(prev);
-      card.packs = back.packs; card.singles = back.singles; card.users = back.users; card.rules = back.rules; card.inv = back.inv; card.rev = back.rev;
+  function setOrderQty(key, n) {
+    const d = ensurePlanDraft();
+    const order = d.orders[d.family];
+    const prev = order[key] || 0;
+    const next = Math.max(0, Math.floor(Number(n) || 0));
+    if (next === prev) return;
+    order[key] = next;
+    if (belowUsed(d.family, order)) {
+      order[key] = prev;
       openFreeUp();
+      rerenderPlans(key);
       return;
     }
-    planDraft.showErr[family] = '';
+    d.showErr = '';
+    rerenderPlans(key);
   }
-  function usePack(family) {
-    const card = planDraft.cards[family];
-    const tier = PACK[family].tier;
-    if ((card.singles[tier] || 0) < 5) return;
-    card.packs = (card.packs || 0) + 1;
-    card.singles[tier] -= 5;
-    planDraft.showErr[family] = '';
+  function tierPriceText(family, id, qty, factor) {
+    const single = (TIER_SINGLE[family][id] || 0) * factor;
+    const pack = PACK[family];
+    if (id !== pack.tier) return moneyLabel(single) + ' each';
+    const packs = Math.floor((qty || 0) / pack.qty);
+    const rest = (qty || 0) % pack.qty;
+    if (packs < 1) return moneyLabel(single) + ' each, ' + moneyLabel(pack.each * factor) + ' each from 5';
+    let text = (packs * pack.qty) + ' ' + tierName(id) + ' · pack price ' + moneyLabel(packs * pack.total * factor);
+    if (rest) text += ', plus ' + rest + ' at ' + moneyLabel(single);
+    return text;
   }
-  function applyCard(family, card) {
-    const next = cardAsState(family, card);
+  function applyOrder() {
+    const d = ensurePlanDraft();
+    const next = orderState(d.family, d.orders[d.family]);
     const mode = billingMode();
-    licenseState = { demo: mode === 'active' ? 'active' : 'subscribed', subscribed: true, family: family, period: planDraft.period, plans: next.plans, rules: next.rules, inv: next.inv, users: next.users, rev: next.rev };
+    licenseState = { demo: mode === 'active' ? 'active' : 'subscribed', subscribed: true, family: d.family, period: d.period, plans: next.plans, rules: next.rules, inv: next.inv, users: next.users, rev: next.rev };
     saveLicenseState();
   }
-  function submitPlan(family) {
-    const card = planDraft.cards[family];
-    if (!licenceCount(card)) { planDraft.showErr[family] = 'empty'; rerenderPlans(); return; }
-    const current = loadLicenseState().family === family && billingMode() !== 'empty';
-    if (current && cardMatches(family, card)) { planDraft.showErr[family] = 'same'; rerenderPlans(); return; }
-    if (belowUsed(family, card)) { openFreeUp(); return; }
-    const finish = () => {
-      applyCard(family, card);
+  function orderBits(family, order) {
+    const stock = orderStock(family, order);
+    const bits = [];
+    ['ess', 'pro', 'max'].forEach((id) => { if (stock.plans[id]) bits.push(stock.plans[id] + ' ' + tierName(id)); });
+    Object.keys(stock.rules).forEach((id) => bits.push(sizeName(id) + ' × ' + stock.rules[id]));
+    Object.keys(stock.inv).forEach((id) => bits.push(sizeName(id) + ' × ' + stock.inv[id]));
+    if (stock.users) bits.push('Team members × ' + stock.users);
+    if (stock.rev) bits.push('Revenue recognition × ' + stock.rev + ' subscriptions');
+    return bits;
+  }
+  function submitPlan() {
+    const d = ensurePlanDraft();
+    const order = d.orders[d.family];
+    const fresh = billingMode() === 'empty' || !loadLicenseState().family;
+    if (!licenceCount(order)) { d.showErr = 'empty'; rerenderPlans(); return; }
+    if (!fresh && orderMatches()) { d.showErr = 'same'; rerenderPlans(); return; }
+    if (belowUsed(d.family, order)) { openFreeUp(); return; }
+    const monthly = orderMonthly(d.family, order);
+    const yearly = d.period === 'year';
+    const oldMonthly = fresh ? 0 : chargeMonthly(loadLicenseState());
+    const today = fresh ? (yearly ? monthly * 12 : monthly) : prorate(monthly - oldMonthly);
+    const nextAmount = yearly ? monthly * 12 : monthly;
+    const bits = orderBits(d.family, order);
+    const body = '<p class="text-body2">' + familyName(d.family) + '. ' + (bits.join(', ') || 'No licences') + '.</p><p class="text-body2">Charged today ' + moneyLabel(today) + ' + taxes.</p><p class="text-body2">' + (yearly ? 'Billed yearly.' : 'Billed monthly.') + '</p><p class="text-body2">Next charge ' + moneyLabel(nextAmount) + ' on ' + NEXT_CHARGE + '.</p>';
+    const label = fresh ? 'Subscribe' : 'Update plan';
+    const { modal, close } = dialogShell(fresh ? 'Subscribe' : 'Update plan', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">' + label + '</button>');
+    modal.querySelector('#planGo').onclick = () => {
+      applyOrder();
+      close();
       st.plansOpen = false;
       st.page = 'billing';
       st.billView = 'licences';
-      showKitToast('Licences updated');
+      showKitToast(fresh ? 'Subscribed to ' + familyName(d.family) : 'Licences updated');
       render();
     };
-    if (!current) { finish(); return; }
-    const amount = Math.max(0, prorate(cardMonthly(family, card) - chargeMonthly(loadLicenseState())));
-    const { modal, close } = dialogShell('Plan update', '<p class="text-body2">You pay now ' + usd(amount) + ' + taxes. This covers the ' + DAYS_LEFT + ' days left in this period.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">Update plan</button>');
-    modal.querySelector('#planGo').onclick = () => { close(); finish(); };
+  }
+  function numField(key, value, label) {
+    return '<div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-qty="' + key + '" data-dir="-1" aria-label="Fewer ' + label + '"><span class="material-icons">remove</span></button><input class="input" type="number" min="0" step="1" inputmode="numeric" data-qty-input="' + key + '" aria-label="' + label + '" value="' + (value || 0) + '"><button type="button" class="btn-icon btn-icon--bordered" data-qty="' + key + '" data-dir="1" aria-label="More ' + label + '"><span class="material-icons">add</span></button></div>';
   }
   function planChecks(family) {
     const lines = family === 'core'
-      ? ['Essential up to 3,000 syncs/mo per client', 'Pro up to 20,000 syncs/mo', 'Smart Rules and Invoicing add-ons']
-      : ['Everything in Core at about 10% less per licence', 'Pro Max up to 40,000 syncs/mo', 'Revenue recognition'];
+      ? ['5 Essential licences included in the pack', 'Up to 3,000 transactions/mo per client (Essential), 20,000 (Pro)', 'Smart Rules and Invoicing add-ons']
+      : ['5 Pro licences included in the pack', 'Pro Max up to 40,000 transactions/mo', 'Revenue recognition'];
     return lines.map((line) => '<div class="d-flex align-center gap-8"><span class="material-icons icon-sm">check</span><span class="text-body2">' + line + '</span></div>').join('');
-  }
-  function qtyRow(family, key, name, price, qty) {
-    return '<div class="d-flex align-center gap-12"><span class="text-body2 flex-1">' + name + '</span><span class="text-body2 text-secondary">' + moneyLabel(price) + '/mo</span><div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-step="' + family + '" data-key="' + key + '" data-dir="-1" aria-label="Fewer ' + name + '"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-step="' + family + '" data-key="' + key + '" data-dir="1" aria-label="More ' + name + '"><span class="material-icons">add</span></button></div></div>';
-  }
-  function addonSelect(family, kind, label, options, value) {
-    const opts = '<option value="">None</option>' + options.map((item) => '<option value="' + item[0] + '"' + (String(value) === String(item[0]) ? ' selected' : '') + '>' + item[1] + '</option>').join('');
-    return '<div class="form-field"><label class="form-label" for="' + kind + '-' + family + '">' + label + '</label><select class="select" id="' + kind + '-' + family + '" data-addon="' + family + '" data-kind="' + kind + '">' + opts + '</select></div>';
   }
   function buyCard(family) {
     const d = ensurePlanDraft();
     const factor = d.period === 'year' ? 0.8 : 1;
     const pack = PACK[family];
-    const locked = family === 'advanced' && billingMode() === 'active' && loadLicenseState().family === 'core';
-    const who = family === 'core' ? 'Best for firms with smaller clients.' : 'Best for growing clients and revenue recognition.';
-    const head = '<h2 class="text-h2">' + familyName(family) + '</h2><p class="text-body2">' + who + '</p><p class="text-h2">from ' + moneyLabel(pack.total * factor) + ' /month</p><p class="text-caption">Pack of 5 ' + tierName(pack.tier) + ' licences</p><p class="text-subtitle2">What\'s inside</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>';
-    if (locked) {
-      return '<div class="card flex-1 d-flex flex-col gap-16">' + head + '<p class="text-body2">Switching to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined w-full" id="bookAdvanced">Book a call</button></div>';
+    const who = family === 'core' ? 'Firms with smaller clients.' : 'Growing clients and revenue recognition.';
+    const caption = family === 'core' ? 'Starts with a pack of 5 Essential licences' : '5 Pro licences';
+    if (family === 'advanced' && advancedLocked()) {
+      return '<div class="card flex-1 d-flex flex-col gap-12"><p class="text-subtitle1">Synder Advanced</p><p class="text-body2">' + who + '</p><p class="text-body2">Moving to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined" id="bookAdvanced">Book a call</button></div>';
     }
-    const card = d.cards[family];
-    const tiers = family === 'advanced' ? [['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']] : [['ess', 'Essential'], ['pro', 'Pro']];
-    let rows = qtyRow(family, 'packs', 'Pack (5 ' + tierName(pack.tier) + ')', pack.total * factor, card.packs || 0);
-    tiers.forEach((item) => { rows += qtyRow(family, item[0], item[1], TIER_SINGLE[family][item[0]] * factor, card.singles[item[0]] || 0); });
-    rows += qtyRow(family, 'users', 'Firm additional user', 24 * factor, card.users || 0);
-    const err = d.showErr[family] === 'empty' ? '<div class="form-error-msg">Add at least one licence or pack to subscribe.</div>' : '';
-    const hint = (card.singles[pack.tier] || 0) >= 5 ? '<p class="text-body2">A pack of 5 is cheaper: ' + moneyLabel(pack.each * factor) + ' per licence. <button type="button" class="link" data-use-pack="' + family + '">Use pack</button></p>' : '';
+    const checked = d.family === family ? ' checked' : '';
+    const discount = family === 'advanced' ? '<div class="alert alert-info"><span class="material-icons">info</span><span class="text-body2">Single licences cost less on Advanced: Essential ' + moneyLabel(72 * factor) + ' instead of ' + moneyLabel(80 * factor) + ', Pro ' + moneyLabel(184 * factor) + ' instead of ' + moneyLabel(200 * factor) + '.</span></div>' : '';
+    return '<label class="card flex-1 d-flex flex-col gap-12"><span class="radio-wrap"><input class="radio" type="radio" name="buyFamily" value="' + family + '"' + checked + '><span class="text-subtitle1">' + familyName(family) + '</span></span><p class="text-body2">' + who + '</p><p class="text-subtitle1">from ' + moneyLabel(pack.each * factor) + ' per client / month</p><p class="text-caption">' + caption + '</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>' + discount + '</label>';
+  }
+  function orderLicenceRow(family, id, qty, factor) {
+    const limit = id === 'ess' ? 'Up to 3,000 transactions/mo per client' : (id === 'pro' ? 'Up to 20,000 transactions/mo per client' : 'Up to 40,000 transactions/mo per client');
+    return '<div class="d-flex flex-col gap-8"><div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + tierName(id) + '</p><p class="text-caption">' + limit + '</p></div><p class="text-body2 text-secondary">' + tierPriceText(family, id, qty, factor) + '</p></div>' + numField(id, qty, tierName(id) + ' licences') + '</div>';
+  }
+  function addonRow(key, qtyKey, label, caption, options, value, qty, priceText) {
+    const opts = '<option value="">Select a size</option>' + options.map((item) => '<option value="' + item[0] + '"' + (String(value) === String(item[0]) ? ' selected' : '') + '>' + item[1] + '</option>').join('');
+    return '<div class="d-flex flex-col gap-8"><div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + label + '</p><p class="text-caption">' + caption + '</p></div><p class="text-body2 text-secondary">' + priceText + '</p></div><div class="d-flex align-center gap-8"><select class="select" data-size="' + key + '" aria-label="' + label + ' size">' + opts + '</select>' + numField(qtyKey, qty, label + ' quantity') + '</div></div>';
+  }
+  function orderSection() {
+    const d = ensurePlanDraft();
+    const family = d.family;
+    const order = d.orders[family];
+    const factor = d.period === 'year' ? 0.8 : 1;
+    const tiers = family === 'advanced' ? ['ess', 'pro', 'max'] : ['ess', 'pro'];
+    const licences = tiers.map((id) => orderLicenceRow(family, id, order[id] || 0, factor)).join('');
     const ruleOpts = RULE_SIZES.map((item) => [item[0], 'Up to ' + item[0].replace('rules', '') + ' rules · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
     const invOpts = INV_SIZES.map((item) => [item[0], 'Up to ' + item[1].replace('Invoicing up to ', '') + ' invoices · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
     const revOpts = [['1', '1 subscription · ' + moneyLabel(2 * factor) + '/mo'], ['10', '10 subscriptions · ' + moneyLabel(20 * factor) + '/mo'], ['50', '50 subscriptions · ' + moneyLabel(100 * factor) + '/mo']];
-    let addons = addonSelect(family, 'rules', 'Smart Rules', ruleOpts, card.rules) + addonSelect(family, 'inv', 'Invoicing', invOpts, card.inv);
-    if (family === 'advanced') addons += addonSelect(family, 'rev', 'Revenue recognition', revOpts, card.rev);
-    const current = billingMode() !== 'empty' && loadLicenseState().family === family;
-    const same = d.showErr[family] === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '';
-    const total = '<p class="text-body2 text-bold">Total ' + moneyLabel(cardMonthly(family, card)) + ' /month</p><button type="button" class="btn w-full" data-subscribe="' + family + '">' + (current ? 'Update plan' : 'Subscribe') + '</button>' + same;
-    return '<div class="card flex-1 d-flex flex-col gap-16">' + head + '<p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-8">' + rows + '</div>' + err + hint + '<p class="text-subtitle2">Add-ons</p>' + addons + total + '</div>';
+    const rulePrice = order.rules && order.rulesQty ? moneyLabel(ADDON_PRICE[order.rules] * order.rulesQty * factor) + ' / month' : '';
+    const invPrice = order.inv && order.invQty ? moneyLabel(ADDON_PRICE[order.inv] * order.invQty * factor) + ' / month' : '';
+    let addons = addonRow('rules', 'rulesQty', 'Smart Rules', 'per client', ruleOpts, order.rules, order.rulesQty, rulePrice);
+    addons += addonRow('inv', 'invQty', 'Invoicing', 'per client', invOpts, order.inv, order.invQty, invPrice);
+    if (family === 'advanced') {
+      const revPrice = order.rev && order.revQty ? moneyLabel(Number(order.rev) * 2 * order.revQty * factor) + ' / month' : '';
+      addons += addonRow('rev', 'revQty', 'Revenue recognition', 'per client', revOpts, order.rev, order.revQty, revPrice);
+    }
+    const team = '<div class="d-flex flex-col gap-8"><div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">Team members · ' + moneyLabel(24 * factor) + ' each</p><p class="text-caption">for your firm, not per client</p></div><p class="text-body2 text-secondary">' + (order.users ? moneyLabel(24 * order.users * factor) + ' / month' : '') + '</p></div>' + numField('users', order.users, 'Team members') + '</div>';
+    const monthly = orderMonthly(family, order);
+    const yearly = d.period === 'year';
+    const totalText = yearly ? moneyLabel(monthly) + ' / month, billed ' + moneyLabel(monthly * 12) + ' yearly' : moneyLabel(monthly) + ' / month';
+    const fresh = billingMode() === 'empty' || !loadLicenseState().family;
+    let delta = '';
+    if (!fresh) {
+      const diff = monthly - chargeMonthly(loadLicenseState());
+      const today = prorate(diff);
+      const sign = diff < 0 ? '−' : '+';
+      delta = '<p class="text-body2">' + sign + moneyLabel(Math.abs(diff)) + '/month from Dec 1, ' + moneyLabel(today) + ' today (prorated)</p>';
+    }
+    const err = d.showErr === 'empty' ? '<div class="form-error-msg">Add at least one licence to subscribe.</div>' : (d.showErr === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '');
+    const pay = yearly ? monthly * 12 : monthly;
+    const button = fresh ? (yearly ? 'Subscribe, pay ' + moneyLabel(pay) : 'Subscribe') : 'Update plan';
+    return '<div class="card d-flex flex-col gap-16"><h2 class="text-h2">Set up your order</h2><div><p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-16 mt-8">' + licences + '</div></div><div><p class="text-subtitle2">Add-ons</p><div class="d-flex flex-col gap-16 mt-8">' + addons + team + '</div><p class="text-caption mt-8">Example prices</p></div><div aria-live="polite"><p class="text-h2">' + totalText + '</p>' + delta + '</div>' + err + '<div><button type="button" class="btn" id="planSubscribe">' + button + '</button></div></div>';
   }
   function buyOverlay() {
     const d = ensurePlanDraft();
     const monthOn = d.period !== 'year';
-    const period = '<div class="btn-joined" role="group" aria-label="Billing period"><button type="button" class="' + (monthOn ? 'btn' : 'btn-outlined') + '" data-period="month" aria-pressed="' + (monthOn ? 'true' : 'false') + '">Monthly</button><button type="button" class="' + (monthOn ? 'btn-outlined' : 'btn') + '" data-period="year" aria-pressed="' + (monthOn ? 'false' : 'true') + '">Yearly</button></div>';
-    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"><button type="button" class="btn-outlined" id="closeBuy">Cancel</button></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16">' + buyCard('core') + buyCard('advanced') + '</div><p class="text-caption">Example prices.</p></div></div></div>';
+    const period = '<div class="tabs" role="tablist"><button type="button" class="tab' + (monthOn ? ' active' : '') + '" data-period="month" role="tab" aria-selected="' + (monthOn ? 'true' : 'false') + '">Monthly</button><button type="button" class="tab' + (monthOn ? '' : ' active') + '" data-period="year" role="tab" aria-selected="' + (monthOn ? 'false' : 'true') + '">Yearly · save 20%</button></div>';
+    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"><button type="button" class="btn-outlined" id="closeBuy">Cancel</button></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16" role="radiogroup" aria-label="Plan">' + buyCard('core') + buyCard('advanced') + '</div>' + orderSection() + '</div></div></div>';
   }
   function openBuyMore(id, opts) {
     opts = opts || {};
@@ -4273,18 +4338,38 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('choosePlanEmpty', openBuyPlans);
     bindClick('closeBuy', closeBuyPlans);
     bindClick('bookAdvanced', showNotPart);
+    bindClick('planSubscribe', submitPlan);
     m.querySelectorAll('[data-bill-view]').forEach((b) => b.onclick = () => { st.billView = b.dataset.billView; render(); });
     m.querySelectorAll('[data-buy-one]').forEach((b) => b.onclick = () => openBuyMore(b.dataset.buyOne));
-    m.querySelectorAll('[data-period]').forEach((b) => b.onclick = () => { if (planDraft) { planDraft.period = b.dataset.period; rerenderPlans(); } });
-    m.querySelectorAll('[data-step]').forEach((b) => b.onclick = () => { stepCard(b.dataset.step, b.dataset.key, Number(b.dataset.dir)); rerenderPlans(); });
-    m.querySelectorAll('[data-use-pack]').forEach((b) => b.onclick = () => { usePack(b.dataset.usePack); rerenderPlans(); });
-    m.querySelectorAll('[data-subscribe]').forEach((b) => b.onclick = () => submitPlan(b.dataset.subscribe));
-    m.querySelectorAll('[data-addon]').forEach((el) => el.onchange = () => {
-      const card = planDraft.cards[el.dataset.addon];
-      const prev = card[el.dataset.kind];
-      card[el.dataset.kind] = el.value;
-      if (belowUsed(el.dataset.addon, card)) { card[el.dataset.kind] = prev; openFreeUp(); }
-      planDraft.showErr[el.dataset.addon] = '';
+    m.querySelectorAll('[data-period]').forEach((b) => b.onclick = () => {
+      if (!planDraft) return;
+      planDraft.period = b.dataset.period;
+      planDraft.showErr = '';
+      rerenderPlans();
+    });
+    m.querySelectorAll('input[name="buyFamily"]').forEach((el) => el.onchange = () => {
+      if (!planDraft || (el.value === 'advanced' && advancedLocked())) return;
+      planDraft.family = el.value;
+      planDraft.showErr = '';
+      rerenderPlans();
+    });
+    m.querySelectorAll('[data-qty]').forEach((b) => b.onclick = (e) => {
+      e.preventDefault();
+      const order = selectedOrder();
+      setOrderQty(b.dataset.qty, (order[b.dataset.qty] || 0) + Number(b.dataset.dir));
+    });
+    m.querySelectorAll('[data-qty-input]').forEach((el) => el.oninput = () => {
+      const parsed = parseInt(el.value, 10);
+      const n = el.value === '' || !isFinite(parsed) ? 0 : Math.max(0, parsed);
+      setOrderQty(el.dataset.qtyInput, n);
+    });
+    m.querySelectorAll('[data-size]').forEach((el) => el.onchange = () => {
+      const order = selectedOrder();
+      const key = el.dataset.size;
+      const prev = order[key];
+      order[key] = el.value;
+      if (belowUsed(planDraft.family, order)) { order[key] = prev; openFreeUp(); }
+      planDraft.showErr = '';
       rerenderPlans();
     });
     m.querySelectorAll('[data-bill-filter]').forEach((b) => b.onclick = () => {
