@@ -1779,6 +1779,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (a.rev) bits.push('Revenue recognition × ' + a.rev);
     return bits.join(' · ');
   }
+  function planCell(c) {
+    const firm = c.firmLic && c.firmLic.plan ? tierName(c.firmLic.plan) : '';
+    const own = c.ownPlan && c.ownPlan.name ? c.ownPlan.name : '';
+    const legacy = licenseLabel(c);
+    const plan = firm || own || (legacy.secondary ? '' : legacy.text);
+    if (!plan) return '<span class="text-body2">—</span>';
+    let extra = '';
+    if (c.ownPlan && !(c.firmLic && c.firmLic.plan)) extra += ' <span class="status status-yellow">Pays on its own</span>';
+    if (c.moving) extra += ' <span class="status status-blue">Firm licence from ' + esc(c.moving) + '</span>';
+    if (c.firmLic && c.firmLic.pending) extra += '<span class="cell-subtext">Activates when they accept</span>';
+    return '<span class="text-body2">' + esc(plan) + '</span>' + extra;
+  }
   function firmLicCell(c) {
     let main;
     if (c.firmLic && c.firmLic.plan) main = '<span class="text-body2">' + esc(licenceSummary(c)) + '</span>';
@@ -1921,10 +1933,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function emptyLicences() {
     return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlanEmpty">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
   }
-  function firmSectionTabs(active) {
-    const tabs = [['colleagues', 'Colleagues'], ['clients', 'Clients'], ['billing', 'Billing and licenses']];
-    return '<div class="tabs" role="tablist">' + tabs.map((item) => '<button type="button" class="tab' + (active === item[0] ? ' active' : '') + '" data-firm-tab="' + item[0] + '" role="tab">' + item[1] + '</button>').join('') + '</div>';
-  }
   const EXAMPLE_PRICE = { corePack: 360, coreEss: 80, corePro: 200, advPack: 632, advEss: 72, advPro: 184, advMax: 384, user: 24, rev: 2, rules: { rules3: 15, rules5: 25, rules10: 40, rules30: 70, rules100: 120 }, inv: { inv20: 20, inv50: 45, inv200: 90, inv1000: 160 } };
   const RULE_OPTS = [['rules3', 'Up to 3'], ['rules5', 'Up to 5'], ['rules10', 'Up to 10'], ['rules30', 'Up to 30'], ['rules100', 'Up to 100']];
   const INV_OPTS = [['inv20', 'Up to 20'], ['inv50', 'Up to 50'], ['inv200', 'Up to 200'], ['inv1000', 'Up to 1,000']];
@@ -1975,13 +1983,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function renderBilling() {
     if (billingMode() === 'error') {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><button type="button" class="btn" id="revealLicences">Book a call</button></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Pay a fixed fee per client for unlimited integrations, syncs and rules.</p><button type="button" class="btn" id="revealLicences">See licenses</button><button type="button" class="btn-text" id="bookCallQuiet">Book a call</button></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[1] - row[2]) + '</td></tr>').join('');
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + firmSectionTabs('billing') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><h2 class="text-h2">Purchased licenses</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openBuyLicenses">Buy licenses</button>') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><h2 class="text-h2">Purchased licenses</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div><h2 class="text-h2">Assign licenses</h2>' + renderAssignTab() + '</div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -2106,9 +2114,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return '<div class="d-flex align-center gap-8"><select class="select" data-addon-size="' + family + ':' + kind + ':' + index + '" aria-label="' + kind + '">' + options + '</select><span class="text-body2">' + price + '</span>' + stepPair(family + ':' + kind + ':' + index, row.qty || 0) + '<button type="button" class="btn-icon" data-del-addon="' + family + ':' + kind + ':' + index + '" aria-label="Delete"><span class="material-icons">close</span></button></div>';
   }
   function renderManageLicenses() {
-    const tab = st.manageTab === 'buy' ? 'buy' : 'assign';
-    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (tab === 'assign' ? ' active' : '') + '" data-manage-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab' + (tab === 'buy' ? ' active' : '') + '" data-manage-tab="buy" role="tab">Buy licenses</button></div>';
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Buy licenses') + renderBuyTab() + '</div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -3719,8 +3725,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     });
     if (st.openMonth) rows = rows.filter((c) => (c.monthStatus || 'Open') !== 'Closed');
     if (st.tagFilter) rows = rows.filter((c) => (c.tags || []).indexOf(st.tagFilter) >= 0);
+    const showHealth = listed.some((c) => !isOffClient(c));
     const body = rows.map((c) => {
-      const lic = licenseLabel(c);
       const off = isOffClient(c);
       const lost = hasLostConnection(c);
       const waiting = isWaitingClient(c);
@@ -3734,13 +3740,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           : (waiting ? `<button type="button" class="dropdown-item" data-resend="${c.id}">Resend invite</button>` : ''));
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
-        <td><span class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</span></td>
-        <td>${firmLicCell(c)}</td>
+        <td>${planCell(c)}</td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
-        <td>${healthCell(c)}</td>
+        ${showHealth ? `<td>${healthCell(c)}</td>` : ''}
         <td>${reconCell(c)}</td>
-        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button><button type="button" class="dropdown-item" data-see="${c.id}">See details</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button>${licenceMenuItem(c)}<button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
+        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button>${licenceMenuItem(c)}<button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -3759,12 +3764,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="d-flex align-center gap-8 flex-wrap">
         <button type="button" class="btn-outlined" id="tagFilterBtn">${esc(st.tagFilter ? (firmTags.find((t) => t.id === st.tagFilter) || {}).name || 'All tags' : 'All tags')}</button>
         <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="openMonth"${st.openMonth ? ' checked' : ''}> Has open month</label>
-        <button type="button" class="btn-outlined" id="firmChecklistBtn">Firm checklist</button>
-        <button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button>
       </div>
       <div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Name</th><th>Plan</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="8" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr><th>Name</th><th>Plan</th><th>Accounting</th><th>Integrations</th>${showHealth ? '<th>Health checks</th>' : ''}<th>Reconciliation</th><th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="${showHealth ? 7 : 6}" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
     </div>${flowDialogs()}`;
@@ -3947,7 +3950,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const tabHtml = `<div class="tabs" role="tablist">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}" role="tab">${label}</button>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="#clients">Back to clients</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">Client details</p></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="removeThisClient">Remove client</button></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientAccountingLine(c))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
       ${tabHtml}
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
     </div>`;
@@ -4059,18 +4062,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }).join('') || '<tr><td colspan="4" class="text-body2">No colleagues match.</td></tr>';
     const sortCls = 'sortable' + (st.colSort ? ' sorted' + (st.colSort === 'desc' ? ' desc' : '') : '');
     return `<div class="flow-wide page-stack">
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(FIRM.name)}</h1><p class="synder-page-subtitle"><button type="button" class="link" id="copyFirmId">Firm ID ${esc(FIRM.firmId)}</button></p></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="openFirmDetails">Firm details</button><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
-      ${firmSectionTabs('colleagues')}
+      ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
       <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
   }
+  function clientAccountingLine(c) {
+    if (!c || !c.accounting || isOffClient(c)) return 'Accounting not connected';
+    const books = c.accounting === 'QuickBooks' ? 'QuickBooks Online' : c.accounting;
+    return books + ' · ' + (booksLost(c) ? 'Disconnected' : 'Connected');
+  }
   function renderFirmSettings() {
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Firm settings')}
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">Firm settings</h1><p class="synder-page-subtitle"><button type="button" class="link" id="copyFirmId">Firm ID ${esc(FIRM.firmId)}</button></p></div></div>
       <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
       <div><button type="button" class="btn" id="firmNameSave">Save</button></div>
+      <div class="d-flex gap-8"><button type="button" class="btn-outlined" id="firmChecklistBtn">Firm checklist</button><button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button></div>
     </div>`;
   }
   function colleagueRoleName(p) { return p.firmRole === 'admin' ? 'Admin' : 'Firm Colleague'; }
@@ -4640,9 +4648,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('sortColName', () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); });
     const sortTh = document.getElementById('sortColName');
     if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
-    m.querySelectorAll('[data-firm-tab]').forEach((b) => b.onclick = () => goFirm(b.dataset.firmTab));
     bindClick('revealLicences', () => { st.licencesOn = true; render(); });
-    bindClick('openManage', () => { st.page = 'manage'; st.manageTab = 'assign'; st.licencesOn = true; render(); });
+    bindClick('openBuyLicenses', () => { st.page = 'buylicenses'; st.licencesOn = true; render(); });
+    bindClick('bookCallQuiet', () => showKitToast('We’ll email you to book a call'));
     bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
     m.querySelectorAll('[data-manage-tab]').forEach((b) => b.onclick = () => { st.manageTab = b.dataset.manageTab; render(); });
     m.querySelectorAll('[data-buy-period]').forEach((b) => b.onclick = () => { ensureBuyDraft().period = b.dataset.buyPeriod; renderMain(); });
@@ -5180,6 +5188,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       render();
       return;
     }
+    if (head === 'settings' || head === 'firmsettings') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      st.ctx = 'firm';
+      st.page = 'firmsettings';
+      st.clientId = null;
+      st.orgId = null;
+      closePop();
+      render();
+      return;
+    }
     if (head === 'billing') {
       scenario = 'firm';
       load();
@@ -5188,11 +5210,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
       st.plansOpen = false;
-      if (parts[1] === 'manage' || parts[1] === 'buy' || parts[1] === 'plans') {
-        st.page = 'manage';
-        st.manageTab = (parts[1] === 'buy' || parts[1] === 'plans' || parts[2] === 'buy') ? 'buy' : 'assign';
+      if (parts[1] === 'buy' || parts[1] === 'plans' || (parts[1] === 'manage' && parts[2] === 'buy')) {
+        st.page = 'buylicenses';
         st.licencesOn = true;
-      } else { st.page = 'billing'; st.licencesOn = parts[1] === 'licences'; }
+      } else if (parts[1] === 'manage' || parts[1] === 'licences') {
+        st.page = 'billing';
+        st.licencesOn = true;
+      } else { st.page = 'billing'; st.licencesOn = false; }
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -5324,9 +5348,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'clienthealth' && st.clientId) h = '#clients/' + st.clientId + '/health';
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
+    else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage' + (st.manageTab === 'buy' || st.page === 'buylicenses' || st.page === 'buyplans' ? '/buy' : '');
+    else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage/buy';
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.licencesOn ? '/licences' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
