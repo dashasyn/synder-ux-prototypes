@@ -2189,7 +2189,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const d = ensurePlanDraft();
     const monthOn = d.period !== 'year';
     const period = '<div class="tabs" role="tablist"><button type="button" class="tab' + (monthOn ? ' active' : '') + '" data-period="month" role="tab" aria-selected="' + (monthOn ? 'true' : 'false') + '">Monthly</button><button type="button" class="tab' + (monthOn ? '' : ' active') + '" data-period="year" role="tab" aria-selected="' + (monthOn ? 'false' : 'true') + '">Yearly · save 20%</button></div>';
-    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"><button type="button" class="btn-outlined" id="closeBuy">Cancel</button></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16" role="radiogroup" aria-label="Plan">' + buyCard('core') + buyCard('advanced') + '</div>' + orderSection() + '</div></div></div>';
+    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><button type="button" class="btn-icon" id="closeBuy" aria-label="Close"><span class="material-icons">close</span></button><span class="overlay-header-divider"></span><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16" role="radiogroup" aria-label="Plan">' + buyCard('core') + buyCard('advanced') + '</div>' + orderSection() + '</div></div></div>';
   }
   function openBuyMore(id, opts) {
     opts = opts || {};
@@ -3492,7 +3492,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ${pickerHtml()}`;
   }
   function bringChoices() {
-    const logos = `<span class="logo-line">${brandMark('QuickBooks', 40)}${brandMark('Xero', 40)}</span>`;
+    const logos = `<span class="d-flex align-center gap-8">${brandMark('QuickBooks', 40)}${brandMark('Xero', 40)}</span>`;
     return `<div class="bring-stage">
       <h1 class="text-h1">Let’s start by bringing in your clients.</h1>
       <p class="text-body1 text-secondary">Import in bulk or add them one by one. Importing only copies client names.</p>
