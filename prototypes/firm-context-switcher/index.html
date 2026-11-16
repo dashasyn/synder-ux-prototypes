@@ -1921,18 +1921,39 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function emptyLicences() {
     return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlanEmpty">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
   }
+  function firmSectionTabs(active) {
+    const tabs = [['colleagues', 'Colleagues'], ['clients', 'Clients'], ['billing', 'Billing and licenses']];
+    return '<div class="tabs" role="tablist">' + tabs.map((item) => '<button type="button" class="tab' + (active === item[0] ? ' active' : '') + '" data-firm-tab="' + item[0] + '" role="tab">' + item[1] + '</button>').join('') + '</div>';
+  }
+  const PLACEHOLDER_LICENCES = [
+    { id: 'core-pack', name: 'Core pack · 5 Essential', balance: 2, price: 360 },
+    { id: 'core-single', name: 'Core Essential', balance: 1, price: 80 },
+    { id: 'adv-pack', name: 'Advanced pack · 5 Pro', balance: 0, price: 632 },
+    { id: 'rules', name: 'Smart Rules up to 10', balance: 3, price: 40 }
+  ];
   function renderBilling() {
-    const mode = billingMode();
-    const view = st.billView === 'clients' ? 'clients' : 'licences';
-    const action = mode === 'error'
-      ? '<button type="button" class="btn" id="billRetry">Try again</button>'
-      : (mode === 'empty' ? '<button type="button" class="btn" id="choosePlan">Choose a plan</button>' : '<button type="button" class="btn" id="buyPlans">Buy plans</button>');
-    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (view === 'licences' ? ' active' : '') + '" data-bill-view="licences" role="tab">Licences</button><button type="button" class="tab' + (view === 'clients' ? ' active' : '') + '" data-bill-view="clients" role="tab">Clients</button></div>';
-    let body = '';
-    if (mode === 'error') body = '<p class="text-body2">Billing and licenses is unavailable. The licenses of this firm could not be loaded. Check the connection and try again.</p>';
-    else if (view === 'clients') body = renderBillClients();
-    else body = (mode === 'empty' ? emptyLicences() : moneySummary() + renderLicenceTable());
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', action) + (mode === 'error' ? '' : tabs) + body + '</div>' + (st.plansOpen ? buyOverlay() : '');
+    if (!st.licencesOn) {
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + firmSectionTabs('billing') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><button type="button" class="btn" id="revealLicences">Book a call</button></div><p class="text-caption">Placeholder empty state. Production copy for the licences table follows.</p></div>';
+    }
+    const rows = PLACEHOLDER_LICENCES.map((row) => '<tr><td><span class="text-body2">' + row.name + '</span></td><td><span class="text-body2">' + row.balance + ' left</span></td><td class="text-right"><button type="button" class="link" data-assign-lic="' + row.id + '">Assign</button></td></tr>').join('');
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openBuyLicenses">Buy licenses</button>') + firmSectionTabs('billing') + '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Balance</th><th class="text-right"></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="text-caption">Placeholder licence names, balances, and prices.</p></div>';
+  }
+  function renderBuyLicensesPage() {
+    const annual = st.buyPeriod === 'annual';
+    const factor = annual ? 0.8 : 1;
+    if (!st.buyQty) st.buyQty = {};
+    const lines = PLACEHOLDER_LICENCES.map((row) => {
+      const qty = st.buyQty[row.id] || 0;
+      const price = Math.round(row.price * factor * 100) / 100;
+      return '<div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + row.name + '</p><p class="text-caption">Placeholder · $' + price + ' each</p></div><div class="d-flex align-center gap-8"><button type="button" class="btn-icon btn-icon--bordered" data-buy-qty="' + row.id + '" data-dir="-1" aria-label="Fewer"><span class="material-icons">remove</span></button><span class="text-body2">' + qty + '</span><button type="button" class="btn-icon btn-icon--bordered" data-buy-qty="' + row.id + '" data-dir="1" aria-label="More"><span class="material-icons">add</span></button></div></div>';
+    }).join('');
+    const qty = PLACEHOLDER_LICENCES.reduce((n, row) => n + (st.buyQty[row.id] || 0), 0);
+    const raw = PLACEHOLDER_LICENCES.reduce((n, row) => n + (st.buyQty[row.id] || 0) * row.price * factor, 0);
+    const discount = qty >= 5 ? 10 : 0;
+    const total = Math.round(raw * (1 - discount / 100) * 100) / 100;
+    const period = '<div class="tabs" role="tablist"><button type="button" class="tab' + (annual ? '' : ' active') + '" data-buy-period="month" role="tab">Monthly</button><button type="button" class="tab' + (annual ? ' active' : '') + '" data-buy-period="annual" role="tab">Annual <span class="status status-green">20% OFF</span></button></div>';
+    const need = st.buyNeed ? '<div class="form-error-msg">Add at least one licence.</div>' : '';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing">Billing and licenses</a>' + pageHeader('Buy licenses', '', 'Placeholder catalogue. Production names and prices will replace these.') + period + lines + '<div class="card page-stack"><h2 class="text-h2">Order</h2>' + (discount ? '<p class="text-body2">Discount - ' + discount + '%</p>' : '<p class="text-body2">Discount - 0%</p>') + '<p class="text-h2">$' + total + (annual ? ' / year' : ' / month') + '</p>' + need + '<button type="button" class="btn" id="confirmPurchase">Buy licenses</button></div></div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -2545,7 +2566,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
     if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
-    if (st.page === 'billing' || st.page === 'buyplans') activePage = 'billing';
+    if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
     $('nav').innerHTML = items.map(([k, ic, label]) =>
@@ -3504,13 +3525,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <button type="button" class="btn" id="emptyBooks">Import clients</button>
         </div>
         <div class="box box--white bring-choice">
-          <span class="bring-mark"></span>
+          <span class="bring-mark"><span class="material-icons icon-lg" aria-hidden="true">upload_file</span></span>
           <h2 class="text-h2">From a CSV file</h2>
           <p class="text-body2">Upload a list of client names from your practice tool.</p>
           <button type="button" class="btn-outlined" id="emptyCsv">Upload CSV</button>
         </div>
         <div class="box box--white bring-choice">
-          <span class="bring-mark"></span>
+          <span class="bring-mark"><span class="material-icons icon-lg" aria-hidden="true">person_add</span></span>
           <h2 class="text-h2">One by one</h2>
           <p class="text-body2">Connect one client's books and integrations.</p>
           <button type="button" class="btn-outlined" id="emptyAdd">Add client</button>
@@ -3541,6 +3562,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (filter === 'off') return isOffClient(c);
       return true;
     });
+    if (st.openMonth) rows = rows.filter((c) => (c.monthStatus || 'Open') !== 'Closed');
+    if (st.tagFilter) rows = rows.filter((c) => (c.tags || []).indexOf(st.tagFilter) >= 0);
     const body = rows.map((c) => {
       const lic = licenseLabel(c);
       const off = isOffClient(c);
@@ -3578,6 +3601,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
+      <div class="d-flex align-center gap-8 flex-wrap">
+        <button type="button" class="btn-outlined" id="tagFilterBtn">${esc(st.tagFilter ? (firmTags.find((t) => t.id === st.tagFilter) || {}).name || 'All tags' : 'All tags')}</button>
+        <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="openMonth"${st.openMonth ? ' checked' : ''}> Has open month</label>
+        <button type="button" class="btn-outlined" id="firmChecklistBtn">Firm checklist</button>
+        <button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button>
+      </div>
       <div class="table-wrap clients-table"><table class="synder-table">
           <thead><tr><th>Name</th><th>Plan</th><th>License</th><th>Accounting</th><th>Integrations</th><th>Health checks</th><th>Reconciliation</th><th></th></tr></thead>
         <tbody>${body || `<tr><td colspan="8" class="text-body2">No clients match.</td></tr>`}</tbody>
@@ -3595,20 +3624,19 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   const FIRM_ROLE_COLLEAGUE = 'Have access to the clients assigned to them by the Firm Admin. Not be able to manage Firm details or colleagues. Have the view access to all of the colleagues\' details without the editing rights.';
   const CLIENT_ROLE_MANAGER = 'Edit client\'s organization details. Connect/disconnect integrations (eCommerce platforms and payment providers). Have full control over the synchronization process and settings.';
   const CLIENT_ROLE_MEMBER = 'View client\'s organization details. Adjust synchronization settings. Synchronize transactions in the client\'s books.';
-  const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question.';
+  const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question. Learn more';
   const SELF_ROLE_HINT = 'You can\'t change the role for yourself. Please ask another Firm admins to do that for you if needed.';
   let firmPeople = [
-    { id: 'p1', name: 'Ignat Plot', email: 'ignat@wlslabs.com', status: 'active', firmRole: 'admin', self: true },
-    { id: 'p2', name: 'Maya Chen', email: 'maya.chen@wlslabs.com', status: 'active', firmRole: 'colleague' },
-    { id: 'p3', name: 'Owen Brooks', email: 'owen.brooks@wlslabs.com', status: 'active', firmRole: 'colleague' },
-    { id: 'p4', name: 'Priya Shah', email: 'priya.shah@wlslabs.com', status: 'invited', firmRole: 'colleague' }
+    { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'admin', self: true },
+    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'colleague' }
   ];
   let clientAccess = [
-    { personId: 'p1', clientId: 'e1', role: 'Manager' },
-    { personId: 'p2', clientId: 'e1', role: 'Member' },
-    { personId: 'p2', clientId: 'e2', role: 'Manager' },
-    { personId: 'p3', clientId: 'e5', role: 'Member' },
-    { personId: 'p1', clientId: 'e3', role: 'Manager' }
+    { personId: 'p1', clientId: 'e1', role: 'Manager' }
+  ];
+  let firmTags = [{ id: 'monthly', name: 'Monthly close', used: 0 }];
+  let firmChecklist = [
+    { id: 'bank', label: 'Bank statements received', required: false, all: true },
+    { id: 'owner', label: 'Owner review done', required: false, all: true }
   ];
   function findPerson(id) { return firmPeople.find((p) => p.id === id); }
   function accessForClient(clientId) {
@@ -3756,19 +3784,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       }).join('');
       health = `<p class="text-body2">${view.health.passed} of ${view.health.total} passed</p><ul class="detail-list">${items}</ul>`;
     }
-    const action = off
-      ? `<button type="button" class="btn" data-connect="${c.id}">Connect client</button>`
-      : `<button type="button" class="btn" id="detailGo">Go to client</button>`;
     const tab = st.detailTab || 'work';
     const tabs = [['work', 'Work'], ['billing', 'Billing'], ['colleagues', 'Firm colleagues']];
-    const tabHtml = `<div class="tabs">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}">${label}</button>`).join('')}</div>`;
+    const tabHtml = `<div class="tabs" role="tablist">${tabs.map(([id, label]) => `<button type="button" class="tab${id === tab ? ' active' : ''}" data-detail-tab="${id}" role="tab">${label}</button>`).join('')}</div>`;
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="#clients">Back to clients</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(c.name)}</h1><span class="status status-${view.kind}">${esc(view.label)}</span></div></div><div class="synder-page-actions">${action}</div></div>
-      <section class="detail-block"><h2 class="text-h2">License</h2><p class="text-body2${lic.secondary ? ' text-secondary' : ''}">${esc(lic.text)}</p></section>
-      <section class="detail-block"><h2 class="text-h2">Accounting</h2>${accounting}</section>
-      <section class="detail-block"><h2 class="text-h2">Integrations</h2>${integrations}</section>
-      <section class="detail-block"><h2 class="text-h2">Health checks</h2>${health}</section>
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">Client details</p></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="removeThisClient">Remove client</button></div></div>
       ${tabHtml}
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
     </div>`;
@@ -3798,7 +3819,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="modal-actions"><button type="button" class="btn-outlined" id="profileCancel">Cancel</button><button type="button" class="btn" id="profileSave">Save client details</button></div>
       </div>`;
     } else if (!profile) {
-      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2><p class="text-body2">No client details yet</p><div><button type="button" class="btn" id="addProfile">Add client details</button></div></div>`;
+      details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2><p class="text-body2">No client details yet.</p><p class="text-body2">Owner: Dasha</p><div><button type="button" class="btn" id="addProfile">Add client details</button></div></div>`;
     } else {
       const lines = [['Contact name', profile.contact], ['Contact email', profile.email], ['Phone', profile.phone], ['Entity type', profile.entity], ['Fiscal year end', profile.fiscal], ['Close deadline', profile.deadline], ['Firm reference', profile.reference], ['Services', profile.services], ['Tags', profile.tags], ['Working notes', profile.notes]];
       details = `<div class="box box--white page-stack"><h2 class="text-h2">Client details</h2>${lines.map(([k, v]) => `<p class="text-body2"><span class="text-secondary">${k}. </span>${esc(v || '—')}</p>`).join('')}
@@ -3814,25 +3835,25 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div><button type="button" class="btn-outlined" data-save-note="${chk.id}">Add note</button></div>
     </div>`).join('');
     const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('') || '<p class="text-body2 text-secondary">No notes yet.</p>';
-    const connections = off ? '' : connectionRows(c).map((row) => `<div class="page-stack">
-      <p class="text-body2 logo-line">${brandMark(row.logo, 18)}<span>${esc(row.name)}</span></p>
-      <p class="text-body2 text-secondary">${esc(row.type)}</p>
-      <p class="text-body2">${statusChip(row.chip, row.label)}</p>
-    </div>`).join('');
-    const done = c.firmChecks.filter((chk) => chk.done).length;
-    const closeItems = off
-      ? ['Syncs', 'Reconciliation', 'Daily summaries', 'Mappings', 'Revenue recognition'].map((name) => `<p class="text-body2">${name}: Not set up for this client</p>`).join('')
-      : `<p class="text-body2">Syncs: 62 syncs finished, none failed <span class="text-secondary">Passed</span></p>
+    const prodConnections = [
+      ['Changolivia (Shopify)', 'Payment platform', 'Disconnected', 'yellow', 'Shopify'],
+      ['Synder test (Stripe)', 'Payment platform', 'Connected', 'green', 'Stripe'],
+      ['mzkt.by (Stripe)', 'Payment platform', 'Disconnected', 'yellow', 'Stripe'],
+      ['Sandbox Company_US_1 (QuickBooks Online)', 'Accounting', 'Connected', 'green', 'QuickBooks']
+    ];
+    const connections = prodConnections.map((row) => `<div class="page-stack"><p class="text-body2 logo-line">${brandMark(row[4], 18)}<span>${esc(row[0])}</span></p><p class="text-body2 text-secondary">${esc(row[1])}</p><p class="text-body2">${statusChip(row[3], row[2])}</p></div>`).join('');
+    const closeItems = `<p class="text-body2">Syncs: 62 syncs finished, none failed <span class="status status-green">Passed</span></p>
         <p class="text-body2">Reconciliation: Not set up for this client</p>
         <p class="text-body2">Daily summaries: Not set up for this client</p>
         <p class="text-body2">Mappings: Not set up for this client</p>
-        <p class="text-body2">Revenue recognition: Not set up for this client</p>
-        <button type="button" class="link" data-stub>Reconciliation runs</button>`;
+        <p class="text-body2">Revenue recognition: Not set up for this client</p>`;
+    const monthChip = c.monthStatus === 'Closed' ? 'green' : (c.monthStatus === 'In review' ? 'yellow' : 'grey');
     return `<div class="page-stack">
+      <p class="text-body2">Checking close eligibility</p>
       <div class="toolbar">
         <button type="button" class="btn-outlined" id="monthPrev">Previous month</button>
         <span class="text-h2">${esc(month.label)}</span>
-        <span class="status status-blue">${esc(c.monthStatus)}</span>
+        <span class="status status-${monthChip}">${esc(c.monthStatus || 'Open')}</span>
         <button type="button" class="btn-outlined" id="monthNext">Next month</button>
         <button type="button" class="btn-outlined" id="markReview">Mark in review</button>
         <button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>
@@ -3851,19 +3872,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div><button type="button" class="btn" id="addMonthNote">Add note</button></div>
       </div>
       <div class="box box--white page-stack"><h2 class="text-h2">Synder evidence</h2><h2 class="text-subtitle1">Connections</h2>${connections}</div>
-      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2>${(() => { const summary = healthSummary(c); const fails = summary.failed.map((f) => `<p class="text-body2">${esc(f.name)}${f.detail ? ' · ' + esc(f.detail) : ''}</p>`).join(''); return `<p class="text-body2">${statusChip(chipKind(summary.tone), summary.label)}</p>${fails}`; })()}<button type="button" class="link" data-stub>Health history</button></div>
+      <div class="box box--white page-stack"><h2 class="text-h2">Health</h2><p class="text-body2">Synder has not checked this client yet.</p><button type="button" class="link" data-stub>Health history</button></div>
       ${preWorkBlock(c)}
       <div class="box box--white page-stack"><h2 class="text-h2">Month close checks</h2>${closeItems}</div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th></th></tr></thead>
-        <tbody><tr><td>${esc(month.label)}</td><td>${esc(c.monthStatus)}</td><td>${done}/${c.firmChecks.length}</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr>
-        <tr><td>September 2026</td><td>Open</td><td>0/2</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="btn-outlined" data-stub>Events</button></td></tr></tbody></table></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th></tr></thead>
+        <tbody><tr><td>November 2026</td><td><span class="status status-grey">Open</span></td><td>0/2</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>October 2026</td><td><span class="status status-grey">Open</span></td><td>0/2</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
     </div>`;
   }
   function clientBillingTab(c) {
-    const summary = licenceSummary(c);
-    const move = c.ownPlan && !c.moving && !(c.firmLic && c.firmLic.plan) ? `<button type="button" class="btn-outlined" data-lic-move="${c.id}">Move to firm licence</button>` : '';
-    const edit = c.firmLic && c.firmLic.plan ? `<button type="button" class="btn-outlined" data-lic-change="${c.id}">Change</button>` : `<button type="button" class="btn-outlined" data-lic-assign="${c.id}">Assign</button>`;
-    return `<div class="page-stack"><h2 class="text-h2">Licence</h2><p class="text-body2">${summary ? esc(summary) : '<span class="status status-grey">No licence</span>'}</p><div>${edit}</div><h2 class="text-h2">Who pays</h2>${paysCell(c)}${move}</div>`;
+    return `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Balance</th></tr></thead><tbody><tr><td><span class="text-body2">Placeholder licence for ${esc(c.name)}</span></td><td><span class="text-body2">Not assigned</span></td></tr></tbody></table></div><p class="text-caption">Placeholder until the production billing tab copy arrives.</p>`;
   }
   function clientColleaguesTab(c) {
     const q = (st.clientColQ || '').toLowerCase();
@@ -3873,27 +3891,27 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const open = a.person.status === 'active';
       return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${a.person.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(a.person.name)}</span>${a.person.firmRole === 'admin' ? ' <span class="status status-grey">Admin</span>' : ''}</td><td><span class="text-body2">${esc(a.role)}</span></td></tr>`;
     }).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
-    return `<div class="page-stack">
-      <div class="ph"><div class="toolbar"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /></div><div class="ph-actions"><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>
-      ${page.html}
-    </div>`;
+    return `<div class="page-stack"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Colleague</th><th>Role in the client</th></tr></thead><tbody>${body || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>'}</tbody></table></div><p class="text-caption">Placeholder until the production Firm colleagues tab copy arrives.</p></div>`;
   }
   function renderColleagues() {
     const q = (st.colQ || '').toLowerCase();
-    const rows = firmPeople.filter((p) => !q || p.name.toLowerCase().includes(q));
-    const page = paginate('colleagues', rows);
+    let rows = firmPeople.filter((p) => !q || p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q));
+    rows.sort((a, b) => a.name.localeCompare(b.name));
+    if (st.colSort === 'desc') rows.reverse();
+    const page = paginate('colleagues', rows, [25, 50, 100]);
     const body = page.slice.map((p) => {
       const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
-      const admin = p.firmRole === 'admin' ? ' (admin)' : '';
-      const count = p.firmRole === 'admin' ? 'All clients' : String(accessForPerson(p.id).length);
-      const items = `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button><button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove colleague</button>`;
-      return `<tr class="row-clickable" data-person="${p.id}" tabindex="0"><td><span class="text-body2">${esc(p.name)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td>${status}${admin}</td><td><span class="text-body2">${count}</span></td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
-    }).join('') || '<tr><td colspan="5" class="text-body2">No colleagues match.</td></tr>';
+      const label = p.firmRole === 'admin' ? p.name + ' (admin)' : p.name;
+      const items = (p.status === 'invited' ? '' : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button>`) + `<button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove</button>`;
+      const open = p.status !== 'invited';
+      return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${p.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(label)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td>${status}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
+    }).join('') || '<tr><td colspan="4" class="text-body2">No colleagues match.</td></tr>';
+    const sortCls = 'sortable' + (st.colSort ? ' sorted' + (st.colSort === 'desc' ? ' desc' : '') : '');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(FIRM.name)}</h1><p class="synder-page-subtitle"><button type="button" class="link" id="copyFirmId">Firm ID ${esc(FIRM.firmId)}</button></p></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="openFirmDetails">Firm details</button><button type="button" class="btn" id="addColleague">Add colleague</button></div></div>
+      ${firmSectionTabs('colleagues')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Clients</th><th class="text-right"></th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
   }
@@ -3909,46 +3927,38 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const p = findPerson(st.colleagueId);
     if (!p) return renderColleagues();
     const tab = st.colleagueTab || 'details';
-    const assigned = p.firmRole === 'admin'
-      ? listedClients().map((c) => ({ client: c, clientId: c.id, role: 'Admin', locked: true }))
-      : accessForPerson(p.id).map((a) => Object.assign({ locked: false }, a));
-    const locked = !!(p.self || p.status === 'invited');
-    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details" role="tab" aria-selected="${tab === 'details'}">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients" role="tab" aria-selected="${tab === 'clients'}">Clients <span class="status status-grey">${assigned.length}</span></button></div>`;
-    const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
-    const menu = `${p.status === 'invited' ? `<button type="button" class="dropdown-item" data-resend-person="${p.id}">Resend invite</button>` : ''}<button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove colleague</button>`;
+    const assigned = accessForPerson(p.id).map((a) => Object.assign({ locked: false }, a));
+    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details" role="tab">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients" role="tab">Clients</button></div>`;
+    const adminTag = p.firmRole === 'admin' ? '<span class="status status-grey">Admin</span>' : '';
     let body = '';
     if (tab === 'clients') {
-      const page = paginate('personClients', assigned);
+      const q = (st.personClientQ || '').toLowerCase();
+      const filtered = assigned.filter((a) => a.client && (!q || a.client.name.toLowerCase().includes(q)));
+      const page = paginate('personClients', filtered, [25, 50, 100]);
       const rows = page.slice.map((a) => {
-        const menu = a.locked ? '' : `<td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="ac-${a.clientId}" aria-label="Actions for ${esc(a.client.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-ac-${a.clientId}"><button type="button" class="dropdown-item" data-change-role="${p.id}:${a.clientId}">Change role</button><button type="button" class="dropdown-item" data-drop-client="${p.id}:${a.clientId}">Unassign</button></div></div></td>`;
-        return `<tr class="row-clickable" data-row="${a.clientId}" tabindex="0"><td><span class="text-body2">${esc(a.client.name)}</span></td><td><span class="text-body2">${esc(a.role)}</span></td><td>${acctCell(a.client)}</td>${a.locked ? '<td></td>' : menu}</tr>`;
-      }).join('') || '<tr><td colspan="4" class="text-body2">No clients assigned.</td></tr>';
-      const assign = p.firmRole === 'admin' ? '' : '<button type="button" class="btn-outlined" id="addPersonClient">+ Assign client</button>';
+        const select = a.locked
+          ? `<span class="text-body2">${esc(a.role)}</span>`
+          : `<select class="select" data-inline-role="${p.id}:${a.clientId}" aria-label="Role in the client"><option value="Manager"${a.role === 'Manager' ? ' selected' : ''}>Manager</option><option value="Member"${a.role !== 'Manager' ? ' selected' : ''}>Member</option></select>`;
+        return `<tr><td><span class="text-body2">${esc(a.client.name)}</span></td><td>${select}</td><td class="text-right"><button type="button" class="btn-icon" data-drop-client="${p.id}:${a.clientId}" aria-label="Remove ${esc(a.client.name)}"><span class="material-icons">close</span></button></td></tr>`;
+      }).join('') || '<tr><td colspan="3" class="text-body2">No clients assigned.</td></tr>';
       body = `<div class="page-stack">
-        <div class="ph"><div></div><div class="ph-actions">${assign}</div></div>
-        <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Role in the client</th><th>Accounting status</th><th class="text-right"></th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="d-flex align-center gap-8"><input type="search" class="input-search" id="personClientSearch" placeholder="Search by client's name" value="${esc(st.personClientQ || '')}" /><button type="button" class="btn" id="addPersonClient">Add a client</button></div>
+        <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client name</th><th>Role in the client</th><th class="text-right"></th></tr></thead><tbody>${rows}</tbody></table></div>
         ${page.html}
       </div>`;
-    } else if (locked) {
+    } else {
+      const role = p.self
+        ? `<p class="text-body2">Admin</p><p class="form-hint">${esc(SELF_ROLE_HINT)}</p>`
+        : `<p class="text-body2">${esc(colleagueRoleName(p))}</p>`;
       body = `<div class="page-stack">
         <div class="form-field"><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
+        <div class="form-field"><span class="form-label form-label-required">Role in the Firm</span>${role}</div>
         <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
-        <div class="form-field"><span class="form-label">Role in the Firm ${helpIcon(firmRoleTip())}</span><p class="text-body2">${esc(colleagueRoleName(p))}</p></div>
-        ${p.self ? `<p class="text-body2">${esc(SELF_ROLE_HINT)}</p>` : ''}
-      </div>`;
-    } else {
-      body = `<div class="page-stack">
-        <div class="form-field"><label class="form-label form-label-required" for="colName">Name</label><input class="input" id="colName" data-required="1" value="${esc(p.name)}" /></div>
-        <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
-        <div class="form-field">${fieldLabel('firmRole', 'Role in the Firm', firmRoleTip())}
-          <select class="select" id="firmRole"><option value="admin"${p.firmRole === 'admin' ? ' selected' : ''}>Admin</option><option value="colleague"${p.firmRole !== 'admin' ? ' selected' : ''}>Firm Colleague</option></select>
-        </div>
-        <div><button type="button" class="btn" id="saveColleague">Save</button></div>
       </div>`;
     }
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backColleagues" href="#colleagues">Back to colleagues</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(p.name)}</h1>${status}</div><p class="synder-page-subtitle">${esc(p.email)} · ${esc(colleagueRoleName(p))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="col-${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-col-${p.id}">${menu}</div></div></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(p.name)}</h1>${adminTag}</div></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button></div></div>
       ${tabs}${body}
     </div>`;
   }
@@ -4076,8 +4086,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
       else if (st.page === 'billing') html = renderBilling();
-      else if (st.page === 'buyplans') { st.page = 'billing'; st.plansOpen = true; html = renderBilling(); }
-      else if (st.page === 'buylicenses') { st.page = 'billing'; html = renderBilling(); }
+      else if (st.page === 'buyplans' || st.page === 'buylicenses') html = renderBuyLicensesPage();
       else if (st.page === 'colleagues') html = renderColleagues();
       else if (st.page === 'colleague') html = renderColleague();
       else if (st.page === 'firmsettings') html = renderFirmSettings();
@@ -4438,6 +4447,54 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       render();
     });
     bindClick('addColleague', openAddColleague);
+    bindClick('openFirmDetails', openFirmDetails);
+    bindClick('copyFirmId', () => {
+      const id = FIRM.firmId || '';
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id).catch(() => {});
+      showKitToast('Firm ID copied');
+    });
+    bindClick('sortColName', () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); });
+    const sortTh = document.getElementById('sortColName');
+    if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
+    m.querySelectorAll('[data-firm-tab]').forEach((b) => b.onclick = () => goFirm(b.dataset.firmTab));
+    bindClick('revealLicences', () => { st.licencesOn = true; render(); });
+    bindClick('openBuyLicenses', () => { st.page = 'buylicenses'; render(); });
+    bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
+    m.querySelectorAll('[data-buy-period]').forEach((b) => b.onclick = () => { st.buyPeriod = b.dataset.buyPeriod; renderMain(); });
+    m.querySelectorAll('[data-buy-qty]').forEach((b) => b.onclick = () => {
+      if (!st.buyQty) st.buyQty = {};
+      const id = b.dataset.buyQty;
+      st.buyQty[id] = Math.max(0, (st.buyQty[id] || 0) + Number(b.dataset.dir));
+      st.buyNeed = false;
+      renderMain();
+    });
+    bindClick('confirmPurchase', () => {
+      const qty = PLACEHOLDER_LICENCES.reduce((n, row) => n + ((st.buyQty && st.buyQty[row.id]) || 0), 0);
+      if (!qty) { st.buyNeed = true; renderMain(); return; }
+      const annual = st.buyPeriod === 'annual';
+      const factor = annual ? 0.8 : 1;
+      const raw = PLACEHOLDER_LICENCES.reduce((n, row) => n + ((st.buyQty[row.id] || 0) * row.price * factor), 0);
+      const discount = qty >= 5 ? 10 : 0;
+      const total = Math.round(raw * (1 - discount / 100) * 100) / 100;
+      const { modal, close } = dialogShell('Confirm purchase', '<p class="text-body2">Placeholder order. ' + qty + ' licence' + (qty === 1 ? '' : 's') + ', ' + (annual ? 'billed annually' : 'billed monthly') + '. Charged $' + total + ' + taxes.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="doPurchase">Buy licenses</button>');
+      modal.querySelector('#doPurchase').onclick = () => {
+        PLACEHOLDER_LICENCES.forEach((row) => { row.balance += (st.buyQty[row.id] || 0); });
+        st.buyQty = {};
+        close();
+        st.page = 'billing';
+        st.licencesOn = true;
+        showKitToast('Licences updated');
+        render();
+      };
+    });
+    m.querySelectorAll('[data-assign-lic]').forEach((b) => b.onclick = () => openAssignPlaceholder(b.dataset.assignLic));
+    bindClick('removeThisClient', () => { if (st.clientId) tryRemoveClient(st.clientId); });
+    bindClick('tagFilterBtn', openTagFilter);
+    bindClick('openMonth', () => { st.openMonth = !!($('openMonth') && $('openMonth').checked); renderMain(); });
+    bindClick('firmChecklistBtn', openFirmChecklist);
+    bindClick('manageTagsBtn', openManageTags);
+    const personClientSearch = $('personClientSearch');
+    if (personClientSearch) personClientSearch.oninput = () => { st.personClientQ = personClientSearch.value; renderMain(); };
     bindClick('saveColleague', () => {
       const person = findPerson(st.colleagueId);
       const name = $('colName');
@@ -4467,8 +4524,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-drop-client]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const parts = b.dataset.dropClient.split(':');
+      const owned = clientAccess.filter((a) => a.personId === parts[0]);
+      if (owned.length <= 1) {
+        dialogShell('Unable to remove the last client', '<p class="text-body2">You can\'t remove this client from this colleague, as every Synder user must have at least one Synder organization to be linked to. Assign another client to this colleague first to be able to perform this action</p>', '<button type="button" class="btn" data-cancel>Okay</button>');
+        return;
+      }
       clientAccess = clientAccess.filter((a) => !(a.personId === parts[0] && a.clientId === parts[1]));
       renderMain();
+    });
+    m.querySelectorAll('[data-inline-role]').forEach((sel) => sel.onchange = () => {
+      const parts = sel.dataset.inlineRole.split(':');
+      const row = clientAccess.find((a) => a.personId === parts[0] && a.clientId === parts[1]);
+      if (row) row.role = sel.value;
     });
     m.querySelectorAll('[data-change-role]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
@@ -4501,6 +4568,86 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (cancel) cancel.onclick = close;
     watchRequired(modal);
     return { modal, close };
+  }
+  function openAssignPlaceholder(id) {
+    const row = PLACEHOLDER_LICENCES.find((item) => item.id === id);
+    if (!row) return;
+    const options = listedClients().map((c) => '<option value="' + c.id + '">' + esc(c.name) + '</option>').join('');
+    const list = PLACEHOLDER_LICENCES.map((item) => '<p class="text-body2">' + item.name + ' · ' + item.balance + ' left</p>').join('');
+    const { modal, close } = dialogShell('Assign', '<p class="text-body2">Placeholder assign dialog.</p>' + list + '<div class="form-field"><label class="form-label form-label-required" for="assignClient">Client</label><select class="select" id="assignClient" data-required="1"><option value="">Select…</option>' + options + '</select></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="assignGo">Assign</button>');
+    modal.querySelector('#assignGo').onclick = () => {
+      const client = modal.querySelector('#assignClient');
+      if (!client.value) { fieldError(client, 'Required'); return; }
+      if (row.balance < 1) { fieldError(client, 'None left'); return; }
+      row.balance -= 1;
+      close();
+      showKitToast('Licence assigned');
+      renderMain();
+    };
+  }
+  function openTagFilter() {
+    const tags = '<label class="radio-wrap"><input class="radio" type="radio" name="tagPick" value=""' + (st.tagFilter ? '' : ' checked') + '> All tags</label>' + firmTags.map((tag) => '<label class="radio-wrap"><input class="radio" type="radio" name="tagPick" value="' + tag.id + '"' + (st.tagFilter === tag.id ? ' checked' : '') + '> ' + esc(tag.name) + '</label>').join('');
+    const { modal, close } = dialogShell('All tags', '<div class="d-flex flex-col gap-8">' + tags + '</div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="tagApply">Apply</button>');
+    modal.querySelector('#tagApply').onclick = () => {
+      const picked = modal.querySelector('input[name="tagPick"]:checked');
+      st.tagFilter = picked ? picked.value : '';
+      close();
+      renderMain();
+    };
+  }
+  function openManageTags() {
+    const rows = firmTags.map((tag) => '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + esc(tag.name) + '</span><span class="text-body2 text-secondary">Used by ' + tag.used + ' clients</span><button type="button" class="link" data-rename-tag="' + tag.id + '">Rename</button><button type="button" class="link" data-delete-tag="' + tag.id + '">Delete</button></div>').join('');
+    const { modal, close } = dialogShell('Manage tags', '<div class="form-field"><label class="form-label" for="tagSearch">Search tags</label><input class="input" id="tagSearch" placeholder="Search tags"></div><div class="d-flex flex-col gap-8" id="tagRows">' + rows + '</div>', '<button type="button" class="btn-outlined" data-cancel>Close</button>');
+    const paint = () => {
+      const q = (modal.querySelector('#tagSearch').value || '').toLowerCase();
+      modal.querySelector('#tagRows').innerHTML = firmTags.filter((tag) => !q || tag.name.toLowerCase().indexOf(q) >= 0).map((tag) => '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + esc(tag.name) + '</span><span class="text-body2 text-secondary">Used by ' + tag.used + ' clients</span><button type="button" class="link" data-rename-tag="' + tag.id + '">Rename</button><button type="button" class="link" data-delete-tag="' + tag.id + '">Delete</button></div>').join('') || '<p class="text-body2">No tags match.</p>';
+      modal.querySelectorAll('[data-rename-tag]').forEach((b) => b.onclick = () => {
+        const tag = firmTags.find((item) => item.id === b.dataset.renameTag);
+        const next = window.prompt('Rename tag', tag ? tag.name : '');
+        if (tag && next && next.trim()) { tag.name = next.trim(); paint(); }
+      });
+      modal.querySelectorAll('[data-delete-tag]').forEach((b) => b.onclick = () => {
+        firmTags = firmTags.filter((item) => item.id !== b.dataset.deleteTag);
+        if (st.tagFilter === b.dataset.deleteTag) st.tagFilter = '';
+        paint();
+      });
+    };
+    modal.querySelector('#tagSearch').oninput = paint;
+    paint();
+    modal.querySelector('[data-cancel]').onclick = () => { close(); renderMain(); };
+  }
+  function openFirmChecklist() {
+    let draft = firmChecklist.map((row) => Object.assign({}, row));
+    const suggested = ['Sales tax filed', 'Payroll posted'];
+    const { modal, close } = dialogShell('Firm checklist', '', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="saveChecklist">Save checklist</button>');
+    const paint = () => {
+      const rows = draft.map((row, i) => '<div class="d-flex flex-col gap-8"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '> Required to close</label><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-all="' + i + '"' + (row.all ? ' checked' : '') + '> All clients</label><button type="button" class="link" data-archive="' + i + '">Archive</button></div>').join('');
+      const ideas = suggested.filter((name) => !draft.some((row) => row.label === name)).map((name) => '<button type="button" class="link" data-suggest="' + esc(name) + '">' + esc(name) + '</button>').join(' ');
+      modal.querySelector('.modal-body').innerHTML = '<p class="text-body2">Changes apply to every open and in-review month. Closed months stay as they were, and keep the old name of a renamed check.</p>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><p class="text-subtitle2">Suggested checks</p><div class="d-flex gap-8">' + ideas + '</div>';
+      modal.querySelectorAll('[data-check-label]').forEach((el) => el.oninput = () => { draft[Number(el.dataset.checkLabel)].label = el.value; });
+      modal.querySelectorAll('[data-check-req]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkReq)].required = el.checked; });
+      modal.querySelectorAll('[data-check-all]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkAll)].all = el.checked; });
+      modal.querySelectorAll('[data-archive]').forEach((el) => el.onclick = () => { draft.splice(Number(el.dataset.archive), 1); paint(); });
+      const add = modal.querySelector('#addChecklistRow');
+      if (add) add.onclick = () => { draft.push({ id: 'k' + Date.now(), label: '', required: false, all: true }); paint(); };
+      modal.querySelectorAll('[data-suggest]').forEach((el) => el.onclick = () => { draft.push({ id: 'k' + Date.now(), label: el.dataset.suggest, required: false, all: true }); paint(); });
+    };
+    paint();
+    modal.querySelector('#saveChecklist').onclick = () => {
+      let bad = false;
+      modal.querySelectorAll('[data-check-label]').forEach((el) => {
+        if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; }
+        else fieldClear(el);
+      });
+      if (bad) return;
+      firmChecklist = draft.map((row) => Object.assign({}, row));
+      listedClients().forEach((c) => {
+        if ((c.monthStatus || 'Open') === 'Closed') return;
+        c.firmChecks = firmChecklist.map((row) => ({ id: row.id, label: row.label, done: false, note: '', required: !!row.required }));
+      });
+      close();
+      renderMain();
+    };
   }
   function openFirmDetails() {
     const { modal, close } = dialogShell('Firm details', `<div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="firmNameSave">Save</button>`);
@@ -4591,7 +4738,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     modal.querySelector('#resendGo').onclick = () => { close(); };
   }
   function confirmRemove(person) {
-    const { modal, close } = dialogShell('Remove colleague', `<p class="text-body2">Remove ${esc(person.name)} from the firm? Their client assignments are removed too.</p>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="confirmRemove">Remove</button>`);
+    const body = `<p class="text-body2">Removing this colleague from your Firm means that they will:</p><p class="text-body2">No longer be part of your Firm in Synder.</p><p class="text-body2">Lose access to all of your Firm's clients in Synder.</p><p class="text-body2">Not be able to view your Firm's colleagues list or your Firm's details.</p>`;
+    const { modal, close } = dialogShell('Remove this colleague from your Firm', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="confirmRemove">Remove</button>`);
     modal.querySelector('#confirmRemove').onclick = () => {
       firmPeople = firmPeople.filter((p) => p.id !== person.id);
       clientAccess = clientAccess.filter((a) => a.personId !== person.id);
@@ -4741,10 +4889,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       mode = 'firm';
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
-      st.page = 'billing';
-      st.plansOpen = parts[1] === 'plans';
-      if (parts[1] === 'clients') st.billView = 'clients';
-      else if (parts[1] !== 'plans') st.billView = 'licences';
+      st.plansOpen = false;
+      if (parts[1] === 'buy' || parts[1] === 'plans') st.page = 'buylicenses';
+      else { st.page = 'billing'; st.licencesOn = parts[1] === 'licences'; }
       st.clientId = null;
       st.orgId = null;
       closePop();
@@ -4878,8 +5025,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && st.page === 'billing' && st.plansOpen) h = '#billing/plans';
-    else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.billView === 'clients' ? '/clients' : '');
+    else if (st.ctx === 'firm' && (st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/buy';
+    else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.licencesOn ? '/licences' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
