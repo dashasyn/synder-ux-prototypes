@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://dashasyn.github.io/synder-prototypes/ui-kit/synder-ui-kit.css">
 <style>
 /* Page layout on top of the kit. All text ≥14px. Proto-bar is not product chrome. */
-body { margin: 0; background: var(--bg-surface); color: var(--text-primary); font-family: var(--font-family); }
+body { margin: 0; background: var(--bg-surface); color: var(--text-primary); font-family: var(--font-family); font-size: 14px; }
 .proto-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; background:#1a1b24; color:#fff; padding:8px 20px; flex-shrink:0; font-size:14px; }
 .proto-bar .name { opacity:.75; letter-spacing:.01em; }
 .proto-bar .seg { display:flex; gap:4px; background:rgba(255,255,255,.1); border-radius:6px; padding:3px; }
@@ -102,7 +102,8 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
 .chev { width:16px; height:16px; flex-shrink:0; }
 .help { position:relative; display:inline-flex; color:var(--color-grey-30,#8C97B1); cursor:help; }
 .help svg { width:16px; height:16px; }
-.help .tooltip { font-size:14px; line-height:20px; white-space:nowrap; font-weight:400; max-width:none; }
+.help .tooltip { font-size:14px; line-height:20px; white-space:normal; font-weight:400; max-width:280px; width:280px; }
+.help:hover .tooltip, .help:focus .tooltip, .help:focus-within .tooltip { opacity:1; }
 
 .ts-head { margin-bottom:16px; }
 .ts-head h1 { font-size:28px; font-weight:400; line-height:36px; margin:0 0 2px; }
@@ -146,7 +147,10 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
 .finding-b { padding:0 14px 14px 44px; font-size:14px; line-height:20px; }
 .finding-b .fl { font-weight:700; color:var(--text-secondary,#6B778C); margin:8px 0 2px; }
 .finding-b p { margin:0 0 6px; }
-.finding-b ul { margin:0 0 10px; padding-left:18px; }
+.finding-b ul, .finding-b ol, .how-steps { margin:0 0 10px; padding-left:1.3em; font-size:14px; line-height:20px; }
+.how-steps { list-style:decimal; }
+.how-steps li { margin:0 0 4px; }
+.scope-line { font-size:14px; line-height:20px; color:var(--text-secondary,#6B778C); margin:8px 0; }
 .finding-btns { display:flex; gap:8px; flex-wrap:wrap; }
 .hc-group { margin:20px 0 8px; font-size:14px; font-weight:700; color:var(--text-secondary,#6B778C); }
 .hc-blurb { font-size:14px; color:var(--text-secondary,#6B778C); margin:0 0 4px; }
@@ -155,13 +159,44 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
 .toast.show { opacity:1; }
 
 .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:300; }
-.modal { background:#fff; border-radius:4px; width:560px; max-width:calc(100vw - 32px); max-height:calc(100vh - 48px); overflow:auto; box-shadow:0 8px 28px rgba(0,0,0,.2); }
-.modal-header { padding:16px 32px; font-size:20px; line-height:28px; border-bottom:1px solid #DFE4EC; }
-.modal-body { padding:16px 32px; font-size:14px; line-height:20px; }
+.modal { background:#fff; border-radius:4px; width:560px; max-width:calc(100vw - 32px); max-height:calc(100vh - 48px); overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.2); display:flex; flex-direction:column; }
+.modal.modal-lg { width:720px; max-width:min(720px, calc(100vw - 32px)); }
+.modal-header { padding:16px 32px; font-size:20px; line-height:28px; border-bottom:1px solid #DFE4EC; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.modal-body { padding:16px 32px; font-size:14px; line-height:20px; overflow:auto; }
 .modal-footer { padding:12px 32px; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #DFE4EC; }
-.cfg-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid #EFF1F5; }
-.cfg-row label { flex:1; }
-.cfg-sec { font-weight:700; margin:16px 0 8px; }
+.modal-close { flex-shrink:0; width:32px; height:32px; padding:0; border:none; background:none; color:#6B778C; cursor:pointer; font-size:24px; line-height:1; border-radius:4px; }
+.modal-close:hover { color:#1A1B24; }
+.modal-close:focus-visible, .btn:focus-visible, .run-group-head:focus-visible, .tip:focus-visible { outline:2px solid var(--border-focus,#0053CC); outline-offset:2px; }
+.cfg-sec { font-weight:700; font-size:14px; margin:16px 0 8px; }
+.modal-note { margin:0 0 12px; color:#6B778C; font-size:14px; line-height:20px; }
+.run-only { margin:8px 0 12px; padding:8px 12px; background:#EFF1F5; border-radius:4px; font-size:14px; line-height:20px; }
+.run-info { margin:12px 0 0; font-size:14px; line-height:20px; color:#0053CC; }
+.field-error { color:var(--color-red,#CC2929); font-size:14px; line-height:20px; margin:8px 0 0; }
+.sched-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; }
+.schedule-field { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:6px 0; font-size:14px; }
+.schedule-field .select { width:auto; min-width:140px; height:32px; }
+.run-groups { border:1px solid var(--border-default,#DFE4EC); border-radius:4px; }
+.run-group + .run-group { border-top:1px solid #F0F2F5; }
+.run-group-head { width:100%; display:flex; align-items:center; gap:8px; padding:10px 12px; font:inherit; font-size:14px; line-height:20px; background:#fff; border:none; cursor:pointer; text-align:left; color:#1A1B24; }
+.run-group-head:hover { background:#F7F8FA; }
+.run-group-note { margin-left:auto; color:#6B778C; font-size:14px; font-weight:400; text-align:right; }
+.run-group-count { font-size:14px; font-weight:700; background:#EFF1F5; border-radius:99px; padding:0 8px; white-space:nowrap; }
+.run-group-body { padding:0 12px 8px 36px; }
+.cfg-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid #EFF1F5; font-size:14px; line-height:20px; }
+.cfg-row:last-child { border-bottom:none; }
+.cfg-label { display:inline-flex; align-items:center; gap:6px; min-width:0; }
+.cfg-row.off .cfg-label { color:#8C97B1; }
+.run-dates { display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; }
+.run-dates .ff { min-width:160px; }
+.tip { position:relative; display:inline-flex; align-items:center; color:var(--color-grey-30,#8C97B1); cursor:help; }
+.tip svg { width:16px; height:16px; }
+.tip-bubble { display:none; width:280px; max-width:280px; padding:8px 12px; background:#fff; color:#1A1B24; border:1px solid #DFE4EC; box-shadow:0 7px 14px rgba(129,142,165,.25); font-size:14px; line-height:20px; font-weight:400; white-space:normal; border-radius:4px; text-align:left; z-index:4000; pointer-events:none; }
+.tip:hover .tip-bubble, .tip:focus .tip-bubble, .tip:focus-within .tip-bubble { display:block; position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); }
+.tip-bubble.tip-fixed, .tooltip.tip-fixed { position:fixed !important; display:block !important; opacity:1 !important; transform:none !important; white-space:normal !important; width:280px; max-width:280px; }
+.act-title { font-size:20px; font-weight:400; line-height:28px; margin:8px 0 12px; }
+.act-back { margin-bottom:4px; }
+.hc-table .exp-box ul, .hc-table .exp-box ol { margin:0 0 10px; padding-left:1.3em; font-size:14px; }
+@media (max-width:720px) { .sched-grid { grid-template-columns:1fr; } .run-group-note { margin-left:0; } }
 
 [hidden] { display:none !important; }
 
@@ -292,7 +327,7 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
               Health check
               <span class="hc-sevs" id="hc-sevs"></span>
             </div>
-            <div class="hc-meta" id="hc-meta"></div>
+            <div class="hc-meta" id="hc-meta" aria-live="polite"></div>
           </div>
           <button type="button" class="btn btn-primary" id="hc-cta" data-nav="trouble" data-tab="health">Check issues</button>
         </div>
@@ -398,15 +433,77 @@ body { margin: 0; background: var(--bg-surface); color: var(--text-primary); fon
 <script>
 var CHECKS = [{"id": "auto-import-enabled", "label": "Auto-import", "cost": "live", "scope": "state", "cat": "Integration", "sev": "warn", "title": "Auto-import is off — My garden shop (Stripe)", "what": "Checks that auto-import is on for each connected sales or payment channel. With auto-import on, Synder pulls in new transactions automatically.", "why": "When auto-import is off, new transactions do not come into Synder. They do not sync, and the books fall behind without a warning.", "how": ["Open the channel settings.", "Turn on Auto-import.", "If you turned it off on purpose, ignore this check."], "fix": "Go to Stripe settings"}, {"id": "auto-sync-enabled", "label": "Auto-sync", "cost": "live", "scope": "state", "cat": "Integration", "sev": "warn", "title": "Auto-sync is off — My wonderful flowers (Stripe)", "what": "Checks that auto-sync is on for each connected channel. With auto-sync on, Synder sends imported transactions to your books automatically.", "why": "When auto-sync is off, imported transactions stay in Synder until someone syncs them by hand. Balances and reports in the books are not up to date.", "how": ["Open the channel settings.", "Turn on Auto-sync.", "If you sync by hand on purpose, ignore this check."], "fix": "Go to Stripe settings"}, {"id": "auto-sync-partial", "label": "Auto-sync for some tabs", "cost": "live", "scope": "state", "cat": "Integration", "sev": "warn", "title": "Auto-sync is off for some tabs — My garden shop (Stripe)", "what": "Checks the additional settings of each channel that has auto-sync on. It finds tabs where auto-sync is off.", "why": "Transactions on those tabs, for example fees or payouts, do not sync automatically. The books look complete, but part of the data is missing.", "how": ["Open the channel settings and go to the additional settings.", "Find the tabs where auto-sync is off.", "Turn on auto-sync for those tabs. If manual sync is intentional, ignore this check."], "fix": "Go to Stripe settings"}, {"id": "invoice-settings-auto-apply-credit-conflict", "label": "Invoice auto-apply conflict", "cost": "live", "scope": "state", "cat": "Accounting", "sev": "danger", "title": "Automatically apply credits is on — My lovely money (QuickBooks Online)", "what": "Checks the QuickBooks Online setting Automatically apply credits. Synder needs it off to apply payments and credits to the correct invoices.", "why": "When it is on, QuickBooks applies credits to open invoices by itself. Payments from Synder then go to the wrong invoices, and customer balances and accounts receivable do not match.", "how": ["In QuickBooks Online, go to Settings → Account and settings → Advanced → Automation.", "Turn off Automatically apply credits and save.", "Check recent invoices that QuickBooks changed, and correct them."], "fix": "Go to QuickBooks settings"}, {"id": "revrec-missing-mapping", "label": "RevRec mapping", "cost": "live", "scope": "state", "cat": "RevRec", "sev": "danger", "title": "Missing mapping on RevRec", "revrec": true, "what": "Checks that each subscription product or price plan has a product and an income account in the revenue recognition configuration.", "why": "Without a mapping, Synder cannot build the recognition journal entries for that item. Deferred and recognized revenue in the books are not correct.", "how": ["Open Revenue recognition → Configuration.", "Map each product or price plan that has no product or income account.", "Save. The check updates automatically."], "fix": "Go to Revenue recognition configuration"}, {"id": "recon-errored", "label": "Reconciliation errors", "cost": "live", "scope": "date", "cat": "Accounting", "sev": "warn", "title": "Transaction reconciliation errors", "what": "Checks for transaction reconciliations in the period with the Error status. Deleted reconciliations are not counted.", "why": "The reconciliation could not complete, so the period is not reconciled.", "how": ["Open Transaction reconciliation and filter by Error.", "Open the process log. It shows the step that failed, with the file, the row and the reason.", "Correct the source file or the setting, then run the reconciliation again."], "fix": "Go to Transaction reconciliation"}, {"id": "recon-attention", "label": "Reconciliation needs attention", "cost": "live", "scope": "date", "cat": "Accounting", "sev": "warn", "title": "Transaction reconciliation needs attention", "what": "Checks for transaction reconciliations in the period with the Attention required status. Deleted reconciliations are not counted.", "why": "The reconciliation finished, but transactions in Discrepancy or Missing source are not resolved. The books and the platform do not agree for the period.", "how": ["Open the reconciliation.", "Resolve each transaction in Discrepancy and Missing source: fix it, match it, or move it to Ignored.", "After you sync missing transactions, click Refresh data."], "fix": "Go to Transaction reconciliation"}, {"id": "recon-cancelled", "label": "Reconciliation cancelled", "cost": "live", "scope": "date", "cat": "Accounting", "sev": "info", "title": "Transaction reconciliation cancelled", "what": "Checks for transaction reconciliations in the period with the Cancelled status. Deleted reconciliations are not counted.", "why": "A cancelled reconciliation did not finish, so part of the period is not reconciled.", "how": ["Open Transaction reconciliation and filter by Cancelled.", "Start the reconciliation again for the same account and period."], "fix": "Go to Transaction reconciliation"}, {"id": "period-not-locked", "label": "Period not locked after reconciliation", "cost": "live", "scope": "date", "cat": "Accounting", "sev": "info", "title": "Period not locked after reconciliation", "what": "Checks the transaction reconciliations in the period with the Reconciled status. For each one, it checks that Period lock is set through the end date of that reconciliation.", "why": "A reconciled period is complete. Without a period lock, a late sync, a rollback or a resync can still change that period, and the reconciliation no longer agrees with the books. This is information, not an error.", "how": ["Open Period lock.", "Turn on the lock for the integration and set the lock date to the end date of the reconciliation. You can also click Lock period on the reconciliation result.", "If you do not lock periods on purpose, ignore this check."], "fix": "Go to Period lock"}, {"id": "revrec-incomplete-subscription", "label": "Incomplete subscriptions", "cost": "live", "scope": "date", "cat": "RevRec", "sev": "warn", "title": "Incomplete subscriptions", "revrec": true, "what": "Checks for revenue recognition subscriptions with the Incomplete status. Synder cannot complete the processing of their transactions for the recognition schedules.", "why": "Revenue for these subscriptions is not recognized on schedule, so deferred and recognized revenue are not correct.", "how": ["Open Revenue recognition and find the subscriptions with the Incomplete status.", "Contact Synder Support with the subscription IDs."], "fix": "Go to Revenue recognition"}, {"id": "provider-clearing-consistency", "label": "Clearing account consistency", "cost": "scheduled", "scope": "state", "cat": "Integration", "sev": "warn", "title": "Clearing mismatch, USD — My wonderful flowers (Stripe)", "what": "Checks that sales and fees of each channel and currency use the same clearing account.", "why": "When sales and fees use different clearing accounts, payouts do not net to zero, and the bank deposit does not match.", "how": ["Open the channel settings for that currency.", "Use one clearing account for sales and fees.", "Save, then run the check again."], "fix": "Go to Stripe settings"}, {"id": "duplicate-currency-slot-account", "label": "Multi-currency account mapping", "cost": "scheduled", "scope": "state", "cat": "Integration", "sev": "warn", "title": "Shared account across currencies — My ceramic plates (Amazon)", "hide": "amazon", "what": "Checks that each currency of a channel has its own account, not an account shared with other currencies.", "why": "When currencies share one account, balances and exchange differences mix, and the account does not reconcile.", "how": ["Open the multi-currency mapping of the channel.", "Give each currency its own account. Use the same account for that currency on all tabs.", "Save, then run the check again."], "fix": "Go to Amazon settings"}, {"id": "foreign-payouts-multicurrency", "label": "Foreign payouts / multicurrency", "cost": "scheduled", "scope": "state", "cat": "Integration", "sev": "danger", "title": "Foreign payouts need multicurrency — My wonderful flowers (Stripe)", "what": "Checks that multicurrency is on when a channel has payouts in a currency other than the home currency.", "why": "Without multicurrency, foreign payouts post with wrong amounts or fail. Bank deposits and exchange differences do not reconcile.", "how": ["Turn on multicurrency in your accounting company.", "Set up the currency accounts for the channel in Synder.", "Run the check again."], "fix": "Go to QuickBooks settings"}, {"id": "sync-duration-health", "label": "Sync duration", "cost": "scheduled", "scope": "date", "cat": "Sync", "sev": "warn", "title": "Syncs running slower than usual", "what": "Checks how long syncs in the period took to finish.", "why": "Slow syncs delay when transactions appear in the books. Until they finish, data can look missing.", "how": ["Open Sync speed and check if slow syncs are still running.", "Fix failed or stuck syncs before a large re-sync.", "If syncs stay slow, contact Synder Support."], "fix": "Go to Sync speed"}, {"id": "deleted-accounting-transaction", "label": "Deleted transactions", "cost": "scheduled", "scope": "date", "cat": "Accounting", "sev": "danger", "title": "Deleted in accounting — 3 synced transactions", "what": "For each transaction that Synder synced in the period, Synder checks that the linked entry still exists in the accounting company. It finds transactions that Synder shows as Synced, but that the user or another app deleted in accounting.", "why": "Synder still shows these transactions as Synced, but they are not in the books. Income, fees or payouts are missing, and reports and reconciliation do not agree.", "how": ["Open the affected transactions in Synder.", "Find out who or which app deleted them in the accounting company.", "If they must be in the books, sync them again from Transactions (Actions → Sync). To remove a synced transaction, roll it back in Synder instead of deleting it in the books."], "fix": "Go to Transactions"}, {"id": "moved-clearing-account", "label": "Moved clearing account", "cost": "scheduled", "scope": "date", "cat": "Integration", "sev": "warn", "title": "Moved clearing account — My wonderful flowers (Stripe)", "what": "Checks that transactions synced in the period use the clearing account that is in the settings now.", "why": "When the clearing account changes in the middle of a period, older entries stay on the old account. Payouts do not net to zero, and bank reconciliation does not match.", "how": ["Confirm the correct clearing account in the channel settings.", "Roll back and sync again the transactions that use the old account.", "Run the check again."], "fix": "Go to Stripe settings"}, {"id": "amazon-v2-reports-readiness", "label": "Amazon settlement coverage", "cost": "scheduled", "scope": "date", "cat": "Integration", "sev": "warn", "title": "Settlement reports have a gap — My ceramic plates (Amazon)", "what": "Checks that processed Amazon settlement reports cover the full period.", "why": "A gap in settlement reports means payouts, fees or refunds for those days are missing in Synder and in the books.", "how": ["Check the Amazon connection.", "Wait for late settlement reports, or reconnect Amazon if reports stopped.", "Run the check again when the period is covered."], "fix": "Go to Amazon settings"}];
 var DEMO = {"auto-import-enabled": "ignored", "auto-sync-enabled": "ignored", "auto-sync-partial": "ignored", "invoice-settings-auto-apply-credit-conflict": "ignored", "revrec-missing-mapping": "passed", "recon-errored": "passed", "recon-attention": "failed", "recon-cancelled": "passed", "period-not-locked": "passed", "revrec-incomplete-subscription": "passed", "provider-clearing-consistency": "failed", "duplicate-currency-slot-account": "failed", "foreign-payouts-multicurrency": "failed", "sync-duration-health": "passed", "deleted-accounting-transaction": "failed", "moved-clearing-account": "passed", "amazon-v2-reports-readiness": "ignored"};
-var LAST_CHECK = 'Oct 14, 2026 09:12';
+var SEEDED_STAMP = 'Oct 14, 2026 09:12';
+var SEEDED_PERIOD = 'Sep 14 \u2013 Oct 14, 2026';
+var LAST_CHECK = SEEDED_STAMP;
+var USER_EMAIL = 'lara.croft@mywonderfulflowers.com';
+var RUN_MS = 700;
+/* Next run confirms a marked finding. Set to 'returned' and the finding comes back failed. */
+var markedOutcome = 'confirmed';
 var openSet = {};
 var enabled = {};
-CHECKS.forEach(function (c) { enabled[c.id] = true; });
 var userIgnored = {};
 var marked = {};
+var checkRun = {};
+var periodBy = {};
+var checking = false;
+var schedule = { type:'monthly-day', day:5, weekday:1 };
+var schedPeriod = '30';
+var cfgModal = null;
+var runModal = null;
+var modalOpener = null;
+var actFilter = { type:'Health check', initiator:'' };
+var log = [
+  { ts:'Oct 14, 2026, 09:12 UTC', initiator:USER_EMAIL, kind:'User', action:'Check ran', type:'Health check', details:'Manual run \u00b7 Period: Sep 14 \u2013 Oct 14, 2026' },
+  { ts:'Sep 5, 2026, 03:00 UTC', initiator:'System', kind:'System', action:'Check ran', type:'Health check', details:'Scheduled run \u00b7 Period: Aug 6 \u2013 Sep 5, 2026' },
+  { ts:'Aug 5, 2026, 03:00 UTC', initiator:'System', kind:'System', action:'Check ran', type:'Health check', details:'Scheduled run \u00b7 Period: Jul 6 \u2013 Aug 5, 2026' },
+  { ts:'Jul 5, 2026, 03:00 UTC', initiator:'System', kind:'System', action:'Check ran', type:'Health check', details:'Scheduled run \u00b7 Period: Jun 5 \u2013 Jul 5, 2026' }
+];
+CHECKS.forEach(function(c, i){ c.ord = i; enabled[c.id] = true; });
+CHECKS.forEach(function(c){
+  if(c.cost!=='scheduled' || DEMO[c.id]==='ignored') return;
+  checkRun[c.id] = SEEDED_STAMP;
+  if(c.scope==='date') periodBy[c.id] = SEEDED_PERIOD;
+});
+
+var TYPES = [
+  { key:'live-state', label:'Live setting checks', cost:'live', scope:'state' },
+  { key:'live-date', label:'Live date-range checks', cost:'live', scope:'date' },
+  { key:'scheduled-state', label:'Scheduled setting checks', cost:'scheduled', scope:'state' },
+  { key:'scheduled-date', label:'Scheduled date-range checks', cost:'scheduled', scope:'date' }
+];
+var PERIODS = [['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days']];
+var PERIOD_LABEL = { '7':'Last 7 days', '30':'Last 30 days', '90':'Last 90 days' };
+var DAY = 864e5;
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function stripTime(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+var TODAY = stripTime(new Date());
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmt(d){ return MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); }
+function fmtRange(a, b){
+  var left = MON[a.getMonth()]+' '+a.getDate();
+  if(a.getFullYear()!==b.getFullYear()) left += ', '+a.getFullYear();
+  return left+' \u2013 '+fmt(b);
+}
+function fmtDateTime(d){
+  return MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+}
+function fmtUtc(d){
+  return MON[d.getUTCMonth()]+' '+d.getUTCDate()+', '+d.getUTCFullYear()+', '+pad2(d.getUTCHours())+':'+pad2(d.getUTCMinutes())+' UTC';
+}
+function toISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function fromISO(v){
+  var p = String(v||'').split('-').map(Number);
+  if(!p[0] || !p[1] || !p[2]) return null;
+  return new Date(p[0], p[1]-1, p[2]);
+}
+function presetRange(k){ return [stripTime(new Date(TODAY.getTime()-Number(k)*DAY)), TODAY]; }
+function rollingPeriod(){
+  var r = presetRange(schedPeriod);
+  return fmtRange(r[0], r[1]);
+}
 
 var BVE = 'Business Validation Error: We\u2019re sorry, QuickBooks encountered an error while calculating tax. Try reselecting the tax rate or reentering the product';
-/* Sync issues quantities sum to Needs attention 130 */
 var SYNC_ISSUES = [
   [50,'Failed',BVE],
   [20,'Canceled','Sync stopped before completion'],
@@ -417,31 +514,30 @@ var SYNC_ISSUES = [
 ];
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function sevWord(s){ return s==='danger' ? 'High' : 'Medium'; } /* info treated as Medium if shown; only red/yellow */
-function sevClass(s){ return s==='danger' ? 'high' : 'med'; }
-function statusOf(c){
-  if(!enabled[c.id]) return 'ignored';
-  if(userIgnored[c.id]) return 'ignored';
-  if(marked[c.id]) return 'marked';
-  if(DEMO[c.id]==='ignored') return 'ignored';
-  if(DEMO[c.id]==='passed') return 'passed';
-  if(DEMO[c.id]==='failed') return 'failed';
-  return DEMO[c.id] || 'passed';
+function sevWord(s){ return s==='danger' ? 'High' : 'Medium'; }
+function connectionBlocked(c){
+  return DEMO[c.id]==='ignored' && (c.id.indexOf('amazon')>=0 || c.id.indexOf('auto-')===0 || c.id.indexOf('invoice-')===0);
 }
-function ignoreReason(c){
-  if(!enabled[c.id]) return 'Turned off in Check settings.';
-  if(userIgnored[c.id]) return 'Ignored by you.';
-  if(DEMO[c.id]==='ignored'){
-    if(c.id.indexOf('amazon')>=0 || c.id.indexOf('auto-')===0 || c.id.indexOf('invoice-')===0)
-      return 'Ignored by the system: a connection is lost. Reconnect it to check again. Connection issues are listed on the Dashboard.';
-    return 'Ignored by the system.';
-  }
-  return '';
+function reasonOf(c){
+  if(!enabled[c.id]) return 'off';
+  if(userIgnored[c.id]) return 'user';
+  if(DEMO[c.id]==='ignored') return connectionBlocked(c) ? 'connection' : 'system';
+  if(c.cost==='scheduled' && !checkRun[c.id]) return 'notyet';
+  return null;
+}
+function statusOf(c){
+  if(reasonOf(c)) return 'ignored';
+  if(marked[c.id]) return 'marked';
+  if(DEMO[c.id]==='failed') return 'failed';
+  return 'passed';
+}
+function ignTip(c){
+  return c.cost==='live' ? 'It stays ignored until you undo it.' : 'It stays ignored until the next check.';
 }
 function openFindings(){
   return CHECKS.filter(function(c){
     if(statusOf(c)!=='failed') return false;
-    if(c.sev==='info') return false; /* only red/yellow */
+    if(c.sev==='info') return false;
     return true;
   });
 }
@@ -449,6 +545,21 @@ function countBySev(){
   var high=0, med=0;
   openFindings().forEach(function(c){ if(c.sev==='danger') high++; else med++; });
   return { high:high, med:med, total:high+med };
+}
+function copyEnabled(src){
+  var o = {};
+  CHECKS.forEach(function(c){ o[c.id] = !!src[c.id]; });
+  return o;
+}
+function countOn(set){
+  var n = 0;
+  CHECKS.forEach(function(c){ if(set[c.id]) n++; });
+  return n;
+}
+function canExecute(c, set){
+  if(!set[c.id]) return false;
+  if(connectionBlocked(c)) return false;
+  return true;
 }
 
 function renderHcBlock(){
@@ -467,41 +578,71 @@ function renderHcBlock(){
     if(c.high) pills += '<span class="status status-red">' + c.high + ' high</span>';
     if(c.med) pills += '<span class="status status-yellow">' + c.med + ' medium</span>';
     sevs.innerHTML = pills + '<span class="status status-yellow">' + c.total + (c.total===1?' issue':' issues') + '</span>';
-    meta.textContent = 'Last checked ' + LAST_CHECK + ' · Scheduled and settings checks. Connection lost and sync failures are listed above.';
+    meta.textContent = 'Last checked ' + LAST_CHECK + ' \u00b7 Scheduled and settings checks. Connection lost and sync failures are listed above.';
     document.getElementById('hc-cta').textContent = 'Check issues';
   }
 }
 
+function helpIcon(text, label){
+  return '<span class="tip" tabindex="0" role="button" aria-label="'+esc(label)+'"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.2 6.1a1.9 1.9 0 0 1 3.7.5c0 1.3-1.9 1.6-1.9 2.7" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="#fff"/></svg><span class="tip-bubble" role="tooltip">'+esc(text)+'</span></span>';
+}
+function detailsHtml(c){
+  return '<div class="fl">What</div><p>'+esc(c.what)+'</p>'
+    + '<div class="fl">Why it matters</div><p>'+esc(c.why)+'</p>'
+    + '<div class="fl">How to fix</div><ol class="how-steps">'+(c.how||[]).map(function(h){ return '<li>'+esc(h)+'</li>'; }).join('')+'</ol>';
+}
+function actsHtml(c, kind){
+  var st = statusOf(c);
+  var goCls = kind==='card' ? 'btn btn-primary' : 'act act-fix';
+  var minor = kind==='card' ? 'btn btn-outlined' : 'act';
+  var wrap = kind==='card' ? 'finding-btns' : 'exp-actions';
+  var html = '';
+  var line = '';
+  if(st==='failed'){
+    line = c.cost==='scheduled'
+      ? 'Mark as fixed stays unconfirmed until the next check. If the issue is still there, it comes back. Ignore stays until the next check.'
+      : 'Ignore stays until you undo it.';
+    html += '<button type="button" class="'+goCls+'" data-go="'+esc(c.fix)+'">'+esc(c.fix)+'</button>';
+    if(c.cost==='scheduled'){
+      html += '<button type="button" class="'+minor+'" data-mark="'+c.id+'" title="The next scheduled check confirms the fix. If the issue is still there, it comes back.">Mark as fixed</button>';
+    }
+    html += '<button type="button" class="'+minor+'" data-ignore="'+c.id+'" title="'+esc(ignTip(c))+'">Ignore</button>';
+  } else if(st==='marked'){
+    line = 'You marked this issue as fixed. It stays unconfirmed until the next check. The next check confirms it, or brings it back if the issue is still there.';
+    html += '<button type="button" class="'+minor+'" data-undo="'+c.id+'">Undo</button>';
+  } else if(st==='passed'){
+    line = 'No issues found.';
+  } else {
+    var r = reasonOf(c);
+    if(r==='user'){
+      line = 'You ignored this check. '+ignTip(c);
+      html += '<button type="button" class="'+minor+'" data-undo="'+c.id+'">Undo</button>';
+    } else if(r==='off'){
+      line = 'Turned off in Check settings.';
+      html += '<button type="button" class="'+(kind==='card'?'btn btn-outlined':'act act-fix')+'" data-open-settings="1">Open Check settings</button>';
+    } else if(r==='connection'){
+      line = 'Ignored by the system: a connection is lost. Reconnect it to check again. Connection issues are listed on the Dashboard.';
+      html += '<button type="button" class="'+(kind==='card'?'btn btn-outlined':'act act-fix')+'" data-go="Organization settings">Go to Organization settings</button>';
+    } else if(r==='notyet'){
+      line = 'Ignored by the system until the first scheduled check. It runs on the schedule, or when you click Run check.';
+    } else {
+      line = 'Ignored by the system.';
+    }
+  }
+  return (line ? '<p class="scope-line">'+line+'</p>' : '') + (html ? '<div class="'+wrap+'">'+html+'</div>' : '');
+}
 function findingRow(c){
   var st = statusOf(c);
   var open = !!openSet[c.id];
-  var sev = (st==='failed') ? sevClass(c.sev) : (st==='passed'||st==='marked' ? 'ok' : 'ignored');
+  var sev = (st==='failed') ? (c.sev==='danger' ? 'high' : 'med') : (st==='passed'||st==='marked' ? 'ok' : 'ignored');
   var pill;
-  if(st==='failed') pill = '<span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">Needs fix · '+sevWord(c.sev)+'</span>';
+  if(st==='failed') pill = '<span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">Needs fix \u00b7 '+sevWord(c.sev)+'</span>';
   else if(st==='marked') pill = '<span class="status status-blue">Marked as fixed</span>';
   else if(st==='passed') pill = '<span class="status status-green">Passed check</span>';
   else pill = '<span class="status status-grey">Ignored</span>';
-  var title = st==='failed' || st==='marked' ? c.title : c.label;
+  var title = (st==='failed' || st==='marked') ? c.title : c.label;
   var cost = c.cost==='live' ? 'Live' : 'Scheduled';
-  var body = '';
-  if(open){
-    body = '<div class="finding-b">'
-      + (st==='ignored' ? '<p>'+esc(ignoreReason(c))+'</p>' : '')
-      + '<div class="fl">What</div><p>'+esc(c.what)+'</p>'
-      + '<div class="fl">Why it matters</div><p>'+esc(c.why)+'</p>'
-      + '<div class="fl">How to fix</div><ul>'+(c.how||[]).map(function(h){return '<li>'+esc(h)+'</li>';}).join('')+'</ul>'
-      + '<div class="finding-btns">';
-    if(st==='failed'){
-      body += '<button type="button" class="btn btn-primary" data-go="'+esc(c.fix)+'">'+esc(c.fix)+'</button>';
-      if(c.cost==='scheduled') body += '<button type="button" class="btn btn-outlined" data-mark="'+c.id+'">Mark as fixed</button>';
-      body += '<button type="button" class="btn btn-outlined" data-ignore="'+c.id+'">Ignore</button>';
-    } else if(st==='ignored' && !enabled[c.id]){
-      body += '<button type="button" class="btn btn-outlined" data-open-settings="1">Open Check settings</button>';
-    } else if(st==='ignored' && DEMO[c.id]==='ignored'){
-      body += '<button type="button" class="btn btn-outlined" data-go="Organization settings">Go to Organization settings</button>';
-    }
-    body += '</div></div>';
-  }
+  var body = open ? '<div class="finding-b">'+detailsHtml(c)+actsHtml(c,'card')+'</div>' : '';
   return '<div class="finding sev-'+sev+'" data-id="'+c.id+'">'
     + '<button type="button" class="finding-h" aria-expanded="'+(open?'true':'false')+'">'
     + '<svg class="tw" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -509,35 +650,28 @@ function findingRow(c){
     + '<span class="fmeta">'+pill+'<span class="status status-grey">'+cost+'</span></span>'
     + '</button>'+body+'</div>';
 }
-
 function sortedChecks(){
   var order = { failed:0, marked:1, passed:2, ignored:3 };
-  return CHECKS.slice().sort(function(a,b){
-    var sa=statusOf(a), sb=statusOf(b);
-    if(order[sa]!==order[sb]) return order[sa]-order[sb];
-    if(sa==='failed'){
-      if(a.sev!==b.sev) return a.sev==='danger'?-1:1;
-      if(a.cost!==b.cost) return a.cost==='live'?-1:1;
-    }
-    return 0;
+  return CHECKS.slice().sort(function(a, b){
+    var d = order[statusOf(a)] - order[statusOf(b)];
+    if(d) return d;
+    return a.ord - b.ord;
   });
 }
 function lastCheckedText(c){
   if(c.cost==='live') return 'Live';
-  var st = statusOf(c);
-  if(st==='ignored' && DEMO[c.id]==='ignored') return '—';
-  return LAST_CHECK;
+  return checkRun[c.id] || '\u2014';
 }
 function periodText(c){
-  var st = statusOf(c);
-  if(st==='ignored') return '—';
+  if(statusOf(c)==='ignored') return '\u2014';
   if(c.scope==='state') return 'Current setting';
-  if(c.cost==='live') return 'Last 30 days';
-  return 'Last scheduled run';
+  if(periodBy[c.id]) return periodBy[c.id];
+  if(c.cost==='live') return rollingPeriod();
+  return '\u2014';
 }
 function tableStatusPill(c){
   var st = statusOf(c);
-  if(st==='failed') return '<span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">Needs fix · '+sevWord(c.sev)+'</span>';
+  if(st==='failed') return '<span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">Needs fix \u00b7 '+sevWord(c.sev)+'</span>';
   if(st==='marked') return '<span class="status status-blue">Marked as fixed</span>';
   if(st==='passed') return '<span class="status status-green">Passed check</span>';
   return '<span class="status status-grey">Ignored</span>';
@@ -547,43 +681,21 @@ function hcScore(){
   CHECKS.forEach(function(c){
     var s = statusOf(c);
     if(s==='failed' || s==='marked'){
+      if(c.sev==='info') return;
       pts += (c.sev==='danger' ? 8 : 4);
     }
   });
   return Math.max(0, 100 - pts);
 }
 function tableExpanded(c){
-  var st = statusOf(c);
-  var body = '';
-  if(st==='ignored'){
-    body += '<p class="scope-line">'+esc(ignoreReason(c))+'</p>';
-  }
-  body += '<div class="fl">What</div><p>'+esc(c.what)+'</p>'
-    + '<div class="fl">Why it matters</div><p>'+esc(c.why)+'</p>'
-    + '<div class="fl">How to fix</div><ul>'+(c.how||[]).map(function(h){return '<li>'+esc(h)+'</li>';}).join('')+'</ul>';
-  var acts = '<div class="exp-actions">';
-  if(st==='failed'){
-    acts += '<button type="button" class="act act-fix" data-go="'+esc(c.fix)+'">'+esc(c.fix)+'</button>';
-    if(c.cost==='scheduled') acts += '<button type="button" class="act" data-mark="'+c.id+'">Mark as fixed</button>';
-    acts += '<button type="button" class="act" data-ignore="'+c.id+'">Ignore</button>';
-  } else if(st==='ignored' && !enabled[c.id]){
-    acts += '<button type="button" class="act act-fix" data-open-settings="1">Open Check settings</button>';
-  } else if(st==='ignored' && DEMO[c.id]==='ignored'){
-    acts += '<button type="button" class="act act-fix" data-go="Organization settings">Go to Organization settings</button>';
-  } else if(st==='marked'){
-    body = '<p class="scope-line">You marked this issue as fixed. The next scheduled check confirms it.</p>' + body;
-  } else if(st==='passed'){
-    body = '<p class="scope-line">No issues found.</p>' + body;
-  }
-  acts += '</div>';
-  return '<div class="exp-box">'+body+acts+'</div>';
+  return '<div class="exp-box">'+detailsHtml(c)+actsHtml(c,'table')+'</div>';
 }
 function findingTableRow(c){
   var st = statusOf(c);
   var open = !!openSet[c.id];
   var title = (st==='failed' || st==='marked') ? c.title : c.label;
   var muted = st==='ignored' ? ' style="color:#6B778C"' : '';
-  return '<tr class="row-main" data-row="'+c.id+'"><td class="chev-cell"><span class="chev'+(open?' open':'')+'" aria-hidden="true">›</span></td>'
+  return '<tr class="row-main" data-row="'+c.id+'" aria-expanded="'+(open?'true':'false')+'"><td class="chev-cell"><span class="chev'+(open?' open':'')+'" aria-hidden="true">\u203a</span></td>'
     + '<td style="font-weight:700"><span'+muted+'>'+esc(title)+'</span></td>'
     + '<td>'+esc(c.cat)+'</td>'
     + '<td style="white-space:nowrap">'+esc(lastCheckedText(c))+'</td>'
@@ -591,42 +703,43 @@ function findingTableRow(c){
     + '<td>'+tableStatusPill(c)+'</td></tr>'
     + '<tr class="row-exp" id="exp-'+c.id+'"'+(open?'':' hidden')+'><td></td><td colspan="5">'+tableExpanded(c)+'</td></tr>';
 }
+function toolbarHtml(summary){
+  return '<div class="hc-toolbar">'+summary+'<span class="spacer"></span>'
+    + '<button type="button" class="btn btn-outlined" id="btn-activity">Activity log</button>'
+    + '<button type="button" class="btn btn-outlined" id="btn-run"'+(checking?' disabled':'')+'>'+(checking?'Checking\u2026':'Run check')+'</button>'
+    + '<button type="button" class="btn btn-primary" id="btn-settings">Check settings</button></div>';
+}
 function renderHealthCards(){
   var list = sortedChecks();
   var c = countBySev();
-  var html = '<p class="hc-blurb">Settings and scheduled checks for your organization. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard — they are not repeated here.</p>'
-    + '<div class="hc-toolbar"><span class="hc-last">Last checked '+LAST_CHECK+' · '+c.total+' open</span><span class="spacer"></span>'
-    + '<button type="button" class="btn btn-outlined" id="btn-run">Run check</button>'
-    + '<button type="button" class="btn btn-primary" id="btn-settings">Check settings</button></div>';
-  var groups = [['Open findings', function(x){return statusOf(x)==='failed';}],
-                ['Passed / marked', function(x){var s=statusOf(x); return s==='passed'||s==='marked';}],
-                ['Ignored', function(x){return statusOf(x)==='ignored';}]];
+  var html = '<p class="hc-blurb">Settings and scheduled checks for your organization. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard \u2014 they are not repeated here.</p>'
+    + toolbarHtml('<span class="hc-last">Last checked '+esc(LAST_CHECK)+' \u00b7 '+c.total+' open</span>');
+  var groups = [['Open findings', function(x){ return statusOf(x)==='failed'; }],
+                ['Passed / marked', function(x){ var s=statusOf(x); return s==='passed'||s==='marked'; }],
+                ['Ignored', function(x){ return statusOf(x)==='ignored'; }]];
   groups.forEach(function(g){
     var rows = list.filter(g[1]);
     if(!rows.length) return;
-    html += '<div class="hc-group">'+g[0]+' · '+rows.length+'</div>' + rows.map(findingRow).join('');
+    html += '<div class="hc-group">'+g[0]+' \u00b7 '+rows.length+'</div>' + rows.map(findingRow).join('');
   });
   return html;
 }
 function renderHealthTable(){
-  /* Long-table layout from original att.html (Issue · Category · Last checked · Period · Status) */
   var list = sortedChecks();
   var c = countBySev();
   var score = hcScore();
-  var html = '<p class="hc-blurb">All checks for your organization in one list. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard — they are not repeated here.</p>'
-    + '<div class="hc-toolbar">'
-    + '<span class="hc-last">Score <span class="hc-score">'+score+'<small>/100</small></span> · Last checked '+LAST_CHECK+' · '+c.total+' open</span>'
-    + '<span class="spacer"></span>'
-    + '<button type="button" class="btn btn-outlined" id="btn-run">Run check</button>'
-    + '<button type="button" class="btn btn-primary" id="btn-settings">Check settings</button></div>'
+  var summary = '<span class="hc-last">Score <span class="hc-score">'+score+'<small>/100</small></span> '
+    + helpIcon('Starts at 100. Each open red finding takes off 8 points and each open yellow finding takes off 4. An issue marked as fixed counts until the next check confirms it. Ignored checks do not count.', 'How the score is calculated')
+    + ' \u00b7 Last checked '+esc(LAST_CHECK)+' \u00b7 '+c.total+' open</span>';
+  return '<p class="hc-blurb">All checks for your organization in one list. Live checks stay up to date. Scheduled checks run on your schedule, or when you click Run check. Connection lost and sync failures stay on the Dashboard \u2014 they are not repeated here.</p>'
+    + toolbarHtml(summary)
     + '<div class="hc-table-wrap"><table class="hc-table" id="integrity-table"><thead><tr>'
     + '<th class="chev-cell"></th><th style="width:40%">Issue</th><th style="width:11%">Category</th>'
     + '<th style="width:12%">Last checked</th><th style="width:17%">Period</th><th>Status</th>'
     + '</tr></thead><tbody>'
     + list.map(findingTableRow).join('')
     + '</tbody></table></div>'
-    + '<div class="hc-pager"><span>Rows per page: <b>50 ▾</b></span><span>|‹ &nbsp; ‹ &nbsp; ›</span></div>';
-  return html;
+    + '<div class="hc-pager"><span>Rows per page: <b>50 \u25be</b></span><span>|\u2039 \u00a0 \u2039 \u00a0 \u203a</span></div>';
 }
 function renderHealth(){
   return variant === 'b' ? renderHealthTable() : renderHealthCards();
@@ -636,21 +749,20 @@ function renderSyncIssues(){
   var body = SYNC_ISSUES.map(function(r){
     return '<tr><td>'+r[0]+'</td><td><span class="status '+(r[1]==='Failed'||r[1]==='Rollback failed'?'status-red':'status-yellow')+'">'+esc(r[1])+'</span></td>'
       + '<td class="msg" title="'+esc(r[2])+'">'+esc(r[2])+'</td>'
-      + '<td><button type="button" class="lnk" data-go="Platform transactions · '+esc(r[1])+'">See related transactions</button></td></tr>';
+      + '<td><button type="button" class="lnk" data-go="Platform transactions \u00b7 '+esc(r[1])+'">See related transactions</button></td></tr>';
   }).join('');
   var sum = SYNC_ISSUES.reduce(function(a,r){return a+r[0];},0);
   return '<div class="fpanel"><div class="frow">'
     + '<div class="ff"><label>Search</label><input class="input" placeholder="Search by any word..." style="width:220px"><span class="hint">Enter at least 3 characters</span></div>'
     + '<div class="ff"><label>Status</label><select class="select" style="width:180px"><option>All</option><option>Failed</option><option>Canceled</option></select></div>'
     + '<div class="ff"><label>Date range</label><select class="select" style="width:120px"><option>Custom</option></select></div>'
-    + '<div class="ff"><label>From</label><div class="frange"><input type="date" class="input"> – </div></div>'
+    + '<div class="ff"><label>From</label><div class="frange"><input type="date" class="input"> \u2013 </div></div>'
     + '<div class="ff"><label>To</label><input type="date" class="input"></div>'
     + '</div><div class="fbtns"><button type="button" class="btn btn-primary">Apply</button><button type="button" class="btn btn-outlined">Reset filters</button></div></div>'
-    + '<p class="hc-blurb" style="margin-bottom:12px">'+sum+' transactions across '+SYNC_ISSUES.length+' error groups · matches Needs attention on the Dashboard.</p>'
-    + '<div class="table-wrap"><table class="synder-table table--sm ts-table"><thead><tr><th>Quantity ↓</th><th>Status</th><th>Error message</th><th>Actions</th></tr></thead><tbody>'+body+'</tbody></table></div>'
-    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1–'+SYNC_ISSUES.length+' of '+SYNC_ISSUES.length+'</span></div>';
+    + '<p class="hc-blurb" style="margin-bottom:12px">'+sum+' transactions across '+SYNC_ISSUES.length+' error groups \u00b7 matches Needs attention on the Dashboard.</p>'
+    + '<div class="table-wrap"><table class="synder-table table--sm ts-table"><thead><tr><th>Quantity \u2193</th><th>Status</th><th>Error message</th><th>Actions</th></tr></thead><tbody>'+body+'</tbody></table></div>'
+    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1\u2013'+SYNC_ISSUES.length+' of '+SYNC_ISSUES.length+'</span></div>';
 }
-
 function renderImport(){
   return '<div class="ts-intro"><span>View the list of imports from connected integrations into Synder.</span>'
     + '<button type="button" class="btn btn-outlined" data-go="Import historical data">Import historical data</button></div>'
@@ -658,48 +770,290 @@ function renderImport(){
     + '<th>Request date</th><th>Import from</th><th>Import to</th><th>Integration</th><th>Imported</th><th>Type</th><th>Import status</th>'
     + '</tr></thead><tbody>'
     + '<tr><td>Oct 2, 2026</td><td>Oct 2, 2026 03:58:00</td><td>Oct 2, 2026 05:58:00</td><td><span class="intg">My wonderful flowers (Stripe)</span></td><td>42</td><td>Hourly</td><td><span class="status status-green">Finished</span></td></tr>'
-    + '<tr><td>Oct 2, 2026</td><td>Oct 2, 2026 03:58:00</td><td>—</td><td><span class="intg">My great bread (Amazon)</span></td><td>0</td><td>Hourly</td><td><span class="status status-yellow">Postponed</span></td></tr>'
+    + '<tr><td>Oct 2, 2026</td><td>Oct 2, 2026 03:58:00</td><td>\u2014</td><td><span class="intg">My great bread (Amazon)</span></td><td>0</td><td>Hourly</td><td><span class="status status-yellow">Postponed</span></td></tr>'
     + '<tr><td>Oct 1, 2026</td><td>Oct 1, 2026 01:58:00</td><td>Oct 1, 2026 03:58:00</td><td><span class="intg">My wonderful flowers (Stripe)</span></td><td>38</td><td>Hourly</td><td><span class="status status-green">Finished</span></td></tr>'
     + '</tbody></table></div>'
-    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1–3 of 3</span></div>';
+    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1\u20133 of 3</span></div>';
 }
-
 function renderHistory(){
   return '<p class="hc-blurb" style="margin-bottom:12px">Sync runs that pushed transactions to your books. Moved here from its previous location so it sits with the other Troubleshooting tools.</p>'
     + '<div class="table-wrap"><table class="synder-table table--sm ts-table"><thead><tr>'
     + '<th>Time</th><th>Integration</th><th>Synced</th><th>Failed</th><th>Status</th><th>Actions</th>'
     + '</tr></thead><tbody>'
-    + '<tr><td>Oct 2, 2026 05:58</td><td>My wonderful flowers (Stripe)</td><td>36</td><td>4</td><td><span class="status status-yellow">Completed with errors</span></td><td><button type="button" class="lnk" data-go="Platform transactions · Sync run">View transactions</button></td></tr>'
-    + '<tr><td>Oct 2, 2026 03:58</td><td>My wonderful flowers (Stripe)</td><td>40</td><td>0</td><td><span class="status status-green">Synced</span></td><td><button type="button" class="lnk" data-go="Platform transactions · Sync run">View transactions</button></td></tr>'
+    + '<tr><td>Oct 2, 2026 05:58</td><td>My wonderful flowers (Stripe)</td><td>36</td><td>4</td><td><span class="status status-yellow">Completed with errors</span></td><td><button type="button" class="lnk" data-go="Platform transactions \u00b7 Sync run">View transactions</button></td></tr>'
+    + '<tr><td>Oct 2, 2026 03:58</td><td>My wonderful flowers (Stripe)</td><td>40</td><td>0</td><td><span class="status status-green">Synced</span></td><td><button type="button" class="lnk" data-go="Platform transactions \u00b7 Sync run">View transactions</button></td></tr>'
     + '<tr><td>Oct 1, 2026 23:10</td><td>My great bread (Amazon)</td><td>0</td><td>12</td><td><span class="status status-red">Failed</span></td><td><button type="button" class="lnk" data-nav="trouble" data-tab="sync">View sync issues</button></td></tr>'
-    + '<tr><td>Oct 1, 2026 21:10</td><td>My great bread (Amazon)</td><td>28</td><td>0</td><td><span class="status status-green">Synced</span></td><td><button type="button" class="lnk" data-go="Platform transactions · Sync run">View transactions</button></td></tr>'
+    + '<tr><td>Oct 1, 2026 21:10</td><td>My great bread (Amazon)</td><td>28</td><td>0</td><td><span class="status status-green">Synced</span></td><td><button type="button" class="lnk" data-go="Platform transactions \u00b7 Sync run">View transactions</button></td></tr>'
     + '</tbody></table></div>'
-    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1–4 of 4</span></div>';
+    + '<div class="ts-pager"><span>Rows per page:</span><select class="select" style="width:70px"><option>25</option></select><span>1\u20134 of 4</span></div>';
 }
-
 function renderSpeed(){
-  return '<div class="ts-info"><span>Below graphs help getting a grasp of how quickly the synchronization goes. <button type="button" class="lnk" data-go="Learn more · Sync speed">Learn more.</button></span></div>'
+  return '<div class="ts-info"><span>Below graphs help getting a grasp of how quickly the synchronization goes. <button type="button" class="lnk" data-go="Learn more \u00b7 Sync speed">Learn more.</button></span></div>'
     + '<section class="ts-card"><h2>Transaction volume by platform</h2>'
-    + '<p class="sub">Connection lost on Oct 2 — volumes drop to zero after that.</p>'
+    + '<p class="sub">Connection lost on Oct 2 \u2014 volumes drop to zero after that.</p>'
     + '<div class="legend"><span><i style="background:var(--color-red,#CC2929)"></i>My wonderful flowers (Stripe)</span><span><i style="background:var(--color-primary,#0053CC)"></i>My great bread (Amazon)</span></div>'
-    + '<div class="chart-missing">Median sync 42 s · p95 3 min 10 s · [chart placeholder]</div></section>'
+    + '<div class="chart-missing">Median sync 42 s \u00b7 p95 3 min 10 s \u00b7 [chart placeholder]</div></section>'
     + '<section class="ts-card"><h2>Sync time process breakdown</h2>'
     + '<p class="sub">Breakdown of average time by sync process steps.</p>'
     + '<div class="chart-missing">[chart not captured]</div></section>';
 }
 
+function optHtml(list, cur){
+  return list.map(function(p){
+    return '<option value="'+p[0]+'"'+(String(cur)===String(p[0])?' selected':'')+'>'+esc(p[1])+'</option>';
+  }).join('');
+}
+function checkListHtml(scope, set, grp, notes){
+  return '<div class="run-groups">'+TYPES.map(function(t){
+    var list = CHECKS.filter(function(c){ return c.cost===t.cost && c.scope===t.scope; });
+    var on = list.filter(function(c){ return !!set[c.id]; }).length;
+    var open = !!grp[t.key];
+    var body = '';
+    if(open){
+      body = '<div class="run-group-body" id="grp-body-'+scope+'-'+t.key+'">'+list.map(function(c){
+        var onC = !!set[c.id];
+        return '<div class="cfg-row'+(onC?'':' off')+'"><span class="cfg-label">'+esc(c.label)+helpIcon(c.what, 'What it checks: '+c.label)+'</span>'
+          + '<input type="checkbox" class="switch" data-toggle="'+scope+'" data-id="'+c.id+'" data-focus-key="sw-'+scope+'-'+c.id+'"'+(onC?' checked':'')+' aria-label="'+esc(c.label)+'"></div>';
+      }).join('')+'</div>';
+    }
+    return '<div class="run-group"><button type="button" class="run-group-head" data-grp="'+scope+':'+t.key+'" data-focus-key="grp-'+scope+'-'+t.key+'" aria-expanded="'+(open?'true':'false')+'"'+(open?' aria-controls="grp-body-'+scope+'-'+t.key+'"':'')+'>'
+      + '<svg class="tw" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '<span>'+esc(t.label)+'</span><span class="run-group-note">'+esc(notes[t.key]||'')+'</span><span class="run-group-count">'+on+' of '+list.length+' on</span></button>'
+      + body + '</div>';
+  }).join('')+'</div>';
+}
+function modalShell(dialogId, titleId, title, body, foot){
+  return '<div class="modal-bg"><div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="'+titleId+'" id="'+dialogId+'">'
+    + '<div class="modal-header"><span id="'+titleId+'">'+title+'</span><button type="button" class="modal-close" data-discard="1" data-initial-focus aria-label="Close">&times;</button></div>'
+    + '<div class="modal-body">'+body+'</div>'
+    + '<div class="modal-footer">'+foot+'</div></div></div>';
+}
+function rangeError(){
+  var m = runModal;
+  if(!m || m.preset!=='custom') return '';
+  if(!m.from || !m.to) return 'Enter a start date and an end date.';
+  if(m.from > m.to) return 'The start date must be on or before the end date.';
+  if(m.to > TODAY) return 'The end date cannot be in the future.';
+  return '';
+}
+function paintModal(focusKey){
+  var prev = document.querySelector('#modal-root .modal-body');
+  var scroll = prev ? prev.scrollTop : 0;
+  if(cfgModal) renderCfgModal();
+  else if(runModal) renderRunModal();
+  else { document.getElementById('modal-root').innerHTML = ''; return; }
+  var next = document.querySelector('#modal-root .modal-body');
+  if(next) next.scrollTop = scroll;
+  var el = focusKey
+    ? document.querySelector('#modal-root [data-focus-key="'+focusKey+'"]')
+    : document.querySelector('#modal-root [data-initial-focus]');
+  if(el) el.focus();
+}
+function renderCfgModal(){
+  var m = cfgModal;
+  var n = countOn(m.enabled);
+  var notes = {
+    'live-state':'Current settings',
+    'scheduled-state':'Current settings',
+    'live-date':'Rolling '+PERIOD_LABEL[m.schedPeriod].toLowerCase(),
+    'scheduled-date':PERIOD_LABEL[m.schedPeriod]+' at each run'
+  };
+  var days = '';
+  for(var d=1; d<=28; d++) days += '<option value="'+d+'"'+(d===Number(m.schedule.day)?' selected':'')+'>'+d+'</option>';
+  var wds = [[1,'Monday'],[2,'Tuesday'],[3,'Wednesday'],[4,'Thursday'],[5,'Friday'],[6,'Saturday'],[0,'Sunday']];
+  var wd = wds.map(function(p){
+    return '<option value="'+p[0]+'"'+(Number(p[0])===Number(m.schedule.weekday)?' selected':'')+'>'+p[1]+'</option>';
+  }).join('');
+  var monthly = m.schedule.type==='monthly-day';
+  var body = '<p class="modal-note">Synder runs these checks on your schedule. A check that is off does not run. Its row shows Ignored.</p>'
+    + '<div class="sched-grid"><div><div class="cfg-sec">Schedule</div>'
+    + '<div class="schedule-field"><label class="form-check"><input class="radio" type="radio" name="cfg-sched" value="monthly-day" data-focus-key="cfg-mode-monthly"'+(monthly?' checked':'')+'> Every month on day</label>'
+    + '<select class="select" data-cfg-sched="day" data-focus-key="cfg-day" aria-label="Day of the month"'+(monthly?'':' disabled')+'>'+days+'</select></div>'
+    + '<div class="schedule-field"><label class="form-check"><input class="radio" type="radio" name="cfg-sched" value="weekly" data-focus-key="cfg-mode-weekly"'+(monthly?'':' checked')+'> Weekly on</label>'
+    + '<select class="select" data-cfg-sched="weekday" data-focus-key="cfg-weekday" aria-label="Weekday"'+(monthly?' disabled':'')+'>'+wd+'</select></div></div>'
+    + '<div><div class="cfg-sec">Period</div><select class="select" id="cfg-period" data-focus-key="cfg-period" aria-label="Check period">'+optHtml(PERIODS, m.schedPeriod)+'</select>'
+    + '<p class="modal-note">For date-range checks. Last 7, 30, or 90 days.</p></div></div>'
+    + '<p class="run-info">Scheduled date-range checks look at this period at each run. Live date-range checks look at the same period, rolling, all the time. Setting checks use the current settings.</p>'
+    + '<div class="cfg-sec" id="cfg-count">Checks \u00b7 '+n+' of '+CHECKS.length+' on</div>'
+    + checkListHtml('cfg', m.enabled, m.grp, notes);
+  document.getElementById('modal-root').innerHTML = modalShell('cfg-dialog','cfg-title','Check settings', body,
+    '<button type="button" class="btn btn-outlined" data-discard="1">Cancel</button><button type="button" class="btn btn-primary" id="cfg-save">Save</button>');
+}
+function renderRunModal(){
+  var m = runModal;
+  var err = rangeError();
+  var n = countOn(m.enabled);
+  var custom = m.preset==='custom';
+  var rng = (m.from && m.to && !err) ? fmtRange(m.from, m.to) : '\u2014';
+  var notes = {
+    'live-state':'Current settings',
+    'scheduled-state':'Current settings',
+    'live-date':rng,
+    'scheduled-date':rng
+  };
+  var body = '<p class="modal-note">Run the checks now. The schedule in Check settings does not change.</p>'
+    + '<div class="cfg-sec">Period</div>'
+    + '<div class="schedule-field"><select class="select" id="run-period" data-focus-key="run-period" aria-label="Run period">'+optHtml(PERIODS.concat([['custom','Custom']]), m.preset)+'</select>'
+    + (custom ? '' : '<span id="run-range">'+esc(rng)+'</span>')+'</div>'
+    + (custom
+      ? '<div class="run-dates"><div class="ff"><label for="run-from">From</label><input class="input" type="date" id="run-from" data-focus-key="run-from" value="'+(m.from?toISO(m.from):'')+'" max="'+toISO(TODAY)+'" aria-invalid="'+(err?'true':'false')+'"></div>'
+        + '<div class="ff"><label for="run-to">To</label><input class="input" type="date" id="run-to" data-focus-key="run-to" value="'+(m.to?toISO(m.to):'')+'" max="'+toISO(TODAY)+'" aria-invalid="'+(err?'true':'false')+'"></div></div>'
+      : '')
+    + (err ? '<p class="field-error" id="run-error" role="alert">'+esc(err)+'</p>' : '')
+    + '<p class="run-info">Date-range checks use this period. Setting checks use the current settings.</p>'
+    + '<div class="cfg-sec" id="run-count">Checks \u00b7 '+n+' of '+CHECKS.length+' on</div>'
+    + '<p class="run-only"><strong>This run only.</strong> These switches start from Check settings. Changes here apply to this run and do not change Check settings.</p>'
+    + checkListHtml('run', m.enabled, m.grp, notes);
+  document.getElementById('modal-root').innerHTML = modalShell('run-dialog','run-title','Run check', body,
+    '<button type="button" class="btn btn-outlined" data-discard="1">Cancel</button><button type="button" class="btn btn-primary" id="run-confirm"'+((err||!n)?' disabled':'')+'>Run check</button>');
+}
+function openSettingsModal(){
+  if(runModal) closeModal();
+  modalOpener = document.activeElement;
+  cfgModal = {
+    enabled: copyEnabled(enabled),
+    schedule: { type:schedule.type, day:schedule.day, weekday:schedule.weekday },
+    schedPeriod: schedPeriod,
+    grp: {}
+  };
+  paintModal(null);
+}
+function openRunModal(){
+  if(checking) return;
+  if(cfgModal) closeModal();
+  modalOpener = document.activeElement;
+  var rng = presetRange(schedPeriod);
+  runModal = {
+    preset: schedPeriod,
+    from: rng[0],
+    to: rng[1],
+    enabled: copyEnabled(enabled),
+    grp: {}
+  };
+  paintModal(null);
+}
+function closeModal(){
+  cfgModal = null;
+  runModal = null;
+  modalOpener = null;
+  document.getElementById('modal-root').innerHTML = '';
+}
+function discardModal(){
+  var opener = modalOpener;
+  closeModal();
+  if(opener && document.contains(opener)) opener.focus();
+}
+function saveSettings(){
+  enabled = copyEnabled(cfgModal.enabled);
+  schedule = { type:cfgModal.schedule.type, day:Number(cfgModal.schedule.day), weekday:Number(cfgModal.schedule.weekday) };
+  schedPeriod = cfgModal.schedPeriod;
+  closeModal();
+  refresh();
+  var b = document.getElementById('btn-settings');
+  if(b) b.focus();
+  toast('Check settings saved');
+}
+function confirmRun(){
+  if(!runModal || rangeError() || !countOn(runModal.enabled)) return;
+  var from = runModal.from;
+  var to = runModal.to;
+  var set = copyEnabled(runModal.enabled);
+  closeModal();
+  startRun(from, to, set);
+}
+function startRun(from, to, set){
+  if(checking) return;
+  checking = true;
+  refresh();
+  var busy = document.getElementById('btn-run');
+  if(busy) busy.focus();
+  setTimeout(function(){
+    var now = new Date();
+    var stamp = fmtDateTime(now);
+    var ran = CHECKS.filter(function(c){ return canExecute(c, set); });
+    ran.forEach(function(c){
+      if(c.scope==='date') periodBy[c.id] = fmtRange(from, to);
+      if(c.cost!=='scheduled') return;
+      checkRun[c.id] = stamp;
+      if(marked[c.id]){
+        delete marked[c.id];
+        DEMO[c.id] = markedOutcome==='confirmed' ? 'passed' : 'failed';
+      } else if(userIgnored[c.id]){
+        delete userIgnored[c.id];
+      }
+    });
+    LAST_CHECK = stamp;
+    checking = false;
+    log.unshift({
+      ts: fmtUtc(now),
+      initiator: USER_EMAIL,
+      kind: 'User',
+      action: 'Check ran',
+      type: 'Health check',
+      details: 'Manual run \u00b7 Period: '+fmtRange(from, to)+' \u00b7 '+ran.length+' checks'
+    });
+    refresh();
+    toast('Check finished.');
+  }, RUN_MS);
+}
+function setFindingState(id, mode){
+  if(mode==='ignored'){ userIgnored[id] = 1; delete marked[id]; }
+  else if(mode==='marked'){ marked[id] = 1; delete userIgnored[id]; }
+  else {
+    delete userIgnored[id];
+    delete marked[id];
+  }
+  openSet[id] = 1;
+  refresh();
+}
+
+function renderActivity(){
+  var tabs = document.querySelector('.ts-tabs');
+  if(tabs) tabs.hidden = true;
+  var rows = log.filter(function(r){
+    if(actFilter.type && actFilter.type!=='Health check') return false;
+    if(actFilter.initiator && actFilter.initiator!==r.kind) return false;
+    return true;
+  });
+  var body = rows.length
+    ? rows.map(function(r){
+        return '<tr><td style="white-space:nowrap">'+esc(r.ts)+'</td><td>'+esc(r.initiator)+'</td><td>'+esc(r.action)+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.details)+'</td></tr>';
+      }).join('')
+    : '<tr><td colspan="5" class="empty">No events for these filters.</td></tr>';
+  function chosen(val, cur){ return String(val)===String(cur) ? ' selected' : ''; }
+  document.getElementById('ts-body').innerHTML =
+    '<button type="button" class="lnk act-back" id="act-back">Back to Health check</button>'
+    + '<h2 class="act-title">Activity log</h2>'
+    + '<div class="fpanel"><div class="frow">'
+    + '<div class="ff"><label for="act-f-initiator">Initiator</label><select class="select" id="act-f-initiator">'
+    + '<option value=""'+chosen('', actFilter.initiator)+'>All</option>'
+    + '<option value="System"'+chosen('System', actFilter.initiator)+'>System</option>'
+    + '<option value="User"'+chosen('User', actFilter.initiator)+'>User</option>'
+    + '</select></div>'
+    + '<div class="ff"><label for="act-f-type">Type</label><select class="select" id="act-f-type">'
+    + '<option value=""'+chosen('', actFilter.type)+'>All</option>'
+    + '<option value="Health check"'+chosen('Health check', actFilter.type)+'>Health check</option>'
+    + '<option value="Integration"'+chosen('Integration', actFilter.type)+'>Integration</option>'
+    + '<option value="User"'+chosen('User', actFilter.type)+'>User</option>'
+    + '</select></div></div>'
+    + '<div class="fbtns"><button type="button" class="btn btn-primary" id="act-apply">Apply</button>'
+    + '<button type="button" class="btn btn-outlined" id="act-reset">Reset filters</button></div></div>'
+    + '<div class="table-wrap"><table class="synder-table table--sm ts-table" id="act-table"><thead><tr>'
+    + '<th>Timestamp</th><th>Initiator</th><th>Action</th><th>Type</th><th>Details</th>'
+    + '</tr></thead><tbody id="act-body">'+body+'</tbody></table></div>';
+}
+
 var page = 'dash', tsTab = 'health';
-var variant = 'a'; /* a = Cards, b = Table (original long-table) */
+var variant = 'a';
 
 function writeUrl(){
   try {
-    var h = '#lost' + (page==='trouble' ? '/' + tsTab : '');
-    var q = '?v=' + variant;
-    history.replaceState(null,'', q + h);
+    var h = '#lost';
+    if(page==='activity') h = '#lost/activity';
+    else if(page==='trouble') h = '#lost/' + tsTab;
+    history.replaceState(null, '', '?v=' + variant + h);
   } catch(e){}
 }
-function writeHash(){ writeUrl(); }
-
 function setVariant(v, opts){
   variant = (v === 'b') ? 'b' : 'a';
   document.getElementById('seg-a').classList.toggle('on', variant==='a');
@@ -707,20 +1061,22 @@ function setVariant(v, opts){
   if(page==='trouble') renderTrouble();
   if(!opts || !opts.skipUrl) writeUrl();
 }
-
 function openPage(p, tab){
+  if(cfgModal || runModal) discardModal();
   page = p;
-  if(tab) tsTab = tab;
+  if(tab && tab!=='activity') tsTab = tab;
   document.getElementById('page-dash').hidden = p !== 'dash';
-  document.getElementById('page-trouble').hidden = p !== 'trouble';
+  document.getElementById('page-trouble').hidden = p === 'dash';
   document.getElementById('nav-dashboard').classList.toggle('active', p==='dash');
-  document.getElementById('nav-troubleshooting').classList.toggle('active', p==='trouble');
-  if(p==='trouble') renderTrouble();
+  document.getElementById('nav-troubleshooting').classList.toggle('active', p!=='dash');
+  if(p==='activity') renderActivity();
+  else if(p==='trouble') renderTrouble();
   writeUrl();
   window.scrollTo(0,0);
 }
-
 function renderTrouble(){
+  var tabs = document.querySelector('.ts-tabs');
+  if(tabs) tabs.hidden = false;
   document.querySelectorAll('.ts-tabs .tab').forEach(function(t){
     var on = t.getAttribute('data-tab')===tsTab;
     t.classList.toggle('active', on);
@@ -733,6 +1089,11 @@ function renderTrouble(){
   else if(tsTab==='history') body.innerHTML = renderHistory();
   else body.innerHTML = renderSpeed();
 }
+function refresh(){
+  renderHcBlock();
+  if(page==='trouble') renderTrouble();
+  else if(page==='activity') renderActivity();
+}
 
 var toastTimer;
 function toast(msg){
@@ -742,39 +1103,59 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
 }
-
-function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
-
-function openRunModal(){
-  var sched = CHECKS.filter(function(c){ return c.cost==='scheduled' && enabled[c.id]; });
-  var body = '<p style="margin:0 0 12px;color:#6B778C">Run the checks now. The schedule in Check settings does not change.</p>'
-    + '<div class="cfg-sec">Scheduled checks in this run</div>'
-    + sched.map(function(c){ return '<div class="cfg-row"><label class="form-check"><input type="checkbox" checked disabled> '+esc(c.label)+'</label><span class="status status-'+(c.sev==='danger'?'red':'yellow')+'">'+sevWord(c.sev)+'</span></div>'; }).join('');
-  document.getElementById('modal-root').innerHTML = '<div class="modal-bg" data-close-modal="1"><div class="modal" role="dialog" aria-modal="true"><div class="modal-header">Run check</div><div class="modal-body">'+body+'</div><div class="modal-footer"><button type="button" class="btn btn-outlined" data-close-modal="1">Cancel</button><button type="button" class="btn btn-primary" id="run-confirm">Run check</button></div></div></div>';
-}
-
-function openSettingsModal(){
-  var live = CHECKS.filter(function(c){return c.cost==='live';});
-  var sched = CHECKS.filter(function(c){return c.cost==='scheduled';});
-  function rows(arr){
-    return arr.map(function(c){
-      return '<div class="cfg-row"><label class="form-check"><input type="checkbox" data-en="'+c.id+'" '+(enabled[c.id]?'checked':'')+'> '+esc(c.label)+'</label><span class="status status-grey">'+c.cat+'</span></div>';
-    }).join('');
-  }
-  var body = '<p style="margin:0 0 12px;color:#6B778C">Synder runs these checks on your schedule. A check that is off does not run. Its row shows Ignored.</p>'
-    + '<div class="cfg-sec">Live setting checks</div>'+rows(live)
-    + '<div class="cfg-sec">Scheduled checks</div>'+rows(sched)
-    + '<div class="cfg-sec">Schedule</div><p style="margin:0">Monthly on day 5 · Period: last 30 days</p>';
-  document.getElementById('modal-root').innerHTML = '<div class="modal-bg" data-close-modal="1"><div class="modal" role="dialog" aria-modal="true"><div class="modal-header">Check settings</div><div class="modal-body">'+body+'</div><div class="modal-footer"><button type="button" class="btn btn-outlined" data-close-modal="1">Cancel</button><button type="button" class="btn btn-primary" id="cfg-save">Save</button></div></div></div>';
+function focusables(root){
+  return Array.prototype.filter.call(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'), function(el){
+    if(el.disabled || el.tabIndex < 0) return false;
+    var style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  });
 }
 
 document.addEventListener('click', function(e){
+  if(cfgModal || runModal){
+    if(e.target.classList && e.target.classList.contains('modal-bg')){ discardModal(); return; }
+    if(e.target.closest('[data-discard]')){ discardModal(); return; }
+    var grp = e.target.closest('[data-grp]');
+    if(grp){
+      var parts = grp.getAttribute('data-grp').split(':');
+      var bag = parts[0]==='run' ? runModal : cfgModal;
+      bag.grp[parts[1]] = !bag.grp[parts[1]];
+      paintModal('grp-'+parts[0]+'-'+parts[1]);
+      return;
+    }
+    if(e.target.closest('#cfg-save')){ saveSettings(); return; }
+    if(e.target.closest('#run-confirm')){ confirmRun(); return; }
+    return;
+  }
   var head = e.target.closest('#issues-head');
   if(head){
     var body = document.getElementById('issues-body');
     var open = head.getAttribute('aria-expanded')!=='true';
     head.setAttribute('aria-expanded', open?'true':'false');
     body.hidden = !open;
+    return;
+  }
+  var undo = e.target.closest('[data-undo]');
+  if(undo){ setFindingState(undo.getAttribute('data-undo'), 'undo'); return; }
+  var ig = e.target.closest('[data-ignore]');
+  if(ig){ setFindingState(ig.getAttribute('data-ignore'), 'ignored'); return; }
+  var mk = e.target.closest('[data-mark]');
+  if(mk){ setFindingState(mk.getAttribute('data-mark'), 'marked'); return; }
+  if(e.target.closest('#btn-run')){ openRunModal(); return; }
+  if(e.target.closest('#btn-settings') || e.target.closest('[data-open-settings]')){ openSettingsModal(); return; }
+  if(e.target.closest('#btn-activity')){ openPage('activity'); return; }
+  if(e.target.closest('#act-back')){ openPage('trouble', 'health'); return; }
+  if(e.target.closest('#act-apply')){
+    actFilter = {
+      initiator: document.getElementById('act-f-initiator').value,
+      type: document.getElementById('act-f-type').value
+    };
+    renderActivity();
+    return;
+  }
+  if(e.target.closest('#act-reset')){
+    actFilter = { initiator:'', type:'' };
+    renderActivity();
     return;
   }
   var fh = e.target.closest('.finding-h');
@@ -784,62 +1165,151 @@ document.addEventListener('click', function(e){
     renderTrouble();
     return;
   }
-  var ig = e.target.closest('[data-ignore]');
-  if(ig){ userIgnored[ig.getAttribute('data-ignore')]=1; renderHcBlock(); renderTrouble(); toast('Check ignored'); return; }
-  var mk = e.target.closest('[data-mark]');
-  if(mk){ marked[mk.getAttribute('data-mark')]=1; DEMO[mk.getAttribute('data-mark')]='marked'; renderHcBlock(); renderTrouble(); toast('Marked as fixed — next scheduled check confirms'); return; }
-  if(e.target.closest('#btn-run')){ openRunModal(); return; }
-  if(e.target.closest('#btn-settings') || e.target.closest('[data-open-settings]')){ openSettingsModal(); return; }
-  if(e.target.closest('#run-confirm')){ LAST_CHECK = 'Nov 5, 2026 18:10'; closeModal(); renderHcBlock(); renderTrouble(); toast('Check finished · '+countBySev().total+' open'); return; }
-  if(e.target.closest('#cfg-save')){
-    document.querySelectorAll('[data-en]').forEach(function(cb){ enabled[cb.getAttribute('data-en')] = cb.checked; });
-    closeModal(); renderHcBlock(); renderTrouble(); toast('Check settings saved'); return;
-  }
-  if(e.target.classList && e.target.classList.contains('modal-bg')){ closeModal(); return; }
-  if(e.target.closest('[data-close-modal]') && !e.target.closest('.modal-body') && !e.target.closest('.modal-header')){ closeModal(); return; }
-
   var nav = e.target.closest('[data-nav]');
-  if(nav){ e.preventDefault(); openPage(nav.getAttribute('data-nav'), nav.getAttribute('data-tab') || (nav.getAttribute('data-nav')==='trouble'?tsTab||'health':null)); return; }
-  var tab = e.target.closest('.ts-tabs [data-tab]');
-  if(tab){ tsTab = tab.getAttribute('data-tab'); renderTrouble(); writeHash(); return; }
+  if(nav){
+    e.preventDefault();
+    var dest = nav.getAttribute('data-nav');
+    var tab = nav.getAttribute('data-tab');
+    if(dest==='trouble' && !tab) tab = tsTab || 'health';
+    openPage(dest, tab);
+    return;
+  }
+  var tabBtn = e.target.closest('.ts-tabs [data-tab]');
+  if(tabBtn){
+    tsTab = tabBtn.getAttribute('data-tab');
+    page = 'trouble';
+    renderTrouble();
+    writeUrl();
+    return;
+  }
   var seg = e.target.closest('.proto-bar [data-variant]');
   if(seg){ setVariant(seg.getAttribute('data-variant')); return; }
   var trow = e.target.closest('.hc-table tr.row-main');
-  if(trow && !e.target.closest('[data-go],[data-mark],[data-ignore],[data-open-settings]')){
+  if(trow && !e.target.closest('[data-go],[data-mark],[data-ignore],[data-undo],[data-open-settings],.tip')){
     var rid = trow.getAttribute('data-row');
     openSet[rid] = !openSet[rid];
     renderTrouble();
     return;
   }
   var g = e.target.closest('[data-go]');
-  if(g){ e.preventDefault(); toast('Prototype — would open: '+g.getAttribute('data-go')); return; }
+  if(g){ e.preventDefault(); toast('Prototype \u2014 would open: '+g.getAttribute('data-go')); return; }
   var a = e.target.closest('a[href="#"]');
-  if(a){ e.preventDefault(); toast('Prototype — would open: '+a.textContent.trim()); }
+  if(a){ e.preventDefault(); toast('Prototype \u2014 would open: '+a.textContent.trim()); }
 });
+document.addEventListener('change', function(e){
+  var t = e.target;
+  if(runModal){
+    if(t.id==='run-period'){
+      runModal.preset = t.value;
+      if(t.value!=='custom'){
+        var rng = presetRange(t.value);
+        runModal.from = rng[0];
+        runModal.to = rng[1];
+      }
+      paintModal('run-period');
+      return;
+    }
+    if(t.id==='run-from' || t.id==='run-to'){
+      runModal[t.id==='run-from'?'from':'to'] = fromISO(t.value);
+      paintModal(t.id);
+      return;
+    }
+  }
+  if(cfgModal){
+    if(t.id==='cfg-period'){ cfgModal.schedPeriod = t.value; paintModal('cfg-period'); return; }
+    if(t.name==='cfg-sched'){ cfgModal.schedule.type = t.value; paintModal(t.getAttribute('data-focus-key')); return; }
+    if(t.getAttribute('data-cfg-sched')==='day'){ cfgModal.schedule.day = Number(t.value); return; }
+    if(t.getAttribute('data-cfg-sched')==='weekday'){ cfgModal.schedule.weekday = Number(t.value); return; }
+  }
+  if(t.getAttribute('data-toggle') && (cfgModal || runModal)){
+    var scope = t.getAttribute('data-toggle');
+    var bag = scope==='run' ? runModal : cfgModal;
+    if(!bag) return;
+    bag.enabled[t.getAttribute('data-id')] = !!t.checked;
+    paintModal(t.getAttribute('data-focus-key'));
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(!(cfgModal || runModal)) return;
+  if(e.key==='Escape'){ e.preventDefault(); discardModal(); return; }
+  if(e.key!=='Tab') return;
+  var dlg = document.querySelector('#modal-root [role="dialog"]');
+  if(!dlg) return;
+  var items = focusables(dlg);
+  if(!items.length) return;
+  var first = items[0], last = items[items.length-1];
+  if(e.shiftKey && (document.activeElement===first || !dlg.contains(document.activeElement))){
+    e.preventDefault(); last.focus();
+  } else if(!e.shiftKey && (document.activeElement===last || !dlg.contains(document.activeElement))){
+    e.preventDefault(); first.focus();
+  }
+});
+
+(function bindFixedTips(){
+  function bubble(tip){ return tip.querySelector('.tip-bubble, .tooltip'); }
+  function place(tip){
+    var b = bubble(tip); if(!b) return;
+    b.classList.add('tip-fixed');
+    var w = 280;
+    b.style.width = w+'px';
+    var r = tip.getBoundingClientRect();
+    var left = r.left;
+    if(left + w > window.innerWidth - 12) left = window.innerWidth - w - 12;
+    if(left < 12) left = 12;
+    var top = r.bottom + 8;
+    b.style.left = left+'px';
+    b.style.top = top+'px';
+    var h = b.offsetHeight || 80;
+    if(top + h > window.innerHeight - 8) b.style.top = Math.max(8, r.top - 8 - h)+'px';
+  }
+  function clear(tip){
+    var b = bubble(tip); if(!b) return;
+    b.classList.remove('tip-fixed');
+    b.style.left = b.style.top = b.style.width = '';
+  }
+  document.addEventListener('mouseover', function(e){
+    var tip = e.target.closest && e.target.closest('.tip, .help');
+    if(tip) place(tip);
+  });
+  document.addEventListener('focusin', function(e){
+    var tip = e.target.closest && e.target.closest('.tip, .help');
+    if(tip) place(tip);
+  });
+  document.addEventListener('mouseout', function(e){
+    var tip = e.target.closest && e.target.closest('.tip, .help');
+    if(tip && !tip.contains(e.relatedTarget)) clear(tip);
+  });
+  document.addEventListener('focusout', function(e){
+    var tip = e.target.closest && e.target.closest('.tip, .help');
+    if(tip && !tip.contains(e.relatedTarget)) clear(tip);
+  });
+})();
 
 function parseUrl(){
   var params = new URLSearchParams(location.search || '');
   var v = (params.get('v') || 'a').toLowerCase();
   if(v !== 'a' && v !== 'b') v = 'a';
-  var m = /^#lost(?:\/(health|sync|import|history|speed))?$/.exec(location.hash||'#lost');
+  var m = /^#lost(?:\/(health|sync|import|history|speed|activity))?$/.exec(location.hash||'#lost');
   return { v: v, t: m && m[1] ? m[1] : null };
 }
-function parseHash(){ return parseUrl(); }
 window.addEventListener('hashchange', function(){
   var h = parseUrl();
-  openPage(h.t ? 'trouble' : 'dash', h.t);
+  if(h.t==='activity') openPage('activity');
+  else openPage(h.t ? 'trouble' : 'dash', h.t);
 });
 window.addEventListener('popstate', function(){
   var h = parseUrl();
   setVariant(h.v, { skipUrl: true });
-  openPage(h.t ? 'trouble' : 'dash', h.t);
+  if(h.t==='activity') openPage('activity');
+  else openPage(h.t ? 'trouble' : 'dash', h.t);
 });
 
 renderHcBlock();
 var h0 = parseUrl();
 setVariant(h0.v, { skipUrl: true });
-if(h0.t) openPage('trouble', h0.t);
-else { writeUrl(); }
+if(h0.t==='activity') openPage('activity');
+else if(h0.t) openPage('trouble', h0.t);
+else writeUrl();
 </script>
 </body>
 </html>
