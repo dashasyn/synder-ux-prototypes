@@ -53,6 +53,8 @@ body {
     }
 .proto-reset:hover { color: #fff; text-decoration: underline; }
 .proto-reset:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
+/* Kit topbar sticks to the viewport. The prototype bar sits above it, and the kit has no offset for that. */
+.topbar.topbar--app { top: var(--proto-bar-h); }
 /* ── Marketing home (rough synder.com) ── */
 .shell-hide .ob:has(.home) { background: #002658; }
 .home { min-height: calc(100vh - var(--proto-bar-h)); background: linear-gradient(#002658 72%, #1c1f23); color: #fff; }
@@ -78,49 +80,10 @@ body {
 .home-trial { margin: 12px 0 0; color: rgba(255,255,255,.75); font-size: 14px; line-height: 20px; }
 .home-stat { text-align: center; padding: 12px 24px 56px; font-size: 22px; line-height: 30px; font-weight: 500; }
 /* ── Product shell ── */
-.p-top {
-      height: 56px; background: #fff; border-bottom: 1px solid #C8C7CC;
-      display: flex; align-items: center; justify-content: flex-end;
-      gap: 16px; padding: 0 20px 0 10px;
-      position: sticky; top: var(--proto-bar-h); z-index: 30;
-    }
-.t-balance { font-size: 14px; line-height: 20px; color: #1A1B24; padding: 2px 0; border-bottom: 2px solid #0053CC; cursor: default; }
-.t-balance b { color: #0053CC; font-weight: 600; }
-.t-how { font-size: 14px; color: #0053CC; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
-.t-how:hover { text-decoration: underline; }
-.t-wrap { position: relative; }
-.t-ico {
-      position: relative; height: 32px; min-width: 32px; border-radius: 6px; padding: 0 4px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 0;
-      color: #0053CC; background: transparent; border: none; cursor: pointer; font-family: inherit;
-    }
-.t-ico:hover, .t-ico[aria-expanded="true"] { background: #F2F6FC; }
-.t-ico .material-icons { font-size: 22px; }
-.t-ico .chev { font-size: 18px; opacity: .7; }
-.t-badge {
-      position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px;
-      border-radius: 8px; background: #CC2929; color: #fff; font-size: 11px; line-height: 16px; font-weight: 500;
-    }
-.menu {
-      position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 220px;
-      background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm); padding: 6px 0;
-      box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none;
-    }
-.menu.open { display: block; }
-.menu button {
-      display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 16px;
-      background: none; border: none; cursor: pointer; font: inherit; font-size: 14px; color: #1A1B24; text-align: left;
-    }
-.menu button:hover { background: #F2F6FC; }
-.menu .material-icons { font-size: 20px; color: #6B778C; }
-.menu .div { height: 1px; background: #EFF1F5; margin: 6px 0; }
-.menu .who { padding: 8px 16px 10px; border-bottom: 1px solid #EFF1F5; margin-bottom: 6px; }
-.menu .who b { display: block; font-weight: 500; }
-.menu .who span { color: #6B778C; }
-.p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - 56px); }
+.p-body { display: flex; min-height: calc(100vh - var(--proto-bar-h) - var(--topbar-height)); }
 .p-side {
-      position: sticky; top: calc(var(--proto-bar-h) + 56px);
-      height: calc(100vh - var(--proto-bar-h) - 56px);
+      position: sticky; top: calc(var(--proto-bar-h) + var(--topbar-height));
+      height: calc(100vh - var(--proto-bar-h) - var(--topbar-height));
       display: flex; flex-direction: column; flex-shrink: 0;
       background: var(--bg-sidebar);
     }
@@ -234,7 +197,6 @@ body {
 /* ── v4 client details ── */
 .period { height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 8px; font: inherit; background: #fff; }
 .more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
-.menu .danger, .menu .danger .material-icons { color: #CC2929; }
 button.tab { background: transparent; font-family: inherit; border-radius: 0; border-top: 0; border-left: 0; border-right: 0; cursor: pointer; }
 .sum { display: flex; gap: 12px; align-items: flex-start; }
 .sum .material-icons { font-size: 24px; }
@@ -265,7 +227,7 @@ textarea.note { width: 100%; min-height: 72px; border: 1px solid #C8C7CC; border
 .form input, .form textarea { font: inherit; font-size: 14px; color: #1A1B24; }
 #stateSeg.hide { visibility: hidden; }
 /* ── v7 onboarding: portrait cards + client directory ── */
-.shell-hide .p-top, .shell-hide .p-body { display: none; }
+.shell-hide .topbar, .shell-hide .p-body { display: none; }
 .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: var(--bg-page); }
 .shell-hide .ob { display: block; }
 .ob-in { max-width: 1040px; margin: 0 auto; padding: var(--space-8) var(--space-8) var(--space-10); }
@@ -330,7 +292,7 @@ button.dropdown-item { background: none; border: 0; width: 100%; font: inherit; 
 .row-menu .dropdown-menu { right: 0; left: auto; }
 body.provider-plain .p-body { display: block; }
 body.provider-plain .p-main { min-height: calc(100vh - var(--proto-bar-h)); display: flex; align-items: center; justify-content: center; background: var(--color-white); }
-body.wizard-plain .p-top, body.wizard-plain .p-side { display: none; }
+body.wizard-plain .topbar, body.wizard-plain .p-side { display: none; }
 body.wizard-plain .p-body { display: block; }
 body.wizard-plain .p-main { padding: 0; min-height: calc(100vh - var(--proto-bar-h)); background: var(--color-white); }
 .connect-shell { display: flex; min-height: calc(100vh - var(--proto-bar-h)); }
@@ -359,7 +321,7 @@ body.wizard-plain .p-main { padding: 0; min-height: calc(100vh - var(--proto-bar
 .kit-screen .page-back { background: none; border: 0; padding: 0; font-family: inherit; margin: 0 0 8px; }
 button.dropdown-item { width: 100%; text-align: left; cursor: pointer; background: none; border: 0; font: inherit; }
 .modal-bg .modal { width: min(480px, calc(100vw - 32px)); max-width: 480px; }
-body.provider-plain .p-top, body.provider-plain .p-side { display: none; }
+body.provider-plain .topbar, body.provider-plain .p-side { display: none; }
 .modal-bg .modal.modal-lg { width: 960px; max-width: calc(100vw - 64px); }
 .modal-bg .modal.story-modal { width: min(560px, calc(100vw - 64px)); max-width: 560px; }
 .story-top { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-6) 0; }
@@ -594,13 +556,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
-  <div class="p-top">
+  <header class="topbar topbar--app">
     <div class="t-left">
       <div class="ctx">
         <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
         <div class="pop" id="pop" role="dialog" aria-label="Switch firm or organization">
           <div class="pop-search" id="popSearchWrap">
-            <input type="search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
+            <input type="search" class="input-search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
             <span class="kbd" id="kbdHint">Ctrl K</span>
           </div>
           <div id="popFirm"></div>
@@ -610,21 +572,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </div>
       <div id="backChip"></div>
     </div>
-    <span class="t-balance">Balance: <b>∞</b></span>
-    <button type="button" class="t-how" data-top="how">How it works?</button>
-    <button type="button" class="t-ico" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications_none</span><span class="t-badge">3</span></button>
-    <div class="t-wrap">
-      <button type="button" class="t-ico" id="helpBtn" aria-label="Help" aria-expanded="false"><span class="material-icons">help_outline</span><span class="material-icons chev">expand_more</span></button>
-      <div class="menu" id="helpMenu">
-        <button data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
-        <button data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
+    <div class="topbar-right">
+      <div class="topbar-balance" id="topBalance"><span>Balance:</span> <b>∞</b></div>
+      <a class="topbar-link" data-top="how" role="button">How it works?</a>
+      <button type="button" class="topbar-icon" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications</span><span class="status status-red">3</span></button>
+      <div class="dropdown row-menu">
+        <button type="button" class="topbar-icon" id="helpBtn" aria-label="Help" aria-expanded="false" aria-haspopup="menu"><span class="material-icons">help_outline</span><span class="material-icons topbar-caret">expand_more</span></button>
+        <div class="dropdown-menu" id="helpMenu">
+          <button type="button" class="dropdown-item" data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
+          <button type="button" class="dropdown-item" data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
+        </div>
+      </div>
+      <div class="dropdown row-menu">
+        <button type="button" class="topbar-icon" id="userBtn" aria-label="Account" aria-expanded="false" aria-haspopup="menu"><span class="material-icons">account_circle</span><span class="material-icons topbar-caret">expand_more</span></button>
+        <div class="dropdown-menu" id="userMenu"></div>
       </div>
     </div>
-    <div class="t-wrap">
-      <button type="button" class="t-ico" id="userBtn" aria-label="Account" aria-expanded="false"><span class="material-icons">account_circle</span><span class="material-icons chev">expand_more</span></button>
-      <div class="menu" id="userMenu"></div>
-    </div>
-  </div>
+  </header>
 
   <div class="p-body">
     <aside class="p-side">
@@ -866,11 +830,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     goWorkspace('clients');
   }
   function existingClients() {
-    const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, licence: 'None', setupState: 'Not set up' };
-    const on = (accounting, integrations, issues, licence) => ({
+    const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, license: 'None', setupState: 'Not set up' };
+    const on = (accounting, integrations, issues, license) => ({
       connected: true, accounting, integrations, issues, syncing: false, ledger: accounting, pay: (integrations[0] || null),
       books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'today at 9:14 AM',
-      setup: true, licence: licence || 'Pro', setupState: 'Ready'
+      setup: true, license: license || 'Pro', setupState: 'Ready'
     });
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
     const src = (acct, name) => acct + ' · ' + name;
@@ -988,7 +952,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (alreadyInFirm(c)) return;
       sc().clients.push({
         id: c.id, name: c.name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
-        setup: false, licence: 'None', setupState: 'Not set up', connected: false, integrations: [], issues: [], syncing: false
+        setup: false, license: 'None', setupState: 'Not set up', connected: false, integrations: [], issues: [], syncing: false
       });
     });
     const fresh = sc().clients.filter((c) => added.some((a) => a.id === c.id));
@@ -1721,7 +1685,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return (planMonthly(state.family || 'core', state.plans || {}) + addonMonthly(state)) * factor;
   }
   function prorate(amount) { return Math.max(0, amount) * DAYS_LEFT / 30; }
-  function licenceSummary(c) {
+  function licenseSummary(c) {
     const a = c && c.firmLic;
     if (!a || !a.plan) return '';
     const bits = [tierName(a.plan)];
@@ -1739,26 +1703,26 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!plan) return '<span class="text-body2">—</span>';
     let extra = '';
     if (c.ownPlan && !(c.firmLic && c.firmLic.plan)) extra += ' <span class="status status-yellow">Pays on its own</span>';
-    if (c.moving) extra += ' <span class="status status-blue">Firm licence from ' + esc(c.moving) + '</span>';
+    if (c.moving) extra += ' <span class="status status-blue">Firm license from ' + esc(c.moving) + '</span>';
     if (c.firmLic && c.firmLic.pending) extra += '<span class="cell-subtext">Activates when they accept</span>';
     return '<span class="text-body2">' + esc(plan) + '</span>' + extra;
   }
   function firmLicCell(c) {
     let main;
-    if (c.firmLic && c.firmLic.plan) main = '<span class="text-body2">' + esc(licenceSummary(c)) + '</span>';
+    if (c.firmLic && c.firmLic.plan) main = '<span class="text-body2">' + esc(licenseSummary(c)) + '</span>';
     else if (typeof missingFirmLicense === 'function' && missingFirmLicense(c)) main = '<span class="status status-red">No license</span>';
-    else main = '<span class="status status-grey">No licence</span>';
+    else main = '<span class="status status-grey">No license</span>';
     const sync = payingNotSyncing(c) ? ' <span class="status status-red">Paying, not syncing</span>' : '';
     const pending = c.firmLic && c.firmLic.pending ? '<span class="cell-subtext">Activates when they accept</span>' : '';
     return main + sync + pending;
   }
-  function licenceMenuItem(c) {
-    if (c.ownPlan && !c.moving && !(c.firmLic && c.firmLic.plan)) return '<button type="button" class="dropdown-item" data-lic-move="' + c.id + '">Move to firm licence</button>';
-    if (c.firmLic && c.firmLic.plan) return '<button type="button" class="dropdown-item" data-lic-change="' + c.id + '">Change licence</button>';
-    return '<button type="button" class="dropdown-item" data-lic-assign="' + c.id + '">Assign licence</button>';
+  function licenseMenuItem(c) {
+    if (c.ownPlan && !c.moving && !(c.firmLic && c.firmLic.plan)) return '<button type="button" class="dropdown-item" data-lic-move="' + c.id + '">Move to firm license</button>';
+    if (c.firmLic && c.firmLic.plan) return '<button type="button" class="dropdown-item" data-lic-change="' + c.id + '">Change license</button>';
+    return '<button type="button" class="dropdown-item" data-lic-assign="' + c.id + '">Assign license</button>';
   }
   function paysCell(c) {
-    if (c.moving) return '<span class="status status-blue">Firm licence from ' + esc(c.moving) + '</span><span class="cell-subtext">Own plan ends then</span>';
+    if (c.moving) return '<span class="status status-blue">Firm license from ' + esc(c.moving) + '</span><span class="cell-subtext">Own plan ends then</span>';
     if (c.ownPlan) return '<span class="status status-yellow">Pays on its own</span><span class="cell-subtext">' + esc(c.ownPlan.name) + ' · renews ' + esc(c.ownPlan.renews) + '</span>';
     if (c.firmLic && c.firmLic.plan) return '<span class="status status-green">Firm pays</span>';
     return '<span class="status status-grey">No plan</span>';
@@ -1829,7 +1793,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     groups.push(['Additional users', (s.users || 0) > 0 ? ['users'] : []]);
     return groups.filter((group) => group[1].length);
   }
-  function licenceRow(id, total, left, buy) {
+  function licenseRow(id, total, left, buy) {
     const leftHtml = left <= 0 ? '<span class="status status-red">0 left</span>' : String(left);
     const action = buy ? '<button type="button" class="link" data-buy-one="' + id + '">Buy more</button>' : '';
     return '<tr><td>' + esc(sizeName(id)) + '</td><td>' + total + '</td><td>' + leftHtml + '</td><td class="text-right">' + action + '</td></tr>';
@@ -1839,9 +1803,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rows = [['Gold', 2, 2], ['Platinum', 1, 1], ['Pro (shared between 2 orgs)', 1, 1]];
     return groupRow('Older plans') + rows.map((row) => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td>' + row[2] + '</td><td></td></tr>').join('') + '<tr><td colspan="4"><span class="text-caption">Your firm keeps these from an older plan. Contact support to move to Core or Advanced.</span></td></tr>';
   }
-  function renderLicenceTable() {
-    const body = stockRows().map((group) => groupRow(group[0]) + group[1].map((id) => licenceRow(id, stockTotal(id), licLeft(id), true)).join('')).join('') + olderPlanRows();
-    return '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Licence</th><th>Total</th><th>Left</th><th class="text-right">Action</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+  function renderLicenseTable() {
+    const body = stockRows().map((group) => groupRow(group[0]) + group[1].map((id) => licenseRow(id, stockTotal(id), licLeft(id), true)).join('')).join('') + olderPlanRows();
+    return '<div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Left</th><th class="text-right">Action</th></tr></thead><tbody>' + body + '</tbody></table></div>';
   }
   function billClientMatch(c, tab) {
     if (tab === 'firm') return !!(c.firmLic && c.firmLic.plan) && !c.ownPlan;
@@ -1853,7 +1817,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const list = (sc().clients || []).filter((c) => c && !c.fresh && c.name);
     const q = (st.billQ || '').toLowerCase();
     const searched = list.filter((c) => !q || c.name.toLowerCase().indexOf(q) >= 0);
-    const tabs = [['all', 'All', 'grey'], ['firm', 'Firm pays', 'green'], ['none', 'No licence', 'grey'], ['own', 'Pays on its own', 'yellow']];
+    const tabs = [['all', 'All', 'grey'], ['firm', 'Firm pays', 'green'], ['none', 'No license', 'grey'], ['own', 'Pays on its own', 'yellow']];
     const tab = tabs.some((item) => item[0] === st.billTab) ? st.billTab : 'all';
     const counts = {};
     tabs.forEach((item) => { counts[item[0]] = searched.filter((c) => billClientMatch(c, item[0])).length; });
@@ -1861,17 +1825,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const page = paginate('billClients', filtered, [10, 25, 50, 100]);
     const tabHtml = '<div class="tabs" role="tablist">' + tabs.map((item) => '<button type="button" class="tab' + (tab === item[0] ? ' active' : '') + '" data-bill-filter="' + item[0] + '" role="tab">' + item[1] + ' <span class="status status-' + item[2] + '">' + counts[item[0]] + '</span></button>').join('') + '</div>';
     const body = page.slice.map((c) => {
-      const summary = licenceSummary(c);
-      const lic = summary ? '<span class="text-body2">' + esc(summary) + '</span>' : '<span class="status status-grey">No licence</span>';
+      const summary = licenseSummary(c);
+      const lic = summary ? '<span class="text-body2">' + esc(summary) + '</span>' : '<span class="status status-grey">No license</span>';
       const pending = c.firmLic && c.firmLic.pending ? '<span class="cell-subtext">Activates when they accept</span>' : '';
       const action = c.ownPlan && !c.moving && !(c.firmLic && c.firmLic.plan)
-        ? '<button type="button" class="btn-outlined" data-lic-move="' + c.id + '">Move to firm licence</button>'
+        ? '<button type="button" class="btn-outlined" data-lic-move="' + c.id + '">Move to firm license</button>'
         : (c.firmLic && c.firmLic.plan
           ? '<button type="button" class="btn-outlined" data-lic-change="' + c.id + '">Change</button>'
           : '<button type="button" class="btn-outlined" data-lic-assign="' + c.id + '">Assign</button>');
       return '<tr><td><span class="text-body2">' + esc(c.name) + '</span>' + pending + '</td><td>' + lic + '</td><td>' + paysCell(c) + '</td><td>' + action + '</td></tr>';
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients here</td></tr>';
-    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Licence</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
+    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>License</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
   }
   function periodWord(state) { return state && state.period === 'year' ? 'Yearly' : 'Monthly'; }
   function pageHeader(title, actions, subtitle) {
@@ -1882,8 +1846,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!s.family) return '';
     return '<p class="text-body2">' + familyName(s.family) + ' · ' + periodWord(s) + ' · Next charge ' + usd(chargeMonthly(s)) + ' on ' + NEXT_CHARGE + '</p>';
   }
-  function emptyLicences() {
-    return '<div class="page-stack"><h2 class="text-h2">No licences yet</h2><p class="text-body2">You buy licences once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlanEmpty">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
+  function emptyLicenses() {
+    return '<div class="page-stack"><h2 class="text-h2">No licenses yet</h2><p class="text-body2">You buy licenses once and assign them to clients.</p><div><button type="button" class="btn" id="choosePlanEmpty">Choose a plan</button></div><p class="text-body2"><button type="button" class="link" id="bookCall">Not sure which fits? Book a call</button></p></div>';
   }
   const EXAMPLE_PRICE = { corePack: 360, coreEss: 80, corePro: 200, advPack: 632, advEss: 72, advPro: 184, advMax: 384, user: 24, rev: 2, rules: { rules3: 15, rules5: 25, rules10: 40, rules30: 70, rules100: 120 }, inv: { inv20: 20, inv50: 45, inv200: 90, inv1000: 160 } };
   const RULE_OPTS = [['rules3', 'Up to 3'], ['rules5', 'Up to 5'], ['rules10', 'Up to 10'], ['rules30', 'Up to 30'], ['rules100', 'Up to 100']];
@@ -1941,7 +1905,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="page-stack"><h2 class="text-h2">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
-    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licences', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -2064,7 +2028,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderManageLicenses() {
     const tab = st.manageTab === 'buy' ? 'buy' : 'assign';
     const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (tab === 'assign' ? ' active' : '') + '" data-manage-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab' + (tab === 'buy' ? ' active' : '') + '" data-manage-tab="buy" role="tab">Buy licenses</button></div>';
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Licences</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Licenses</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -2168,7 +2132,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const invIds = Object.keys(s.inv || {}).concat(Object.keys(next.inv));
     return invIds.some((id) => (next.inv[id] || 0) < licUsed(id));
   }
-  function licenceCount(order) {
+  function licenseCount(order) {
     return (order.ess || 0) + (order.pro || 0) + (order.max || 0);
   }
   function rerenderPlans(focusKey) {
@@ -2230,7 +2194,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const d = ensurePlanDraft();
     const order = d.orders[d.family];
     const fresh = billingMode() === 'empty' || !loadLicenseState().family;
-    if (!licenceCount(order)) { d.showErr = 'empty'; rerenderPlans(); return; }
+    if (!licenseCount(order)) { d.showErr = 'empty'; rerenderPlans(); return; }
     if (!fresh && orderMatches()) { d.showErr = 'same'; rerenderPlans(); return; }
     if (belowUsed(d.family, order)) { openFreeUp(); return; }
     const monthly = orderMonthly(d.family, order);
@@ -2239,7 +2203,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const today = fresh ? (yearly ? monthly * 12 : monthly) : prorate(monthly - oldMonthly);
     const nextAmount = yearly ? monthly * 12 : monthly;
     const bits = orderBits(d.family, order);
-    const body = '<p class="text-body2">' + familyName(d.family) + '. ' + (bits.join(', ') || 'No licences') + '.</p><p class="text-body2">Charged today ' + moneyLabel(today) + ' + taxes.</p><p class="text-body2">' + (yearly ? 'Billed yearly.' : 'Billed monthly.') + '</p><p class="text-body2">Next charge ' + moneyLabel(nextAmount) + ' on ' + NEXT_CHARGE + '.</p>';
+    const body = '<p class="text-body2">' + familyName(d.family) + '. ' + (bits.join(', ') || 'No licenses') + '.</p><p class="text-body2">Charged today ' + moneyLabel(today) + ' + taxes.</p><p class="text-body2">' + (yearly ? 'Billed yearly.' : 'Billed monthly.') + '</p><p class="text-body2">Next charge ' + moneyLabel(nextAmount) + ' on ' + NEXT_CHARGE + '.</p>';
     const label = fresh ? 'Subscribe' : 'Update plan';
     const { modal, close } = dialogShell(fresh ? 'Subscribe' : 'Update plan', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="planGo">' + label + '</button>');
     modal.querySelector('#planGo').onclick = () => {
@@ -2248,7 +2212,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       st.plansOpen = false;
       st.page = 'billing';
       st.billView = 'licences';
-      showKitToast(fresh ? 'Subscribed to ' + familyName(d.family) : 'Licences updated');
+      showKitToast(fresh ? 'Subscribed to ' + familyName(d.family) : 'Licenses updated');
       render();
     };
   }
@@ -2257,8 +2221,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function planChecks(family) {
     const lines = family === 'core'
-      ? ['5 Essential licences included in the pack', 'Up to 3,000 transactions/mo per client (Essential), 20,000 (Pro)', 'Smart Rules and Invoicing add-ons']
-      : ['5 Pro licences included in the pack', 'Pro Max up to 40,000 transactions/mo', 'Revenue recognition'];
+      ? ['5 Essential licenses included in the pack', 'Up to 3,000 transactions/mo per client (Essential), 20,000 (Pro)', 'Smart Rules and Invoicing add-ons']
+      : ['5 Pro licenses included in the pack', 'Pro Max up to 40,000 transactions/mo', 'Revenue recognition'];
     return lines.map((line) => '<div class="d-flex align-center gap-8"><span class="material-icons icon-sm">check</span><span class="text-body2">' + line + '</span></div>').join('');
   }
   function buyCard(family) {
@@ -2266,17 +2230,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const factor = d.period === 'year' ? 0.8 : 1;
     const pack = PACK[family];
     const who = family === 'core' ? 'Firms with smaller clients.' : 'Growing clients and revenue recognition.';
-    const caption = family === 'core' ? 'Starts with a pack of 5 Essential licences' : '5 Pro licences';
+    const caption = family === 'core' ? 'Starts with a pack of 5 Essential licenses' : '5 Pro licenses';
     if (family === 'advanced' && advancedLocked()) {
       return '<div class="box box--white flex-1 d-flex flex-col gap-12"><p class="text-subtitle1">Synder Advanced</p><p class="text-body2">' + who + '</p><p class="text-body2">Moving to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined" id="bookAdvanced">Book a call</button></div>';
     }
     const checked = d.family === family ? ' checked' : '';
-    const discount = family === 'advanced' ? '<div class="alert alert-info"><span class="material-icons">info</span><span class="text-body2">Single licences cost less on Advanced: Essential ' + moneyLabel(72 * factor) + ' instead of ' + moneyLabel(80 * factor) + ', Pro ' + moneyLabel(184 * factor) + ' instead of ' + moneyLabel(200 * factor) + '.</span></div>' : '';
+    const discount = family === 'advanced' ? '<div class="alert alert-info"><span class="material-icons">info</span><span class="text-body2">Single licenses cost less on Advanced: Essential ' + moneyLabel(72 * factor) + ' instead of ' + moneyLabel(80 * factor) + ', Pro ' + moneyLabel(184 * factor) + ' instead of ' + moneyLabel(200 * factor) + '.</span></div>' : '';
     return '<label class="box box--white flex-1 d-flex flex-col gap-12"><span class="radio-wrap"><input class="radio" type="radio" name="buyFamily" value="' + family + '"' + checked + '><span class="text-subtitle1">' + familyName(family) + '</span></span><p class="text-body2">' + who + '</p><p class="text-subtitle1">from ' + moneyLabel(pack.each * factor) + ' per client / month</p><p class="text-caption">' + caption + '</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>' + discount + '</label>';
   }
-  function orderLicenceRow(family, id, qty, factor) {
+  function orderLicenseRow(family, id, qty, factor) {
     const limit = id === 'ess' ? 'Up to 3,000 transactions/mo per client' : (id === 'pro' ? 'Up to 20,000 transactions/mo per client' : 'Up to 40,000 transactions/mo per client');
-    return '<div class="d-flex flex-col gap-8"><div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + tierName(id) + '</p><p class="text-caption">' + limit + '</p></div><p class="text-body2 text-secondary">' + tierPriceText(family, id, qty, factor) + '</p></div>' + numField(id, qty, tierName(id) + ' licences') + '</div>';
+    return '<div class="d-flex flex-col gap-8"><div class="d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + tierName(id) + '</p><p class="text-caption">' + limit + '</p></div><p class="text-body2 text-secondary">' + tierPriceText(family, id, qty, factor) + '</p></div>' + numField(id, qty, tierName(id) + ' licenses') + '</div>';
   }
   function addonRow(key, qtyKey, label, caption, options, value, qty, priceText) {
     const opts = '<option value="">Select a size</option>' + options.map((item) => '<option value="' + item[0] + '"' + (String(value) === String(item[0]) ? ' selected' : '') + '>' + item[1] + '</option>').join('');
@@ -2288,7 +2252,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const order = d.orders[family];
     const factor = d.period === 'year' ? 0.8 : 1;
     const tiers = family === 'advanced' ? ['ess', 'pro', 'max'] : ['ess', 'pro'];
-    const licences = tiers.map((id) => orderLicenceRow(family, id, order[id] || 0, factor)).join('');
+    const licenses = tiers.map((id) => orderLicenseRow(family, id, order[id] || 0, factor)).join('');
     const ruleOpts = RULE_SIZES.map((item) => [item[0], 'Up to ' + item[0].replace('rules', '') + ' rules · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
     const invOpts = INV_SIZES.map((item) => [item[0], 'Up to ' + item[1].replace('Invoicing up to ', '') + ' invoices · ' + moneyLabel(ADDON_PRICE[item[0]] * factor) + '/mo']);
     const revOpts = [['1', '1 subscription · ' + moneyLabel(2 * factor) + '/mo'], ['10', '10 subscriptions · ' + moneyLabel(20 * factor) + '/mo'], ['50', '50 subscriptions · ' + moneyLabel(100 * factor) + '/mo']];
@@ -2312,16 +2276,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const sign = diff < 0 ? '−' : '+';
       delta = '<p class="text-body2">' + sign + moneyLabel(Math.abs(diff)) + '/month from Dec 1, ' + moneyLabel(today) + ' today (prorated)</p>';
     }
-    const err = d.showErr === 'empty' ? '<div class="form-error-msg">Add at least one licence to subscribe.</div>' : (d.showErr === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '');
+    const err = d.showErr === 'empty' ? '<div class="form-error-msg">Add at least one license to subscribe.</div>' : (d.showErr === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '');
     const pay = yearly ? monthly * 12 : monthly;
     const button = fresh ? (yearly ? 'Subscribe, pay ' + moneyLabel(pay) : 'Subscribe') : 'Update plan';
-    return '<div class="box box--white d-flex flex-col gap-16"><h2 class="text-h2">Set up your order</h2><div><p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-16 mt-8">' + licences + '</div></div><div><p class="text-subtitle2">Add-ons</p><div class="d-flex flex-col gap-16 mt-8">' + addons + team + '</div><p class="text-caption mt-8">Example prices</p></div><div aria-live="polite"><p class="text-h2">' + totalText + '</p>' + delta + '</div>' + err + '<div><button type="button" class="btn" id="planSubscribe">' + button + '</button></div></div>';
+    return '<div class="box box--white d-flex flex-col gap-16"><h2 class="text-h2">Set up your order</h2><div><p class="text-subtitle2">Licenses</p><div class="d-flex flex-col gap-16 mt-8">' + licenses + '</div></div><div><p class="text-subtitle2">Add-ons</p><div class="d-flex flex-col gap-16 mt-8">' + addons + team + '</div><p class="text-caption mt-8">Example prices</p></div><div aria-live="polite"><p class="text-h2">' + totalText + '</p>' + delta + '</div>' + err + '<div><button type="button" class="btn" id="planSubscribe">' + button + '</button></div></div>';
   }
   function buyOverlay() {
     const d = ensurePlanDraft();
     const monthOn = d.period !== 'year';
     const period = '<div class="tabs" role="tablist"><button type="button" class="tab' + (monthOn ? ' active' : '') + '" data-period="month" role="tab" aria-selected="' + (monthOn ? 'true' : 'false') + '">Monthly</button><button type="button" class="tab' + (monthOn ? '' : ' active') + '" data-period="year" role="tab" aria-selected="' + (monthOn ? 'false' : 'true') + '">Yearly · save 20%</button></div>';
-    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><button type="button" class="btn-icon" id="closeBuy" aria-label="Close"><span class="material-icons">close</span></button><span class="overlay-header-divider"></span><div class="overlay-header-title" id="buyTitle">Buy licences</div></div><div class="overlay-header-actions"></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16" role="radiogroup" aria-label="Plan">' + buyCard('core') + buyCard('advanced') + '</div>' + orderSection() + '</div></div></div>';
+    return '<div class="overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle"><div class="overlay-header"><div class="overlay-header-left"><button type="button" class="btn-icon" id="closeBuy" aria-label="Close"><span class="material-icons">close</span></button><span class="overlay-header-divider"></span><div class="overlay-header-title" id="buyTitle">Buy licenses</div></div><div class="overlay-header-actions"></div></div><div class="overlay-body"><div class="d-flex flex-col gap-16">' + period + '<div class="d-flex gap-16" role="radiogroup" aria-label="Plan">' + buyCard('core') + buyCard('advanced') + '</div>' + orderSection() + '</div></div></div>';
   }
   function openBuyMore(id, opts) {
     opts = opts || {};
@@ -2336,7 +2300,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const paint = () => {
       const each = unitPrice(chosen());
       modal.querySelector('#buyQty').textContent = String(qty);
-      modal.querySelector('#buyEach').textContent = usd(each) + ' per licence';
+      modal.querySelector('#buyEach').textContent = usd(each) + ' per license';
       modal.querySelector('#buyNow').textContent = 'You pay now ' + usd(prorate(each * qty)) + ' + taxes';
       const hint = modal.querySelector('#buyPack');
       const pack = PACK[loadLicenseState().family || 'core'];
@@ -2360,14 +2324,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         if (client && formFits(client, form)) {
           pendingAssign = null;
           applyForm(client, form);
-          showKitToast(form.plan ? client.name + ': ' + tierName(form.plan) + ' licence' : 'Licences updated');
+          showKitToast(form.plan ? client.name + ': ' + tierName(form.plan) + ' license' : 'Licenses updated');
           render();
           return;
         }
         pendingAssign = null;
       }
       if (opts.reopen) { openAssign(opts.reopen); return; }
-      showKitToast('Licences updated');
+      showKitToast('Licenses updated');
       render();
     };
     modal.querySelector('[data-cancel]').onclick = () => {
@@ -2410,19 +2374,19 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rules = ownedIds('rules');
     const inv = ownedIds('inv');
     const planField = plans.length
-      ? '<div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">No licence</option>' + optionList(plans, a.plan || '') + '</select></div>'
-      : '<p class="text-body2">You haven\'t bought plan licences yet. <button type="button" class="link" data-buy-group="plan">Buy plans</button></p>';
+      ? '<div class="form-field"><label class="form-label" for="asPlan">Plan</label><select class="select" id="asPlan"><option value="">No license</option>' + optionList(plans, a.plan || '') + '</select></div>'
+      : '<p class="text-body2">You haven\'t bought plan licenses yet. <button type="button" class="link" data-buy-group="plan">Buy plans</button></p>';
     const rulesField = rules.length
       ? '<div class="form-field"><label class="form-label" for="asRules">Smart Rules</label><select class="select" id="asRules"><option value="">None</option>' + optionList(rules, a.rules || '') + '</select></div>'
-      : '<p class="text-body2">You haven\'t bought Smart Rules licences yet. <button type="button" class="link" data-buy-group="rules">Buy Smart Rules</button></p>';
+      : '<p class="text-body2">You haven\'t bought Smart Rules licenses yet. <button type="button" class="link" data-buy-group="rules">Buy Smart Rules</button></p>';
     const invField = inv.length
       ? '<div class="form-field"><label class="form-label" for="asInv">Invoicing</label><select class="select" id="asInv"><option value="">None</option>' + optionList(inv, a.invoicing || '') + '</select></div>'
-      : '<p class="text-body2">You haven\'t bought Invoicing licences yet. <button type="button" class="link" data-buy-group="inv">Buy Invoicing</button></p>';
+      : '<p class="text-body2">You haven\'t bought Invoicing licenses yet. <button type="button" class="link" data-buy-group="inv">Buy Invoicing</button></p>';
     const revField = s.family === 'advanced'
       ? '<div class="form-field"><label class="form-label" for="asRev">Revenue recognition</label><input class="input" id="asRev" type="number" min="0" value="' + (a.rev || 0) + '"></div>'
       : '';
-    const title = (a.plan ? 'Change licences for ' : 'Assign licences to ') + esc(c.name);
-    const { modal, close } = dialogShell(title, '<div class="page-stack"><p class="text-body2">Pick a plan for this client, then add Smart Rules or Invoicing if they need them. Licences come from what your firm has bought.</p><p class="text-body2">' + familyName(s.family) + '</p>' + planField + rulesField + invField + '<div class="form-field"><label class="form-label" for="asUsers">Additional users (' + Math.max(0, licLeft('users')) + ' available)</label><input class="input" id="asUsers" type="number" min="0" value="' + (a.users || 0) + '"></div>' + revField + '<p class="form-error-msg" id="asErr" hidden></p></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="asGo">Assign</button>');
+    const title = (a.plan ? 'Change licenses for ' : 'Assign licenses to ') + esc(c.name);
+    const { modal, close } = dialogShell(title, '<div class="page-stack"><p class="text-body2">Pick a plan for this client, then add Smart Rules or Invoicing if they need them. Licenses come from what your firm has bought.</p><p class="text-body2">' + familyName(s.family) + '</p>' + planField + rulesField + invField + '<div class="form-field"><label class="form-label" for="asUsers">Additional users (' + Math.max(0, licLeft('users')) + ' available)</label><input class="input" id="asUsers" type="number" min="0" value="' + (a.users || 0) + '"></div>' + revField + '<p class="form-error-msg" id="asErr" hidden></p></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="asGo">Assign</button>');
     modal.querySelectorAll('[data-buy-group]').forEach((b) => b.onclick = () => {
       close();
       if (b.dataset.buyGroup === 'plan') { openBuyPlans(); return; }
@@ -2451,7 +2415,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       }
       applyForm(c, form);
       close();
-      showKitToast(form.plan ? c.name + ': ' + tierName(form.plan) + ' licence' : c.name + ': licence removed');
+      showKitToast(form.plan ? c.name + ': ' + tierName(form.plan) + ' license' : c.name + ': license removed');
       render();
     };
   }
@@ -2487,7 +2451,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function openShortfall(c, gap) {
     const owned = stockTotal(gap.id);
     const used = licUsed(gap.id);
-    const { modal, close } = dialogShell('Not enough ' + sizeName(gap.id) + ' licences', '<p class="text-body2">' + used + ' of ' + owned + ' are in use. Buy ' + gap.qty + ' more for ' + esc(c.name) + '?</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="shortBuy">Buy ' + gap.qty + ' more</button>');
+    const { modal, close } = dialogShell('Not enough ' + sizeName(gap.id) + ' licenses', '<p class="text-body2">' + used + ' of ' + owned + ' are in use. Buy ' + gap.qty + ' more for ' + esc(c.name) + '?</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="shortBuy">Buy ' + gap.qty + ' more</button>');
     modal.querySelector('#shortBuy').onclick = () => {
       close();
       openBuyMore(gap.id, { qty: gap.qty, assignId: c.id });
@@ -2496,7 +2460,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function openMove(id) {
     const c = findOrg(id);
     if (!c || !c.ownPlan) return;
-    const { modal, close } = dialogShell('Move ' + esc(c.name) + ' to a firm licence', '<p class="text-body2">' + esc(c.name) + ' pays for ' + esc(c.ownPlan.name) + ' itself. Its plan stays active until ' + esc(c.ownPlan.renews) + ', then the firm licence takes over and its own plan is cancelled. Nobody is charged twice.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="moveGo">Move on ' + esc(c.ownPlan.renews) + '</button>');
+    const { modal, close } = dialogShell('Move ' + esc(c.name) + ' to a firm license', '<p class="text-body2">' + esc(c.name) + ' pays for ' + esc(c.ownPlan.name) + ' itself. Its plan stays active until ' + esc(c.ownPlan.renews) + ', then the firm license takes over and its own plan is cancelled. Nobody is charged twice.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="moveGo">Move on ' + esc(c.ownPlan.renews) + '</button>');
     modal.querySelector('#moveGo').onclick = () => {
       const plan = ownedIds('plan').filter((item) => licLeft(item) > 0)[0] || ownedIds('plan')[0];
       if (!plan || licLeft(plan) <= 0) {
@@ -2507,7 +2471,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       }
       applyForm(c, { plan: plan, rules: '', invoicing: '', users: 0, rev: 0 });
       close();
-      showKitToast(c.name + ' moves to the firm licence on ' + c.moving);
+      showKitToast(c.name + ' moves to the firm license on ' + c.moving);
       render();
     };
   }
@@ -2714,7 +2678,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     'Payout matching', 'Order sync'
   ];
   function licenseLabel(c) {
-    const lic = (c && (c.licence || c.license)) || '';
+    const lic = (c && (c.license || c.license)) || '';
     if (!lic || lic === 'None' || lic === 'Not assigned') return { text: 'Not assigned', secondary: true };
     return { text: lic, secondary: false };
   }
@@ -2950,6 +2914,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
+    if (isOffClient(c)) return '<span class="text-body2">—</span>';
     const summary = healthSummary(c);
     if (!summary.total) {
       return `<span class="logo-line">${statusChip('grey', 'Not checked yet')}${helpIcon('<p class="text-body2">Connect accounting and integrations to see health check results.</p>')}</span>`;
@@ -2963,28 +2928,25 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!list.length) return false;
     return !lostIntegrations(c).length && !pendingIntegrations(c).length;
   }
+  function preHasRun(c) {
+    return !!(c && c.pre && (c.pre.status === 'done' || c.pre.status === 'failed' || c.pre.status === 'running'));
+  }
   function preCell(c) {
-    if (!isOffClient(c)) return '';
+    if (!c || !c.pre) return '';
     const pre = c.pre;
-    if (pre && pre.status === 'running') return statusChip('grey', 'In progress');
-    if (pre && pre.status === 'failed') {
-      return '<div class="cell-stack">' + statusChip('red', 'Error') + preLink(c.id, 'run', 'Run again') + '</div>';
-    }
-    if (pre && pre.status === 'done') {
-      const ok = pre.outcome === 'ok';
-      const chip = ok ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Attention required');
-      return '<div class="cell-stack">' + chip + '<span class="text-body2">' + esc(pre.period || 'Oct 1 - 31, 2026') + '</span>' + preLink(c.id, 'view', 'View') + '</div>';
-    }
-    return preLink(c.id, 'run', 'Try pre-assessment');
+    if (pre.status === 'running') return statusChip('grey', 'In progress');
+    if (pre.status !== 'done' && pre.status !== 'failed') return '';
+    const chip = pre.status === 'failed'
+      ? statusChip('red', 'Error')
+      : (pre.outcome === 'ok' ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Attention required'));
+    return '<span class="d-flex align-center gap-8">' + chip + '<span class="text-body2">' + esc(pre.period || 'Oct 1 - 31, 2026') + '</span>' + preLink(c.id, 'view', 'View') + '</span>';
   }
   function preEligible(c) {
     return !!c && isOffClient(c) && !((c.integrations || []).length);
   }
   function preMenuItem(c) {
-    if (!preEligible(c)) return '';
-    const run = '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
-    if (c.pre && (c.pre.status === 'done' || c.pre.status === 'failed')) return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>' + run;
-    return run;
+    if (!preEligible(c) || !preHasRun(c)) return '';
+    return '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
   }
   function ensurePreSeeds() {
     const seeds = {
@@ -3397,7 +3359,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const c = findOrg(st.clientId);
     if (!c || !c.pre || (c.pre.status !== 'done' && c.pre.status !== 'failed')) { st.page = 'preupload'; return renderPreUpload(); }
     const failed = c.pre.status === 'failed';
-    const ok = !failed && c.pre.outcome === 'ok';
+    if (failed) {
+      const err = '<div class="alert alert-error"><span class="material-icons" aria-hidden="true">error</span><span><span class="alert-title">Couldn\'t build a reconciliation</span><span class="text-body2">There was an unexpected error when building the reconciliation. Check the error and try again.</span></span></div><div class="d-flex gap-8"><button type="button" class="btn" id="preAgain">Run again</button><button type="button" class="btn-outlined" id="preCloseFoot">Cancel</button></div>';
+      return preShell('Reconciliation results', '', '', err);
+    }
+    const ok = c.pre.outcome === 'ok';
     const outcome = failed ? 'failed' : (ok ? 'ok' : 'gap');
     const work = ensurePreWork(c.id, outcome, { from: c.pre.fromIso, to: c.pre.toIso });
     const tab = ['matched', 'discrepancy', 'missing', 'ignored'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
@@ -3421,21 +3387,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const page = paginate('preMatched', resultRows(work, 'matched'), [10, 25, 50]);
       const body = page.slice.map((row) => {
         const open = work.expand === row.id;
-        const sub = open ? '<tr><td colspan="9"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';')[0]) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';').pop()) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
-        const unmatch = row.match === 'Manual' ? '<button type="button" class="link" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button>' : '';
-        return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">' + (open ? 'expand_less' : 'expand_more') + '</span></button></td><td class="col-check"><input class="checkbox" type="checkbox" aria-label="Select ' + esc(row.id) + '"></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td><td>' + unmatch + '</td></tr>' + sub;
-      }).join('') || '<tr><td colspan="9" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th class="col-check"><input class="checkbox" type="checkbox" aria-label="Select all"></th><th class="' + sortCls + '" id="preSortDate">Date</th><th>Matching ID</th><th class="col-amount">Total amount</th><th>Types</th><th>Match type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+        const sub = open ? '<tr><td colspan="7"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';')[0]) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';').pop()) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
+        return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">' + (open ? 'expand_less' : 'expand_more') + '</span></button></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td></tr>' + sub;
+      }).join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th class="' + sortCls + '" id="preSortDate">Date</th><th>Matching ID</th><th class="col-amount">Total amount</th><th>Types</th><th>Match type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
     } else if (tab === 'discrepancy') {
-      const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.acct) + '</td><td class="col-amount">' + preMoney(row.integ) + '</td><td class="col-amount">' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="d-' + esc(row.id) + '" aria-label="Row actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-d-' + esc(row.id) + '"><button type="button" class="dropdown-item" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button><button type="button" class="dropdown-item" data-pre-ignore="' + esc(row.id) + '">Ignore</button></div></div></td></tr>').join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th class="col-amount">Accounting total</th><th class="col-amount">Integration total</th><th class="col-amount">Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.acct) + '</td><td class="col-amount">' + preMoney(row.integ) + '</td><td class="col-amount">' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th class="col-amount">Accounting total</th><th class="col-amount">Integration total</th><th class="col-amount">Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     } else if (tab === 'missing') {
       const shown = (list) => list.filter((row) => preKeep(work, row)).slice().sort((a, b) => String(b.iso || '').localeCompare(String(a.iso || '')));
-      const missTable = (title, list, side) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th><th></th></tr></thead><tbody>' + (shown(list).map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td><td><button type="button" class="link" data-pre-ignore-miss="' + side + ':' + esc(row.primary) + '">Ignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
-      table = '<div class="d-flex align-center gap-8 flex-wrap"><span class="text-body2">Manually match transactions for accurate reconciliation.</span><a class="link" href="https://synder.com/help/how-to-use-manual-matching-in-transaction-reconciliation/" target="_blank" rel="noopener">Learn more</a><button type="button" class="btn" id="preManual">Match manually</button></div><p class="form-error-msg" id="preManualError" hidden>Select one accounting row and one integration row.</p>' + missTable('Missing in accounting', work.missAcct, 'acct') + missTable('Missing in integration', work.missInt, 'int');
+      const missTable = (title, list) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + (shown(list).map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
+      table = missTable('Missing in accounting', work.missAcct) + missTable('Missing in integration', work.missInt);
     } else {
-      const body = resultRows(work, 'ignored').map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td><td><button type="button" class="link" data-pre-unignore="' + esc(row.primary || row.id) + '">Unignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      const body = resultRows(work, 'ignored').map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     }
     return preShell('Reconciliation results', '', '<button type="button" class="btn-outlined" id="preShare">Copy share link</button>', header + note + '<div class="synder-list-block">' + tabs + filters + table + '</div>');
   }
@@ -3452,6 +3417,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const preGuide = $('preGuide');
     if (preGuide) preGuide.onchange = () => { if (preDraft) preDraft.guide = preGuide.value; renderMain(); };
     bind('preCloseFoot', closePre);
+    bind('preAgain', () => { const id = st.clientId; if (id) openPreUpload(id); });
     bind('preHowMissing', () => {
       if (!preDraft) return;
       preDraft.showGuide = true;
@@ -3623,7 +3589,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const id = 'm' + Math.random().toString(36).slice(2, 8);
     sc().clients.push({
       id, name: '', fresh: true, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
-      setup: false, licence: 'None', setupState: 'Not set up', connected: false, accounting: null,
+      setup: false, license: 'None', setupState: 'Not set up', connected: false, accounting: null,
       integrations: [], issues: [], syncing: false
     });
     clearLink();
@@ -3840,15 +3806,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const rowBtn = off
         ? `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`
         : (lost ? `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>` : '');
-      const preRow = preEligible(c) ? `<button type="button" class="link" data-pre-run="${c.id}">Run pre-assessment</button>` : '';
-      const menuExtra = off
-        ? `<button type="button" class="dropdown-item" data-connect="${c.id}">Connect client</button>`
-        : (lost ? `<button type="button" class="dropdown-item" data-reconnect="${c.id}">Reconnect</button>` : '');
+      const preRow = preEligible(c) ? (preHasRun(c) ? preCell(c) : `<button type="button" class="link" data-pre-run="${c.id}">Run pre-assessment</button>`) : '';
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td>${acctCell(c)}</td>
         ${showHealth ? `<td>${healthCell(c)}</td>` : ''}
-        <td><div class="row-actions">${rowBtn}${preRow}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
+        <td><div class="row-actions">${rowBtn}${preRow}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}">${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -4532,7 +4495,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('setupBack', () => goFirm('clients'));
     bind('setupDone', () => {
       const c = findOrg(st.clientId);
-      if (c) { c.setup = true; c.setupState = 'Ready'; c.licence = c.licence && c.licence !== 'None' ? c.licence : 'Pro'; c.ledger = c.ledger || 'QuickBooks Online'; c.books = ['green', 'Healthy']; c.month = c.month || 'Oct 2026'; persistDirectory(); }
+      if (c) { c.setup = true; c.setupState = 'Ready'; c.license = c.license && c.license !== 'None' ? c.license : 'Pro'; c.ledger = c.ledger || 'QuickBooks Online'; c.books = ['green', 'Healthy']; c.month = c.month || 'Oct 2026'; persistDirectory(); }
       goFirm('clients');
     });
     bind('coCta', () => { if (st.ctx === 'firm') goFirm('clients'); else goOrg(st.orgId, 'dashboard'); });
@@ -4724,7 +4687,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('sortColName', () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); });
     const sortTh = document.getElementById('sortColName');
     if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
-    bindClick('revealLicences', () => { st.licencesOn = true; render(); });
+    bindClick('revealLicenses', () => { st.licencesOn = true; render(); });
     bindClick('openManage', () => { st.page = 'manage'; st.manageTab = 'assign'; st.licencesOn = true; render(); });
     bindClick('bookCallQuiet', () => { st.licencesOn = true; render(); });
     bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
@@ -5314,7 +5277,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         st.page = 'manage';
         st.manageTab = 'assign';
         st.licencesOn = true;
-      } else if (parts[1] === 'licences') {
+      } else if (parts[1] === 'licences' || parts[1] === 'licenses') {
         st.page = 'billing';
         st.licencesOn = true;
       } else { st.page = 'billing'; st.licencesOn = false; }
@@ -5471,7 +5434,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
     if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); watchSync(); }
-    const bal = document.querySelector('.t-balance');
+    const bal = document.querySelector('#topBalance');
     if (bal) bal.hidden = !(st && st.ctx === 'org');
   }
   function showFirmWelcome() {
@@ -5684,9 +5647,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (sc().firm) items.push(['myfirm', 'domain', 'Clients']);
     items.push(['orgsettings', 'tune', 'Organization settings'], ['activity', 'history', 'Activity log'],
       ['profile', 'person_outline', 'User profile'], ['orglist', 'list', 'List of organizations']);
-    $('userMenu').innerHTML = `<div class="who"><b>Ignat Plot</b><span>ignat@wlslabs.com</span></div>` +
-      items.map(([k, ic, l]) => `<button data-um="${k}"><span class="material-icons">${ic}</span>${l}</button>`).join('') +
-      `<div class="div"></div><button data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
+    $('userMenu').innerHTML = `<div class="dropdown-item"><span class="text-body2"><span class="text-bold">Ignat Plot</span><br><span class="text-secondary">ignat@wlslabs.com</span></span></div>` +
+      items.map(([k, ic, l]) => `<button type="button" class="dropdown-item" data-um="${k}"><span class="material-icons">${ic}</span>${l}</button>`).join('') +
+      `<div class="dropdown-divider"></div><button type="button" class="dropdown-item" data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
     $('userMenu').querySelectorAll('[data-um]').forEach((b) => b.onclick = () => {
       const k = b.dataset.um;
       if (k === 'myfirm') { closeMenus(); goFirm('clients'); }
@@ -5701,17 +5664,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function closeMenus() {
     const mm = $('moreMenu'); if (mm) { mm.classList.remove('open'); $('moreBtn').setAttribute('aria-expanded', 'false'); }
-    ['helpMenu', 'userMenu'].forEach((id) => $(id).classList.remove('open'));
+    ['helpMenu', 'userMenu'].forEach((id) => { const el = $(id); if (el) el.classList.remove('show'); });
     ['helpBtn', 'userBtn'].forEach((id) => $(id).setAttribute('aria-expanded', 'false'));
   }
   function toggleMenu(btn, menu) {
-    const open = !$(menu).classList.contains('open'); closeMenus(); closePop();
-    if (open) { $(menu).classList.add('open'); $(btn).setAttribute('aria-expanded', 'true'); }
+    const open = !$(menu).classList.contains('show'); closeMenus(); closePop();
+    if (open) { $(menu).classList.add('show'); $(btn).setAttribute('aria-expanded', 'true'); }
   }
   $('helpBtn').onclick = () => toggleMenu('helpBtn', 'helpMenu');
   $('userBtn').onclick = () => toggleMenu('userBtn', 'userMenu');
   document.querySelectorAll('[data-top]').forEach((b) => b.onclick = () => goTop(b.dataset.top));
-  document.addEventListener('mousedown', (e) => { if (!e.target.closest('.t-wrap')) closeMenus(); });
+  document.addEventListener('mousedown', (e) => { if (!e.target.closest('#helpMenu') && !e.target.closest('#userMenu') && !e.target.closest('#helpBtn') && !e.target.closest('#userBtn')) closeMenus(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
 
   $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
