@@ -885,7 +885,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       Object.assign({ id: 'e18', name: 'Aspen Goods', pre: { status: 'failed', reason: 'The PayPal activity report has no dates.', books: 'QuickBooks', platform: 'PayPal', period: 'Jan–Dec 2025' } }, off),
       Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
       Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
-      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [], 'Pro')),
+      Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
+        { key: 'reconnect', source: 'Stripe' }
+      ], 'Pro')),
       Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', books: 'QuickBooks', platform: 'Stripe', period: 'Jan–Dec 2025', checked: 'Dec 31, 2025', history: [{ outcome: 'ok', books: 'QuickBooks', platform: 'Shopify', period: 'Jan–Dec 2024', checked: 'Jan 15, 2025' }] } }, off),
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
@@ -894,12 +896,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       Object.assign({ id: 'e11', name: 'Pinecrest Realty', company: 'Pinecrest Realty LLC' }, on('Xero', ['Stripe', 'Shopify'], [
         { key: 'pending', source: 'Shopify' }
       ], 'Pro')),
-      Object.assign({ id: 'e12', name: 'Quill & Ink Agency', company: 'Quill & Ink Agency LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [], 'Essential')),
-      Object.assign({ id: 'e13', name: 'Riverbend Cafe', company: 'Riverbend Cafe LLC' }, on('Xero', [], [], 'Essential')),
+      Object.assign({ id: 'e12', name: 'Quill & Ink Agency', company: 'Quill & Ink Agency LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
+        { key: 'reconnect', books: true, source: 'QuickBooks' }
+      ], 'Essential')),
+      Object.assign(on('Xero', [], [], 'Essential'), { id: 'e13', name: 'Riverbend Cafe', company: 'Riverbend Cafe LLC', setup: false, setupState: 'Not finished' }),
       Object.assign({ id: 'e14', name: 'Summit Peak Advisors', company: 'Summit Peak Advisors LLC', extraFails: [
         { name: 'Duplicate sales', short: 'Duplicate sales', detail: '6 orders' }
       ] }, on('QuickBooks', ['Stripe', 'Amazon'], [], 'Pro')),
-      Object.assign({ id: 'e15', name: 'Oak & Iron Supply', company: 'Oak & Iron Supply LLC' }, on('QuickBooks', ['Stripe'], [], 'Premium')),
+      Object.assign({ id: 'e15', name: 'Oak & Iron Supply', company: 'Oak & Iron Supply LLC', userDisconnected: true }, on('QuickBooks', ['Stripe'], [], 'Premium')),
       Object.assign({ id: 'e16', name: 'Bluebird Bakery', company: 'Bluebird Bakery LLC' }, on('QuickBooks', four.slice(), [], 'Pro'))
     ];
   }
@@ -2795,6 +2799,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { total: names.length, passed: names.length - unique.length, failed: unique, names };
   }
   function isOffClient(c) { return !c || !c.accounting || !(c.connected || c.setup); }
+  function isNotConnected(c) { return isOffClient(c); }
+  function isNotConfigured(c) { return !!c && !isOffClient(c) && !c.setup; }
+  function isUserDisconnected(c) { return !!(c && c.userDisconnected); }
+  function isConnectionLost(c) {
+    return !!c && !isOffClient(c) && !isUserDisconnected(c) && (booksLost(c) || lostIntegrations(c).length > 0);
+  }
+  function isFailedHealth(c) {
+    return !!c && !isOffClient(c) && c.setup && !isUserDisconnected(c) && !isConnectionLost(c) && hasHealthIssues(c);
+  }
   function isWaitingClient(c) { return !isOffClient(c) && !!(c.invite && c.invite.email && !(c.integrations && c.integrations.length)); }
   function hasLostConnection(c) { return !isOffClient(c) && (booksLost(c) || lostIntegrations(c).length > 0); }
   function hasHealthIssues(c) { const h = isOffClient(c) ? null : healthModel(c); return !!(h && h.failed.length); }
@@ -2986,9 +2999,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function acctCell(c) {
     if (isOffClient(c)) return '<span class="text-body2 text-secondary">Not connected</span>';
-    const down = booksLost(c);
-    const status = down ? 'Disconnected' : 'Connected';
-    return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(down ? 'yellow' : 'green', status)}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
+    const status = isUserDisconnected(c) ? 'Disconnected' : (booksLost(c) ? 'Connection lost' : 'Connected');
+    const kind = status === 'Connected' ? 'green' : 'yellow';
+    return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(kind, status)}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
   }
   function integCell(c) {
     if (isOffClient(c)) return '<span class="text-body2 text-secondary">No integrations</span>';
@@ -3702,15 +3715,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         : '');
     const q = (st._q || '').toLowerCase();
     const searched = listed.filter((c) => c.name.toLowerCase().includes(q));
-    const counts = statusCounts(searched);
-    const filter = st.listFilter || 'all';
-    let rows = searched.filter((c) => {
-      if (filter === 'issues') return hasListedIssue(c);
-      if (filter === 'lost') return hasLostConnection(c);
-      if (filter === 'waiting') return isWaitingClient(c);
-      if (filter === 'off') return isOffClient(c);
-      return true;
-    });
+    const filterDefs = [
+      ['all', 'All', function () { return true; }],
+      ['unconnected', 'Not connected', isNotConnected],
+      ['unconfigured', 'Not configured', isNotConfigured],
+      ['lost', 'Connection lost', isConnectionLost],
+      ['disconnected', 'Disconnected', isUserDisconnected],
+      ['health', 'Failed health checks', isFailedHealth]
+    ];
+    const filter = filterDefs.some((item) => item[0] === st.listFilter) ? st.listFilter : 'all';
+    const counts = {};
+    filterDefs.forEach((item) => { counts[item[0]] = searched.filter(item[2]).length; });
+    let rows = searched.filter(filterDefs.find((item) => item[0] === filter)[2]);
     if (st.openMonth) rows = rows.filter((c) => (c.monthStatus || 'Open') !== 'Closed');
     if (st.tagFilter) rows = rows.filter((c) => (c.tags || []).indexOf(st.tagFilter) >= 0);
     const showHealth = listed.some((c) => !isOffClient(c));
@@ -3740,11 +3756,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ${pageHeader('Clients', `${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}<button type="button" class="btn-outlined" id="listAdd">Add client</button><button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>`)}
       ${banner}
       <div class="tabs" role="tablist">
-        <button type="button" class="tab${filter === 'all' ? ' active' : ''}" data-filter="all" role="tab" aria-selected="${filter === 'all'}">All clients <span class="status status-grey">${counts.all}</span></button>
-        <button type="button" class="tab${filter === 'issues' ? ' active' : ''}" data-filter="issues" role="tab" aria-selected="${filter === 'issues'}">Issues found <span class="status status-red">${counts.issues}</span></button>
-        <button type="button" class="tab${filter === 'lost' ? ' active' : ''}" data-filter="lost" role="tab" aria-selected="${filter === 'lost'}">Connection lost <span class="status status-red">${counts.lost}</span></button>
-        <button type="button" class="tab${filter === 'waiting' ? ' active' : ''}" data-filter="waiting" role="tab" aria-selected="${filter === 'waiting'}">Waiting for owner <span class="status status-yellow">${counts.waiting}</span></button>
-        <button type="button" class="tab${filter === 'off' ? ' active' : ''}" data-filter="off" role="tab" aria-selected="${filter === 'off'}">Not set up <span class="status status-grey">${counts.off}</span></button>
+        ${filterDefs.map((item) => `<button type="button" class="tab${filter === item[0] ? ' active' : ''}" data-filter="${item[0]}" role="tab" aria-selected="${filter === item[0]}">${item[1]} <span class="status status-grey">${counts[item[0]]}</span></button>`).join('')}
       </div>
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
@@ -3753,11 +3765,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <button type="button" class="btn-outlined" id="tagFilterBtn">${esc(st.tagFilter ? (firmTags.find((t) => t.id === st.tagFilter) || {}).name || 'All tags' : 'All tags')}</button>
         <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="openMonth"${st.openMonth ? ' checked' : ''}> Has open month</label>
       </div>
-      <div class="table-wrap clients-table"><table class="synder-table">
+      ${rows.length ? `<div class="table-wrap clients-table"><table class="synder-table">
           <thead><tr><th>Name</th><th>Plan</th><th>Accounting</th><th>Integrations</th>${showHealth ? '<th>Health checks</th>' : ''}<th>Pre-assessment</th><th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="${showHealth ? 7 : 6}" class="text-body2">No clients match.</td></tr>`}</tbody>
+        <tbody>${body}</tbody>
       </table></div>
-      <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>
+      <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>` : '<div class="empty-state"><p class="empty-state-title">No clients match.</p></div>'}
     </div>${flowDialogs()}`;
   }
   const WORK_MONTHS = [
@@ -4059,7 +4071,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function clientAccountingLine(c) {
     if (!c || !c.accounting || isOffClient(c)) return 'Accounting not connected';
     const books = c.accounting === 'QuickBooks' ? 'QuickBooks Online' : c.accounting;
-    return books + ' · ' + (booksLost(c) ? 'Disconnected' : 'Connected');
+    const status = isUserDisconnected(c) ? 'Disconnected' : (booksLost(c) ? 'Connection lost' : 'Connected');
+    return books + ' · ' + status;
   }
   function renderFirmSettings() {
     return `<div class="flow-wide page-stack">
