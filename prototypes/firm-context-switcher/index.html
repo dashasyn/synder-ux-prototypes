@@ -1939,10 +1939,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Pay a fixed fee per client for unlimited integrations, syncs and rules.</p><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="page-stack"><h2 class="text-h2">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[1] - row[2]) + '</td></tr>').join('');
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openBuyLicenses">Buy licenses</button>') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><h2 class="text-h2">Purchased licenses</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div><h2 class="text-h2">Assign licenses</h2>' + renderAssignTab() + '</div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -2063,7 +2063,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return '<div class="d-flex align-center gap-8"><select class="select" data-addon-size="' + family + ':' + kind + ':' + index + '" aria-label="' + kind + '">' + options + '</select><span class="text-body2">' + price + '</span>' + stepPair(family + ':' + kind + ':' + index, row.qty || 0) + '<button type="button" class="btn-icon" data-del-addon="' + family + ':' + kind + ':' + index + '" aria-label="Delete"><span class="material-icons">close</span></button></div>';
   }
   function renderManageLicenses() {
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Buy licenses') + renderBuyTab() + '</div>';
+    const tab = st.manageTab === 'buy' ? 'buy' : 'assign';
+    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (tab === 'assign' ? ' active' : '') + '" data-manage-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab' + (tab === 'buy' ? ' active' : '') + '" data-manage-tab="buy" role="tab">Buy licenses</button></div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -4633,7 +4635,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const sortTh = document.getElementById('sortColName');
     if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
     bindClick('revealLicences', () => { st.licencesOn = true; render(); });
-    bindClick('openBuyLicenses', () => { st.page = 'buylicenses'; st.licencesOn = true; render(); });
+    bindClick('openManage', () => { st.page = 'manage'; st.manageTab = 'assign'; st.licencesOn = true; render(); });
     bindClick('bookCallQuiet', () => { st.licencesOn = true; render(); });
     bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
     m.querySelectorAll('[data-manage-tab]').forEach((b) => b.onclick = () => { st.manageTab = b.dataset.manageTab; render(); });
@@ -5212,9 +5214,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       st.ctx = 'firm';
       st.plansOpen = false;
       if (parts[1] === 'buy' || parts[1] === 'plans' || (parts[1] === 'manage' && parts[2] === 'buy')) {
-        st.page = 'buylicenses';
+        st.page = 'manage';
+        st.manageTab = 'buy';
         st.licencesOn = true;
-      } else if (parts[1] === 'manage' || parts[1] === 'licences') {
+      } else if (parts[1] === 'manage') {
+        st.page = 'manage';
+        st.manageTab = 'assign';
+        st.licencesOn = true;
+      } else if (parts[1] === 'licences') {
         st.page = 'billing';
         st.licencesOn = true;
       } else { st.page = 'billing'; st.licencesOn = false; }
@@ -5362,7 +5369,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
-    else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage/buy';
+    else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage' + ((st.manageTab === 'buy' || st.page === 'buylicenses' || st.page === 'buyplans') ? '/buy' : '');
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.licencesOn ? '/licences' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
     if (location.hash !== h) writeLocation(h);
