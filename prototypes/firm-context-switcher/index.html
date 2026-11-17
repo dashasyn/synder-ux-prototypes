@@ -2675,7 +2675,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
-    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'prelog', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
+    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
     if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses' || st.page === 'manage') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
@@ -2981,9 +2981,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return !!c && isOffClient(c) && !((c.integrations || []).length);
   }
   function preMenuItem(c) {
-    if (!preEligible(c) || (c.pre && c.pre.status === 'running')) return '';
+    if (!preEligible(c)) return '';
     const run = '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
-    if (c.pre && c.pre.status === 'done') return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>' + run;
+    if (c.pre && (c.pre.status === 'done' || c.pre.status === 'failed')) return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>' + run;
     return run;
   }
   function ensurePreSeeds() {
@@ -2998,7 +2998,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   let preDraft = null;
   let preWork = null;
-  let preTicker = null;
+  let preRunTimer = null;
   function preLink(id, kind, label) {
     const attr = kind === 'view' ? 'data-pre-view' : 'data-pre-run';
     return '<button type="button" class="link" ' + attr + '="' + id + '">' + label + '</button>';
@@ -3128,6 +3128,39 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const match = String(label).match(/([A-Z][a-z]{2}) (\d+), (\d+)/);
     if (!match || !months[match[1]]) return 0;
     return Number(match[3]) * 400 + months[match[1]] * 32 + Number(match[2]);
+  }
+  function labelToIso(label) {
+    const months = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+    const match = String(label).match(/([A-Z][a-z]{2}) (\d+), (\d+)/);
+    if (!match || !months[match[1]]) return '';
+    return match[3] + '-' + months[match[1]] + '-' + String(match[2]).padStart(2, '0');
+  }
+  function compactPeriod(start, end) {
+    const sm = String(start).match(/([A-Z][a-z]{2}) (\d+), (\d+)/);
+    const em = String(end).match(/([A-Z][a-z]{2}) (\d+), (\d+)/);
+    if (!sm || !em) return 'Oct 1 - 31, 2026';
+    if (sm[1] === em[1] && sm[3] === em[3]) return sm[1] + ' ' + Number(sm[2]) + ' - ' + Number(em[2]) + ', ' + sm[3];
+    return sm[1] + ' ' + Number(sm[2]) + ' - ' + em[1] + ' ' + Number(em[2]) + ', ' + em[3];
+  }
+  function preMetaFromDraft(draft) {
+    const files = (draft && draft.files) || [];
+    const recs = files.map((f) => f.rec).filter((r) => r && !r.error && !r.unknown);
+    const integ = recs.filter((r) => r.group === 'Integration')[0];
+    const books = recs.filter((r) => r.group === 'Accounting')[0];
+    const integration = integ && integ.label ? integ.label.split(' · ')[0] : 'Stripe';
+    const booksName = books && books.label ? books.label.split(' · ')[0] : 'QuickBooks Online';
+    const spans = files.filter((f) => f.span && f.span.length === 2).map((f) => f.span);
+    let fromIso = '2026-10-01';
+    let toIso = '2026-10-31';
+    let period = 'Oct 1 - 31, 2026';
+    if (spans.length) {
+      const start = spans.map((s) => s[0]).slice().sort((a, b) => spanKey(a) - spanKey(b))[0];
+      const end = spans.map((s) => s[1]).slice().sort((a, b) => spanKey(b) - spanKey(a))[0];
+      fromIso = labelToIso(start) || fromIso;
+      toIso = labelToIso(end) || toIso;
+      period = compactPeriod(start, end);
+    }
+    return { integration: integration, books: booksName, period: period, fromIso: fromIso, toIso: toIso, sub: integration + ' / ' + period };
   }
   function dateOverlapNote(files) {
     const spans = files.filter((f) => f.span && f.rec && !f.rec.error && !f.rec.unknown).map((f) => f.span);
@@ -3264,160 +3297,151 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const nudge = (gaps.stripePay || gaps.stripeBal) ? '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Connect Stripe to skip uploads — Synder pulls Balance change and Payouts for you. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>' : '';
     return preModal('Pre-assessment for ' + c.name, group('Accounting', accounting) + group('Integration', integration) + issues + nudge, '<button type="button" class="btn-outlined" id="preBack">Back</button><button type="button" class="btn" id="preRun">Run pre-assessment</button>');
   }
-  function logPhase() {
-    const elapsed = Date.now() - (st.preLogStart || Date.now());
-    if (!st.preLogLive) return 4;
-    if (elapsed < 1000) return 0;
-    if (elapsed < 2000) return 1;
-    if (elapsed < 3000) return 2;
-    if (elapsed < 4000) return 3;
-    return 4;
-  }
-  function logChip(phase, index) {
-    if (phase > index) return statusChip('green', 'Finished');
-    if (phase === index) return statusChip('yellow', 'In progress');
-    return statusChip('grey', 'Queued');
-  }
-  function logTimes(done) {
-    if (!done) return '<p class="text-body2">Start: —</p><p class="text-body2">End: —</p><p class="text-body2">Duration: —</p>';
-    return '<p class="text-body2">Start: Oct 31, 2026, 9:14 AM</p><p class="text-body2">End: Oct 31, 2026, 9:14 AM</p><p class="text-body2">Duration: 1s</p>';
-  }
-  function renderPreLog() {
-    const c = findOrg(st.clientId);
-    if (!c) return '';
-    const failed = c.pre && c.pre.status === 'failed';
-    const phase = failed ? 4 : logPhase();
-    if (st.preLogLive && !preTicker && phase < 4) {
-      preTicker = setInterval(() => {
-        if (!st || st.page !== 'prelog') { clearInterval(preTicker); preTicker = null; return; }
-        if (logPhase() >= 4) { clearInterval(preTicker); preTicker = null; finishPreLog(); return; }
-        renderMain();
-      }, 700);
+  function stripeToken(n) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let x = (n + 1) * 9973;
+    let s = '';
+    for (let i = 0; i < 24; i++) {
+      x = (x * 1103515245 + 12345) & 0x7fffffff;
+      s += alphabet[x % alphabet.length];
     }
-    const email = (ob && ob.userEmail) || 'ignat@wlslabs.com';
-    const alert = failed
-      ? '<div class="alert alert-error"><span class="material-icons" aria-hidden="true">error</span><span><span class="alert-title">Couldn’t build a reconciliation</span><span class="text-body2">There was an unexpected error when building the reconciliation. Check the error and try again.</span></span></div>'
-      : '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span><span class="alert-title">Building pre-assessment...</span><span class="text-body2">Synder is preparing your data for reconciliation. You can safely close this page while processing continues in the background. We\'ll email you at ' + esc(email) + ' as soon as it\'s ready.</span></span></div>';
-    const names = ['Read files', 'Normalize and map', 'Match transactions', 'Build balance reconciliation'];
-    const steps = names.map((name, i) => {
-      const extra = i === 2 ? '<p class="text-body2">Pass 1: Primary ID to Primary ID</p><p class="text-body2">Pass 2: Primary ID to Secondary ID</p><p class="text-body2">Pass 3: Secondary ID to Secondary ID</p><button type="button" class="link" id="preExplain">Explain matching</button>' : '';
-      return '<div class="page-stack"><h2 class="text-subtitle2">' + name + ' ' + logChip(phase, i) + '</h2>' + logTimes(phase > i) + extra + '</div>';
-    }).join('');
-    return preShell('Process log', '', '', alert + steps);
-  }
-  function finishPreLog() {
-    const id = st.clientId;
-    const c = findOrg(id);
-    if (!c) return;
-    if (id === 'e18') {
-      c.pre = { status: 'failed', period: 'Oct 1 - 31, 2026' };
-      persistDirectory();
-      if (st.page === 'prelog') renderMain();
-      return;
-    }
-    c.pre = { status: 'done', outcome: id === 'e6' ? 'ok' : 'gap', period: 'Oct 1 - 31, 2026' };
-    persistDirectory();
-    st.preLogLive = false;
-    if (st.page === 'prelog' && st.clientId === id) renderMain();
-    setTimeout(() => {
-      const still = st && st.page === 'prelog' && st.clientId === id;
-      if (still) openPreassessment(id);
-      else showPreToast(c);
-    }, 3000);
-  }
-  function showPreToast(c) {
-    showKitToast('Pre-assessment ready for ' + c.name);
+    return s;
   }
   function buildMatched() {
+    const types = ['Bank Transfer;payout', 'Receivable Payment;Payable Payment;charge', 'Payable Payment;Receivable Payment;charge', 'Receive Money;charge'];
     const rows = [];
     for (let i = 0; i < 56; i++) {
-      const day = (i % 28) + 1;
+      const day = 31 - (i % 31);
+      const payout = i % 4 === 0;
+      const manual = i === 3;
       rows.push({
+        iso: '2026-10-' + String(day).padStart(2, '0'),
         date: 'Oct ' + day + ', 2026',
-        id: 'SAMPLE-PO-' + String(i + 10).padStart(3, '0'),
-        amount: i === 0 ? -520.74 : Math.round((80 + i * 13) * 100) / 100,
-        types: i % 2 ? 'Transfer;payout' : 'Charge;sale',
-        match: 'Auto',
-        count: 2
+        id: manual ? 'DEB-001' : ((payout ? 'po_' : 'ch_') + stripeToken(i)),
+        amount: payout ? Math.round((-180 - i * 17.13) * 100) / 100 : Math.round((24.58 + i * 11.37) * 100) / 100,
+        types: manual ? 'Receive Money;charge' : types[i % types.length],
+        match: manual ? 'Manual' : 'Auto',
+        count: manual ? 4 : (payout ? 2 : 3),
+        currency: 'USD'
       });
     }
-    rows[0].date = 'Oct 30, 2026';
-    rows[0].id = 'SAMPLE-PO-010';
+    rows[0].amount = -301.76;
+    rows[0].id = 'po_' + stripeToken(0);
+    rows[4].amount = -520.74;
+    rows[8].amount = -2808.05;
     return rows;
   }
   function buildDisc() {
     return [
-      { id: 'SAMPLE-PO-201', acct: 1540, integ: 1420, delta: 120, date: 'Oct 12, 2026', type: 'Transfer;payout', count: 2 },
-      { id: 'SAMPLE-PO-202', acct: 612.4, integ: -612.4, delta: 1224.8, date: 'Oct 20, 2026', type: 'Fee', count: 2 },
-      { id: 'SAMPLE-PO-203', acct: 89, integ: 178, delta: -89, date: 'Oct 22, 2026', type: 'Refund', count: 2 }
+      { id: 'po_' + stripeToken(201), acct: 1540, integ: 1420, delta: 120, amount: 120, iso: '2026-10-12', date: 'Oct 12, 2026', type: 'Bank Transfer;payout', count: 2, currency: 'USD' },
+      { id: 'ch_' + stripeToken(202), acct: 612.4, integ: -612.4, delta: 1224.8, amount: 1224.8, iso: '2026-10-20', date: 'Oct 20, 2026', type: 'Receivable Payment;Payable Payment;charge', count: 2, currency: 'USD' },
+      { id: 'ch_' + stripeToken(203), acct: 89, integ: 178, delta: -89, amount: -89, iso: '2026-10-22', date: 'Oct 22, 2026', type: 'Receive Money;charge', count: 2, currency: 'USD' }
     ];
   }
   function buildMiss(side) {
     const rows = [];
     const n = side === 'acct' ? 3 : 2;
     for (let i = 0; i < n; i++) {
-      rows.push({ date: 'Oct ' + (12 + i) + ', 2026', primary: 'SAMPLE-PO-' + (300 + i), secondary: 'ch_' + (800 + i), type: side === 'acct' ? 'Transfer;payout' : 'Charge;sale', amount: [1540, 980, 908][i] || 220, desc: side === 'acct' ? 'Stripe payout' : 'Card payment' });
+      const day = 12 + i;
+      rows.push({
+        iso: '2026-10-' + String(day).padStart(2, '0'),
+        date: 'Oct ' + day + ', 2026',
+        primary: (side === 'acct' ? 'po_' : 'ch_') + stripeToken(300 + i),
+        secondary: 'ch_' + stripeToken(800 + i),
+        type: side === 'acct' ? 'Bank Transfer;payout' : 'Receivable Payment;Payable Payment;charge',
+        amount: [1540, 980, 908][i] || 220,
+        desc: side === 'acct' ? 'Stripe payout' : 'Card payment',
+        currency: 'USD'
+      });
     }
     return rows;
   }
-  function ensurePreWork(id, ok) {
-    if (preWork && preWork.id === id) return preWork;
-    preWork = { id: id, ok: ok, matched: buildMatched(), discrepancy: ok ? [] : buildDisc(), missAcct: ok ? [] : buildMiss('acct'), missInt: ok ? [] : buildMiss('int'), ignored: [], expand: null, warn: !ok, q: '', amtMin: '', amtMax: '', currency: '', matchType: '' };
+  function ensurePreWork(id, outcome, range) {
+    if (preWork && preWork.id === id && preWork.outcome === outcome) return preWork;
+    const empty = outcome === 'failed';
+    const ok = outcome === 'ok';
+    const from = (range && range.from) || '2026-10-01';
+    const to = (range && range.to) || '2026-10-31';
+    preWork = {
+      id: id, outcome: outcome,
+      matched: empty ? [] : buildMatched(),
+      discrepancy: (ok || empty) ? [] : buildDisc(),
+      missAcct: (ok || empty) ? [] : buildMiss('acct'),
+      missInt: (ok || empty) ? [] : buildMiss('int'),
+      ignored: [], expand: null,
+      q: '', amtMin: '', amtMax: '', currency: '', matchType: '',
+      dateDir: 'desc', from: from, to: to, periodFrom: from, periodTo: to
+    };
     return preWork;
   }
-  function resultRows(work, tab) {
+  function preKeep(work, row) {
     const q = (work.q || '').toLowerCase();
+    const blob = ((row.id || '') + ' ' + (row.types || row.type || '') + ' ' + (row.primary || '') + ' ' + (row.secondary || '') + ' ' + (row.desc || '')).toLowerCase();
+    if (q && blob.indexOf(q) < 0) return false;
+    if (work.matchType && row.match && row.match !== work.matchType) return false;
+    if (work.currency && (row.currency || 'USD') !== work.currency) return false;
+    if (work.from && row.iso && row.iso < work.from) return false;
+    if (work.to && row.iso && row.iso > work.to) return false;
+    const amt = row.amount != null ? row.amount : row.delta;
+    if (work.amtMin !== '' && amt != null && Number(amt) < Number(work.amtMin)) return false;
+    if (work.amtMax !== '' && amt != null && Number(amt) > Number(work.amtMax)) return false;
+    return true;
+  }
+  function resultRows(work, tab) {
     let list = tab === 'matched' ? work.matched : (tab === 'discrepancy' ? work.discrepancy : (tab === 'ignored' ? work.ignored : []));
-    if (q) list = list.filter((row) => (row.id + ' ' + (row.types || row.type || '') + ' ' + (row.primary || '')).toLowerCase().indexOf(q) >= 0);
-    if (tab === 'matched' && work.matchType) list = list.filter((row) => row.match === work.matchType);
-    return list;
+    list = list.filter((row) => preKeep(work, row));
+    const dir = work.dateDir === 'asc' ? 1 : -1;
+    return list.slice().sort((a, b) => dir * String(a.iso || '').localeCompare(String(b.iso || '')));
   }
   function renderPreResults() {
     const c = findOrg(st.clientId);
-    if (!c || !c.pre || c.pre.status !== 'done') { st.page = 'preupload'; return renderPreUpload(); }
-    const ok = c.pre.outcome === 'ok';
-    const work = ensurePreWork(c.id, ok);
+    if (!c || !c.pre || (c.pre.status !== 'done' && c.pre.status !== 'failed')) { st.page = 'preupload'; return renderPreUpload(); }
+    const failed = c.pre.status === 'failed';
+    const ok = !failed && c.pre.outcome === 'ok';
+    const outcome = failed ? 'failed' : (ok ? 'ok' : 'gap');
+    const work = ensurePreWork(c.id, outcome, { from: c.pre.fromIso, to: c.pre.toIso });
     const tab = ['matched', 'discrepancy', 'missing', 'ignored'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
-    const chip = ok
-      ? '<span class="tooltip-wrap"><span class="status status-green" tabindex="0">Reconciled</span><span class="tooltip" role="tooltip">All transactions matched with no issues found. Reconciliation for this period is complete.</span></span>'
-      : '<span class="tooltip-wrap"><span class="status status-yellow" tabindex="0">Attention required</span><span class="tooltip" role="tooltip">Issues were found during reconciliation — discrepancies, missing transactions, or balance differences. Open the results to see what needs attention.</span></span>';
-    const exportMenu = '<div class="row-menu"><button type="button" class="btn-outlined" data-menu="prex" aria-label="Export">Export</button><div class="dropdown-menu" id="rowmenu-prex"><button type="button" class="dropdown-item" data-pre-export="matched">Export matched</button><button type="button" class="dropdown-item" data-pre-export="discrepancy">Export discrepancy</button><button type="button" class="dropdown-item" data-pre-export="missing">Export missing source</button><button type="button" class="dropdown-item" data-pre-export="ignored">Export ignored</button><button type="button" class="dropdown-item" data-pre-export="all">Export all</button></div></div>';
-    const info = '<div class="page-stack"><div class="d-flex align-center gap-8"><h2 class="text-h2">Stripe clearing account</h2>' + chip + '</div><p class="text-body2">Stripe / Oct 1 - 31, 2026</p><div class="d-flex gap-8"><button type="button" class="btn-outlined" id="preLog">Process log</button>' + exportMenu + '</div></div>';
-    const warn = (!ok && work.warn) ? '<div class="alert alert-warning"><span class="material-icons" aria-hidden="true">warning</span><span>Resolve all transactions in Missing source and Discrepancy to finish reconciliation.</span><button type="button" class="alert-close" id="preWarnClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>' : '';
-    const balRows = ok
-      ? [['Accounting beginning balance', 12400], ['Increase', 8210.4], ['Decrease', 4479], ['Calculated ending balance', 16131.4], ['Accounting ending balance', 16131.4], ['Difference', 0]]
-      : [['Accounting beginning balance', 12400], ['Increase', 8210.4], ['Decrease', 4479], ['Calculated ending balance', 16131.4], ['Accounting ending balance', 12400], ['Difference', 3731.4]];
-    const balance = '<div class="table-wrap"><table class="synder-table"><tbody>' + balRows.map((pair) => '<tr><td><span class="text-body2">' + pair[0] + '</span></td><td><span class="text-body2">' + preMoney(pair[1]) + '</span></td></tr>').join('') + '</tbody></table></div><p class="text-body2">' + (ok ? 'Balance matches' : 'Balance is off by 3,731.40 USD') + '</p>' + (ok ? '' : '<p class="text-body2">To fix the difference, review the Discrepancy and/or Missing source tab(s).</p>');
-    const tabs = '<div class="tabs"><button type="button" class="tab' + (tab === 'matched' ? ' active' : '') + '" data-pre-tab="matched">Matched ' + work.matched.length + '</button><button type="button" class="tab' + (tab === 'discrepancy' ? ' active' : '') + '" data-pre-tab="discrepancy">Discrepancy ' + work.discrepancy.length + '</button><button type="button" class="tab' + (tab === 'missing' ? ' active' : '') + '" data-pre-tab="missing">Missing source ' + (work.missAcct.length + work.missInt.length) + '</button><button type="button" class="tab' + (tab === 'ignored' ? ' active' : '') + '" data-pre-tab="ignored">Ignored ' + work.ignored.length + '</button></div>';
-    const filters = '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="preQ" placeholder="Search by ID or Transaction type..." value="' + esc(work.q) + '"><input class="input" type="date" id="preFFrom" value="2026-10-01" aria-label="Date range"><input class="input" type="date" id="preFTo" value="2026-10-31" aria-label="Date range end"><input class="input" id="preMin" placeholder="Amount" value="' + esc(work.amtMin) + '" aria-label="Amount minimum"><input class="input" id="preMax" placeholder="Amount" value="' + esc(work.amtMax) + '" aria-label="Amount maximum"><select class="select" id="preCur" aria-label="Currency"><option value="">Currency</option><option value="USD"' + (work.currency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (work.currency === 'EUR' ? ' selected' : '') + '>EUR</option></select>' + (tab === 'matched' ? '<select class="select" id="preMatch" aria-label="Match type"><option value="">Match type</option><option value="Auto"' + (work.matchType === 'Auto' ? ' selected' : '') + '>Auto</option></select>' : '') + '<button type="button" class="btn" id="preApply">Apply</button><button type="button" class="btn-outlined" id="preReset">Reset filters</button></div>';
+    const integration = c.pre.integration || 'Stripe';
+    const books = c.pre.books || 'QuickBooks Online';
+    const sub = c.pre.sub || (integration + ' / ' + (c.pre.period || 'Oct 1 - 31, 2026'));
+    const chip = failed
+      ? '<span class="tooltip-wrap"><span class="status status-red" tabindex="0">Error</span><span class="tooltip" role="tooltip">The pre-assessment could not be built. Run it again.</span></span>'
+      : (ok
+        ? '<span class="tooltip-wrap"><span class="status status-green" tabindex="0">Reconciled</span><span class="tooltip" role="tooltip">All transactions matched with no issues found.</span></span>'
+        : '<span class="tooltip-wrap"><span class="status status-yellow" tabindex="0">Attention required</span><span class="tooltip" role="tooltip">Discrepancies or missing transactions need a look.</span></span>');
+    const exportMenu = '<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="prex" aria-haspopup="menu" aria-expanded="false">Export</button><div class="dropdown-menu" id="rowmenu-prex"><button type="button" class="dropdown-item" data-pre-export="matched">Export matched</button><button type="button" class="dropdown-item" data-pre-export="discrepancy">Export discrepancy</button><button type="button" class="dropdown-item" data-pre-export="missing">Export missing source</button><button type="button" class="dropdown-item" data-pre-export="ignored">Export ignored</button><button type="button" class="dropdown-item" data-pre-export="all">Export all</button></div></div>';
+    const header = '<div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">' + esc(integration + ' and ' + books + ' (' + c.name + ')') + ' ' + chip + '</h1><p class="synder-page-subtitle">' + esc(sub) + '</p></div><div class="synder-page-actions">' + exportMenu + '</div></div>';
+    const note = '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span class="flex-1"><span class="text-bold">Pre-assessment complete.</span> Connect ' + esc(c.name) + ' to reconcile automatically every month.</span><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></div>';
+    const tabBtn = (id, label, count, kind) => '<button type="button" class="tab' + (tab === id ? ' active' : '') + '" data-pre-tab="' + id + '">' + label + ' <span class="status status-' + kind + '">' + count + '</span></button>';
+    const tabs = '<div class="tabs">' + tabBtn('matched', 'Matched', work.matched.length, 'green') + tabBtn('discrepancy', 'Discrepancy', work.discrepancy.length, 'yellow') + tabBtn('missing', 'Missing source', work.missAcct.length + work.missInt.length, 'red') + tabBtn('ignored', 'Ignored', work.ignored.length, 'grey') + '</div>';
+    const filters = '<div class="synder-filter-bar"><div class="synder-filter-bar-fields"><div class="form-field flex-1"><label class="form-label" for="preQ">Search</label><input type="search" class="input-search" id="preQ" placeholder="Search by ID or Transaction type..." value="' + esc(work.q) + '"></div><div class="form-field flex-1"><label class="form-label" for="preFFrom">Date range</label><div class="d-flex align-center gap-8"><input class="input" type="date" id="preFFrom" value="' + esc(work.from) + '" aria-label="Date range start"><span class="text-body2">–</span><input class="input" type="date" id="preFTo" value="' + esc(work.to) + '" aria-label="Date range end"></div></div><div class="form-field flex-1"><label class="form-label" for="preMin">Amount</label><div class="d-flex align-center gap-8"><input class="input" id="preMin" value="' + esc(work.amtMin) + '" aria-label="Amount minimum"><span class="text-body2">–</span><input class="input" id="preMax" value="' + esc(work.amtMax) + '" aria-label="Amount maximum"></div></div><div class="form-field flex-1"><label class="form-label" for="preMatch">Match type</label><select class="select" id="preMatch"><option value="">All</option><option value="Auto"' + (work.matchType === 'Auto' ? ' selected' : '') + '>Auto</option><option value="Manual"' + (work.matchType === 'Manual' ? ' selected' : '') + '>Manual</option></select></div><div class="form-field flex-1"><label class="form-label" for="preCur">Currency</label><select class="select" id="preCur"><option value="">All</option><option value="USD"' + (work.currency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (work.currency === 'EUR' ? ' selected' : '') + '>EUR</option></select></div></div><div class="synder-filter-bar-actions"><button type="button" class="btn" id="preApply">Apply</button><button type="button" class="btn-outlined" id="preReset">Reset filters</button></div></div>';
+    const sortCls = 'sortable sorted' + (work.dateDir === 'asc' ? '' : ' desc');
     let table = '';
     if (tab === 'matched') {
       const page = paginate('preMatched', resultRows(work, 'matched'), [10, 25, 50]);
       const body = page.slice.map((row) => {
         const open = work.expand === row.id;
-        const sub = open ? '<tr><td colspan="7"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>Oct 30, 2026</td><td>' + esc(row.id) + '</td><td>po_010</td><td>Transfer</td><td>' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>Oct 30, 2026</td><td>' + esc(row.id) + '</td><td>po_010</td><td>payout</td><td>' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
-        return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">expand_more</span></button></td><td><input class="checkbox" type="checkbox" aria-label="Select ' + esc(row.id) + '"></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td></tr>' + sub;
-      }).join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th></th><th>Date</th><th>Matching ID</th><th>Total amount</th><th>Types</th><th>Match type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+        const sub = open ? '<tr><td colspan="9"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';')[0]) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';').pop()) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
+        const unmatch = row.match === 'Manual' ? '<button type="button" class="link" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button>' : '';
+        return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">' + (open ? 'expand_less' : 'expand_more') + '</span></button></td><td class="col-check"><input class="checkbox" type="checkbox" aria-label="Select ' + esc(row.id) + '"></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td><td>' + unmatch + '</td></tr>' + sub;
+      }).join('') || '<tr><td colspan="9" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th class="col-check"><input class="checkbox" type="checkbox" aria-label="Select all"></th><th class="' + sortCls + '" id="preSortDate">Date</th><th>Matching ID</th><th class="col-amount">Total amount</th><th>Types</th><th>Match type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
     } else if (tab === 'discrepancy') {
-      const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td>' + preMoney(row.acct) + '</td><td>' + preMoney(row.integ) + '</td><td>' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="d-' + esc(row.id) + '" aria-label="Row actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-d-' + esc(row.id) + '"><button type="button" class="dropdown-item" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button><button type="button" class="dropdown-item" data-pre-ignore="' + esc(row.id) + '">Ignore</button></div></div></td></tr>').join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th>Accounting total</th><th>Integration total</th><th>Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.acct) + '</td><td class="col-amount">' + preMoney(row.integ) + '</td><td class="col-amount">' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="d-' + esc(row.id) + '" aria-label="Row actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-d-' + esc(row.id) + '"><button type="button" class="dropdown-item" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button><button type="button" class="dropdown-item" data-pre-ignore="' + esc(row.id) + '">Ignore</button></div></div></td></tr>').join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th class="col-amount">Accounting total</th><th class="col-amount">Integration total</th><th class="col-amount">Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
     } else if (tab === 'missing') {
-      const missTable = (title, list, side) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th><th></th></tr></thead><tbody>' + (list.map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td><td><button type="button" class="link" data-pre-ignore-miss="' + side + ':' + esc(row.primary) + '">Ignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
+      const shown = (list) => list.filter((row) => preKeep(work, row)).slice().sort((a, b) => String(b.iso || '').localeCompare(String(a.iso || '')));
+      const missTable = (title, list, side) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th><th></th></tr></thead><tbody>' + (shown(list).map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td><td><button type="button" class="link" data-pre-ignore-miss="' + side + ':' + esc(row.primary) + '">Ignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
       table = '<div class="d-flex align-center gap-8 flex-wrap"><span class="text-body2">Manually match transactions for accurate reconciliation.</span><a class="link" href="https://synder.com/help/how-to-use-manual-matching-in-transaction-reconciliation/" target="_blank" rel="noopener">Learn more</a><button type="button" class="btn" id="preManual">Match manually</button></div><p class="form-error-msg" id="preManualError" hidden>Select one accounting row and one integration row.</p>' + missTable('Missing in accounting', work.missAcct, 'acct') + missTable('Missing in integration', work.missInt, 'int');
     } else {
-      const body = work.ignored.map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td><td><button type="button" class="link" data-pre-unignore="' + esc(row.primary || row.id) + '">Unignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      const body = resultRows(work, 'ignored').map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td><td><button type="button" class="link" data-pre-unignore="' + esc(row.primary || row.id) + '">Unignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
     }
-    const foot = ok
-      ? '<div class="page-stack"><p class="text-body2">Connect ' + esc(c.name) + ' to keep it that way.</p><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></div>'
-      : '<div class="page-stack"><h2 class="text-h2">Ready to fix these in Synder?</h2><p class="text-body2">Connect ' + esc(c.name) + ' to reconcile automatically every month — no uploads.</p><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></div>';
-    const actions = '<button type="button" class="btn-outlined" id="preShare">Copy share link</button><span class="tooltip-wrap"><button type="button" class="btn-outlined" id="preRefresh">Refresh data</button><span class="tooltip" role="tooltip">Create a new reconciliation for the same time period and same accounts.</span></span><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button>';
-    return preShell('Pre-assessment results', c.name, actions, info + warn + balance + tabs + filters + table + foot);
+    return preShell('Reconciliation results', '', '<button type="button" class="btn-outlined" id="preShare">Copy share link</button>', header + note + '<div class="synder-list-block">' + tabs + filters + table + '</div>');
   }
   function preOverlayHtml() {
+    if (st.page === 'prelog') st.page = 'preassess';
     if (st.page === 'preupload' || st.page === 'precheck') return renderPreUpload();
-    if (st.page === 'prelog') return renderPreLog();
     if (st.page === 'preassess') return renderPreResults();
     return '';
   }
@@ -3464,13 +3488,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         return;
       }
       draft.missingError = false;
-      st.page = 'prelog';
-      st.preLogLive = true;
-      st.preLogStart = Date.now();
-      c.pre = { status: 'running', period: 'Oct 1 - 31, 2026' };
-      persistDirectory();
-      save();
-      render();
+      if (preRunTimer) return;
+      const btn = document.getElementById('preRun');
+      if (btn) btn.textContent = 'Running…';
+      preRunTimer = setTimeout(() => {
+        preRunTimer = null;
+        const meta = preMetaFromDraft(draft);
+        c.pre = Object.assign({ status: c.id === 'e18' ? 'failed' : 'done', outcome: c.id === 'e18' ? 'failed' : (c.id === 'e6' ? 'ok' : 'gap') }, meta);
+        persistDirectory();
+        preWork = null;
+        openPreassessment(c.id);
+      }, 600);
     });
     bind('preBrowse', () => { const input = $('preFile'); if (input) input.click(); });
     const zone = $('preDrop');
@@ -3482,14 +3510,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
     m.querySelectorAll('[data-pre-del]').forEach((b) => b.onclick = () => { preDraft.files.splice(Number(b.dataset.preDel), 1); renderMain(); });
     m.querySelectorAll('[data-pre-connect]').forEach((b) => b.onclick = () => connectNamed(b.dataset.preConnect));
-    bind('preExplain', () => dialogShell('Matching rules', '<p class="text-body2">Synder matches the transactions following these 3 steps.</p>', '<button type="button" class="btn" data-cancel>Okay</button>'));
-    bind('preLog', () => { st.preLogLive = false; st.page = 'prelog'; save(); render(); });
     bind('preShare', () => { const url = location.href; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url); showKitToast('Link copied and ready to share.'); });
-    bind('preRefresh', () => {
-      const { modal, close } = dialogShell('Refresh will reset your changes', '<p class="text-body2">Any manual changes will be lost and returned to their original state.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="preRefreshGo">Continue</button>');
-      modal.querySelector('#preRefreshGo').onclick = () => { preWork = null; close(); renderMain(); };
-    });
-    bind('preWarnClose', () => { if (preWork) preWork.warn = false; renderMain(); });
     bind('preApply', () => {
       if (!preWork) return;
       preWork.q = ($('preQ') && $('preQ').value) || '';
@@ -3497,6 +3518,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       preWork.amtMax = ($('preMax') && $('preMax').value) || '';
       preWork.currency = ($('preCur') && $('preCur').value) || '';
       preWork.matchType = ($('preMatch') && $('preMatch').value) || '';
+      preWork.from = ($('preFFrom') && $('preFFrom').value) || '';
+      preWork.to = ($('preFTo') && $('preFTo').value) || '';
       const state = pagerState('preMatched');
       state.page = 0;
       renderMain();
@@ -3504,16 +3527,34 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('preReset', () => {
       if (!preWork) return;
       preWork.q = ''; preWork.amtMin = ''; preWork.amtMax = ''; preWork.currency = ''; preWork.matchType = '';
+      preWork.from = preWork.periodFrom; preWork.to = preWork.periodTo;
       renderMain();
     });
+    const sortDate = m.querySelector('#preSortDate');
+    if (sortDate) sortDate.onclick = () => { if (!preWork) return; preWork.dateDir = preWork.dateDir === 'desc' ? 'asc' : 'desc'; renderMain(); };
     m.querySelectorAll('[data-pre-tab]').forEach((b) => b.onclick = () => { st.preTab = b.dataset.preTab; renderMain(); });
     m.querySelectorAll('[data-pre-expand]').forEach((b) => b.onclick = () => { if (preWork) preWork.expand = preWork.expand === b.dataset.preExpand ? null : b.dataset.preExpand; renderMain(); });
     m.querySelectorAll('[data-pre-export]').forEach((b) => b.onclick = () => showKitToast('The report will be sent to your email'));
-    m.querySelectorAll('[data-pre-unmatch]').forEach((b) => b.onclick = () => showKitToast('Successfully unmatched. Transactions were moved to Missing source tab.'));
+    m.querySelectorAll('[data-pre-unmatch]').forEach((b) => b.onclick = () => {
+      if (!preWork) return;
+      const id = b.dataset.preUnmatch;
+      const matched = preWork.matched.filter((item) => item.id === id)[0];
+      if (matched) {
+        preWork.matched = preWork.matched.filter((item) => item.id !== id);
+        preWork.missInt.push({ iso: matched.iso, date: matched.date, primary: matched.id, secondary: matched.id, type: matched.types, amount: matched.amount, desc: matched.types, currency: 'USD' });
+      }
+      const gap = preWork.discrepancy.filter((item) => item.id === id)[0];
+      if (gap) {
+        preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== id);
+        preWork.missInt.push({ iso: gap.iso, date: gap.date, primary: gap.id, secondary: gap.id, type: gap.type, amount: gap.delta, desc: gap.type, currency: 'USD' });
+      }
+      showKitToast('Successfully unmatched. Transactions were moved to Missing source tab.');
+      renderMain();
+    });
     m.querySelectorAll('[data-pre-ignore]').forEach((b) => b.onclick = () => {
       if (!preWork) return;
       const row = preWork.discrepancy.filter((item) => item.id === b.dataset.preIgnore)[0];
-      if (row) { preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== row.id); preWork.ignored.push({ date: row.date, primary: row.id, secondary: '-', type: row.type, amount: row.delta, desc: '-' }); }
+      if (row) { preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== row.id); preWork.ignored.push({ iso: row.iso, date: row.date, primary: row.id, secondary: '-', type: row.type, amount: row.delta, desc: '-', currency: 'USD' }); }
       showKitToast('Successfully ignored. Transactions were moved to Ignored tab.');
       renderMain();
     });
@@ -3816,7 +3857,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
-      <div class="table-wrap clients-table"><table class="synder-table">
+      <div class="table-wrap clients-table"><table class="synder-table table--lg">
           <thead><tr><th>Name</th><th>Connection</th>${showHealth ? '<th>Health checks</th>' : ''}<th></th></tr></thead>
         <tbody>${body || `<tr><td colspan="${showHealth ? 3 : 2}" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
@@ -4387,7 +4428,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const menu = $('rowmenu-' + b.dataset.menu);
       const open = menu && menu.classList.contains('show');
       m.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
-      if (!open && menu) menu.classList.add('show');
+      m.querySelectorAll('[data-menu][aria-expanded="true"]').forEach((x) => x.setAttribute('aria-expanded', 'false'));
+      if (!open && menu) { menu.classList.add('show'); b.setAttribute('aria-expanded', 'true'); }
     });
     bind('importCancel', () => goFirm('clients'));
     bind('connectCancel', () => { connectLoading = false; goFirm('clients'); });
@@ -5199,7 +5241,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   });
   document.addEventListener('mousedown', (e) => {
     if (popOpen() && !e.target.closest('.ctx')) closePop();
-    if (!e.target.closest('.row-menu')) document.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
+    if (!e.target.closest('.row-menu')) {
+      document.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
+      document.querySelectorAll('[data-menu][aria-expanded="true"]').forEach((x) => x.setAttribute('aria-expanded', 'false'));
+    }
   });
 
   /* ───────── Add client modal ───────── */
@@ -5300,8 +5345,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         } else if (parts[2] === 'pre-assessment' && parts[3] === 'check') {
           st.page = 'precheck';
         } else if (parts[2] === 'pre-assessment' && parts[3] === 'log') {
-          st.page = 'prelog';
-          st.preLogLive = false;
+          st.page = 'preassess';
         } else if (parts[2] === 'pre-assessment') {
           st.page = 'preassess';
         } else {
@@ -5381,8 +5425,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       document.body.classList.remove('provider-plain', 'wizard-plain', 'center-stage');
       renderMode(); renderOb(); return;
     }
+    if (st && st.page === 'prelog') st.page = 'preassess';
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck' || st.page === 'prelog') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
@@ -5414,7 +5459,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'clienthealth' && st.clientId) h = '#clients/' + st.clientId + '/health';
     else if (st.ctx === 'firm' && st.page === 'preupload' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/upload';
     else if (st.ctx === 'firm' && st.page === 'precheck' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/check';
-    else if (st.ctx === 'firm' && st.page === 'prelog' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/log';
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
