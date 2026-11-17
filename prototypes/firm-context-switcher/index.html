@@ -830,11 +830,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     goWorkspace('clients');
   }
   function existingClients() {
-    const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, license: 'None', setupState: 'Not set up' };
+    const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, onboarding: 'none', license: 'None', setupState: 'Not set up' };
     const on = (accounting, integrations, issues, license) => ({
       connected: true, accounting, integrations, issues, syncing: false, ledger: accounting, pay: (integrations[0] || null),
       books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'today at 9:14 AM',
-      setup: true, license: license || 'Pro', setupState: 'Ready'
+      setup: true, onboarding: 'done', license: license || 'Pro', setupState: 'Ready'
     });
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
     const src = (acct, name) => acct + ' · ' + name;
@@ -847,11 +847,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
       Object.assign({ id: 'e18', name: 'Aspen Goods', pre: { status: 'failed', period: 'Oct 1 - 31, 2026' } }, off),
       Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
-      Object.assign({ id: 'e6', name: 'Maple Street Bakery', pre: { status: 'done', outcome: 'ok', period: 'Oct 1 - 31, 2026' } }, off),
+      Object.assign({ id: 'e6', name: 'Maple Street Bakery', pre: { status: 'done', outcome: 'ok', period: 'Oct 1 - 31, 2026', history: [{ status: 'done', outcome: 'gap', period: 'Sep 1 - 30, 2026' }, { status: 'done', outcome: 'ok', period: 'Aug 1 - 31, 2026' }] } }, off),
       Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
         { key: 'reconnect', source: 'Stripe' }
       ], 'Pro')),
-      Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026' } }, off),
+      Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026', history: [{ status: 'done', outcome: 'ok', period: 'Sep 1 - 30, 2026' }] } }, off),
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
       ], 'Premium')),
@@ -862,12 +862,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       Object.assign({ id: 'e12', name: 'Quill & Ink Agency', company: 'Quill & Ink Agency LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
         { key: 'reconnect', books: true, source: 'QuickBooks' }
       ], 'Essential')),
-      Object.assign(on('Xero', [], [], 'Essential'), { id: 'e13', name: 'Riverbend Cafe', company: 'Riverbend Cafe LLC', setup: false, setupState: 'Not finished' }),
+      Object.assign(on('Xero', [], [], 'Essential'), { id: 'e13', name: 'Riverbend Cafe', company: 'Riverbend Cafe LLC', setup: false, onboarding: 'started', setupState: 'Not finished' }),
       Object.assign({ id: 'e14', name: 'Summit Peak Advisors', company: 'Summit Peak Advisors LLC', extraFails: [
         { name: 'Duplicate sales', short: 'Duplicate sales', detail: '6 orders' }
       ] }, on('QuickBooks', ['Stripe', 'Amazon'], [], 'Pro')),
       Object.assign({ id: 'e15', name: 'Oak & Iron Supply', company: 'Oak & Iron Supply LLC', userDisconnected: true }, on('QuickBooks', ['Stripe'], [], 'Premium')),
-      Object.assign({ id: 'e16', name: 'Bluebird Bakery', company: 'Bluebird Bakery LLC' }, on('QuickBooks', four.slice(), [], 'Pro'))
+      Object.assign(on('QuickBooks', four.slice(), [], 'Pro'), { id: 'e16', name: 'Bluebird Bakery', company: 'Bluebird Bakery LLC', checked: '' })
     ];
   }
   function enterNewFirm() {
@@ -2639,7 +2639,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
-    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
+    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth', 'finishsetup'].includes(st.page)) activePage = 'clients';
     if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses' || st.page === 'manage') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
@@ -2684,7 +2684,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function healthModel(c) {
     if (!c || !c.accounting || !(c.connected || c.setup)) return null;
-    const names = ['Uncategorized transactions', 'Unreconciled periods'].concat((c.integrations && c.integrations.length) ? HEALTH_EXTRA : []);
+    const names = ['Uncategorized transactions', 'Unreconciled periods'];
     const failed = [];
     const periodDetail = (periods) => {
       const list = (periods || []).filter(Boolean).map(String);
@@ -2698,12 +2698,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (issue.key === 'unreconciled') failed.push({ name: 'Unreconciled periods', short: 'Unreconciled', detail: periodDetail(issue.periods) });
       else if (issue.key === 'uncategorized') failed.push({ name: 'Uncategorized transactions', short: 'Uncategorized', detail: (issue.count || 0) + ' transactions' });
     });
-    (c.extraFails || []).forEach((f) => {
-      if (f && f.name) failed.push({ name: f.name, short: f.short || f.name, detail: f.detail || '' });
-    });
     const seen = new Set();
     const unique = failed.filter((f) => names.indexOf(f.name) >= 0 && !seen.has(f.name) && seen.add(f.name));
     return { total: names.length, passed: names.length - unique.length, failed: unique, names };
+  }
+  function onboardingState(c) {
+    if (!c || c.fresh) return 'none';
+    if (c.onboarding === 'none' || c.onboarding === 'started' || c.onboarding === 'done') return c.onboarding;
+    if (c.setup) return 'done';
+    if (c.connected || c.accounting) return 'started';
+    return 'none';
+  }
+  function inSwitcher(c) {
+    const state = onboardingState(c);
+    return state === 'started' || state === 'done';
+  }
+  function yellowDot() {
+    return '<span class="material-icons text-warning icon-sm" aria-label="Onboarding not finished">circle</span>';
   }
   function isOffClient(c) { return !c || !c.accounting || !(c.connected || c.setup); }
   function isNotConnected(c) { return isOffClient(c); }
@@ -2801,24 +2812,39 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
   }
   function showCsvModal() {
+    csvFile = null;
     const modal = $('csvModal');
     if (modal) modal.classList.add('show');
+    const err = $('csvError');
+    const zone = $('csvDrop');
+    const label = $('csvFileName');
+    if (err) { err.hidden = true; err.textContent = ''; }
+    if (zone) zone.classList.remove('is-error');
+    if (label) { label.hidden = true; label.textContent = ''; }
   }
   function showAddModal() { startAddClient(); }
   function closeAddModal() {
     const modal = $('addModal');
     if (modal) modal.classList.remove('show');
   }
+  let csvFile = null;
+  function csvProblem(file) {
+    if (!file) return 'Choose a CSV file';
+    const name = String(file.name || '');
+    if (!/\.csv$/i.test(name)) return 'Use a CSV file';
+    if (file.size > 5 * 1024 * 1024) return 'File exceeds 5 MB';
+    return '';
+  }
   function setCsvFile(file) {
+    csvFile = file || null;
     const name = file && file.name ? file.name : '';
     const label = $('csvFileName');
     if (label) { label.hidden = !name; label.textContent = name; }
     const err = $('csvError');
     const zone = $('csvDrop');
-    if (name) {
-      if (err) err.hidden = true;
-      if (zone) zone.classList.remove('is-error');
-    }
+    const problem = name ? csvProblem(file) : '';
+    if (err) { err.hidden = !problem; err.textContent = problem; }
+    if (zone) zone.classList.toggle('is-error', !!problem);
   }
   let connectLoading = false;
   let linkTimer = 0;
@@ -2890,35 +2916,38 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function chipKind(tone) {
     return tone === 'green' ? 'green' : (tone === 'yellow' ? 'yellow' : (tone === 'red' ? 'red' : 'grey'));
   }
+  function acctStatus(c) {
+    if (!c || !c.accounting) return '';
+    if (isUserDisconnected(c)) return 'Disconnected';
+    if (booksLost(c)) return 'Connection lost';
+    return 'Connected';
+  }
   function acctCell(c) {
-    if (isOffClient(c)) return '<span class="text-body2 text-secondary">Not connected</span>';
-    const status = isUserDisconnected(c) ? 'Disconnected' : (booksLost(c) ? 'Connection lost' : 'Connected');
-    const kind = status === 'Connected' ? 'green' : 'yellow';
+    const status = acctStatus(c);
+    if (!status) return '';
+    const kind = status === 'Connected' ? 'green' : (status === 'Disconnected' ? 'grey' : 'yellow');
     return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(kind, status)}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
   }
   function integCell(c) {
-    if (isOffClient(c)) return '<span class="text-body2 text-secondary">No integrations</span>';
     const list = (c && c.integrations) || [];
-    if (!list.length) return '<span class="text-body2 text-secondary">No integrations</span>';
+    if (!list.length) return '';
     const lost = lostIntegrations(c);
     const pending = pendingIntegrations(c);
-    let chips = '';
-    if (lost.length && pending.length) chips = statusChip('red', lost.length + ' connection lost') + statusChip('yellow', '+' + pending.length + ' pending');
-    else if (lost.length) chips = statusChip('red', lost.length + ' connection lost');
-    else if (pending.length) chips = statusChip('yellow', pending.length === 1 ? 'Pending' : pending.length + ' pending');
-    else chips = statusChip('green', list.length + ' connected');
+    const connected = list.filter((name) => !lost.some((i) => i.source === name) && !pending.some((i) => i.source === name));
+    const chips = [];
+    if (connected.length) chips.push(statusChip('green', connected.length + ' connected'));
+    if (pending.length) chips.push(statusChip('yellow', pending.length === 1 ? 'Finish configuration' : pending.length + ' finish configuration'));
+    if (lost.length) chips.push(statusChip('red', lost.length === 1 ? 'Connection lost' : lost.length + ' connection lost'));
     const tip = list.map((name) => {
-      const state = lost.some((i) => i.source === name) ? 'Connection lost' : (pending.some((i) => i.source === name) ? 'Pending' : 'Connected');
+      const state = lost.some((i) => i.source === name) ? 'Connection lost' : (pending.some((i) => i.source === name) ? 'Finish configuration' : 'Connected');
       return name + ' · ' + state;
     }).join('; ');
-    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips.join('')}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
-    if (isOffClient(c)) return '<span class="text-body2">—</span>';
+    if (onboardingState(c) !== 'done') return '';
+    if (!c.checked) return statusChip('grey', 'Not checked yet');
     const summary = healthSummary(c);
-    if (!summary.total) {
-      return `<span class="logo-line">${statusChip('grey', 'Not checked yet')}${helpIcon('<p class="text-body2">Connect accounting and integrations to see health check results.</p>')}</span>`;
-    }
     const tip = summary.failed.length ? summary.failed.map((f) => f.name).join('; ') : 'All checks passed';
     return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(chipKind(summary.tone), summary.label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
@@ -2932,13 +2961,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return !!(c && c.pre && (c.pre.status === 'done' || c.pre.status === 'failed' || c.pre.status === 'running'));
   }
   function preCell(c) {
-    if (!c || !c.pre) return '';
+    if (!preHasRun(c)) return '<button type="button" class="link" data-pre-run="' + c.id + '">Run pre-assessment</button>';
     const pre = c.pre;
     if (pre.status === 'running') return statusChip('grey', 'In progress');
-    if (pre.status !== 'done' && pre.status !== 'failed') return '';
-    const chip = pre.status === 'failed'
-      ? statusChip('red', 'Error')
-      : (pre.outcome === 'ok' ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Attention required'));
+    const ok = pre.status === 'done' && pre.outcome === 'ok';
+    const chip = ok ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Not reconciled');
     return '<span class="d-flex align-center gap-8">' + chip + '<span class="text-body2">' + esc(pre.period || 'Oct 1 - 31, 2026') + '</span>' + preLink(c.id, 'view', 'View') + '</span>';
   }
   function preEligible(c) {
@@ -3052,7 +3079,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function openPreUpload(id) {
     const c = findOrg(id);
-    if (!c || !isOffClient(c)) return;
+    if (!c) return;
     preDraft = null;
     st.ctx = 'firm';
     st.page = 'preupload';
@@ -3066,6 +3093,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     st.page = 'preassess';
     st.clientId = id;
     st.preTab = 'matched';
+    st.preHist = 0;
     st.orgId = null;
     if (!preWork || preWork.id !== id) preWork = null;
     save();
@@ -3363,13 +3391,19 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const err = '<div class="alert alert-error"><span class="material-icons" aria-hidden="true">error</span><span><span class="alert-title">Couldn\'t build a reconciliation</span><span class="text-body2">There was an unexpected error when building the reconciliation. Check the error and try again.</span></span></div><div class="d-flex gap-8"><button type="button" class="btn" id="preAgain">Run again</button><button type="button" class="btn-outlined" id="preCloseFoot">Cancel</button></div>';
       return preShell('Reconciliation results', '', '', err);
     }
-    const ok = c.pre.outcome === 'ok';
+    const shown = (function () {
+      const latest = c.pre || {};
+      const idx = st.preHist || 0;
+      if (!idx) return latest;
+      return (latest.history || [])[idx - 1] || latest;
+    })();
+    const ok = shown.status === 'done' && shown.outcome === 'ok';
     const outcome = failed ? 'failed' : (ok ? 'ok' : 'gap');
     const work = ensurePreWork(c.id, outcome, { from: c.pre.fromIso, to: c.pre.toIso });
     const tab = ['matched', 'discrepancy', 'missing', 'ignored'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
     const integration = c.pre.integration || 'Stripe';
     const books = c.pre.books || 'QuickBooks Online';
-    const sub = c.pre.sub || (integration + ' / ' + (c.pre.period || 'Oct 1 - 31, 2026'));
+    const sub = integration + ' / ' + (shown.period || c.pre.period || 'Oct 1 - 31, 2026');
     const chip = failed
       ? '<span class="tooltip-wrap"><span class="status status-red" tabindex="0">Error</span><span class="tooltip" role="tooltip">The pre-assessment could not be built. Run it again.</span></span>'
       : (ok
@@ -3402,7 +3436,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const body = resultRows(work, 'ignored').map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>';
       table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     }
-    return preShell('Reconciliation results', '', '<button type="button" class="btn-outlined" id="preShare">Copy share link</button>', header + note + '<div class="synder-list-block">' + tabs + filters + table + '</div>');
+    const hist = (c.pre && c.pre.history) || [];
+    const earlier = hist.length ? '<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="preEarlier" aria-haspopup="menu" aria-expanded="false">Earlier results</button><div class="dropdown-menu" id="rowmenu-preEarlier">' + ['<button type="button" class="dropdown-item" data-pre-hist="0">' + esc(c.pre.period) + '</button>'].concat(hist.map((item, i) => '<button type="button" class="dropdown-item" data-pre-hist="' + (i + 1) + '">' + esc(item.period) + '</button>')).join('') + '</div></div>' : '';
+    return preShell('Reconciliation results', '', earlier + '<button type="button" class="btn-outlined" id="preShare">Copy share link</button>', header + note + '<div class="synder-list-block">' + tabs + filters + table + '</div>');
   }
   function preOverlayHtml() {
     if (st.page === 'prelog') st.page = 'preassess';
@@ -3499,6 +3535,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const sortDate = m.querySelector('#preSortDate');
     if (sortDate) sortDate.onclick = () => { if (!preWork) return; preWork.dateDir = preWork.dateDir === 'desc' ? 'asc' : 'desc'; renderMain(); };
     m.querySelectorAll('[data-pre-tab]').forEach((b) => b.onclick = () => { st.preTab = b.dataset.preTab; renderMain(); });
+    m.querySelectorAll('[data-pre-hist]').forEach((b) => b.onclick = () => { st.preHist = Number(b.dataset.preHist) || 0; renderMain(); });
     m.querySelectorAll('[data-pre-expand]').forEach((b) => b.onclick = () => { if (preWork) preWork.expand = preWork.expand === b.dataset.preExpand ? null : b.dataset.preExpand; renderMain(); });
     m.querySelectorAll('[data-pre-export]').forEach((b) => b.onclick = () => showKitToast('The report will be sent to your email'));
     m.querySelectorAll('[data-pre-unmatch]').forEach((b) => b.onclick = () => {
@@ -3779,7 +3816,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="box box--white bring-choice">
           <span class="bring-mark"><span class="material-icons icon-lg" aria-hidden="true">person_add</span></span>
           <h2 class="text-h2">One by one</h2>
-          <p class="text-body2">Connect one client's books and integrations.</p>
+          <p class="text-body2">Add a client by name. Connect their books later.</p>
           <button type="button" class="btn-outlined" id="emptyAdd">Add client</button>
         </div>
       </div>
@@ -3798,20 +3835,40 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span class="flex-1">Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span>${firmBooksConnected() ? '' : '<button type="button" class="btn" id="bannerImport">Import client list</button>'}<button type="button" class="alert-close" id="bannerDismiss" aria-label="Close"><span class="material-icons">close</span></button></div>`
         : '');
     const q = (st._q || '').toLowerCase();
-    const rows = listed.filter((c) => c.name.toLowerCase().includes(q));
-    const showHealth = listed.some((c) => !isOffClient(c));
+    let rows = listed.filter((c) => c.name.toLowerCase().includes(q));
+    const sort = st.clientSort || { key: 'name', dir: 'asc' };
+    const sortText = (c, key) => {
+      if (key === 'acct') return acctStatus(c);
+      if (key === 'integ') return ((c.integrations || []).slice().sort().join(' '));
+      if (key === 'health') return onboardingState(c) === 'done' ? (c.checked ? healthSummary(c).label : 'Not checked yet') : '';
+      if (key === 'pre') return preHasRun(c) ? ((c.pre.outcome === 'ok' ? 'Reconciled ' : 'Not reconciled ') + (c.pre.period || '')) : '';
+      return c.name || '';
+    };
+    rows = rows.slice().sort((a, b) => {
+      const dir = sort.dir === 'desc' ? -1 : 1;
+      return dir * sortText(a, sort.key).localeCompare(sortText(b, sort.key));
+    });
+    const th = (key, label) => {
+      const on = sort.key === key;
+      return '<th class="sortable' + (on ? ' sorted' + (sort.dir === 'desc' ? ' desc' : '') : '') + '" data-csort="' + key + '">' + label + '</th>';
+    };
     const body = rows.map((c) => {
-      const off = isOffClient(c);
+      const state = onboardingState(c);
       const lost = hasLostConnection(c);
-      const rowBtn = off
-        ? `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`
-        : (lost ? `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>` : '');
-      const preRow = preEligible(c) ? (preHasRun(c) ? preCell(c) : `<button type="button" class="link" data-pre-run="${c.id}">Run pre-assessment</button>`) : '';
+      const finish = pendingIntegrations(c);
+      const dot = state === 'started' ? yellowDot() : '';
+      let rowBtn = '';
+      if (state !== 'done') rowBtn += `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`;
+      else if (lost) rowBtn += `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>`;
+      if (state === 'done' && finish.length) rowBtn += `<button type="button" class="btn-outlined" data-finish="${c.id}">Finish configuration</button>`;
+      const go = (state === 'started' || state === 'done') ? `<button type="button" class="dropdown-item" data-goto="${c.id}">Go to the client's organization</button>` : '';
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
-        <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
+        <td><div class="client-cell">${av(c, true)}${dot}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td>${acctCell(c)}</td>
-        ${showHealth ? `<td>${healthCell(c)}</td>` : ''}
-        <td><div class="row-actions">${rowBtn}${preRow}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}">${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
+        <td>${integCell(c)}</td>
+        <td>${healthCell(c)}</td>
+        <td>${preCell(c)}</td>
+        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}">${go}<button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
@@ -3821,8 +3878,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
       <div class="table-wrap clients-table"><table class="synder-table table--lg">
-          <thead><tr><th>Name</th><th>Connection</th>${showHealth ? '<th>Health checks</th>' : ''}<th></th></tr></thead>
-        <tbody>${body || `<tr><td colspan="${showHealth ? 3 : 2}" class="text-body2">No clients match.</td></tr>`}</tbody>
+          <thead><tr>${th('name', 'Name')}${th('acct', 'Accounting')}${th('integ', 'Integrations')}${th('health', 'Health checks')}${th('pre', 'Pre-assessment')}<th></th></tr></thead>
+        <tbody>${body || '<tr><td colspan="6" class="text-body2">No clients match.</td></tr>'}</tbody>
       </table></div>
       <div class="tbl-foot" id="listCount">${rows.length} of ${listed.length} clients</div>
     </div>${flowDialogs()}`;
@@ -3941,7 +3998,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }];
     (c.integrations || []).forEach((name) => {
       const chip = lost[name] ? 'red' : (pending[name] ? 'yellow' : 'green');
-      const label = lost[name] ? 'Connection lost' : (pending[name] ? 'Pending' : 'Connected');
+      const label = lost[name] ? 'Connection lost' : (pending[name] ? 'Finish configuration' : 'Connected');
       rows.push({
         name: company + ' (' + name + ')',
         type: name.toUpperCase() + ' · ' + (pay[name] ? 'Payment platform' : 'Sales platform'),
@@ -4178,6 +4235,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </div>
     </div>`;
   }
+  function renderFinishSetup() {
+    const c = findOrg(st.clientId);
+    const name = st.finishSource || 'this integration';
+    return `<div class="flow-wide page-stack">
+      <a class="page-back" id="backClients" href="#clients">Back to clients</a>
+      ${pageHeader('Finish configuration', '', esc(c ? c.name : ''))}
+      <p class="text-body2">Finish setting up ${esc(name)} for ${esc(c ? c.name : 'this client')}. This stands in for the setup on the Per Transaction Dashboard.</p>
+      <div><button type="button" class="btn" id="finishDone">Done</button></div>
+    </div>`;
+  }
   function renderClientHealth() {
     const c = findOrg(st.clientId);
     if (!c || !isClient(c.id)) return renderClients();
@@ -4301,6 +4368,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       else if (st.page === 'review') { if (ob) ob.picker = true; st.page = 'clients'; html = renderClients(); }
       else if (st.page === 'addone') html = renderAddOne();
       else if (st.page === 'setup') html = renderClientSetup();
+      else if (st.page === 'finishsetup') html = renderFinishSetup();
       else if (st.page === 'billing') html = renderBilling();
       else if (st.page === 'manage' || st.page === 'buyplans' || st.page === 'buylicenses') html = renderManageLicenses();
       else if (st.page === 'colleagues') html = renderColleagues();
@@ -4332,6 +4400,24 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       save(); render();
     });
     m.querySelectorAll('[data-connect]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClientConnect(b.dataset.connect); });
+    m.querySelectorAll('[data-finish]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const client = findOrg(b.dataset.finish);
+      const pending = client ? pendingIntegrations(client)[0] : null;
+      st.ctx = 'firm';
+      st.page = 'finishsetup';
+      st.clientId = b.dataset.finish;
+      st.finishSource = pending ? pending.source : 'Integration';
+      st.orgId = null;
+      save();
+      render();
+    });
+    m.querySelectorAll('[data-csort]').forEach((th) => th.onclick = () => {
+      const key = th.dataset.csort;
+      const cur = st.clientSort || { key: 'name', dir: 'asc' };
+      st.clientSort = { key: key, dir: cur.key === key && cur.dir === 'asc' ? 'desc' : 'asc' };
+      renderMain();
+    });
     m.querySelectorAll('[data-row]').forEach((tr) => bindOpenRow(tr, () => openDetails(tr.dataset.row)));
     m.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => e.stopPropagation()));
     m.querySelectorAll('[data-ctab]').forEach((b) => b.onclick = () => { st.page = b.dataset.ctab; save(); render(); });
@@ -4363,6 +4449,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
+    bind('finishDone', () => {
+      const client = findOrg(st.clientId);
+      if (client && st.finishSource) client.issues = (client.issues || []).filter((issue) => !(issue.key === 'pending' && issue.source === st.finishSource));
+      persistDirectory();
+      goFirm('clients');
+    });
     bind('closeMonth', () => {
       const c = findOrg(st.orgId || st.clientId);
       const v = c ? clientView(c) : null;
@@ -4463,9 +4555,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
     bind('csvGo', () => {
+      const problem = csvProblem(csvFile);
       const err = $('csvError');
-      if (err) err.hidden = true;
       const zone = $('csvDrop');
+      if (problem) {
+        if (err) { err.hidden = false; err.textContent = problem; }
+        if (zone) zone.classList.add('is-error');
+        return;
+      }
+      if (err) err.hidden = true;
       if (zone) zone.classList.remove('is-error');
       ob.source = 'upload';
       openPicker();
@@ -5128,7 +5226,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
 
   function item(o, cap, current, action) {
     const sub = isClient(o.id) ? '' : cap;
-    return `<button class="pop-item" data-act="${action}">${av(o, true)}<span class="t"><span class="n">${esc(o.name)}</span>${sub ? `<span class="c">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
+    const dot = isClient(o.id) && onboardingState(o) === 'started' ? yellowDot() : '';
+    return `<button class="pop-item" data-act="${action}">${av(o, true)}<span class="t"><span class="n">${dot}${esc(o.name)}</span>${sub ? `<span class="c">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
@@ -5138,7 +5237,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     let html = '';
     if (s.firm) {
-      const list = s.clients.filter((c) => !c.pending && !c.fresh && (!q || c.name.toLowerCase().includes(q)));
+      const list = s.clients.filter((c) => !c.pending && !c.fresh && inSwitcher(c) && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
         html += `<div class="pop-sec">Clients</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
@@ -5300,6 +5399,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         st.orgId = null;
         if (parts[2] === 'health') {
           st.page = 'clienthealth';
+        } else if (parts[2] === 'finish') {
+          st.page = 'finishsetup';
+          const target = findOrg(parts[1]);
+          const pending = target ? pendingIntegrations(target)[0] : null;
+          st.finishSource = pending ? pending.source : 'Integration';
         } else if (parts[2] === 'pre-assessment' && parts[3] === 'upload') {
           st.page = 'preupload';
         } else if (parts[2] === 'pre-assessment' && parts[3] === 'check') {
@@ -5387,7 +5491,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     if (st && st.page === 'prelog') st.page = 'preassess';
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck' || st.page === 'finishsetup') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
@@ -5420,6 +5524,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'preupload' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/upload';
     else if (st.ctx === 'firm' && st.page === 'precheck' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/check';
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
+    else if (st.ctx === 'firm' && st.page === 'finishsetup' && st.clientId) h = '#clients/' + st.clientId + '/finish';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
