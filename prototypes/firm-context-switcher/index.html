@@ -3784,10 +3784,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   const CLIENT_ROLE_MEMBER = 'View client\'s organization details. Adjust synchronization settings. Synchronize transactions in the client\'s books.';
   const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question. Learn more';
   const SELF_ROLE_HINT = 'You can\'t change the role for yourself. Please ask another Firm admins to do that for you if needed.';
+  const FIRM_TITLES = ['Owner', 'Admin', 'Accountant', 'Bookkeeper'];
   let firmPeople = [
-    { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'admin', self: true },
-    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'colleague' },
-    { id: 'p3', name: 'Alex Kim', email: 'alex.kim@example.com', status: 'active', firmRole: 'colleague' }
+    { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'Owner', self: true },
+    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'Bookkeeper' },
+    { id: 'p3', name: 'Alex Kim', email: 'alex.kim@example.com', status: 'active', firmRole: 'Accountant' }
   ];
   let clientAccess = [
     { personId: 'p1', clientId: 'e1', role: 'Manager' },
@@ -4037,7 +4038,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rows = accessForClient(c.id).filter((a) => !q || a.person.name.toLowerCase().includes(q));
     const page = paginate('clientFirmCols', rows, [25, 50, 100]);
     const body = page.slice.map((a) => {
-      const admin = a.person.firmRole === 'admin';
+      const admin = isFirmAdmin(a.person);
       const name = `<span class="text-body2">${esc(a.person.name)}</span>${admin ? ' <span class="text-body2">(admin)</span>' : ''}`;
       const role = admin
         ? `<span class="text-body2">${esc(a.role || 'Manager')}</span>`
@@ -4055,16 +4056,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const page = paginate('colleagues', rows, [25, 50, 100]);
     const body = page.slice.map((p) => {
       const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
-      const label = p.firmRole === 'admin' ? p.name + ' (admin)' : p.name;
       const items = (p.status === 'invited' ? '' : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button>`) + `<button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove</button>`;
       const open = p.status !== 'invited';
-      return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${p.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(label)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td>${status}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
-    }).join('') || '<tr><td colspan="4" class="text-body2">No colleagues match.</td></tr>';
+      return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${p.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(p.name)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td><span class="text-body2">${esc(colleagueRoleName(p))}</span></td><td>${status}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
+    }).join('') || '<tr><td colspan="5" class="text-body2">No colleagues match.</td></tr>';
     const sortCls = 'sortable' + (st.colSort ? ' sorted' + (st.colSort === 'desc' ? ' desc' : '') : '');
     return `<div class="flow-wide page-stack">
       ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Role in firm</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
   }
@@ -4082,14 +4082,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="d-flex gap-8"><button type="button" class="btn-outlined" id="firmChecklistBtn">Firm checklist</button><button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button></div>
     </div>`;
   }
-  function colleagueRoleName(p) { return p.firmRole === 'admin' ? 'Admin' : 'Firm Colleague'; }
+  function colleagueRoleName(p) {
+    if (p && p.firmRole === 'admin') return 'Admin';
+    if (p && FIRM_TITLES.indexOf(p.firmRole) >= 0) return p.firmRole;
+    return 'Accountant';
+  }
+  function isFirmAdmin(p) {
+    const role = colleagueRoleName(p);
+    return role === 'Owner' || role === 'Admin';
+  }
   function renderColleague() {
     const p = findPerson(st.colleagueId);
     if (!p) return renderColleagues();
     const tab = st.colleagueTab || 'details';
     const assigned = accessForPerson(p.id).map((a) => Object.assign({ locked: false }, a));
     const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details" role="tab">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients" role="tab">Clients</button></div>`;
-    const adminTag = p.firmRole === 'admin' ? '<span class="status status-grey">Admin</span>' : '';
+    const adminTag = '<span class="status status-grey">' + esc(colleagueRoleName(p)) + '</span>';
     let body = '';
     if (tab === 'clients') {
       const q = (st.personClientQ || '').toLowerCase();
@@ -4108,11 +4116,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </div>`;
     } else {
       const role = p.self
-        ? `<p class="text-body2">Admin</p><p class="form-hint">${esc(SELF_ROLE_HINT)}</p>`
+        ? `<p class="text-body2">${esc(colleagueRoleName(p))}</p><p class="form-hint">${esc(SELF_ROLE_HINT)}</p>`
         : `<p class="text-body2">${esc(colleagueRoleName(p))}</p>`;
       body = `<div class="page-stack">
         <div class="form-field"><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
-        <div class="form-field"><span class="form-label form-label-required">Role in the Firm</span>${role}</div>
+        <div class="form-field"><span class="form-label form-label-required">Role in firm</span>${role}</div>
         <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
       </div>`;
     }
@@ -5021,18 +5029,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const body = `<p class="text-body2">Your colleague will receive an email invitation to join your Firm. Please, fill out all of the required fields.</p>
       <div class="form-field"><label class="form-label form-label-required" for="newColName">Name</label><input class="input" id="newColName" data-required="1" /></div>
       <div class="form-field"><label class="form-label form-label-required" for="newColEmail">Email</label><input class="input" id="newColEmail" type="email" data-required="1" /></div>
+      <div class="form-field"><label class="form-label form-label-required" for="newColFirmRole">Role in firm</label><select class="select" id="newColFirmRole" data-required="1"><option value="">Select…</option>${FIRM_TITLES.map((role) => `<option value="${role}"${role === 'Accountant' ? ' selected' : ''}>${role}</option>`).join('')}</select></div>
       <div class="form-field">${fieldLabel('newColClient', 'Assign client', '<p class="text-body2">' + esc(ASSIGN_CLIENT_TIP) + '</p>')}<select class="select" id="newColClient" data-required="1"><option value="">Select…</option>${options}</select></div>
       <div class="form-field">${fieldLabel('newColRole', 'Role in the client', clientRoleTip())}<select class="select" id="newColRole"><option value="Member" selected>Member</option><option value="Manager">Manager</option></select></div>`;
     const { modal, close } = dialogShell('Add colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="sendInvite">Send invitation</button>`);
     modal.querySelector('#sendInvite').onclick = () => {
       const name = modal.querySelector('#newColName');
       const email = modal.querySelector('#newColEmail');
+      const firmRole = modal.querySelector('#newColFirmRole');
       const client = modal.querySelector('#newColClient');
       let bad = false;
-      [name, email, client].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      [name, email, firmRole, client].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
       if (bad) return;
       const id = 'p' + Date.now();
-      firmPeople.push({ id, name: name.value.trim(), email: email.value.trim(), status: 'invited', firmRole: 'colleague' });
+      firmPeople.push({ id, name: name.value.trim(), email: email.value.trim(), status: 'invited', firmRole: firmRole.value });
       clientAccess.push({ personId: id, clientId: client.value, role: modal.querySelector('#newColRole').value || 'Member' });
       close();
       renderMain();
