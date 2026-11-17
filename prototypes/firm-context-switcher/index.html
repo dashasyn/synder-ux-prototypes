@@ -892,7 +892,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
       ], 'Premium')),
-      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC', invite: { email: 'owner@fablecoffee.com', message: '', sent: '12 Nov 2026' } }, on('Xero', [], [], 'Essential')),
+      Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC' }, off),
       Object.assign({ id: 'e11', name: 'Pinecrest Realty', company: 'Pinecrest Realty LLC' }, on('Xero', ['Stripe', 'Shopify'], [
         { key: 'pending', source: 'Shopify' }
       ], 'Pro')),
@@ -954,7 +954,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     ob.variant = 'existing';
     ob.directoryReady = true;
-    ob.banner = 'invite';
+    ob.banner = 'roster';
     ob.step = 'done';
     ob.firmName = 'WLS Labs';
     ob.firmTouched = true;
@@ -993,7 +993,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       });
     });
     const fresh = sc().clients.filter((c) => added.some((a) => a.id === c.id));
-    if (ob && ob.variant === 'existing' && ob.banner === 'invite') ob.banner = 'invite';
     if (ob) {
       if (ob.source === 'xero') ob.firmBooks = 'xero';
       else if (ob.source === 'qbo' || ob.source === 'qboa') ob.firmBooks = 'qbo';
@@ -1595,19 +1594,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
           <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
     }
-    const counts = statusCounts(list);
     return `<div class="flow-wide page-stack">${pageHeader('Dashboard', '<button class="btn" id="dashContinue">Continue setup</button>', esc(FIRM.name))}
       <div class="setup-bar"><b>${done} of ${list.length} clients set up</b>
         <span class="bar"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></span>
         <span class="muted">${need} still need setup</span></div>
-      <h2 class="section-h">Clients</h2>
-      <div class="issues">
-        <div class="issue"><div class="n">${counts.all}</div><div class="l">All clients</div></div>
-        <div class="issue"><div class="n">${counts.issues}</div><div class="l">Issues found</div></div>
-        <div class="issue"><div class="n">${counts.lost}</div><div class="l">Connection lost</div></div>
-        <div class="issue"><div class="n">${counts.waiting}</div><div class="l">Waiting for owner</div></div>
-        <div class="issue"><div class="n">${counts.off}</div><div class="l">Not set up</div></div>
-      </div>`;
+    </div>`;
   }
   const TIER_NAME = { ess: 'Essential', pro: 'Pro', max: 'Pro Max' };
   const TIER_CREDITS = { ess: 'up to 3,000 sync credits/month', pro: 'up to 20,000 sync credits/month', max: 'up to 40,000 sync credits/month' };
@@ -1747,7 +1738,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return !!(a && (a.plan || a.rules || a.invoicing || a.users || a.rev));
   }
   function payingNotSyncing(c) {
-    if (!c || !c.firmLic || !c.firmLic.plan || c.firmLic.pending || isWaitingClient(c)) return false;
+    if (!c || !c.firmLic || !c.firmLic.plan || c.firmLic.pending) return false;
     return isOffClient(c) || booksLost(c) || lostIntegrations(c).length > 0;
   }
   function planMonthly(family, plans) {
@@ -2011,9 +2002,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const applied = st.licApplied || { q: '', type: '', license: '' };
     let list = listedClients().filter((c) => {
       const row = clientLicenses[c.id];
-      const pending = isWaitingClient(c);
-      if (applied.type === 'pending' && !pending) return false;
-      if (applied.type === 'active' && pending) return false;
       if (applied.license === 'none' && row && row.plan) return false;
       if (applied.license && applied.license !== 'none') {
         if (!row) return false;
@@ -2030,15 +2018,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (st.assignSort === 'desc') list.reverse();
     const page = paginate('assignClients', list, [10, 25, 50, 100]);
     const body = page.slice.map((c) => {
-      const pending = isWaitingClient(c);
       const summary = assignedSummary(clientLicenses[c.id]);
-      const action = pending ? '<span class="status status-yellow">Pending</span>' : '<button type="button" class="btn-outlined" data-lic-action="' + c.id + '">' + (clientLicenses[c.id] && clientLicenses[c.id].plan ? 'Change' : 'Assign') + '</button>';
+      const action = '<button type="button" class="btn-outlined" data-lic-action="' + c.id + '">' + (clientLicenses[c.id] && clientLicenses[c.id].plan ? 'Change' : 'Assign') + '</button>';
       return '<tr><td><span class="text-body2">' + esc(c.name) + '</span></td><td><span class="text-body2">' + summary + '</span></td><td class="text-right">' + action + '</td></tr>';
     }).join('') || '<tr><td colspan="3" class="text-body2">No clients found</td></tr>';
     const planOpts = [['', 'License'], ['none', 'None'], ['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']].concat(RULE_OPTS.map((item) => [item[0], 'Smart Rules ' + item[1].toLowerCase()])).concat(INV_OPTS.map((item) => [item[0], 'Invoicing ' + item[1].toLowerCase()]));
     const sel = (id, opts, value) => '<select class="select" id="' + id + '">' + opts.map((item) => '<option value="' + item[0] + '"' + (value === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') + '</select>';
     const sortCls = 'sortable sorted' + (st.assignSort === 'desc' ? ' desc' : '');
-    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client'], ['pending', 'Pending invitation']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
   }
   function exampleDiscountPct(count) {
     if (count >= 50) return 15;
@@ -2602,10 +2589,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <button class="btn-text sec" id="setupBack">Back to Clients</button></div>`,
       integrations: `<div class="empty"><span class="material-icons">hub</span>
         <h2>Connect integrations <span class="draft-tag">details pending</span></h2>
-        <p>Shopify, Stripe and others. Or invite the account owner to connect them.</p>
+        <p>Shopify, Stripe and others.</p>
         <button class="btn" data-next="mode">Continue</button>
-        <button class="btn-text sec" data-next="books">Back</button>
-        <button class="ob-quiet" id="inviteOwner">Invite account owner</button></div>`,
+        <button class="btn-text sec" data-next="books">Back</button></div>`,
       mode: `<div class="empty"><span class="material-icons">tune</span>
         <h2>Select mode <span class="draft-tag">details pending</span></h2>
         <p>Mode options aren’t locked yet. We won’t show client data until a mode is chosen.</p>
@@ -2808,7 +2794,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function isFailedHealth(c) {
     return !!c && !isOffClient(c) && c.setup && !isUserDisconnected(c) && !isConnectionLost(c) && hasHealthIssues(c);
   }
-  function isWaitingClient(c) { return !isOffClient(c) && !!(c.invite && c.invite.email && !(c.integrations && c.integrations.length)); }
   function hasLostConnection(c) { return !isOffClient(c) && (booksLost(c) || lostIntegrations(c).length > 0); }
   function hasHealthIssues(c) { const h = isOffClient(c) ? null : healthModel(c); return !!(h && h.failed.length); }
   function firmHasPlans() {
@@ -2817,9 +2802,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function missingFirmLicense(c) {
     if (!firmHasPlans()) return false;
-    return !isWaitingClient(c) && !hasFirmLic(c) && !(c && c.ownPlan);
+    return !hasFirmLic(c) && !(c && c.ownPlan);
   }
-  function hasListedIssue(c) { return hasHealthIssues(c) || missingFirmLicense(c) || payingNotSyncing(c); }
   function issueCountLabel(n) { return n === 1 ? '1 issue found' : n + ' issues found'; }
   function healthSummary(c) {
     if (isOffClient(c)) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
@@ -2835,9 +2819,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const acct = c.accounting;
     const issues = Array.isArray(c.issues) ? c.issues : [];
     const summary = healthSummary(c);
-    if (isWaitingClient(c)) {
-      return { key: 'waiting', label: 'Waiting for owner', kind: 'blue', tip: 'Invite sent to ' + c.invite.email + ' on ' + c.invite.sent + '.', health, accounting: acct, issues };
-    }
     const lostInteg = lostIntegrations(c);
     if (booksLost(c) || lostInteg.length) {
       const bits = [];
@@ -2852,15 +2833,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function firmBooksConnected() { return !!(ob && (ob.firmBooks === 'qbo' || ob.firmBooks === 'xero')); }
   function needsAttention(c) { return hasHealthIssues(c) || hasLostConnection(c); }
-  function statusCounts(list) {
-    return {
-      all: list.length,
-      issues: list.filter(hasListedIssue).length,
-      lost: list.filter(hasLostConnection).length,
-      waiting: list.filter(isWaitingClient).length,
-      off: list.filter(isOffClient).length
-    };
-  }
   function clientCountLine() {
     const list = sc().clients.filter((c) => !c.pending);
     const ready = list.filter((c) => clientView(c).key !== 'off').length;
@@ -3005,7 +2977,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function integCell(c) {
     if (isOffClient(c)) return '<span class="text-body2 text-secondary">No integrations</span>';
-    if (isWaitingClient(c)) return `<span class="tooltip-wrap"><span tabindex="0">${statusChip('grey', 'Waiting for owner')}</span><span class="tooltip" role="tooltip">${esc(c.invite.email + ' · sent ' + c.invite.sent)}</span></span>`;
     const list = (c && c.integrations) || [];
     if (!list.length) return '<span class="text-body2 text-secondary">No integrations</span>';
     const lost = lostIntegrations(c);
@@ -3030,7 +3001,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(chipKind(summary.tone), summary.label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function fullyConnected(c) {
-    if (isOffClient(c) || booksLost(c) || isWaitingClient(c)) return false;
+    if (isOffClient(c) || booksLost(c)) return false;
     const list = (c && c.integrations) || [];
     if (!list.length) return false;
     return !lostIntegrations(c).length && !pendingIntegrations(c).length;
@@ -3417,58 +3388,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const pick = st.connectPick || { accounting: [], sales: [], pay: [] };
     return pick.accounting.concat(pick.sales || [], pick.pay || []);
   }
-  function showInviteDialog(c, fromWizard) {
-    const old = document.getElementById('inviteModal');
-    if (old) old.remove();
-    const modal = document.createElement('div');
-    modal.id = 'inviteModal';
-    modal.className = 'modal-bg show';
-    const email = (c.invite && c.invite.email) || '';
-    const message = (c.invite && c.invite.message) || '';
-    modal.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
-      <div class="modal-header" id="inviteTitle">Invite account owner</div>
-      <div class="modal-body">
-        <p class="text-body2">You often have access to the books, but not to the sales and payment integrations.</p>
-        <div class="form-field"><label class="form-label form-label-required" for="inviteEmail">Owner's email</label><input class="input" id="inviteEmail" type="email" value="${esc(email)}" /><p class="form-error-msg" id="inviteError" hidden>Required</p></div>
-        <div class="form-field"><label class="form-label" for="inviteMsg">Message</label><textarea class="input" id="inviteMsg">${esc(message)}</textarea></div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn-outlined" id="inviteCancel">Cancel</button><button type="button" class="btn" id="inviteSend">Send invite</button></div>
-    </div>`;
-    document.body.appendChild(modal);
-    const close = () => modal.remove();
-    modal.querySelector('#inviteCancel').onclick = close;
-    modal.onclick = (e) => { if (e.target === modal) close(); };
-    modal.querySelector('#inviteSend').onclick = () => {
-      const input = modal.querySelector('#inviteEmail');
-      const err = modal.querySelector('#inviteError');
-      const value = (input.value || '').trim();
-      if (!value) { err.hidden = false; err.textContent = 'Required'; input.focus(); return; }
-      err.hidden = true;
-      const note = (modal.querySelector('#inviteMsg').value || '').trim();
-      if (fromWizard) {
-        const pick = st.connectPick || { accounting: [] };
-        if (!pick.accounting.length) { const need = $('intError'); if (need) need.hidden = false; close(); return; }
-        c.connected = true;
-        c.syncing = false;
-        c.accounting = pick.accounting[0];
-        c.integrations = [];
-        c.issues = [];
-        c.company = companyName(c);
-        c.ledger = c.accounting;
-        c.pay = null;
-        c.setup = true;
-        c.setupState = 'Ready';
-        c.month = c.month || 'Oct 2026';
-        c.books = ['grey', 'Waiting for owner'];
-      }
-      c.invite = { email: value, message: note, sent: '12 Nov 2026' };
-      delete c.fresh;
-      persistDirectory();
-      close();
-      clearLink();
-      goFirm('clients');
-    };
-  }
   function finishClientConnect() {
     clearLink();
     const c = findOrg(st.clientId);
@@ -3580,8 +3499,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         ${integSection('Sales integrations', ['Amazon', 'eBay', 'Shopify', 'Etsy', 'WooCommerce'].map((n) => integTile('sales', n)).join(''))}
         ${integSection('Payment integrations', ['Stripe', 'PayPal', 'Square', 'GoCardless', 'Authorize.Net'].map((n) => integTile('pay', n)).join(''))}
         <p class="form-error-msg" id="intError" hidden>Required</p>
-        <p class="text-body2">You often have access to the books, but not to the sales and payment integrations.</p>
-        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn-outlined" id="inviteOwner">Invite account owner</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
+        <div class="ob-actions"><button type="button" class="btn-outlined" id="connectBack">Back</button><button type="button" class="btn" id="connectNext">Next step</button></div>`;
     } else if (step === 'linking') {
       const what = names.length ? names.join(' and ') : 'the selected integrations';
       body = `<div class="connect-copy"><h1 class="text-h1">Connect</h1>
@@ -3706,7 +3624,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!listed.length) {
       return `<div class="bring-wrap">${bringChoices()}${SHOW_STORY ? '<p class="story-reopen text-body2"><button type="button" class="link" id="howWorks">How Synder works</button></p>' : ''}</div>${flowDialogs()}`;
     }
-    const showInvite = ob && ob.banner === 'invite' && ob.welcomeSeen && !ob.welcomePending;
+    const showInvite = ob && ob.banner === 'roster' && ob.welcomeSeen && !ob.welcomePending;
     const showImport = ob && ob.importKind === 'list' && ob.importNote > 0;
     const banner = showImport
       ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.<br>Not ready to connect? <button type="button" class="link" id="preHint">Try a pre-assessment</button> on any client, no connection needed.</span><button type="button" class="btn-text" id="importNoteClose">Dismiss</button></div>`
@@ -3733,15 +3651,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const body = rows.map((c) => {
       const off = isOffClient(c);
       const lost = hasLostConnection(c);
-      const waiting = isWaitingClient(c);
       const rowBtn = off
         ? `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`
         : (lost ? `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>` : '');
       const menuExtra = off
         ? `<button type="button" class="dropdown-item" data-connect="${c.id}">Connect client</button>`
-        : (lost
-          ? `<button type="button" class="dropdown-item" data-reconnect="${c.id}">Reconnect</button>`
-          : (waiting ? `<button type="button" class="dropdown-item" data-resend="${c.id}">Resend invite</button>` : ''));
+        : (lost ? `<button type="button" class="dropdown-item" data-reconnect="${c.id}">Reconnect</button>` : '');
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td>${planCell(c)}</td>
@@ -3923,9 +3838,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       accounting = `<div class="cell-stack"><span class="logo-line">${brandMark(c.accounting, 18)}<span class="text-body2">${esc(c.accounting)}</span></span>${company}${state}</div>`;
     }
     let integrations = '<p class="text-body2">—</p>';
-    if (view.key === 'waiting' && c.invite) {
-      integrations = `<p class="text-body2">Waiting for owner</p><p class="text-body2 text-secondary">${esc(c.invite.email)} · sent ${esc(c.invite.sent)}</p><button type="button" class="link" data-resend="${c.id}">Resend</button>`;
-    } else if (c.integrations && c.integrations.length) {
+    if (c.integrations && c.integrations.length) {
       const lostNames = {};
       lostIntegrations(c).forEach((i) => { lostNames[i.source] = true; });
       integrations = `<ul class="detail-list">${c.integrations.map((name) => {
@@ -4413,18 +4326,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       render();
     });
     bind('bringCancel', () => goFirm('clients'));
-    bind('inviteOwner', () => {
-      const pick = st.connectPick || { accounting: [] };
-      if (!pick.accounting.length) { const err = $('intError'); if (err) err.hidden = false; return; }
-      const c = findOrg(st.clientId);
-      if (c) showInviteDialog(c, true);
-    });
     m.querySelectorAll('[data-reconnect]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClientConnect(b.dataset.reconnect); });
-    m.querySelectorAll('[data-resend]').forEach((b) => b.onclick = (e) => {
-      e.stopPropagation();
-      const c = findOrg(b.dataset.resend);
-      if (c) showInviteDialog(c, false);
-    });
     bind('connectBack', () => {
       if (st.connectStep === 'integrations') { st.connectStep = 'details'; save(); render(); return; }
       clearLink();
@@ -5195,8 +5097,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (needOpen && e.key === 'Escape') { e.preventDefault(); needOpen.remove(); return; }
     const bizStop = document.getElementById('bizStop');
     if (bizStop && e.key === 'Escape') { e.preventDefault(); const btn = document.getElementById('bizStopCancel'); if (btn) btn.click(); return; }
-    const inviteOpen = document.getElementById('inviteModal');
-    if (inviteOpen && e.key === 'Escape') { e.preventDefault(); inviteOpen.remove(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); popOpen() ? closePop() : openPop(); return; }
     if ($('scrim').classList.contains('open') && e.key === 'Escape') { closeModal(); return; }
     if (!popOpen()) return;
