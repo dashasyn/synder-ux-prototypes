@@ -111,60 +111,19 @@ body {
 .t-left { display: flex; align-items: center; gap: 12px; margin-right: auto; height: 40px; }
 .t-left #backChip:empty { display: none; }
 .ctx-trigger {
-      width: 100%; display: flex; align-items: center; gap: 10px;
-      height: 40px; padding: 0 8px; border: 0; border-radius: 6px;
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      height: 40px; padding: 0 8px; border: 0; border-radius: var(--radius-sm);
       background: transparent; cursor: pointer; text-align: left; font: inherit; color: inherit;
     }
-.ctx-trigger:hover { background: #F2F6FC; }
-.ctx-trigger[aria-expanded="true"] { background: #F2F6FC; box-shadow: inset 0 0 0 1px #DFE4EC; }
-.ctx-trigger:focus-visible { outline: 2px solid #0053CC; outline-offset: 0; }
-.ctx-trigger .av { width: 28px; height: 28px; font-size: 12px; }
+.ctx-trigger:hover,
+.ctx-trigger[aria-expanded="true"] { background: var(--bg-hover); }
+.ctx-trigger:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 0; }
 .ctx-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.ctx-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ctx-cap { font-size: 12px; line-height: 16px; color: #6B778C; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ctx-trigger .material-icons { font-size: 20px; color: #6B778C; }
-.av {
-      width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
-      display: inline-flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 13px; font-weight: 500; letter-spacing: .02em;
-    }
-.av.firm { border-radius: var(--radius-sm); background: #1A1B24; }
-.av.sm { width: 24px; height: 24px; font-size: 11px; }
-.av.sm.firm { border-radius: 6px; }
-/* ── Switcher popover ── */
-.pop {
-      position: absolute; left: 0; top: calc(100% + 8px); z-index: 60;
-      width: 300px; background: #fff; border: 1px solid #DFE4EC; border-radius: var(--radius-sm);
-      box-shadow: 0 8px 24px rgba(26,27,36,.14); display: none; overflow: hidden;
-    }
-.pop.open { display: block; }
-.pop-search { padding: 10px; border-bottom: 1px solid #EFF1F5; position: relative; }
-.pop-search input { height: 36px; padding-right: 56px; }
-.kbd {
-      position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
-      font-size: 12px; color: #6B778C; border: 1px solid #DFE4EC; border-radius: 4px; padding: 0 5px; background: #F7F8FA;
-    }
-.pop-list { max-height: 320px; overflow-y: auto; padding: 4px 0; }
-#popFirm { border-bottom: 1px solid var(--border-default); }
-.pop-sec { padding: 10px 14px 4px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: #6B778C; }
-.pop-item {
-      display: flex; align-items: center; gap: 10px; width: 100%;
-      padding: 7px 14px; background: none; border: none; cursor: pointer; text-align: left;
-      font: inherit; color: #1A1B24;
-    }
-.pop-item:hover, .pop-item.kb { background: #F2F6FC; }
-.pop-item .t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.pop-item .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pop-item .c { font-size: 12px; line-height: 16px; color: #6B778C; }
-.pop-item .check { font-size: 18px; color: #0053CC; }
-.pop-empty { padding: 16px 14px; color: #6B778C; }
-.pop-foot { border-top: 1px solid #EFF1F5; padding: 6px 0; }
-.pop-foot button {
-      display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 14px;
-      background: none; border: none; cursor: pointer; font: inherit; color: #6B778C; text-align: left;
-    }
-.pop-foot button:hover, .pop-foot button.kb { background: #F7F8FA; color: #1A1B24; }
-.pop-foot .material-icons { font-size: 18px; width: 24px; text-align: center; }
+.ctx-trigger .material-icons { font-size: 20px; color: var(--text-secondary); }
+/* Kit menu items have no keyboard-current state. */
+.dropdown-item.kb { background: var(--bg-hover); }
+/* Kit menu has no max height, so a long client list would leave the viewport. */
+#popList { max-height: 320px; overflow-y: auto; }
 .nav, #nav { flex: 1; }
 /* ── Main content ── */
 .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
@@ -558,16 +517,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
 
   <header class="topbar topbar--app">
     <div class="t-left">
-      <div class="ctx">
+      <div class="ctx dropdown">
         <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
-        <div class="pop" id="pop" role="dialog" aria-label="Switch firm or organization">
-          <div class="pop-search" id="popSearchWrap">
+        <div class="dropdown-menu w-full" id="pop" role="dialog" aria-label="Switch firm or organization">
+          <div id="popSearchWrap">
             <input type="search" class="input-search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
-            <span class="kbd" id="kbdHint">Ctrl K</span>
+            <span class="text-caption" id="kbdHint">Ctrl K</span>
           </div>
           <div id="popFirm"></div>
-          <div class="pop-list" id="popList"></div>
-          <div class="pop-foot" id="popFoot"></div>
+          <div id="popList"></div>
+          <div class="dropdown-divider"></div>
+          <div id="popFoot"></div>
         </div>
       </div>
       <div id="backChip"></div>
@@ -625,7 +585,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   const SCENARIOS = {
     'firm':   { firm: true,  clients: [], own: [] },
   };
-  const PALETTE = ['#0053CC', '#1F8940', '#CB7515', '#310BB0', '#3C4EAC', '#CC2929', '#0E7C86', '#8A4FBF'];
   const FIRM_NAV = [
     ['clients', 'people', 'Clients'],
     ['colleagues', 'groups', 'Colleagues'],
@@ -679,10 +638,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const initials = (n) => n.replace(/&/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-  const color = (id) => { let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; };
-  const av = (o, sm) => o.id === 'firm'
-    ? `<span class="av firm${sm ? ' sm' : ''}">${initials(o.name)}</span>`
-    : `<span class="av${sm ? ' sm' : ''}" style="background:${color(o.id)}">${initials(o.name)}</span>`;
+  const av = (o, sm) => `<span class="avatar${sm ? ' avatar-sm' : ''}">${initials(o.name)}</span>`;
 
   /* ───────── v7: Onboarding ─────────
      Import sources are simulated design proposals. No OAuth, sign-in, or live books.
@@ -2631,7 +2587,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     let name, cap, obj;
     if (st.ctx === 'firm') { obj = FIRM; name = FIRM.name; cap = 'Accounting firm'; }
     else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client' : 'Organization'; }
-    $('ctxTrigger').innerHTML = `${av(obj)}<span class="ctx-text"><span class="ctx-name">${esc(name)}</span><span class="ctx-cap">${esc(cap)}</span></span><span class="material-icons">unfold_more</span>`;
+    $('ctxTrigger').innerHTML = `${av(obj, true)}<span class="ctx-text"><span class="ctx-name text-body2 text-truncate">${esc(name)}</span><span class="text-caption text-truncate">${esc(cap)}</span></span><span class="material-icons">unfold_more</span>`;
     $('backChip').innerHTML = '';
   }
 
@@ -3538,50 +3494,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-pre-hist]').forEach((b) => b.onclick = () => { st.preHist = Number(b.dataset.preHist) || 0; renderMain(); });
     m.querySelectorAll('[data-pre-expand]').forEach((b) => b.onclick = () => { if (preWork) preWork.expand = preWork.expand === b.dataset.preExpand ? null : b.dataset.preExpand; renderMain(); });
     m.querySelectorAll('[data-pre-export]').forEach((b) => b.onclick = () => showKitToast('The report will be sent to your email'));
-    m.querySelectorAll('[data-pre-unmatch]').forEach((b) => b.onclick = () => {
-      if (!preWork) return;
-      const id = b.dataset.preUnmatch;
-      const matched = preWork.matched.filter((item) => item.id === id)[0];
-      if (matched) {
-        preWork.matched = preWork.matched.filter((item) => item.id !== id);
-        preWork.missInt.push({ iso: matched.iso, date: matched.date, primary: matched.id, secondary: matched.id, type: matched.types, amount: matched.amount, desc: matched.types, currency: 'USD' });
-      }
-      const gap = preWork.discrepancy.filter((item) => item.id === id)[0];
-      if (gap) {
-        preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== id);
-        preWork.missInt.push({ iso: gap.iso, date: gap.date, primary: gap.id, secondary: gap.id, type: gap.type, amount: gap.delta, desc: gap.type, currency: 'USD' });
-      }
-      showKitToast('Successfully unmatched. Transactions were moved to Missing source tab.');
-      renderMain();
-    });
-    m.querySelectorAll('[data-pre-ignore]').forEach((b) => b.onclick = () => {
-      if (!preWork) return;
-      const row = preWork.discrepancy.filter((item) => item.id === b.dataset.preIgnore)[0];
-      if (row) { preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== row.id); preWork.ignored.push({ iso: row.iso, date: row.date, primary: row.id, secondary: '-', type: row.type, amount: row.delta, desc: '-', currency: 'USD' }); }
-      showKitToast('Successfully ignored. Transactions were moved to Ignored tab.');
-      renderMain();
-    });
-    m.querySelectorAll('[data-pre-ignore-miss]').forEach((b) => b.onclick = () => {
-      if (!preWork) return;
-      const parts = b.dataset.preIgnoreMiss.split(':');
-      const list = parts[0] === 'acct' ? 'missAcct' : 'missInt';
-      const row = preWork[list].filter((item) => item.primary === parts[1])[0];
-      if (row) { preWork[list] = preWork[list].filter((item) => item.primary !== parts[1]); preWork.ignored.push(row); }
-      showKitToast('Successfully ignored. Transactions were moved to Ignored tab.');
-      renderMain();
-    });
-    m.querySelectorAll('[data-pre-unignore]').forEach((b) => b.onclick = () => {
-      if (!preWork) return;
-      preWork.ignored = preWork.ignored.filter((item) => (item.primary || item.id) !== b.dataset.preUnignore);
-      renderMain();
-    });
-    bind('preManual', () => {
-      const err = $('preManualError');
-      const checked = m.querySelectorAll('#preOverlay input.checkbox:checked');
-      if (checked.length < 2) { if (err) err.hidden = false; return; }
-      if (err) err.hidden = true;
-      showKitToast('Successfully matched. Transactions were moved to Matched tab.');
-    });
   }
   function issueChip(c) {
     const v = clientView(c);
@@ -5214,20 +5126,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
 
   /* ───────── Switcher popover ───────── */
-  function popOpen() { return $('pop').classList.contains('open'); }
+  function popOpen() { return $('pop').classList.contains('show'); }
   function openPop() {
-    $('pop').classList.add('open'); $('ctxTrigger').setAttribute('aria-expanded', 'true');
+    $('pop').classList.add('show'); $('ctxTrigger').setAttribute('aria-expanded', 'true');
     $('popSearch').value = ''; kbIndex = -1; renderPop();
     const total = sc().clients.length + sc().own.length + (sc().firm ? 1 : 0);
     $('popSearchWrap').style.display = total > 5 ? '' : 'none';
     setTimeout(() => { kbIndex = 0; highlight(); if (total > 5) $('popSearch').focus(); }, 0);
   }
-  function closePop() { $('pop').classList.remove('open'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
+  function closePop() { $('pop').classList.remove('show'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
 
   function item(o, cap, current, action) {
     const sub = isClient(o.id) ? '' : cap;
     const dot = isClient(o.id) && onboardingState(o) === 'started' ? yellowDot() : '';
-    return `<button class="pop-item" data-act="${action}">${av(o, true)}<span class="t"><span class="n">${dot}${esc(o.name)}</span>${sub ? `<span class="c">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons check">check</span>' : ''}</button>`;
+    return `<button type="button" class="dropdown-item" data-act="${action}">${av(o, true)}<span class="flex-1"><span class="text-body2 text-truncate">${dot}${esc(o.name)}</span>${sub ? `<span class="text-caption d-block">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons">check</span>' : ''}</button>`;
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
@@ -5239,19 +5151,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (s.firm) {
       const list = s.clients.filter((c) => !c.pending && !c.fresh && inSwitcher(c) && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
-        html += `<div class="pop-sec">Clients</div>` +
+        html += `<div class="text-caption">Clients</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
       }
     }
     const own = s.own.filter((o) => !q || o.name.toLowerCase().includes(q));
     if (own.length) {
-      html += `<div class="pop-sec">My organizations</div>` + own.map((o) => item(o, null, st.ctx === 'org' && st.orgId === o.id, 'org:' + o.id)).join('');
+      html += `<div class="text-caption">My organizations</div>` + own.map((o) => item(o, null, st.ctx === 'org' && st.orgId === o.id, 'org:' + o.id)).join('');
     }
-    if (!html && q) html = `<div class="pop-empty text-body2">Nothing matches.</div>`;
+    if (!html && q) html = `<div class="dropdown-item text-body2">Nothing matches.</div>`;
     $('popList').innerHTML = html;
-    $('popFoot').innerHTML =
-      `<button data-act="createorg"><span class="material-icons">add</span>Add client</button>` +
-      '';
+    $('popFoot').innerHTML = `<button type="button" class="dropdown-item" data-act="createorg"><span class="material-icons">add</span>Add client</button>`;
     $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
   }
   function act(a) {
