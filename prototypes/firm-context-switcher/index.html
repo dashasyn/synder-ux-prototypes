@@ -3693,17 +3693,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     { label: 'October 2026', short: 'October' },
     { label: 'November 2026', short: 'November' }
   ];
-  const FIRM_ROLE_ADMIN = 'Invite/remove colleagues to/from the Firm\'s colleagues list. Invite/remove clients to/from the Firm\'s clients list. Appoint other colleagues to be Firm Admins. Have access to any connected client with the Manager permissions.';
-  const FIRM_ROLE_COLLEAGUE = 'Have access to the clients assigned to them by the Firm Admin. Not be able to manage Firm details or colleagues. Have the view access to all of the colleagues\' details without the editing rights.';
   const CLIENT_ROLE_MANAGER = 'Edit client\'s organization details. Connect/disconnect integrations (eCommerce platforms and payment providers). Have full control over the synchronization process and settings.';
   const CLIENT_ROLE_MEMBER = 'View client\'s organization details. Adjust synchronization settings. Synchronize transactions in the client\'s books.';
   const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question. Learn more';
-  const SELF_ROLE_HINT = 'You can\'t change the role for yourself. Please ask another Firm admins to do that for you if needed.';
-  const FIRM_TITLES = ['Owner', 'Admin', 'Accountant', 'Bookkeeper'];
   let firmPeople = [
-    { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'Owner', self: true },
-    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'Bookkeeper' },
-    { id: 'p3', name: 'Alex Kim', email: 'alex.kim@example.com', status: 'active', firmRole: 'Accountant' }
+    { id: 'p1', name: 'Dasha', email: 'dasha.aibot@synder.com', status: 'active', firmRole: 'Admin', self: true },
+    { id: 'p2', name: 'Jane Doe', email: 'jane.doe@example.com', status: 'invited', firmRole: 'Colleague' },
+    { id: 'p3', name: 'Alex Kim', email: 'alex.kim@example.com', status: 'active', firmRole: 'Colleague' }
   ];
   let clientAccess = [
     { personId: 'p1', clientId: 'e1', role: 'Manager' },
@@ -3732,7 +3728,19 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<label class="form-label form-label-required" for="${forId}">${esc(text)} ${helpIcon(tipHtml)}</label>`;
   }
   function clientRoleTip() { return headedTip([['Manager', CLIENT_ROLE_MANAGER], ['Member', CLIENT_ROLE_MEMBER]]); }
-  function firmRoleTip() { return headedTip([['Admin', FIRM_ROLE_ADMIN], ['Firm Colleague', FIRM_ROLE_COLLEAGUE]]); }
+  function firmRoleTip() {
+    const block = (title, lead, items) => '<p class="text-body2"><b>' + title + '</b></p><p class="text-body2">' + lead + '</p><ul>' + items.map((item) => '<li class="text-body2">' + item + '</li>').join('') + '</ul>';
+    return block('Admin', 'As a Firm Admin, a user can:', [
+      'Invite/remove colleagues to/from the Firm\'s colleagues list.',
+      'Invite/remove clients to/from the Firm\'s clients list.',
+      'Appoint other colleagues to be Firm Admins.',
+      'Have access to any connected client with the Manager permissions.'
+    ]) + block('Firm Colleague', 'As a Firm Colleague, a user will:', [
+      'Have access to the clients assigned to them by the Firm Admin.',
+      'Not be able to manage Firm details or colleagues.',
+      'Have the view access to all of the colleagues\' details without the editing rights.'
+    ]);
+  }
   function pagerState(key, initial) {
     if (!st.pagers) st.pagers = {};
     if (!st.pagers[key]) st.pagers[key] = { size: initial || 25, page: 0 };
@@ -3977,7 +3985,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<div class="flow-wide page-stack">
       ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Role in firm</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Role in the Firm ${helpIcon(firmRoleTip())}</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
   }
@@ -3996,14 +4004,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     </div>`;
   }
   function colleagueRoleName(p) {
-    if (p && p.firmRole === 'admin') return 'Admin';
-    if (p && FIRM_TITLES.indexOf(p.firmRole) >= 0) return p.firmRole;
-    return 'Accountant';
+    return p && (p.firmRole === 'Admin' || p.firmRole === 'admin') ? 'Admin' : 'Colleague';
   }
-  function isFirmAdmin(p) {
-    const role = colleagueRoleName(p);
-    return role === 'Owner' || role === 'Admin';
-  }
+  function isFirmAdmin(p) { return colleagueRoleName(p) === 'Admin'; }
   function renderColleague() {
     const p = findPerson(st.colleagueId);
     if (!p) return renderColleagues();
@@ -4028,12 +4031,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         ${page.html}
       </div>`;
     } else {
-      const role = p.self
-        ? `<p class="text-body2">${esc(colleagueRoleName(p))}</p><p class="form-hint">${esc(SELF_ROLE_HINT)}</p>`
-        : `<p class="text-body2">${esc(colleagueRoleName(p))}</p>`;
+      const current = colleagueRoleName(p);
+      const role = `<select class="select" id="firmRole" aria-label="Role in the Firm"><option value="Admin"${current === 'Admin' ? ' selected' : ''}>Admin</option><option value="Colleague"${current === 'Colleague' ? ' selected' : ''}>Colleague</option></select>`;
       body = `<div class="page-stack">
         <div class="form-field"><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
-        <div class="form-field"><span class="form-label form-label-required">Role in firm</span>${role}</div>
+        <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label>${role}</div>
         <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
       </div>`;
     }
@@ -4663,6 +4665,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('manageTagsBtn', openManageTags);
     const personClientSearch = $('personClientSearch');
     if (personClientSearch) personClientSearch.oninput = () => { st.personClientQ = personClientSearch.value; renderMain(); };
+    const firmRole = $('firmRole');
+    if (firmRole) firmRole.onchange = () => {
+      const person = findPerson(st.colleagueId);
+      if (!person || firmRole.value === colleagueRoleName(person)) return;
+      confirmRoleChange(person, firmRole.value);
+    };
     bindClick('saveColleague', () => {
       const person = findPerson(st.colleagueId);
       const name = $('colName');
@@ -4670,7 +4678,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (!name || !(name.value || '').trim()) { fieldError(name, 'Required'); return; }
       fieldClear(name);
       person.name = name.value.trim();
-      if ($('firmRole')) person.firmRole = $('firmRole').value;
       renderMain();
     });
     m.querySelectorAll('[data-person]').forEach((tr) => bindOpenRow(tr, () => openColleague(tr.dataset.person)));
@@ -4724,6 +4731,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function openColleague(id) {
     st.ctx = 'firm'; st.page = 'colleague'; st.colleagueId = id; st.colleagueTab = 'details'; st.clientId = null;
     save(); render();
+  }
+  function confirmRoleChange(person, next) {
+    const text = next === 'Admin'
+      ? 'This user will get admin rights within this Firm and will have unlimited permissions. Are you sure you want to proceed?'
+      : 'This user will lose admin rights within this Firm and will have limited permissions as a colleague. Are you sure you want to proceed?';
+    const { modal, close } = dialogShell('Change role', '<p class="text-body2">' + esc(text) + '</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="confirmRole">Change</button>');
+    const revert = () => { close(); renderMain(); };
+    const cancel = modal.querySelector('[data-cancel]');
+    if (cancel) cancel.onclick = revert;
+    modal.onclick = (e) => { if (e.target === modal) revert(); };
+    modal.querySelector('#confirmRole').onclick = () => {
+      person.firmRole = next;
+      close();
+      showKitToast('Colleague updated successfully!');
+      renderMain();
+    };
   }
   function dialogShell(title, body, footerHtml) {
     const modal = document.createElement('div');
@@ -4931,20 +4954,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const body = `<p class="text-body2">Your colleague will receive an email invitation to join your Firm. Please, fill out all of the required fields.</p>
       <div class="form-field"><label class="form-label form-label-required" for="newColName">Name</label><input class="input" id="newColName" data-required="1" /></div>
       <div class="form-field"><label class="form-label form-label-required" for="newColEmail">Email</label><input class="input" id="newColEmail" type="email" data-required="1" /></div>
-      <div class="form-field"><label class="form-label form-label-required" for="newColFirmRole">Role in firm</label><select class="select" id="newColFirmRole" data-required="1"><option value="">Select…</option>${FIRM_TITLES.map((role) => `<option value="${role}"${role === 'Accountant' ? ' selected' : ''}>${role}</option>`).join('')}</select></div>
       <div class="form-field">${fieldLabel('newColClient', 'Assign client', '<p class="text-body2">' + esc(ASSIGN_CLIENT_TIP) + '</p>')}<select class="select" id="newColClient" data-required="1"><option value="">Select…</option>${options}</select></div>
       <div class="form-field">${fieldLabel('newColRole', 'Role in the client', clientRoleTip())}<select class="select" id="newColRole"><option value="Member" selected>Member</option><option value="Manager">Manager</option></select></div>`;
     const { modal, close } = dialogShell('Add colleague', body, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="sendInvite">Send invitation</button>`);
     modal.querySelector('#sendInvite').onclick = () => {
       const name = modal.querySelector('#newColName');
       const email = modal.querySelector('#newColEmail');
-      const firmRole = modal.querySelector('#newColFirmRole');
       const client = modal.querySelector('#newColClient');
       let bad = false;
-      [name, email, firmRole, client].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      [name, email, client].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
       if (bad) return;
       const id = 'p' + Date.now();
-      firmPeople.push({ id, name: name.value.trim(), email: email.value.trim(), status: 'invited', firmRole: firmRole.value });
+      firmPeople.push({ id, name: name.value.trim(), email: email.value.trim(), status: 'invited', firmRole: 'Colleague' });
       clientAccess.push({ personId: id, clientId: client.value, role: modal.querySelector('#newColRole').value || 'Member' });
       close();
       renderMain();
