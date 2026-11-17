@@ -882,13 +882,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ], 'Pro')),
       Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [], 'Premium')),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
-      Object.assign({ id: 'e18', name: 'Aspen Goods', pre: { status: 'failed', reason: 'The PayPal activity report has no dates.', books: 'QuickBooks', platform: 'PayPal', period: 'Jan–Dec 2025' } }, off),
+      Object.assign({ id: 'e18', name: 'Aspen Goods', pre: { status: 'failed', period: 'Oct 1 - 31, 2026' } }, off),
       Object.assign({ id: 'e5', name: 'Cedar & Pine Interiors', company: 'Cedar & Pine Interiors LLC' }, on('Xero', ['Stripe', 'Shopify', 'Square', 'Amazon', 'Etsy', 'PayPal'], [], 'Essential')),
-      Object.assign({ id: 'e6', name: 'Maple Street Bakery' }, off),
+      Object.assign({ id: 'e6', name: 'Maple Street Bakery', pre: { status: 'done', outcome: 'ok', period: 'Oct 1 - 31, 2026' } }, off),
       Object.assign({ id: 'e7', name: 'Juniper Yoga', company: 'Juniper Yoga LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Square'], [
         { key: 'reconnect', source: 'Stripe' }
       ], 'Pro')),
-      Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', books: 'QuickBooks', platform: 'Stripe', period: 'Jan–Dec 2025', checked: 'Dec 31, 2025', history: [{ outcome: 'ok', books: 'QuickBooks', platform: 'Shopify', period: 'Jan–Dec 2024', checked: 'Jan 15, 2025' }] } }, off),
+      Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026' } }, off),
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
         { key: 'uncategorized', count: 14, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
       ], 'Premium')),
@@ -2718,7 +2718,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
-    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
+    if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'prelog', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth'].includes(st.page)) activePage = 'clients';
     if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses' || st.page === 'manage') activePage = 'billing';
     if (st.page === 'colleague') activePage = 'colleagues';
     const clientN = sc().clients.filter((c) => !c.fresh).length;
@@ -3006,182 +3006,125 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!list.length) return false;
     return !lostIntegrations(c).length && !pendingIntegrations(c).length;
   }
-  function preOutcome(platform) {
-    return platform === 'Shopify' || platform === 'Square' ? 'ok' : 'gap';
-  }
-  function preLink(id, kind, label) {
-    const attr = kind === 'view' ? 'data-pre-view' : 'data-pre-run';
-    return `<button type="button" class="link" ${attr}="${id}">${label}</button>`;
-  }
   function preCell(c) {
     if (!isOffClient(c)) return '';
     const pre = c.pre;
-    if (pre && pre.status === 'running') return statusChip('grey', 'Running');
+    if (pre && pre.status === 'running') return statusChip('grey', 'In progress');
     if (pre && pre.status === 'failed') {
-      return `<div class="cell-stack">${tipChip('red', 'Failed', pre.reason || 'The reports could not be read.')}${preLink(c.id, 'run', 'Run again')}</div>`;
+      return '<div class="cell-stack">' + statusChip('red', 'Error') + preLink(c.id, 'run', 'Run again') + '</div>';
     }
     if (pre && pre.status === 'done') {
-      const ok = (pre.outcome || preOutcome(pre.platform)) === 'ok';
-      const chip = ok ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Not reconciled');
-      return `<div class="cell-stack">${chip}<span class="text-body2">${esc(pre.period || '')}</span>${preLink(c.id, 'view', 'View')}</div>`;
+      const ok = pre.outcome === 'ok';
+      const chip = ok ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Attention required');
+      return '<div class="cell-stack">' + chip + '<span class="text-body2">' + esc(pre.period || 'Oct 1 - 31, 2026') + '</span>' + preLink(c.id, 'view', 'View') + '</div>';
     }
     return preLink(c.id, 'run', 'Try pre-assessment');
   }
   function preMenuItem(c) {
     if (!isOffClient(c) || (c.pre && c.pre.status === 'running')) return '';
-    if (c.pre && c.pre.status === 'done') return `<button type="button" class="dropdown-item" data-pre-view="${c.id}">View pre-assessment</button>`;
-    return `<button type="button" class="dropdown-item" data-pre-run="${c.id}">Run pre-assessment</button>`;
+    if (c.pre && c.pre.status === 'done') return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>';
+    return '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
   }
-  const PRE_PLATFORMS = ['Stripe', 'PayPal', 'Shopify', 'Square'];
-  const preTimers = {};
   function ensurePreSeeds() {
     const seeds = {
-      e8: { status: 'done', outcome: 'gap', books: 'QuickBooks', platform: 'Stripe', period: 'Jan–Dec 2025', checked: 'Dec 31, 2025', history: [{ outcome: 'ok', books: 'QuickBooks', platform: 'Shopify', period: 'Jan–Dec 2024', checked: 'Jan 15, 2025' }] },
-      e18: { status: 'failed', reason: 'The PayPal activity report has no dates.', books: 'QuickBooks', platform: 'PayPal', period: 'Jan–Dec 2025' }
+      e6: { status: 'done', outcome: 'ok', period: 'Oct 1 - 31, 2026' },
+      e8: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026' },
+      e18: { status: 'failed', period: 'Oct 1 - 31, 2026' }
     };
     (sc().clients || []).forEach((c) => {
-      if (c && isOffClient(c) && !c.pre && seeds[c.id]) c.pre = JSON.parse(JSON.stringify(seeds[c.id]));
+      if (c && isOffClient(c) && !c.pre && seeds[c.id]) c.pre = Object.assign({}, seeds[c.id]);
     });
-  }
-  function armPreTimers() {
-    (sc().clients || []).forEach((c) => {
-      if (!c.pre || c.pre.status !== 'running' || preTimers[c.id]) return;
-      if (!c.pre.startedAt) c.pre.startedAt = Date.now();
-      const wait = Math.max(0, 3000 - (Date.now() - c.pre.startedAt));
-      preTimers[c.id] = setTimeout(() => {
-        delete preTimers[c.id];
-        const current = findOrg(c.id);
-        if (!current || !current.pre || current.pre.status !== 'running') return;
-        current.pre.status = 'done';
-        current.pre.outcome = preOutcome(current.pre.platform);
-        current.pre.period = current.pre.period || 'Jan–Dec 2025';
-        current.pre.checked = lastChecked(current.pre.period);
-        persistDirectory();
-        showPreToast(current);
-        const show = st && (st.page === 'clients' || st.page === 'dashboard' || ((st.page === 'clientdetail' || st.page === 'preassess') && st.clientId === current.id));
-        if (show && mode !== 'onboarding') render();
-      }, wait);
-    });
-  }
-  function showPreToast(c) {
-    let stack = document.getElementById('preToasts');
-    if (!stack) {
-      stack = document.createElement('div');
-      stack.id = 'preToasts';
-      stack.className = 'synder-toast-stack';
-      document.body.appendChild(stack);
-    }
-    const toast = document.createElement('div');
-    toast.className = 'synder-toast synder-toast-success';
-    toast.setAttribute('role', 'status');
-    toast.innerHTML = `<span class="material-icons">check_circle</span><span>Pre-assessment ready for ${esc(c.name)}</span><button type="button" class="synder-toast-close" data-pre-toast="${c.id}">View result</button><button type="button" class="synder-toast-close" data-pre-dismiss aria-label="Dismiss"><span class="material-icons">close</span></button>`;
-    stack.appendChild(toast);
-    const kill = () => toast.remove();
-    toast.querySelector('[data-pre-dismiss]').onclick = kill;
-    toast.querySelector('[data-pre-toast]').onclick = () => { kill(); openPreassessment(c.id); };
-    setTimeout(kill, 5000);
-  }
-  function openPreassessment(id) {
-    st.ctx = 'firm';
-    st.page = 'preassess';
-    st.clientId = id;
-    st.preTab = 'matched';
-    st.preWhich = 'latest';
-    st.orgId = null;
-    save();
-    render();
-  }
-  const PRE_BOOKS = ['QuickBooks', 'Xero'];
-  function preBooksDefault(c) {
-    if (c && c.accounting === 'Xero') return 'Xero';
-    if (c && c.accounting === 'QuickBooks') return 'QuickBooks';
-    if (c && c.pre && PRE_BOOKS.indexOf(c.pre.books) >= 0) return c.pre.books;
-    return 'QuickBooks';
-  }
-  function uploadLine(books, platform) {
-    const n = platform === 'Stripe' ? 2 : 1;
-    return 'Upload 1 ' + books + ' report and ' + n + ' ' + platform + (n === 1 ? ' report' : ' reports') + '.';
-  }
-  function exportSteps(books, platform) {
-    const booksName = books === 'Xero' ? 'Xero' : 'QuickBooks';
-    const steps = ['In ' + booksName + ', export the general ledger detail for the ' + platform + ' clearing account.'];
-    if (platform === 'Stripe') steps.push('Export 2 Stripe reports for the same dates: balance change from activity, and payouts.');
-    else steps.push('Export 1 ' + platform + ' report for the same dates.');
-    return steps;
-  }
-  function lastChecked(period) {
-    const ends = { 'Oct 2026': 'Oct 31, 2026', 'Sep 2026': 'Sep 30, 2026', 'Aug 2026': 'Aug 31, 2026', 'Jul 2026': 'Jul 31, 2026', 'Jun 2026': 'Jun 30, 2026', 'May 2026': 'May 31, 2026', 'Jan–Dec 2025': 'Dec 31, 2025', 'Jan–Dec 2024': 'Dec 31, 2024' };
-    if (ends[period]) return ends[period];
-    const year = (String(period || '').match(/(\d{4})/) || [])[1];
-    return year ? 'Dec 31, ' + year : (period || '');
-  }
-  function samplePreFiles(books, platform) {
-    const booksFile = books === 'Xero'
-      ? { name: 'xero-account-transactions.csv', label: 'Books report' }
-      : { name: 'quickbooks-transaction-detail.csv', label: 'Books report' };
-    if (platform === 'Stripe') return [booksFile, { name: 'stripe-balance-change.csv', label: 'Stripe balance report' }, { name: 'stripe-payouts.csv', label: 'Stripe payouts report' }];
-    if (platform === 'PayPal') return [booksFile, { name: 'paypal-activity-download.csv', label: 'PayPal activity' }];
-    if (platform === 'Shopify') return [booksFile, { name: 'shopify-payouts.csv', label: 'Shopify payouts' }];
-    return [booksFile, { name: 'square-transactions.csv', label: 'Square transactions' }];
-  }
-  function detectPreLabel(name, platform, existing) {
-    const n = String(name || '').toLowerCase();
-    if (/book|quickbooks|xero|transaction detail|clearing/.test(n)) return 'Books report';
-    if (platform === 'Stripe' && /payout/.test(n)) return 'Stripe payouts report';
-    if (platform === 'Stripe' && /balance|activity/.test(n)) return 'Stripe balance report';
-    if (platform === 'PayPal' || /paypal/.test(n)) return 'PayPal activity';
-    if (platform === 'Shopify' || /shopify/.test(n)) return 'Shopify payouts';
-    if (platform === 'Square' || /square/.test(n)) return 'Square transactions';
-    const labels = existing.map((f) => f.label);
-    if (labels.indexOf('Books report') < 0) return 'Books report';
-    if (platform === 'Stripe' && labels.indexOf('Stripe balance report') < 0) return 'Stripe balance report';
-    if (platform === 'Stripe' && labels.indexOf('Stripe payouts report') < 0) return 'Stripe payouts report';
-    if (platform === 'PayPal') return 'PayPal activity';
-    if (platform === 'Shopify') return 'Shopify payouts';
-    return 'Square transactions';
-  }
-  function preNeeded(platform) {
-    const need = ['Books report'];
-    if (platform === 'Stripe') need.push('Stripe balance report', 'Stripe payouts report');
-    else if (platform === 'PayPal') need.push('PayPal activity');
-    else if (platform === 'Shopify') need.push('Shopify payouts');
-    else need.push('Square transactions');
-    return need;
-  }
-  function preFileGap(platform, files) {
-    const labels = (files || []).map((f) => f.label);
-    const missing = preNeeded(platform).filter((name) => labels.indexOf(name) < 0);
-    if (!missing.length) return '';
-    const named = missing.map((name) => 'the ' + name);
-    if (named.length === 1) return 'We still need ' + named[0] + '.';
-    return 'We still need ' + named.slice(0, -1).join(', ') + ' and ' + named[named.length - 1] + '.';
   }
   let preDraft = null;
-  function openClientConnect(id) {
-    const c = findOrg(id);
-    if (!c) { startAddClient(); return; }
-    clearLink();
-    const acct = c.accounting === 'Xero' ? 'Xero' : (c.accounting ? 'QuickBooks' : '');
-    st.connectPick = { accounting: acct ? [acct] : [], sales: [], pay: [] };
-    st.connectStep = (c.name || '').trim() ? 'integrations' : 'details';
-    goFirm('clientconnect', id);
+  let preWork = null;
+  let preTicker = null;
+  function preLink(id, kind, label) {
+    const attr = kind === 'view' ? 'data-pre-view' : 'data-pre-run';
+    return '<button type="button" class="link" ' + attr + '="' + id + '">' + label + '</button>';
   }
-  function booksLabel(name) {
-    return name === 'Xero' ? 'Xero' : 'QuickBooks Online';
+  function preMoney(n) {
+    if (n == null) return '-';
+    const neg = n < 0;
+    const parts = Math.abs(n).toFixed(2).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '-' : '') + parts[0] + '.' + parts[1] + ' USD';
   }
-  function connectNamed(id) {
-    const c = findOrg(id);
-    if (!c) return;
-    clearLink();
-    st.connectPick = { accounting: [], sales: [], pay: [] };
-    st.connectStep = 'details';
-    goFirm('clientconnect', id);
+  function preSteps(lines) {
+    return '<ol>' + lines.map((line) => '<li class="text-body2">' + line + '</li>').join('') + '</ol>';
+  }
+  function preAcc(title, body, open) {
+    return '<details class="accordion"' + (open ? ' open' : '') + '><summary class="accordion-summary"><span class="text-subtitle2">' + title + '</span></summary><div class="accordion-body">' + body + '</div></details>';
+  }
+  function preAbove() { return 'Upload the file above'; }
+  function preDirections() {
+    const qb = preSteps([
+      'Go to Reports → Standard reports → Balance sheet in your QuickBooks Online account',
+      'Select the period you want to reconcile',
+      'Click the total of the needed account',
+      'Export the Transaction report to Excel',
+      preAbove()
+    ]);
+    const xero = preSteps([
+      'Open Xero Reporting <a class="link" href="https://reporting.xero.com/" target="_blank" rel="noopener">reporting.xero.com</a> → Account Transactions',
+      'Select accounts: Clearing, Accounts Receivable, Accounts Payable, Realized Currency Gains',
+      'Pick the date range that matches the reconciliation date range',
+      'Set Grouping to Group by Account',
+      'Select columns: Contact, Credit, Date, Debit, Description, Reference, Running Balance, Source. Then also Net.',
+      'Export as Excel (XLS or XLSX)'
+    ]) + '<p class="text-body2">Tip: save the report settings as a Custom view in Xero to avoid this next time.</p><p class="text-body2"><a class="link" href="https://synder.com/help/assisted-transaction-reconciliation-for-xero/" target="_blank" rel="noopener">Need more detail? See the full guide with screenshots</a></p>';
+    const stripeCommon = [
+      'Go to your Stripe account',
+      'Open Reports menu tab → Balance summary',
+      'Select the needed dates, currency (in case of multicurrency)'
+    ];
+    const stripe1 = preSteps(stripeCommon.concat([
+      'Scroll to “Balance change from activity”, click “Export” → “Download to system” (go for “Itemized” report with “All” columns)',
+      preAbove()
+    ]));
+    const stripe2 = preSteps(stripeCommon.concat([
+      'Scroll to “Payouts”, click “Export” → “Download to system” (go for “Itemized” report with “All” columns)',
+      preAbove()
+    ]));
+    const paypal = preSteps([
+      'Navigate to Activity → All Reports in your PayPal account',
+      'Activities → Activity report',
+      'Transaction type = Balance affecting, then select date range, Format is CSV → create report',
+      preAbove()
+    ]);
+    return '<h2 class="text-h2">Where to get the files</h2>'
+      + preAcc('How to get the Transaction report from QuickBooks Online', qb)
+      + preAcc('How to get Account Transactions from Xero', xero)
+      + '<h2 class="text-subtitle2">Stripe <span class="status status-grey">2 files</span></h2>'
+      + preAcc('How to get Balance change from the activity from Stripe', stripe1)
+      + preAcc('How to get Payouts from Stripe', stripe2)
+      + preAcc('How to get Statement from PayPal', paypal);
+  }
+  function stripeFile1Directions() {
+    return preSteps([
+      'Go to your Stripe account',
+      'Open Reports menu tab → Balance summary',
+      'Select the needed dates, currency (in case of multicurrency)',
+      'Scroll to “Balance change from activity”, click “Export” → “Download to system” (go for “Itemized” report with “All” columns)',
+      preAbove()
+    ]);
+  }
+  function recogniseFile(name, sizeMb) {
+    const n = String(name || '').toLowerCase();
+    const ext = n.split('.').pop();
+    if (sizeMb > 100) return { error: 'File exceeds max size' };
+    if (['csv', 'xlsx', 'xls', 'pdf'].indexOf(ext) < 0) return { error: 'The wrong file format is uploaded' };
+    if (/fail/.test(n)) return { error: 'Upload failed' };
+    const currency = /eur/.test(n) ? 'EUR' : 'USD';
+    if (/xero|account-transactions|account transactions/.test(n)) return { group: 'Accounting', label: 'Xero · Account Transactions', currency: currency };
+    if (/quickbooks|qbo|transaction/.test(n)) return { group: 'Accounting', label: 'QuickBooks Online · Transaction report', currency: currency };
+    if (/stripe/.test(n) && /payout/.test(n)) return { group: 'Integration', platform: 'Stripe', report: 'Payouts', label: 'Stripe · Payouts', currency: currency };
+    if (/stripe/.test(n) && /balance/.test(n)) return { group: 'Integration', platform: 'Stripe', report: 'Balance change from activity', label: 'Stripe · Balance change from activity', currency: currency };
+    if (/paypal|statement/.test(n)) return { group: 'Integration', platform: 'PayPal', report: 'Statement', label: 'PayPal · Statement', currency: currency };
+    return { unrecognised: true };
   }
   function ensurePreDraft(c) {
     if (preDraft && preDraft.id === c.id) return preDraft;
-    const books = preBooksDefault(c);
-    const platform = c.pre && PRE_PLATFORMS.indexOf(c.pre.platform) >= 0 ? c.pre.platform : 'Stripe';
-    preDraft = { id: c.id, books: books, platform: platform, files: [], gap: '' };
+    preDraft = { id: c.id, from: '2026-10-01', to: '2026-10-31', files: [], dateError: '', fileError: '', info: true };
     return preDraft;
   }
   function openPreUpload(id) {
@@ -3195,190 +3138,334 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     save();
     render();
   }
-  function relabelPreFiles() {
-    if (!preDraft) return;
-    preDraft.files.forEach((file, i, list) => {
-      file.label = detectPreLabel(file.name, preDraft.platform, list.slice(0, i));
-    });
+  function openPreassessment(id) {
+    st.ctx = 'firm';
+    st.page = 'preassess';
+    st.clientId = id;
+    st.preTab = 'matched';
+    st.orgId = null;
+    if (!preWork || preWork.id !== id) preWork = null;
+    save();
+    render();
   }
-  function submitPreAnalysis() {
-    const c = findOrg(st.clientId);
-    if (!c || !preDraft) return;
-    const gap = preFileGap(preDraft.platform, preDraft.files);
-    if (gap) { preDraft.gap = gap; renderMain(); return; }
-    const history = (c.pre && c.pre.history) ? c.pre.history.slice() : [];
-    if (c.pre && c.pre.status === 'done') {
-      history.push({
-        outcome: c.pre.outcome || preOutcome(c.pre.platform),
-        books: c.pre.books,
-        platform: c.pre.platform,
-        period: c.pre.period,
-        checked: c.pre.checked || lastChecked(c.pre.period)
-      });
-    }
-    if (preTimers[c.id]) clearTimeout(preTimers[c.id]);
-    delete preTimers[c.id];
-    c.pre = {
-      status: 'running',
-      books: preDraft.books,
-      platform: preDraft.platform,
-      period: 'Jan–Dec 2025',
-      startedAt: Date.now(),
-      history: history
-    };
-    preDraft = null;
-    persistDirectory();
-    goFirm('clients');
+  function closePre() {
+    st.page = 'clients';
+    st.clientId = null;
+    save();
+    render();
+  }
+  function preShell(title, subtitle, actions, body) {
+    return '<div class="overlay" id="preOverlay" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="overlay-header"><div class="overlay-header-left"><button type="button" class="btn-icon" id="preClose" aria-label="Close"><span class="material-icons">close</span></button><div class="overlay-header-divider"></div><div><div class="overlay-header-title">' + esc(title) + '</div>' + (subtitle ? '<p class="text-body2">' + esc(subtitle) + '</p>' : '') + '</div></div><div class="overlay-header-actions">' + actions + '</div></div><div class="overlay-body page-stack">' + body + '</div></div>';
+  }
+  function addPreFile(name, sizeMb) {
+    const rec = recogniseFile(name, sizeMb);
+    preDraft.files.push({ name: name, size: sizeMb, rec: rec });
+    preDraft.fileError = '';
+  }
+  function addDemoPair() {
+    addPreFile('quickbooks-transaction-report.xlsx', 1.2);
+    addPreFile('stripe-payouts.csv', 0.8);
+  }
+  function preFileRows(files) {
+    return files.map((f, i) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2 text-secondary">' + f.size + ' Mb</span>' + (f.rec && f.rec.error ? '<span class="text-body2 text-error">' + esc(f.rec.error) + '</span>' : '') + '<button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>').join('');
   }
   function renderPreUpload() {
     const c = findOrg(st.clientId);
-    if (!c || !isOffClient(c)) { st.page = 'clients'; st.clientId = null; return renderClients(); }
+    if (!c) return '';
     const draft = ensurePreDraft(c);
-    const steps = exportSteps(draft.books, draft.platform).map((step, i) => '<p class="text-body2">' + (i + 1) + '. ' + esc(step) + '</p>').join('');
-    const files = draft.files.map((f, i) => '<div class="logo-line"><span class="text-body2">' + esc(f.name) + '</span><span class="status status-grey">' + esc(f.label) + '</span><button type="button" class="link" data-pre-remove="' + i + '">Remove</button></div>').join('');
-    const gap = draft.gap || '';
-    const detected = draft.files.length ? '<p class="text-body2 text-secondary">Period detected from the files: Jan–Dec 2025</p>' : '';
-    return '<div class="flow-wide page-stack">'
-      + '<a class="page-back" id="backClients" href="#clients">Back to clients</a>'
-      + pageHeader('Pre-assessment', '', esc(c.name))
-      + '<div class="connect-pair">'
-      + '<div class="form-field"><label class="form-label" for="preBooks">Accounting system</label><select class="select" id="preBooks">' + PRE_BOOKS.map((name) => '<option value="' + name + '"' + (name === draft.books ? ' selected' : '') + '>' + booksLabel(name) + '</option>').join('') + '</select></div>'
-      + '<div class="form-field"><label class="form-label" for="prePlatform">Platform</label><select class="select" id="prePlatform">' + PRE_PLATFORMS.map((name) => '<option value="' + name + '"' + (name === draft.platform ? ' selected' : '') + '>' + name + '</option>').join('') + '</select></div>'
-      + '</div>'
-      + '<div class="page-stack">' + steps + '</div>'
-      + '<div class="file-upload' + (gap ? ' is-error' : '') + '" id="preDrop"><span>Drop CSV, Excel, or PDF files here, or</span><button type="button" class="link" id="preBrowse">browse</button></div>'
-      + '<input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf,text/csv,application/pdf" multiple hidden />'
-      + '<div class="page-stack">' + files + '</div>'
-      + detected
-      + '<p class="form-error-msg"' + (gap ? '' : ' hidden') + '>' + esc(gap) + '</p>'
-      + '<div><button type="button" class="link" id="preSamples">Use sample files</button></div>'
-      + '<div><button type="button" class="btn" id="preAnalyze">Run analysis</button></div>'
-      + '<p class="text-body2 text-secondary">Have the client\'s logins? <button type="button" class="link" id="preConnectInstead">Connect ' + esc(c.name) + '</button> instead</p>'
-      + '</div>';
+    const info = draft.info ? '<div class="alert alert-info" id="preInfo"><span class="material-icons" aria-hidden="true">info</span><span><span class="alert-title">We compare your integration data with your books.</span><span class="text-body2">We take transaction reports from both sides, match them, and show you what\'s missing or doesn\'t add up.</span><span class="text-body2">Read-only — nothing changes in your books.</span></span><button type="button" class="alert-close" id="preInfoClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>' : '';
+    const advice = '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Faster: connect ' + esc(c.name) + '\'s accounting and integrations. Synder pulls these reports for you — no uploads. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>';
+    const dates = '<div class="form-field"><label class="form-label form-label-required" for="preFrom">Date range</label><div class="d-flex gap-8"><input class="input" type="date" id="preFrom" value="' + esc(draft.from) + '"><input class="input" type="date" id="preTo" value="' + esc(draft.to) + '" aria-label="Date range end"></div>' + (draft.dateError ? '<p class="form-error-msg">Required</p>' : '') + '</div>';
+    const zone = '<div class="form-field"><span class="form-label">Upload your accounting and integration files</span><div class="file-upload' + (draft.fileError ? ' is-error' : '') + '" id="preDrop"><span>Browse or drag your files here</span><span>CSV, XLSX or PDF formats, up to 100MB</span><button type="button" class="link" id="preBrowse">Browse</button></div><input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf" multiple hidden>' + (draft.fileError ? '<p class="form-error-msg">' + esc(draft.fileError) + '</p>' : '') + '<div class="page-stack">' + preFileRows(draft.files) + '</div></div>';
+    const actions = '<button type="button" class="btn" id="preCheck">Check files</button>';
+    return preShell('Pre-assessment', c.name, actions, info + advice + dates + zone + preDirections());
   }
-  function usd(n) {
-    if (n == null) return '—';
-    const neg = n < 0;
-    const parts = Math.abs(n).toFixed(2).split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return (neg ? '-$' : '$') + parts[0] + '.' + parts[1];
+  function preGaps(files) {
+    const ok = files.filter((f) => f.rec && !f.rec.error && !f.rec.unrecognised);
+    const books = ok.some((f) => f.rec.group === 'Accounting');
+    const stripePay = ok.some((f) => f.rec.report === 'Payouts');
+    const stripeBal = ok.some((f) => f.rec.report === 'Balance change from activity');
+    const currencies = ok.map((f) => f.rec.currency).filter((v, i, a) => a.indexOf(v) === i);
+    return { books: books, stripePay: stripePay, stripeBal: stripeBal, currencies: currencies, bad: files.some((f) => f.rec && (f.rec.error || f.rec.unrecognised)) };
   }
-  function preShown(c) {
-    const history = (c.pre && c.pre.history) || [];
-    if (typeof st.preWhich === 'number' && history[st.preWhich]) return history[st.preWhich];
-    return c.pre || {};
-  }
-  function preStory(record) {
-    const platform = record.platform || 'Stripe';
-    const books = record.books || 'QuickBooks';
-    const period = record.period || 'Jan–Dec 2025';
-    const ok = (record.outcome || preOutcome(platform)) === 'ok';
-    const checked = record.checked || lastChecked(period);
-    if (ok) {
-      return {
-        ok: true, platform: platform, books: books, period: period, checked: checked,
-        platformTotal: 48220, booksTotal: 48220, difference: 0, matched: '186 of 186',
-        fixes: [],
-        counts: { matched: 186, books: 0, platform: 0, differs: 0 }
-      };
+  function renderPreCheck() {
+    const c = findOrg(st.clientId);
+    if (!c || !preDraft) { st.page = 'preupload'; return renderPreUpload(); }
+    const files = preDraft.files;
+    const gaps = preGaps(files);
+    const row = (f) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2">' + esc(f.rec.label) + '</span>' + statusChip('green', 'Recognised') + '</div>';
+    const group = (title, list) => '<div class="page-stack"><h2 class="text-subtitle2">' + title + '</h2>' + (list.map(row).join('') || '<p class="text-body2">—</p>') + '</div>';
+    const accounting = files.filter((f) => f.rec && f.rec.group === 'Accounting');
+    const integration = files.filter((f) => f.rec && f.rec.group === 'Integration');
+    let issues = '';
+    if (!gaps.books) issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Add your accounting file: QuickBooks Online Transaction report or Xero Account Transactions.</span></div>';
+    if (gaps.stripePay && !gaps.stripeBal) {
+      issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Stripe needs one more file: Balance change from activity.</span></div>' + preAcc('How to get Balance change from the activity from Stripe', stripeFile1Directions(), true) + '<div class="file-upload" id="preSlot"><span>Upload Balance change from activity</span></div>';
     }
-    return {
-      ok: false, platform: platform, books: books, period: period, checked: checked,
-      platformTotal: 18640, booksTotal: 14908.60, difference: 3731.40, matched: '412 of 431',
-      fixes: [
-        { label: '3 ' + platform + ' payouts are not in the books', amount: 2988 },
-        { label: platform + ' fees are booked as income, not as an expense', amount: 612.40 },
-        { label: 'One refund is recorded twice', amount: 89 },
-        { label: 'An adjustment is on ' + platform + ' and not in the books', amount: 42 }
-      ],
-      counts: { matched: 412, books: 12, platform: 4, differs: 3 }
-    };
+    files.forEach((f, i) => {
+      if (f.rec && f.rec.unrecognised) issues += '<div class="alert alert-error" id="preIssue"><span class="material-icons" aria-hidden="true">error</span><span>We couldn\'t recognise this file. Check the directions in "Where to get the files". <button type="button" class="link" data-pre-del="' + i + '">Remove</button></span></div>';
+    });
+    if (gaps.currencies.length > 1) issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Files are in ' + esc(gaps.currencies.join(' and ')) + '. Pre-assessment works with one currency — upload files in one currency.</span></div>';
+    const nudge = (gaps.stripePay || gaps.stripeBal) ? '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Connect Stripe to skip uploads — Synder pulls Balance change and Payouts for you. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>' : '';
+    const actions = '<button type="button" class="btn-outlined" id="preBack">Back</button><button type="button" class="btn" id="preRun">Run pre-assessment</button>';
+    return preShell('Pre-assessment', c.name, actions, group('Accounting', accounting) + group('Integration', integration) + issues + nudge);
   }
-  function preBridge(c, story) {
-    if (story.ok) return 'Books match. Connect ' + c.name + ' to keep them that way.';
-    const n = story.fixes.length;
-    return n + (n === 1 ? ' item' : ' items') + ' to fix, ' + usd(story.difference) + ' difference. Connect ' + c.name + ' to fix them with Synder.';
+  function logPhase() {
+    const elapsed = Date.now() - (st.preLogStart || Date.now());
+    if (!st.preLogLive) return 4;
+    if (elapsed < 1000) return 0;
+    if (elapsed < 2000) return 1;
+    if (elapsed < 3000) return 2;
+    if (elapsed < 4000) return 3;
+    return 4;
   }
-  function preTableRows(story, tab) {
-    const n = story.counts[tab] || 0;
-    const platform = story.platform;
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function logChip(phase, index) {
+    if (phase > index) return statusChip('green', 'Finished');
+    if (phase === index) return statusChip('yellow', 'In progress');
+    return statusChip('grey', 'Queued');
+  }
+  function logTimes(done) {
+    if (!done) return '<p class="text-body2">Start: —</p><p class="text-body2">End: —</p><p class="text-body2">Duration: —</p>';
+    return '<p class="text-body2">Start: Oct 31, 2026, 9:14 AM</p><p class="text-body2">End: Oct 31, 2026, 9:14 AM</p><p class="text-body2">Duration: 1s</p>';
+  }
+  function renderPreLog() {
+    const c = findOrg(st.clientId);
+    if (!c) return '';
+    const failed = c.pre && c.pre.status === 'failed';
+    const phase = failed ? 4 : logPhase();
+    if (st.preLogLive && !preTicker && phase < 4) {
+      preTicker = setInterval(() => {
+        if (!st || st.page !== 'prelog') { clearInterval(preTicker); preTicker = null; return; }
+        if (logPhase() >= 4) { clearInterval(preTicker); preTicker = null; finishPreLog(); return; }
+        renderMain();
+      }, 700);
+    }
+    const email = (ob && ob.userEmail) || 'ignat@wlslabs.com';
+    const alert = failed
+      ? '<div class="alert alert-error"><span class="material-icons" aria-hidden="true">error</span><span><span class="alert-title">Couldn’t build a reconciliation</span><span class="text-body2">There was an unexpected error when building the reconciliation. Check the error and try again.</span></span></div>'
+      : '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span><span class="alert-title">Building pre-assessment...</span><span class="text-body2">Synder is preparing your data for reconciliation. You can safely close this page while processing continues in the background. We\'ll email you at ' + esc(email) + ' as soon as it\'s ready.</span></span></div>';
+    const names = ['Read files', 'Normalize and map', 'Match transactions', 'Build balance reconciliation'];
+    const steps = names.map((name, i) => {
+      const extra = i === 2 ? '<p class="text-body2">Pass 1: Primary ID to Primary ID</p><p class="text-body2">Pass 2: Primary ID to Secondary ID</p><p class="text-body2">Pass 3: Secondary ID to Secondary ID</p><button type="button" class="link" id="preExplain">Explain matching</button>' : '';
+      return '<div class="page-stack"><h2 class="text-subtitle2">' + name + ' ' + logChip(phase, i) + '</h2>' + logTimes(phase > i) + extra + '</div>';
+    }).join('');
+    return preShell('Process log', '', '', alert + steps);
+  }
+  function finishPreLog() {
+    const id = st.clientId;
+    const c = findOrg(id);
+    if (!c) return;
+    if (id === 'e18') {
+      c.pre = { status: 'failed', period: 'Oct 1 - 31, 2026' };
+      persistDirectory();
+      if (st.page === 'prelog') renderMain();
+      return;
+    }
+    c.pre = { status: 'done', outcome: id === 'e6' ? 'ok' : 'gap', period: 'Oct 1 - 31, 2026' };
+    persistDirectory();
+    st.preLogLive = false;
+    if (st.page === 'prelog' && st.clientId === id) renderMain();
+    setTimeout(() => {
+      const still = st && st.page === 'prelog' && st.clientId === id;
+      if (still) openPreassessment(id);
+      else showPreToast(c);
+    }, 3000);
+  }
+  function showPreToast(c) {
+    showKitToast('Pre-assessment ready for ' + c.name);
+  }
+  function buildMatched() {
     const rows = [];
+    for (let i = 0; i < 56; i++) {
+      const day = (i % 28) + 1;
+      rows.push({
+        date: 'Oct ' + day + ', 2026',
+        id: 'SAMPLE-PO-' + String(i + 10).padStart(3, '0'),
+        amount: i === 0 ? -520.74 : Math.round((80 + i * 13) * 100) / 100,
+        types: i % 2 ? 'Transfer;payout' : 'Charge;sale',
+        match: 'Auto',
+        count: 2
+      });
+    }
+    rows[0].date = 'Oct 30, 2026';
+    rows[0].id = 'SAMPLE-PO-010';
+    return rows;
+  }
+  function buildDisc() {
+    return [
+      { id: 'SAMPLE-PO-201', acct: 1540, integ: 1420, delta: 120, date: 'Oct 12, 2026', type: 'Transfer;payout', count: 2 },
+      { id: 'SAMPLE-PO-202', acct: 612.4, integ: -612.4, delta: 1224.8, date: 'Oct 20, 2026', type: 'Fee', count: 2 },
+      { id: 'SAMPLE-PO-203', acct: 89, integ: 178, delta: -89, date: 'Oct 22, 2026', type: 'Refund', count: 2 }
+    ];
+  }
+  function buildMiss(side) {
+    const rows = [];
+    const n = side === 'acct' ? 3 : 2;
     for (let i = 0; i < n; i++) {
-      if (tab === 'books' && i < 3) {
-        rows.push({ date: ['Mar 12, 2025', 'Mar 15, 2025', 'Mar 18, 2025'][i], desc: platform + ' payout', left: [1100, 980, 908][i], right: null });
-        continue;
-      }
-      if (tab === 'differs' && i === 0) {
-        rows.push({ date: 'Jun 20, 2025', desc: platform + ' fee', left: -612.4, right: 612.4 });
-        continue;
-      }
-      if (tab === 'differs' && i === 1) {
-        rows.push({ date: 'Jun 22, 2025', desc: 'Refund', left: -89, right: -178 });
-        continue;
-      }
-      const amt = Math.round((40 + (i * 17) % 800) * 100) / 100;
-      const date = months[i % 12] + ' ' + ((i % 27) + 1) + ', 2025';
-      if (tab === 'matched') rows.push({ date: date, desc: 'Card payment', left: amt, right: amt });
-      else if (tab === 'books') rows.push({ date: date, desc: platform + ' payout', left: amt, right: null });
-      else if (tab === 'platform') rows.push({ date: date, desc: 'Bank deposit', left: null, right: amt });
-      else rows.push({ date: date, desc: 'Adjustment', left: amt, right: Math.round((amt - 18.5) * 100) / 100 });
+      rows.push({ date: 'Oct ' + (12 + i) + ', 2026', primary: 'SAMPLE-PO-' + (300 + i), secondary: 'ch_' + (800 + i), type: side === 'acct' ? 'Transfer;payout' : 'Charge;sale', amount: [1540, 980, 908][i] || 220, desc: side === 'acct' ? 'Stripe payout' : 'Card payment' });
     }
     return rows;
   }
-  function renderPreassessment() {
+  function ensurePreWork(id, ok) {
+    if (preWork && preWork.id === id) return preWork;
+    preWork = { id: id, ok: ok, matched: buildMatched(), discrepancy: ok ? [] : buildDisc(), missAcct: ok ? [] : buildMiss('acct'), missInt: ok ? [] : buildMiss('int'), ignored: [], expand: null, warn: !ok, q: '', amtMin: '', amtMax: '', currency: '', matchType: '' };
+    return preWork;
+  }
+  function resultRows(work, tab) {
+    const q = (work.q || '').toLowerCase();
+    let list = tab === 'matched' ? work.matched : (tab === 'discrepancy' ? work.discrepancy : (tab === 'ignored' ? work.ignored : []));
+    if (q) list = list.filter((row) => (row.id + ' ' + (row.types || row.type || '') + ' ' + (row.primary || '')).toLowerCase().indexOf(q) >= 0);
+    if (tab === 'matched' && work.matchType) list = list.filter((row) => row.match === work.matchType);
+    return list;
+  }
+  function renderPreResults() {
     const c = findOrg(st.clientId);
-    if (!c || !c.pre || c.pre.status !== 'done') { st.page = 'clients'; st.clientId = null; return renderClients(); }
-    const record = preShown(c);
-    const story = preStory(record);
-    const tab = ['matched', 'books', 'platform', 'differs'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
-    const tabs = [
-      ['matched', 'Matched', story.counts.matched],
-      ['books', 'Missing from books', story.counts.books],
-      ['platform', 'Missing from platform', story.counts.platform],
-      ['differs', 'Amount differs', story.counts.differs]
-    ];
-    const rows = preTableRows(story, tab);
-    const page = paginate('pre-' + c.id + '-' + tab, rows, [10, 25, 50]);
-    const diffOf = (row) => row.left == null ? row.right : (row.right == null ? row.left : Math.round((row.left - row.right) * 100) / 100);
-    const body = page.slice.map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.desc) + '</td><td>' + usd(row.left) + '</td><td>' + usd(row.right) + '</td><td>' + usd(diffOf(row)) + '</td></tr>').join('') || '<tr><td colspan="5" class="text-body2">Nothing in this group.</td></tr>';
-    const summaryRows = [
-      ['Accounting vs platform', booksLabel(story.books) + ' vs ' + story.platform],
-      ['Period', story.period],
-      ['Total on platform', usd(story.platformTotal)],
-      ['Total in books', usd(story.booksTotal)],
-      ['Difference', usd(story.difference)],
-      ['Matched', story.matched],
-      ['Last checked', story.checked]
-    ].map((pair) => '<tr><td><span class="text-body2 text-secondary">' + esc(pair[0]) + '</span></td><td><span class="text-body2">' + esc(pair[1]) + '</span></td></tr>').join('');
-    const chip = story.ok ? statusChip('green', 'Reconciled') : statusChip('yellow', 'Not reconciled');
-    const fixes = story.ok
-      ? '<h2 class="text-h2">What to fix</h2><p class="text-body2">Everything matches</p>'
-      : '<h2 class="text-h2">What to fix</h2>' + story.fixes.map((item) => '<p class="text-body2">' + esc(item.label) + ' <span class="text-secondary">' + usd(item.amount) + '</span></p>').join('');
-    const history = c.pre.history || [];
-    const earlier = [];
-    if (typeof st.preWhich === 'number') earlier.push({ key: 'latest', period: c.pre.period, checked: c.pre.checked || lastChecked(c.pre.period) });
-    history.forEach((item, i) => {
-      if (st.preWhich === i) return;
-      earlier.push({ key: String(i), period: item.period, checked: item.checked || lastChecked(item.period) });
+    if (!c || !c.pre || c.pre.status !== 'done') { st.page = 'preupload'; return renderPreUpload(); }
+    const ok = c.pre.outcome === 'ok';
+    const work = ensurePreWork(c.id, ok);
+    const tab = ['matched', 'discrepancy', 'missing', 'ignored'].indexOf(st.preTab) >= 0 ? st.preTab : 'matched';
+    const chip = ok
+      ? '<span class="tooltip-wrap"><span class="status status-green" tabindex="0">Reconciled</span><span class="tooltip" role="tooltip">All transactions matched with no issues found. Reconciliation for this period is complete.</span></span>'
+      : '<span class="tooltip-wrap"><span class="status status-yellow" tabindex="0">Attention required</span><span class="tooltip" role="tooltip">Issues were found during reconciliation — discrepancies, missing transactions, or balance differences. Open the results to see what needs attention.</span></span>';
+    const exportMenu = '<div class="row-menu"><button type="button" class="btn-outlined" data-menu="prex" aria-label="Export">Export</button><div class="dropdown-menu" id="rowmenu-prex"><button type="button" class="dropdown-item" data-pre-export="matched">Export matched</button><button type="button" class="dropdown-item" data-pre-export="discrepancy">Export discrepancy</button><button type="button" class="dropdown-item" data-pre-export="missing">Export missing source</button><button type="button" class="dropdown-item" data-pre-export="ignored">Export ignored</button><button type="button" class="dropdown-item" data-pre-export="all">Export all</button></div></div>';
+    const info = '<div class="page-stack"><div class="d-flex align-center gap-8"><h2 class="text-h2">Stripe clearing account</h2>' + chip + '</div><p class="text-body2">Stripe / Oct 1 - 31, 2026</p><div class="d-flex gap-8"><button type="button" class="btn-outlined" id="preLog">Process log</button>' + exportMenu + '</div></div>';
+    const warn = (!ok && work.warn) ? '<div class="alert alert-warning"><span class="material-icons" aria-hidden="true">warning</span><span>Resolve all transactions in Missing source and Discrepancy to finish reconciliation.</span><button type="button" class="alert-close" id="preWarnClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>' : '';
+    const balRows = ok
+      ? [['Accounting beginning balance', 12400], ['Increase', 8210.4], ['Decrease', 4479], ['Calculated ending balance', 16131.4], ['Accounting ending balance', 16131.4], ['Difference', 0]]
+      : [['Accounting beginning balance', 12400], ['Increase', 8210.4], ['Decrease', 4479], ['Calculated ending balance', 16131.4], ['Accounting ending balance', 12400], ['Difference', 3731.4]];
+    const balance = '<div class="table-wrap"><table class="synder-table"><tbody>' + balRows.map((pair) => '<tr><td><span class="text-body2">' + pair[0] + '</span></td><td><span class="text-body2">' + preMoney(pair[1]) + '</span></td></tr>').join('') + '</tbody></table></div><p class="text-body2">' + (ok ? 'Balance matches' : 'Balance is off by 3,731.40 USD') + '</p>' + (ok ? '' : '<p class="text-body2">To fix the difference, review the Discrepancy and/or Missing source tab(s).</p>');
+    const tabs = '<div class="tabs"><button type="button" class="tab' + (tab === 'matched' ? ' active' : '') + '" data-pre-tab="matched">Matched ' + work.matched.length + '</button><button type="button" class="tab' + (tab === 'discrepancy' ? ' active' : '') + '" data-pre-tab="discrepancy">Discrepancy ' + work.discrepancy.length + '</button><button type="button" class="tab' + (tab === 'missing' ? ' active' : '') + '" data-pre-tab="missing">Missing source ' + (work.missAcct.length + work.missInt.length) + '</button><button type="button" class="tab' + (tab === 'ignored' ? ' active' : '') + '" data-pre-tab="ignored">Ignored ' + work.ignored.length + '</button></div>';
+    const filters = '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="preQ" placeholder="Search by ID or Transaction type..." value="' + esc(work.q) + '"><input class="input" type="date" id="preFFrom" value="2026-10-01" aria-label="Date range"><input class="input" type="date" id="preFTo" value="2026-10-31" aria-label="Date range end"><input class="input" id="preMin" placeholder="Amount" value="' + esc(work.amtMin) + '" aria-label="Amount minimum"><input class="input" id="preMax" placeholder="Amount" value="' + esc(work.amtMax) + '" aria-label="Amount maximum"><select class="select" id="preCur" aria-label="Currency"><option value="">Currency</option><option value="USD"' + (work.currency === 'USD' ? ' selected' : '') + '>USD</option><option value="EUR"' + (work.currency === 'EUR' ? ' selected' : '') + '>EUR</option></select>' + (tab === 'matched' ? '<select class="select" id="preMatch" aria-label="Match type"><option value="">Match type</option><option value="Auto"' + (work.matchType === 'Auto' ? ' selected' : '') + '>Auto</option></select>' : '') + '<button type="button" class="btn" id="preApply">Apply</button><button type="button" class="btn-outlined" id="preReset">Reset filters</button></div>';
+    let table = '';
+    if (tab === 'matched') {
+      const page = paginate('preMatched', resultRows(work, 'matched'), [10, 25, 50]);
+      const body = page.slice.map((row) => {
+        const open = work.expand === row.id;
+        const sub = open ? '<tr><td colspan="7"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>Oct 30, 2026</td><td>' + esc(row.id) + '</td><td>po_010</td><td>Transfer</td><td>' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>Oct 30, 2026</td><td>' + esc(row.id) + '</td><td>po_010</td><td>payout</td><td>' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
+        return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">expand_more</span></button></td><td><input class="checkbox" type="checkbox" aria-label="Select ' + esc(row.id) + '"></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td></tr>' + sub;
+      }).join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th></th><th>Date</th><th>Matching ID</th><th>Total amount</th><th>Types</th><th>Match type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+    } else if (tab === 'discrepancy') {
+      const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td>' + preMoney(row.acct) + '</td><td>' + preMoney(row.integ) + '</td><td>' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td><td><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="d-' + esc(row.id) + '" aria-label="Row actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-d-' + esc(row.id) + '"><button type="button" class="dropdown-item" data-pre-unmatch="' + esc(row.id) + '">Unmatch</button><button type="button" class="dropdown-item" data-pre-ignore="' + esc(row.id) + '">Ignore</button></div></div></td></tr>').join('') || '<tr><td colspan="8" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th>Accounting total</th><th>Integration total</th><th>Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+    } else if (tab === 'missing') {
+      const missTable = (title, list, side) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th><th></th></tr></thead><tbody>' + (list.map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td><td><button type="button" class="link" data-pre-ignore-miss="' + side + ':' + esc(row.primary) + '">Ignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
+      table = '<div class="d-flex align-center gap-8 flex-wrap"><span class="text-body2">Manually match transactions for accurate reconciliation.</span><a class="link" href="https://synder.com/help/how-to-use-manual-matching-in-transaction-reconciliation/" target="_blank" rel="noopener">Learn more</a><button type="button" class="btn" id="preManual">Match manually</button></div><p class="form-error-msg" id="preManualError" hidden>Select one accounting row and one integration row.</p>' + missTable('Missing in accounting', work.missAcct, 'acct') + missTable('Missing in integration', work.missInt, 'int');
+    } else {
+      const body = work.ignored.map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td>' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td><td><button type="button" class="link" data-pre-unignore="' + esc(row.primary || row.id) + '">Unignore</button></td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
+      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+    }
+    const foot = ok
+      ? '<div class="page-stack"><p class="text-body2">Connect ' + esc(c.name) + ' to keep it that way.</p><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></div>'
+      : '<div class="page-stack"><h2 class="text-h2">Ready to fix these in Synder?</h2><p class="text-body2">Connect ' + esc(c.name) + ' to reconcile automatically every month — no uploads.</p><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></div>';
+    const actions = '<button type="button" class="btn-outlined" id="preShare">Copy share link</button><span class="tooltip-wrap"><button type="button" class="btn-outlined" id="preRefresh">Refresh data</button><span class="tooltip" role="tooltip">Create a new reconciliation for the same time period and same accounts.</span></span><button type="button" class="btn" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button>';
+    return preShell('Pre-assessment results', c.name, actions, info + warn + balance + tabs + filters + table + foot);
+  }
+  function preOverlayHtml() {
+    if (st.page === 'preupload') return renderPreUpload();
+    if (st.page === 'precheck') return renderPreCheck();
+    if (st.page === 'prelog') return renderPreLog();
+    if (st.page === 'preassess') return renderPreResults();
+    return '';
+  }
+  function bindPreOverlay(m) {
+    const bind = (id, fn) => { const el = m.querySelector('#' + id); if (el) el.onclick = fn; };
+    bind('preClose', closePre);
+    bind('preInfoClose', () => { if (preDraft) preDraft.info = false; renderMain(); });
+    bind('preCheck', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const draft = ensurePreDraft(c);
+      draft.from = ($('preFrom') && $('preFrom').value) || '';
+      draft.to = ($('preTo') && $('preTo').value) || '';
+      draft.dateError = (!draft.from || !draft.to) ? 'Required' : '';
+      const usable = draft.files.filter((f) => f.rec && !f.rec.error);
+      draft.fileError = usable.length ? '' : 'Please, upload your file';
+      if (draft.dateError || draft.fileError) { renderMain(); return; }
+      st.page = 'precheck';
+      save();
+      render();
     });
-    const earlierHtml = earlier.length
-      ? '<h2 class="text-h2">Earlier results</h2>' + earlier.map((item) => '<p class="text-body2"><button type="button" class="link" data-pre-earlier="' + item.key + '">' + esc(item.period) + '</button> <span class="text-secondary">' + esc(item.checked) + '</span></p>').join('')
-      : '';
-    const connect = '<button type="button" class="btn" id="preConnect">Connect ' + esc(c.name) + '</button>';
-    const connectEnd = '<div><button type="button" class="btn" id="preConnectEnd">Connect ' + esc(c.name) + '</button></div>';
-    const bridge = preBridge(c, story);
-    return '<div class="flow-wide page-stack">'
-      + '<a class="page-back" id="backClients" href="#clients">Back to clients</a>'
-      + '<div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">Pre-assessment</h1>' + chip + '</div><p class="synder-page-subtitle">' + esc(c.name) + '</p><p class="text-body2">' + esc(bridge) + '</p></div><div class="synder-page-actions">' + connect + '</div></div>'
-      + '<div class="table-wrap"><table class="synder-table"><tbody>' + summaryRows + '</tbody></table></div>'
-      + fixes
-      + '<div class="tabs">' + tabs.map(([id, label, n]) => '<button type="button" class="tab' + (id === tab ? ' active' : '') + '" data-pre-tab="' + id + '">' + esc(label) + ' (' + n + ')</button>').join('') + '</div>'
-      + '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Description</th><th>Amount on platform</th><th>Amount in books</th><th>Difference</th></tr></thead><tbody>' + body + '</tbody></table></div>'
-      + page.html
-      + earlierHtml
-      + connectEnd
-      + '</div>';
+    bind('preBack', () => { st.page = 'preupload'; save(); render(); });
+    bind('preRun', () => {
+      const issue = document.getElementById('preIssue');
+      if (issue) { issue.scrollIntoView({ block: 'center' }); return; }
+      st.page = 'prelog';
+      st.preLogLive = true;
+      st.preLogStart = Date.now();
+      const client = findOrg(st.clientId);
+      if (client) { client.pre = { status: 'running', period: 'Oct 1 - 31, 2026' }; persistDirectory(); }
+      save();
+      render();
+    });
+    bind('preBrowse', () => { const input = $('preFile'); if (input) input.click(); });
+    const zone = $('preDrop');
+    if (zone) zone.onclick = (e) => { if (e.target.closest('button')) return; addDemoPair(); renderMain(); };
+    const slot = $('preSlot');
+    if (slot) slot.onclick = () => { addPreFile('stripe-balance-change.csv', 0.6); renderMain(); };
+    const input = $('preFile');
+    if (input) input.onchange = () => {
+      Array.from(input.files || []).forEach((file) => addPreFile(file.name, Math.round((file.size / 1048576) * 10) / 10 || 0.1));
+      renderMain();
+    };
+    m.querySelectorAll('[data-pre-del]').forEach((b) => b.onclick = () => { preDraft.files.splice(Number(b.dataset.preDel), 1); renderMain(); });
+    m.querySelectorAll('[data-pre-connect]').forEach((b) => b.onclick = () => connectNamed(b.dataset.preConnect));
+    bind('preExplain', () => dialogShell('Matching rules', '<p class="text-body2">Synder matches the transactions following these 3 steps.</p>', '<button type="button" class="btn" data-cancel>Okay</button>'));
+    bind('preLog', () => { st.preLogLive = false; st.page = 'prelog'; save(); render(); });
+    bind('preShare', () => { const url = location.href; if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url); showKitToast('Link copied and ready to share.'); });
+    bind('preRefresh', () => {
+      const { modal, close } = dialogShell('Refresh will reset your changes', '<p class="text-body2">Any manual changes will be lost and returned to their original state.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="preRefreshGo">Continue</button>');
+      modal.querySelector('#preRefreshGo').onclick = () => { preWork = null; close(); renderMain(); };
+    });
+    bind('preWarnClose', () => { if (preWork) preWork.warn = false; renderMain(); });
+    bind('preApply', () => {
+      if (!preWork) return;
+      preWork.q = ($('preQ') && $('preQ').value) || '';
+      preWork.amtMin = ($('preMin') && $('preMin').value) || '';
+      preWork.amtMax = ($('preMax') && $('preMax').value) || '';
+      preWork.currency = ($('preCur') && $('preCur').value) || '';
+      preWork.matchType = ($('preMatch') && $('preMatch').value) || '';
+      const state = pagerState('preMatched');
+      state.page = 0;
+      renderMain();
+    });
+    bind('preReset', () => {
+      if (!preWork) return;
+      preWork.q = ''; preWork.amtMin = ''; preWork.amtMax = ''; preWork.currency = ''; preWork.matchType = '';
+      renderMain();
+    });
+    m.querySelectorAll('[data-pre-tab]').forEach((b) => b.onclick = () => { st.preTab = b.dataset.preTab; renderMain(); });
+    m.querySelectorAll('[data-pre-expand]').forEach((b) => b.onclick = () => { if (preWork) preWork.expand = preWork.expand === b.dataset.preExpand ? null : b.dataset.preExpand; renderMain(); });
+    m.querySelectorAll('[data-pre-export]').forEach((b) => b.onclick = () => showKitToast('The report will be sent to your email'));
+    m.querySelectorAll('[data-pre-unmatch]').forEach((b) => b.onclick = () => showKitToast('Successfully unmatched. Transactions were moved to Missing source tab.'));
+    m.querySelectorAll('[data-pre-ignore]').forEach((b) => b.onclick = () => {
+      if (!preWork) return;
+      const row = preWork.discrepancy.filter((item) => item.id === b.dataset.preIgnore)[0];
+      if (row) { preWork.discrepancy = preWork.discrepancy.filter((item) => item.id !== row.id); preWork.ignored.push({ date: row.date, primary: row.id, secondary: '-', type: row.type, amount: row.delta, desc: '-' }); }
+      showKitToast('Successfully ignored. Transactions were moved to Ignored tab.');
+      renderMain();
+    });
+    m.querySelectorAll('[data-pre-ignore-miss]').forEach((b) => b.onclick = () => {
+      if (!preWork) return;
+      const parts = b.dataset.preIgnoreMiss.split(':');
+      const list = parts[0] === 'acct' ? 'missAcct' : 'missInt';
+      const row = preWork[list].filter((item) => item.primary === parts[1])[0];
+      if (row) { preWork[list] = preWork[list].filter((item) => item.primary !== parts[1]); preWork.ignored.push(row); }
+      showKitToast('Successfully ignored. Transactions were moved to Ignored tab.');
+      renderMain();
+    });
+    m.querySelectorAll('[data-pre-unignore]').forEach((b) => b.onclick = () => {
+      if (!preWork) return;
+      preWork.ignored = preWork.ignored.filter((item) => (item.primary || item.id) !== b.dataset.preUnignore);
+      renderMain();
+    });
+    bind('preManual', () => {
+      const err = $('preManualError');
+      const checked = m.querySelectorAll('#preOverlay input.checkbox:checked');
+      if (checked.length < 2) { if (err) err.hidden = false; return; }
+      if (err) err.hidden = true;
+      showKitToast('Successfully matched. Transactions were moved to Matched tab.');
+    });
   }
   function issueChip(c) {
     const v = clientView(c);
@@ -4160,8 +4247,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
       else if (st.page === 'clientdetail') html = renderClientDetail();
       else if (st.page === 'clienthealth') html = renderClientHealth();
-      else if (st.page === 'preassess') html = renderPreassessment();
-      else if (st.page === 'preupload') html = renderPreUpload();
+      else if (st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck' || st.page === 'prelog') html = renderClients() + preOverlayHtml();
       else if (st.page === 'import') html = renderImport();
       else if (st.page === 'connect') html = renderConnect();
       else if (st.page === 'clientconnect') html = renderClientConnect();
@@ -4193,13 +4279,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-goto]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.goto); });
     m.querySelectorAll('[data-pre-run]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreUpload(b.dataset.preRun); });
     m.querySelectorAll('[data-pre-view]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreassessment(b.dataset.preView); });
-    m.querySelectorAll('[data-pre-tab]').forEach((b) => b.onclick = () => {
-      st.preTab = b.dataset.preTab;
-      const state = pagerState('pre-' + st.clientId + '-' + st.preTab);
-      state.page = 0;
-      save();
-      renderMain();
-    });
+    bindPreOverlay(m);
     m.querySelectorAll('[data-health]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       st.ctx = 'firm'; st.page = 'clienthealth'; st.clientId = b.dataset.health; st.orgId = null;
@@ -4273,59 +4353,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('connectLeave', cancelConnect);
     bind('backClients', () => goFirm('clients'));
     bind('detailGo', () => { if (st.clientId) openClient(st.clientId); });
-    bind('preConnect', () => { if (st.clientId) connectNamed(st.clientId); });
-    bind('preConnectEnd', () => { if (st.clientId) connectNamed(st.clientId); });
-    bind('preConnectInstead', () => { if (st.clientId) connectNamed(st.clientId); });
     bind('preHint', () => {
       const next = (sc().clients || []).find((c) => isOffClient(c) && !c.fresh);
       if (next) openPreUpload(next.id);
-    });
-    bind('preAnalyze', submitPreAnalysis);
-    bind('preBrowse', () => { const input = $('preFile'); if (input) input.click(); });
-    bind('preSamples', () => {
-      if (!preDraft) return;
-      preDraft.files = samplePreFiles(preDraft.books, preDraft.platform).map((f) => Object.assign({}, f));
-      preDraft.gap = '';
-      renderMain();
-    });
-    const preBooks = $('preBooks');
-    if (preBooks) preBooks.onchange = () => { preDraft.books = preBooks.value; preDraft.gap = ''; renderMain(); };
-    const prePlatform = $('prePlatform');
-    if (prePlatform) prePlatform.onchange = () => { preDraft.platform = prePlatform.value; relabelPreFiles(); preDraft.gap = ''; renderMain(); };
-    const preFile = $('preFile');
-    if (preFile) preFile.onchange = () => {
-      Array.from(preFile.files || []).forEach((file) => {
-        preDraft.files.push({ name: file.name, label: detectPreLabel(file.name, preDraft.platform, preDraft.files) });
-      });
-      preDraft.gap = '';
-      renderMain();
-    };
-    const preDrop = $('preDrop');
-    if (preDrop) {
-      preDrop.addEventListener('dragover', (e) => { e.preventDefault(); preDrop.classList.add('is-dragging'); });
-      preDrop.addEventListener('dragleave', () => preDrop.classList.remove('is-dragging'));
-      preDrop.addEventListener('drop', (e) => {
-        e.preventDefault();
-        preDrop.classList.remove('is-dragging');
-        const dropped = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
-        dropped.forEach((file) => {
-          preDraft.files.push({ name: file.name, label: detectPreLabel(file.name, preDraft.platform, preDraft.files) });
-        });
-        preDraft.gap = '';
-        renderMain();
-      });
-    }
-    m.querySelectorAll('[data-pre-remove]').forEach((b) => b.onclick = () => {
-      if (!preDraft) return;
-      preDraft.files.splice(Number(b.dataset.preRemove), 1);
-      preDraft.gap = '';
-      renderMain();
-    });
-    m.querySelectorAll('[data-pre-earlier]').forEach((b) => b.onclick = () => {
-      st.preWhich = b.dataset.preEarlier === 'latest' ? 'latest' : Number(b.dataset.preEarlier);
-      st.preTab = 'matched';
-      save();
-      render();
     });
     bind('bringCancel', () => goFirm('clients'));
     m.querySelectorAll('[data-reconnect]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClientConnect(b.dataset.reconnect); });
@@ -5222,9 +5252,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           st.page = 'clienthealth';
         } else if (parts[2] === 'pre-assessment' && parts[3] === 'upload') {
           st.page = 'preupload';
+        } else if (parts[2] === 'pre-assessment' && parts[3] === 'check') {
+          st.page = 'precheck';
+        } else if (parts[2] === 'pre-assessment' && parts[3] === 'log') {
+          st.page = 'prelog';
+          st.preLogLive = false;
         } else if (parts[2] === 'pre-assessment') {
           st.page = 'preassess';
-          if (st.preWhich == null) st.preWhich = 'latest';
         } else {
           st.page = 'clientdetail';
           st.detailTab = parts[2] === 'billing' || parts[2] === 'colleagues' ? parts[2] : 'work';
@@ -5303,7 +5337,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMode(); renderOb(); return;
     }
     if (st && st.page === 'clientconnect' && !isClient(st.clientId)) { st.page = 'clients'; st.clientId = null; }
-    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
+    if (st && (st.page === 'clientdetail' || st.page === 'clienthealth' || st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck' || st.page === 'prelog') && !isClient(st.clientId)) { st.ctx = 'firm'; st.page = 'clients'; st.clientId = null; }
     if (st && st.page === 'colleague' && !findPerson(st.colleagueId)) { st.ctx = 'firm'; st.page = 'colleagues'; st.colleagueId = null; }
     if (st && st.page === 'setup' && !isClient(st.clientId)) {
       st.ctx = 'firm'; st.page = 'clients'; st.clientId = null;
@@ -5334,6 +5368,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'addone') h += '/add';
     else if (st.ctx === 'firm' && st.page === 'clienthealth' && st.clientId) h = '#clients/' + st.clientId + '/health';
     else if (st.ctx === 'firm' && st.page === 'preupload' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/upload';
+    else if (st.ctx === 'firm' && st.page === 'precheck' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/check';
+    else if (st.ctx === 'firm' && st.page === 'prelog' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment/log';
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
@@ -5348,7 +5384,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       rainSparkles(maybeAutoStory);
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
-    if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); armPreTimers(); watchSync(); }
+    if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); watchSync(); }
     const bal = document.querySelector('.t-balance');
     if (bal) bal.hidden = !(st && st.ctx === 'org');
   }
