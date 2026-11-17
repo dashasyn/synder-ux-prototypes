@@ -1939,7 +1939,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Pay a fixed fee per client for unlimited integrations, syncs and rules.</p><button type="button" class="btn" id="revealLicences">See licenses</button><button type="button" class="btn-text" id="bookCallQuiet">Book a call</button></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="empty-state"><div class="empty-state-title">License-Based Pricing</div><p class="text-body2">Pay a fixed fee per client for unlimited integrations, syncs and rules.</p><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[1] - row[2]) + '</td></tr>').join('');
     return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openBuyLicenses">Buy licenses</button>') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><h2 class="text-h2">Purchased licenses</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div><h2 class="text-h2">Assign licenses</h2>' + renderAssignTab() + '</div>';
@@ -3113,9 +3113,61 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function preShell(title, subtitle, actions, body) {
     return '<div class="overlay" id="preOverlay" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="overlay-header"><div class="overlay-header-left"><button type="button" class="btn-icon" id="preClose" aria-label="Close"><span class="material-icons">close</span></button><div class="overlay-header-divider"></div><div><div class="overlay-header-title">' + esc(title) + '</div>' + (subtitle ? '<p class="text-body2">' + esc(subtitle) + '</p>' : '') + '</div></div><div class="overlay-header-actions">' + actions + '</div></div><div class="overlay-body page-stack">' + body + '</div></div>';
   }
+  function fileSpan(name) {
+    const n = String(name || '').toLowerCase();
+    if (/balance/.test(n)) return ['Sep 15, 2026', 'Oct 31, 2026'];
+    return ['Oct 1, 2026', 'Oct 31, 2026'];
+  }
+  function spanKey(label) {
+    const months = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+    const match = String(label).match(/([A-Z][a-z]{2}) (\d+), (\d+)/);
+    if (!match || !months[match[1]]) return 0;
+    return Number(match[3]) * 400 + months[match[1]] * 32 + Number(match[2]);
+  }
+  function dateOverlapNote(files) {
+    const spans = files.filter((f) => f.span && f.rec && !f.rec.error && !f.rec.unrecognised).map((f) => f.span);
+    if (spans.length < 2) return '';
+    const same = spans.every((span) => span[0] === spans[0][0] && span[1] === spans[0][1]);
+    if (same) return '';
+    const start = spans.map((span) => span[0]).sort((a, b) => spanKey(a) - spanKey(b)).pop();
+    const end = spans.map((span) => span[1]).sort((a, b) => spanKey(a) - spanKey(b))[0];
+    if (spanKey(start) > spanKey(end)) return '';
+    return 'Your files cover different dates. We\'ll compare only ' + start.replace(', 2026', '') + ' – ' + end + '.';
+  }
+  function guideBody(platform) {
+    if (platform === 'QuickBooks Online') return preSteps([
+      'Go to Reports → Standard reports → Balance sheet in your QuickBooks Online account',
+      'Select the period you want to reconcile',
+      'Click the total of the needed account',
+      'Export the Transaction report to Excel',
+      'Upload the file above'
+    ]);
+    if (platform === 'Xero') return preSteps([
+      'Open Xero Reporting reporting.xero.com → Account Transactions',
+      'Select accounts: Clearing, Accounts Receivable, Accounts Payable, Realized Currency Gains',
+      'Pick the date range that matches the reconciliation date range',
+      'Set Grouping to Group by Account',
+      'Select columns: Contact, Credit, Date, Debit, Description, Reference, Running Balance, Source. Then also Net.',
+      'Export as Excel (XLS or XLSX)'
+    ]) + '<p class="text-body2">Tip: save the report settings as a Custom view in Xero to avoid this next time.</p>';
+    if (platform === 'Stripe') return '<p class="text-subtitle2">Balance change from activity</p>' + stripeFile1Directions() + '<p class="text-subtitle2">Payouts</p>' + preSteps([
+      'Go to your Stripe account',
+      'Open Reports menu tab → Balance summary',
+      'Select the needed dates, currency (in case of multicurrency)',
+      'Scroll to “Payouts”, click “Export” → “Download to system” (go for “Itemized” report with “All” columns)',
+      'Upload the file above'
+    ]);
+    if (platform === 'PayPal') return preSteps([
+      'Navigate to Activity → All Reports in your PayPal account',
+      'Activities → Activity report',
+      'Transaction type = Balance affecting, then select date range, Format is CSV → create report',
+      'Upload the file above'
+    ]);
+    return '<p class="text-body2">We don\'t have a guide for ' + esc(platform) + ' yet. Export its transactions or payouts report as CSV.</p>';
+  }
   function addPreFile(name, sizeMb) {
     const rec = recogniseFile(name, sizeMb);
-    preDraft.files.push({ name: name, size: sizeMb, rec: rec });
+    preDraft.files.push({ name: name, size: sizeMb, rec: rec, span: fileSpan(name) });
     preDraft.fileError = '';
   }
   function addDemoPair() {
@@ -3125,16 +3177,28 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function preFileRows(files) {
     return files.map((f, i) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2 text-secondary">' + f.size + ' Mb</span>' + (f.rec && f.rec.error ? '<span class="text-body2 text-error">' + esc(f.rec.error) + '</span>' : '') + '<button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>').join('');
   }
+  function preModal(title, body, footer) {
+    return '<div class="modal-bg show" id="preOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="preTitle"><div class="modal-header"><span id="preTitle">' + esc(title) + '</span><button type="button" class="modal-close" id="preClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="modal-body page-stack">' + body + '</div>' + (footer ? '<div class="modal-footer">' + footer + '</div>' : '') + '</div></div>';
+  }
   function renderPreUpload() {
     const c = findOrg(st.clientId);
     if (!c) return '';
     const draft = ensurePreDraft(c);
-    const info = draft.info ? '<div class="alert alert-info" id="preInfo"><span class="material-icons" aria-hidden="true">info</span><span><span class="alert-title">We compare your integration data with your books.</span><span class="text-body2">We take transaction reports from both sides, match them, and show you what\'s missing or doesn\'t add up.</span><span class="text-body2">Read-only — nothing changes in your books.</span></span><button type="button" class="alert-close" id="preInfoClose" aria-label="Dismiss"><span class="material-icons">close</span></button></div>' : '';
-    const advice = '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Faster: connect ' + esc(c.name) + '\'s accounting and integrations. Synder pulls these reports for you — no uploads. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>';
-    const dates = '<div class="form-field"><label class="form-label form-label-required" for="preFrom">Date range</label><div class="d-flex gap-8"><input class="input" type="date" id="preFrom" value="' + esc(draft.from) + '"><input class="input" type="date" id="preTo" value="' + esc(draft.to) + '" aria-label="Date range end"></div>' + (draft.dateError ? '<p class="form-error-msg">Required</p>' : '') + '</div>';
-    const zone = '<div class="form-field"><span class="form-label">Upload your accounting and integration files</span><div class="file-upload' + (draft.fileError ? ' is-error' : '') + '" id="preDrop"><span>Browse or drag your files here</span><span>CSV, XLSX or PDF formats, up to 100MB</span><button type="button" class="link" id="preBrowse">Browse</button></div><input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf" multiple hidden>' + (draft.fileError ? '<p class="form-error-msg">' + esc(draft.fileError) + '</p>' : '') + '<div class="page-stack">' + preFileRows(draft.files) + '</div></div>';
-    const actions = '<button type="button" class="btn" id="preCheck">Check files</button>';
-    return preShell('Pre-assessment', c.name, actions, info + advice + dates + zone + preDirections());
+    const platforms = ['QuickBooks Online', 'Xero', 'Sage', 'Stripe', 'PayPal', 'Shopify', 'Square', 'Amazon'];
+    if (draft.showGuide && !draft.guide) draft.guide = 'QuickBooks Online';
+    const guide = draft.showGuide
+      ? '<div class="page-stack"><label class="form-label" for="preGuide">Platform</label><select class="select" id="preGuide">' + platforms.map((name) => '<option value="' + name + '"' + (draft.guide === name ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>' + guideBody(draft.guide) + '</div>'
+      : '';
+    const body = '<p class="text-body2">We take the dates from your files. If they don\'t match, we\'ll tell you.</p>'
+      + '<p class="text-body2">Upload a report from your books and a report from your sales or payment platform. We\'ll recognise the platforms and tell you if anything is missing.</p>'
+      + '<div class="file-upload' + (draft.fileError ? ' is-error' : '') + '" id="preDrop"><span>Browse or drag your files here</span><span>CSV, XLSX or PDF formats, up to 100MB</span><button type="button" class="link" id="preBrowse">Browse</button></div>'
+      + '<input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf" multiple hidden>'
+      + (draft.fileError ? '<p class="form-error-msg">' + esc(draft.fileError) + '</p>' : '')
+      + '<div class="page-stack">' + preFileRows(draft.files) + '</div>'
+      + '<div><button type="button" class="link" id="preWhere">Where do I get these files?</button></div>'
+      + guide
+      + '<p class="text-body2">Faster: <button type="button" class="link" data-pre-connect="' + c.id + '">connect ' + esc(c.name) + '</button>\'s accounting and integrations — Synder pulls the reports for you.</p>';
+    return preModal('Pre-assessment for ' + c.name, body, '<button type="button" class="btn" id="preCheck">Check files</button>');
   }
   function preGaps(files) {
     const ok = files.filter((f) => f.rec && !f.rec.error && !f.rec.unrecognised);
@@ -3159,12 +3223,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Stripe needs one more file: Balance change from activity.</span></div>' + preAcc('How to get Balance change from the activity from Stripe', stripeFile1Directions(), true) + '<div class="file-upload" id="preSlot"><span>Upload Balance change from activity</span></div>';
     }
     files.forEach((f, i) => {
-      if (f.rec && f.rec.unrecognised) issues += '<div class="alert alert-error" id="preIssue"><span class="material-icons" aria-hidden="true">error</span><span>We couldn\'t recognise this file. Check the directions in "Where to get the files". <button type="button" class="link" data-pre-del="' + i + '">Remove</button></span></div>';
+      if (f.rec && f.rec.unrecognised) issues += '<div class="alert alert-error" id="preIssue"><span class="material-icons" aria-hidden="true">error</span><span>We couldn\'t recognise this file. Check the directions in Where do I get these files? <button type="button" class="link" data-pre-del="' + i + '">Remove</button></span></div>';
     });
     if (gaps.currencies.length > 1) issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Files are in ' + esc(gaps.currencies.join(' and ')) + '. Pre-assessment works with one currency — upload files in one currency.</span></div>';
+    const dateNote = dateOverlapNote(files);
+    if (dateNote) issues += '<p class="text-body2" id="preDates">' + esc(dateNote) + '</p>';
     const nudge = (gaps.stripePay || gaps.stripeBal) ? '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Connect Stripe to skip uploads — Synder pulls Balance change and Payouts for you. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>' : '';
-    const actions = '<button type="button" class="btn-outlined" id="preBack">Back</button><button type="button" class="btn" id="preRun">Run pre-assessment</button>';
-    return preShell('Pre-assessment', c.name, actions, group('Accounting', accounting) + group('Integration', integration) + issues + nudge);
+    return preModal('Pre-assessment for ' + c.name, group('Accounting', accounting) + group('Integration', integration) + issues + nudge, '<button type="button" class="btn-outlined" id="preBack">Back</button><button type="button" class="btn" id="preRun">Run pre-assessment</button>');
   }
   function logPhase() {
     const elapsed = Date.now() - (st.preLogStart || Date.now());
@@ -3327,17 +3392,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function bindPreOverlay(m) {
     const bind = (id, fn) => { const el = m.querySelector('#' + id); if (el) el.onclick = fn; };
     bind('preClose', closePre);
-    bind('preInfoClose', () => { if (preDraft) preDraft.info = false; renderMain(); });
+    bind('preWhere', () => { if (preDraft) preDraft.showGuide = !preDraft.showGuide; renderMain(); });
+    const preGuide = $('preGuide');
+    if (preGuide) preGuide.onchange = () => { if (preDraft) preDraft.guide = preGuide.value; renderMain(); };
     bind('preCheck', () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const draft = ensurePreDraft(c);
-      draft.from = ($('preFrom') && $('preFrom').value) || '';
-      draft.to = ($('preTo') && $('preTo').value) || '';
-      draft.dateError = (!draft.from || !draft.to) ? 'Required' : '';
       const usable = draft.files.filter((f) => f.rec && !f.rec.error);
       draft.fileError = usable.length ? '' : 'Please, upload your file';
-      if (draft.dateError || draft.fileError) { renderMain(); return; }
+      if (draft.fileError) { renderMain(); return; }
       st.page = 'precheck';
       save();
       render();
@@ -3675,21 +3739,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span>${firmBooksConnected() ? '' : '<button type="button" class="btn" id="bannerImport">Import client list</button>'}<button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
         : '');
     const q = (st._q || '').toLowerCase();
-    const searched = listed.filter((c) => c.name.toLowerCase().includes(q));
-    const filterDefs = [
-      ['all', 'All', function () { return true; }],
-      ['unconnected', 'Not connected', isNotConnected],
-      ['unconfigured', 'Not configured', isNotConfigured],
-      ['lost', 'Connection lost', isConnectionLost],
-      ['disconnected', 'Disconnected', isUserDisconnected],
-      ['health', 'Failed health checks', isFailedHealth]
-    ];
-    const filter = filterDefs.some((item) => item[0] === st.listFilter) ? st.listFilter : 'all';
-    const counts = {};
-    filterDefs.forEach((item) => { counts[item[0]] = searched.filter(item[2]).length; });
-    let rows = searched.filter(filterDefs.find((item) => item[0] === filter)[2]);
-    if (st.openMonth) rows = rows.filter((c) => (c.monthStatus || 'Open') !== 'Closed');
-    if (st.tagFilter) rows = rows.filter((c) => (c.tags || []).indexOf(st.tagFilter) >= 0);
+    const rows = listed.filter((c) => c.name.toLowerCase().includes(q));
     const showHealth = listed.some((c) => !isOffClient(c));
     const body = rows.map((c) => {
       const off = isOffClient(c);
@@ -3703,30 +3753,21 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td>${acctCell(c)}</td>
-        <td>${integCell(c)}</td>
         ${showHealth ? `<td>${healthCell(c)}</td>` : ''}
-        <td>${preCell(c)}</td>
         <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
       ${pageHeader('Clients', `${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}<button type="button" class="btn-outlined" id="listAdd">Add client</button><button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>`)}
       ${banner}
-      <div class="tabs" role="tablist">
-        ${filterDefs.map((item) => `<button type="button" class="tab${filter === item[0] ? ' active' : ''}" data-filter="${item[0]}" role="tab" aria-selected="${filter === item[0]}">${item[1]} <span class="status status-grey">${counts[item[0]]}</span></button>`).join('')}
-      </div>
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
-      <div class="d-flex align-center gap-8 flex-wrap">
-        <button type="button" class="btn-outlined" id="tagFilterBtn">${esc(st.tagFilter ? (firmTags.find((t) => t.id === st.tagFilter) || {}).name || 'All tags' : 'All tags')}</button>
-        <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="openMonth"${st.openMonth ? ' checked' : ''}> Has open month</label>
-      </div>
-      ${rows.length ? `<div class="table-wrap clients-table"><table class="synder-table">
-          <thead><tr><th>Name</th><th>Accounting</th><th>Integrations</th>${showHealth ? '<th>Health checks</th>' : ''}<th>Pre-assessment</th><th></th></tr></thead>
-        <tbody>${body}</tbody>
+      <div class="table-wrap clients-table"><table class="synder-table">
+          <thead><tr><th>Name</th><th>Connection</th>${showHealth ? '<th>Health checks</th>' : ''}<th></th></tr></thead>
+        <tbody>${body || `<tr><td colspan="${showHealth ? 3 : 2}" class="text-body2">No clients match.</td></tr>`}</tbody>
       </table></div>
-      <div class="tbl-foot" id="listCount">${rows.length} of ${searched.length} clients</div>` : '<div class="empty-state"><p class="empty-state-title">No clients match.</p></div>'}
+      <div class="tbl-foot" id="listCount">${rows.length} of ${listed.length} clients</div>
     </div>${flowDialogs()}`;
   }
   const WORK_MONTHS = [
@@ -4037,12 +4078,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const status = isUserDisconnected(c) ? 'Disconnected' : (booksLost(c) ? 'Connection lost' : 'Connected');
     return books + ' · ' + status;
   }
+  function settingsBlock(title, text, action) {
+    return '<div class="card d-flex align-center justify-between gap-16"><div><h2 class="text-subtitle1">' + title + '</h2><p class="text-body2">' + text + '</p></div>' + action + '</div>';
+  }
   function renderFirmSettings() {
-    return `<div class="flow-wide page-stack">
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">Firm settings</h1><p class="synder-page-subtitle"><button type="button" class="link" id="copyFirmId">Firm ID ${esc(FIRM.firmId)}</button></p></div></div>
-      <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
-      <div><button type="button" class="btn" id="firmNameSave">Save</button></div>
-      <div class="d-flex gap-8"><button type="button" class="btn-outlined" id="firmChecklistBtn">Firm checklist</button><button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button></div>
+    return `<div class="flow-narrow content-narrow page-stack">
+      ${pageHeader('Firm settings')}
+      <div class="card page-stack">
+        <div class="d-flex align-center justify-between gap-16">
+          <div><h2 class="text-subtitle1">Firm details</h2><p class="text-body2">The name your team and clients see.</p></div>
+          <button type="button" class="btn" id="firmNameSave">Save</button>
+        </div>
+        <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
+      </div>
+      ${settingsBlock('Firm ID', esc(FIRM.firmId), '<button type="button" class="btn-copy" id="copyFirmId" aria-label="Copy Firm ID">content_copy</button>')}
+      ${settingsBlock('Firm tags', 'Group clients with your own labels, like region or service type.', '<button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button>')}
+      ${settingsBlock('Checklist', 'Set the month-close steps your team follows for every client.', '<button type="button" class="btn-outlined" id="firmChecklistBtn">Edit checklist</button>')}
     </div>`;
   }
   function colleagueRoleName(p) {
@@ -4052,39 +4103,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderColleague() {
     const p = findPerson(st.colleagueId);
     if (!p) return renderColleagues();
-    const tab = st.colleagueTab || 'details';
-    const assigned = accessForPerson(p.id).map((a) => Object.assign({ locked: false }, a));
-    const tabs = `<div class="tabs" role="tablist"><button type="button" class="tab${tab === 'details' ? ' active' : ''}" data-col-tab="details" role="tab">Details</button><button type="button" class="tab${tab === 'clients' ? ' active' : ''}" data-col-tab="clients" role="tab">Clients</button></div>`;
-    const adminTag = '<span class="status status-grey">' + esc(colleagueRoleName(p)) + '</span>';
-    let body = '';
-    if (tab === 'clients') {
-      const q = (st.personClientQ || '').toLowerCase();
-      const filtered = assigned.filter((a) => a.client && (!q || a.client.name.toLowerCase().includes(q)));
-      const page = paginate('personClients', filtered, [25, 50, 100]);
-      const rows = page.slice.map((a) => {
-        const select = a.locked
-          ? `<span class="text-body2">${esc(a.role)}</span>`
-          : `<select class="select" data-inline-role="${p.id}:${a.clientId}" aria-label="Role in the client"><option value="Manager"${a.role === 'Manager' ? ' selected' : ''}>Manager</option><option value="Member"${a.role !== 'Manager' ? ' selected' : ''}>Member</option></select>`;
-        return `<tr><td><span class="text-body2">${esc(a.client.name)}</span></td><td>${select}</td><td class="text-right"><button type="button" class="btn-icon" data-drop-client="${p.id}:${a.clientId}" aria-label="Remove ${esc(a.client.name)}"><span class="material-icons">close</span></button></td></tr>`;
-      }).join('') || '<tr><td colspan="3" class="text-body2">No clients assigned.</td></tr>';
-      body = `<div class="page-stack">
-        <div class="d-flex align-center gap-8"><input type="search" class="input-search" id="personClientSearch" placeholder="Search by client's name" value="${esc(st.personClientQ || '')}" /><button type="button" class="btn" id="addPersonClient">Add a client</button></div>
-        <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client name</th><th>Role in the client</th><th class="text-right"></th></tr></thead><tbody>${rows}</tbody></table></div>
-        ${page.html}
-      </div>`;
-    } else {
-      const current = colleagueRoleName(p);
-      const role = `<select class="select" id="firmRole" aria-label="Role in the Firm"><option value="Admin"${current === 'Admin' ? ' selected' : ''}>Admin</option><option value="Colleague"${current === 'Colleague' ? ' selected' : ''}>Colleague</option></select>`;
-      body = `<div class="page-stack">
-        <div class="form-field"><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
-        <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label>${role}</div>
-        <div class="form-field"><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
-      </div>`;
-    }
-    return `<div class="flow-wide page-stack">
+    const assigned = accessForPerson(p.id);
+    const clients = assigned.length
+      ? assigned.map((a) => '<p class="text-body2">' + esc(a.client.name) + ' · ' + esc(a.role || 'Member') + '</p>').join('')
+      : '<p class="text-body2">No clients assigned.</p>';
+    const current = colleagueRoleName(p);
+    const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
+    return `<div class="flow-narrow content-narrow page-stack">
       <a class="page-back" id="backColleagues" href="#colleagues">Back to colleagues</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><div class="page-title-row"><h1 class="synder-page-title">${esc(p.name)}</h1>${adminTag}</div></div><div class="synder-page-actions"><button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button></div></div>
-      ${tabs}${body}
+      ${pageHeader(esc(p.name), '<button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button>')}
+      <div class="card page-stack">
+        <div><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
+        <div><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
+        <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label><select class="select" id="firmRole" aria-label="Role in the Firm"><option value="Admin"${current === 'Admin' ? ' selected' : ''}>Admin</option><option value="Colleague"${current === 'Colleague' ? ' selected' : ''}>Colleague</option></select></div>
+        <div><span class="form-label">Status</span><p class="text-body2">${status}</p></div>
+        <div><span class="form-label">Clients</span>${clients}</div>
+      </div>
     </div>`;
   }
   function renderClientHealth() {
@@ -4593,14 +4627,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('copyFirmId', () => {
       const id = FIRM.firmId || '';
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id).catch(() => {});
-      showKitToast('Firm ID copied');
+      showKitToast('Copied');
     });
     bindClick('sortColName', () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); });
     const sortTh = document.getElementById('sortColName');
     if (sortTh) sortTh.onclick = () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); };
     bindClick('revealLicences', () => { st.licencesOn = true; render(); });
     bindClick('openBuyLicenses', () => { st.page = 'buylicenses'; st.licencesOn = true; render(); });
-    bindClick('bookCallQuiet', () => showKitToast('We’ll email you to book a call'));
+    bindClick('bookCallQuiet', () => { st.licencesOn = true; render(); });
     bindClick('backBilling', () => { st.page = 'billing'; st.licencesOn = true; render(); });
     m.querySelectorAll('[data-manage-tab]').forEach((b) => b.onclick = () => { st.manageTab = b.dataset.manageTab; render(); });
     m.querySelectorAll('[data-buy-period]').forEach((b) => b.onclick = () => { ensureBuyDraft().period = b.dataset.buyPeriod; renderMain(); });
