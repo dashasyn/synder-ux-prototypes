@@ -347,7 +347,6 @@ body.wizard-plain .p-main { padding: 0; min-height: calc(100vh - var(--proto-bar
 .connect-main .progress { margin-top: var(--space-4); max-width: 360px; }
 .tooltip-wrap:focus-within .tooltip { opacity: 1; }
 .clients-table { overflow: visible; }
-.clients-table table.synder-table tbody td { height: 68px; padding-top: var(--space-2); padding-bottom: var(--space-2); }
 .status-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-4); }
 .detail-block { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 .detail-block .text-h2, .detail-block p { margin: 0; }
@@ -2978,10 +2977,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     return preLink(c.id, 'run', 'Try pre-assessment');
   }
+  function preEligible(c) {
+    return !!c && isOffClient(c) && !((c.integrations || []).length);
+  }
   function preMenuItem(c) {
-    if (!isOffClient(c) || (c.pre && c.pre.status === 'running')) return '';
-    if (c.pre && c.pre.status === 'done') return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>';
-    return '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
+    if (!preEligible(c) || (c.pre && c.pre.status === 'running')) return '';
+    const run = '<button type="button" class="dropdown-item" data-pre-run="' + c.id + '">Run pre-assessment</button>';
+    if (c.pre && c.pre.status === 'done') return '<button type="button" class="dropdown-item" data-pre-view="' + c.id + '">View pre-assessment</button>' + run;
+    return run;
   }
   function ensurePreSeeds() {
     const seeds = {
@@ -3066,7 +3069,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       preAbove()
     ]);
   }
-  function recogniseFile(name, sizeMb) {
+  function classifyFile(name, sizeMb) {
     const n = String(name || '').toLowerCase();
     const ext = n.split('.').pop();
     if (sizeMb > 100) return { error: 'File exceeds max size' };
@@ -3078,7 +3081,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (/stripe/.test(n) && /payout/.test(n)) return { group: 'Integration', platform: 'Stripe', report: 'Payouts', label: 'Stripe · Payouts', currency: currency };
     if (/stripe/.test(n) && /balance/.test(n)) return { group: 'Integration', platform: 'Stripe', report: 'Balance change from activity', label: 'Stripe · Balance change from activity', currency: currency };
     if (/paypal|statement/.test(n)) return { group: 'Integration', platform: 'PayPal', report: 'Statement', label: 'PayPal · Statement', currency: currency };
-    return { unrecognised: true };
+    return { unknown: true };
   }
   function ensurePreDraft(c) {
     if (preDraft && preDraft.id === c.id) return preDraft;
@@ -3127,7 +3130,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return Number(match[3]) * 400 + months[match[1]] * 32 + Number(match[2]);
   }
   function dateOverlapNote(files) {
-    const spans = files.filter((f) => f.span && f.rec && !f.rec.error && !f.rec.unrecognised).map((f) => f.span);
+    const spans = files.filter((f) => f.span && f.rec && !f.rec.error && !f.rec.unknown).map((f) => f.span);
     if (spans.length < 2) return '';
     const same = spans.every((span) => span[0] === spans[0][0] && span[1] === spans[0][1]);
     if (same) return '';
@@ -3168,19 +3171,41 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return '<p class="text-body2">We don\'t have a guide for ' + esc(platform) + ' yet. Export its transactions or payouts report as CSV.</p>';
   }
   function addPreFile(name, sizeMb) {
-    const rec = recogniseFile(name, sizeMb);
+    const rec = classifyFile(name, sizeMb);
     preDraft.files.push({ name: name, size: sizeMb, rec: rec, span: fileSpan(name) });
     preDraft.fileError = '';
+  }
+  function addLabeled(name, label, group, report) {
+    if (!preDraft || preDraft.files.some((f) => f.rec && f.rec.label === label)) return;
+    preDraft.files.push({ name: name, size: 1.2, rec: { group: group, label: label, report: report }, span: fileSpan(name) });
+    preDraft.fileError = '';
+    preDraft.missingError = false;
+  }
+  function demoDropClick() {
+    const c = findOrg(st.clientId);
+    if (!c) return;
+    const draft = ensurePreDraft(c);
+    const labels = draft.files.map((f) => f.rec && f.rec.label);
+    const hasBooks = labels.indexOf('QuickBooks Online · Transaction report') >= 0;
+    const hasPay = labels.indexOf('Stripe · Payouts') >= 0;
+    const hasBal = labels.indexOf('Stripe · Balance change from activity') >= 0;
+    if (!hasBooks || !hasPay) {
+      addLabeled('quickbooks-transaction-report.xlsx', 'QuickBooks Online · Transaction report', 'Accounting', 'Transaction report');
+      addLabeled('stripe-payouts.csv', 'Stripe · Payouts', 'Integration', 'Payouts');
+    } else if (!hasBal) {
+      addLabeled('stripe-balance-change.csv', 'Stripe · Balance change from activity', 'Integration', 'Balance change from activity');
+    }
+    renderMain();
   }
   function addDemoPair() {
     addPreFile('quickbooks-transaction-report.xlsx', 1.2);
     addPreFile('stripe-payouts.csv', 0.8);
   }
   function preFileRows(files) {
-    return files.map((f, i) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2 text-secondary">' + f.size + ' Mb</span>' + (f.rec && f.rec.error ? '<span class="text-body2 text-error">' + esc(f.rec.error) + '</span>' : '') + '<button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>').join('');
+    return files.map((f, i) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2">' + esc((f.rec && f.rec.label) || '') + '</span><button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>').join('');
   }
   function preModal(title, body, footer) {
-    return '<div class="modal-bg show" id="preOverlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="preTitle"><div class="modal-header"><span id="preTitle">' + esc(title) + '</span><button type="button" class="modal-close" id="preClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="modal-body page-stack">' + body + '</div>' + (footer ? '<div class="modal-footer">' + footer + '</div>' : '') + '</div></div>';
+    return '<div class="modal-bg show" id="preOverlay"><div class="modal d-flex flex-col" role="dialog" aria-modal="true" aria-labelledby="preTitle"><div class="modal-header"><span id="preTitle">' + esc(title) + '</span><button type="button" class="modal-close" id="preClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="modal-body overlay-body page-stack">' + body + '</div>' + (footer ? '<div class="modal-footer">' + footer + '</div>' : '') + '</div></div>';
   }
   function renderPreUpload() {
     const c = findOrg(st.clientId);
@@ -3191,31 +3216,37 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const guide = draft.showGuide
       ? '<div class="page-stack"><label class="form-label" for="preGuide">Platform</label><select class="select" id="preGuide">' + platforms.map((name) => '<option value="' + name + '"' + (draft.guide === name ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>' + guideBody(draft.guide) + '</div>'
       : '';
-    const body = '<p class="text-body2">We take the dates from your files. If they don\'t match, we\'ll tell you.</p>'
-      + '<p class="text-body2">Upload a report from your books and a report from your sales or payment platform. We\'ll recognise the platforms and tell you if anything is missing.</p>'
+    const gaps = preGaps(draft.files);
+    const missing = gaps.stripePay && !gaps.stripeBal;
+    const missingAlert = missing
+      ? '<div class="alert ' + (draft.missingError ? 'alert-error' : 'alert-warning') + '" id="preIssue"><span class="material-icons" aria-hidden="true">' + (draft.missingError ? 'error' : 'warning') + '</span><span>Add one more Stripe file: Balance change from activity. <button type="button" class="link" id="preHowMissing">How to get it</button></span></div>'
+      : '';
+    const body = '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Faster: connect ' + esc(c.name) + '\'s accounting and integrations. Synder pulls the reports for you. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>'
+      + '<p class="text-body2">Upload a report from your books and a report from your sales or payment platform. We\'ll reconcile them and show what matches.</p>'
       + '<div class="file-upload' + (draft.fileError ? ' is-error' : '') + '" id="preDrop"><span>Browse or drag your files here</span><span>CSV, XLSX or PDF formats, up to 100MB</span><button type="button" class="link" id="preBrowse">Browse</button></div>'
       + '<input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf" multiple hidden>'
       + (draft.fileError ? '<p class="form-error-msg">' + esc(draft.fileError) + '</p>' : '')
       + '<div class="page-stack">' + preFileRows(draft.files) + '</div>'
+      + missingAlert
       + '<div><button type="button" class="link" id="preWhere">Where do I get these files?</button></div>'
       + guide
-      + '<p class="text-body2">Faster: <button type="button" class="link" data-pre-connect="' + c.id + '">connect ' + esc(c.name) + '</button>\'s accounting and integrations — Synder pulls the reports for you.</p>';
-    return preModal('Pre-assessment for ' + c.name, body, '<button type="button" class="btn" id="preCheck">Check files</button>');
+      + '<div><button type="button" class="btn-text" id="preSamples">Use sample files</button></div>';
+    return preModal('Pre-assessment for ' + c.name, body, '<button type="button" class="btn-outlined" id="preCloseFoot">Cancel</button><button type="button" class="btn" id="preRun">Run pre-assessment</button>');
   }
   function preGaps(files) {
-    const ok = files.filter((f) => f.rec && !f.rec.error && !f.rec.unrecognised);
+    const ok = files.filter((f) => f.rec && !f.rec.error && !f.rec.unknown);
     const books = ok.some((f) => f.rec.group === 'Accounting');
     const stripePay = ok.some((f) => f.rec.report === 'Payouts');
     const stripeBal = ok.some((f) => f.rec.report === 'Balance change from activity');
     const currencies = ok.map((f) => f.rec.currency).filter((v, i, a) => a.indexOf(v) === i);
-    return { books: books, stripePay: stripePay, stripeBal: stripeBal, currencies: currencies, bad: files.some((f) => f.rec && (f.rec.error || f.rec.unrecognised)) };
+    return { books: books, stripePay: stripePay, stripeBal: stripeBal, currencies: currencies, bad: files.some((f) => f.rec && (f.rec.error || f.rec.unknown)) };
   }
   function renderPreCheck() {
     const c = findOrg(st.clientId);
     if (!c || !preDraft) { st.page = 'preupload'; return renderPreUpload(); }
     const files = preDraft.files;
     const gaps = preGaps(files);
-    const row = (f) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2">' + esc(f.rec.label) + '</span>' + statusChip('green', 'Recognised') + '</div>';
+    const row = (f) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2">' + esc(f.rec.label) + '</span></div>';
     const group = (title, list) => '<div class="page-stack"><h2 class="text-subtitle2">' + title + '</h2>' + (list.map(row).join('') || '<p class="text-body2">—</p>') + '</div>';
     const accounting = files.filter((f) => f.rec && f.rec.group === 'Accounting');
     const integration = files.filter((f) => f.rec && f.rec.group === 'Integration');
@@ -3225,7 +3256,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Stripe needs one more file: Balance change from activity.</span></div>' + preAcc('How to get Balance change from the activity from Stripe', stripeFile1Directions(), true) + '<div class="file-upload" id="preSlot"><span>Upload Balance change from activity</span></div>';
     }
     files.forEach((f, i) => {
-      if (f.rec && f.rec.unrecognised) issues += '<div class="alert alert-error" id="preIssue"><span class="material-icons" aria-hidden="true">error</span><span>We couldn\'t recognise this file. Check the directions in Where do I get these files? <button type="button" class="link" data-pre-del="' + i + '">Remove</button></span></div>';
+      if (f.rec && f.rec.unknown) issues += '<div class="alert alert-error" id="preIssue"><span class="material-icons" aria-hidden="true">error</span><span>This file is not one of the expected reports. <button type="button" class="link" data-pre-del="' + i + '">Remove</button></span></div>';
     });
     if (gaps.currencies.length > 1) issues += '<div class="alert alert-warning" id="preIssue"><span class="material-icons" aria-hidden="true">warning</span><span>Files are in ' + esc(gaps.currencies.join(' and ')) + '. Pre-assessment works with one currency — upload files in one currency.</span></div>';
     const dateNote = dateOverlapNote(files);
@@ -3385,8 +3416,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return preShell('Pre-assessment results', c.name, actions, info + warn + balance + tabs + filters + table + foot);
   }
   function preOverlayHtml() {
-    if (st.page === 'preupload') return renderPreUpload();
-    if (st.page === 'precheck') return renderPreCheck();
+    if (st.page === 'preupload' || st.page === 'precheck') return renderPreUpload();
     if (st.page === 'prelog') return renderPreLog();
     if (st.page === 'preassess') return renderPreResults();
     return '';
@@ -3397,34 +3427,54 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('preWhere', () => { if (preDraft) preDraft.showGuide = !preDraft.showGuide; renderMain(); });
     const preGuide = $('preGuide');
     if (preGuide) preGuide.onchange = () => { if (preDraft) preDraft.guide = preGuide.value; renderMain(); };
-    bind('preCheck', () => {
+    bind('preCloseFoot', closePre);
+    bind('preHowMissing', () => {
+      if (!preDraft) return;
+      preDraft.showGuide = true;
+      preDraft.guide = 'Stripe';
+      renderMain();
+      const guide = document.getElementById('preGuide');
+      if (guide) guide.scrollIntoView({ block: 'center' });
+    });
+    bind('preSamples', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const draft = ensurePreDraft(c);
+      draft.files = [];
+      draft.fileError = '';
+      draft.missingError = false;
+      addLabeled('quickbooks-transaction-report.xlsx', 'QuickBooks Online · Transaction report', 'Accounting', 'Transaction report');
+      addLabeled('stripe-payouts.csv', 'Stripe · Payouts', 'Integration', 'Payouts');
+      addLabeled('stripe-balance-change.csv', 'Stripe · Balance change from activity', 'Integration', 'Balance change from activity');
+      renderMain();
+    });
+    bind('preRun', () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const draft = ensurePreDraft(c);
       const usable = draft.files.filter((f) => f.rec && !f.rec.error);
-      draft.fileError = usable.length ? '' : 'Please, upload your file';
-      if (draft.fileError) { renderMain(); return; }
-      st.page = 'precheck';
-      save();
-      render();
-    });
-    bind('preBack', () => { st.page = 'preupload'; save(); render(); });
-    bind('preRun', () => {
-      const issue = document.getElementById('preIssue');
-      if (issue) { issue.scrollIntoView({ block: 'center' }); return; }
+      if (!usable.length) { draft.fileError = 'Required'; draft.missingError = false; renderMain(); return; }
+      const gaps = preGaps(draft.files);
+      if (gaps.stripePay && !gaps.stripeBal) {
+        draft.missingError = true;
+        draft.fileError = '';
+        renderMain();
+        const issue = document.getElementById('preIssue');
+        if (issue) issue.scrollIntoView({ block: 'center' });
+        return;
+      }
+      draft.missingError = false;
       st.page = 'prelog';
       st.preLogLive = true;
       st.preLogStart = Date.now();
-      const client = findOrg(st.clientId);
-      if (client) { client.pre = { status: 'running', period: 'Oct 1 - 31, 2026' }; persistDirectory(); }
+      c.pre = { status: 'running', period: 'Oct 1 - 31, 2026' };
+      persistDirectory();
       save();
       render();
     });
     bind('preBrowse', () => { const input = $('preFile'); if (input) input.click(); });
     const zone = $('preDrop');
-    if (zone) zone.onclick = (e) => { if (e.target.closest('button')) return; addDemoPair(); renderMain(); };
-    const slot = $('preSlot');
-    if (slot) slot.onclick = () => { addPreFile('stripe-balance-change.csv', 0.6); renderMain(); };
+    if (zone) zone.onclick = (e) => { if (e.target.closest('button')) return; demoDropClick(); };
     const input = $('preFile');
     if (input) input.onchange = () => {
       Array.from(input.files || []).forEach((file) => addPreFile(file.name, Math.round((file.size / 1048576) * 10) / 10 || 0.1));
@@ -3749,6 +3799,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const rowBtn = off
         ? `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`
         : (lost ? `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>` : '');
+      const preRow = preEligible(c) ? `<button type="button" class="link" data-pre-run="${c.id}">Run pre-assessment</button>` : '';
       const menuExtra = off
         ? `<button type="button" class="dropdown-item" data-connect="${c.id}">Connect client</button>`
         : (lost ? `<button type="button" class="dropdown-item" data-reconnect="${c.id}">Reconnect</button>` : '');
@@ -3756,7 +3807,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <td><div class="client-cell">${av(c, true)}<span class="text-body2">${esc(c.name)}</span></div></td>
         <td>${acctCell(c)}</td>
         ${showHealth ? `<td>${healthCell(c)}</td>` : ''}
-        <td><div class="row-actions">${rowBtn}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
+        <td><div class="row-actions">${rowBtn}${preRow}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Go to client</button>${menuExtra}${preMenuItem(c)}<button type="button" class="dropdown-item" data-health="${c.id}">Run health check</button><button type="button" class="dropdown-item danger" data-remove-client="${c.id}">Remove client</button></div></div></div></td>
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
