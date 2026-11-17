@@ -1940,8 +1940,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!st.licencesOn) {
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="page-stack"><h2 class="text-h2">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
-    const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[1] - row[2]) + '</td></tr>').join('');
-    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table"><thead><tr><th>License</th><th>Total</th><th>Used</th><th>Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
+    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licences', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -2054,7 +2054,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rules = (card.rules || []).map((row, i) => addonLine(family, 'rules', i, row, RULE_OPTS, EXAMPLE_PRICE.rules, factor)).join('');
     const inv = (card.inv || []).map((row, i) => addonLine(family, 'inv', i, row, INV_OPTS, EXAMPLE_PRICE.inv, factor)).join('');
     const button = '<button type="button" class="' + (current ? 'btn' : 'btn-outlined') + '" data-plan-update="' + family + '">' + (licenseBook.family ? 'Update' : 'Subscribe') + '</button>';
-    return '<div class="card flex-1 d-flex flex-col gap-12"><h2 class="text-h2">' + (family === 'advanced' ? 'Synder Advanced' : 'Synder Core') + '</h2>' + badge + '<p class="text-subtitle1">from ' + moneyLabel(from * factor) + ' month</p>' + (yearly ? '<p class="text-body2">Billed yearly</p>' : '') + '<p class="text-subtitle2">Plans ' + helpIcon('<p class="text-body2">Sync credits included with each plan.</p>') + '</p><p class="text-body2">' + who + '<button type="button" class="link" data-stub>' + feature + '</button></p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Pack ' + moneyLabel(packPrice * factor) + '/mo</span>' + stepPair(family + ':pack', card.pack || 0) + '</div>' + singles + '<p class="text-body2">Discount - ' + priced.pct + '%</p><p class="text-subtitle2">Additional users</p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + moneyLabel(EXAMPLE_PRICE.user * factor) + '/mo</span>' + stepPair(family + ':users', card.users || 0) + '</div><p class="text-subtitle2">Smart Rules</p>' + rules + '<button type="button" class="link" data-add-addon="' + family + ':rules">+ Add more</button><p class="text-subtitle2">Invoicing</p>' + inv + '<button type="button" class="link" data-add-addon="' + family + ':inv">+ Add more</button><p class="text-subtitle2">Revenue recognition</p><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><input class="input" data-rev="' + family + '" placeholder="Monthly subscriptions" value="' + (card.rev || '') + '"><p class="text-caption">' + moneyLabel(EXAMPLE_PRICE.rev * factor) + '/mo per subscription</p><p class="text-body2">You will pay now: ' + moneyLabel(priced.total) + '</p>' + button + '</div>';
+    return '<div class="box box--white flex-1 d-flex flex-col gap-12"><h2 class="text-h2">' + (family === 'advanced' ? 'Synder Advanced' : 'Synder Core') + '</h2>' + badge + '<p class="text-subtitle1">from ' + moneyLabel(from * factor) + ' month</p>' + (yearly ? '<p class="text-body2">Billed yearly</p>' : '') + '<p class="text-subtitle2">Plans ' + helpIcon('<p class="text-body2">Sync credits included with each plan.</p>') + '</p><p class="text-body2">' + who + '<button type="button" class="link" data-stub>' + feature + '</button></p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">Pack ' + moneyLabel(packPrice * factor) + '/mo</span>' + stepPair(family + ':pack', card.pack || 0) + '</div>' + singles + '<p class="text-body2">Discount - ' + priced.pct + '%</p><p class="text-subtitle2">Additional users</p><div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + moneyLabel(EXAMPLE_PRICE.user * factor) + '/mo</span>' + stepPair(family + ':users', card.users || 0) + '</div><p class="text-subtitle2">Smart Rules</p>' + rules + '<button type="button" class="link" data-add-addon="' + family + ':rules">+ Add more</button><p class="text-subtitle2">Invoicing</p>' + inv + '<button type="button" class="link" data-add-addon="' + family + ':inv">+ Add more</button><p class="text-subtitle2">Revenue recognition</p><p class="text-body2">Enter the total monthly subscriptions volume to split across your clients.</p><input class="input" data-rev="' + family + '" placeholder="Monthly subscriptions" value="' + (card.rev || '') + '"><p class="text-caption">' + moneyLabel(EXAMPLE_PRICE.rev * factor) + '/mo per subscription</p><p class="text-body2">You will pay now: ' + moneyLabel(priced.total) + '</p>' + button + '</div>';
   }
   function addonLine(family, kind, index, row, opts, prices, factor) {
     const price = row.id ? moneyLabel((prices[row.id] || 0) * factor) + '/mo' : '';
@@ -2064,7 +2064,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderManageLicenses() {
     const tab = st.manageTab === 'buy' ? 'buy' : 'assign';
     const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (tab === 'assign' ? ' active' : '') + '" data-manage-tab="assign" role="tab">Assign licenses</button><button type="button" class="tab' + (tab === 'buy' ? ' active' : '') + '" data-manage-tab="buy" role="tab">Buy licenses</button></div>';
-    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Billing and licenses</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
+    return '<div class="flow-wide page-stack"><a class="page-back" id="backBilling" href="#billing/licences">Licences</a>' + pageHeader('Manage licenses') + tabs + (tab === 'buy' ? renderBuyTab() : renderAssignTab()) + '</div>';
   }
   function moneyLabel(n) {
     const v = Math.round((Number(n) || 0) * 100) / 100;
@@ -2268,11 +2268,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const who = family === 'core' ? 'Firms with smaller clients.' : 'Growing clients and revenue recognition.';
     const caption = family === 'core' ? 'Starts with a pack of 5 Essential licences' : '5 Pro licences';
     if (family === 'advanced' && advancedLocked()) {
-      return '<div class="card flex-1 d-flex flex-col gap-12"><p class="text-subtitle1">Synder Advanced</p><p class="text-body2">' + who + '</p><p class="text-body2">Moving to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined" id="bookAdvanced">Book a call</button></div>';
+      return '<div class="box box--white flex-1 d-flex flex-col gap-12"><p class="text-subtitle1">Synder Advanced</p><p class="text-body2">' + who + '</p><p class="text-body2">Moving to Advanced? Our specialist will move you.</p><button type="button" class="btn-outlined" id="bookAdvanced">Book a call</button></div>';
     }
     const checked = d.family === family ? ' checked' : '';
     const discount = family === 'advanced' ? '<div class="alert alert-info"><span class="material-icons">info</span><span class="text-body2">Single licences cost less on Advanced: Essential ' + moneyLabel(72 * factor) + ' instead of ' + moneyLabel(80 * factor) + ', Pro ' + moneyLabel(184 * factor) + ' instead of ' + moneyLabel(200 * factor) + '.</span></div>' : '';
-    return '<label class="card flex-1 d-flex flex-col gap-12"><span class="radio-wrap"><input class="radio" type="radio" name="buyFamily" value="' + family + '"' + checked + '><span class="text-subtitle1">' + familyName(family) + '</span></span><p class="text-body2">' + who + '</p><p class="text-subtitle1">from ' + moneyLabel(pack.each * factor) + ' per client / month</p><p class="text-caption">' + caption + '</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>' + discount + '</label>';
+    return '<label class="box box--white flex-1 d-flex flex-col gap-12"><span class="radio-wrap"><input class="radio" type="radio" name="buyFamily" value="' + family + '"' + checked + '><span class="text-subtitle1">' + familyName(family) + '</span></span><p class="text-body2">' + who + '</p><p class="text-subtitle1">from ' + moneyLabel(pack.each * factor) + ' per client / month</p><p class="text-caption">' + caption + '</p><div class="d-flex flex-col gap-8">' + planChecks(family) + '</div>' + discount + '</label>';
   }
   function orderLicenceRow(family, id, qty, factor) {
     const limit = id === 'ess' ? 'Up to 3,000 transactions/mo per client' : (id === 'pro' ? 'Up to 20,000 transactions/mo per client' : 'Up to 40,000 transactions/mo per client');
@@ -2315,7 +2315,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const err = d.showErr === 'empty' ? '<div class="form-error-msg">Add at least one licence to subscribe.</div>' : (d.showErr === 'same' ? '<div class="form-error-msg">Change a quantity first.</div>' : '');
     const pay = yearly ? monthly * 12 : monthly;
     const button = fresh ? (yearly ? 'Subscribe, pay ' + moneyLabel(pay) : 'Subscribe') : 'Update plan';
-    return '<div class="card d-flex flex-col gap-16"><h2 class="text-h2">Set up your order</h2><div><p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-16 mt-8">' + licences + '</div></div><div><p class="text-subtitle2">Add-ons</p><div class="d-flex flex-col gap-16 mt-8">' + addons + team + '</div><p class="text-caption mt-8">Example prices</p></div><div aria-live="polite"><p class="text-h2">' + totalText + '</p>' + delta + '</div>' + err + '<div><button type="button" class="btn" id="planSubscribe">' + button + '</button></div></div>';
+    return '<div class="box box--white d-flex flex-col gap-16"><h2 class="text-h2">Set up your order</h2><div><p class="text-subtitle2">Licences</p><div class="d-flex flex-col gap-16 mt-8">' + licences + '</div></div><div><p class="text-subtitle2">Add-ons</p><div class="d-flex flex-col gap-16 mt-8">' + addons + team + '</div><p class="text-caption mt-8">Example prices</p></div><div aria-live="polite"><p class="text-h2">' + totalText + '</p>' + delta + '</div>' + err + '<div><button type="button" class="btn" id="planSubscribe">' + button + '</button></div></div>';
   }
   function buyOverlay() {
     const d = ensurePlanDraft();
@@ -3827,9 +3827,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const showInvite = ob && ob.banner === 'roster' && ob.welcomeSeen && !ob.welcomePending;
     const showImport = ob && ob.importKind === 'list' && ob.importNote > 0;
     const banner = showImport
-      ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span>${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.<br>Not ready to connect? <button type="button" class="link" id="preHint">Try a pre-assessment</button> on any client, no connection needed.</span><button type="button" class="btn-text" id="importNoteClose">Dismiss</button></div>`
+      ? `<div class="alert alert-info" id="importNote"><span class="material-icons" aria-hidden="true">info</span><span class="flex-1">${ob.importNote} client${ob.importNote === 1 ? '' : 's'} imported. Connect a client's books to start automating.</span><button type="button" class="alert-close" id="importNoteClose" aria-label="Close"><span class="material-icons">close</span></button></div>`
       : (showInvite
-        ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span>Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span>${firmBooksConnected() ? '' : '<button type="button" class="btn" id="bannerImport">Import client list</button>'}<button type="button" class="btn-text" id="bannerDismiss">Dismiss</button></div>`
+        ? `<div class="alert alert-info" id="existBanner"><span class="material-icons" aria-hidden="true">info</span><span class="flex-1">Bring in the rest of your client list when you are ready. Read-only, no changes to books.</span>${firmBooksConnected() ? '' : '<button type="button" class="btn" id="bannerImport">Import client list</button>'}<button type="button" class="alert-close" id="bannerDismiss" aria-label="Close"><span class="material-icons">close</span></button></div>`
         : '');
     const q = (st._q || '').toLowerCase();
     const rows = listed.filter((c) => c.name.toLowerCase().includes(q));
@@ -3852,7 +3852,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Clients', `${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}<button type="button" class="btn-outlined" id="listAdd">Add client</button><button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>`)}
+      ${pageHeader('Clients', `${firmBooksConnected() ? '' : '<button type="button" class="btn" id="listImport">Connect and import</button>'}<button type="button" class="btn-outlined" id="listImportClients">${brandMark('QuickBooks', 18)}${brandMark('Xero', 18)} Import clients</button><button type="button" class="btn-outlined" id="listAdd">Add client</button><button type="button" class="btn-outlined" id="listCsv">Upload CSV</button>`)}
       ${banner}
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
@@ -4173,12 +4173,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return books + ' · ' + status;
   }
   function settingsBlock(title, text, action) {
-    return '<div class="card d-flex align-center justify-between gap-16"><div><h2 class="text-subtitle1">' + title + '</h2><p class="text-body2">' + text + '</p></div>' + action + '</div>';
+    return '<div class="box box--white d-flex align-center justify-between gap-16"><div><h2 class="text-subtitle1">' + title + '</h2><p class="text-body2">' + text + '</p></div>' + action + '</div>';
   }
   function renderFirmSettings() {
     return `<div class="flow-narrow content-narrow page-stack">
       ${pageHeader('Firm settings')}
-      <div class="card page-stack">
+      <div class="box box--white page-stack">
         <div class="d-flex align-center justify-between gap-16">
           <div><h2 class="text-subtitle1">Firm details</h2><p class="text-body2">The name your team and clients see.</p></div>
           <button type="button" class="btn" id="firmNameSave">Save</button>
@@ -4206,7 +4206,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<div class="flow-narrow content-narrow page-stack">
       <a class="page-back" id="backColleagues" href="#colleagues">Back to colleagues</a>
       ${pageHeader(esc(p.name), '<button type="button" class="btn-outlined" id="removeColleague">Remove colleague</button>')}
-      <div class="card page-stack">
+      <div class="box box--white page-stack">
         <div><span class="form-label">Name</span><p class="text-body2">${esc(p.name)}</p></div>
         <div><span class="form-label">Email</span><p class="text-body2">${esc(p.email)}</p></div>
         <div class="form-field"><label class="form-label form-label-required" for="firmRole">Role in the Firm</label><select class="select" id="firmRole" aria-label="Role in the Firm"><option value="Admin"${current === 'Admin' ? ' selected' : ''}>Admin</option><option value="Colleague"${current === 'Colleague' ? ' selected' : ''}>Colleague</option></select></div>
@@ -4418,6 +4418,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('emptyCsv', showCsvModal);
     bind('emptyAdd', showAddModal);
     bind('listImport', showBooksModal);
+    bind('listImportClients', showBooksModal);
     bind('listAdd', showAddModal);
     bind('listCsv', showCsvModal);
     bind('bannerImport', showBooksModal);
@@ -4437,10 +4438,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bind('connectLeave', cancelConnect);
     bind('backClients', () => goFirm('clients'));
     bind('detailGo', () => { if (st.clientId) openClient(st.clientId); });
-    bind('preHint', () => {
-      const next = (sc().clients || []).find((c) => isOffClient(c) && !c.fresh);
-      if (next) openPreUpload(next.id);
-    });
     bind('bringCancel', () => goFirm('clients'));
     m.querySelectorAll('[data-reconnect]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClientConnect(b.dataset.reconnect); });
     bind('connectBack', () => {
