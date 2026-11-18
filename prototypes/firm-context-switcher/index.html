@@ -1781,7 +1781,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           : '<button type="button" class="btn-outlined" data-lic-assign="' + c.id + '">Assign</button>');
       return '<tr><td><span class="text-body2">' + esc(c.name) + '</span>' + pending + '</td><td>' + lic + '</td><td>' + paysCell(c) + '</td><td>' + action + '</td></tr>';
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients here</td></tr>';
-    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>License</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
+    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client</th><th>License</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
   }
   function periodWord(state) { return state && state.period === 'year' ? 'Yearly' : 'Monthly'; }
   function pageHeader(title, actions, subtitle) {
@@ -1890,7 +1890,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const planOpts = [['', 'License'], ['none', 'None'], ['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']].concat(RULE_OPTS.map((item) => [item[0], 'Smart Rules ' + item[1].toLowerCase()])).concat(INV_OPTS.map((item) => [item[0], 'Invoicing ' + item[1].toLowerCase()]));
     const sel = (id, opts, value) => '<select class="select" id="' + id + '">' + opts.map((item) => '<option value="' + item[0] + '"' + (value === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') + '</select>';
     const sortCls = 'sortable sorted' + (st.assignSort === 'desc' ? ' desc' : '');
-    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
   }
   function exampleDiscountPct(count) {
     if (count >= 50) return 15;
@@ -2524,6 +2524,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     st.orgId = null;
     save();
     render();
+  }
+  function openCloseClient(id) {
+    const c = findOrg(id);
+    if (c) {
+      const label = closeMonthName() + ' ' + closeYearNum();
+      const idx = WORK_MONTHS.findIndex((item) => item.label === label);
+      if (idx >= 0) c.monthIndex = idx;
+    }
+    openDetails(id);
   }
   function openClient(id, page) {
     const c = findOrg(id);
@@ -4072,18 +4081,90 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (entry && entry.key !== 'clear') return entry.reason;
     return '—';
   }
+  const CLOSE_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const CLOSE_YEARS = [2025, 2026, 2027];
+  function closeMonthNum() { return st && st.closeMonthNum ? st.closeMonthNum : 10; }
+  function closeYearNum() { return st && st.closeYear ? st.closeYear : 2026; }
+  function closeMonthName() { return CLOSE_MONTHS[closeMonthNum() - 1] || 'October'; }
+  function tieRecord(c) {
+    ensureWork(c);
+    const key = closeYearNum() + '-' + closeMonthNum();
+    if (!c.tie) c.tie = {};
+    if (!c.tie[key]) {
+      const october = closeMonthNum() === 10 && closeYearNum() === 2026;
+      const closed = october && c.monthStatus === 'Closed' && !!c.accounting;
+      let sync = 'passed';
+      let recon = 'passed';
+      if (!c.accounting) { sync = 'unchecked'; recon = 'unchecked'; }
+      else if (!closed && (hasHealthIssues(c) || booksLost(c))) { sync = 'failed'; recon = 'unchecked'; }
+      else if (!closed && (c.id.charCodeAt(c.id.length - 1) + closeMonthNum()) % 2 === 0) recon = 'unchecked';
+      c.tie[key] = { sync, recon, closed, review: false };
+    }
+    return c.tie[key];
+  }
+  function tieChip(label, state) {
+    if (state === 'failed') return `<span class="status status-red"><span class="material-icons icon-sm" aria-hidden="true">error_outline</span>${esc(label)} · Failed</span>`;
+    if (state === 'unchecked') return `<span class="status status-grey"><span class="material-icons icon-sm" aria-hidden="true">help_outline</span>${esc(label)} · Not checked</span>`;
+    return `<span class="status status-green"><span class="material-icons icon-sm" aria-hidden="true">check</span>${esc(label)} · Passed</span>`;
+  }
+  function tiePassed(rec) { return (rec.sync === 'passed' ? 1 : 0) + (rec.recon === 'passed' ? 1 : 0); }
+  function tieUnmet(rec) {
+    const bits = [];
+    if (rec.sync === 'failed') bits.push('Syncs failed');
+    else if (rec.sync !== 'passed') bits.push('Syncs has not been checked');
+    if (rec.recon === 'failed') bits.push('Reconciliation failed');
+    else if (rec.recon !== 'passed') bits.push('Reconciliation has not been checked');
+    return bits;
+  }
+  function closePageModel(list) {
+    const sizes = [10, 25, 50, 100];
+    if (!st.closePageSize || sizes.indexOf(st.closePageSize) < 0) st.closePageSize = 100;
+    const size = st.closePageSize;
+    const pages = Math.max(1, Math.ceil(list.length / size) || 1);
+    let page = st.closePage || 0;
+    if (page > pages - 1) page = pages - 1;
+    if (page < 0) page = 0;
+    st.closePage = page;
+    const start = page * size;
+    const from = list.length ? start + 1 : 0;
+    const to = Math.min(list.length, start + size);
+    const range = (list.length ? from + '–' + to : '0–0') + ' of ' + list.length;
+    const nums = [];
+    for (let i = 0; i < pages; i++) nums.push(`<button type="button" data-close-page="${i}"${i === page ? ' aria-current="page"' : ''}>${i + 1}</button>`);
+    const end = (on) => on ? ' disabled' : '';
+    const html = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select id="closePageSize" aria-label="Rows per page">${sizes.map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-pages"><button type="button" data-close-nav="first" aria-label="First page"${end(page === 0)}><span class="material-icons">first_page</span></button><button type="button" data-close-nav="prev" aria-label="Previous page"${end(page === 0)}><span class="material-icons">chevron_left</span></button>${nums.join('')}<button type="button" data-close-nav="next" aria-label="Next page"${end(page >= pages - 1)}><span class="material-icons">chevron_right</span></button><button type="button" data-close-nav="last" aria-label="Last page"${end(page >= pages - 1)}><span class="material-icons">last_page</span></button></span></div>`;
+    return { slice: list.slice(start, start + size), html };
+  }
   function renderMonthClose() {
-    const index = boardMonthIndex();
-    const month = WORK_MONTHS[index];
-    const clients = listedClients().filter((c) => c.accounting);
-    const body = clients.map((c) => {
-      const status = statusForBoard(c, index);
-      return `<tr class="row-clickable" data-row="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td>${monthStatusChip(status)}</td><td><span class="text-body2">${closeProgress(c)}</span></td><td><span class="text-body2">${esc(closeBlockers(c, status))}</span></td><td><button type="button" class="btn-outlined" data-open-work="${c.id}">Start reconciliation</button></td></tr>`;
-    }).join('') || '<tr><td colspan="5" class="text-body2">No clients with accounting yet.</td></tr>';
-    const actions = `<button type="button" class="btn-icon" id="closeBoardPrev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><button type="button" class="btn-icon" id="closeBoardNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>`;
+    const month = closeMonthNum();
+    const year = closeYearNum();
+    const q = (st.closeQ || '').trim().toLowerCase();
+    const list = listedClients().filter((c) => !q || c.name.toLowerCase().includes(q));
+    const page = closePageModel(list);
+    const monthOpts = CLOSE_MONTHS.map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
+    const yearOpts = CLOSE_YEARS.map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
+    const body = page.slice.map((c) => {
+      const rec = tieRecord(c);
+      const note = st.closeBlock === c.id ? `<tr><td colspan="4"><p class="form-error-msg">${esc(c.name)}: ${esc(tieUnmet(rec).join('. ') + '.')}</p></td></tr>` : '';
+      const action = rec.closed
+        ? '<span class="status status-green">Closed</span>'
+        : `<button type="button" class="btn" data-close-month="${c.id}">Close ${esc(closeMonthName())}</button>`;
+      const review = rec.closed ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
+      const reopen = rec.closed ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
+      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${tieChip('Syncs', rec.sync)}${tieChip('Reconciliation', rec.recon)}</div></td><td><span class="text-body2">${tiePassed(rec)} of 2</span> <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
+    }).join('') || '<tr><td colspan="4" class="text-body2">No clients match.</td></tr>';
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Month close', actions, 'Closing ' + month.label)}
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Status</th><th>Checks</th><th>Blockers</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+      ${pageHeader('Month close', '', 'Closing ' + closeMonthName() + ' ' + year)}
+      <div class="d-flex align-center justify-between gap-16">
+        <div class="d-flex align-center gap-16">
+          <div><label class="form-label" for="closeMonthPick">Month</label><select class="select" id="closeMonthPick" aria-label="Month">${monthOpts}</select></div>
+          <div><label class="form-label" for="closeYearPick">Year</label><select class="select" id="closeYearPick" aria-label="Year">${yearOpts}</select></div>
+          <div><label class="form-label" for="closeSearch">Client name</label><input type="search" class="input-search" id="closeSearch" placeholder="Search by client name..." value="${esc(st.closeQ || '')}" aria-label="Client name" /></div>
+        </div>
+        <button type="button" class="btn-outlined" id="checkAllClose">Check all clients</button>
+      </div>
+      <div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client name</th><th>Checks</th><th>Progress</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
+      ${page.html}
     </div>`;
   }
   function healthReportBlock(c) {
@@ -4211,7 +4292,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const action = admin ? '' : `<button type="button" class="btn-icon" data-unassign-firm="${a.personId}" aria-label="Unassign ${esc(a.person.name)} from this client"><span class="material-icons">close</span></button>`;
       return `<tr><td>${name}</td><td><div class="d-flex align-center justify-between gap-8">${role}${action}</div></td></tr>`;
     }).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
-    return `<div class="page-stack"><div class="d-flex align-center gap-8"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div><div class="table-wrap"><table class="synder-table"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}</div>`;
+    return `<div class="page-stack"><div class="d-flex align-center gap-8"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}</div>`;
   }
   function renderColleagues() {
     const q = (st.colQ || '').toLowerCase();
@@ -4230,7 +4311,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<div class="flow-wide page-stack">
       ${pageHeader('Colleagues', '<button type="button" class="btn" id="addColleague">Add colleague</button>')}
       <div class="toolbar"><input type="search" class="input-search" id="colSearch" placeholder="Search by a colleague's name" value="${esc(st.colQ || '')}" /></div>
-      <div class="table-wrap"><table class="synder-table"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Role in the Firm ${helpIcon(firmRoleTip())}</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th class="${sortCls}" id="sortColName">Name</th><th>Email</th><th>Role in the Firm ${helpIcon(firmRoleTip())}</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>
       ${page.html}
     </div>`;
   }
@@ -4957,7 +5038,66 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('diagnoseBtn', () => { const c = findOrg(st.clientId); if (c) openDiagnose(c); });
     bindClick('closeBoardPrev', () => { st.closeMonth = boardMonthIndex() - 1; renderMain(); });
     bindClick('closeBoardNext', () => { st.closeMonth = boardMonthIndex() + 1; renderMain(); });
-    m.querySelectorAll('[data-open-work]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.openWork); });
+    const monthPick = $('closeMonthPick');
+    if (monthPick) monthPick.onchange = () => { st.closeMonthNum = Number(monthPick.value); st.closePage = 0; st.closeBlock = ''; renderMain(); };
+    const yearPick = $('closeYearPick');
+    if (yearPick) yearPick.onchange = () => { st.closeYear = Number(yearPick.value); st.closePage = 0; st.closeBlock = ''; renderMain(); };
+    const closeSearch = $('closeSearch');
+    if (closeSearch) closeSearch.oninput = () => {
+      st.closeQ = closeSearch.value; st.closePage = 0; st.closeBlock = '';
+      renderMain();
+      const again = $('closeSearch');
+      if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+    };
+    const pageSize = $('closePageSize');
+    if (pageSize) pageSize.onchange = () => { st.closePageSize = Number(pageSize.value); st.closePage = 0; renderMain(); };
+    m.querySelectorAll('[data-close-page]').forEach((b) => b.onclick = () => { st.closePage = Number(b.dataset.closePage); renderMain(); });
+    m.querySelectorAll('[data-close-nav]').forEach((b) => b.onclick = () => {
+      const pages = Math.max(1, Math.ceil(listedClients().filter((c) => !(st.closeQ || '').trim() || c.name.toLowerCase().includes((st.closeQ || '').trim().toLowerCase())).length / (st.closePageSize || 100)));
+      const cur = st.closePage || 0;
+      if (b.dataset.closeNav === 'first') st.closePage = 0;
+      else if (b.dataset.closeNav === 'prev') st.closePage = Math.max(0, cur - 1);
+      else if (b.dataset.closeNav === 'next') st.closePage = Math.min(pages - 1, cur + 1);
+      else st.closePage = pages - 1;
+      renderMain();
+    });
+    bindClick('checkAllClose', () => {
+      listedClients().forEach((c) => {
+        const rec = tieRecord(c);
+        if (rec.sync === 'unchecked') rec.sync = 'passed';
+        if (rec.recon === 'unchecked') rec.recon = 'passed';
+      });
+      showKitToast('Checked all clients');
+      renderMain();
+    });
+    m.querySelectorAll('[data-close-month]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const c = findOrg(b.dataset.closeMonth);
+      if (!c) return;
+      const rec = tieRecord(c);
+      const unmet = tieUnmet(rec);
+      if (unmet.length) { st.closeBlock = c.id; renderMain(); return; }
+      rec.closed = true;
+      st.closeBlock = '';
+      renderMain();
+    });
+    m.querySelectorAll('[data-reopen]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const c = findOrg(b.dataset.reopen);
+      if (!c) return;
+      tieRecord(c).closed = false;
+      renderMain();
+    });
+    m.querySelectorAll('[data-mark-review]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const c = findOrg(b.dataset.markReview);
+      if (!c) return;
+      tieRecord(c).review = true;
+      showKitToast(c.name + ' marked in review');
+    });
+    m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.startRecon); });
+    m.querySelectorAll('[data-close-details]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.closeDetails); });
+    m.querySelectorAll('[data-open-work]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.openWork); });
     m.querySelectorAll('[data-approve-person]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const person = findPerson(b.dataset.approvePerson);
