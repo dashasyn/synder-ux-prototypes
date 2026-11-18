@@ -3686,7 +3686,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="modal-body">
           <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
           <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="pickNewOnly"${ob.pickNewOnly ? ' checked' : ''}> Show only not imported clients</label>
-          <div class="table-wrap pick-scroll"><table class="synder-table">
+          <div class="table-wrap table-wrap--scroll pick-scroll"><table class="synder-table">
             <thead><tr><th class="col-check"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>Status</th></tr></thead>
             <tbody>${list.map((c) => {
               const have = alreadyInFirm(c);
