@@ -106,22 +106,10 @@ body {
 .p-side button.sidebar-item:focus,
     .p-side button.sidebar-item:focus-visible { outline: none; }
 .p-main { flex: 1; min-width: 0; padding: var(--space-6) var(--space-8) var(--space-10); }
-/* ── Context switcher trigger ── */
-.ctx { position: relative; flex: 0 0 228px; width: 228px; height: 40px; display: flex; align-items: center; }
-.t-left { display: flex; align-items: center; gap: 12px; margin-right: auto; height: 40px; }
-.t-left #backChip:empty { display: none; }
-.ctx-trigger {
-      width: 100%; display: flex; align-items: center; gap: 8px;
-      height: 40px; padding: 0 8px; border: 0; border-radius: var(--radius-sm);
-      background: transparent; cursor: pointer; text-align: left; font: inherit; color: inherit;
-    }
-.ctx-trigger:hover,
-.ctx-trigger[aria-expanded="true"] { background: var(--bg-hover); }
-.ctx-trigger:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 0; }
-.ctx-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.ctx-trigger .material-icons { font-size: 20px; color: var(--text-secondary); }
 /* Kit menu items have no keyboard-current state. */
 .dropdown-item.kb { background: var(--bg-hover); }
+/* Kit menu is min-width 180 and has no wider size. Nov 17 the switcher menu was 300px. */
+#pop.dropdown-menu { width: 300px; }
 /* Kit menu has no max height, so a long client list would leave the viewport. */
 #popList { max-height: 320px; overflow-y: auto; }
 .nav, #nav { flex: 1; }
@@ -516,21 +504,19 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   </div>
 
   <header class="topbar topbar--app">
-    <div class="t-left">
-      <div class="ctx dropdown">
-        <button class="ctx-trigger" id="ctxTrigger" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)"></button>
-        <div class="dropdown-menu w-full" id="pop" role="dialog" aria-label="Switch firm or organization">
-          <div id="popSearchWrap">
-            <input type="search" class="input-search" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" />
-            <span class="text-caption" id="kbdHint">Ctrl K</span>
-          </div>
-          <div id="popFirm"></div>
-          <div id="popList"></div>
-          <div class="dropdown-divider"></div>
-          <div id="popFoot"></div>
+    <div class="topbar-org dropdown" id="ctxTrigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" title="Switch (Ctrl/⌘ K)">
+      <span class="sidebar-org-avatar" id="ctxAvatar"></span>
+      <span class="topbar-org-name" id="ctxName"></span>
+      <span class="material-icons">expand_more</span>
+      <div class="dropdown-menu" id="pop" role="dialog" aria-label="Switch firm or organization">
+        <div class="dropdown-item" id="popSearchWrap">
+          <input type="search" class="input-search flex-1" id="popSearch" placeholder="Search clients and organizations" autocomplete="off" aria-label="Search clients and organizations" />
         </div>
+        <div id="popFirm"></div>
+        <div id="popList"></div>
+        <div class="dropdown-divider"></div>
+        <div id="popFoot"></div>
       </div>
-      <div id="backChip"></div>
     </div>
     <div class="topbar-right">
       <div class="topbar-balance" id="topBalance"><span>Balance:</span> <b>∞</b></div>
@@ -603,8 +589,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     orgsettings: ['tune', 'Organization settings'], activity: ['history', 'Activity log'],
     profile: ['person_outline', 'User profile'], orglist: ['list', 'List of organizations']
   };
-  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-
   /* ───────── State ───────── */
   let scenario = 'firm';
   let st = null;          // { ctx: 'firm'|'org', orgId, page, clientId, recent: [] }
@@ -2586,11 +2570,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       st.ctx = 'firm'; st.orgId = null; st.clientId = null;
       if (st.page === 'dashboard') st.page = 'clients';
     }
-    let name, cap, obj;
-    if (st.ctx === 'firm') { obj = FIRM; name = FIRM.name; cap = 'Accounting firm'; }
-    else { obj = findOrg(st.orgId); name = obj.name; cap = isClient(obj.id) ? 'Client' : 'Organization'; }
-    $('ctxTrigger').innerHTML = `${av(obj, true)}<span class="ctx-text"><span class="ctx-name text-body2 text-truncate">${esc(name)}</span><span class="text-caption text-truncate">${esc(cap)}</span></span><span class="material-icons">unfold_more</span>`;
-    $('backChip').innerHTML = '';
+    let name;
+    if (st.ctx === 'firm') name = FIRM.name;
+    else name = findOrg(st.orgId).name;
+    $('ctxAvatar').textContent = initials(name);
+    $('ctxName').textContent = name;
   }
 
   /* ───────── Render: sidebar ───────── */
@@ -5159,9 +5143,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function openPop() {
     $('pop').classList.add('show'); $('ctxTrigger').setAttribute('aria-expanded', 'true');
     $('popSearch').value = ''; kbIndex = -1; renderPop();
-    const total = sc().clients.length + sc().own.length + (sc().firm ? 1 : 0);
-    $('popSearchWrap').style.display = total > 5 ? '' : 'none';
-    setTimeout(() => { kbIndex = 0; highlight(); if (total > 5) $('popSearch').focus(); }, 0);
+    setTimeout(() => { kbIndex = 0; highlight(); $('popSearch').focus(); }, 0);
   }
   function closePop() { $('pop').classList.remove('show'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
 
@@ -5174,7 +5156,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
     const firm = $('popFirm');
     if (firm) {
-      firm.innerHTML = s.firm ? item(FIRM, 'Accounting firm', st.ctx === 'firm', 'firm') : '';
+      firm.innerHTML = s.firm ? item(FIRM, '', st.ctx === 'firm', 'firm') : '';
     }
     let html = '';
     if (s.firm) {
@@ -5213,7 +5195,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (f[kbIndex]) f[kbIndex].scrollIntoView({ block: 'nearest' });
   }
 
-  $('ctxTrigger').onclick = () => popOpen() ? closePop() : openPop();
+  $('ctxTrigger').onclick = (e) => { if (e.target.closest('#pop')) return; popOpen() ? closePop() : openPop(); };
+  $('ctxTrigger').onkeydown = (e) => {
+    if (e.target.closest('#pop')) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); popOpen() ? closePop() : openPop(); }
+  };
   $('popSearch').oninput = () => { kbIndex = 0; renderPop(); highlight(); };
   document.addEventListener('keydown', (e) => {
     if (document.getElementById('storyModal')) {
@@ -5238,7 +5224,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (e.key === 'Enter' && f[kbIndex]) { e.preventDefault(); act(f[kbIndex].dataset.act); }
   });
   document.addEventListener('mousedown', (e) => {
-    if (popOpen() && !e.target.closest('.ctx')) closePop();
+    if (popOpen() && !e.target.closest('#ctxTrigger')) closePop();
     if (!e.target.closest('.row-menu')) {
       document.querySelectorAll('.dropdown-menu.show').forEach((x) => x.classList.remove('show'));
       document.querySelectorAll('[data-menu][aria-expanded="true"]').forEach((x) => x.setAttribute('aria-expanded', 'false'));
@@ -5721,7 +5707,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   document.addEventListener('mousedown', (e) => { if (!e.target.closest('#helpMenu') && !e.target.closest('#userMenu') && !e.target.closest('#helpBtn') && !e.target.closest('#userBtn')) closeMenus(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenus(); });
 
-  $('kbdHint').textContent = isMac ? '⌘K' : 'Ctrl K';
   loadOb();
   restoreDirectory();
   writeLocation(location.hash);
