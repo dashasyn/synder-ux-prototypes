@@ -3519,6 +3519,23 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const pick = st.connectPick || { accounting: [], sales: [], pay: [] };
     return pick.accounting.concat(pick.sales || [], pick.pay || []);
   }
+  function openClientConnect(id) {
+    const c = findOrg(id);
+    if (!c) { startAddClient(); return; }
+    clearLink();
+    const acct = c.accounting === 'Xero' ? 'Xero' : (c.accounting ? 'QuickBooks' : '');
+    st.connectPick = { accounting: acct ? [acct] : [], sales: [], pay: [] };
+    st.connectStep = (c.name || '').trim() ? 'integrations' : 'details';
+    goFirm('clientconnect', id);
+  }
+  function connectNamed(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    clearLink();
+    st.connectPick = { accounting: [], sales: [], pay: [] };
+    st.connectStep = 'details';
+    goFirm('clientconnect', id);
+  }
   function finishClientConnect() {
     clearLink();
     const c = findOrg(st.clientId);
