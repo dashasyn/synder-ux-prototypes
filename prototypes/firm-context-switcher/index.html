@@ -451,6 +451,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
+    <div class="seg" id="actSeg" aria-label="Acting as">
+      <button type="button" data-act="Admin">Admin</button>
+      <button type="button" data-act="Manager">Manager</button>
+      <button type="button" data-act="Member">Member</button>
+    </div>
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
@@ -728,7 +733,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const off = { connected: false, accounting: null, integrations: [], issues: [], syncing: false, company: null, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null, setup: false, onboarding: 'none', license: 'None', setupState: 'Not set up' };
     const on = (accounting, integrations, issues, license) => ({
       connected: true, accounting, integrations, issues, syncing: false, ledger: accounting, pay: (integrations[0] || null),
-      books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'today at 9:14 AM',
+      books: issues.length ? ['yellow', 'Needs review'] : ['green', 'Healthy'], month: 'Oct 2026', checked: 'Nov 18, 2026, 9:14 (UTC+2)',
       setup: true, onboarding: 'done', license: license || 'Pro', setupState: 'Ready'
     });
     const four = ['Stripe', 'PayPal', 'Shopify', 'Square'];
@@ -736,7 +741,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return [
       Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify'], [], 'Essential')),
       Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC' }, on('QuickBooks', four.slice(), [
-        { key: 'uncategorized', count: 3, accounts: 'Uncategorized Expense', equity: 'Opening Balance Equity at zero', source: src('QuickBooks', 'Tidewater Dental LLC') }
+        { key: 'uncategorized', count: 3, amount: 842.15, accounts: 'Uncategorized Expense', equity: 'Opening Balance Equity at zero', source: src('QuickBooks', 'Tidewater Dental LLC'), items: [{ name: 'Office Depot', amount: 214.40 }, { name: 'Unknown card', amount: 88.00 }, { name: 'Supplies', amount: 539.75 }] }
       ], 'Pro')),
       Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [], 'Premium')),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
@@ -748,7 +753,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ], 'Pro')),
       Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026', history: [{ status: 'done', outcome: 'ok', period: 'Sep 1 - 30, 2026' }] } }, off),
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
-        { key: 'undeposited', unapplied: 24, funds: 0, older: 10, source: src('QuickBooks', 'Lumen Dental Lab LLC') }
+        { key: 'undeposited', unapplied: 24, funds: 0, older: 10, amount: 3207.87, account: 'Undeposited Funds', customers: ['Harbor Dental Group', 'Northside Clinic', 'Oak Family Dentistry'], source: src('QuickBooks', 'Lumen Dental Lab LLC'), items: [{ name: 'Harbor Dental Group', amount: 640.00 }, { name: 'Northside Clinic', amount: 1280.50 }, { name: 'Oak Family Dentistry', amount: 1287.37 }] }
       ], 'Premium')),
       Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC' }, off),
       Object.assign({ id: 'e11', name: 'Pinecrest Realty', company: 'Pinecrest Realty LLC' }, on('Xero', ['Stripe', 'Shopify'], [
@@ -2592,27 +2597,57 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { text: lic, secondary: false };
   }
   function isQuickBooks(c) { return !!(c && c.accounting === 'QuickBooks'); }
+  function money(n) {
+    return '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function stampLabel(date) {
+    const d = date ? new Date(date) : new Date();
+    const shifted = new Date(d.getTime() + 2 * 60 * 60 * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const hh = String(shifted.getUTCHours()).padStart(2, '0');
+    const mm = String(shifted.getUTCMinutes()).padStart(2, '0');
+    return months[shifted.getUTCMonth()] + ' ' + shifted.getUTCDate() + ', ' + shifted.getUTCFullYear() + ', ' + hh + ':' + mm + ' (UTC+2)';
+  }
+  function stampShort(date) {
+    const d = date ? new Date(date) : new Date();
+    const shifted = new Date(d.getTime() + 2 * 60 * 60 * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const hh = String(shifted.getUTCHours()).padStart(2, '0');
+    const mm = String(shifted.getUTCMinutes()).padStart(2, '0');
+    return months[shifted.getUTCMonth()] + ' ' + shifted.getUTCDate() + ', ' + hh + ':' + mm;
+  }
+  function actorName() { return 'Ignat P.'; }
+  function canCloseBooks() {
+    const role = (st && st.viewerRole) || 'Admin';
+    return role === 'Admin' || role === 'Manager';
+  }
+  function healthIssue(c, key) { return ((c && c.issues) || []).find((issue) => issue.key === key) || null; }
+  function uncatDetail(issue) {
+    if (!issue) return 'No uncategorized or suspense items.';
+    const items = (issue.items || []).map((item) => item.name + ' ' + money(item.amount)).join('; ');
+    return (issue.count || 0) + ' items, ' + money(issue.amount) + ', in ' + (issue.accounts || 'Uncategorized Expense') + ', ' + (issue.equity || 'Opening Balance Equity at zero') + '.' + (items ? ' ' + items + '.' : '');
+  }
+  function fundsDetail(issue) {
+    if (!issue) return 'No unapplied payments or undeposited funds.';
+    const customers = (issue.customers || []).join(', ');
+    return (issue.unapplied || 0) + ' unapplied payments, ' + money(issue.amount) + '. Account: ' + (issue.account || 'Undeposited Funds') + '.' + (customers ? ' Customers: ' + customers + '.' : '') + ((issue.older || 0) ? ' ' + issue.older + ' older than 30 days.' : '');
+  }
   function healthModel(c) {
     if (!isQuickBooks(c)) return null;
-    const issues = c.issues || [];
-    const uncat = issues.find((issue) => issue.key === 'uncategorized');
-    const funds = issues.find((issue) => issue.key === 'undeposited');
+    const uncat = healthIssue(c, 'uncategorized');
+    const funds = healthIssue(c, 'undeposited');
     const checks = [
       {
         id: 'qbo-uncategorized-and-suspense',
         name: 'Uncategorized',
         short: 'Uncategorized',
-        detail: uncat
-          ? 'Uncategorized and suspense items: ' + (uncat.count || 0) + ' items in ' + (uncat.accounts || 'Uncategorized Expense') + ', ' + (uncat.equity || 'Opening Balance Equity at zero') + '.'
-          : 'No uncategorized or suspense items.'
+        detail: uncatDetail(uncat)
       },
       {
         id: 'qbo-unapplied-and-undeposited',
         name: 'Undeposited',
         short: 'Undeposited',
-        detail: funds
-          ? (funds.unapplied || 0) + ' unapplied payments · ' + (funds.funds || 0) + ' undeposited.' + ((funds.older || 0) ? ' ' + funds.older + ' older than 30 days.' : '')
-          : 'No unapplied payments or undeposited funds.'
+        detail: fundsDetail(funds)
       }
     ];
     if (uncat) checks[0].failed = true;
@@ -2681,7 +2716,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { key: 'good', label: 'All good', kind: 'green', tip: summary.label, health, accounting: acct, issues };
   }
   function firmBooksConnected() { return !!(ob && (ob.firmBooks === 'qbo' || ob.firmBooks === 'xero')); }
-  function needsAttention(c) { return hasHealthIssues(c) || hasLostConnection(c); }
+  function needsAttention(c) {
+    if (!c || c.fresh || !c.accounting || c.checking) return false;
+    if (connectionLost(c)) return true;
+    if (!isQuickBooks(c) || onboardingState(c) !== 'done' || pendingIntegrations(c).length) return false;
+    if ((c.issues || []).some((issue) => issue.key === 'sync')) return true;
+    return hasHealthIssues(c);
+  }
   function clientCountLine() {
     const list = sc().clients.filter((c) => !c.pending);
     const ready = list.filter((c) => clientView(c).key !== 'off').length;
@@ -2845,7 +2886,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const status = acctStatus(c);
     if (status === 'Not connected') return statusChip('grey', 'Not connected');
     const kind = status === 'Connected' ? 'green' : 'yellow';
-    return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(kind, status)}</span><span class="tooltip" role="tooltip">${esc(c.accounting + ' · ' + status)}</span></span>`;
+    const file = c.company || c.name || '';
+    const tip = c.accounting === 'QuickBooks' ? 'QuickBooks · ' + file + ' · ' + status : c.accounting + ' · ' + status;
+    return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(kind, status)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function integCell(c) {
     const list = (c && c.integrations) || [];
@@ -2860,6 +2903,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chip}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
+    if (c && c.checking) return statusChip('grey', 'Checking…');
     if (!c || !c.accounting || !isQuickBooks(c) || connectionLost(c)) {
       const tip = !c || !c.accounting ? 'Not connected' : (!isQuickBooks(c) ? 'Health checks are available for QuickBooks only.' : 'Connection lost');
       return `<span class="tooltip-wrap"><span tabindex="0">${statusChip('grey', "Can't check")}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
@@ -3504,10 +3548,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       c.accounting = pick.accounting[0];
       c.integrations = (pick.sales || []).concat(pick.pay || []);
       c.issues = [];
-      c.company = companyName(c);
+      c.company = (c.name || '').trim();
+      c.checking = true;
+      c.checked = '';
       c.ledger = c.accounting;
       c.pay = c.integrations[0] || null;
       c.setup = true;
+      c.onboarding = 'done';
       c.setupState = 'Ready';
       c.month = c.month || 'Oct 2026';
       c.books = ['blue', 'Syncing'];
@@ -3542,9 +3589,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const cur = findOrg(id);
     if (!cur || !cur.syncing) return;
     cur.syncing = false;
-    const src = (cur.accounting || 'QuickBooks') + ' · ' + companyName(cur);
-    cur.issues = cur.accounting === 'QuickBooks' ? [{ key: 'uncategorized', count: 3, accounts: 'Uncategorized Expense', equity: 'Opening Balance Equity at zero', source: src }] : [];
-    cur.books = ['yellow', 'Needs review'];
+    cur.checking = false;
+    cur.checked = stampLabel(new Date());
+    cur.issues = [];
+    cur.books = ['green', 'Healthy'];
     cur.month = cur.month || 'Oct 2026';
     persistDirectory();
     if (mode !== 'onboarding') render();
@@ -3728,8 +3776,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function needRank(c) {
     if (connectionLost(c)) return 0;
-    if (isQuickBooks(c) && healthModel(c) && healthModel(c).failed.length) return 1;
-    if (c && c.accounting && onboardingState(c) === 'started') return 2;
+    if (needsAttention(c)) return 1;
+    if (c && c.accounting && (onboardingState(c) === 'started' || pendingIntegrations(c).length || !isQuickBooks(c))) return 2;
     if (!c || !c.accounting) return 4;
     return 3;
   }
@@ -3757,7 +3805,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return c.name || '';
     };
     const filter = st.listFilter || '';
-    if (filter === 'attention') rows = rows.filter((c) => needRank(c) < 3);
+    if (filter === 'attention') rows = rows.filter((c) => needsAttention(c));
     if (filter === 'off') rows = rows.filter((c) => !c.accounting);
     rows = rows.slice().sort((a, b) => {
       const dir = sort.dir === 'desc' ? -1 : 1;
@@ -3788,7 +3836,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<div class="flow-wide page-stack">
       ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Partner Achievements</a>`)}
       <div class="d-flex gap-16">
-        <button type="button" class="box box--white page-stack" data-filter="attention" aria-pressed="${filter === 'attention' ? 'true' : 'false'}"><span class="text-caption">Needs attention</span><span class="text-h2">${listed.filter((c) => needRank(c) < 3).length}</span></button>
+        <button type="button" class="box box--white page-stack" data-filter="attention" aria-pressed="${filter === 'attention' ? 'true' : 'false'}"><span class="text-caption">Needs attention</span><span class="text-h2">${listed.filter((c) => needsAttention(c)).length}</span></button>
         <button type="button" class="box box--white page-stack" data-filter="off" aria-pressed="${filter === 'off' ? 'true' : 'false'}"><span class="text-caption">Not connected</span><span class="text-h2">${listed.filter((c) => !c.accounting).length}</span></button>
       </div>
       ${banner}
@@ -3802,23 +3850,43 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="tbl-foot" id="listCount">${rows.length} of ${listed.length} clients</div>
     </div>${flowDialogs()}`;
   }
+  function cantCheckReason(c) {
+    if (!c || !c.accounting) return 'Books not connected';
+    if (c.checking) return 'Checking…';
+    if (!isQuickBooks(c)) return 'Xero, not supported yet';
+    if (onboardingState(c) !== 'done') return 'Onboarding not finished';
+    if (pendingIntegrations(c).length) return 'Integration still configuring';
+    if (connectionLost(c)) return 'Connection lost';
+    return '';
+  }
+  function blocksClose(c) {
+    if (!c || !c.accounting || c.checking || connectionLost(c)) return false;
+    return !isQuickBooks(c) || onboardingState(c) !== 'done' || pendingIntegrations(c).length > 0;
+  }
   function monitorEntry(c) {
-    if (!c || !c.accounting) return { key: 'cant', reason: 'Not connected', tip: 'Not connected' };
-    if (!isQuickBooks(c)) return { key: 'cant', reason: 'QuickBooks only', tip: 'Health checks are available for QuickBooks only.' };
-    if (connectionLost(c)) return { key: 'needs', reason: 'Connection lost', tip: 'Connection lost' };
+    if (!c || !c.accounting) return { key: 'cant', reason: 'Books not connected', tip: 'Books not connected', label: '' };
+    if (c.checking) return { key: 'cant', reason: 'Checking…', tip: 'The first check is still running.', label: '' };
+    if (!isQuickBooks(c)) return { key: 'cant', reason: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.', label: '' };
+    if (onboardingState(c) !== 'done') return { key: 'cant', reason: 'Onboarding not finished', tip: 'Onboarding not finished', label: '' };
+    if (pendingIntegrations(c).length) return { key: 'cant', reason: 'Integration still configuring', tip: 'Finish configuration before this client can be checked.', label: '' };
+    if (connectionLost(c)) return { key: 'needs', reason: 'Connection lost', tip: 'Connection lost', label: 'Connection' };
+    if ((c.issues || []).some((issue) => issue.key === 'sync')) return { key: 'needs', reason: 'A sync did not finish', tip: 'A sync failed. The other checks are unchanged.', label: 'Syncs' };
     const health = healthModel(c);
     if (health && health.failed.length) {
       const fail = health.failed[0];
-      const issue = (c.issues || []).find((item) => (fail.short === 'Undeposited' ? item.key === 'undeposited' : item.key === 'uncategorized'));
-      const reason = fail.short === 'Undeposited'
-        ? 'Undeposited: ' + ((issue && issue.unapplied) || 0) + ' unapplied payments'
-        : (fail.short === 'Uncategorized' ? 'Uncategorized: ' + ((issue && issue.count) || 0) + ' items' : fail.short);
-      return { key: 'needs', reason, tip: fail.detail };
+      if (fail.short === 'Undeposited') {
+        const issue = healthIssue(c, 'undeposited');
+        return { key: 'needs', reason: (issue.unapplied || 0) + " customer payments aren't matched to an invoice or deposit", tip: fail.detail, label: 'Undeposited' };
+      }
+      const issue = healthIssue(c, 'uncategorized');
+      return { key: 'needs', reason: ((issue && issue.count) || 0) + ' expenses have no category', tip: fail.detail, label: 'Uncategorized' };
     }
-    return { key: 'clear', reason: 'All good', tip: (health && health.checks || []).map((check) => check.detail).join(' ') };
+    return { key: 'clear', reason: 'All good', tip: (health && health.checks || []).map((check) => check.detail).join(' '), label: '' };
   }
   function lastCheckedLabel(c) {
-    return (c && c.checked && String(c.checked).trim()) || 'Nov 18, 2026';
+    if (c && c.checking) return 'Checking…';
+    if (!c || !c.checked || !String(c.checked).trim()) return 'Never checked';
+    return String(c.checked).trim();
   }
   function monitorFix(c, entry) {
     if (!entry || entry.key !== 'needs') return null;
@@ -3827,26 +3895,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const src = lostIntegrations(c)[0];
       return { label: 'Reconnect ' + (src ? src.source : 'integration'), go: 'reconnect' };
     }
+    if ((c.issues || []).some((issue) => issue.key === 'sync')) return { label: 'Fix syncs', go: 'work' };
     const health = healthModel(c);
     const fail = health && health.failed[0];
     if (fail && fail.short === 'Uncategorized') {
-      const issue = (c.issues || []).find((item) => item.key === 'uncategorized');
+      const issue = healthIssue(c, 'uncategorized');
       return { label: 'Review ' + ((issue && issue.count) || 0) + ' uncategorized', go: 'work' };
     }
     if (fail && fail.short === 'Undeposited') {
-      const issue = (c.issues || []).find((item) => item.key === 'undeposited');
+      const issue = healthIssue(c, 'undeposited');
       return { label: 'Review ' + ((issue && issue.unapplied) || 0) + ' unapplied payments', go: 'work' };
     }
     return { label: 'Fix syncs', go: 'work' };
-  }
-  function nextCloseAction(c, month, year) {
-    const rec = tieRecord(c, month, year);
-    if (!c.accounting) return { label: 'Connect', go: 'connect', outlined: true };
-    if (connectionLost(c)) return { label: 'Reconnect', go: 'reconnect', outlined: true };
-    if (rec.closed) return { label: 'Closed', go: 'closed', outlined: false };
-    const progress = gateProgress(c, month, year);
-    if (progress.done < progress.total) return { label: 'Fix syncs', go: 'work', outlined: true };
-    return { label: 'Close ' + closeMonthName(), go: 'close', outlined: false };
   }
   function renderMonitoring() {
     const groups = [
@@ -3862,7 +3922,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const body = list.map(({ c, entry }) => {
         const action = monitorFix(c, entry);
         const button = key === 'needs' && action ? `<button type="button" class="btn-outlined" data-mon-fix="${c.id}" data-mon-go="${action.go}">${esc(action.label)}</button>` : '';
-        const reason = entry.tip ? `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(entry.reason)}</span><span class="tooltip" role="tooltip">${esc(entry.tip)}</span></span>` : `<span class="text-body2">${esc(entry.reason)}</span>`;
+        const reason = `<span class="tooltip-wrap"><span tabindex="0"><span class="text-body2">${esc(entry.reason)}</span>${entry.label ? ` <span class="text-caption text-secondary">${esc(entry.label)}</span>` : ''}</span><span class="tooltip" role="tooltip">${esc(entry.tip || entry.reason)}</span></span>`;
         return `<tr class="row-clickable" data-mon="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td>${reason}</td><td><span class="text-body2">${esc(lastCheckedLabel(c))}</span></td><td>${button}</td></tr>`;
       }).join('');
       const open = key === 'needs' ? ' open' : '';
@@ -3870,16 +3930,25 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
     return `<div class="flow-wide page-stack">
       ${pageHeader('Monitoring', '<button type="button" class="btn" id="checkAll">Check all clients</button>', 'Pick who to fix first.')}
-      <p class="text-body2">Checks run on their own once QuickBooks is connected. Xero and clients without accounting are listed under Can't check.</p>
+      <p class="text-body2">Checks run on their own once QuickBooks is connected. Xero, unfinished setup, and clients without books are listed under Can't check.</p>
       ${groups.map(([key, title]) => section(key, title)).join('')}
     </div>`;
   }
-  const WORK_MONTHS = [
-    { label: 'August 2026', short: 'August' },
-    { label: 'September 2026', short: 'September' },
-    { label: 'October 2026', short: 'October' },
-    { label: 'November 2026', short: 'November' }
-  ];
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function currentPeriod() { return { year: 2026, month: 11 }; }
+  function periodList() {
+    const end = currentPeriod();
+    const out = [];
+    let year = 2025;
+    let month = 1;
+    while (year < end.year || (year === end.year && month <= end.month)) {
+      out.push({ year, month, label: MONTH_NAMES[month - 1] + ' ' + year, short: MONTH_NAMES[month - 1] });
+      month += 1;
+      if (month > 12) { month = 1; year += 1; }
+    }
+    return out;
+  }
+  const WORK_MONTHS = periodList();
   const CLIENT_ROLE_MANAGER = 'Edit client\'s organization details. Connect/disconnect integrations (eCommerce platforms and payment providers). Have full control over the synchronization process and settings.';
   const CLIENT_ROLE_MEMBER = 'View client\'s organization details. Adjust synchronization settings. Synchronize transactions in the client\'s books.';
   const ASSIGN_CLIENT_TIP = 'Select the client you want to assign to this colleague. If you haven\'t connected the needed client to your Firm yet, please connect it first or select any client for this colleague to be able to join the Firm. You\'ll be able to reassign them later once you connected the client in question. Learn more';
@@ -3952,35 +4021,32 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { slice: list.slice(start, start + size), html };
   }
   function checkAllClients() {
+    const stamp = stampLabel(new Date());
     listedClients().forEach((c) => {
-      if (!c.accounting || !isQuickBooks(c) || connectionLost(c)) return;
-      c.checked = 'Nov 18, 2026';
-      const rec = tieRecord(c);
-      if (rec.sync === 'unchecked') rec.sync = 'passed';
-      if (rec.recon === 'unchecked') rec.recon = 'passed';
+      if (!c.accounting || !isQuickBooks(c) || connectionLost(c) || blocksClose(c) || c.checking) return;
+      c.checked = stamp;
+      Object.keys(c.tie || {}).forEach((key) => {
+        const rec = c.tie[key];
+        if (rec && !rec.closed) rec.sync = realSyncState(c);
+      });
     });
     showKitToast('Checked all clients');
     renderMain();
   }
   function syncFirmChecks(c) {
-    const prev = {};
-    (c.firmChecks || []).forEach((chk) => { prev[chk.id] = chk; });
-    const closed = c.monthStatus === 'Closed';
-    c.firmChecks = firmChecklist.map((row) => {
-      const old = prev[row.id];
-      return { id: row.id, label: row.label, done: old ? !!old.done : !!closed, note: old ? (old.note || '') : '', required: !!row.required };
-    });
+    if (!Array.isArray(c.extraChecks)) c.extraChecks = [];
   }
   function ensureWork(c) {
-    if (typeof c.monthIndex !== 'number') c.monthIndex = 2;
-    c.monthIndex = Math.max(0, Math.min(WORK_MONTHS.length - 1, c.monthIndex));
+    const list = periodList();
+    const shared = list.findIndex((item) => item.year === closeYearNum() && item.month === closeMonthNum());
+    c.monthIndex = shared >= 0 ? shared : 0;
     if (!c.monthStatus) {
       const seeded = { e1: 'Closed', e2: 'Open', e3: 'In review', e5: 'Closed', e7: 'Open', e9: 'In review', e11: 'Open', e12: 'Open', e13: 'In review', e14: 'Closed', e15: 'Open', e16: 'Closed' };
       c.monthStatus = seeded[c.id] || 'Open';
     }
     syncFirmChecks(c);
     if (!Array.isArray(c.monthNotes)) c.monthNotes = [];
-    return WORK_MONTHS[c.monthIndex];
+    return list[c.monthIndex];
   }
   function billingRow(c) {
     const lic = licenseLabel(c);
@@ -3997,15 +4063,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     lostIntegrations(c).forEach((i) => { lost[i.source] = true; });
     pendingIntegrations(c).forEach((i) => { pending[i.source] = true; });
     const company = companyName(c);
+    const booksDown = booksLost(c) || !!c.userDisconnected;
     const rows = [{
       name: company + ' (' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online') + ')',
       type: (c.accounting === 'Xero' ? 'XERO' : 'INTUIT') + ' · Accounting',
-      chip: booksLost(c) ? 'yellow' : 'green',
-      label: booksLost(c) ? 'Disconnected' : 'Connected',
+      chip: booksDown ? 'yellow' : 'green',
+      label: booksDown ? 'Connection lost' : 'Connected',
       logo: c.accounting
     }];
     (c.integrations || []).forEach((name) => {
-      const chip = lost[name] ? 'red' : (pending[name] ? 'yellow' : 'green');
+      const chip = lost[name] ? 'yellow' : (pending[name] ? 'yellow' : 'green');
       const label = lost[name] ? 'Connection lost' : (pending[name] ? 'Finish configuration' : 'Connected');
       rows.push({
         name: company + ' (' + name + ')',
@@ -4108,61 +4175,165 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function closeBlockers(c, status) {
     ensureWork(c);
     if (status === 'Closed') return '—';
-    const missing = c.firmChecks.filter((chk) => chk.required && !chk.done).map((chk) => chk.label);
+    const missing = gateUnmet(c);
     if (missing.length) return missing.join(', ');
     const entry = monitorEntry(c);
     if (entry && entry.key !== 'clear') return entry.reason;
     return '—';
   }
-  const CLOSE_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const CLOSE_YEARS = [2025, 2026, 2027];
-  function closeMonthNum() { return st && st.closeMonthNum ? st.closeMonthNum : 10; }
-  function closeYearNum() { return st && st.closeYear ? st.closeYear : 2026; }
-  function closeMonthName() { return CLOSE_MONTHS[closeMonthNum() - 1] || 'October'; }
+  const CLOSE_MONTHS = MONTH_NAMES;
+  function closeMonthNum() {
+    const now = currentPeriod();
+    const month = st && st.closeMonthNum ? st.closeMonthNum : 10;
+    const year = st && st.closeYear ? st.closeYear : 2026;
+    const max = year < now.year ? 12 : now.month;
+    return Math.max(1, Math.min(max, month));
+  }
+  function closeYearNum() {
+    const now = currentPeriod();
+    const year = st && st.closeYear ? st.closeYear : 2026;
+    return Math.max(2025, Math.min(now.year, year));
+  }
+  function closeMonthName(month) { return CLOSE_MONTHS[(month || closeMonthNum()) - 1] || 'October'; }
+  function monthHasEnded(year, month) {
+    const now = currentPeriod();
+    return year < now.year || (year === now.year && month < now.month);
+  }
+  function realSyncState(c) {
+    if (!c || !c.accounting) return 'na';
+    if (c.checking || connectionLost(c) || blocksClose(c)) return 'cant';
+    if ((c.issues || []).some((issue) => issue.key === 'sync')) return 'failed';
+    return 'passed';
+  }
+  function healthSnapshot(c) {
+    if (!c || !c.accounting || !isQuickBooks(c) || connectionLost(c) || blocksClose(c) || c.checking) return { label: "Can't check" };
+    const summary = healthSummary(c);
+    return { label: summary.label || 'All good' };
+  }
+  function seedTie(c, month, year) {
+    const ended = monthHasEnded(year, month);
+    const beforeWorking = year < 2026 || (year === 2026 && month < 10);
+    const octoberClosed = !!c.accounting && c.monthStatus === 'Closed' && month === 10 && year === 2026;
+    const closed = !!c.accounting && ended && (beforeWorking || octoberClosed);
+    const review = !!c.accounting && !closed && c.monthStatus === 'In review' && month === 10 && year === 2026;
+    const checks = {};
+    const checklist = firmChecklist.map((row) => ({ id: row.id, label: row.label, required: !!row.required }));
+    if (closed) {
+      checklist.forEach((row) => { checks[row.id] = { done: true, note: '', by: 'Ignat P.', at: 'Oct 31, 14:02', required: row.required, label: row.label }; });
+    }
+    return {
+      sync: realSyncState(c),
+      recon: closed ? 'passed' : (!c.accounting ? 'na' : 'unchecked'),
+      reconResult: closed ? { accounts: 'Checking', balance: 12480.22, asOf: 'Oct 31, 2026' } : null,
+      closed,
+      review,
+      checks,
+      checklist: closed ? checklist : null,
+      resolved: null,
+      healthAtClose: closed ? healthSnapshot(c) : null,
+      events: closed ? [{ type: 'close', who: 'Ignat P.', at: 'Oct 31, 2026, 16:40 (UTC+2)', reason: '' }] : []
+    };
+  }
   function tieRecord(c, month, year) {
     ensureWork(c);
     month = month || closeMonthNum();
     year = year || closeYearNum();
     const key = year + '-' + month;
     if (!c.tie) c.tie = {};
-    if (!c.tie[key]) {
-      const seededClosed = !!c.accounting && c.monthStatus === 'Closed' && month === 10 && year === 2026;
-      const seededReview = !!c.accounting && c.monthStatus === 'In review' && month === 10 && year === 2026;
-      let sync = 'passed';
-      let recon = 'passed';
-      if (!c.accounting) { sync = 'na'; recon = 'na'; }
-      else if (connectionLost(c)) { sync = 'failed'; recon = 'unchecked'; }
-      else if (!seededClosed && hasHealthIssues(c)) { sync = 'failed'; recon = 'unchecked'; }
-      else if (!seededClosed && (c.id.charCodeAt(c.id.length - 1) + month) % 2 === 0) recon = 'unchecked';
-      c.tie[key] = { sync, recon, closed: seededClosed, review: seededReview };
-    }
-    return c.tie[key];
+    if (!c.tie[key]) c.tie[key] = seedTie(c, month, year);
+    const rec = c.tie[key];
+    if (!rec.closed) rec.sync = realSyncState(c);
+    if (!rec.checks) rec.checks = {};
+    if (!rec.events) rec.events = [];
+    return rec;
   }
   function shownClose(c) {
-    const month = ensureWork(c);
-    const parts = month.label.split(' ');
-    const num = CLOSE_MONTHS.indexOf(parts[0]) + 1;
-    const year = Number(parts[1]);
-    return { num, year, label: month.label, short: month.short, rec: tieRecord(c, num, year) };
+    const month = closeMonthNum();
+    const year = closeYearNum();
+    const item = periodList().find((row) => row.year === year && row.month === month) || periodList()[0];
+    return { num: item.month, year: item.year, label: item.label, short: item.short, rec: tieRecord(c, item.month, item.year) };
+  }
+  function firmPeriodChecks(c, rec) {
+    const source = rec.closed && rec.checklist && rec.checklist.length ? rec.checklist : firmChecklist.concat(c.extraChecks || []);
+    return source.map((row) => {
+      const saved = (rec.checks || {})[row.id] || {};
+      return { id: row.id, label: row.label, required: !!row.required, done: !!saved.done, note: saved.note || '', by: saved.by || '', at: saved.at || '' };
+    });
+  }
+  function reconTip(rec) {
+    const result = rec && rec.reconResult;
+    if (rec && rec.recon === 'passed' && result) return result.accounts + ' · ' + money(result.balance) + ' · as of ' + result.asOf;
+    return 'Not checked. Start reconciliation to record the account, statement balance, and as-of date.';
   }
   function gateItems(c, month, year) {
-    syncFirmChecks(c);
     const rec = tieRecord(c, month, year);
-    const system = [
-      { id: 'syncs', label: 'Syncs', state: rec.sync, required: false },
-      { id: 'recon', label: 'Reconciliation', state: rec.recon, required: false }
+    const locked = !c.accounting ? 'na' : ((c.checking || connectionLost(c) || blocksClose(c)) ? 'cant' : '');
+    const uncat = healthIssue(c, 'uncategorized');
+    const funds = healthIssue(c, 'undeposited');
+    const items = [
+      { id: 'syncs', label: 'Syncs', state: locked || rec.sync, required: true, tip: rec.sync === 'failed' ? 'A sync failed in this period.' : 'Syncs reflect only a failed sync.' },
+      { id: 'recon', label: 'Reconciliation', state: locked || rec.recon, required: true, tip: reconTip(rec) },
+      { id: 'uncat', label: 'Uncategorized', state: locked || (uncat ? 'failed' : 'passed'), required: true, tip: uncatDetail(uncat), count: uncat ? uncat.count : 0 },
+      { id: 'funds', label: 'Undeposited', state: locked || (funds ? 'failed' : 'passed'), required: true, tip: fundsDetail(funds), count: funds ? funds.unapplied : 0 }
     ];
-    const firm = (c.firmChecks || []).map((chk) => ({ id: chk.id, label: chk.label, state: !c.accounting ? 'na' : (chk.done ? 'passed' : 'unchecked'), required: !!chk.required }));
-    return system.concat(firm);
+    firmPeriodChecks(c, rec).forEach((chk) => {
+      items.push({ id: chk.id, label: chk.label, state: locked || (chk.done ? 'passed' : 'unchecked'), required: !!chk.required, tip: chk.by ? chk.by + ', ' + chk.at : '', note: chk.note, by: chk.by, at: chk.at, kind: 'firm' });
+    });
+    return items;
+  }
+  function gateLeft(c, month, year) {
+    const rec = tieRecord(c, month, year);
+    const waived = !!(rec.resolved && rec.resolved.reason);
+    const rank = { syncs: 0, uncat: 1, funds: 2 };
+    return gateItems(c, month, year).filter((item) => item.required && item.state !== 'passed' && item.state !== 'na' && !(item.state === 'cant' && waived)).sort((a, b) => {
+      const weight = (item) => item.kind === 'firm' ? 3 : (item.id === 'recon' ? 4 : (rank[item.id] == null ? 3 : rank[item.id]));
+      return weight(a) - weight(b);
+    });
   }
   function gateProgress(c, month, year) {
-    const items = gateItems(c, month, year);
-    if (!c.accounting) return { label: '—', done: 0, total: items.length, items };
-    const done = items.filter((item) => item.state === 'passed').length;
-    return { label: done + ' of ' + items.length, done, total: items.length, items };
+    const items = gateItems(c, month, year).filter((item) => item.required);
+    if (!c.accounting) return { label: '—', done: 0, total: items.length, items, left: [] };
+    const left = gateLeft(c, month, year);
+    const done = items.length - left.length;
+    return { label: done + ' of ' + items.length + ' done', done, total: items.length, items, left };
   }
   function gateUnmet(c, month, year) {
-    return gateItems(c, month, year).filter((item) => item.required && item.state !== 'passed').map((item) => item.label);
+    return gateLeft(c, month, year).map((item) => item.label);
+  }
+  function firstOpenEarlier(c, month, year) {
+    const list = periodList();
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (item.year > year || (item.year === year && item.month >= month)) break;
+      if (!monthHasEnded(item.year, item.month)) continue;
+      if (c.accounting && !tieRecord(c, item.month, item.year).closed) return item;
+    }
+    return null;
+  }
+  function actionForItem(item) {
+    if (item.id === 'syncs') return { label: 'Fix syncs', go: 'work', outlined: true };
+    if (item.id === 'uncat') return { label: 'Review ' + (item.count || 0) + ' uncategorized', go: 'work', outlined: true };
+    if (item.id === 'funds') return { label: 'Review ' + (item.count || 0) + ' unapplied payments', go: 'work', outlined: true };
+    if (item.id === 'recon') return { label: 'Start reconciliation', go: 'recon', outlined: true };
+    if (item.id === 'bank') return { label: 'Add bank statements', go: 'work', outlined: true };
+    return { label: item.label, go: 'work', outlined: true };
+  }
+  function nextCloseAction(c, month, year) {
+    month = month || closeMonthNum();
+    year = year || closeYearNum();
+    const rec = tieRecord(c, month, year);
+    if (!c.accounting) return { label: 'Connect', go: 'connect', outlined: true };
+    if (connectionLost(c)) return { label: 'Reconnect', go: 'reconnect', outlined: true };
+    if (c.checking) return { label: 'Checking…', go: 'wait', outlined: true };
+    if (rec.closed) return { label: 'Closed', go: 'closed', outlined: false };
+    if (!monthHasEnded(year, month)) return { label: closeMonthName(month) + " hasn't ended", go: 'wait', outlined: true };
+    const earlier = firstOpenEarlier(c, month, year);
+    if (earlier) return { label: 'Close ' + earlier.short + ' first', go: 'earlier', outlined: true, month: earlier.month, year: earlier.year };
+    if (blocksClose(c) && !(rec.resolved && rec.resolved.reason)) return { label: 'Resolve', go: 'resolve', outlined: true };
+    const left = gateLeft(c, month, year);
+    if (left.length) return actionForItem(left[0]);
+    if (!canCloseBooks()) return { label: 'Ask a manager to close', go: 'ask', outlined: true };
+    return { label: 'Close ' + closeMonthName(month), go: 'close', outlined: false };
   }
   function closeState(c, rec) {
     if (!c.accounting) return 'Not applicable';
@@ -4170,10 +4341,33 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (rec.review) return 'In review';
     return 'Open';
   }
-  function tieChip(label, state) {
-    if (state === 'failed') return `<span class="status status-red"><span class="material-icons icon-sm" aria-hidden="true">error_outline</span>${esc(label)} · Failed</span>`;
-    if (state === 'unchecked') return `<span class="status status-grey"><span class="material-icons icon-sm" aria-hidden="true">help_outline</span>${esc(label)} · Not checked</span>`;
-    return `<span class="status status-green"><span class="material-icons icon-sm" aria-hidden="true">check</span>${esc(label)} · Passed</span>`;
+  function tieChip(item) {
+    const label = item.label;
+    const state = item.state;
+    const tip = item.tip || label;
+    if (state === 'na') return tipChip('grey', label + ' · Not applicable', tip);
+    if (state === 'cant') return tipChip('grey', label + " · Can't check", tip || cantCheckReason(item));
+    if (state === 'failed') return tipChip('red', label + ' · Failed', tip);
+    if (state === 'unchecked') return tipChip('grey', label + ' · Not checked', tip);
+    return tipChip('green', label + ' · Passed', tip);
+  }
+  function closeActionHtml(next, id) {
+    if (next.go === 'closed') {
+      const ask = canCloseBooks() ? '' : ' <span class="text-body2">Ask a manager to close</span>';
+      return '<span class="status status-green">Closed</span>' + ask;
+    }
+    if (next.go === 'ask' || next.go === 'wait') return `<span class="text-body2">${esc(next.label)}</span>`;
+    if (next.go === 'earlier') return `<button type="button" class="btn-outlined" data-close-month-jump="${next.year}-${next.month}">${esc(next.label)}</button>`;
+    return `<button type="button" class="${next.outlined ? 'btn-outlined' : 'btn'}" data-close-go="${next.go}" data-close-id="${id}">${esc(next.label)}</button>`;
+  }
+  function progressHtml(c, month, year) {
+    const progress = gateProgress(c, month, year);
+    if (!c.accounting) return '<span class="text-body2">—</span>';
+    let left = progress.left;
+    if (connectionLost(c)) left = [{ id: 'connection', label: 'Connection lost' }];
+    else if (blocksClose(c) && !(tieRecord(c, month, year).resolved && tieRecord(c, month, year).resolved.reason)) left = [{ id: 'resolve', label: cantCheckReason(c) }];
+    const links = left.map((item) => `<button type="button" class="link" data-left="${esc(item.id)}" data-left-client="${c.id}">${esc(item.label)}</button>`).join(', ');
+    return `<span class="text-body2">${progress.done} of ${progress.total} done${left.length ? '. Left: ' : ''}</span>${links ? ' ' + links : ''}`;
   }
   function tiePassed(rec) { return (rec.sync === 'passed' ? 1 : 0) + (rec.recon === 'passed' ? 1 : 0); }
   function tieUnmet(rec) {
@@ -4209,30 +4403,27 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const q = (st.closeQ || '').trim().toLowerCase();
     const list = listedClients().filter((c) => !q || c.name.toLowerCase().includes(q));
     const page = closePageModel(list);
-    const monthOpts = CLOSE_MONTHS.map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
-    const yearOpts = CLOSE_YEARS.map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
+    const maxMonth = year < currentPeriod().year ? 12 : currentPeriod().month;
+    const monthOpts = CLOSE_MONTHS.slice(0, maxMonth).map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
+    const yearOpts = [];
+    for (let n = 2025; n <= currentPeriod().year; n++) yearOpts.push(`<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`);
     const body = page.slice.map((c) => {
       const rec = tieRecord(c);
-      const progress = gateProgress(c);
       const unmet = gateUnmet(c);
       const next = nextCloseAction(c);
       const note = st.closeBlock === c.id && unmet.length ? `<tr><td colspan="4"><p class="form-error-msg">${esc(c.name)}: ${esc(unmet.join(', '))} ${unmet.length === 1 ? 'is' : 'are'} still required to close.</p></td></tr>` : '';
-      const chips = connectionLost(c)
-        ? '<span class="status status-yellow">Connection lost</span>'
-        : progress.items.map((item) => item.state === 'na' ? `<span class="status status-grey">${esc(item.label)} · Not applicable</span>` : tieChip(item.label, item.state)).join('');
-      const action = next.go === 'closed'
-        ? '<span class="status status-green">Closed</span>'
-        : `<button type="button" class="${next.outlined ? 'btn-outlined' : 'btn'}" data-close-go="${next.go}" data-close-id="${c.id}">${esc(next.label)}</button>`;
+      const chips = gateItems(c).map((item) => tieChip(item)).join('');
+      const action = closeActionHtml(next, c.id);
       const review = rec.closed || !c.accounting ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
-      const reopen = rec.closed ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
-      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${chips}</div></td><td><span class="text-body2">${progress.label}</span> <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
+      const reopen = rec.closed && canCloseBooks() ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
+      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${chips}</div></td><td>${progressHtml(c, month, year)} <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients match.</td></tr>';
     return `<div class="flow-wide page-stack">
       ${pageHeader('Month close', '', 'Closing ' + closeMonthName() + ' ' + year)}
       <div class="d-flex align-center justify-between gap-16">
         <div class="d-flex align-center gap-16">
           <div><label class="form-label" for="closeMonthPick">Month</label><select class="select" id="closeMonthPick" aria-label="Month">${monthOpts}</select></div>
-          <div><label class="form-label" for="closeYearPick">Year</label><select class="select" id="closeYearPick" aria-label="Year">${yearOpts}</select></div>
+          <div><label class="form-label" for="closeYearPick">Year</label><select class="select" id="closeYearPick" aria-label="Year">${yearOpts.join('')}</select></div>
           <div><label class="form-label" for="closeSearch">Client name</label><input type="search" class="input-search" id="closeSearch" placeholder="Search by client name..." value="${esc(st.closeQ || '')}" aria-label="Client name" /></div>
         </div>
         <button type="button" class="btn-outlined" id="checkAllClose">Check all clients</button>
@@ -4242,26 +4433,41 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     </div>`;
   }
   function healthReportBlock(c) {
+    const shown = c && c.accounting ? shownClose(c) : null;
+    const atClose = shown && shown.rec.closed && shown.rec.healthAtClose ? `<p class="text-body2">Health at close: ${esc(shown.rec.healthAtClose.label)}</p>` : '';
+    if (c && c.checking) return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">Checking…</p><p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
     if (!isQuickBooks(c) || connectionLost(c)) {
-      const note = !c || !c.accounting ? 'Not connected' : (!isQuickBooks(c) ? 'Health checks are available for QuickBooks only.' : 'Connection lost');
-      return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">—</p><p class="text-body2">${note}</p></div>`;
+      const note = !c || !c.accounting ? 'Books not connected' : (!isQuickBooks(c) ? 'Xero, not supported yet' : 'Connection lost');
+      return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">—</p><p class="text-body2">${note}</p>${atClose}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
     }
     const health = healthModel(c);
     const lines = (health ? health.checks : []).map((check) => {
       const chip = check.failed ? '<span class="status status-red">Failed</span>' : '<span class="status status-green">Passed</span>';
       return `<div class="d-flex align-center justify-between gap-8"><span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(check.short)}</span><span class="tooltip" role="tooltip">${esc(check.detail)}</span></span>${chip}</div>`;
     }).join('');
-    return `<div class="box box--white page-stack"><div class="d-flex align-center justify-between gap-8"><h2 class="text-h2">Health report</h2><button type="button" class="btn-outlined" id="diagnoseBtn">Diagnose</button></div>${lines}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
+    return `<div class="box box--white page-stack"><div class="d-flex align-center justify-between gap-8"><h2 class="text-h2">Health report</h2><button type="button" class="btn-outlined" id="diagnoseBtn">Diagnose</button></div>${lines}${atClose}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
+  }
+  function diagnoseFail(fail, issue) {
+    const undeposited = fail.short === 'Undeposited';
+    const effect = undeposited
+      ? (issue.unapplied || 0) + " customer payments aren't matched to an invoice or deposit"
+      : (issue.count || 0) + ' expenses have no category';
+    const steps = undeposited
+      ? ["Match each payment to its invoice or deposit. Don't delete them.", 'Open Undeposited Funds and include only the payments that belong in this deposit.', 'Come back here and check again.']
+      : ['Open each expense and choose the category it belongs in.', 'Leave Opening Balance Equity at zero.', 'Come back here and check again.'];
+    const href = undeposited ? 'https://qbo.intuit.com/app/bankdeposit' : 'https://qbo.intuit.com/app/chartofaccounts';
+    const items = (issue.items || []).map((item) => `<li class="text-body2">${esc(item.name)} · ${esc(money(item.amount))}</li>`).join('');
+    return `<p class="text-caption text-secondary">${esc(fail.short)}</p><p class="text-body2">${esc(effect)}</p><ol>${steps.map((step) => `<li class="text-body2">${esc(step)}</li>`).join('')}</ol><p class="text-body2"><a class="link" href="${href}" target="_blank" rel="noopener noreferrer">Open in QuickBooks</a></p>${items ? `<ul>${items}</ul>` : ''}`;
   }
   function openDiagnose(c) {
     const old = document.getElementById('diagnoseSheet');
     if (old) old.remove();
-    const health = isQuickBooks(c) ? healthModel(c) : null;
-    let body = '<p class="text-body2">Health checks are available for QuickBooks only.</p>';
+    const health = isQuickBooks(c) && !connectionLost(c) ? healthModel(c) : null;
+    let body = '<p class="text-body2">' + esc(cantCheckReason(c) || 'Health checks are available for QuickBooks only.') + '</p>';
     if (health && health.failed.length) {
-      body = `<p class="text-body2">${esc(c.name)} needs a fix on ${health.failed.length === 1 ? 'one check' : health.failed.length + ' checks'}.</p>` + health.failed.map((fail) => `<p class="text-body2"><span class="text-bold">What's wrong.</span> ${esc(fail.short)} failed.</p><p class="text-body2"><span class="text-bold">Which items.</span> ${esc(fail.detail)}</p><p class="text-body2"><span class="text-bold">How to fix in QuickBooks.</span> Open the ${fail.short === 'Undeposited' ? 'Bank deposit and undeposited funds' : 'Chart of accounts'} screen, clear the ${fail.short === 'Undeposited' ? 'unapplied payments and undeposited funds' : 'uncategorized and suspense items'}, then come back and check again.</p>`).join('') + '<p class="text-body2"><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Open the QuickBooks check</a></p>';
+      body = health.failed.map((fail) => diagnoseFail(fail, healthIssue(c, fail.short === 'Undeposited' ? 'undeposited' : 'uncategorized') || {})).join('');
     } else if (health) {
-      body = `<p class="text-body2">${esc(c.name)} is clear. Uncategorized and Undeposited both passed.</p>`;
+      body = `<p class="text-caption text-secondary">Uncategorized</p><p class="text-body2">No expenses are missing a category.</p><p class="text-caption text-secondary">Undeposited</p><p class="text-body2">No customer payments are waiting to be matched.</p>`;
     }
     const wrap = document.createElement('div');
     wrap.id = 'diagnoseSheet';
@@ -4277,8 +4483,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rec = shown.rec;
     const progress = gateProgress(c, shown.num, shown.year);
     const statusName = closeState(c, rec);
-    const missing = (c.firmChecks || []).filter((chk) => chk.required && !chk.done);
-    const reqLink = missing.length ? `<button type="button" class="link" id="requiredLeft">${missing.length} required check${missing.length === 1 ? '' : 's'} remaining</button>` : '';
+    const periodChecks = firmPeriodChecks(c, rec);
     const monthChip = statusName === 'Closed' ? 'green' : (statusName === 'In review' ? 'yellow' : 'grey');
     let details = '';
     if (st.profileEdit) {
@@ -4290,7 +4495,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     } else {
       details = `<p class="text-body2">${esc(c.firmProfile.contact || c.name)}. <button type="button" class="link" id="addProfile">Add client details</button></p>`;
     }
-    const checks = c.firmChecks.map((chk) => `<div class="d-flex align-center gap-8"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><span>${esc(chk.label)}</span></label>${chk.required ? '<span class="status status-grey">Required</span>' : ''}${chk.note ? `<span class="text-body2">${esc(chk.note)}</span>` : ''}<button type="button" class="link" data-note-open="${chk.id}">${chk.note ? 'Edit note' : 'Add note'}</button>${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="link" data-save-note="${chk.id}">Save note</button>` : ''}</div>`).join('');
+    const checks = periodChecks.map((chk) => `<div class="d-flex align-center gap-8 flex-wrap"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><span>${esc(chk.label)}</span></label>${chk.required ? '<span class="status status-grey">Required</span>' : ''}${chk.by ? `<span class="text-body2 text-secondary">${esc(chk.by + ', ' + chk.at)}</span>` : ''}${chk.note ? `<span class="text-body2">${esc(chk.note)}</span>` : ''}<button type="button" class="link" data-note-open="${chk.id}">${chk.note ? 'Edit note' : 'Add note'}</button>${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="link" data-save-note="${chk.id}">Save note</button>` : ''}</div>`).join('');
     const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('');
     const connRows = c.accounting ? connectionRows(c) : [];
     const connBad = connRows.filter((row) => row.label !== 'Connected');
@@ -4304,16 +4509,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const evidence = !c.accounting
       ? '<p class="text-body2">Not set up for this client.</p>'
       : closeRow('Syncs', syncCopy.desc, syncCopy.chip, syncCopy.kind) + closeRow('Reconciliation', reconCopy.desc, reconCopy.chip, reconCopy.kind) + '<p class="text-body2">Daily summaries, Mappings, and Revenue recognition are not set up for this client.</p>';
-    const history = WORK_MONTHS.map((item) => {
-      const parts = item.label.split(' ');
-      const num = CLOSE_MONTHS.indexOf(parts[0]) + 1;
-      const year = Number(parts[1]);
-      const rowRec = tieRecord(c, num, year);
-      const rowProgress = gateProgress(c, num, year);
+    const history = periodList().map((item) => {
+      const rowRec = tieRecord(c, item.month, item.year);
+      const rowProgress = gateProgress(c, item.month, item.year);
       const rowStatus = closeState(c, rowRec);
-      const kind = rowStatus === 'Closed' ? 'green' : (rowStatus === 'In review' ? 'yellow' : (rowStatus === 'Not applicable' ? 'grey' : 'grey'));
-      const run = !c.accounting ? '—' : (rowRec.sync === 'passed' ? 'Passed' : (rowRec.sync === 'failed' ? 'Failed' : 'Not checked'));
-      return `<tr><td>${esc(item.label)}</td><td><span class="status status-${kind}">${esc(rowStatus)}</span></td><td>${esc(rowProgress.label)}</td><td>${isQuickBooks(c) && !connectionLost(c) ? esc(healthSummary(c).label || 'All good') : "Can't check"}</td><td>${esc(run)}</td><td>${esc(lastCheckedLabel(c))}</td></tr>`;
+      const kind = rowStatus === 'Closed' ? 'green' : (rowStatus === 'In review' ? 'yellow' : 'grey');
+      const healthAt = rowRec.closed && rowRec.healthAtClose ? rowRec.healthAtClose.label : '—';
+      const events = (rowRec.events || []).map((ev) => ev.type === 'close' ? 'Closed by ' + ev.who + ', ' + ev.at : (ev.type === 'reopen' ? 'Reopened by ' + ev.who + ', ' + ev.at + (ev.reason ? ' — ' + ev.reason : '') : 'Reviewed by ' + ev.who + ', ' + ev.at + ' — ' + (ev.reason || ''))).join('; ') || '—';
+      return `<tr><td>${esc(item.label)}</td><td><span class="status status-${kind}">${esc(rowStatus)}</span></td><td>${esc(rowProgress.label)}</td><td>${esc(healthAt)}</td><td>${esc(events)}</td><td>${esc(lastCheckedLabel(c))}</td></tr>`;
     }).join('');
     return `<div class="page-stack">
       ${healthReportBlock(c)}
@@ -4326,12 +4529,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <span class="status status-${monthChip}">${esc(statusName)}</span>
         </div>
         <div class="d-flex align-center gap-8 flex-wrap">
-          ${(() => { const next = nextCloseAction(c, shown.num, shown.year); if (next.go === 'closed') return '<span class="status status-green">Closed</span>'; return `<button type="button" class="${next.outlined ? 'btn-outlined' : 'btn'}" data-close-go="${next.go}" data-close-id="${c.id}">${esc(next.label)}</button>`; })()}
+          ${closeActionHtml(nextCloseAction(c, shown.num, shown.year), c.id)}
           <button type="button" class="link" id="nextClient">Next client</button>
         </div>
       </div>
-      <p class="text-body2">${esc(progress.label)}</p>
-      ${progress.items.map((item) => `<div class="d-flex align-center justify-between gap-8"><span class="text-body2">${esc(item.label)}</span><span class="text-body2">${item.state === 'passed' ? 'Passed' : (item.state === 'failed' ? 'Failed' : (item.state === 'na' ? 'Not applicable' : 'Not checked'))}</span></div>`).join('')}
+      <p>${progressHtml(c, shown.num, shown.year)}</p>
+      ${gateItems(c, shown.num, shown.year).map((item) => `<div class="d-flex align-center justify-between gap-8"><span class="text-body2">${esc(item.label)}${item.required ? '' : ' <span class="text-caption text-secondary">Optional</span>'}</span><span class="text-body2">${item.state === 'passed' ? 'Passed' : (item.state === 'failed' ? 'Failed' : (item.state === 'na' ? 'Not applicable' : (item.state === 'cant' ? "Can't check" : 'Not checked')))}</span></div>`).join('')}
       </div>
       <p class="form-error-msg" id="closeNeed" hidden></p>
       ${details}
@@ -4830,15 +5033,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-stub]').forEach((b) => b.onclick = (e) => { e.preventDefault(); showNotPart(); });
     m.querySelectorAll('[data-check]').forEach((box) => box.onchange = () => {
       const c = findOrg(st.clientId);
-      const chk = c && c.firmChecks.find((item) => item.id === box.dataset.check);
-      if (chk) chk.done = box.checked;
+      if (!c) return;
+      const rec = tieRecord(c);
+      if (rec.closed) { box.checked = !box.checked; return; }
+      const row = firmPeriodChecks(c, rec).find((item) => item.id === box.dataset.check) || {};
+      rec.checks[box.dataset.check] = { done: box.checked, note: row.note || '', by: box.checked ? actorName() : '', at: box.checked ? stampShort(new Date()) : '', label: row.label || '', required: !!row.required };
+      renderMain();
     });
     m.querySelectorAll('[data-save-note]').forEach((b) => b.onclick = () => {
       const input = document.getElementById('note-' + b.dataset.saveNote);
       if (!input || !(input.value || '').trim()) { fieldError(input, 'Required'); return; }
       const c = findOrg(st.clientId);
-      const chk = c && c.firmChecks.find((item) => item.id === b.dataset.saveNote);
-      if (chk) chk.note = input.value.trim();
+      if (!c) return;
+      const rec = tieRecord(c);
+      const row = firmPeriodChecks(c, rec).find((item) => item.id === b.dataset.saveNote) || {};
+      rec.checks[b.dataset.saveNote] = { done: !!row.done, note: input.value.trim(), by: row.by || actorName(), at: row.at || stampShort(new Date()), label: row.label || '', required: !!row.required };
+      st.openNote = '';
       renderMain();
     });
     const colSearch = $('colSearch');
@@ -4903,16 +5113,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-lic-change]').forEach((b) => b.onclick = () => openAssign(b.dataset.licChange));
     m.querySelectorAll('[data-lic-move]').forEach((b) => b.onclick = () => openMove(b.dataset.licMove));
     m.querySelectorAll('[data-remove-client]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); tryRemoveClient(b.dataset.removeClient); });
-    bindClick('monthPrev', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex -= 1; renderMain(); });
-    bindClick('monthNext', () => { const c = findOrg(st.clientId); if (!c) return; ensureWork(c); c.monthIndex += 1; renderMain(); });
+    bindClick('monthPrev', () => shiftSharedMonth(-1));
+    bindClick('monthNext', () => shiftSharedMonth(1));
     bindClick('markReview', () => { const c = findOrg(st.clientId); if (!c) return; const shown = shownClose(c); shown.rec.review = true; c.monthStatus = 'In review'; renderMain(); });
     bindClick('requiredLeft', () => {
       const c = findOrg(st.clientId);
       const need = $('closeNeed');
       if (!c || !need) return;
-      const missing = c.firmChecks.filter((chk) => chk.required && !chk.done);
+      const missing = gateUnmet(c);
       need.hidden = false;
-      need.textContent = missing.map((chk) => chk.label).join(', ') + (missing.length === 1 ? ' is still required to close.' : ' are still required to close.');
+      need.textContent = missing.join(', ') + (missing.length === 1 ? ' is still required to close.' : ' are still required to close.');
     });
     bindClick('nextClient', () => {
       const list = listedClients();
@@ -4957,7 +5167,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const c = findOrg(st.clientId);
       if (!c) return;
       ensureWork(c);
-      c.firmChecks.push({ id: 'k' + Date.now(), label: name, done: false, note: '', required: !!($('newCheckRequired') && $('newCheckRequired').checked) });
+      c.extraChecks.push({ id: 'k' + Date.now(), label: name, required: !!($('newCheckRequired') && $('newCheckRequired').checked) });
       renderMain();
     });
     bindClick('addMonthNote', () => {
@@ -5156,17 +5366,31 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const go = b.dataset.closeGo;
       if (go === 'connect' || go === 'reconnect') openClientConnect(id);
       else if (go === 'work') openDetails(id, st.page === 'monthclose' ? 'monthclose' : st.from);
+      else if (go === 'resolve') openResolveDialog(id);
+      else if (go === 'recon') openReconDialog(id);
       else if (go === 'close') {
         const c = findOrg(id);
         if (!c) return;
-        const rec = tieRecord(c);
-        const unmet = gateUnmet(c);
-        if (unmet.length) { st.closeBlock = c.id; renderMain(); return; }
-        rec.closed = true;
-        c.monthStatus = 'Closed';
+        if (!recordClose(c)) { st.closeBlock = c.id; renderMain(); return; }
         st.closeBlock = '';
         renderMain();
       }
+    });
+    m.querySelectorAll('[data-close-month-jump]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const parts = b.dataset.closeMonthJump.split('-');
+      st.closeYear = Number(parts[0]);
+      st.closeMonthNum = Number(parts[1]);
+      st.closeBlock = '';
+      renderMain();
+    });
+    m.querySelectorAll('[data-left]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const id = b.dataset.leftClient || st.clientId;
+      if (b.dataset.left === 'connection') openClientConnect(id);
+      else if (b.dataset.left === 'resolve') openResolveDialog(id);
+      else if (b.dataset.left === 'recon') openReconDialog(id);
+      else openDetails(id, st.page === 'monthclose' ? 'monthclose' : (st.from || 'monthclose'));
     });
     bindClick('showAddCheck', () => { st.showAddCheck = !st.showAddCheck; renderMain(); });
     bindClick('showAddNote', () => { st.showAddNote = !st.showAddNote; renderMain(); });
@@ -5182,13 +5406,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       st.closeBlock = '';
       renderMain();
     });
-    m.querySelectorAll('[data-reopen]').forEach((b) => b.onclick = (e) => {
-      e.stopPropagation();
-      const c = findOrg(b.dataset.reopen);
-      if (!c) return;
-      tieRecord(c).closed = false;
-      renderMain();
-    });
+    m.querySelectorAll('[data-reopen]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openReopenDialog(b.dataset.reopen); });
     m.querySelectorAll('[data-mark-review]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const c = findOrg(b.dataset.markReview);
@@ -5196,7 +5414,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       tieRecord(c).review = true;
       showKitToast(c.name + ' marked in review');
     });
-    m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.startRecon); });
+    m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openReconDialog(b.dataset.startRecon); });
     m.querySelectorAll('[data-close-details]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.closeDetails); });
     m.querySelectorAll('[data-open-work]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.openWork); });
     m.querySelectorAll('[data-approve-person]').forEach((b) => b.onclick = (e) => {
@@ -5426,7 +5644,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const paint = () => {
       const rows = draft.map((row, i) => '<div class="d-flex flex-col gap-8"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '> Required to close</label><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-all="' + i + '"' + (row.all ? ' checked' : '') + '> All clients</label><button type="button" class="link" data-archive="' + i + '">Archive</button></div>').join('');
       const ideas = suggested.filter((name) => !draft.some((row) => row.label === name)).map((name) => '<button type="button" class="link" data-suggest="' + esc(name) + '">' + esc(name) + '</button>').join(' ');
-      modal.querySelector('.modal-body').innerHTML = '<p class="text-body2">Changes apply to every open and in-review month. Closed months stay as they were, and keep the old name of a renamed check.</p>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><p class="text-subtitle2">Suggested checks</p><div class="d-flex gap-8">' + ideas + '</div>';
+      modal.querySelector('.modal-body').innerHTML = '<p class="text-body2">Changes apply to months you haven\'t closed. Closed months don\'t change.</p>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><p class="text-subtitle2">Suggested checks</p><div class="d-flex gap-8">' + ideas + '</div>';
       modal.querySelectorAll('[data-check-label]').forEach((el) => el.oninput = () => { draft[Number(el.dataset.checkLabel)].label = el.value; });
       modal.querySelectorAll('[data-check-req]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkReq)].required = el.checked; });
       modal.querySelectorAll('[data-check-all]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkAll)].all = el.checked; });
@@ -5444,10 +5662,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       });
       if (bad) return;
       firmChecklist = draft.map((row) => Object.assign({}, row));
-      listedClients().forEach((c) => {
-        if ((c.monthStatus || 'Open') === 'Closed') return;
-        c.firmChecks = firmChecklist.map((row) => ({ id: row.id, label: row.label, done: false, note: '', required: !!row.required }));
-      });
       close();
       renderMain();
     };
@@ -6095,6 +6309,89 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
   });
+  function paintAct() {
+    const role = (st && st.viewerRole) || 'Admin';
+    document.querySelectorAll('#actSeg button').forEach((b) => b.classList.toggle('active', b.dataset.act === role));
+  }
+  document.querySelectorAll('#actSeg button').forEach((b) => b.onclick = () => {
+    if (st) st.viewerRole = b.dataset.act;
+    paintAct();
+    if (typeof mode !== 'undefined' && mode !== 'onboarding') render();
+  });
+  paintAct();
+  function shiftSharedMonth(dir) {
+    const list = periodList();
+    const index = list.findIndex((item) => item.year === closeYearNum() && item.month === closeMonthNum());
+    const next = list[Math.max(0, Math.min(list.length - 1, (index < 0 ? 0 : index) + dir))];
+    if (!next) return;
+    st.closeMonthNum = next.month;
+    st.closeYear = next.year;
+    st.closeBlock = '';
+    renderMain();
+  }
+  function recordClose(c, month, year) {
+    month = month || closeMonthNum();
+    year = year || closeYearNum();
+    const rec = tieRecord(c, month, year);
+    if (!canCloseBooks() || !monthHasEnded(year, month) || firstOpenEarlier(c, month, year) || gateUnmet(c, month, year).length || blocksClose(c) && !(rec.resolved && rec.resolved.reason) || connectionLost(c)) return false;
+    rec.closed = true;
+    rec.review = false;
+    rec.healthAtClose = healthSnapshot(c);
+    rec.checklist = firmChecklist.concat(c.extraChecks || []).map((row) => ({ id: row.id, label: row.label, required: !!row.required }));
+    rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
+    c.monthStatus = 'Closed';
+    return true;
+  }
+  function openResolveDialog(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const rec = tieRecord(c);
+    const { modal, close } = dialogShell('Resolve ' + esc(c.name), '<p class="text-body2">' + esc(cantCheckReason(c)) + '. Marking this reviewed does not pass the checks.</p><div class="form-field"><label class="form-label form-label-required" for="resolveReason">Reason</label><textarea class="input" id="resolveReason"></textarea></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="resolveSave">Mark reviewed</button>');
+    modal.querySelector('#resolveSave').onclick = () => {
+      const input = modal.querySelector('#resolveReason');
+      if (!(input.value || '').trim()) { fieldError(input, 'Required'); return; }
+      rec.resolved = { who: actorName(), at: stampLabel(new Date()), reason: input.value.trim() };
+      rec.events.push({ type: 'resolve', who: rec.resolved.who, at: rec.resolved.at, reason: rec.resolved.reason });
+      close();
+      renderMain();
+    };
+  }
+  function openReconDialog(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const rec = tieRecord(c);
+    const result = rec.reconResult || {};
+    const { modal, close } = dialogShell('Start reconciliation', '<div class="form-field"><label class="form-label form-label-required" for="reconAccount">Account</label><input class="input" id="reconAccount" value="' + esc(result.accounts || '') + '"></div><div class="form-field"><label class="form-label form-label-required" for="reconBalance">Statement balance</label><input class="input" id="reconBalance" value="' + esc(result.balance == null ? '' : String(result.balance)) + '"></div><div class="form-field"><label class="form-label form-label-required" for="reconAsOf">As of</label><input class="input" id="reconAsOf" value="' + esc(result.asOf || '') + '" placeholder="Oct 31, 2026"></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reconSave">Save reconciliation</button>');
+    modal.querySelector('#reconSave').onclick = () => {
+      const account = modal.querySelector('#reconAccount');
+      const balance = modal.querySelector('#reconBalance');
+      const asOf = modal.querySelector('#reconAsOf');
+      let bad = false;
+      [account, balance, asOf].forEach((el) => { if (!(el.value || '').trim()) { fieldError(el, 'Required'); bad = true; } else fieldClear(el); });
+      if (bad) return;
+      rec.recon = 'passed';
+      rec.reconResult = { accounts: account.value.trim(), balance: Number(String(balance.value).replace(/[^0-9.]/g, '')) || 0, asOf: asOf.value.trim() };
+      close();
+      renderMain();
+    };
+  }
+  function openReopenDialog(id) {
+    if (!canCloseBooks()) return;
+    const c = findOrg(id);
+    if (!c) return;
+    const rec = tieRecord(c);
+    const { modal, close } = dialogShell('Reopen ' + esc(closeMonthName()) + ' ' + closeYearNum(), '<p class="text-body2">' + esc(c.name) + ' goes back to Open for this month.</p><div class="form-field"><label class="form-label form-label-required" for="reopenReason">Reason</label><textarea class="input" id="reopenReason"></textarea></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reopenSave">Reopen</button>');
+    modal.querySelector('#reopenSave').onclick = () => {
+      const input = modal.querySelector('#reopenReason');
+      if (!(input.value || '').trim()) { fieldError(input, 'Required'); return; }
+      rec.closed = false;
+      rec.review = false;
+      c.monthStatus = 'Open';
+      rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason: input.value.trim() });
+      close();
+      renderMain();
+    };
+  }
   function clearV10Storage() {
     const drop = (store) => {
       const keys = [];
