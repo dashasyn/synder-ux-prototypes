@@ -128,12 +128,7 @@ body {
 .linkish:hover { text-decoration: underline; }
 .client-cell { display: flex; align-items: center; gap: var(--space-2); }
 .section-h { font-size: 20px; line-height: 28px; font-weight: 400; margin: 8px 0 12px; }
-.empty { text-align: center; padding: 56px 24px; max-width: 460px; margin: 0 auto; }
 .proto-stub { min-height: calc(100vh - 180px); display: flex; align-items: center; justify-content: center; text-align: center; padding: var(--space-8); }
-.empty .material-icons { font-size: 40px; color: #B4BBCB; }
-.empty h2 { font-size: 20px; line-height: 28px; font-weight: 500; margin: 12px 0 6px; }
-.empty p { color: #6B778C; margin: 0 0 20px; }
-.empty .sec { display: block; margin: 12px auto 0; }
 /* ── Modal ── */
 .scrim { position: fixed; inset: 0; background: rgba(26,27,36,.4); z-index: 400; display: none; align-items: center; justify-content: center; }
 .scrim.open { display: flex; }
@@ -141,38 +136,7 @@ body {
 .idrow { display: flex; gap: 8px; }
 .idrow input { font-size: 16px; letter-spacing: .04em; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
-/* ── v4 client details ── */
-.period { height: 36px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 0 8px; font: inherit; background: #fff; }
-.more:hover, .more[aria-expanded="true"] { background: #F2F6FC; }
 button.tab { background: transparent; font-family: inherit; border-radius: 0; border-top: 0; border-left: 0; border-right: 0; cursor: pointer; }
-.sum { display: flex; gap: 12px; align-items: flex-start; }
-.sum .material-icons { font-size: 24px; }
-.sum h3 { margin: 0; font-size: 16px; font-weight: 500; }
-.sum ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-secondary); }
-.sum li { margin: 2px 0; }
-.sum.ready { background: #F1F9F3; border-color: #BFE3C8; }
-.sum.ready > .material-icons { color: #1F8940; }
-.bar { flex: 0 0 120px; height: 6px; border-radius: 3px; background: #EFF1F5; overflow: hidden; }
-.bar i { display: block; height: 100%; background: #1F8940; }
-.chk { border-bottom: 1px solid #EFF1F5; }
-.chk summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; }
-.chk summary::-webkit-details-marker { display: none; }
-.chk .ic { font-size: 20px; }
-.ic.pass { color: #1F8940; }
-.ic.wait { color: #B4BBCB; }
-.chk .nm { width: 180px; font-weight: 500; }
-.chk .det { padding: 0 0 12px 32px; color: #6B778C; }
-textarea.note { width: 100%; min-height: 72px; border: 1px solid #C8C7CC; border-radius: 4px; padding: 8px; font: inherit; resize: vertical; }
-.hist summary { cursor: pointer; color: #6B778C; list-style: none; }
-.hist summary::-webkit-details-marker { display: none; }
-.hist table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-.hist td { padding: 6px 8px 6px 0; border-top: 1px solid #EFF1F5; vertical-align: top; }
-.hist td:first-child { color: #6B778C; white-space: nowrap; width: 130px; }
-.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; max-width: 880px; }
-.form label { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary); font-size: 13px; }
-.form .full { grid-column: 1 / -1; }
-.form input, .form textarea { font: inherit; font-size: 14px; color: #1A1B24; }
-#stateSeg.hide { visibility: hidden; }
 /* ── v7 onboarding: portrait cards + client directory ── */
 .shell-hide .topbar, .shell-hide .p-body { display: none; }
 .ob { display: none; min-height: calc(100vh - var(--proto-bar-h)); background: var(--bg-page); }
@@ -412,19 +376,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
 .ob-table-wrap th { font-weight: 500; color: #6B778C; }
 .ob-table-wrap tr:last-child td { border-bottom: 0; }
 .ob-table-wrap input[type=checkbox] { width: 16px; height: 16px; }
-.setup-bar { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #F2F6FC; border: 1px solid #D6E4F7; border-radius: var(--radius-sm); margin-bottom: 20px; max-width: 880px; }
-.setup-bar .bar { flex: 1; height: 8px; background: #DFE4EC; border-radius: 4px; overflow: hidden; }
-.setup-bar .bar i { display: block; height: 100%; background: #0053CC; }
-.setup-bar b { white-space: nowrap; }
-.issues { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 880px; margin: 16px 0 24px; }
-.issue { border: 1px solid #DFE4EC; border-radius: var(--radius-sm); padding: 14px; }
-.issue .n { font-size: 24px; line-height: 32px; }
-.issue .l { color: #6B778C; font-size: 13px; }
-.stepper { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-.stepper span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 13px; color: #6B778C; background: #F7F8FA; }
-.stepper span.on { background: var(--color-primary-5); color: var(--color-primary); font-weight: 400; }
-.stepper span.done { color: #1F8940; }
-.draft-tag { display: inline-block; font-size: 12px; color: #CB7515; background: #FFF7F0; border: 1px solid #F3D2B3; border-radius: 4px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
 /* Falling sparkles — exact styles from prototypes/joy-sparkles/index.html */
 .spark-fall {
       position: fixed;
@@ -1452,7 +1403,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const need = list.length - done;
     if (done === 0) {
       return `<div class="flow-wide page-stack">${pageHeader('Dashboard')}
-        <div class="empty"><span class="material-icons">checklist</span>
+        <div class="empty-state"><span class="material-icons">checklist</span>
           <h2>Set up your first client</h2>
           <p>Your firm list is ready. Connect books on a client to unlock the firm overview.</p>
           <button class="btn" id="dashGoClients">Go to Clients</button></div>`;
@@ -2449,22 +2400,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const stepr = SETUP_STEPS.map(([k, l], i) =>
       `<span class="${k === step ? 'on' : (i < idx ? 'done' : '')}">${i < idx ? '✓ ' : ''}${l}</span>`).join('');
     const bodies = {
-      books: `<div class="empty"><span class="material-icons">account_balance</span>
+      books: `<div class="empty-state"><span class="material-icons">account_balance</span>
         <h2>Connect books <span class="draft-tag">details pending</span></h2>
         <p>Connect QuickBooks Online or Xero for ${esc(c.name)}. Exact fields coming from the demo.</p>
         <button class="btn" data-next="integrations">Continue</button>
         <button class="btn-text sec" id="setupBack">Back to Clients</button></div>`,
-      integrations: `<div class="empty"><span class="material-icons">hub</span>
+      integrations: `<div class="empty-state"><span class="material-icons">hub</span>
         <h2>Connect integrations <span class="draft-tag">details pending</span></h2>
         <p>Shopify, Stripe and others.</p>
         <button class="btn" data-next="mode">Continue</button>
         <button class="btn-text sec" data-next="books">Back</button></div>`,
-      mode: `<div class="empty"><span class="material-icons">tune</span>
+      mode: `<div class="empty-state"><span class="material-icons">tune</span>
         <h2>Select mode <span class="draft-tag">details pending</span></h2>
         <p>Mode options aren’t locked yet. We won’t show client data until a mode is chosen.</p>
         <button class="btn" data-next="import">Continue</button>
         <button class="btn-text sec" data-next="integrations">Back</button></div>`,
-      import: `<div class="empty"><span class="material-icons">download</span>
+      import: `<div class="empty-state"><span class="material-icons">download</span>
         <h2>Import data <span class="draft-tag">details pending</span></h2>
         <p>Pull history once books and mode are set. Stub only.</p>
         <button class="btn" id="setupDone">Finish setup</button>
@@ -2612,7 +2563,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   /* ───────── Render: main ───────── */
   function placeholder(title, sub) {
     return `<div class="ph"><div><h1>${esc(title)}</h1>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div></div>
-      <div class="empty"><span class="material-icons">construction</span><h2>${esc(title)} isn't in this prototype</h2>
+      <div class="empty-state"><span class="material-icons">construction</span><h2>${esc(title)} isn't in this prototype</h2>
       <p>This step only covers switching between the firm and organizations.</p></div>`;
   }
 
@@ -2901,16 +2852,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!list.length) return statusChip('grey', 'Not connected');
     const lost = lostIntegrations(c);
     const pending = pendingIntegrations(c);
-    const connected = list.filter((name) => !lost.some((i) => i.source === name) && !pending.some((i) => i.source === name));
-    const chips = [];
-    if (connected.length) chips.push(statusChip('green', connected.length + ' connected'));
-    if (pending.length) chips.push(statusChip('yellow', pending.length === 1 ? 'Finish configuration' : pending.length + ' finish configuration'));
-    if (lost.length) chips.push(statusChip('red', lost.length === 1 ? 'Connection lost' : lost.length + ' connection lost'));
     const tip = list.map((name) => {
       const state = lost.some((i) => i.source === name) ? 'Connection lost' : (pending.some((i) => i.source === name) ? 'Finish configuration' : 'Connected');
       return name + ' · ' + state;
     }).join('; ');
-    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips.join('')}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
+    const chip = lost.length ? statusChip('yellow', 'Connection lost') : (pending.length ? statusChip('yellow', 'Finish configuration') : statusChip('green', list.length + ' connected'));
+    return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chip}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
     if (!c || !c.accounting || !isQuickBooks(c) || connectionLost(c)) {
@@ -2933,7 +2880,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function preWords(pre) {
     if (!pre) return { kind: 'grey', label: '' };
     if (pre.status === 'running') return { kind: 'grey', label: 'Running' };
-    if (pre.status === 'failed' || pre.outcome === 'failed') return { kind: 'red', label: 'Error' };
+    if (pre.status === 'failed' || pre.outcome === 'failed') return { kind: 'text', label: 'Failed, re-run' };
     if (pre.outcome === 'ok') return { kind: 'green', label: 'No gaps found' };
     return { kind: 'yellow', label: 'Gaps found' };
   }
@@ -2944,8 +2891,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     const pre = c.pre;
     const word = preWords(pre);
+    if (word.kind === 'text') return '<button type="button" class="link" data-pre-run="' + c.id + '">Failed, re-run</button>';
     if (pre.status === 'running') return statusChip(word.kind, word.label);
-    return '<span class="d-flex align-center gap-8">' + statusChip(word.kind, word.label) + '<span class="text-body2">' + esc(pre.period || 'Oct 1 - 31, 2026') + '</span>' + preLink(c.id, 'view', 'View') + '</span>';
+    return '<span class="d-flex align-center gap-8">' + statusChip(word.kind, word.label) + preLink(c.id, 'view', 'View') + '</span>';
   }
   function preEligible(c) {
     return !!c && isOffClient(c) && !((c.integrations || []).length);
@@ -3778,6 +3726,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </div>
     </div>`;
   }
+  function needRank(c) {
+    if (connectionLost(c)) return 0;
+    if (isQuickBooks(c) && healthModel(c) && healthModel(c).failed.length) return 1;
+    if (c && c.accounting && onboardingState(c) === 'started') return 2;
+    if (!c || !c.accounting) return 4;
+    return 3;
+  }
   function renderClients() {
     const listed = sc().clients.filter((c) => !c.fresh);
     if (!listed.length) {
@@ -3792,14 +3747,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         : '');
     const q = (st._q || '').toLowerCase();
     let rows = listed.filter((c) => c.name.toLowerCase().includes(q));
-    const sort = st.clientSort || { key: 'name', dir: 'asc' };
+    const sort = st.clientSort || { key: 'need', dir: 'asc' };
     const sortText = (c, key) => {
       if (key === 'acct') return acctStatus(c);
       if (key === 'integ') return ((c.integrations || []).slice().sort().join(' '));
-      if (key === 'health') return isQuickBooks(c) ? healthSummary(c).label : '';
-      if (key === 'pre') return preHasRun(c) ? (preWords(c.pre).label + ' ' + (c.pre.period || '')) : '';
+      if (key === 'health') return isQuickBooks(c) && !connectionLost(c) ? healthSummary(c).label : '';
+      if (key === 'pre') return preHasRun(c) ? preWords(c.pre).label : '';
+      if (key === 'need') return String(needRank(c)).padStart(2, '0') + ' ' + (c.name || '');
       return c.name || '';
     };
+    const filter = st.listFilter || '';
+    if (filter === 'attention') rows = rows.filter((c) => needRank(c) < 3);
+    if (filter === 'off') rows = rows.filter((c) => !c.accounting);
     rows = rows.slice().sort((a, b) => {
       const dir = sort.dir === 'desc' ? -1 : 1;
       return dir * sortText(a, sort.key).localeCompare(sortText(b, sort.key));
@@ -3812,14 +3771,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const state = onboardingState(c);
       const lost = hasLostConnection(c);
       const finish = pendingIntegrations(c);
-      const dot = state === 'started' ? yellowDot() : '';
       let rowBtn = '';
-      if (state !== 'done') rowBtn += `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`;
-      else if (lost) rowBtn += `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>`;
+      if (!c.accounting || state !== 'done') rowBtn += `<button type="button" class="btn-outlined" data-connect="${c.id}">Connect</button>`;
+      else if (lost || connectionLost(c)) rowBtn += `<button type="button" class="btn-outlined" data-reconnect="${c.id}">Reconnect</button>`;
       if (state === 'done' && finish.length) rowBtn += `<button type="button" class="btn-outlined" data-finish="${c.id}">Finish configuration</button>`;
       const go = (state === 'started' || state === 'done') ? `<button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button>` : '';
       return `<tr class="row-clickable" data-row="${c.id}" tabindex="0">
-        <td><div class="client-cell">${dot}<span class="text-body2">${esc(c.name)}</span></div></td>
+        <td><span class="text-body2">${esc(c.name)}</span></td>
         <td>${acctCell(c)}</td>
         <td>${integCell(c)}</td>
         <td>${healthCell(c)}</td>
@@ -3828,7 +3786,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Partner Achievements</a>`)}
+      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Partner Achievements</a>`)}
+      <div class="d-flex gap-16">
+        <button type="button" class="box box--white page-stack" data-filter="attention" aria-pressed="${filter === 'attention' ? 'true' : 'false'}"><span class="text-caption">Needs attention</span><span class="text-h2">${listed.filter((c) => needRank(c) < 3).length}</span></button>
+        <button type="button" class="box box--white page-stack" data-filter="off" aria-pressed="${filter === 'off' ? 'true' : 'false'}"><span class="text-caption">Not connected</span><span class="text-h2">${listed.filter((c) => !c.accounting).length}</span></button>
+      </div>
       ${banner}
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
@@ -3846,12 +3808,45 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (connectionLost(c)) return { key: 'needs', reason: 'Connection lost', tip: 'Connection lost' };
     const health = healthModel(c);
     if (health && health.failed.length) {
-      return { key: 'needs', reason: health.failed.map((fail) => fail.short).join(', '), tip: health.failed.map((fail) => fail.detail).join(' ') };
+      const fail = health.failed[0];
+      const issue = (c.issues || []).find((item) => (fail.short === 'Undeposited' ? item.key === 'undeposited' : item.key === 'uncategorized'));
+      const reason = fail.short === 'Undeposited'
+        ? 'Undeposited: ' + ((issue && issue.unapplied) || 0) + ' unapplied payments'
+        : (fail.short === 'Uncategorized' ? 'Uncategorized: ' + ((issue && issue.count) || 0) + ' items' : fail.short);
+      return { key: 'needs', reason, tip: fail.detail };
     }
     return { key: 'clear', reason: 'All good', tip: (health && health.checks || []).map((check) => check.detail).join(' ') };
   }
   function lastCheckedLabel(c) {
     return (c && c.checked && String(c.checked).trim()) || 'Nov 18, 2026';
+  }
+  function monitorFix(c, entry) {
+    if (!entry || entry.key !== 'needs') return null;
+    if (connectionLost(c)) {
+      if (booksLost(c) || c.userDisconnected) return { label: 'Reconnect ' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks'), go: 'reconnect' };
+      const src = lostIntegrations(c)[0];
+      return { label: 'Reconnect ' + (src ? src.source : 'integration'), go: 'reconnect' };
+    }
+    const health = healthModel(c);
+    const fail = health && health.failed[0];
+    if (fail && fail.short === 'Uncategorized') {
+      const issue = (c.issues || []).find((item) => item.key === 'uncategorized');
+      return { label: 'Review ' + ((issue && issue.count) || 0) + ' uncategorized', go: 'work' };
+    }
+    if (fail && fail.short === 'Undeposited') {
+      const issue = (c.issues || []).find((item) => item.key === 'undeposited');
+      return { label: 'Review ' + ((issue && issue.unapplied) || 0) + ' unapplied payments', go: 'work' };
+    }
+    return { label: 'Fix syncs', go: 'work' };
+  }
+  function nextCloseAction(c, month, year) {
+    const rec = tieRecord(c, month, year);
+    if (!c.accounting) return { label: 'Connect', go: 'connect', outlined: true };
+    if (connectionLost(c)) return { label: 'Reconnect', go: 'reconnect', outlined: true };
+    if (rec.closed) return { label: 'Closed', go: 'closed', outlined: false };
+    const progress = gateProgress(c, month, year);
+    if (progress.done < progress.total) return { label: 'Fix syncs', go: 'work', outlined: true };
+    return { label: 'Close ' + closeMonthName(), go: 'close', outlined: false };
   }
   function renderMonitoring() {
     const groups = [
@@ -3863,8 +3858,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const rows = listedClients().map((c) => ({ c, entry: monitorEntry(c) }));
     const section = (key, title) => {
       const list = rows.filter((row) => row.entry.key === key);
-      const body = list.map(({ c, entry }) => `<tr class="row-clickable" data-mon="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td>${entry.tip ? `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(entry.reason)}</span><span class="tooltip" role="tooltip">${esc(entry.tip)}</span></span>` : `<span class="text-body2">${esc(entry.reason)}</span>`}</td><td><span class="text-body2">${esc(lastCheckedLabel(c))}</span></td><td><button type="button" class="btn-outlined" data-mon-open="${c.id}">Open client work</button></td></tr>`).join('') || '<tr><td colspan="4" class="text-body2">None right now.</td></tr>';
-      return `<h2 class="text-h2">${title}</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client</th><th>Reason</th><th>Last checked</th><th></th></tr></thead><tbody>${body}</tbody></table></div>`;
+      if (!list.length) return '';
+      const body = list.map(({ c, entry }) => {
+        const action = monitorFix(c, entry);
+        const button = key === 'needs' && action ? `<button type="button" class="btn-outlined" data-mon-fix="${c.id}" data-mon-go="${action.go}">${esc(action.label)}</button>` : '';
+        const reason = entry.tip ? `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(entry.reason)}</span><span class="tooltip" role="tooltip">${esc(entry.tip)}</span></span>` : `<span class="text-body2">${esc(entry.reason)}</span>`;
+        return `<tr class="row-clickable" data-mon="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td>${reason}</td><td><span class="text-body2">${esc(lastCheckedLabel(c))}</span></td><td>${button}</td></tr>`;
+      }).join('');
+      const open = key === 'needs' ? ' open' : '';
+      return `<details class="accordion"${open}><summary class="accordion-summary"><span class="text-subtitle1">${title}</span><span class="text-body2 text-secondary">${list.length}</span></summary><div class="accordion-body"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client</th><th>Reason</th><th>Last checked</th><th></th></tr></thead><tbody>${body}</tbody></table></div></div></details>`;
     };
     return `<div class="flow-wide page-stack">
       ${pageHeader('Monitoring', '<button type="button" class="btn" id="checkAll">Check all clients</button>', 'Pick who to fix first.')}
@@ -4077,7 +4079,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const backLabel = st.from === 'monitoring' ? 'Back to monitoring' : (st.from === 'monthclose' ? 'Back to month close' : 'Back to clients');
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="${backHref}">${backLabel}</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">Client work</h1><p class="synder-page-subtitle">${esc(c.name)} · ${esc(clientAccountingLine(c))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientAccountingLine(c))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
       ${tabHtml}
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
     </div>`;
@@ -4213,11 +4215,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const rec = tieRecord(c);
       const progress = gateProgress(c);
       const unmet = gateUnmet(c);
+      const next = nextCloseAction(c);
       const note = st.closeBlock === c.id && unmet.length ? `<tr><td colspan="4"><p class="form-error-msg">${esc(c.name)}: ${esc(unmet.join(', '))} ${unmet.length === 1 ? 'is' : 'are'} still required to close.</p></td></tr>` : '';
-      const chips = progress.items.map((item) => item.state === 'na' ? `<span class="status status-grey">${esc(item.label)} · Not applicable</span>` : tieChip(item.label, item.state)).join('');
-      const action = !c.accounting
-        ? `<button type="button" class="btn" data-connect="${c.id}">Connect</button>`
-        : (rec.closed ? '<span class="status status-green">Closed</span>' : `<button type="button" class="btn" data-close-month="${c.id}">Close ${esc(closeMonthName())}</button>`);
+      const chips = connectionLost(c)
+        ? '<span class="status status-yellow">Connection lost</span>'
+        : progress.items.map((item) => item.state === 'na' ? `<span class="status status-grey">${esc(item.label)} · Not applicable</span>` : tieChip(item.label, item.state)).join('');
+      const action = next.go === 'closed'
+        ? '<span class="status status-green">Closed</span>'
+        : `<button type="button" class="${next.outlined ? 'btn-outlined' : 'btn'}" data-close-go="${next.go}" data-close-id="${c.id}">${esc(next.label)}</button>`;
       const review = rec.closed || !c.accounting ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
       const reopen = rec.closed ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
       return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${chips}</div></td><td><span class="text-body2">${progress.label}</span> <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
@@ -4285,11 +4290,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     } else {
       details = `<p class="text-body2">${esc(c.firmProfile.contact || c.name)}. <button type="button" class="link" id="addProfile">Add client details</button></p>`;
     }
-    const checks = c.firmChecks.map((chk) => `<div class="page-stack"><span class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><label for="chk-${chk.id}">${esc(chk.label)}</label></span><button type="button" class="link" data-note-open="${chk.id}">Add note</button>${chk.required ? '<p class="text-caption">Required to close</p>' : ''}${chk.note ? `<p class="text-body2">${esc(chk.note)}</p>` : ''}${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="btn-outlined" data-save-note="${chk.id}">Add note</button>` : ''}</div>`).join('');
+    const checks = c.firmChecks.map((chk) => `<div class="d-flex align-center gap-8"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><span>${esc(chk.label)}</span></label>${chk.required ? '<span class="status status-grey">Required</span>' : ''}${chk.note ? `<span class="text-body2">${esc(chk.note)}</span>` : ''}<button type="button" class="link" data-note-open="${chk.id}">${chk.note ? 'Edit note' : 'Add note'}</button>${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="link" data-save-note="${chk.id}">Save note</button>` : ''}</div>`).join('');
     const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('');
-    const connections = c.accounting
-      ? connectionRows(c).map((row) => `<div class="d-flex align-center justify-between gap-8"><p class="text-body2">${brandMark(row.logo, 18)} ${esc(row.name)}</p><span class="status status-${row.chip}">${esc(row.label === 'Disconnected' || row.label === 'Lost connection' ? 'Connection lost' : row.label)}</span></div>`).join('')
-      : '<p class="text-body2">The client has no accounting connection in Synder, so its month close checks do not apply.</p>';
+    const connRows = c.accounting ? connectionRows(c) : [];
+    const connBad = connRows.filter((row) => row.label !== 'Connected');
+    const connSummary = !c.accounting ? 'Not connected' : (connBad.length ? connBad.length + ' connection' + (connBad.length === 1 ? '' : 's') + ' lost' : connRows.length + ' connections OK');
+    const connections = connBad.length
+      ? connBad.map((row) => `<div class="d-flex align-center justify-between gap-8"><p class="text-body2">${brandMark(row.logo, 18)} ${esc(row.name)}</p><span class="status status-yellow">Connection lost</span></div>`).join('')
+      : '';
     const closeRow = (title, desc, chip, kind, extra) => `<div class="d-flex align-center justify-between gap-16"><div><p class="text-body2">${title}</p><p class="text-caption">${desc}</p>${extra || ''}</div><span class="status status-${kind}">${chip}</span></div>`;
     const syncCopy = !c.accounting ? null : (rec.sync === 'failed' ? { desc: connectionLost(c) ? 'Connection lost, so syncs did not run.' : 'Syncs failed in this period.', chip: 'Failed', kind: 'red' } : (rec.sync === 'unchecked' ? { desc: 'Not checked yet.', chip: 'Not checked', kind: 'grey' } : { desc: 'Syncs passed in this period.', chip: 'Passed', kind: 'green' }));
     const reconCopy = !c.accounting ? null : (rec.recon === 'failed' ? { desc: 'Reconciliation failed in this period.', chip: 'Failed', kind: 'red' } : (rec.recon === 'unchecked' ? { desc: 'Not checked yet.', chip: 'Not checked', kind: 'grey' } : { desc: 'Reconciliation passed in this period.', chip: 'Passed', kind: 'green' }));
@@ -4318,13 +4326,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <span class="status status-${monthChip}">${esc(statusName)}</span>
         </div>
         <div class="d-flex align-center gap-8 flex-wrap">
-          <button type="button" class="btn-outlined" id="markReview">Mark in review</button>
-          ${reqLink}
-          ${c.accounting ? `<button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>` : `<button type="button" class="btn" data-connect="${c.id}">Connect</button>`}
-          <button type="button" class="link" id="nextClient">Next client ›</button>
+          ${(() => { const next = nextCloseAction(c, shown.num, shown.year); if (next.go === 'closed') return '<span class="status status-green">Closed</span>'; return `<button type="button" class="${next.outlined ? 'btn-outlined' : 'btn'}" data-close-go="${next.go}" data-close-id="${c.id}">${esc(next.label)}</button>`; })()}
+          <button type="button" class="link" id="nextClient">Next client</button>
         </div>
       </div>
       <p class="text-body2">${esc(progress.label)}</p>
+      ${progress.items.map((item) => `<div class="d-flex align-center justify-between gap-8"><span class="text-body2">${esc(item.label)}</span><span class="text-body2">${item.state === 'passed' ? 'Passed' : (item.state === 'failed' ? 'Failed' : (item.state === 'na' ? 'Not applicable' : 'Not checked'))}</span></div>`).join('')}
       </div>
       <p class="form-error-msg" id="closeNeed" hidden></p>
       ${details}
@@ -4332,26 +4339,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="flex-1 page-stack">
           <h2 class="text-h2">Firm checks</h2>
           ${checks}
-          <div class="d-flex align-center gap-8 flex-wrap">
-            <input class="input" id="newCheck" placeholder="Add a check for this client only">
-            <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="newCheckRequired"> Required to close</label>
-            <button type="button" class="btn-outlined" id="addCheck">Add check</button>
-          </div>
-          <h2 class="text-h2">Notes for ${esc(month.short)}</h2>
+          <button type="button" class="link" id="showAddCheck">${st.showAddCheck ? 'Hide add check' : 'Add check'}</button>
+          ${st.showAddCheck ? `<div class="d-flex align-center gap-8"><input class="input" id="newCheck" placeholder="Add a check for this client only"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="newCheckRequired"> Required</label><button type="button" class="link" id="addCheck">Save check</button></div>` : ''}
+          <button type="button" class="link" id="showAddNote">${st.showAddNote ? 'Hide add note' : 'Add note'}</button>
           ${notes}
-          <input class="input" id="monthNote" placeholder="Write a note for ${esc(month.short)}...">
-          <select class="select" id="notePeriod"><option selected>The whole of ${esc(month.short)}</option></select>
-          <div><button type="button" class="btn-outlined" id="addMonthNote">Add note</button></div>
+          ${st.showAddNote ? `<div class="d-flex align-center gap-8"><input class="input" id="monthNote" placeholder="Write a note for ${esc(month.short)}..."><button type="button" class="link" id="addMonthNote">Save note</button></div>` : ''}
         </div>
         <div class="flex-1 page-stack">
-          <h2 class="text-h2">Synder evidence</h2>
-          <h2 class="text-subtitle1">Connections</h2>
-          ${connections}
-          <h2 class="text-subtitle1">Health</h2>
-          <p class="text-body2">${isQuickBooks(c) && !connectionLost(c) ? esc(healthSummary(c).label || 'All good') : "Can't check"}</p>
-          <details class="accordion"><summary class="accordion-summary">Health history</summary><div class="accordion-body"><p class="text-body2">Not set up for this client yet.</p></div></details>
-          <h2 class="text-subtitle1">Month close checks</h2>
-          ${evidence}
+          <details class="accordion"${connBad.length ? ' open' : ''}><summary class="accordion-summary"><span class="text-subtitle1">Synder evidence</span><span class="text-body2">${esc(connSummary)}</span></summary><div class="accordion-body page-stack">${connections || '<p class="text-body2">Nothing else to show.</p>'}${evidence}</div></details>
         </div>
       </div>
       <p><button type="button" class="link" id="showHistory">${st.historyOpen ? 'Hide history' : 'History'}</button></p>
@@ -4520,14 +4515,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
 
   function renderCreateFirm() {
     return `${pageHeader('Create a Firm')}
-      <div class="empty"><span class="material-icons">domain_add</span><h2>Work on your clients' books from one place</h2>
+      <div class="empty-state"><span class="material-icons">domain_add</span><h2>Work on your clients' books from one place</h2>
       <p>A Firm lets clients connect to you and gives your team one list of every client.</p>
       <button class="btn" id="cfCta">Create a Firm</button>
       <button class="btn-text sec" id="cfSec">Not now</button></div>`;
   }
   function renderCreateOrg() {
     return `${pageHeader('Create organization')}
-      <div class="empty"><span class="material-icons">add_business</span><h2>New organization</h2>
+      <div class="empty-state"><span class="material-icons">add_business</span><h2>New organization</h2>
       <p>Not built in this prototype. The new org would show up under My organizations.</p>
       <button class="btn" id="coCta">Back</button></div>`;
   }
@@ -4667,6 +4662,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     });
     const s = $('clientSearch');
     if (s) s.oninput = () => { st._q = s.value; const pos = s.selectionStart; renderMain(); const n = $('clientSearch'); n.focus(); n.setSelectionRange(pos, pos); };
+    m.querySelectorAll('[data-filter]').forEach((b) => b.onclick = () => { st.listFilter = st.listFilter === b.dataset.filter ? '' : b.dataset.filter; renderMain(); });
     const bind = (id, fn) => { const el = $(id); if (el) el.onclick = fn; };
     bind('finishDone', () => {
       const client = findOrg(st.clientId);
@@ -5149,6 +5145,31 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('checkAllClose', checkAllClients);
     m.querySelectorAll('[data-mon]').forEach((tr) => bindOpenRow(tr, () => openDetails(tr.dataset.mon, 'monitoring')));
     m.querySelectorAll('[data-mon-open]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.monOpen, 'monitoring'); });
+    m.querySelectorAll('[data-mon-fix]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      if (b.dataset.monGo === 'reconnect') openClientConnect(b.dataset.monFix);
+      else openDetails(b.dataset.monFix, 'monitoring');
+    });
+    m.querySelectorAll('[data-close-go]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const id = b.dataset.closeId;
+      const go = b.dataset.closeGo;
+      if (go === 'connect' || go === 'reconnect') openClientConnect(id);
+      else if (go === 'work') openDetails(id, st.page === 'monthclose' ? 'monthclose' : st.from);
+      else if (go === 'close') {
+        const c = findOrg(id);
+        if (!c) return;
+        const rec = tieRecord(c);
+        const unmet = gateUnmet(c);
+        if (unmet.length) { st.closeBlock = c.id; renderMain(); return; }
+        rec.closed = true;
+        c.monthStatus = 'Closed';
+        st.closeBlock = '';
+        renderMain();
+      }
+    });
+    bindClick('showAddCheck', () => { st.showAddCheck = !st.showAddCheck; renderMain(); });
+    bindClick('showAddNote', () => { st.showAddNote = !st.showAddNote; renderMain(); });
     m.querySelectorAll('[data-close-month]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const c = findOrg(b.dataset.closeMonth);
