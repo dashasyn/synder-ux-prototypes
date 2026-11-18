@@ -521,12 +521,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     <div class="topbar-right">
       <div class="topbar-balance" id="topBalance"><span>Balance:</span> <b>∞</b></div>
       <a class="topbar-link" data-top="how" role="button">How it works?</a>
+      <a class="topbar-link" id="connectAi" role="button" tabindex="0">Connect AI assistant</a>
       <button type="button" class="topbar-icon" data-top="notifications" aria-label="Notifications"><span class="material-icons">notifications</span><span class="status status-red">3</span></button>
       <div class="dropdown row-menu">
         <button type="button" class="topbar-icon" id="helpBtn" aria-label="Help" aria-expanded="false" aria-haspopup="menu"><span class="material-icons">help_outline</span><span class="material-icons topbar-caret">expand_more</span></button>
         <div class="dropdown-menu" id="helpMenu">
           <button type="button" class="dropdown-item" data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
           <button type="button" class="dropdown-item" data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
+          <a class="dropdown-item" href="https://synder.com" target="_blank" rel="noopener noreferrer"><span class="material-icons">person_search</span>Find an accountant</a>
         </div>
       </div>
       <div class="dropdown row-menu">
@@ -573,6 +575,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   };
   const FIRM_NAV = [
     ['clients', 'people', 'Clients'],
+    ['monitoring', 'monitor_heart', 'Monitoring'],
+    ['monthclose', 'event_note', 'Month close'],
     ['colleagues', 'groups', 'Colleagues'],
     ['billing', 'receipt_long', 'Billing and licenses'],
     ['firmsettings', 'settings', 'Firm settings']
@@ -3795,7 +3799,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div>`)}
+      ${pageHeader('Clients', `<a class="btn-outlined" href="https://synder.com" target="_blank" rel="noopener noreferrer">Partner Achievements</a><div class="row-menu"><button type="button" class="btn btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div>`)}
       ${banner}
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
@@ -3806,6 +3810,40 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </table></div>` : '<div class="empty-state"><p class="empty-state-title">No clients match</p><p class="empty-state-desc">Try a different name.</p></div>'}
       <div class="tbl-foot" id="listCount">${rows.length} of ${listed.length} clients</div>
     </div>${flowDialogs()}`;
+  }
+  function monitorEntry(c) {
+    if (!c || !c.accounting) return null;
+    const health = healthModel(c);
+    if (c.userDisconnected) return { key: 'waiting', reason: 'Waiting on the client to reconnect ' + c.accounting };
+    if (health && health.failed.length) {
+      const fail = health.failed[0];
+      return { key: 'needs', reason: fail.short + ': ' + fail.detail };
+    }
+    if (booksLost(c)) return { key: 'needs', reason: c.accounting + ' connection lost' };
+    const lost = lostIntegrations(c);
+    if (lost.length) return { key: 'needs', reason: lost[0].source + ' connection lost' };
+    return { key: 'clear', reason: 'All good' };
+  }
+  function lastCheckedLabel(c) {
+    return (c && c.checked && String(c.checked).trim()) || 'Nov 18, 2026';
+  }
+  function renderMonitoring() {
+    const groups = [
+      ['needs', 'Needs you'],
+      ['waiting', 'Waiting on client'],
+      ['clear', 'Clear']
+    ];
+    const rows = listedClients().map((c) => ({ c, entry: monitorEntry(c) })).filter((row) => row.entry);
+    const section = (key, title) => {
+      const list = rows.filter((row) => row.entry.key === key);
+      const body = list.map(({ c, entry }) => `<tr class="row-clickable" data-row="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td><span class="text-body2">${esc(entry.reason)}</span></td><td><span class="text-body2">${esc(lastCheckedLabel(c))}</span></td></tr>`).join('') || '<tr><td colspan="3" class="text-body2">None right now.</td></tr>';
+      return `<h2 class="text-h2">${title}</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Reason</th><th>Last checked</th></tr></thead><tbody>${body}</tbody></table></div>`;
+    };
+    return `<div class="flow-wide page-stack">
+      ${pageHeader('Monitoring', '<button type="button" class="btn" id="checkAll">Check all clients</button>', 'Pick who to fix first.')}
+      <p class="text-body2">Clients without accounting are not on this board. Checks run on their own once accounting is connected.</p>
+      ${groups.map(([key, title]) => section(key, title)).join('')}
+    </div>`;
   }
   const WORK_MONTHS = [
     { label: 'August 2026', short: 'August' },
@@ -3884,14 +3922,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { slice: list.slice(start, start + size), html };
   }
   function ensureWork(c) {
-    if (typeof c.monthIndex !== 'number') c.monthIndex = 3;
+    if (typeof c.monthIndex !== 'number') c.monthIndex = 2;
     c.monthIndex = Math.max(0, Math.min(WORK_MONTHS.length - 1, c.monthIndex));
-    if (!c.monthStatus) c.monthStatus = 'Open';
+    if (!c.monthStatus) {
+      const seeded = { e1: 'Closed', e2: 'Open', e3: 'In review', e5: 'Closed', e7: 'Open', e9: 'In review', e11: 'Open', e12: 'Open', e13: 'In review', e14: 'Closed', e15: 'Open', e16: 'Closed' };
+      c.monthStatus = seeded[c.id] || 'Open';
+    }
     if (!Array.isArray(c.firmChecks)) {
+      const closed = c.monthStatus === 'Closed';
       c.firmChecks = [
-        { id: 'tax', label: 'Sales tax filed', done: false, note: '', required: true },
-        { id: 'bank', label: 'Bank statements received', done: false, note: '', required: false },
-        { id: 'owner', label: 'Owner review done', done: false, note: '', required: false }
+        { id: 'tax', label: 'Sales tax filed', done: closed, note: '', required: true },
+        { id: 'bank', label: 'Bank statements received', done: closed || c.id === 'e2', note: '', required: false },
+        { id: 'owner', label: 'Owner review done', done: closed, note: '', required: false }
       ];
     }
     if (!Array.isArray(c.monthNotes)) c.monthNotes = [];
@@ -3997,6 +4039,84 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
     </div>`;
   }
+  function boardMonthIndex() {
+    if (!st || typeof st.closeMonth !== 'number') return 2;
+    return Math.max(0, Math.min(WORK_MONTHS.length - 1, st.closeMonth));
+  }
+  function statusForBoard(c, index) {
+    ensureWork(c);
+    if (index === c.monthIndex) return c.monthStatus || 'Open';
+    if (!c.closeByMonth) c.closeByMonth = {};
+    if (!c.closeByMonth[index]) {
+      const n = (c.id.charCodeAt(c.id.length - 1) + index) % 3;
+      c.closeByMonth[index] = ['Open', 'In review', 'Closed'][n];
+    }
+    return c.closeByMonth[index];
+  }
+  function monthStatusChip(status) {
+    const kind = status === 'Closed' ? 'green' : (status === 'In review' ? 'yellow' : 'grey');
+    return `<span class="status status-${kind}">${esc(status)}</span>`;
+  }
+  function closeProgress(c) {
+    ensureWork(c);
+    const total = c.firmChecks.length;
+    const done = c.firmChecks.filter((chk) => chk.done).length;
+    return done + '/' + total;
+  }
+  function closeBlockers(c, status) {
+    ensureWork(c);
+    if (status === 'Closed') return '—';
+    const missing = c.firmChecks.filter((chk) => chk.required && !chk.done).map((chk) => chk.label);
+    if (missing.length) return missing.join(', ');
+    const entry = monitorEntry(c);
+    if (entry && entry.key !== 'clear') return entry.reason;
+    return '—';
+  }
+  function renderMonthClose() {
+    const index = boardMonthIndex();
+    const month = WORK_MONTHS[index];
+    const clients = listedClients().filter((c) => c.accounting);
+    const body = clients.map((c) => {
+      const status = statusForBoard(c, index);
+      return `<tr class="row-clickable" data-row="${c.id}" tabindex="0"><td><span class="text-body2">${esc(c.name)}</span></td><td>${monthStatusChip(status)}</td><td><span class="text-body2">${closeProgress(c)}</span></td><td><span class="text-body2">${esc(closeBlockers(c, status))}</span></td><td><button type="button" class="btn-outlined" data-open-work="${c.id}">Start reconciliation</button></td></tr>`;
+    }).join('') || '<tr><td colspan="5" class="text-body2">No clients with accounting yet.</td></tr>';
+    const actions = `<button type="button" class="btn-icon" id="closeBoardPrev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><button type="button" class="btn-icon" id="closeBoardNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>`;
+    return `<div class="flow-wide page-stack">
+      ${pageHeader('Month close', actions, 'Closing ' + month.label)}
+      <div class="table-wrap"><table class="synder-table"><thead><tr><th>Client</th><th>Status</th><th>Checks</th><th>Blockers</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+    </div>`;
+  }
+  function healthReportBlock(c) {
+    if (!c || !c.accounting) {
+      return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">—</p><p class="text-body2">Connect accounting and the checks run on their own.</p></div>`;
+    }
+    const health = healthModel(c);
+    const lines = (health ? health.names : []).map((name) => {
+      const fail = health.failed.find((item) => item.name === name);
+      const chip = fail ? `<span class="status status-red">${esc(fail.short)}</span>` : '<span class="status status-green">Passed</span>';
+      const detail = fail ? `<span class="text-body2">${esc(fail.detail)}</span>` : '';
+      return `<div class="d-flex align-center justify-between gap-8"><span class="text-body2">${esc(name)}</span><span class="d-flex align-center gap-8">${detail}${chip}</span></div>`;
+    }).join('');
+    return `<div class="box box--white page-stack"><div class="d-flex align-center justify-between gap-8"><h2 class="text-h2">Health report</h2><button type="button" class="btn" id="diagnoseBtn">Diagnose</button></div>${lines}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
+  }
+  function openDiagnose(c) {
+    const old = document.getElementById('diagnoseSheet');
+    if (old) old.remove();
+    const health = c && c.accounting ? healthModel(c) : null;
+    let body = '<p class="text-body2">—</p>';
+    if (health && health.failed.length) {
+      body = `<p class="text-body2">${esc(c.name)} needs a fix on ${health.failed.length === 1 ? 'one check' : health.failed.length + ' checks'}.</p>` + health.failed.map((fail) => `<p class="text-body2"><span class="text-bold">${esc(fail.name)}.</span> ${esc(fail.detail)}.</p><p class="text-body2">Suggested fix: clear the ${esc(fail.short.toLowerCase())} in ${esc(c.accounting)} before the month is closed.</p>`).join('');
+    } else if (health) {
+      body = `<p class="text-body2">${esc(c.name)} is clear. Both checks passed, so there is nothing to fix.</p>`;
+    }
+    const wrap = document.createElement('div');
+    wrap.id = 'diagnoseSheet';
+    wrap.innerHTML = `<div class="synder-side-sheet-bg" id="diagnoseBg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true" aria-labelledby="diagnoseTitle"><div class="synder-side-sheet-header"><span id="diagnoseTitle">Diagnosis</span><button type="button" class="btn-icon" id="diagnoseClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body">${body}</div></div>`;
+    document.body.appendChild(wrap);
+    const close = () => wrap.remove();
+    wrap.querySelector('#diagnoseClose').onclick = close;
+    wrap.querySelector('#diagnoseBg').onclick = close;
+  }
   function clientWorkTab(c) {
     const month = ensureWork(c);
     const missing = c.firmChecks.filter((chk) => chk.required && !chk.done);
@@ -4019,6 +4139,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       : '<p class="text-body2">The client has no accounting connection in Synder, so its month close checks do not apply.</p>';
     const closeRow = (title, desc, chip, kind, extra) => `<div class="d-flex align-center justify-between gap-16"><div><p class="text-body2">${title}</p><p class="text-caption">${desc}</p>${extra || ''}</div><span class="status status-${kind}">${chip}</span></div>`;
     return `<div class="page-stack">
+      ${healthReportBlock(c)}
+      <div class="box box--white page-stack">
       <div class="d-flex align-center justify-between gap-16 flex-wrap">
         <div class="d-flex align-center gap-8">
           <button type="button" class="btn-icon" id="monthPrev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button>
@@ -4032,6 +4154,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <button type="button" class="btn" id="closeMonthBtn">Close ${esc(month.short)}</button>
           <button type="button" class="link" id="nextClient">Next client ›</button>
         </div>
+      </div>
+      <p class="text-body2">${closeProgress(c)} checks · ${esc(closeBlockers(c, c.monthStatus || 'Open'))}</p>
       </div>
       <p class="form-error-msg" id="closeNeed" hidden></p>
       ${details}
@@ -4055,7 +4179,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <h2 class="text-subtitle1">Connections</h2>
           ${connections}
           <h2 class="text-subtitle1">Health</h2>
-          <p class="text-body2">Synder has not checked this client yet.</p>
+          <p class="text-body2">${c.accounting ? esc(healthSummary(c).label || 'All good') : '—'}</p>
           <details class="accordion"><summary class="accordion-summary">Health history</summary><div class="accordion-body"><p class="text-body2">Not set up for this client yet.</p></div></details>
           <h2 class="text-subtitle1">Month close checks</h2>
           ${closeRow('Syncs', '8 failed and 0 rolled back syncs in the period', 'Failed', 'red')}
@@ -4097,7 +4221,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const page = paginate('colleagues', rows, [25, 50, 100]);
     const body = page.slice.map((p) => {
       const status = p.status === 'invited' ? '<span class="status status-grey">Invited</span>' : '<span class="status status-green">Active</span>';
-      const items = (p.status === 'invited' ? '' : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button>`) + `<button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove</button>`;
+      const pending = p.status === 'invited' || p.status === 'pending';
+      const items = (pending ? `<button type="button" class="dropdown-item" data-approve-person="${p.id}">Approve</button>` : `<button type="button" class="dropdown-item" data-open-person="${p.id}">See details</button>`) + `<button type="button" class="dropdown-item" data-role-person="${p.id}">Change role</button><button type="button" class="dropdown-item danger" data-remove-person="${p.id}">Remove</button>`;
       const open = p.status !== 'invited';
       return `<tr class="${open ? 'row-clickable' : ''}"${open ? ` data-person="${p.id}" tabindex="0"` : ''}><td><span class="text-body2">${esc(p.name)}</span></td><td><span class="text-body2">${esc(p.email)}</span></td><td><span class="text-body2">${esc(colleagueRoleName(p))}</span></td><td>${status}</td><td class="text-right"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="${p.id}" aria-label="Actions for ${esc(p.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-${p.id}">${items}</div></div></td></tr>`;
     }).join('') || '<tr><td colspan="5" class="text-body2">No colleagues match.</td></tr>';
@@ -4283,6 +4408,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       html = placeholder(TOP_PAGES[st.page][1], st.ctx === 'firm' ? FIRM.name : findOrg(st.orgId).name);
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
+      else if (st.page === 'monitoring') html = renderMonitoring();
+      else if (st.page === 'monthclose') html = renderMonthClose();
       else if (st.page === 'clientdetail') html = renderClientDetail();
       else if (st.page === 'clienthealth') html = renderClientHealth();
       else if (st.page === 'preassess' || st.page === 'preupload' || st.page === 'precheck' || st.page === 'prelog') html = renderClients() + preOverlayHtml();
@@ -4822,8 +4949,41 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('backColleagues', () => goFirm('colleagues'));
     bindClick('removeColleague', () => { const p = findPerson(st.colleagueId); if (p) confirmRemove(p); });
     bindClick('addPersonClient', openAddPersonClient);
+    bindClick('checkAll', () => {
+      listedClients().forEach((c) => { if (c.accounting) c.checked = 'Nov 18, 2026'; });
+      showKitToast('Checked all clients');
+      renderMain();
+    });
+    bindClick('diagnoseBtn', () => { const c = findOrg(st.clientId); if (c) openDiagnose(c); });
+    bindClick('closeBoardPrev', () => { st.closeMonth = boardMonthIndex() - 1; renderMain(); });
+    bindClick('closeBoardNext', () => { st.closeMonth = boardMonthIndex() + 1; renderMain(); });
+    m.querySelectorAll('[data-open-work]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.openWork); });
+    m.querySelectorAll('[data-approve-person]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const person = findPerson(b.dataset.approvePerson);
+      if (!person) return;
+      person.status = 'active';
+      renderMain();
+    });
+    m.querySelectorAll('[data-role-person]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const person = findPerson(b.dataset.rolePerson);
+      if (person) openFirmRole(person);
+    });
     m.querySelectorAll('[data-open-person]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openColleague(b.dataset.openPerson); });
     m.querySelectorAll('[data-remove-person]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); const p = findPerson(b.dataset.removePerson); if (p) confirmRemove(p); });
+  }
+  function openFirmRole(person) {
+    const current = colleagueRoleName(person);
+    const { modal, close } = dialogShell('Change role', `<p class="text-body2">Role in the firm for ${esc(person.name)}.</p><div class="form-field"><label class="form-label form-label-required" for="firmRolePick">Role in the Firm</label><select class="select" id="firmRolePick"><option value="Admin"${current === 'Admin' ? ' selected' : ''}>Admin</option><option value="Colleague"${current === 'Colleague' ? ' selected' : ''}>Colleague</option></select></div>`, `<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="firmRoleSave">Save</button>`);
+    modal.querySelector('#firmRoleSave').onclick = () => {
+      const sel = modal.querySelector('#firmRolePick');
+      if (!(sel.value || '').trim()) { fieldError(sel, 'Required'); return; }
+      fieldClear(sel);
+      const next = sel.value;
+      close();
+      if (next !== colleagueRoleName(person)) confirmRoleChange(person, next);
+    };
   }
   function openColleague(id) {
     st.ctx = 'firm'; st.page = 'colleague'; st.colleagueId = id; st.colleagueTab = 'details'; st.clientId = null;
@@ -5172,7 +5332,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     if (!html && q) html = `<div class="dropdown-item text-body2">Nothing matches.</div>`;
     $('popList').innerHTML = html;
-    $('popFoot').innerHTML = `<button type="button" class="dropdown-item" data-act="createorg"><span class="material-icons">add</span>Add client</button>`;
+    $('popFoot').innerHTML = `<button type="button" class="dropdown-item" data-act="createorg"><span class="material-icons">add</span>Add client</button><div class="dropdown-item text-caption">Connect more clients to get a discount.</div>`;
     $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
   }
   function act(a) {
@@ -5250,6 +5410,34 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const parts = raw.split('/');
     const head = parts[0];
     if (!ob) loadOb();
+    if (head === 'monitoring') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      st.ctx = 'firm';
+      st.page = 'monitoring';
+      st.clientId = null;
+      st.orgId = null;
+      closePop();
+      render();
+      return;
+    }
+    if (head === 'month-close') {
+      scenario = 'firm';
+      load();
+      if (!(ob && ob.directoryReady)) { goOnboarding('home'); return; }
+      mode = 'firm';
+      document.body.classList.remove('shell-hide');
+      st.ctx = 'firm';
+      st.page = 'monthclose';
+      st.clientId = null;
+      st.orgId = null;
+      closePop();
+      render();
+      return;
+    }
     if (head === 'colleagues') {
       scenario = 'firm';
       load();
@@ -5451,6 +5639,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'finishsetup' && st.clientId) h = '#clients/' + st.clientId + '/finish';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
+    else if (st.ctx === 'firm' && st.page === 'monitoring') h = '#monitoring';
+    else if (st.ctx === 'firm' && st.page === 'monthclose') h = '#month-close';
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
     else if (st.ctx === 'firm' && st.page === 'colleagues') h = '#colleagues';
     else if (st.ctx === 'firm' && st.page === 'colleague' && st.colleagueId) h = '#colleagues/' + st.colleagueId + (st.colleagueTab === 'clients' ? '/clients' : '');
@@ -5701,6 +5891,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const open = !$(menu).classList.contains('show'); closeMenus(); closePop();
     if (open) { $(menu).classList.add('show'); $(btn).setAttribute('aria-expanded', 'true'); }
   }
+  $('connectAi').onclick = (e) => {
+    e.preventDefault();
+    const { modal, close } = dialogShell('Connect AI assistant', '<p class="text-body2">Connect the assistant to this firm. It suggests fixes from the health checks.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="aiConnect">Connect</button>');
+    modal.querySelector('#aiConnect').onclick = () => { close(); showKitToast('AI assistant connected'); };
+  };
   $('helpBtn').onclick = () => toggleMenu('helpBtn', 'helpMenu');
   $('userBtn').onclick = () => toggleMenu('userBtn', 'userMenu');
   document.querySelectorAll('[data-top]').forEach((b) => b.onclick = () => goTop(b.dataset.top));
