@@ -1138,7 +1138,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         </div>
         <button type="button" class="ob-quiet" id="obSkipList">Continue without a list</button>`);
     } else if (step === 'add') {
-      const rows = (ob.manual || []).map((c) => `<div class="dir-row">${av(c, true)}<span class="nm">${esc(c.name)}</span><button type="button" class="linkish" data-rm="${c.id}">Remove</button></div>`).join('');
+      const rows = (ob.manual || []).map((c) => `<div class="dir-row"><span class="text-body2">${esc(c.name)}</span><button type="button" class="link" data-rm="${c.id}">Remove</button></div>`).join('');
       html = obShell(`
         ${backSlot(true)}
         <h1>Add a client</h1>
@@ -1196,7 +1196,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <div class="ob-table-wrap"><table>
             <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>In this sample</th></tr></thead>
             <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] ? ' checked' : ''} /></td>
-              <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td>
+              <td><span class="text-body2">${esc(c.name)}</span></td>
               <td class="${c.former ? 'sample-former' : 'sample-current'}">${c.former ? 'Former client' : 'Current client'}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No names match that search.</td></tr>'}</tbody>
           </table></div>
         </div>
@@ -2641,7 +2641,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { text: lic, secondary: false };
   }
   function healthModel(c) {
-    if (!c || !c.accounting || !(c.connected || c.setup)) return null;
+    if (!c || !c.accounting) return null;
     const names = ['Uncategorized transactions', 'Unreconciled periods'];
     const failed = [];
     const periodDetail = (periods) => {
@@ -2696,11 +2696,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function issueCountLabel(n) { return n === 1 ? '1 issue found' : n + ' issues found'; }
   function healthSummary(c) {
-    if (isOffClient(c)) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
     const health = healthModel(c);
-    if (!health) return { label: 'Not checked yet', tone: 'grey', failed: [], total: 0, passed: 0 };
-    if (health.failed.length) return { label: issueCountLabel(health.failed.length), tone: 'red', failed: health.failed, total: health.total, passed: health.passed };
-    return { label: health.passed + ' of ' + health.total + ' passed', tone: 'green', failed: [], total: health.total, passed: health.passed };
+    if (!health) return { label: '', tone: 'grey', failed: [], total: 0, passed: 0 };
+    if (health.failed.length) return { label: health.passed + ' of ' + health.total + ' passed', tone: 'red', failed: health.failed, total: health.total, passed: health.passed };
+    return { label: 'All good', tone: 'green', failed: [], total: health.total, passed: health.passed };
   }
   function clientView(c) {
     const empty = { key: 'off', label: 'Not set up', kind: 'grey', tip: 'Connect accounting to start working with this client.', health: null, accounting: '', issues: [] };
@@ -2903,8 +2902,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<span class="tooltip-wrap"><span class="logo-line" tabindex="0">${chips.join('')}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
   }
   function healthCell(c) {
-    if (onboardingState(c) !== 'done') return '';
-    if (!c.checked) return statusChip('grey', 'Not checked yet');
+    if (!c || !c.accounting) return '<span class="text-body2">—</span>';
     const summary = healthSummary(c);
     const tip = summary.failed.length ? summary.failed.map((f) => f.name).join('; ') : 'All checks passed';
     return `<span class="tooltip-wrap"><span tabindex="0">${statusChip(chipKind(summary.tone), summary.label)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span>`;
@@ -3529,12 +3527,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     goFirm('clientconnect', id);
   }
   function connectNamed(id) {
-    const c = findOrg(id);
-    if (!c) return;
-    clearLink();
-    st.connectPick = { accounting: [], sales: [], pay: [] };
-    st.connectStep = 'details';
-    goFirm('clientconnect', id);
+    openClientConnect(id);
   }
   function finishClientConnect() {
     clearLink();
@@ -3685,20 +3678,21 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function pickerHtml() {
     if (!ob || !ob.picker) return '';
     const q = (ob.q || '').toLowerCase();
-    const list = IMPORT_POOL.filter((c) => !q || c.name.toLowerCase().includes(q));
+    const list = IMPORT_POOL.filter((c) => (!q || c.name.toLowerCase().includes(q)) && (!ob.pickNewOnly || !alreadyInFirm(c)));
     const n = IMPORT_POOL.filter((c) => ob.selected[c.id] === true && !alreadyInFirm(c)).length;
     return `<div class="modal-bg show" id="pickModal">
       <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
         <div class="modal-header" id="pickTitle">Choose clients to import</div>
         <div class="modal-body">
           <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
-          <div class="pick-scroll"><table class="synder-table">
-            <thead><tr><th style="width:40px"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
+          <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="pickNewOnly"${ob.pickNewOnly ? ' checked' : ''}> Show only not imported clients</label>
+          <div class="table-wrap pick-scroll"><table class="synder-table">
+            <thead><tr><th class="col-check"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>Status</th></tr></thead>
             <tbody>${list.map((c) => {
               const have = alreadyInFirm(c);
-              return `<tr><td><input class="checkbox" type="checkbox" data-cid="${c.id}" data-have="${have ? '1' : '0'}" aria-label="${esc(c.name)}"${have ? '' : (ob.selected[c.id] === true ? ' checked' : '')} /></td>
-              <td><div class="client-cell">${av(c, true)}<span class="${have ? 'text-body2' : ''}">${esc(c.name)}</span>${have ? '<span class="status status-grey">Already in your firm</span>' : ''}</div></td></tr>`;
-            }).join('') || '<tr><td colspan="2" class="text-body2">No matches.</td></tr>'}</tbody>
+              return `<tr><td class="col-check"><input class="checkbox" type="checkbox" data-cid="${c.id}" data-have="${have ? '1' : '0'}" aria-label="${esc(c.name)}"${have ? '' : (ob.selected[c.id] === true ? ' checked' : '')} /></td>
+              <td><span class="text-body2">${esc(c.name)}</span></td><td>${have ? '<span class="status status-grey">Already imported</span>' : ''}</td></tr>`;
+            }).join('') || '<tr><td colspan="3" class="text-body2">No matches.</td></tr>'}</tbody>
           </table></div>
           <p class="form-error-msg" id="pickError" hidden>Choose at least one client</p>
         </div>
@@ -3785,7 +3779,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const sortText = (c, key) => {
       if (key === 'acct') return acctStatus(c);
       if (key === 'integ') return ((c.integrations || []).slice().sort().join(' '));
-      if (key === 'health') return onboardingState(c) === 'done' ? (c.checked ? healthSummary(c).label : 'Not checked yet') : '';
+      if (key === 'health') return c.accounting ? healthSummary(c).label : '';
       if (key === 'pre') return preHasRun(c) ? (preWords(c.pre).label + ' ' + (c.pre.period || '')) : '';
       return c.name || '';
     };
@@ -3817,7 +3811,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">${brandMark('QuickBooks', 18)}${brandMark('Xero', 18)} Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">${brandMark('QuickBooks', 18)} QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">${brandMark('Xero', 18)} Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div>`)}
+      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div>`)}
       ${banner}
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
@@ -4229,7 +4223,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="table-wrap"><table class="synder-table">
         <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
         <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] !== false ? ' checked' : ''} /></td>
-          <td><div class="client-cell">${av(c, true)}${esc(c.name)}</div></td></tr>`).join('') || '<tr><td colspan="2" class="muted">No names match that search.</td></tr>'}</tbody>
+          <td><span class="text-body2">${esc(c.name)}</span></td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No names match that search.</td></tr>'}</tbody>
       </table></div>
       <div class="review-bar">
         <span class="text-body1" id="reviewCount">${n} selected</span>
@@ -4268,6 +4262,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ob.q = search.value; saveOb(); renderMain();
       const n = $('obSearch'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
     };
+    const onlyNew = $('pickNewOnly');
+    if (onlyNew) onlyNew.onchange = () => { ob.pickNewOnly = onlyNew.checked; saveOb(); renderMain(); };
     const all = $('obAll');
     if (all) {
       const q = (ob.q || '').toLowerCase();
@@ -5172,7 +5168,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function item(o, cap, current, action) {
     const sub = isClient(o.id) ? '' : cap;
     const dot = isClient(o.id) && onboardingState(o) === 'started' ? yellowDot() : '';
-    return `<button type="button" class="dropdown-item" data-act="${action}">${av(o, true)}<span class="flex-1"><span class="text-body2 text-truncate">${dot}${esc(o.name)}</span>${sub ? `<span class="text-caption d-block">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons">check</span>' : ''}</button>`;
+    return `<button type="button" class="dropdown-item" data-act="${action}"><span class="flex-1"><span class="text-body2 text-truncate">${dot}${esc(o.name)}</span>${sub ? `<span class="text-caption d-block">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons">check</span>' : ''}</button>`;
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
