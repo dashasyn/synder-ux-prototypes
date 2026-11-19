@@ -1707,7 +1707,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return groupRow('Older plans') + rows.map((row) => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td>' + row[2] + '</td><td></td></tr>').join('') + '<tr><td colspan="4"><span class="text-caption">Your firm keeps these from an older plan. Contact support to move to Core or Advanced.</span></td></tr>';
   }
   function renderLicenseTable() {
-    const body = stockRows().map((group) => groupRow(group[0]) + group[1].map((id) => licenseRow(id, stockTotal(id), licLeft(id), true)).join('')).join('') + olderPlanRows();
+    const body = stockRows().map((group) => groupRow(group[0]) + group[1].map((id) => licenseRow(id, stockTotal(id), licLeft(id), true)).join('')).join('') + olderPlanRows() || '<tr><td colspan="4" class="text-body2">No licenses yet.</td></tr>';
     return '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th>Total</th><th>Left</th><th class="text-right">Action</th></tr></thead><tbody>' + body + '</tbody></table></div>';
   }
   function billClientMatch(c, tab) {
@@ -1807,8 +1807,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!st.licencesOn) {
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="page-stack"><h2 class="text-h2">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
-    const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
-    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    const view = st.billView === 'clients' ? 'clients' : 'licences';
+    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (view === 'licences' ? ' active' : '') + '" data-bill-view="licences" role="tab">Licenses</button><button type="button" class="tab' + (view === 'clients' ? ' active' : '') + '" data-bill-view="clients" role="tab">Clients</button></div>';
+    const panel = view === 'clients' ? renderBillClients() : ('<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p>' + renderLicenseTable());
+    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<div class="page-stack">' + tabs + '<div>' + panel + '</div></div></div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -3389,20 +3391,20 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const page = paginate('preMatched', resultRows(work, 'matched'), [10, 25, 50]);
       const body = page.slice.map((row) => {
         const open = work.expand === row.id;
-        const sub = open ? '<tr><td colspan="7"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';')[0]) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table><h3 class="text-subtitle2">Integration rows (1)</h3><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';').pop()) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></td></tr>' : '';
+        const sub = open ? '<tr><td colspan="7"><div class="page-stack"><h3 class="text-subtitle2">Accounting rows (1)</h3><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';')[0]) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div><h3 class="text-subtitle2">Integration rows (1)</h3><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th>Amount</th><th>Description</th></tr></thead><tbody><tr><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td>' + esc(row.id) + '</td><td>' + esc((row.types || '').split(';').pop()) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>Payout</td></tr></tbody></table></div></div></td></tr>' : '';
         return '<tr><td><button type="button" class="btn-icon" data-pre-expand="' + esc(row.id) + '" aria-label="Expand"><span class="material-icons">' + (open ? 'expand_less' : 'expand_more') + '</span></button></td><td>' + esc(row.date) + '</td><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.types) + '</td><td>' + esc(row.match) + '</td><td>' + row.count + '</td></tr>' + sub;
       }).join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th></th><th class="' + sortCls + '" id="preSortDate">Date</th><th>Matching ID</th><th class="col-amount">Total amount</th><th>Types</th><th>Match type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+      table = '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th></th><th class="' + sortCls + '" id="preSortDate">Date</th><th>Matching ID</th><th class="col-amount">Total amount</th><th>Types</th><th>Match type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
     } else if (tab === 'discrepancy') {
       const body = resultRows(work, 'discrepancy').map((row) => '<tr><td>' + esc(row.id) + '</td><td class="col-amount">' + preMoney(row.acct) + '</td><td class="col-amount">' + preMoney(row.integ) + '</td><td class="col-amount">' + preMoney(row.delta) + '</td><td>' + esc(row.date) + '</td><td>' + esc(row.type) + '</td><td>' + row.count + '</td></tr>').join('') || '<tr><td colspan="7" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Matching ID</th><th class="col-amount">Accounting total</th><th class="col-amount">Integration total</th><th class="col-amount">Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      table = '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Matching ID</th><th class="col-amount">Accounting total</th><th class="col-amount">Integration total</th><th class="col-amount">Delta</th><th>Integration date</th><th>Integration type</th><th>Count</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     } else if (tab === 'missing') {
       const shown = (list) => list.filter((row) => preKeep(work, row)).slice().sort((a, b) => String(b.iso || '').localeCompare(String(a.iso || '')));
-      const missTable = (title, list) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + (shown(list).map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
+      const missTable = (title, list) => '<h2 class="text-subtitle2">' + title + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + (shown(list).map((row) => '<tr><td>' + esc(row.date) + '</td><td>' + esc(row.primary) + '</td><td>' + esc(row.secondary) + '</td><td>' + esc(row.type) + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc) + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>') + '</tbody></table></div>';
       table = missTable('Missing in accounting', work.missAcct) + missTable('Missing in integration', work.missInt);
     } else {
       const body = resultRows(work, 'ignored').map((row) => '<tr><td>' + esc(row.date || '-') + '</td><td>' + esc(row.primary || row.id) + '</td><td>' + esc(row.secondary || '-') + '</td><td>' + esc(row.type || row.types || '-') + '</td><td class="col-amount">' + preMoney(row.amount) + '</td><td>' + esc(row.desc || '-') + '</td></tr>').join('') || '<tr><td colspan="6" class="text-body2">No results found</td></tr>';
-      table = '<div class="table-wrap"><table class="synder-table"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      table = '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Date</th><th>Primary ID</th><th>Secondary ID</th><th>Transaction type</th><th class="col-amount">Amount</th><th>Description</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     }
     const hist = (c.pre && c.pre.history) || [];
     const histLabel = (item) => esc(item.period) + ' · ' + esc(preWords(item).label);
@@ -3699,7 +3701,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="modal-body">
           <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
           <label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="pickNewOnly"${ob.pickNewOnly ? ' checked' : ''}> Show only not imported clients</label>
-          <div class="table-wrap table-wrap--scroll pick-scroll"><table class="synder-table">
+          <div class="table-wrap table-wrap--scroll pick-scroll"><table class="synder-table table--lg">
             <thead><tr><th class="col-check"><input class="checkbox" type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th><th>Status</th></tr></thead>
             <tbody>${list.map((c) => {
               const have = alreadyInFirm(c);
@@ -4785,8 +4787,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return `<div class="flow-wide review-page">
       ${pageHeader('Choose clients to import', '', 'All ticked. Untick anyone you no longer work with.')}
       <div class="toolbar"><input type="search" class="input-search" id="obSearch" placeholder="Search clients" value="${esc(ob.q || '')}" aria-label="Search clients" /></div>
-      <div class="table-wrap"><table class="synder-table">
-        <thead><tr><th style="width:40px"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
+      <div class="table-wrap"><table class="synder-table table--lg">
+        <thead><tr><th class="col-check"><input type="checkbox" id="obAll" aria-label="Select all names" /></th><th>Client</th></tr></thead>
         <tbody>${list.map((c) => `<tr><td><input type="checkbox" data-cid="${c.id}" aria-label="${esc(c.name)}"${ob.selected[c.id] !== false ? ' checked' : ''} /></td>
           <td><span class="text-body2">${esc(c.name)}</span></td></tr>`).join('') || '<tr><td colspan="2" class="text-body2">No names match that search.</td></tr>'}</tbody>
       </table></div>
@@ -4804,7 +4806,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     </div>`;
   }
   function renderClientStub() {
-    return `<div class="proto-stub"><p class="text-body1">This screen is not part of this prototype.</p></div>`;
+    return `<div class="flow-wide page-stack">${pageHeader('Organization')}<p class="text-body2">This screen is not part of this prototype.</p></div>`;
   }
 
   function renderCreateFirm() {
