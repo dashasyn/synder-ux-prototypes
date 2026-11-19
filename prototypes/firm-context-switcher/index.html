@@ -1818,7 +1818,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '', 'Buy licences for your clients and see how they\'re used.') + '<div class="kit-narrow"><div class="box box--white page-stack"><h2 class="text-subtitle1">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client. Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '', 'Buy licences for your clients and see how they\'re used.') + '<div class="box box--white page-stack"><h2 class="text-subtitle1">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
     return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
@@ -2447,7 +2447,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
 
   function sc() { return SCENARIOS[scenario]; }
-  function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id) || monClient(id); }
+  function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id); }
   function isClient(id) { return sc().clients.some((c) => c.id === id); }
 
   function defaultState() {
@@ -3962,56 +3962,50 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const prev = month === 1 ? { month: 12, year: year - 1 } : { month: month - 1, year: year };
     return monShort(prev.month, prev.year);
   }
-  const MON_OWNERS = ['Dasha', 'Alex Kim', 'Jane Doe'];
+  const MON_OWNERS = ['Dasha', 'Alex Kim', 'Jane Doe', 'Unassigned'];
+  function monHash(text) {
+    let n = 0;
+    const s = String(text || '');
+    for (let i = 0; i < s.length; i++) n = (n * 33 + s.charCodeAt(i)) >>> 0;
+    return n;
+  }
   function monitorOwner(c) {
-    const n = String(c.id).split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-    if (c.id === 'e16') return 'Unassigned';
+    const n = monHash((c && c.id) + '|' + (c && c.name) + '|' + monYearNum() + '-' + monMonthNum());
     return MON_OWNERS[n % MON_OWNERS.length];
   }
-  const MON_IDS = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e9', 'e12', 'e14', 'e15', 'e16'];
-  function monClient(id) {
-    const live = sc().clients.find((c) => c.id === id);
-    if (live) return live;
-    if (MON_IDS.indexOf(id) < 0) return null;
-    if (!monClient.cache) monClient.cache = {};
-    if (!monClient.cache[id]) {
-      const sample = existingClients().find((c) => c.id === id);
-      if (sample) monClient.cache[id] = sample;
-    }
-    return monClient.cache[id] || null;
-  }
-  function monRoster() {
-    return MON_IDS.map(monClient).filter(Boolean);
-  }
-  function monScore(base, month, year) {
-    const swing = ((year + month) % 5) - 2;
-    return Math.max(1, Math.min(10, base + swing));
+  function monRoster() { return listedClients(); }
+  function monProfile(hash) {
+    const group = ['needs', 'waiting', 'clear'][hash % 3];
+    const score = group === 'clear' ? 8 + (hash % 3) : (group === 'needs' ? 3 + (hash % 4) : 5 + (hash % 3));
+    return { group: group, score: score };
   }
   function monBoard(c) {
-    const known = {
-      e2: { group: 'needs', severity: 'risk', score: 4, issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
-      e9: { group: 'needs', severity: 'risk', score: 5, issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' },
-      e7: { group: 'waiting', severity: 'watch', score: 6, issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
-      e12: { group: 'waiting', severity: 'watch', score: 7, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
-      e15: { group: 'waiting', severity: 'watch', score: 6, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
-      e1: { group: 'clear', severity: 'healthy', score: 10, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e3: { group: 'clear', severity: 'healthy', score: 9, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e14: { group: 'clear', severity: 'healthy', score: 10, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e16: { group: 'clear', severity: 'healthy', score: 8, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e5: { group: 'cant', severity: '', score: 0, issue: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.', logo: '' },
-      e6: { group: 'cant', severity: '', score: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' },
-      e4: { group: 'cant', severity: '', score: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' }
-    };
-    const row = known[c.id];
-    if (!row) return null;
-    if (!row.severity) return Object.assign({ trend: 'flat', delta: 0 }, row);
+    if (!c || !isQuickBooks(c)) {
+      const xero = !!(c && c.accounting === 'Xero');
+      return { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: xero ? 'Xero, not supported yet' : 'Books not connected', tip: xero ? 'Health checks are available for QuickBooks only.' : 'Books not connected', logo: '' };
+    }
     const month = monMonthNum();
     const year = monYearNum();
-    const score = monScore(row.score, month, year);
+    const key = c.id + '|' + c.name;
+    const now = monProfile(monHash(key + '|' + year + '-' + month));
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
-    const delta = score - monScore(row.score, prevMonth, prevYear);
-    return Object.assign({}, row, { score: score, delta: Math.abs(delta), trend: delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat') });
+    const prev = monProfile(monHash(key + '|' + prevYear + '-' + prevMonth));
+    const delta = now.score - prev.score;
+    const h = monHash(key + '|' + year + '-' + month);
+    const issues = {
+      needs: [
+        { issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
+        { issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' }
+      ],
+      waiting: [
+        { issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
+        { issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' }
+      ],
+      clear: [{ issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' }]
+    };
+    const pick = issues[now.group][h % issues[now.group].length];
+    return { group: now.group, severity: now.group === 'needs' ? 'risk' : (now.group === 'waiting' ? 'watch' : 'healthy'), score: now.score, trend: delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat'), delta: Math.abs(delta), issue: pick.issue, tip: pick.tip, logo: pick.logo };
   }
   function monTrendText(board) {
     if (board.trend === 'up') return '↑ ' + board.delta + ' vs previous month';
@@ -4025,6 +4019,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   const MON_SEV = { risk: ['red', 'At risk'], watch: ['yellow', 'Watch'], healthy: ['green', 'Healthy'] };
   const MON_GROUPS = [['needs', 'Needs you', 'fixable in Synder, client not involved'], ['waiting', 'Waiting on client', 'access, document or reply requested'], ['clear', 'Clear', 'all checks passed'], ['cant', "Can't check", 'Xero or no accounting connected']];
   function renderMonitoring() {
+    if (!listedClients().length) {
+      return `<div class="flow-wide page-stack">
+        ${pageHeader('Monitoring', '', "Health of every client's books for the month, grouped by who needs to act.")}
+        <div class="empty-state"><p class="empty-state-title">No clients yet</p><p class="empty-state-desc">Import a client list, or add one client, to see health for the month.</p><button type="button" class="btn" id="monImport">Import clients</button></div>
+      </div>`;
+    }
     const month = monMonthNum();
     const year = monYearNum();
     const rows = monBoardRows();
@@ -4046,8 +4046,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const yearOpts = monYears().map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
     const reconLabel = 'Start reconciliation (' + monShort(month, year) + ')';
     const section = (key, title, hint) => {
+      const all = rows.filter((row) => row.board.group === key);
       const list = slice.filter((row) => row.board.group === key);
-      if (!list.length) return '';
+      if (!all.length || !list.length) return '';
       const collapsed = key === 'clear' && !st.monClearOpen;
       const icon = key === 'clear' ? `<button type="button" class="btn-icon" id="monClearToggle" aria-label="${collapsed ? 'Expand Clear' : 'Collapse Clear'}"><span class="material-icons">${collapsed ? 'chevron_right' : 'expand_more'}</span></button>` : '';
       const body = list.map(({ c, board }) => {
@@ -4063,7 +4064,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         return `<tr><td><span class="tooltip-wrap"><button type="button" class="link text-truncate mon-name" data-mon-work="${c.id}">${esc(c.name)}</button><span class="tooltip" role="tooltip">${esc(c.name)}</span></span></td><td><div class="d-flex flex-col">${health}</div></td><td>${issue}</td><td><span class="text-body2">${esc(monitorOwner(c))}</span></td><td><div class="d-flex align-center justify-end gap-8">${running ? `<span class="text-body2 text-secondary">${running}</span>` : ''}${menu}</div></td></tr>`;
       }).join('');
       const table = collapsed ? '' : `<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client name</th><th>${esc(head)}</th><th>Top issue</th><th>Owner</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>`;
-      return `<div class="page-stack"><div class="mon-group d-flex align-center gap-8">${icon}<span class="text-subtitle2">${title}</span><span class="text-body2 text-secondary">(${list.length}) — ${hint}</span></div>${table}</div>`;
+      return `<div class="page-stack"><div class="mon-group d-flex align-center gap-8">${icon}<span class="text-subtitle2">${title}</span><span class="text-body2 text-secondary">(${all.length}) — ${hint}</span></div>${table}</div>`;
     };
     const groups = MON_GROUPS.map(([key, title, hint]) => section(key, title, hint)).join('');
     const empty = rows.length ? '' : ((st.monQ || '').trim() ? '<p class="text-body2">No clients match this search.</p>' : '');
@@ -4965,9 +4966,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div>
           <p class="form-label">Firm name</p>
           <p class="text-body2">${esc(FIRM.name)}</p>
-          <p class="text-body2 text-secondary">Firm ID ${esc(FIRM.firmId)} <button type="button" class="btn-copy" id="copyFirmId" aria-label="Copy Firm ID">content_copy</button></p>
         </div>
         <button type="button" class="btn-outlined" id="openFirmDetails">Edit</button>
+      </div>
+      <div class="box box--white d-flex align-center justify-between gap-16">
+        <div>
+          <p class="form-label">Firm ID</p>
+          <p class="text-body2">${esc(FIRM.firmId)}</p>
+        </div>
+        <button type="button" class="btn-icon" id="copyFirmId" aria-label="Copy Firm ID"><span class="material-icons">content_copy</span></button>
       </div>
       ${settingsBlock('Firm tags', 'Group clients with your own labels, like region or service type.', '<button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button>')}
       ${settingsBlock('Checklist', 'Set the month-close steps your team follows for every client.', '<button type="button" class="btn-outlined" id="firmChecklistBtn">Edit checklist</button>')}
@@ -5565,7 +5572,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('copyFirmId', () => {
       const id = FIRM.firmId || '';
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id).catch(() => {});
-      showKitToast('Copied');
+      showKitToast('Firm ID copied');
     });
     bindClick('sortColName', () => { st.colSort = st.colSort === 'asc' ? 'desc' : 'asc'; renderMain(); });
     const sortTh = document.getElementById('sortColName');
@@ -5699,6 +5706,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
     const monSize = $('monPageSize');
     if (monSize) monSize.onchange = () => { st.monPageSize = Number(monSize.value); st.monPage = 0; renderMain(); };
+    bindClick('monImport', openPicker);
     bindClick('monClear', () => { st.monQ = ''; st.monPage = 0; renderMain(); });
     bindClick('monClearToggle', () => { st.monClearOpen = !st.monClearOpen; renderMain(); });
     m.querySelectorAll('[data-mon-work]').forEach((b) => b.onclick = (e) => {
@@ -6076,7 +6084,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const paint = () => {
       const rows = draft.map((row, i) => {
         const scope = scopes.map((item) => '<option value="' + item[0] + '"' + (checklistScope(row) === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('');
-        return '<div class="work-row d-flex align-center gap-8 flex-wrap"><div class="flex-1"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '" aria-label="Check name"></div><label class="d-flex align-center gap-8"><input class="switch" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '><span class="text-body2">Required to close</span></label><div class="mon-search"><select class="select" data-check-scope="' + i + '" aria-label="Scope">' + scope + '</select></div><button type="button" class="btn-icon" data-check-up="' + i + '" aria-label="Move up"><span class="material-icons">arrow_upward</span></button><button type="button" class="btn-icon" data-check-down="' + i + '" aria-label="Move down"><span class="material-icons">arrow_downward</span></button><button type="button" class="link" data-archive="' + i + '">Archive</button></div>';
+        const up = i === 0 ? '<span class="btn-icon" aria-hidden="true"></span>' : '<button type="button" class="btn-icon" data-check-up="' + i + '" aria-label="Move up"><span class="material-icons">arrow_upward</span></button>';
+        const down = i === draft.length - 1 ? '<span class="btn-icon" aria-hidden="true"></span>' : '<button type="button" class="btn-icon" data-check-down="' + i + '" aria-label="Move down"><span class="material-icons">arrow_downward</span></button>';
+        return '<div class="work-row d-flex align-center gap-8 flex-wrap"><div class="flex-1"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '" aria-label="Check name"></div><label class="d-flex align-center gap-8"><input class="switch" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '><span class="text-body2">Required to close</span></label><div class="mon-search"><select class="select" data-check-scope="' + i + '" aria-label="Scope">' + scope + '</select></div>' + up + down + '<button type="button" class="link" data-archive="' + i + '">Archive</button></div>';
       }).join('');
       const ideas = suggested.filter((item) => !draft.some((row) => row.label === item.label)).map((item) => '<div class="d-flex align-center justify-between gap-8"><span class="text-body2">' + esc(item.label) + '</span><button type="button" class="link" data-suggest="' + esc(item.label) + '">Add</button></div>').join('');
       modal.querySelector('.modal-body').innerHTML = '<div class="box box--grey"><p class="text-body2">Changes apply to every open and in-review month. Closed months stay as they were, and keep the old name of a renamed check.</p></div>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><details class="accordion"' + (showSuggested ? ' open' : '') + '><summary class="accordion-summary">Suggested checks</summary><div class="accordion-body page-stack">' + (ideas || '<p class="text-body2">Every suggestion is already on the checklist.</p>') + '</div></details>';
