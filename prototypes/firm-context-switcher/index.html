@@ -112,16 +112,6 @@ body {
 #pop.dropdown-menu { width: 300px; }
 /* Kit menu has no max height, so a long client list would leave the viewport. */
 #popList { max-height: 320px; overflow-y: auto; }
-/* Kit gap: no width utilities. Production Monitoring filters are 240px and the table columns are 128 / 168 / 192. text-truncate does not bound a table cell. Empty state has no 128px height. */
-.mon-field { width: 240px; flex: 0 0 240px; }
-.mon-field.input, .mon-field.select, .mon-field.select-ms { width: 240px; }
-.mon-table { table-layout: fixed; width: 100%; }
-.mon-clients { width: 128px; }
-.mon-status { width: 168px; }
-.mon-actions { width: 192px; }
-.mon-msg .tooltip-wrap { display: flex; max-width: 100%; min-width: 0; }
-.mon-msg .text-truncate { display: block; min-width: 0; flex: 1; }
-.mon-empty { height: 128px; display: flex; align-items: center; justify-content: center; }
 .nav, #nav { flex: 1; }
 /* ── Main content ── */
 .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
@@ -3913,131 +3903,120 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     return { label: 'Fix syncs', go: 'work' };
   }
-  const MON_SYNC_STATUSES = [
-    ['failed', 'Failed', 'red'],
-    ['rollback', 'Rollback failed', 'red'],
-    ['warnings', 'Synced with warnings', 'yellow'],
-    ['skipped', 'Skipped', 'yellow'],
-    ['rule', 'Synced with rule failed', 'yellow'],
-    ['canceled', 'Canceled', 'yellow']
-  ];
-  const MON_HEALTH_STATUSES = [['failed', 'Failed', 'red'], ['passed', 'Passed', 'green']];
-  const MON_RANGES = ['Today', 'Yesterday', 'This week', 'Last week', 'Last month', 'Last 365 days', 'This year', 'Last year', 'Custom'];
-  const MON_SYNC = [
-    { id: 's1', status: 'failed', message: 'Shopify payout did not post to the deposit account.', date: '2026-11-19', clients: ['e2', 'e7', 'e9'] },
-    { id: 's2', status: 'rollback', message: 'Rollback stopped because the QuickBooks payment was already matched.', date: '2026-11-18', clients: ['e12', 'e15'] },
-    { id: 's3', status: 'warnings', message: 'Sales tax was left blank on synced invoices, so the tax line needs a review.', date: '2026-11-17', clients: ['e1', 'e3'] },
-    { id: 's4', status: 'skipped', message: 'This order already exists in the books, so the sync was skipped.', date: '2026-11-10', clients: ['e14', 'e16', 'e5'] },
-    { id: 's5', status: 'rule', message: 'Smart Rule "Shopify fees" did not match this payout.', date: '2026-10-20', clients: ['e11'] },
-    { id: 's6', status: 'canceled', message: 'The sync was canceled because the books connection dropped before it finished.', date: '2026-01-15', clients: ['e7', 'e12'] }
-  ];
-  function monState() {
-    if (!st.mon) st.mon = { tab: 'sync', q: '', syncStatus: [], healthStatus: [], range: 'Last 365 days', from: '', to: '', sort: 'desc', page: 0, size: 25, open: '', statusOpen: false };
-    return st.mon;
+  function monMonthNum() { return st && st.monMonth ? st.monMonth : 10; }
+  function monYearNum() { return st && st.monYear ? st.monYear : 2025; }
+  function monShort(month, year) { return MONTH_NAMES[month - 1].slice(0, 3) + ' ' + year; }
+  function monPrevLabel(month, year) {
+    const prev = month === 1 ? { month: 12, year: year - 1 } : { month: month - 1, year: year };
+    return monShort(prev.month, prev.year);
   }
-  function monToday() { return new Date(2026, 10, 19); }
-  function monDay(iso) { const p = String(iso || '').split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
-  function monInRange(iso, range, from, to) {
-    const day = monDay(iso);
-    const today = monToday();
-    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    if (range === 'Today') return day.getTime() === t.getTime();
-    if (range === 'Yesterday') return day.getTime() === t.getTime() - 86400000;
-    if (range === 'This week') {
-      const monday = new Date(t); monday.setDate(t.getDate() - ((t.getDay() + 6) % 7));
-      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-      return day >= monday && day <= sunday;
+  function monitorOwner(c) {
+    const rows = accessForClient(c.id).filter((a) => a.person && a.person.status === 'active');
+    const manager = rows.find((a) => a.role === 'Manager');
+    if (manager) return manager.person.name;
+    const admin = firmPeople.find((p) => (p.firmRole === 'Admin' || p.firmRole === 'admin') && p.status === 'active');
+    return admin ? admin.name : '—';
+  }
+  function monBoard(c) {
+    if (!c || !c.accounting) return { group: 'cant', reason: 'Books not connected', tip: 'Books not connected' };
+    if (c.checking) return { group: 'cant', reason: 'Checking…', tip: 'The first check is still running.' };
+    if (!isQuickBooks(c)) return { group: 'cant', reason: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.' };
+    if (onboardingState(c) !== 'done') return { group: 'cant', reason: 'Onboarding not finished', tip: 'Onboarding not finished' };
+    if (connectionLost(c)) {
+      const who = (booksLost(c) || c.userDisconnected) ? c.accounting : lostIntegrations(c).map((i) => i.source).join(', ');
+      return { group: 'waiting', severity: 'watch', issue: 'Connection lost', tip: (who || 'A connection') + ' needs access again.' };
     }
-    if (range === 'Last week') {
-      const monday = new Date(t); monday.setDate(t.getDate() - ((t.getDay() + 6) % 7) - 7);
-      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-      return day >= monday && day <= sunday;
+    const health = healthModel(c);
+    if (health && health.failed.length) {
+      const fail = health.failed[0];
+      const issue = healthIssue(c, fail.short === 'Undeposited' ? 'undeposited' : 'uncategorized');
+      const line = fail.short === 'Undeposited'
+        ? ((issue && issue.unapplied) || 0) + " customer payments aren't matched to an invoice or deposit"
+        : (((issue && issue.count) || 0) + ' expenses have no category');
+      return { group: 'needs', severity: 'risk', issue: line, tip: fail.detail };
     }
-    if (range === 'Last month') return day.getFullYear() === t.getFullYear() && day.getMonth() === t.getMonth() - 1;
-    if (range === 'This year') return day.getFullYear() === t.getFullYear();
-    if (range === 'Last year') return day.getFullYear() === t.getFullYear() - 1;
-    if (range === 'Custom') {
-      if (from && day < monDay(from)) return false;
-      if (to && day > monDay(to)) return false;
-      return !!(from || to);
-    }
-    const past = new Date(t); past.setDate(t.getDate() - 365);
-    return day >= past && day <= t;
+    if ((c.issues || []).some((item) => item.key === 'sync')) return { group: 'needs', severity: 'watch', issue: 'A sync did not finish', tip: 'A sync failed. The other checks are unchanged.' };
+    const tip = (health && health.checks || []).map((check) => check.detail).join(' ');
+    return { group: 'clear', severity: 'healthy', issue: 'All checks passed', tip: tip || 'Uncategorized and Undeposited passed.' };
   }
-  function monStatusMeta(tab, id) {
-    return (tab === 'health' ? MON_HEALTH_STATUSES : MON_SYNC_STATUSES).find((row) => row[0] === id) || ['failed', 'Failed', 'red'];
+  function monBoardRows() {
+    const q = (st.monQ || '').trim().toLowerCase();
+    return listedClients().filter((c) => !q || c.name.toLowerCase().includes(q)).map((c) => ({ c, board: monBoard(c) })).sort((a, b) => a.c.name.localeCompare(b.c.name));
   }
-  function monHealthRows() {
-    const qb = listedClients().filter((c) => isQuickBooks(c) && !connectionLost(c) && !c.checking);
-    const uncat = qb.filter((c) => healthIssue(c, 'uncategorized'));
-    const funds = qb.filter((c) => healthIssue(c, 'undeposited'));
-    const rows = [];
-    if (uncat.length) rows.push({ id: 'uncat', status: 'failed', message: uncat.length + (uncat.length === 1 ? ' client has items in Uncategorized or suspense accounts' : ' clients have items in Uncategorized or suspense accounts'), date: '2026-11-19', clients: uncat.map((c) => c.id), label: 'Uncategorized' });
-    if (funds.length) rows.push({ id: 'funds', status: 'failed', message: funds.length + (funds.length === 1 ? ' client has unapplied payments or undeposited funds' : ' clients have unapplied payments or undeposited funds'), date: '2026-11-19', clients: funds.map((c) => c.id), label: 'Undeposited' });
-    return rows;
-  }
-  function monRows() {
-    const s = monState();
-    const source = s.tab === 'health' ? monHealthRows() : MON_SYNC;
-    const picked = s.tab === 'health' ? s.healthStatus : s.syncStatus;
-    const q = (s.q || '').trim().toLowerCase();
-    return source.filter((row) => {
-      if (picked.length && picked.indexOf(row.status) < 0) return false;
-      if (!monInRange(row.date, s.range, s.from, s.to)) return false;
-      if (!q) return true;
-      const names = row.clients.map((id) => { const c = findOrg(id); return c ? c.name : ''; }).join(' ').toLowerCase();
-      return row.message.toLowerCase().indexOf(q) >= 0 || names.indexOf(q) >= 0 || (row.label || '').toLowerCase().indexOf(q) >= 0;
-    }).slice().sort((a, b) => (s.sort === 'asc' ? 1 : -1) * (a.clients.length - b.clients.length) || a.message.localeCompare(b.message));
-  }
-  function monPage(list) {
-    const s = monState();
-    const sizes = [10, 25, 50, 100];
-    if (sizes.indexOf(s.size) < 0) s.size = 25;
-    const pages = Math.max(1, Math.ceil(list.length / s.size) || 1);
-    if (s.page > pages - 1) s.page = pages - 1;
-    if (s.page < 0) s.page = 0;
-    const start = s.page * s.size;
-    const from = list.length ? start + 1 : 0;
-    const to = Math.min(list.length, start + s.size);
-    const range = (list.length ? from + '–' + to : '0–0') + ' of ' + list.length;
-    const end = (on) => on ? ' disabled' : '';
-    const html = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select id="monPageSize" aria-label="Rows per page">${sizes.map((n) => `<option value="${n}"${n === s.size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-pages"><button type="button" data-mon-nav="prev" aria-label="Previous page"${end(s.page === 0)}><span class="material-icons">chevron_left</span></button><button type="button" data-mon-nav="next" aria-label="Next page"${end(s.page >= pages - 1)}><span class="material-icons">chevron_right</span></button></span></div>`;
-    return { slice: list.slice(start, start + s.size), html };
-  }
+  const MON_SEV = { risk: ['red', 'At risk'], watch: ['yellow', 'Watch'], healthy: ['green', 'Healthy'] };
+  const MON_GROUPS = [['needs', 'Needs you', true], ['waiting', 'Waiting on client', true], ['clear', 'Clear', false], ['cant', "Can't check", false]];
   function renderMonitoring() {
-    const s = monState();
-    const rows = monRows();
-    const page = monPage(rows);
-    const statuses = s.tab === 'health' ? MON_HEALTH_STATUSES : MON_SYNC_STATUSES;
-    const picked = s.tab === 'health' ? s.healthStatus : s.syncStatus;
-    const statusLabel = !picked.length || picked.length === statuses.length ? 'All' : (picked.length === 1 ? '1 item selected' : picked.length + ' items selected');
-    const statusMenu = statuses.map((row) => `<label class="select-ms-option"><input class="checkbox" type="checkbox" data-mon-status="${row[0]}"${picked.indexOf(row[0]) >= 0 ? ' checked' : ''}> ${esc(row[1])}</label>`).join('');
-    const ranges = MON_RANGES.map((name) => `<option${s.range === name ? ' selected' : ''}>${name}</option>`).join('');
-    const custom = s.range === 'Custom' ? `<input class="input mon-field" id="monFrom" type="date" aria-label="From" value="${esc(s.from || '')}"><input class="input mon-field" id="monTo" type="date" aria-label="To" value="${esc(s.to || '')}">` : '';
-    const sortCls = 'sortable sorted' + (s.sort === 'desc' ? ' desc' : '');
-    const body = page.slice.map((row) => {
-      const meta = monStatusMeta(s.tab, row.status);
-      const text = s.tab === 'health' ? row.label + '. ' + row.message : row.message;
-      const tip = text;
-      const list = s.open === row.id ? `<tr><td colspan="4"><div class="page-stack">${row.clients.map((id) => { const c = findOrg(id); return `<div class="d-flex align-center justify-between gap-16"><span class="text-body2">${esc(c ? c.name : id)}</span><button type="button" class="link" data-mon-tx="${id}">See related transactions</button></div>`; }).join('')}</div></td></tr>` : '';
-      return `<tr><td class="mon-clients"><span class="text-body2">${row.clients.length}</span></td><td class="mon-status"><span class="status status-${meta[2]}">${esc(meta[1])}</span></td><td class="mon-msg"><span class="tooltip-wrap"><span class="text-body2 text-truncate" tabindex="0">${esc(text)}</span><span class="tooltip" role="tooltip">${esc(tip)}</span></span></td><td class="mon-actions"><button type="button" class="link" data-mon-see="${row.id}">See clients</button></td></tr>${list}`;
-    }).join('');
-    const empty = s.tab === 'health' ? 'No health check issues' : 'No synchronization issues';
-    const tableHtml = page.slice.length
-      ? `<div class="table-wrap"><table class="synder-table mon-table"><thead><tr><th class="${sortCls} mon-clients" id="monSort">Clients</th><th class="mon-status">Status</th><th>${s.tab === 'health' ? 'Check' : 'Error message'}</th><th class="mon-actions">Actions</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}`
-      : `<div class="box box--white mon-empty"><p class="text-body2 text-secondary">${empty}</p></div>`;
+    const month = monMonthNum();
+    const year = monYearNum();
+    const rows = monBoardRows();
+    const sizes = [10, 25, 50, 100];
+    if (!st.monPageSize || sizes.indexOf(st.monPageSize) < 0) st.monPageSize = 25;
+    const size = st.monPageSize;
+    const pages = Math.max(1, Math.ceil(rows.length / size) || 1);
+    let page = st.monPage || 0;
+    if (page > pages - 1) page = pages - 1;
+    if (page < 0) page = 0;
+    st.monPage = page;
+    const slice = rows.slice(page * size, page * size + size);
+    const from = rows.length ? page * size + 1 : 0;
+    const to = Math.min(rows.length, page * size + size);
+    const range = (rows.length ? from + '–' + to : '0–0') + ' of ' + rows.length;
+    const off = (on) => on ? ' disabled' : '';
+    const pager = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select id="monPageSize" aria-label="Rows per page">${sizes.map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-pages"><button type="button" data-mon-nav="prev" aria-label="Previous page"${off(page === 0)}><span class="material-icons">chevron_left</span></button><button type="button" data-mon-nav="next" aria-label="Next page"${off(page >= pages - 1)}><span class="material-icons">chevron_right</span></button></span></div>`;
+    const trend = 'no change vs ' + monPrevLabel(month, year);
+    const head = 'Health for ' + monShort(month, year);
+    const monthOpts = MONTH_NAMES.map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
+    const yearOpts = [2025, 2026, 2027].map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
+    const section = (key, title, open) => {
+      const list = slice.filter((row) => row.board.group === key);
+      if (!list.length) return '';
+      const body = list.map(({ c, board }) => {
+        const health = board.severity ? `<span class="d-flex align-center gap-8 flex-wrap"><span class="status status-${MON_SEV[board.severity][0]}">${MON_SEV[board.severity][1]}</span><span class="text-caption">${esc(trend)}</span></span>` : '<span class="text-body2">—</span>';
+        const issue = `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(board.issue || board.reason)}</span><span class="tooltip" role="tooltip">${esc(board.tip || board.reason || '')}</span></span>`;
+        const menu = `<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="mon-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-mon-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button></div></div>`;
+        return `<tr><td><span class="text-body2">${esc(c.name)}</span></td><td>${health}</td><td>${issue}</td><td><span class="text-body2">${esc(monitorOwner(c))}</span></td><td><div class="d-flex align-center justify-end gap-8"><button type="button" class="btn-outlined" data-mon-open="${c.id}">Review</button>${menu}</div></td></tr>`;
+      }).join('');
+      return `<details class="accordion"${open ? ' open' : ''}><summary class="accordion-summary"><span class="text-subtitle1">${title}</span><span class="text-body2 text-secondary">${list.length}</span></summary><div class="accordion-body"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client name</th><th>${esc(head)}</th><th>Top issue</th><th>Owner</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div></div></details>`;
+    };
+    const groups = MON_GROUPS.map(([key, title, open]) => section(key, title, open)).join('');
+    const empty = rows.length ? '' : '<div class="empty-state"><p class="empty-state-title">No clients match</p><p class="empty-state-desc">Try a different name.</p></div>';
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Monitoring', '', "See where your clients' data has problems and fix them early.")}
-      <div class="tabs" role="tablist"><button type="button" class="tab${s.tab === 'sync' ? ' active' : ''}" data-mon-tab="sync" role="tab">Synchronization issues</button><button type="button" class="tab${s.tab === 'health' ? ' active' : ''}" data-mon-tab="health" role="tab">Health checks</button></div>
+      ${pageHeader('Monitoring', '<button type="button" class="btn-outlined" id="checkAll">Check all clients</button>', "Health of every client's books for the month, grouped by who needs to act.")}
       <div class="d-flex align-center gap-16 flex-wrap">
-        <input class="input input-search mon-field" id="monSearch" placeholder="Search by client or message..." value="${esc(s.q || '')}" aria-label="Search by client or message" />
-        <div class="select-ms mon-field${s.statusOpen ? ' open' : ''}" id="monStatus"><div class="select-ms-control" tabindex="0"><span class="select-ms-value">${esc(statusLabel)}</span>${picked.length ? '<button type="button" class="select-clear" aria-label="Clear">close</button>' : ''}<span class="select-sep"></span><span class="select-arrow">expand_more</span></div><div class="select-ms-menu">${statusMenu}</div></div>
-        <select class="select mon-field" id="monRange" aria-label="Date range">${ranges}</select>
-        ${custom}
-        <button type="button" class="btn-outlined" id="monReset">Reset filters</button>
+        <div><label class="form-label" for="monMonth">Month</label><select class="select" id="monMonth" aria-label="Month">${monthOpts}</select></div>
+        <div><label class="form-label" for="monYear">Year</label><select class="select" id="monYear" aria-label="Year">${yearOpts}</select></div>
+        <div><label class="form-label" for="monSearch">Client name</label><input class="input input-search" id="monSearch" placeholder="Search by client name..." value="${esc(st.monQ || '')}" aria-label="Client name" /></div>
       </div>
-      ${tableHtml}
+      ${groups || empty}
+      ${rows.length ? pager : ''}
     </div>`;
+  }
+  function openFirmHealthCheck() {
+    const month = monMonthNum();
+    const year = monYearNum();
+    const last = new Date(year, month, 0).getDate();
+    const iso = (day) => year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    const body = '<p class="text-body2">Run the ' + esc(monShort(month, year)) + ' health check for every approved client.</p><div class="form-field"><label class="form-label form-label-required" for="hcFrom">From</label><input class="input" id="hcFrom" type="date" value="' + iso(1) + '"></div><div class="form-field"><label class="form-label form-label-required" for="hcTo">To</label><input class="input" id="hcTo" type="date" value="' + iso(last) + '"></div><p class="form-label">Checks</p><label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="hcUncat" checked> Uncategorized</label><label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="hcFunds" checked> Undeposited</label><p class="form-error-msg" id="hcErr" hidden>Required</p>';
+    const { modal, close } = dialogShell('Check all clients', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="hcLaunch">Launch</button>');
+    modal.querySelector('#hcLaunch').onclick = () => {
+      const from = modal.querySelector('#hcFrom');
+      const to = modal.querySelector('#hcTo');
+      const picked = modal.querySelector('#hcUncat').checked || modal.querySelector('#hcFunds').checked;
+      const err = modal.querySelector('#hcErr');
+      let bad = false;
+      if (!(from.value || '').trim()) { fieldError(from, 'Required'); bad = true; }
+      if (!(to.value || '').trim()) { fieldError(to, 'Required'); bad = true; }
+      if (!picked) bad = true;
+      if (bad) { err.hidden = false; return; }
+      const approved = listedClients().filter((c) => isQuickBooks(c) && onboardingState(c) === 'done' && !connectionLost(c));
+      const running = approved.filter((c) => c.checking).length;
+      const launched = approved.filter((c) => !c.checking);
+      const stamp = stampLabel(new Date());
+      launched.forEach((c) => { c.checked = stamp; });
+      close();
+      showKitToast('Launched: ' + launched.length + ' of ' + approved.length);
+      showKitToast('Already running: ' + running);
+    };
   }
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function currentPeriod() { return { year: 2026, month: 11 }; }
@@ -5391,93 +5370,30 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('backColleagues', () => goFirm('colleagues'));
     bindClick('removeColleague', () => { const p = findPerson(st.colleagueId); if (p) confirmRemove(p); });
     bindClick('addPersonClient', openAddPersonClient);
-    bindClick('checkAll', checkAllClients);
+    bindClick('checkAll', openFirmHealthCheck);
     bindClick('diagnoseBtn', () => { const c = findOrg(st.clientId); if (c) openDiagnose(c); });
-    m.querySelectorAll('[data-mon-tab]').forEach((b) => b.onclick = () => {
-      const s = monState();
-      s.tab = b.dataset.monTab;
-      s.page = 0;
-      s.open = '';
-      s.statusOpen = false;
-      renderMain();
-    });
+    const monMonth = $('monMonth');
+    if (monMonth) monMonth.onchange = () => { st.monMonth = Number(monMonth.value); st.monPage = 0; renderMain(); };
+    const monYear = $('monYear');
+    if (monYear) monYear.onchange = () => { st.monYear = Number(monYear.value); st.monPage = 0; renderMain(); };
     const monSearch = $('monSearch');
     if (monSearch) monSearch.oninput = () => {
-      const s = monState();
-      s.q = monSearch.value;
-      s.page = 0;
-      s.open = '';
-      s.statusOpen = false;
+      st.monQ = monSearch.value;
+      st.monPage = 0;
       const pos = monSearch.selectionStart;
       renderMain();
       const again = $('monSearch');
       if (again) { again.focus(); again.setSelectionRange(pos, pos); }
     };
-    const monRange = $('monRange');
-    if (monRange) monRange.onchange = () => {
-      const s = monState();
-      s.range = monRange.value;
-      s.page = 0;
-      s.open = '';
-      s.statusOpen = false;
-      renderMain();
-    };
-    const monFrom = $('monFrom');
-    if (monFrom) monFrom.onchange = () => { monState().from = monFrom.value; monState().page = 0; renderMain(); };
-    const monTo = $('monTo');
-    if (monTo) monTo.onchange = () => { monState().to = monTo.value; monState().page = 0; renderMain(); };
-    bindClick('monReset', () => {
-      st.mon = null;
-      renderMain();
-    });
-    bindClick('monSort', () => {
-      const s = monState();
-      s.sort = s.sort === 'desc' ? 'asc' : 'desc';
-      s.statusOpen = false;
-      renderMain();
-    });
     const monSize = $('monPageSize');
-    if (monSize) monSize.onchange = () => { monState().size = Number(monSize.value); monState().page = 0; renderMain(); };
+    if (monSize) monSize.onchange = () => { st.monPageSize = Number(monSize.value); st.monPage = 0; renderMain(); };
     m.querySelectorAll('[data-mon-nav]').forEach((b) => b.onclick = () => {
-      const s = monState();
-      s.page += b.dataset.monNav === 'next' ? 1 : -1;
+      const pages = Math.max(1, Math.ceil(monBoardRows().length / (st.monPageSize || 25)));
+      const cur = st.monPage || 0;
+      st.monPage = b.dataset.monNav === 'next' ? Math.min(pages - 1, cur + 1) : Math.max(0, cur - 1);
       renderMain();
     });
-    const monStatus = $('monStatus');
-    if (monStatus) {
-      monStatus.querySelector('.select-ms-control').onclick = (e) => {
-        const s = monState();
-        if (e.target.closest('.select-ms-option')) return;
-        if (e.target.closest('.select-clear')) {
-          if (s.tab === 'health') s.healthStatus = []; else s.syncStatus = [];
-          s.page = 0;
-          s.statusOpen = true;
-          renderMain();
-          return;
-        }
-        s.statusOpen = !s.statusOpen;
-        monStatus.classList.toggle('open', s.statusOpen);
-      };
-      monStatus.querySelectorAll('[data-mon-status]').forEach((el) => el.onchange = (e) => {
-        e.stopPropagation();
-        const s = monState();
-        const key = s.tab === 'health' ? 'healthStatus' : 'syncStatus';
-        const set = new Set(s[key]);
-        if (el.checked) set.add(el.dataset.monStatus); else set.delete(el.dataset.monStatus);
-        s[key] = [...set];
-        s.page = 0;
-        s.open = '';
-        s.statusOpen = true;
-        renderMain();
-      });
-    }
-    m.querySelectorAll('[data-mon-see]').forEach((b) => b.onclick = () => {
-      const s = monState();
-      s.open = s.open === b.dataset.monSee ? '' : b.dataset.monSee;
-      s.statusOpen = false;
-      renderMain();
-    });
-    m.querySelectorAll('[data-mon-tx]').forEach((b) => b.onclick = () => openDetails(b.dataset.monTx, 'monitoring'));
+    m.querySelectorAll('[data-mon-open]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.monOpen, 'monitoring'); });
     bindClick('closeBoardPrev', () => { st.closeMonth = boardMonthIndex() - 1; renderMain(); });
     bindClick('closeBoardNext', () => { st.closeMonth = boardMonthIndex() + 1; renderMain(); });
     const monthPick = $('closeMonthPick');
