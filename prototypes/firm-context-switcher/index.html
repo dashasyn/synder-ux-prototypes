@@ -109,9 +109,24 @@ body {
 /* Kit menu items have no keyboard-current state. */
 .dropdown-item.kb { background: var(--bg-hover); }
 /* Kit menu is min-width 180 and has no wider size. Nov 17 the switcher menu was 300px. */
-#pop.dropdown-menu { width: 300px; }
+#pop.dropdown-menu { width: 300px; padding-bottom: 0; }
 /* Kit menu has no max height, so a long client list would leave the viewport. */
 #popList { max-height: 320px; overflow-y: auto; }
+/* Kit gap: dropdown items are padded 12px, the caption has no inset, and the avatar is one colour with no attention dot. */
+#pop .dropdown-item { padding-left: 16px; padding-right: 16px; }
+#pop .pop-section { display: block; padding: 8px 16px 4px; }
+#pop .pop-discount { background: var(--color-primary-10); padding: 16px; border-radius: 0 0 var(--radius-dialog) var(--radius-dialog); }
+#pop .pop-discount .btn { margin-top: 8px; }
+.org-badge { position: relative; color: #fff; font-weight: 400; }
+.org-badge-green { background: #6AB186; }
+.org-badge-rose { background: #C98998; }
+.org-badge-pink { background: #D98BB0; }
+.org-badge-magenta { background: #B86BA8; }
+.topbar-org .sidebar-org-avatar.org-badge-green { background: #6AB186; }
+.topbar-org .sidebar-org-avatar.org-badge-rose { background: #C98998; }
+.topbar-org .sidebar-org-avatar.org-badge-pink { background: #D98BB0; }
+.topbar-org .sidebar-org-avatar.org-badge-magenta { background: #B86BA8; }
+.org-badge-dot::after { content: ''; position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--sds-orange); border: 1px solid #fff; }
 .nav, #nav { flex: 1; }
 /* ── Main content ── */
 .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
@@ -1826,7 +1841,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '', 'Buy licences for your clients and see how they\'re used.') + '<div class="box box--white page-stack"><h2 class="text-subtitle1">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '', 'Buy licences for your clients and see how they\'re used.') + '<div class="box box--white page-stack text-center"><h2 class="text-subtitle1">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
     }
     const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
     return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
@@ -2564,7 +2579,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     let name;
     if (st.ctx === 'firm') name = FIRM.name;
     else name = findOrg(st.orgId).name;
-    $('ctxAvatar').textContent = initials(name);
+    const avatar = $('ctxAvatar');
+    avatar.textContent = initials(name);
+    avatar.className = 'sidebar-org-avatar org-badge ' + orgBadgeClass(name);
     $('ctxName').textContent = name;
   }
 
@@ -6254,10 +6271,21 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function closePop() { $('pop').classList.remove('show'); $('ctxTrigger').setAttribute('aria-expanded', 'false'); }
 
+  function orgBadgeClass(name) {
+    const palette = ['org-badge-green', 'org-badge-rose', 'org-badge-pink', 'org-badge-magenta'];
+    return palette[monHash(name) % palette.length];
+  }
+  function switcherDot(c) {
+    if (!c || !isClient(c.id)) return false;
+    if (onboardingState(c) !== 'done') return true;
+    return !c.accounting || connectionLost(c) || needsAttention(c);
+  }
+  function orgBadge(name, dot) {
+    return '<span class="avatar avatar-sm org-badge ' + orgBadgeClass(name) + (dot ? ' org-badge-dot' : '') + '" aria-hidden="true">' + esc(initials(name)) + '</span>';
+  }
   function item(o, cap, current, action) {
     const sub = isClient(o.id) ? '' : cap;
-    const dot = isClient(o.id) && onboardingState(o) === 'started' ? yellowDot() : '';
-    return `<button type="button" class="dropdown-item" data-act="${action}"><span class="flex-1"><span class="text-body2 text-truncate">${dot}${esc(o.name)}</span>${sub ? `<span class="text-caption d-block">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons">check</span>' : ''}</button>`;
+    return `<button type="button" class="dropdown-item" data-act="${action}">${orgBadge(o.name, switcherDot(o))}<span class="flex-1"><span class="text-body2 text-truncate">${esc(o.name)}</span>${sub ? `<span class="text-caption d-block">${esc(sub)}</span>` : ''}</span>${current ? '<span class="material-icons">check</span>' : ''}</button>`;
   }
   function renderPop() {
     const s = sc(); const q = $('popSearch').value.trim().toLowerCase();
@@ -6269,17 +6297,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (s.firm) {
       const list = s.clients.filter((c) => !c.pending && !c.fresh && inSwitcher(c) && (!q || c.name.toLowerCase().includes(q)));
       if (list.length) {
-        html += `<div class="text-caption">Clients</div>` +
+        html += `<div class="text-caption pop-section">Clients</div>` +
           list.map((c) => item(c, null, st.ctx === 'org' && st.orgId === c.id, 'org:' + c.id)).join('');
       }
     }
     const own = s.own.filter((o) => !q || o.name.toLowerCase().includes(q));
     if (own.length) {
-      html += `<div class="text-caption">My organizations</div>` + own.map((o) => item(o, null, st.ctx === 'org' && st.orgId === o.id, 'org:' + o.id)).join('');
+      html += `<div class="text-caption pop-section">My organizations</div>` + own.map((o) => item(o, null, st.ctx === 'org' && st.orgId === o.id, 'org:' + o.id)).join('');
     }
     if (!html && q) html = `<div class="dropdown-item text-body2">Nothing matches.</div>`;
     $('popList').innerHTML = html;
-    $('popFoot').innerHTML = `<button type="button" class="dropdown-item" data-act="createorg"><span class="material-icons">add</span>Add client</button><p class="text-body2 text-secondary">Connect more clients to get a discount.</p>`;
+    $('popFoot').innerHTML = `<button type="button" class="dropdown-item" data-act="createorg"><span class="material-icons">add</span>Add client</button><div class="dropdown-divider"></div><div class="pop-discount"><p class="text-body2">Connect more clients to get a discount.</p><button type="button" class="btn btn-sm" data-act="billing">Learn more</button></div>`;
     $('pop').querySelectorAll('[data-act]').forEach((b) => b.onclick = () => act(b.dataset.act));
   }
   function act(a) {
@@ -6289,6 +6317,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (a === 'allclients') { st._q = ''; goFirm('clients'); }
     else if (a.startsWith('org:')) goOrg(a.slice(4));
     else if (a === 'createorg') startAddClient();
+    else if (a === 'billing') goFirm('billing');
     else if (a === 'createfirm') { st.ctx = 'org'; st.page = 'createfirm'; save(); render(); }
     if (!keepFocus) $('ctxTrigger').focus();
   }
