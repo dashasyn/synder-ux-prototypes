@@ -174,12 +174,15 @@ button.tab { background: transparent; font-family: inherit; border-radius: 0; bo
 .mon-month { width: 140px; flex: 0 0 140px; }
 .mon-year { width: 96px; flex: 0 0 96px; }
 .mon-search { width: 280px; flex: 0 0 280px; }
-.mon-month .select, .mon-year .select, .mon-search .input { width: 100%; }
+.mon-month .select, .mon-year .select, .mon-search .input, .mon-search .select { width: 100%; }
 .mon-group { background: var(--color-grey-5); width: 100%; padding: 8px 12px; }
 .mon-name { display: block; max-width: 240px; }
 .modal-bg .modal.mon-dialog { width: 560px; max-width: calc(100vw - 32px); }
 .modal-bg .modal.mon-dialog-sm { width: 480px; max-width: calc(100vw - 32px); }
 .mon-muted { color: var(--color-grey-50); cursor: default; }
+/* Kit gap: table.synder-table thead th { text-align: left } beats .text-right, so Actions sat at the left of a wide last column. */
+table.synder-table thead th.text-right,
+table.synder-table tbody td.text-right { text-align: right; }
 .page-stack .alert, .page-stack .toolbar, .page-stack .form-field, .page-stack .ob-actions, .provider-card .ob-actions { margin: 0; }
 .auth-screen { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
 .auth-screen > .btn-text { align-self: flex-start; }
@@ -1718,7 +1721,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function renderLicenseTable() {
     const body = stockRows().map((group) => groupRow(group[0]) + group[1].map((id) => licenseRow(id, stockTotal(id), licLeft(id), true)).join('')).join('') + olderPlanRows() || '<tr><td colspan="4" class="text-body2">No licenses yet.</td></tr>';
-    return '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th>Total</th><th>Left</th><th class="text-right">Action</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+    return '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th>Total</th><th>Left</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div>';
   }
   function billClientMatch(c, tab) {
     if (tab === 'firm') return !!(c.firmLic && c.firmLic.plan) && !c.ownPlan;
@@ -1748,7 +1751,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           : '<button type="button" class="btn-outlined" data-lic-assign="' + c.id + '">Assign</button>');
       return '<tr><td><span class="text-body2">' + esc(c.name) + '</span>' + pending + '</td><td>' + lic + '</td><td>' + paysCell(c) + '</td><td>' + action + '</td></tr>';
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients here</td></tr>';
-    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client</th><th>License</th><th>Who pays</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
+    return '<div class="page-stack">' + tabHtml + '<input type="search" class="input-search" id="billSearch" placeholder="Search..." value="' + esc(st.billQ || '') + '"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client</th><th>License</th><th>Who pays</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html + '</div>';
   }
   function periodWord(state) { return state && state.period === 'year' ? 'Yearly' : 'Monthly'; }
   function pageHeader(title, actions, subtitle) {
@@ -1815,12 +1818,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<h2 class="text-h2">Billing and licenses is unavailable</h2><p class="text-body2">The licenses of this firm could not be loaded. Check the connection and try again.</p><button type="button" class="btn" id="billRetry">Try again</button></div>';
     }
     if (!st.licencesOn) {
-      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses') + '<div class="page-stack"><h2 class="text-h2">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client.</p><p class="text-body2">Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div>';
+      return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '', 'Buy licences for your clients and see how they\'re used.') + '<div class="kit-narrow"><div class="box box--white page-stack"><h2 class="text-subtitle1">License-Based Pricing</h2><p class="text-body2">Licenses give you access to unlimited integrations, syncs, rules, a dedicated Synder Specialist, and more at a fixed fee per client. Book a call to learn more about how license-based pricing works and can benefit you.</p><div><button type="button" class="btn" id="bookCallQuiet">Book a call</button></div></div></div></div>';
     }
-    const view = st.billView === 'clients' ? 'clients' : 'licences';
-    const tabs = '<div class="tabs" role="tablist"><button type="button" class="tab' + (view === 'licences' ? ' active' : '') + '" data-bill-view="licences" role="tab">Licenses</button><button type="button" class="tab' + (view === 'clients' ? ' active' : '') + '" data-bill-view="clients" role="tab">Clients</button></div>';
-    const panel = view === 'clients' ? renderBillClients() : ('<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p>' + renderLicenseTable());
-    return '<div class="flow-wide page-stack">' + pageHeader('Billing and licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<div class="page-stack">' + tabs + '<div>' + panel + '</div></div></div>';
+    const rows = purchasedRows().map((row) => '<tr><td><span class="text-body2">' + row[0] + '</span></td><td class="col-amount">' + row[1] + '</td><td class="col-amount">' + row[2] + '</td><td class="col-amount">' + (row[1] - row[2]) + '</td></tr>').join('');
+    return '<div class="flow-wide page-stack"><a class="page-back" href="#billing">Billing</a>' + pageHeader('Licenses', '<button type="button" class="btn" id="openManage">Manage licenses</button>') + '<p class="text-body2 text-secondary">Current billing period: ' + licenseBook.periodLabel + '</p><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>License</th><th class="col-amount">Total</th><th class="col-amount">Used</th><th class="col-amount">Left</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   function assignedSummary(row) {
     if (!row || !row.plan) return 'No assigned licenses';
@@ -1859,7 +1860,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const planOpts = [['', 'License'], ['none', 'None'], ['ess', 'Essential'], ['pro', 'Pro'], ['max', 'Pro Max']].concat(RULE_OPTS.map((item) => [item[0], 'Smart Rules ' + item[1].toLowerCase()])).concat(INV_OPTS.map((item) => [item[0], 'Invoicing ' + item[1].toLowerCase()]));
     const sel = (id, opts, value) => '<select class="select" id="' + id + '">' + opts.map((item) => '<option value="' + item[0] + '"' + (value === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') + '</select>';
     const sortCls = 'sortable sorted' + (st.assignSort === 'desc' ? ' desc' : '');
-    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th></th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
+    return '<div class="d-flex align-center gap-8 flex-wrap"><input type="search" class="input-search" id="licSearch" placeholder="Search..." value="' + esc(applied.q || '') + '">' + sel('licType', [['', 'Type'], ['active', 'Active client']], applied.type || '') + sel('licLicense', planOpts, applied.license || '') + '<button type="button" class="btn" id="licApply">Apply</button><button type="button" class="btn-outlined" id="licReset">Reset filters</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th class="' + sortCls + '" id="sortAssignName">Client name</th><th>Assigned licenses</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div>' + page.html;
   }
   function exampleDiscountPct(count) {
     if (count >= 50) return 15;
@@ -2446,7 +2447,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
 
   function sc() { return SCENARIOS[scenario]; }
-  function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id); }
+  function findOrg(id) { return sc().clients.find((c) => c.id === id) || sc().own.find((o) => o.id === id) || monClient(id); }
   function isClient(id) { return sc().clients.some((c) => c.id === id); }
 
   function defaultState() {
@@ -3208,7 +3209,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     addPreFile('stripe-payouts.csv', 0.8);
   }
   function preFileRows(files) {
-    return files.map((f, i) => '<div class="d-flex align-center gap-8"><span class="text-body2">' + esc(f.name) + '</span><span class="text-body2">' + esc((f.rec && f.rec.label) || '') + '</span><button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>').join('');
+    return files.map((f, i) => {
+      const kind = String(f.name || '').split('.').pop().toUpperCase();
+      const meta = (f.size ? f.size + ' MB' : '') + (kind ? ' · ' + kind : '');
+      return '<div class="box box--white d-flex align-center gap-8"><span class="material-icons" aria-hidden="true">description</span><span class="text-body2 text-truncate mon-name">' + esc(f.name) + '</span><span class="text-body2 text-secondary">' + esc(meta.replace(/^ · /, '')) + '</span><span class="flex-1"></span><button type="button" class="btn-icon" data-pre-del="' + i + '" aria-label="Remove ' + esc(f.name) + '"><span class="material-icons">close</span></button></div>';
+    }).join('');
   }
   function preModal(title, body, footer) {
     return '<div class="modal-bg show" id="preOverlay"><div class="modal d-flex flex-col" role="dialog" aria-modal="true" aria-labelledby="preTitle"><div class="modal-header"><span id="preTitle">' + esc(title) + '</span><button type="button" class="modal-close" id="preClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="modal-body overlay-body page-stack">' + body + '</div>' + (footer ? '<div class="modal-footer">' + footer + '</div>' : '') + '</div></div>';
@@ -3227,7 +3232,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const missingAlert = missing
       ? '<div class="alert ' + (draft.missingError ? 'alert-error' : 'alert-warning') + '" id="preIssue"><span class="material-icons" aria-hidden="true">' + (draft.missingError ? 'error' : 'warning') + '</span><span>Add one more Stripe file: Balance change from activity. <button type="button" class="link" id="preHowMissing">How to get it</button></span></div>'
       : '';
-    const body = '<div class="alert alert-info"><span class="material-icons" aria-hidden="true">info</span><span>Faster: connect ' + esc(c.name) + '\'s accounting and integrations. Synder pulls the reports for you. <button type="button" class="link" data-pre-connect="' + c.id + '">Connect ' + esc(c.name) + '</button></span></div>'
+    const body = '<div class="box box--white page-stack"><h2 class="text-subtitle1">Skip the files — connect ' + esc(c.name) + '</h2><p class="text-body2">Synder pulls the reports, so you can see the full picture in minutes.</p><div><button type="button" class="btn-outlined" data-pre-connect="' + c.id + '">Connect</button></div></div>'
       + '<p class="text-body2">Upload a report from your books and a report from your sales or payment platform. We\'ll reconcile them and show what matches.</p>'
       + '<div class="file-upload' + (draft.fileError ? ' is-error' : '') + '" id="preDrop"><span>Browse or drag your files here</span><span>CSV, XLSX or PDF formats, up to 100MB</span><button type="button" class="link" id="preBrowse">Browse</button></div>'
       + '<input type="file" id="preFile" accept=".csv,.xlsx,.xls,.pdf" multiple hidden>'
@@ -3816,9 +3821,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (key === 'need') return String(needRank(c)).padStart(2, '0') + ' ' + (c.name || '');
       return c.name || '';
     };
-    const filter = st.listFilter || '';
-    if (filter === 'attention') rows = rows.filter((c) => needsAttention(c));
-    if (filter === 'off') rows = rows.filter((c) => !c.accounting);
     rows = rows.slice().sort((a, b) => {
       const dir = sort.dir === 'desc' ? -1 : 1;
       return dir * sortText(a, sort.key).localeCompare(sortText(b, sort.key));
@@ -3846,17 +3848,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       </tr>`;
     }).join('');
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Partner Achievements</a>`)}
-      <div class="d-flex gap-16">
-        <button type="button" class="box box--white page-stack" data-filter="attention" aria-pressed="${filter === 'attention' ? 'true' : 'false'}"><span class="text-caption">Needs attention</span><span class="text-h2">${listed.filter((c) => needsAttention(c)).length}</span></button>
-        <button type="button" class="box box--white page-stack" data-filter="off" aria-pressed="${filter === 'off' ? 'true' : 'false'}"><span class="text-caption">Not connected</span><span class="text-h2">${listed.filter((c) => !c.accounting).length}</span></button>
-      </div>
+      ${pageHeader('Clients', `<div class="row-menu"><button type="button" class="btn-outlined btn-dropdown" data-menu="importClients" aria-haspopup="menu" aria-expanded="false">Import clients</button><div class="dropdown-menu" id="rowmenu-importClients"><button type="button" class="dropdown-item" id="listImportQbo">QuickBooks</button><button type="button" class="dropdown-item" id="listImportXero">Xero</button><button type="button" class="dropdown-item" id="listCsv">Upload CSV</button><button type="button" class="dropdown-item" id="listAdd">Add a client</button></div></div><a class="btn-outlined" href="https://synder.com" target="_blank" rel="noopener noreferrer"><span class="material-icons" aria-hidden="true">military_tech</span>Partner Achievements</a>`)}
       ${banner}
       <div class="toolbar">
         <input type="search" class="input-search" id="clientSearch" placeholder="Search by client's name" value="${esc(st._q || '')}" />
       </div>
       ${rows.length ? `<div class="table-wrap clients-table"><table class="synder-table table--lg">
-          <thead><tr>${th('name', 'Name')}${th('acct', 'Accounting')}${th('integ', 'Integrations')}${th('health', 'Health checks')}${th('pre', 'Pre-assessment')}<th></th></tr></thead>
+          <thead><tr>${th('name', 'Name')}${th('acct', 'Accounting')}${th('integ', 'Integrations')}${th('health', 'Health checks')}${th('pre', 'Pre-assessment')}<th class="text-right">Actions</th></tr></thead>
         <tbody>${body}</tbody>
       </table></div>` : '<div class="empty-state"><p class="empty-state-title">No clients match</p><p class="empty-state-desc">Try a different name.</p></div>'}
       <div class="tbl-foot" id="listCount">${rows.length} of ${listed.length} clients</div>
@@ -3970,22 +3968,50 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (c.id === 'e16') return 'Unassigned';
     return MON_OWNERS[n % MON_OWNERS.length];
   }
+  const MON_IDS = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e9', 'e12', 'e14', 'e15', 'e16'];
+  function monClient(id) {
+    const live = sc().clients.find((c) => c.id === id);
+    if (live) return live;
+    if (MON_IDS.indexOf(id) < 0) return null;
+    if (!monClient.cache) monClient.cache = {};
+    if (!monClient.cache[id]) {
+      const sample = existingClients().find((c) => c.id === id);
+      if (sample) monClient.cache[id] = sample;
+    }
+    return monClient.cache[id] || null;
+  }
+  function monRoster() {
+    return MON_IDS.map(monClient).filter(Boolean);
+  }
+  function monScore(base, month, year) {
+    const swing = ((year + month) % 5) - 2;
+    return Math.max(1, Math.min(10, base + swing));
+  }
   function monBoard(c) {
     const known = {
-      e2: { group: 'needs', severity: 'risk', score: 4, trend: 'down', delta: 1, issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
-      e9: { group: 'needs', severity: 'risk', score: 5, trend: 'down', delta: 2, issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' },
-      e7: { group: 'waiting', severity: 'watch', score: 6, trend: 'flat', delta: 0, issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
-      e12: { group: 'waiting', severity: 'watch', score: 7, trend: 'down', delta: 1, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
-      e15: { group: 'waiting', severity: 'watch', score: 6, trend: 'up', delta: 2, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
-      e1: { group: 'clear', severity: 'healthy', score: 10, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e3: { group: 'clear', severity: 'healthy', score: 9, trend: 'up', delta: 2, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e14: { group: 'clear', severity: 'healthy', score: 10, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e16: { group: 'clear', severity: 'healthy', score: 8, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
-      e5: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.', logo: '' },
-      e6: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' },
-      e4: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' }
+      e2: { group: 'needs', severity: 'risk', score: 4, issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
+      e9: { group: 'needs', severity: 'risk', score: 5, issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' },
+      e7: { group: 'waiting', severity: 'watch', score: 6, issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
+      e12: { group: 'waiting', severity: 'watch', score: 7, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
+      e15: { group: 'waiting', severity: 'watch', score: 6, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
+      e1: { group: 'clear', severity: 'healthy', score: 10, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e3: { group: 'clear', severity: 'healthy', score: 9, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e14: { group: 'clear', severity: 'healthy', score: 10, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e16: { group: 'clear', severity: 'healthy', score: 8, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e5: { group: 'cant', severity: '', score: 0, issue: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.', logo: '' },
+      e6: { group: 'cant', severity: '', score: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' },
+      e4: { group: 'cant', severity: '', score: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' }
     };
-    return known[c.id] || null;
+    const row = known[c.id];
+    if (!row) return null;
+    if (!row.severity) return Object.assign({ trend: 'flat', delta: 0 }, row);
+    const month = monMonthNum();
+    const year = monYearNum();
+    const score = monScore(row.score, month, year);
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    const delta = score - monScore(row.score, prevMonth, prevYear);
+    return Object.assign({}, row, { score: score, delta: Math.abs(delta), trend: delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat') });
   }
   function monTrendText(board) {
     if (board.trend === 'up') return '↑ ' + board.delta + ' vs previous month';
@@ -3994,7 +4020,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function monBoardRows() {
     const q = (st.monQ || '').trim().toLowerCase();
-    return listedClients().filter((c) => !q || c.name.toLowerCase().includes(q)).map((c) => ({ c, board: monBoard(c) })).filter((row) => row.board).sort((a, b) => a.c.name.localeCompare(b.c.name));
+    return monRoster().filter((c) => !q || c.name.toLowerCase().includes(q)).map((c) => ({ c, board: monBoard(c) })).filter((row) => row.board).sort((a, b) => a.c.name.localeCompare(b.c.name));
   }
   const MON_SEV = { risk: ['red', 'At risk'], watch: ['yellow', 'Watch'], healthy: ['green', 'Healthy'] };
   const MON_GROUPS = [['needs', 'Needs you', 'fixable in Synder, client not involved'], ['waiting', 'Waiting on client', 'access, document or reply requested'], ['clear', 'Clear', 'all checks passed'], ['cant', "Can't check", 'Xero or no accounting connected']];
@@ -4040,7 +4066,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       return `<div class="page-stack"><div class="mon-group d-flex align-center gap-8">${icon}<span class="text-subtitle2">${title}</span><span class="text-body2 text-secondary">(${list.length}) — ${hint}</span></div>${table}</div>`;
     };
     const groups = MON_GROUPS.map(([key, title, hint]) => section(key, title, hint)).join('');
-    const empty = rows.length ? '' : '<p class="text-body2">No clients match this search.</p>';
+    const empty = rows.length ? '' : ((st.monQ || '').trim() ? '<p class="text-body2">No clients match this search.</p>' : '');
     return `<div class="flow-wide page-stack">
       ${pageHeader('Monitoring', '', "Health of every client's books for the month, grouped by who needs to act.")}
       <div class="d-flex align-center justify-between gap-16 flex-wrap">
@@ -4266,11 +4292,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     { personId: 'p1', clientId: 'e1', role: 'Manager' },
     { personId: 'p3', clientId: 'e1', role: 'Member' }
   ];
-  let firmTags = [{ id: 'monthly', name: 'Monthly close', used: 0 }];
+  let firmTags = [
+    { id: 'monthly', name: 'Monthly close', used: 8 },
+    { id: 'tax', name: 'Sales tax', used: 3 },
+    { id: 'vip', name: 'VIP', used: 1 }
+  ];
   let firmChecklist = [
-    { id: 'tax', label: 'Sales tax filed', required: true, all: true },
-    { id: 'payroll', label: 'Payroll reconciled', required: false, all: true },
-    { id: 'feeds', label: 'Bank feeds reviewed', required: false, all: true }
+    { id: 'tax', label: 'Sales tax filed', required: true, scope: 'all' },
+    { id: 'statements', label: 'Bank statements received', required: false, scope: 'books' },
+    { id: 'payroll', label: 'Payroll reconciled', required: false, scope: 'all' },
+    { id: 'feeds', label: 'Bank feeds reviewed', required: false, scope: 'all' }
   ];
   function findPerson(id) { return firmPeople.find((p) => p.id === id); }
   function accessForClient(clientId) {
@@ -4552,9 +4583,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     st.closeBlock = '';
     renderMain();
   }
+  function checklistScope(row) {
+    if (row && row.scope) return row.scope;
+    return row && row.all === false ? 'books' : 'all';
+  }
+  function checklistApplies(row, c) {
+    const scope = checklistScope(row);
+    if (scope === 'all') return true;
+    if (!c || !c.accounting) return false;
+    if (scope === 'books') return c.accounting === 'QuickBooks' || c.accounting === 'Xero';
+    if (scope === 'qbo') return c.accounting === 'QuickBooks';
+    if (scope === 'xero') return c.accounting === 'Xero';
+    return true;
+  }
   function firmPeriodChecks(c, rec) {
     const source = rec.closed && rec.checklist && rec.checklist.length ? rec.checklist : firmChecklist.concat(c.extraChecks || []);
-    return source.map((row) => {
+    return source.filter((row) => checklistApplies(row, c)).map((row) => {
       const saved = (rec.checks || {})[row.id] || {};
       return { id: row.id, label: row.label, required: !!row.required, done: !!saved.done, note: saved.note || '', by: saved.by || '', at: saved.at || '' };
     });
@@ -4878,9 +4922,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         ? '<span class="text-body2">Manager (admin)</span>'
         : `<select class="select" data-client-role="${a.personId}" aria-label="Role in the client for ${esc(a.person.name)}"><option value="Manager"${a.role === 'Manager' ? ' selected' : ''}>Manager</option><option value="Member"${a.role !== 'Manager' ? ' selected' : ''}>Member</option></select>`;
       const action = admin ? '' : `<button type="button" class="btn-icon" data-unassign-firm="${a.personId}" aria-label="Unassign ${esc(a.person.name)} from this client"><span class="material-icons">close</span></button>`;
-      return `<tr><td>${name}</td><td><div class="d-flex align-center justify-between gap-8">${role}${action}</div></td></tr>`;
-    }).join('') || '<tr><td colspan="2" class="text-body2">No colleagues on this client.</td></tr>';
-    return `<div class="page-stack"><div class="d-flex align-center gap-8"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Name</th><th>Role</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}</div>`;
+      return `<tr><td>${name}</td><td>${role}</td><td class="text-right">${action}</td></tr>`;
+    }).join('') || '<tr><td colspan="3" class="text-body2">No colleagues on this client.</td></tr>';
+    return `<div class="page-stack"><div class="d-flex align-center gap-8"><input type="search" class="input-search" id="clientColSearch" placeholder="Search by a colleague's name" value="${esc(st.clientColQ || '')}" /><button type="button" class="btn" id="addFirmColleague">Add Firm colleague</button></div><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Name</th><th>Role</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>${page.html}</div>`;
   }
   function renderColleagues() {
     const q = (st.colQ || '').toLowerCase();
@@ -4917,14 +4961,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderFirmSettings() {
     return `<div class="flow-narrow content-narrow page-stack">
       ${pageHeader('Firm settings')}
-      <div class="box box--white page-stack">
-        <div class="d-flex align-center justify-between gap-16">
-          <div><h2 class="text-subtitle1">Firm details</h2><p class="text-body2">The name your team and clients see.</p></div>
-          <button type="button" class="btn" id="firmNameSave">Save</button>
+      <div class="box box--white d-flex align-center justify-between gap-16">
+        <div>
+          <p class="form-label">Firm name</p>
+          <p class="text-body2">${esc(FIRM.name)}</p>
+          <p class="text-body2 text-secondary">Firm ID ${esc(FIRM.firmId)} <button type="button" class="btn-copy" id="copyFirmId" aria-label="Copy Firm ID">content_copy</button></p>
         </div>
-        <div class="form-field"><label class="form-label form-label-required" for="firmNameEdit">Firm name</label><input class="input" id="firmNameEdit" data-required="1" value="${esc(FIRM.name)}" /></div>
+        <button type="button" class="btn-outlined" id="openFirmDetails">Edit</button>
       </div>
-      ${settingsBlock('Firm ID', esc(FIRM.firmId), '<button type="button" class="btn-copy" id="copyFirmId" aria-label="Copy Firm ID">content_copy</button>')}
       ${settingsBlock('Firm tags', 'Group clients with your own labels, like region or service type.', '<button type="button" class="btn-outlined" id="manageTagsBtn">Manage tags</button>')}
       ${settingsBlock('Checklist', 'Set the month-close steps your team follows for every client.', '<button type="button" class="btn-outlined" id="firmChecklistBtn">Edit checklist</button>')}
     </div>`;
@@ -5513,7 +5557,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const name = (input && input.value || '').trim();
       if (!name) { fieldError(input, 'Required'); return; }
       FIRM.name = name;
-      showKitToast('Firm name saved');
+      showKitToast('Firm updated successfully!');
       render();
     });
     bindClick('addColleague', openAddColleague);
@@ -5972,42 +6016,98 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMain();
     };
   }
+  function tagUsedLine(n) {
+    return 'Used by ' + n + ' client' + (n === 1 ? '' : 's');
+  }
   function openManageTags() {
-    const rows = firmTags.map((tag) => '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + esc(tag.name) + '</span><span class="text-body2 text-secondary">Used by ' + tag.used + ' clients</span><button type="button" class="link" data-rename-tag="' + tag.id + '">Rename</button><button type="button" class="link" data-delete-tag="' + tag.id + '">Delete</button></div>').join('');
-    const { modal, close } = dialogShell('Manage tags', '<div class="form-field"><label class="form-label" for="tagSearch">Search tags</label><input class="input" id="tagSearch" placeholder="Search tags"></div><div class="d-flex flex-col gap-8" id="tagRows">' + rows + '</div>', '<button type="button" class="btn-outlined" data-cancel>Close</button>');
+    let editing = '';
+    const { modal, close } = dialogShell('Manage tags', '<input class="input w-full" id="tagSearch" placeholder="Search tags" aria-label="Search tags"><div id="tagRows"></div>', '<button type="button" class="btn-outlined" data-cancel>Close</button>');
     const paint = () => {
       const q = (modal.querySelector('#tagSearch').value || '').toLowerCase();
-      modal.querySelector('#tagRows').innerHTML = firmTags.filter((tag) => !q || tag.name.toLowerCase().indexOf(q) >= 0).map((tag) => '<div class="d-flex align-center gap-8"><span class="text-body2 flex-1">' + esc(tag.name) + '</span><span class="text-body2 text-secondary">Used by ' + tag.used + ' clients</span><button type="button" class="link" data-rename-tag="' + tag.id + '">Rename</button><button type="button" class="link" data-delete-tag="' + tag.id + '">Delete</button></div>').join('') || '<p class="text-body2">No tags match.</p>';
-      modal.querySelectorAll('[data-rename-tag]').forEach((b) => b.onclick = () => {
-        const tag = firmTags.find((item) => item.id === b.dataset.renameTag);
-        const next = window.prompt('Rename tag', tag ? tag.name : '');
-        if (tag && next && next.trim()) { tag.name = next.trim(); paint(); }
-      });
+      const list = firmTags.filter((tag) => !q || tag.name.toLowerCase().indexOf(q) >= 0);
+      modal.querySelector('#tagRows').innerHTML = list.map((tag) => {
+        if (editing === tag.id) {
+          return '<div class="work-row d-flex align-center gap-8"><input class="input" id="tagRename" value="' + esc(tag.name) + '" aria-label="Tag name"><button type="button" class="btn" id="tagSave">Save</button><button type="button" class="btn-outlined" id="tagCancel">Cancel</button></div>';
+        }
+        return '<div class="work-row d-flex align-center gap-16"><div class="flex-1"><p class="text-body2">' + esc(tag.name) + '</p><p class="text-body2 text-secondary">' + tagUsedLine(tag.used) + '</p></div><button type="button" class="link" data-rename-tag="' + tag.id + '">Rename</button><button type="button" class="link" data-delete-tag="' + tag.id + '">Delete</button></div>';
+      }).join('') || '<p class="text-body2">No tags match.</p>';
+      modal.querySelectorAll('[data-rename-tag]').forEach((b) => b.onclick = () => { editing = b.dataset.renameTag; paint(); const input = modal.querySelector('#tagRename'); if (input) input.focus(); });
       modal.querySelectorAll('[data-delete-tag]').forEach((b) => b.onclick = () => {
-        firmTags = firmTags.filter((item) => item.id !== b.dataset.deleteTag);
-        if (st.tagFilter === b.dataset.deleteTag) st.tagFilter = '';
-        paint();
+        const tag = firmTags.find((item) => item.id === b.dataset.deleteTag);
+        if (!tag) return;
+        const ask = dialogShell('Delete ' + esc(tag.name), '<p class="text-body2">Delete this tag? Clients keep their other tags.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="tagDelete">Delete</button>');
+        ask.modal.querySelector('#tagDelete').onclick = () => {
+          firmTags = firmTags.filter((item) => item.id !== tag.id);
+          if (st.tagFilter === tag.id) st.tagFilter = '';
+          if (editing === tag.id) editing = '';
+          ask.close();
+          paint();
+        };
       });
+      const save = modal.querySelector('#tagSave');
+      if (save) save.onclick = () => {
+        const tag = firmTags.find((item) => item.id === editing);
+        const input = modal.querySelector('#tagRename');
+        const next = (input && input.value || '').trim();
+        if (!next) { fieldError(input, 'Required'); return; }
+        if (tag) tag.name = next;
+        editing = '';
+        paint();
+      };
+      const cancelEdit = modal.querySelector('#tagCancel');
+      if (cancelEdit) cancelEdit.onclick = () => { editing = ''; paint(); };
     };
     modal.querySelector('#tagSearch').oninput = paint;
     paint();
     modal.querySelector('[data-cancel]').onclick = () => { close(); renderMain(); };
   }
   function openFirmChecklist() {
-    let draft = firmChecklist.map((row) => Object.assign({}, row));
-    const suggested = ['Sales tax filed', 'Payroll posted'];
-    const { modal, close } = dialogShell('Firm checklist', '', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="saveChecklist">Save checklist</button>');
+    let draft = firmChecklist.map((row) => Object.assign({ scope: checklistScope(row) }, row));
+    let showSuggested = false;
+    const suggested = [
+      { label: 'Sales tax filed', required: true, scope: 'all' },
+      { label: 'Bank statements received', required: false, scope: 'books' },
+      { label: 'Payroll reconciled', required: false, scope: 'all' },
+      { label: '1099s issued', required: false, scope: 'all' }
+    ];
+    const scopes = [['all', 'All clients'], ['books', 'With QuickBooks or Xero'], ['qbo', 'With QuickBooks'], ['xero', 'With Xero']];
+    const { modal, close } = dialogShell('Firm checklist', '', '<div class="d-flex align-center justify-between w-full gap-16"><span class="text-body2 text-secondary">Last changed by ignatiy.plotnikov@synder.com, Oct 29, 2026, 10:39 PM GMT+2</span><span class="d-flex gap-8"><button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="saveChecklist">Save checklist</button></span></div>');
+    monFit(modal, true);
     const paint = () => {
-      const rows = draft.map((row, i) => '<div class="d-flex flex-col gap-8"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '> Required to close</label><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check-all="' + i + '"' + (row.all ? ' checked' : '') + '> All clients</label><button type="button" class="link" data-archive="' + i + '">Archive</button></div>').join('');
-      const ideas = suggested.filter((name) => !draft.some((row) => row.label === name)).map((name) => '<button type="button" class="link" data-suggest="' + esc(name) + '">' + esc(name) + '</button>').join(' ');
-      modal.querySelector('.modal-body').innerHTML = '<p class="text-body2">Changes apply to months you haven\'t closed. Closed months don\'t change.</p>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><p class="text-subtitle2">Suggested checks</p><div class="d-flex gap-8">' + ideas + '</div>';
+      const rows = draft.map((row, i) => {
+        const scope = scopes.map((item) => '<option value="' + item[0] + '"' + (checklistScope(row) === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('');
+        return '<div class="work-row d-flex align-center gap-8 flex-wrap"><div class="flex-1"><input class="input" data-check-label="' + i + '" value="' + esc(row.label) + '" aria-label="Check name"></div><label class="d-flex align-center gap-8"><input class="switch" type="checkbox" data-check-req="' + i + '"' + (row.required ? ' checked' : '') + '><span class="text-body2">Required to close</span></label><div class="mon-search"><select class="select" data-check-scope="' + i + '" aria-label="Scope">' + scope + '</select></div><button type="button" class="btn-icon" data-check-up="' + i + '" aria-label="Move up"><span class="material-icons">arrow_upward</span></button><button type="button" class="btn-icon" data-check-down="' + i + '" aria-label="Move down"><span class="material-icons">arrow_downward</span></button><button type="button" class="link" data-archive="' + i + '">Archive</button></div>';
+      }).join('');
+      const ideas = suggested.filter((item) => !draft.some((row) => row.label === item.label)).map((item) => '<div class="d-flex align-center justify-between gap-8"><span class="text-body2">' + esc(item.label) + '</span><button type="button" class="link" data-suggest="' + esc(item.label) + '">Add</button></div>').join('');
+      modal.querySelector('.modal-body').innerHTML = '<div class="box box--grey"><p class="text-body2">Changes apply to every open and in-review month. Closed months stay as they were, and keep the old name of a renamed check.</p></div>' + rows + '<button type="button" class="link" id="addChecklistRow">+ Add check</button><details class="accordion"' + (showSuggested ? ' open' : '') + '><summary class="accordion-summary">Suggested checks</summary><div class="accordion-body page-stack">' + (ideas || '<p class="text-body2">Every suggestion is already on the checklist.</p>') + '</div></details>';
       modal.querySelectorAll('[data-check-label]').forEach((el) => el.oninput = () => { draft[Number(el.dataset.checkLabel)].label = el.value; });
       modal.querySelectorAll('[data-check-req]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkReq)].required = el.checked; });
-      modal.querySelectorAll('[data-check-all]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkAll)].all = el.checked; });
+      modal.querySelectorAll('[data-check-scope]').forEach((el) => el.onchange = () => { draft[Number(el.dataset.checkScope)].scope = el.value; });
+      modal.querySelectorAll('[data-check-up]').forEach((el) => el.onclick = () => {
+        const i = Number(el.dataset.checkUp);
+        if (i < 1) return;
+        const item = draft.splice(i, 1)[0];
+        draft.splice(i - 1, 0, item);
+        paint();
+      });
+      modal.querySelectorAll('[data-check-down]').forEach((el) => el.onclick = () => {
+        const i = Number(el.dataset.checkDown);
+        if (i >= draft.length - 1) return;
+        const item = draft.splice(i, 1)[0];
+        draft.splice(i + 1, 0, item);
+        paint();
+      });
       modal.querySelectorAll('[data-archive]').forEach((el) => el.onclick = () => { draft.splice(Number(el.dataset.archive), 1); paint(); });
       const add = modal.querySelector('#addChecklistRow');
-      if (add) add.onclick = () => { draft.push({ id: 'k' + Date.now(), label: '', required: false, all: true }); paint(); };
-      modal.querySelectorAll('[data-suggest]').forEach((el) => el.onclick = () => { draft.push({ id: 'k' + Date.now(), label: el.dataset.suggest, required: false, all: true }); paint(); });
+      if (add) add.onclick = () => { draft.push({ id: 'k' + Date.now(), label: '', required: false, scope: 'all' }); paint(); };
+      const details = modal.querySelector('details.accordion');
+      if (details) details.ontoggle = () => { showSuggested = details.open; };
+      modal.querySelectorAll('[data-suggest]').forEach((el) => el.onclick = () => {
+        const item = suggested.find((row) => row.label === el.dataset.suggest);
+        if (!item) return;
+        draft.push({ id: 'k' + Date.now(), label: item.label, required: item.required, scope: item.scope });
+        paint();
+      });
     };
     paint();
     modal.querySelector('#saveChecklist').onclick = () => {
@@ -6017,8 +6117,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         else fieldClear(el);
       });
       if (bad) return;
-      firmChecklist = draft.map((row) => Object.assign({}, row));
+      firmChecklist = draft.map((row) => Object.assign({}, row, { scope: checklistScope(row) }));
       close();
+      showKitToast('Checklist saved');
       renderMain();
     };
   }
@@ -6030,7 +6131,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (!name) { fieldError(input, 'Required'); return; }
       FIRM.name = name;
       close();
-      showKitToast('Firm name saved');
+      showKitToast('Firm updated successfully!');
       render();
     };
   }
