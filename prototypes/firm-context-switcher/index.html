@@ -170,6 +170,16 @@ button.tab { background: transparent; font-family: inherit; border-radius: 0; bo
 .work-split > * { flex: 1; min-width: 0; }
 .work-split > * + * { border-left: 1px solid var(--border-default); padding-left: 32px; }
 .work-row { padding: 12px 0; border-bottom: 1px solid var(--border-default); }
+/* Kit gap: no width utilities, no full-width group header, and the dialog has no 560px or 480px size. text-truncate does not bound a table cell. */
+.mon-month { width: 140px; flex: 0 0 140px; }
+.mon-year { width: 96px; flex: 0 0 96px; }
+.mon-search { width: 280px; flex: 0 0 280px; }
+.mon-month .select, .mon-year .select, .mon-search .input { width: 100%; }
+.mon-group { background: var(--color-grey-5); width: 100%; padding: 8px 12px; }
+.mon-name { display: block; max-width: 240px; }
+.modal-bg .modal.mon-dialog { width: 560px; max-width: calc(100vw - 32px); }
+.modal-bg .modal.mon-dialog-sm { width: 480px; max-width: calc(100vw - 32px); }
+.mon-muted { color: var(--color-grey-50); cursor: default; }
 .page-stack .alert, .page-stack .toolbar, .page-stack .form-field, .page-stack .ob-actions, .provider-card .ob-actions { margin: 0; }
 .auth-screen { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
 .auth-screen > .btn-text { align-self: flex-start; }
@@ -2553,7 +2563,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderNav() {
     const items = st.ctx === 'firm' ? FIRM_NAV : ORG_NAV;
     let activePage = st.page === 'details' ? 'dashboard' : st.page;
-    if (st.ctx === 'firm' && st.page === 'clientdetail' && st.from === 'monitoring') activePage = 'monitoring';
+    if (st.ctx === 'firm' && (st.page === 'monhealth' || (st.page === 'clientdetail' && st.from === 'monitoring'))) activePage = 'monitoring';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.from === 'monthclose') activePage = 'monthclose';
     else if (st.ctx === 'firm' && ['client', 'setup', 'import', 'review', 'addone', 'preassess', 'preupload', 'precheck', 'connect', 'clientconnect', 'dashboard', 'clientdetail', 'clienthealth', 'finishsetup'].includes(st.page)) activePage = 'clients';
     if (st.page === 'billing' || st.page === 'buyplans' || st.page === 'buylicenses' || st.page === 'manage') activePage = 'billing';
@@ -3910,54 +3920,90 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     }
     return { label: 'Fix syncs', go: 'work' };
   }
-  function monMonthNum() { return st && st.monMonth ? st.monMonth : 10; }
-  function monYearNum() { return st && st.monYear ? st.monYear : 2025; }
+  function monNow() { return { year: 2026, month: 11 }; }
+  function monSpan() {
+    const end = monNow();
+    const start = new Date(end.year, end.month - 1 - 24, 1);
+    return { sy: start.getFullYear(), sm: start.getMonth() + 1, ey: end.year, em: end.month };
+  }
+  function monYears() {
+    const span = monSpan();
+    const years = [];
+    for (let y = span.sy; y <= span.ey; y++) years.push(y);
+    return years;
+  }
+  function monMonths(year) {
+    const span = monSpan();
+    let from = 1;
+    let to = 12;
+    if (year === span.sy) from = span.sm;
+    if (year === span.ey) to = span.em;
+    const months = [];
+    for (let m = from; m <= to; m++) months.push(m);
+    return months;
+  }
+  function monMonthNum() {
+    const months = monMonths(monYearNum());
+    const want = st && st.monMonth ? st.monMonth : 10;
+    return months.indexOf(want) >= 0 ? want : months[0];
+  }
+  function monYearNum() {
+    const years = monYears();
+    const want = st && st.monYear ? st.monYear : 2025;
+    return years.indexOf(want) >= 0 ? want : 2025;
+  }
   function monShort(month, year) { return MONTH_NAMES[month - 1].slice(0, 3) + ' ' + year; }
+  function monRangeLabel() {
+    const last = new Date(monYearNum(), monMonthNum(), 0).getDate();
+    return MONTH_NAMES[monMonthNum() - 1].slice(0, 3) + ' 1–' + last + ', ' + monYearNum();
+  }
+  function monIso(day) {
+    return monYearNum() + '-' + String(monMonthNum()).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+  }
   function monPrevLabel(month, year) {
     const prev = month === 1 ? { month: 12, year: year - 1 } : { month: month - 1, year: year };
     return monShort(prev.month, prev.year);
   }
+  const MON_OWNERS = ['Dasha', 'Alex Kim', 'Jane Doe'];
   function monitorOwner(c) {
-    const rows = accessForClient(c.id).filter((a) => a.person && a.person.status === 'active');
-    const manager = rows.find((a) => a.role === 'Manager');
-    if (manager) return manager.person.name;
-    const admin = firmPeople.find((p) => (p.firmRole === 'Admin' || p.firmRole === 'admin') && p.status === 'active');
-    return admin ? admin.name : '—';
+    const n = String(c.id).split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+    if (c.id === 'e16') return 'Unassigned';
+    return MON_OWNERS[n % MON_OWNERS.length];
   }
   function monBoard(c) {
-    if (!c || !c.accounting) return { group: 'cant', reason: 'Books not connected', tip: 'Books not connected' };
-    if (c.checking) return { group: 'cant', reason: 'Checking…', tip: 'The first check is still running.' };
-    if (!isQuickBooks(c)) return { group: 'cant', reason: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.' };
-    if (onboardingState(c) !== 'done') return { group: 'cant', reason: 'Onboarding not finished', tip: 'Onboarding not finished' };
-    if (connectionLost(c)) {
-      const who = (booksLost(c) || c.userDisconnected) ? c.accounting : lostIntegrations(c).map((i) => i.source).join(', ');
-      return { group: 'waiting', severity: 'watch', issue: 'Connection lost', tip: (who || 'A connection') + ' needs access again.' };
-    }
-    const health = healthModel(c);
-    if (health && health.failed.length) {
-      const fail = health.failed[0];
-      const issue = healthIssue(c, fail.short === 'Undeposited' ? 'undeposited' : 'uncategorized');
-      const line = fail.short === 'Undeposited'
-        ? ((issue && issue.unapplied) || 0) + " customer payments aren't matched to an invoice or deposit"
-        : (((issue && issue.count) || 0) + ' expenses have no category');
-      return { group: 'needs', severity: 'risk', issue: line, tip: fail.detail };
-    }
-    if ((c.issues || []).some((item) => item.key === 'sync')) return { group: 'needs', severity: 'watch', issue: 'A sync did not finish', tip: 'A sync failed. The other checks are unchanged.' };
-    const tip = (health && health.checks || []).map((check) => check.detail).join(' ');
-    return { group: 'clear', severity: 'healthy', issue: 'All checks passed', tip: tip || 'Uncategorized and Undeposited passed.' };
+    const known = {
+      e2: { group: 'needs', severity: 'risk', score: 4, trend: 'down', delta: 1, issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
+      e9: { group: 'needs', severity: 'risk', score: 5, trend: 'down', delta: 2, issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' },
+      e7: { group: 'waiting', severity: 'watch', score: 6, trend: 'flat', delta: 0, issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
+      e12: { group: 'waiting', severity: 'watch', score: 7, trend: 'down', delta: 1, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
+      e15: { group: 'waiting', severity: 'watch', score: 6, trend: 'up', delta: 2, issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' },
+      e1: { group: 'clear', severity: 'healthy', score: 10, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e3: { group: 'clear', severity: 'healthy', score: 9, trend: 'up', delta: 2, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e14: { group: 'clear', severity: 'healthy', score: 10, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e16: { group: 'clear', severity: 'healthy', score: 8, trend: 'flat', delta: 0, issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' },
+      e5: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Xero, not supported yet', tip: 'Health checks are available for QuickBooks only.', logo: '' },
+      e6: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' },
+      e4: { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: 'Books not connected', tip: 'Books not connected', logo: '' }
+    };
+    return known[c.id] || null;
+  }
+  function monTrendText(board) {
+    if (board.trend === 'up') return '↑ ' + board.delta + ' vs previous month';
+    if (board.trend === 'down') return '↓ ' + board.delta + ' vs previous month';
+    return 'no change';
   }
   function monBoardRows() {
     const q = (st.monQ || '').trim().toLowerCase();
-    return listedClients().filter((c) => !q || c.name.toLowerCase().includes(q)).map((c) => ({ c, board: monBoard(c) })).sort((a, b) => a.c.name.localeCompare(b.c.name));
+    return listedClients().filter((c) => !q || c.name.toLowerCase().includes(q)).map((c) => ({ c, board: monBoard(c) })).filter((row) => row.board).sort((a, b) => a.c.name.localeCompare(b.c.name));
   }
   const MON_SEV = { risk: ['red', 'At risk'], watch: ['yellow', 'Watch'], healthy: ['green', 'Healthy'] };
-  const MON_GROUPS = [['needs', 'Needs you', true], ['waiting', 'Waiting on client', true], ['clear', 'Clear', false], ['cant', "Can't check", false]];
+  const MON_GROUPS = [['needs', 'Needs you', 'fixable in Synder, client not involved'], ['waiting', 'Waiting on client', 'access, document or reply requested'], ['clear', 'Clear', 'all checks passed'], ['cant', "Can't check", 'Xero or no accounting connected']];
   function renderMonitoring() {
     const month = monMonthNum();
     const year = monYearNum();
     const rows = monBoardRows();
     const sizes = [10, 25, 50, 100];
-    if (!st.monPageSize || sizes.indexOf(st.monPageSize) < 0) st.monPageSize = 25;
+    if (!st.monPageSize || sizes.indexOf(st.monPageSize) < 0) st.monPageSize = 100;
     const size = st.monPageSize;
     const pages = Math.max(1, Math.ceil(rows.length / size) || 1);
     let page = st.monPage || 0;
@@ -3968,62 +4014,229 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const from = rows.length ? page * size + 1 : 0;
     const to = Math.min(rows.length, page * size + size);
     const range = (rows.length ? from + '–' + to : '0–0') + ' of ' + rows.length;
-    const off = (on) => on ? ' disabled' : '';
-    const pager = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select id="monPageSize" aria-label="Rows per page">${sizes.map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-pages"><button type="button" data-mon-nav="prev" aria-label="Previous page"${off(page === 0)}><span class="material-icons">chevron_left</span></button><button type="button" data-mon-nav="next" aria-label="Next page"${off(page >= pages - 1)}><span class="material-icons">chevron_right</span></button></span></div>`;
-    const trend = 'no change vs ' + monPrevLabel(month, year);
+    const pager = `<div class="synder-pagination"><span class="synder-pagination-rows">Rows per page: <select id="monPageSize" aria-label="Rows per page">${sizes.map((n) => `<option value="${n}"${n === size ? ' selected' : ''}>${n}</option>`).join('')}</select></span><span class="synder-pagination-range">${range}</span><span class="synder-pagination-pages"><button type="button" data-mon-nav="prev" aria-label="Previous page"><span class="material-icons">chevron_left</span></button><button type="button" data-mon-nav="next" aria-label="Next page"><span class="material-icons">chevron_right</span></button></span></div>`;
     const head = 'Health for ' + monShort(month, year);
-    const monthOpts = MONTH_NAMES.map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
-    const yearOpts = [2025, 2026, 2027].map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
-    const section = (key, title, open) => {
+    const monthOpts = monMonths(year).map((n) => `<option value="${n}"${n === month ? ' selected' : ''}>${MONTH_NAMES[n - 1]}</option>`).join('');
+    const yearOpts = monYears().map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
+    const reconLabel = 'Start reconciliation (' + monShort(month, year) + ')';
+    const section = (key, title, hint) => {
       const list = slice.filter((row) => row.board.group === key);
       if (!list.length) return '';
+      const collapsed = key === 'clear' && !st.monClearOpen;
+      const icon = key === 'clear' ? `<button type="button" class="btn-icon" id="monClearToggle" aria-label="${collapsed ? 'Expand Clear' : 'Collapse Clear'}"><span class="material-icons">${collapsed ? 'chevron_right' : 'expand_more'}</span></button>` : '';
       const body = list.map(({ c, board }) => {
-        const health = board.severity ? `<span class="d-flex align-center gap-8 flex-wrap"><span class="status status-${MON_SEV[board.severity][0]}">${MON_SEV[board.severity][1]}</span><span class="text-caption">${esc(trend)}</span></span>` : '<span class="text-body2">—</span>';
-        const issue = `<span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(board.issue || board.reason)}</span><span class="tooltip" role="tooltip">${esc(board.tip || board.reason || '')}</span></span>`;
-        const menu = `<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="mon-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-mon-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button></div></div>`;
-        return `<tr><td><span class="text-body2">${esc(c.name)}</span></td><td>${health}</td><td>${issue}</td><td><span class="text-body2">${esc(monitorOwner(c))}</span></td><td><div class="d-flex align-center justify-end gap-8"><button type="button" class="btn-outlined" data-mon-open="${c.id}">Review</button>${menu}</div></td></tr>`;
+        const running = c.monRunning === 'health' ? 'Health check running' : (c.monRunning === 'recon' ? 'Reconciliation running' : '');
+        const health = board.severity
+          ? `<span class="d-flex align-center gap-8"><button type="button" class="btn-text d-flex align-center gap-8" data-mon-report="${c.id}"><span class="status status-${MON_SEV[board.severity][0]}">${MON_SEV[board.severity][1]}</span><span class="tooltip-wrap"><span class="text-body2">${board.score}/10</span><span class="tooltip" role="tooltip">Weighted across the checks that ran. A red finding costs a check its full weight, a yellow one half. 10 means nothing was found.</span></span></button><span class="tooltip-wrap"><span class="text-caption">${esc(monTrendText(board))}</span><span class="tooltip" role="tooltip">Change since the previous month's health check.</span></span></span>${c.monRunning === 'health' ? '<span class="status status-blue">Check running...</span>' : ''}`
+          : '<span class="status status-grey">Health unavailable</span>';
+        const issue = `<span class="tooltip-wrap"><span class="d-flex align-center gap-8" tabindex="0">${board.logo ? brandMark(board.logo, 20) : ''}<span class="text-body2 text-truncate mon-name">${esc(board.issue || '—')}</span></span><span class="tooltip" role="tooltip">${esc(board.issue || '—')}</span></span>`;
+        const settings = isQuickBooks(c)
+          ? `<button type="button" class="dropdown-item" data-mon-act="settings" data-mon-id="${c.id}">Check settings</button>`
+          : '<div class="dropdown-item mon-muted"><span>Check settings</span><span class="text-caption">Available for QuickBooks Online clients only</span></div>';
+        const menu = `<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="mon-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-mon-${c.id}"><button type="button" class="dropdown-item" data-mon-act="report" data-mon-id="${c.id}">Health report</button><button type="button" class="dropdown-item" data-mon-act="run" data-mon-id="${c.id}">Run health check</button><button type="button" class="dropdown-item" data-mon-act="recon" data-mon-id="${c.id}">${esc(reconLabel)}</button><button type="button" class="dropdown-item" data-mon-act="diagnose" data-mon-id="${c.id}">Diagnose</button>${settings}</div></div>`;
+        return `<tr><td><span class="tooltip-wrap"><button type="button" class="link text-truncate mon-name" data-mon-work="${c.id}">${esc(c.name)}</button><span class="tooltip" role="tooltip">${esc(c.name)}</span></span></td><td><div class="d-flex flex-col">${health}</div></td><td>${issue}</td><td><span class="text-body2">${esc(monitorOwner(c))}</span></td><td><div class="d-flex align-center justify-end gap-8">${running ? `<span class="text-body2 text-secondary">${running}</span>` : ''}${menu}</div></td></tr>`;
       }).join('');
-      return `<details class="accordion"${open ? ' open' : ''}><summary class="accordion-summary"><span class="text-subtitle1">${title}</span><span class="text-body2 text-secondary">${list.length}</span></summary><div class="accordion-body"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client name</th><th>${esc(head)}</th><th>Top issue</th><th>Owner</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div></div></details>`;
+      const table = collapsed ? '' : `<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Client name</th><th>${esc(head)}</th><th>Top issue</th><th>Owner</th><th class="text-right">Actions</th></tr></thead><tbody>${body}</tbody></table></div>`;
+      return `<div class="page-stack"><div class="mon-group d-flex align-center gap-8">${icon}<span class="text-subtitle2">${title}</span><span class="text-body2 text-secondary">(${list.length}) — ${hint}</span></div>${table}</div>`;
     };
-    const groups = MON_GROUPS.map(([key, title, open]) => section(key, title, open)).join('');
-    const empty = rows.length ? '' : '<div class="empty-state"><p class="empty-state-title">No clients match</p><p class="empty-state-desc">Try a different name.</p></div>';
+    const groups = MON_GROUPS.map(([key, title, hint]) => section(key, title, hint)).join('');
+    const empty = rows.length ? '' : '<p class="text-body2">No clients match this search.</p>';
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Monitoring', '<button type="button" class="btn-outlined" id="checkAll">Check all clients</button>', "Health of every client's books for the month, grouped by who needs to act.")}
-      <div class="d-flex align-center gap-16 flex-wrap">
-        <div><label class="form-label" for="monMonth">Month</label><select class="select" id="monMonth" aria-label="Month">${monthOpts}</select></div>
-        <div><label class="form-label" for="monYear">Year</label><select class="select" id="monYear" aria-label="Year">${yearOpts}</select></div>
-        <div><label class="form-label" for="monSearch">Client name</label><input class="input input-search" id="monSearch" placeholder="Search by client name..." value="${esc(st.monQ || '')}" aria-label="Client name" /></div>
+      ${pageHeader('Monitoring', '', "Health of every client's books for the month, grouped by who needs to act.")}
+      <div class="d-flex align-center justify-between gap-16 flex-wrap">
+        <div class="d-flex align-center gap-16 flex-wrap">
+          <div class="mon-month"><label class="form-label" for="monMonth">Month</label><select class="select" id="monMonth" aria-label="Month">${monthOpts}</select></div>
+          <div class="mon-year"><label class="form-label" for="monYear">Year</label><select class="select" id="monYear" aria-label="Year">${yearOpts}</select></div>
+          <div class="input-clearable mon-search"><input class="input input-search" id="monSearch" placeholder="Search by client name..." value="${esc(st.monQ || '')}" aria-label="Search by client name" />${st.monQ ? '<button type="button" class="input-clear" id="monClear" aria-label="Clear">close</button>' : ''}</div>
+        </div>
+        <button type="button" class="btn-outlined" id="checkAll">Check all clients</button>
       </div>
       ${groups || empty}
       ${rows.length ? pager : ''}
     </div>`;
   }
+  const MON_CHECKS = [
+    { id: 'uncat', group: 'Books', name: 'Uncategorized', desc: 'Uncategorized and suspense items left at month end.', note: "Checks Synder's default accounts" },
+    { id: 'funds', group: 'Books', name: 'Undeposited', desc: 'Unapplied payments and undeposited funds.', note: '' },
+    { id: 'dupes', group: 'Sales', name: 'Duplicate sales', desc: 'Sales that posted more than once.', note: '' },
+    { id: 'refunds', group: 'Sales', name: 'Open refunds', desc: 'Refunds that are still open.', note: '' },
+    { id: 'payouts', group: 'Payouts', name: 'Missing payouts', desc: 'Payouts that did not reach the books.', note: '' }
+  ];
+  function monChecksHtml() {
+    const groups = [];
+    MON_CHECKS.forEach((check) => { if (groups.indexOf(check.group) < 0) groups.push(check.group); });
+    return groups.map((group) => '<p class="text-subtitle2">' + esc(group) + '</p><div class="d-flex flex-col gap-8">' + MON_CHECKS.filter((check) => check.group === group).map((check) => '<label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-hc="' + check.id + '" checked><span class="text-body2">' + esc(check.name) + '</span><span class="text-body2 text-secondary"> ' + esc(check.desc) + (check.note ? ' ' + esc(check.note) + '.' : '') + ' QuickBooks Online only.</span></label>').join('') + '</div>').join('');
+  }
+  function monFit(modal, wide) {
+    const box = modal.querySelector('.modal');
+    if (box) box.classList.add(wide ? 'mon-dialog' : 'mon-dialog-sm');
+  }
+  function monFinishRun(ids, kind) {
+    ids.forEach((id) => { const c = findOrg(id); if (c) c.monRunning = kind; });
+    render();
+    setTimeout(() => {
+      ids.forEach((id) => { const c = findOrg(id); if (c && c.monRunning === kind) c.monRunning = ''; });
+      if (st && (st.page === 'monitoring' || st.page === 'monhealth')) render();
+    }, 2000);
+  }
+  function monDateError(from, to) {
+    if (!(from || '').trim()) return 'Enter the start date';
+    if (!(to || '').trim()) return 'Enter the end date';
+    if (from > to) return 'The start date must be on or before the end date';
+    return '';
+  }
   function openFirmHealthCheck() {
+    const monthName = MONTH_NAMES[monMonthNum() - 1] + ' ' + monYearNum();
+    const last = new Date(monYearNum(), monMonthNum(), 0).getDate();
+    const body = '<p class="text-subtitle1">Checks ' + esc(monRangeLabel()) + '</p><p class="text-body2">Runs the ' + esc(monthName) + ' health check for every approved client of the firm. Clients already being checked keep their running check. The list updates as the checks finish.</p><div class="d-flex gap-16"><div class="form-field flex-1"><label class="form-label" for="hcFrom">Start date</label><input class="input" id="hcFrom" type="date" value="' + monIso(1) + '"></div><div class="form-field flex-1"><label class="form-label" for="hcTo">End date</label><input class="input" id="hcTo" type="date" value="' + monIso(last) + '"></div></div><div class="d-flex align-center gap-16"><button type="button" class="link" id="hcAll">Select all</button><button type="button" class="link" id="hcNone">Clear</button><span class="text-body2" id="hcCount">' + MON_CHECKS.length + ' of ' + MON_CHECKS.length + ' checks</span></div>' + monChecksHtml() + '<p class="form-error-msg" id="hcErr" hidden></p>';
+    const { modal, close } = dialogShell('Check all clients', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="hcGo">Check all clients</button>');
+    monFit(modal, true);
+    const paintCount = () => { modal.querySelector('#hcCount').textContent = modal.querySelectorAll('[data-hc]:checked').length + ' of ' + MON_CHECKS.length + ' checks'; };
+    modal.querySelector('#hcAll').onclick = () => { modal.querySelectorAll('[data-hc]').forEach((el) => { el.checked = true; }); paintCount(); };
+    modal.querySelector('#hcNone').onclick = () => { modal.querySelectorAll('[data-hc]').forEach((el) => { el.checked = false; }); paintCount(); };
+    modal.querySelectorAll('[data-hc]').forEach((el) => { el.onchange = paintCount; });
+    modal.querySelector('#hcGo').onclick = () => {
+      const err = modal.querySelector('#hcErr');
+      const dateErr = monDateError(modal.querySelector('#hcFrom').value, modal.querySelector('#hcTo').value);
+      const picked = modal.querySelectorAll('[data-hc]:checked').length;
+      if (dateErr || !picked) { err.hidden = false; err.textContent = dateErr || 'Choose at least one check.'; return; }
+      const shown = monBoardRows();
+      const approved = shown.filter((row) => row.board.group !== 'cant').map((row) => row.c);
+      const running = approved.filter((c) => c.monRunning === 'health');
+      const started = approved.filter((c) => c.monRunning !== 'health');
+      const skipped = shown.filter((row) => row.board.group === 'cant').map((row) => row.c);
+      modal.querySelector('.modal-body').innerHTML = '<p class="text-subtitle1">' + started.length + ' started, ' + running.length + ' already running, ' + skipped.length + ' not checked</p><p class="text-body2">Started: ' + esc(started.map((c) => c.name).join(', ') || 'None') + '.</p><p class="text-body2">Already running: ' + esc(running.map((c) => c.name).join(', ') || 'None') + '.</p><p class="text-body2">Not checked: ' + esc(skipped.slice(0, 3).map((c) => c.name).join(', ') || 'None') + '.</p>';
+      modal.querySelector('.modal-footer').innerHTML = '<button type="button" class="btn" id="hcDone">Close</button>';
+      modal.querySelector('#hcDone').onclick = close;
+      showKitToast('Health check started with ' + picked + ' checks');
+      monFinishRun(started.map((c) => c.id), 'health');
+    };
+  }
+  function openRunHealth(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const last = new Date(monYearNum(), monMonthNum(), 0).getDate();
+    const body = '<p class="text-subtitle1">Checks ' + esc(monRangeLabel()) + '</p><p class="form-label form-label-required">Dates</p><div class="d-flex gap-16"><div class="form-field flex-1"><label class="form-label" for="hrFrom">Start date</label><input class="input" id="hrFrom" type="date" value="' + monIso(1) + '"></div><div class="form-field flex-1"><label class="form-label" for="hrTo">End date</label><input class="input" id="hrTo" type="date" value="' + monIso(last) + '"></div></div><div class="d-flex align-center gap-16"><button type="button" class="link" id="hrAll">Select all</button><button type="button" class="link" id="hrNone">Clear</button><span class="text-body2" id="hrCount">' + MON_CHECKS.length + ' of ' + MON_CHECKS.length + ' checks</span></div>' + monChecksHtml() + '<p class="form-error-msg" id="hrErr" hidden></p>';
+    const { modal, close } = dialogShell('Run health check — ' + esc(c.name), body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="hrGo">Launch</button>');
+    monFit(modal, true);
+    const paint = () => { modal.querySelector('#hrCount').textContent = modal.querySelectorAll('[data-hc]:checked').length + ' of ' + MON_CHECKS.length + ' checks'; };
+    modal.querySelector('#hrAll').onclick = () => { modal.querySelectorAll('[data-hc]').forEach((el) => { el.checked = true; }); paint(); };
+    modal.querySelector('#hrNone').onclick = () => { modal.querySelectorAll('[data-hc]').forEach((el) => { el.checked = false; }); paint(); };
+    modal.querySelectorAll('[data-hc]').forEach((el) => { el.onchange = paint; });
+    modal.querySelector('#hrGo').onclick = () => {
+      const err = modal.querySelector('#hrErr');
+      const dateErr = monDateError(modal.querySelector('#hrFrom').value, modal.querySelector('#hrTo').value);
+      const picked = modal.querySelectorAll('[data-hc]:checked').length;
+      if (dateErr || !picked) { err.hidden = false; err.textContent = dateErr || 'Choose at least one check.'; return; }
+      close();
+      showKitToast('Health check of ' + c.name + ' started with ' + picked + ' checks');
+      monFinishRun([c.id], 'health');
+    };
+  }
+  function openMonRecon(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const label = monShort(monMonthNum(), monYearNum());
+    if (c.id === 'e3') {
+      showKitToast('A reconciliation for this month exists already. Delete or replace it in Transaction reconciliation before starting a new one.');
+      return;
+    }
+    if (c.id === 'e1') {
+      const body = '<p class="text-body2">' + esc(c.name) + ' has several payment platforms. Pick the one to reconcile.</p><div class="form-field"><label class="form-label form-label-required" for="recPlat">Payment platform</label><select class="select" id="recPlat"><option value="">Select a payment platform</option><option>STRIPE · Main</option><option>PAYPAL · Shop</option></select></div><p class="form-error-msg" id="recErr" hidden>Required</p>';
+      const { modal, close } = dialogShell('Start reconciliation', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="recGo">Start reconciliation</button>');
+      monFit(modal, false);
+      modal.querySelector('#recGo').onclick = () => {
+        if (!modal.querySelector('#recPlat').value) { modal.querySelector('#recErr').hidden = false; return; }
+        close();
+        showKitToast('Reconciliation of ' + c.name + ' for ' + label + ' started');
+        monFinishRun([c.id], 'recon');
+      };
+      return;
+    }
+    const platform = c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online';
+    const { modal, close } = dialogShell('Start reconciliation', '<p class="text-body2">' + esc(c.name) + ' · ' + platform + ' · ' + esc(label) + '.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="recGo">Start reconciliation</button>');
+    monFit(modal, false);
+    modal.querySelector('#recGo').onclick = () => { close(); showKitToast('Reconciliation of ' + c.name + ' for ' + label + ' started'); monFinishRun([c.id], 'recon'); };
+  }
+  function openMonDiagnose(id) {
+    const c = findOrg(id);
+    if (!c) return;
+    const questions = [['Auto sync not running', 'Sync'], ['Transactions not imported', 'Sync'], ['Payout not posted', 'Payouts'], ['Transaction in wrong period', 'Books'], ['Platform disconnected', 'Connections']];
+    const old = document.getElementById('diagnoseSheet');
+    if (old) old.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'diagnoseSheet';
+    const integ = (c.integrations && c.integrations[0]) || 'Stripe';
+    const options = '<option>' + esc(integ + ' · ' + integ) + '</option><option>PayPal · PayPal</option>';
+    const paintList = () => {
+      wrap.querySelector('.synder-side-sheet-body').innerHTML = questions.map((item, i) => '<p class="text-caption text-secondary">' + esc(item[1]) + '</p><p><button type="button" class="link" data-dq="' + i + '">' + esc(item[0]) + '</button></p>').join('');
+      wrap.querySelectorAll('[data-dq]').forEach((b) => { b.onclick = () => paintForm(Number(b.dataset.dq)); });
+    };
+    const paintForm = (index) => {
+      wrap.querySelector('.synder-side-sheet-body').innerHTML = '<p class="text-subtitle1">' + esc(questions[index][0]) + '</p><div class="form-field"><label class="form-label" for="dqInteg">Integration</label><select class="select" id="dqInteg">' + options + '</select></div><div class="d-flex gap-16"><div class="form-field flex-1"><label class="form-label" for="dqFrom">Start date</label><input class="input" id="dqFrom" type="date" value="' + monIso(1) + '"></div><div class="form-field flex-1"><label class="form-label" for="dqTo">End date</label><input class="input" id="dqTo" type="date" value="' + monIso(new Date(monYearNum(), monMonthNum(), 0).getDate()) + '"></div></div><div class="d-flex gap-16"><button type="button" class="link" id="dqBack">Back to questions</button><button type="button" class="btn" id="dqAsk">Ask</button></div>';
+      wrap.querySelector('#dqBack').onclick = paintList;
+      wrap.querySelector('#dqAsk').onclick = () => {
+        wrap.querySelector('.synder-side-sheet-body').innerHTML = '<p class="text-subtitle1">Asking...</p><p class="text-body2">Synder is looking into it. An answer takes a few seconds.</p>';
+        setTimeout(() => paintAnswer(questions[index][0]), 2000);
+      };
+    };
+    const paintAnswer = (q) => {
+      const found = q === 'Payout not posted' || q === 'Platform disconnected';
+      const chip = q === 'Platform disconnected' ? '<span class="status status-yellow">Needs attention</span>' : (found ? '<span class="status status-red">Issue found</span>' : '<span class="status status-green">No issue found</span>');
+      const headline = q === 'Payout not posted' ? "24 customer payments aren't matched to an invoice or deposit" : (q === 'Platform disconnected' ? 'The platform connection was lost' : 'Nothing in this check needs a fix');
+      wrap.querySelector('.synder-side-sheet-body').innerHTML = chip + '<p class="text-subtitle1">' + esc(headline) + '</p><p class="text-subtitle2">What happened</p><p class="text-body2">' + (found ? 'Synder compared the platform with the books for this month.' : 'The check finished without a finding.') + '</p><p class="text-subtitle2">Likely cause</p><p class="text-body2">' + (found ? 'A payment or connection did not finish.' : 'The books and the platform agree.') + '</p><p class="text-subtitle2">Impact</p><p class="text-body2">' + (found ? 'The month stays open until this is cleared.' : 'No change to the month.') + '</p><p class="text-subtitle2">Next steps</p><p class="text-body2"><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">Open in Synder</a></p><p class="text-caption">Opens in a new tab and switches your Synder organization to this client.</p><p class="text-subtitle2">Help articles</p><p class="text-body2"><a class="link" href="https://synder.com" target="_blank" rel="noopener noreferrer">How this check works</a></p><button type="button" class="btn-outlined" id="dqAgain">Ask another question</button>';
+      wrap.querySelector('#dqAgain').onclick = paintList;
+    };
+    wrap.innerHTML = '<div class="synder-side-sheet-bg" id="diagnoseBg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true"><div class="synder-side-sheet-header"><span>Diagnose ' + esc(c.name) + '</span><button type="button" class="btn-icon" id="diagnoseClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body"></div></div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('#diagnoseClose').onclick = () => wrap.remove();
+    wrap.querySelector('#diagnoseBg').onclick = () => wrap.remove();
+    paintList();
+  }
+  function openCheckSettings(id) {
+    const c = findOrg(id);
+    if (!c || !isQuickBooks(c)) return;
+    const accounts = ['Uncategorized Expense', 'Uncategorized Income', 'Opening Balance Equity', 'Ask My Accountant', 'Suspense'];
+    if (!st.monAccounts) st.monAccounts = {};
+    const chosen = (st.monAccounts[c.id] || ['Uncategorized Expense', 'Opening Balance Equity']).slice();
+    const old = document.getElementById('diagnoseSheet');
+    if (old) old.remove();
+    const wrap = document.createElement('div');
+    wrap.id = 'diagnoseSheet';
+    const paint = () => {
+      const q = ((wrap.querySelector('#acctQ') && wrap.querySelector('#acctQ').value) || '').toLowerCase();
+      const boxes = accounts.filter((name) => !q || name.toLowerCase().indexOf(q) >= 0).map((name) => '<label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-acct="' + esc(name) + '"' + (chosen.indexOf(name) >= 0 ? ' checked' : '') + '> ' + esc(name) + '</label>').join('');
+      wrap.querySelector('.synder-side-sheet-body').innerHTML = '<p class="text-body2">The uncategorized and suspense check flags the transactions left in these accounts at the end of the month.</p><p class="text-body2 text-secondary">Synder\'s default accounts; change them to fit this client.</p><div class="form-field"><label class="form-label" for="acctQ">Accounts</label><input class="input" id="acctQ" placeholder="Search accounts by name" value="' + esc(q) + '"></div><div class="d-flex flex-col gap-8">' + boxes + '</div><p class="text-body2" id="acctChosen">Chosen (' + chosen.length + '): ' + esc(chosen.join(', ') || 'None') + '</p><p class="form-error-msg" id="acctErr" hidden>No account chosen. Save needs at least one account; \'Use Synder defaults\' puts the client back on Synder\'s default accounts.</p><div class="d-flex gap-8 flex-wrap"><button type="button" class="btn" id="acctSave">Save</button><button type="button" class="btn-outlined" id="acctDefault">Use Synder defaults</button><button type="button" class="btn-outlined" id="acctCancel">Cancel</button></div>';
+      wrap.querySelector('#acctQ').oninput = () => {
+        const qv = wrap.querySelector('#acctQ').value.toLowerCase();
+        wrap.querySelectorAll('[data-acct]').forEach((box) => { box.closest('label').style.display = (qv && box.getAttribute('data-acct').toLowerCase().indexOf(qv) < 0) ? 'none' : ''; });
+      };
+      wrap.querySelectorAll('[data-acct]').forEach((el) => { el.onchange = () => { const name = el.getAttribute('data-acct'); const i = chosen.indexOf(name); if (el.checked && i < 0) chosen.push(name); if (!el.checked && i >= 0) chosen.splice(i, 1); wrap.querySelector('#acctChosen').textContent = 'Chosen (' + chosen.length + '): ' + (chosen.join(', ') || 'None'); }; });
+      wrap.querySelector('#acctSave').onclick = () => { if (!chosen.length) { wrap.querySelector('#acctErr').hidden = false; return; } st.monAccounts[c.id] = chosen.slice(); wrap.remove(); showKitToast('Check settings of ' + c.name + ' saved'); };
+      wrap.querySelector('#acctDefault').onclick = () => { st.monAccounts[c.id] = ['Uncategorized Expense', 'Opening Balance Equity']; wrap.remove(); showKitToast(c.name + " uses Synder's default accounts"); };
+      wrap.querySelector('#acctCancel').onclick = () => wrap.remove();
+    };
+    wrap.innerHTML = '<div class="synder-side-sheet-bg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true"><div class="synder-side-sheet-header"><span>Uncategorized accounts — ' + esc(c.name) + '</span><button type="button" class="btn-icon" id="setClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body"></div></div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('#setClose').onclick = () => wrap.remove();
+    wrap.querySelector('.synder-side-sheet-bg').onclick = () => wrap.remove();
+    paint();
+  }
+  function openMonHealth(id) { st.page = 'monhealth'; st.clientId = id; st.ctx = 'firm'; save(); render(); }
+  function renderMonHealth() {
+    const c = findOrg(st.clientId);
+    const board = c && monBoard(c);
+    if (!c || !board) return renderMonitoring();
     const month = monMonthNum();
     const year = monYearNum();
-    const last = new Date(year, month, 0).getDate();
-    const iso = (day) => year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-    const body = '<p class="text-body2">Run the ' + esc(monShort(month, year)) + ' health check for every approved client.</p><div class="form-field"><label class="form-label form-label-required" for="hcFrom">From</label><input class="input" id="hcFrom" type="date" value="' + iso(1) + '"></div><div class="form-field"><label class="form-label form-label-required" for="hcTo">To</label><input class="input" id="hcTo" type="date" value="' + iso(last) + '"></div><p class="form-label">Checks</p><label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="hcUncat" checked> Uncategorized</label><label class="checkbox-wrap"><input class="checkbox" type="checkbox" id="hcFunds" checked> Undeposited</label><p class="form-error-msg" id="hcErr" hidden>Required</p>';
-    const { modal, close } = dialogShell('Check all clients', body, '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="hcLaunch">Launch</button>');
-    modal.querySelector('#hcLaunch').onclick = () => {
-      const from = modal.querySelector('#hcFrom');
-      const to = modal.querySelector('#hcTo');
-      const picked = modal.querySelector('#hcUncat').checked || modal.querySelector('#hcFunds').checked;
-      const err = modal.querySelector('#hcErr');
-      let bad = false;
-      if (!(from.value || '').trim()) { fieldError(from, 'Required'); bad = true; }
-      if (!(to.value || '').trim()) { fieldError(to, 'Required'); bad = true; }
-      if (!picked) bad = true;
-      if (bad) { err.hidden = false; return; }
-      const approved = listedClients().filter((c) => isQuickBooks(c) && onboardingState(c) === 'done' && !connectionLost(c));
-      const running = approved.filter((c) => c.checking).length;
-      const launched = approved.filter((c) => !c.checking);
-      const stamp = stampLabel(new Date());
-      launched.forEach((c) => { c.checked = stamp; });
-      close();
-      showKitToast('Launched: ' + launched.length + ' of ' + approved.length);
-      showKitToast('Already running: ' + running);
-    };
+    const prev = month === 1 ? { month: 12, year: year - 1 } : { month: month - 1, year: year };
+    const prevScore = Math.max(0, (board.score || 0) - (board.trend === 'up' ? board.delta : (board.trend === 'down' ? -board.delta : 0)));
+    const chip = board.severity ? '<span class="status status-' + MON_SEV[board.severity][0] + '">' + MON_SEV[board.severity][1] + '</span>' : '<span class="status status-grey">Health unavailable</span>';
+    const finding = (sev, check, message, who) => '<tr><td><span class="status status-' + sev + '">' + (sev === 'red' ? 'At risk' : (sev === 'yellow' ? 'Watch' : 'Info')) + '</span></td><td>' + check + '</td><td>QuickBooks Online</td><td>' + esc(message) + '</td><td>' + who + '</td><td class="text-right"><button type="button" class="btn-outlined" data-mon-work="' + c.id + '">Open in Synder</button></td></tr>';
+    const risk = board.group === 'needs' ? '<tr><td colspan="6" class="text-subtitle2">At risk (1)</td></tr>' + finding('red', board.issue.indexOf('payment') >= 0 ? 'Undeposited' : 'Uncategorized', board.issue, 'Fix in Synder') : '';
+    const watch = board.group === 'waiting' ? '<tr><td colspan="6" class="text-subtitle2">Watch (1)</td></tr>' + finding('yellow', 'Connection', board.issue, 'Ask the client') : '';
+    const info = '<tr><td colspan="6" class="text-subtitle2">For information (0)</td></tr>';
+    return '<div class="flow-wide page-stack"><div class="d-flex align-center justify-between gap-16 flex-wrap"><a class="page-back" id="backMon" href="#monitoring">Health report</a><div class="d-flex gap-8"><button type="button" class="btn-outlined" id="monExport">Export CSV</button><button type="button" class="btn-outlined" id="monRunAgain">Run again for ' + esc(MONTH_NAMES[month - 1]) + '</button></div></div><div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">' + esc(c.name) + '</h1><p class="synder-page-subtitle">Health for ' + esc(monShort(month, year)) + '</p></div></div><div class="d-flex align-center gap-16 flex-wrap">' + chip + '<span class="text-subtitle1">' + (board.severity ? board.score + '/10' : '—') + '</span><span class="text-body2 text-secondary">checked ' + esc(monRangeLabel()) + ' · finished Nov 2, 2025, 09:14</span></div><p class="text-body2 text-secondary">' + esc(monTrendText(board)) + ' vs ' + esc(monShort(prev.month, prev.year)) + ' (' + esc(monShort(prev.month, prev.year)) + ': ' + prevScore + '/10)</p><p class="text-body2">' + (board.group === 'needs' ? '1 red · 0 yellow · 0 info · 4 green · 0 skipped' : (board.group === 'waiting' ? '0 red · 1 yellow · 0 info · 4 green · 0 skipped' : '0 red · 0 yellow · 0 info · 5 green · 0 skipped')) + '</p><p class="text-subtitle2">Checks run (' + MON_CHECKS.length + ')</p>' + MON_CHECKS.map((check) => '<details class="accordion"><summary class="accordion-summary">About this check · ' + esc(check.name) + '</summary><div class="accordion-body"><p class="text-subtitle2">What you get</p><p class="text-body2">' + esc(check.desc) + '</p><p class="text-subtitle2">Important limit</p><p class="text-body2">QuickBooks Online only.</p><p class="text-subtitle2">Yellow means</p><p class="text-body2">A finding to watch.</p><p class="text-subtitle2">Red means</p><p class="text-body2">A finding that puts the client at risk.</p></div></details>').join('') + '<p class="text-subtitle2">Not used (0)</p><h2 class="text-h2">Findings</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Severity</th><th>Check</th><th>Integration / currency</th><th>Message</th><th>Who acts</th><th class="text-right">Fix</th></tr></thead><tbody>' + risk + watch + info + '<tr><td colspan="6"><button type="button" class="link" id="monShowPassed">' + (st.monShowPassed ? 'Hide' : 'Show') + ' Passed (1)</button></td></tr>' + (st.monShowPassed ? '<tr><td><span class="status status-green">Passed</span></td><td>Duplicate sales</td><td>QuickBooks Online</td><td>No duplicate sales.</td><td>Info</td><td></td></tr>' : '') + '<tr><td colspan="6"><button type="button" class="link" id="monShowSkipped">' + (st.monShowSkipped ? 'Hide' : 'Show') + ' Not run (0)</button></td></tr>' + (st.monShowSkipped ? '<tr><td colspan="6"><span class="text-body2">No checks were skipped.</span></td></tr>' : '') + '</tbody></table></div><h2 class="text-h2">Related synchronizations</h2><p class="text-body2">Shopify payouts (2)</p><p><button type="button" class="link" data-mon-work="' + c.id + '">syn_1042</button></p><p><button type="button" class="link" data-mon-work="' + c.id + '">syn_1048</button></p><h2 class="text-h2">History</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Dates checked</th><th>Outcome</th><th>Score</th><th>Checks</th><th>Finished</th><th></th></tr></thead><tbody><tr><td>' + esc(monRangeLabel()) + '</td><td>' + (board.severity ? MON_SEV[board.severity][1] : 'Health unavailable') + '</td><td>' + (board.severity ? board.score + '/10' : '—') + '</td><td>' + MON_CHECKS.length + '</td><td>Nov 2, 2025, 09:14</td><td>Shown</td></tr><tr><td>' + esc(monShort(prev.month, prev.year)) + '</td><td>' + (board.severity ? MON_SEV[board.severity][1] : '—') + '</td><td>' + prevScore + '/10</td><td>' + MON_CHECKS.length + '</td><td>Oct 2, 2025, 09:14</td><td><button type="button" class="link" id="monHistOpen">Open</button></td></tr></tbody></table></div></div>';
   }
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function currentPeriod() { return { year: 2026, month: 11 }; }
@@ -4866,6 +5079,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       html = placeholder(TOP_PAGES[st.page][1], st.ctx === 'firm' ? FIRM.name : findOrg(st.orgId).name);
     } else if (st.ctx === 'firm') {
       if (st.page === 'clients' || st.page === 'dashboard') html = renderClients();
+      else if (st.page === 'monhealth') html = renderMonHealth();
       else if (st.page === 'monitoring') html = renderMonitoring();
       else if (st.page === 'monthclose') html = renderMonthClose();
       else if (st.page === 'clientdetail') html = renderClientDetail();
@@ -5441,8 +5655,33 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
     const monSize = $('monPageSize');
     if (monSize) monSize.onchange = () => { st.monPageSize = Number(monSize.value); st.monPage = 0; renderMain(); };
+    bindClick('monClear', () => { st.monQ = ''; st.monPage = 0; renderMain(); });
+    bindClick('monClearToggle', () => { st.monClearOpen = !st.monClearOpen; renderMain(); });
+    m.querySelectorAll('[data-mon-work]').forEach((b) => b.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      st.workMonth = monMonthNum();
+      st.workYear = monYearNum();
+      openDetails(b.dataset.monWork, 'monitoring');
+    });
+    m.querySelectorAll('[data-mon-report]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openMonHealth(b.dataset.monReport); });
+    m.querySelectorAll('[data-mon-act]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      const id = b.dataset.monId;
+      if (b.dataset.monAct === 'report') openMonHealth(id);
+      else if (b.dataset.monAct === 'run') openRunHealth(id);
+      else if (b.dataset.monAct === 'recon') openMonRecon(id);
+      else if (b.dataset.monAct === 'diagnose') openMonDiagnose(id);
+      else if (b.dataset.monAct === 'settings') openCheckSettings(id);
+    });
+    bindClick('backMon', (e) => { if (e) e.preventDefault(); st.page = 'monitoring'; render(); });
+    bindClick('monExport', () => showKitToast('Health report exported'));
+    bindClick('monRunAgain', () => openRunHealth(st.clientId));
+    bindClick('monShowPassed', () => { st.monShowPassed = !st.monShowPassed; renderMain(); });
+    bindClick('monShowSkipped', () => { st.monShowSkipped = !st.monShowSkipped; renderMain(); });
+    bindClick('monHistOpen', () => showKitToast('Earlier health report shown'));
     m.querySelectorAll('[data-mon-nav]').forEach((b) => b.onclick = () => {
-      const pages = Math.max(1, Math.ceil(monBoardRows().length / (st.monPageSize || 25)));
+      const pages = Math.max(1, Math.ceil(monBoardRows().length / (st.monPageSize || 100)));
       const cur = st.monPage || 0;
       st.monPage = b.dataset.monNav === 'next' ? Math.min(pages - 1, cur + 1) : Math.max(0, cur - 1);
       renderMain();
@@ -6007,9 +6246,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       mode = 'firm';
       document.body.classList.remove('shell-hide');
       st.ctx = 'firm';
-      st.page = 'monitoring';
-      st.clientId = null;
       st.orgId = null;
+      if (parts[1] === 'health' && parts[2] && findOrg(parts[2])) {
+        st.page = 'monhealth';
+        st.clientId = parts[2];
+      } else {
+        st.page = 'monitoring';
+        st.clientId = null;
+      }
       closePop();
       render();
       return;
@@ -6229,6 +6473,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && st.page === 'preassess' && st.clientId) h = '#clients/' + st.clientId + '/pre-assessment';
     else if (st.ctx === 'firm' && st.page === 'finishsetup' && st.clientId) h = '#clients/' + st.clientId + '/finish';
     else if (st.ctx === 'firm' && st.page === 'clientdetail' && st.clientId) h = '#clients/' + st.clientId + (st.detailTab && st.detailTab !== 'work' ? '/' + st.detailTab : '');
+    else if (st.ctx === 'firm' && st.page === 'monhealth' && st.clientId) h = '#monitoring/health/' + st.clientId;
     else if (st.ctx === 'firm' && st.page === 'monitoring') h = '#monitoring';
     else if (st.ctx === 'firm' && st.page === 'monthclose') h = '#month-close';
     else if (st.ctx === 'firm' && st.page === 'firmsettings') h = '#settings';
