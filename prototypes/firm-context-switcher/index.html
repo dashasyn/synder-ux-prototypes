@@ -728,11 +728,22 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     try { localStorage.removeItem('fcs-dir-v10'); } catch (e) {}
     goOnboarding('home');
   }
+  function importAccounting() {
+    const source = ob && ob.source;
+    if (source === 'xero') return 'Xero';
+    if (source === 'upload' || source === 'skip') return null;
+    return 'QuickBooks';
+  }
+  function clientFromImport(c) {
+    const accounting = importAccounting();
+    const base = { id: c.id, name: c.name, company: c.name, integrations: [], issues: [], syncing: false, pay: null, license: 'None' };
+    if (!accounting) {
+      return Object.assign(base, { ledger: null, books: ['grey', 'Not set up'], month: null, setup: false, connected: false, accounting: null, onboarding: 'none', setupState: 'Not set up' });
+    }
+    return Object.assign(base, { ledger: accounting, books: ['green', 'Healthy'], month: 'Oct 2026', setup: true, connected: true, accounting: accounting, onboarding: 'done', setupState: 'Ready', checked: '' });
+  }
   function finishOnboarding(entries) {
-    const clients = (entries || []).map((c) => ({
-      id: c.id, name: c.name, ledger: null, pay: null,
-      books: ['grey', 'Not set up'], month: null, setup: false
-    }));
+    const clients = (entries || []).map(clientFromImport);
     SCENARIOS.firm.clients = clients;
     FIRM.name = ob.firmName;
     if (ob.source === 'xero') ob.firmBooks = 'xero';
@@ -864,10 +875,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const added = (entries || []).filter((c) => !have.has(c.id));
     added.forEach((c) => {
       if (alreadyInFirm(c)) return;
-      sc().clients.push({
-        id: c.id, name: c.name, ledger: null, pay: null, books: ['grey', 'Not set up'], month: null,
-        setup: false, license: 'None', setupState: 'Not set up', connected: false, integrations: [], issues: [], syncing: false
-      });
+      sc().clients.push(clientFromImport(c));
     });
     const fresh = sc().clients.filter((c) => added.some((a) => a.id === c.id));
     if (ob) {
@@ -3970,8 +3978,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return n;
   }
   function monitorOwner(c) {
-    const n = monHash((c && c.id) + '|' + (c && c.name) + '|' + monYearNum() + '-' + monMonthNum());
-    return MON_OWNERS[n % MON_OWNERS.length];
+    if (c && c.owner) return c.owner;
+    return MON_OWNERS[monHash(c && c.id) % MON_OWNERS.length];
   }
   function monRoster() { return listedClients(); }
   function monProfile(hash) {
@@ -5706,7 +5714,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
     const monSize = $('monPageSize');
     if (monSize) monSize.onchange = () => { st.monPageSize = Number(monSize.value); st.monPage = 0; renderMain(); };
-    bindClick('monImport', openPicker);
+    bindClick('monImport', () => { if (ob) ob.source = 'qbo'; openPicker(); });
     bindClick('monClear', () => { st.monQ = ''; st.monPage = 0; renderMain(); });
     bindClick('monClearToggle', () => { st.monClearOpen = !st.monClearOpen; renderMain(); });
     m.querySelectorAll('[data-mon-work]').forEach((b) => b.onclick = (e) => {
