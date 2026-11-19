@@ -451,11 +451,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
-    <div class="seg" id="actSeg" aria-label="Acting as">
-      <button type="button" data-act="Admin">Admin</button>
-      <button type="button" data-act="Manager">Manager</button>
-      <button type="button" data-act="Member">Member</button>
-    </div>
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
@@ -4182,18 +4177,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return '—';
   }
   const CLOSE_MONTHS = MONTH_NAMES;
-  function closeMonthNum() {
-    const now = currentPeriod();
-    const month = st && st.closeMonthNum ? st.closeMonthNum : 10;
-    const year = st && st.closeYear ? st.closeYear : 2026;
-    const max = year < now.year ? 12 : now.month;
-    return Math.max(1, Math.min(max, month));
-  }
-  function closeYearNum() {
-    const now = currentPeriod();
-    const year = st && st.closeYear ? st.closeYear : 2026;
-    return Math.max(2025, Math.min(now.year, year));
-  }
+  const CLOSE_YEARS = [2025, 2026, 2027];
+  function closeMonthNum() { return st && st.closeMonthNum ? st.closeMonthNum : 10; }
+  function closeYearNum() { return st && st.closeYear ? st.closeYear : 2025; }
   function closeMonthName(month) { return CLOSE_MONTHS[(month || closeMonthNum()) - 1] || 'October'; }
   function monthHasEnded(year, month) {
     const now = currentPeriod();
@@ -4211,27 +4197,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { label: summary.label || 'All good' };
   }
   function seedTie(c, month, year) {
-    const ended = monthHasEnded(year, month);
-    const beforeWorking = year < 2026 || (year === 2026 && month < 10);
-    const octoberClosed = !!c.accounting && c.monthStatus === 'Closed' && month === 10 && year === 2026;
-    const closed = !!c.accounting && ended && (beforeWorking || octoberClosed);
-    const review = !!c.accounting && !closed && c.monthStatus === 'In review' && month === 10 && year === 2026;
-    const checks = {};
-    const checklist = firmChecklist.map((row) => ({ id: row.id, label: row.label, required: !!row.required }));
-    if (closed) {
-      checklist.forEach((row) => { checks[row.id] = { done: true, note: '', by: 'Ignat P.', at: 'Oct 31, 14:02', required: row.required, label: row.label }; });
-    }
+    const closed = !!c.accounting && c.monthStatus === 'Closed' && month === 10 && year === 2025;
+    let sync = 'passed';
+    let recon = 'passed';
+    if (!c.accounting) { sync = 'unchecked'; recon = 'unchecked'; }
+    else if (!closed && (hasHealthIssues(c) || connectionLost(c))) { sync = 'failed'; recon = 'unchecked'; }
+    else if (!closed && (c.id.charCodeAt(c.id.length - 1) + month) % 2 === 0) recon = 'unchecked';
     return {
-      sync: realSyncState(c),
-      recon: closed ? 'passed' : (!c.accounting ? 'na' : 'unchecked'),
-      reconResult: closed ? { accounts: 'Checking', balance: 12480.22, asOf: 'Oct 31, 2026' } : null,
-      closed,
-      review,
-      checks,
-      checklist: closed ? checklist : null,
-      resolved: null,
-      healthAtClose: closed ? healthSnapshot(c) : null,
-      events: closed ? [{ type: 'close', who: 'Ignat P.', at: 'Oct 31, 2026, 16:40 (UTC+2)', reason: '' }] : []
+      sync, recon, closed, review: false, checks: {}, events: closed ? [{ type: 'close', who: 'Ignat P.', at: 'Oct 31, 2025, 16:40 (UTC+2)', reason: '' }] : []
     };
   }
   function tieRecord(c, month, year) {
@@ -4242,7 +4215,6 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (!c.tie) c.tie = {};
     if (!c.tie[key]) c.tie[key] = seedTie(c, month, year);
     const rec = c.tie[key];
-    if (!rec.closed) rec.sync = realSyncState(c);
     if (!rec.checks) rec.checks = {};
     if (!rec.events) rec.events = [];
     return rec;
@@ -4250,8 +4222,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function shownClose(c) {
     const month = closeMonthNum();
     const year = closeYearNum();
-    const item = periodList().find((row) => row.year === year && row.month === month) || periodList()[0];
-    return { num: item.month, year: item.year, label: item.label, short: item.short, rec: tieRecord(c, item.month, item.year) };
+    return { num: month, year, label: closeMonthName(month) + ' ' + year, short: closeMonthName(month), rec: tieRecord(c, month, year) };
   }
   function firmPeriodChecks(c, rec) {
     const source = rec.closed && rec.checklist && rec.checklist.length ? rec.checklist : firmChecklist.concat(c.extraChecks || []);
@@ -4341,15 +4312,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (rec.review) return 'In review';
     return 'Open';
   }
-  function tieChip(item) {
-    const label = item.label;
-    const state = item.state;
-    const tip = item.tip || label;
-    if (state === 'na') return tipChip('grey', label + ' · Not applicable', tip);
-    if (state === 'cant') return tipChip('grey', label + " · Can't check", tip || cantCheckReason(item));
-    if (state === 'failed') return tipChip('red', label + ' · Failed', tip);
-    if (state === 'unchecked') return tipChip('grey', label + ' · Not checked', tip);
-    return tipChip('green', label + ' · Passed', tip);
+  function tieChip(label, state) {
+    if (state === 'failed') return `<span class="status status-red"><span class="material-icons icon-sm" aria-hidden="true">error_outline</span>${esc(label)} · Failed</span>`;
+    if (state === 'unchecked') return `<span class="status status-grey"><span class="material-icons icon-sm" aria-hidden="true">help_outline</span>${esc(label)} · Not checked</span>`;
+    return `<span class="status status-green"><span class="material-icons icon-sm" aria-hidden="true">check</span>${esc(label)} · Passed</span>`;
   }
   function closeActionHtml(next, id) {
     if (next.go === 'closed') {
@@ -4403,27 +4369,24 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const q = (st.closeQ || '').trim().toLowerCase();
     const list = listedClients().filter((c) => !q || c.name.toLowerCase().includes(q));
     const page = closePageModel(list);
-    const maxMonth = year < currentPeriod().year ? 12 : currentPeriod().month;
-    const monthOpts = CLOSE_MONTHS.slice(0, maxMonth).map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
-    const yearOpts = [];
-    for (let n = 2025; n <= currentPeriod().year; n++) yearOpts.push(`<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`);
+    const monthOpts = CLOSE_MONTHS.map((name, i) => `<option value="${i + 1}"${i + 1 === month ? ' selected' : ''}>${name}</option>`).join('');
+    const yearOpts = CLOSE_YEARS.map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
     const body = page.slice.map((c) => {
       const rec = tieRecord(c);
-      const unmet = gateUnmet(c);
-      const next = nextCloseAction(c);
-      const note = st.closeBlock === c.id && unmet.length ? `<tr><td colspan="4"><p class="form-error-msg">${esc(c.name)}: ${esc(unmet.join(', '))} ${unmet.length === 1 ? 'is' : 'are'} still required to close.</p></td></tr>` : '';
-      const chips = gateItems(c).map((item) => tieChip(item)).join('');
-      const action = closeActionHtml(next, c.id);
-      const review = rec.closed || !c.accounting ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
-      const reopen = rec.closed && canCloseBooks() ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
-      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${chips}</div></td><td>${progressHtml(c, month, year)} <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
+      const note = st.closeBlock === c.id ? `<tr><td colspan="4"><p class="form-error-msg">${esc(tieUnmet(rec).join('. ') + '.')}</p></td></tr>` : '';
+      const action = rec.closed
+        ? '<span class="status status-green">Closed</span>'
+        : `<button type="button" class="btn" data-close-month="${c.id}">Close ${esc(closeMonthName())}</button>`;
+      const review = rec.closed ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
+      const reopen = rec.closed ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
+      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${tieChip('Syncs', rec.sync)}${tieChip('Reconciliation', rec.recon)}</div></td><td><span class="text-body2">${tiePassed(rec)} of 2</span> <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients match.</td></tr>';
     return `<div class="flow-wide page-stack">
-      ${pageHeader('Month close', '', 'Closing ' + closeMonthName() + ' ' + year)}
+      ${pageHeader('Month close', '', "Check each client's books for the month and mark the month closed in Synder. Closing doesn't change anything in QuickBooks or Xero.")}
       <div class="d-flex align-center justify-between gap-16">
         <div class="d-flex align-center gap-16">
           <div><label class="form-label" for="closeMonthPick">Month</label><select class="select" id="closeMonthPick" aria-label="Month">${monthOpts}</select></div>
-          <div><label class="form-label" for="closeYearPick">Year</label><select class="select" id="closeYearPick" aria-label="Year">${yearOpts.join('')}</select></div>
+          <div><label class="form-label" for="closeYearPick">Year</label><select class="select" id="closeYearPick" aria-label="Year">${yearOpts}</select></div>
           <div><label class="form-label" for="closeSearch">Client name</label><input type="search" class="input-search" id="closeSearch" placeholder="Search by client name..." value="${esc(st.closeQ || '')}" aria-label="Client name" /></div>
         </div>
         <button type="button" class="btn-outlined" id="checkAllClose">Check all clients</button>
@@ -4433,19 +4396,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     </div>`;
   }
   function healthReportBlock(c) {
-    const shown = c && c.accounting ? shownClose(c) : null;
-    const atClose = shown && shown.rec.closed && shown.rec.healthAtClose ? `<p class="text-body2">Health at close: ${esc(shown.rec.healthAtClose.label)}</p>` : '';
     if (c && c.checking) return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">Checking…</p><p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
     if (!isQuickBooks(c) || connectionLost(c)) {
       const note = !c || !c.accounting ? 'Books not connected' : (!isQuickBooks(c) ? 'Xero, not supported yet' : 'Connection lost');
-      return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">—</p><p class="text-body2">${note}</p>${atClose}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
+      return `<div class="box box--white page-stack"><h2 class="text-h2">Health report</h2><p class="text-body2">—</p><p class="text-body2">${note}</p><p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
     }
     const health = healthModel(c);
     const lines = (health ? health.checks : []).map((check) => {
       const chip = check.failed ? '<span class="status status-red">Failed</span>' : '<span class="status status-green">Passed</span>';
       return `<div class="d-flex align-center justify-between gap-8"><span class="tooltip-wrap"><span class="text-body2" tabindex="0">${esc(check.short)}</span><span class="tooltip" role="tooltip">${esc(check.detail)}</span></span>${chip}</div>`;
     }).join('');
-    return `<div class="box box--white page-stack"><div class="d-flex align-center justify-between gap-8"><h2 class="text-h2">Health report</h2><button type="button" class="btn-outlined" id="diagnoseBtn">Diagnose</button></div>${lines}${atClose}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
+    return `<div class="box box--white page-stack"><div class="d-flex align-center justify-between gap-8"><h2 class="text-h2">Health report</h2><button type="button" class="btn-outlined" id="diagnoseBtn">Diagnose</button></div>${lines}<p class="text-body2">Last checked ${esc(lastCheckedLabel(c))}</p></div>`;
   }
   function diagnoseFail(fail, issue) {
     const undeposited = fail.short === 'Undeposited';
@@ -4481,10 +4442,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const shown = shownClose(c);
     const month = { label: shown.label, short: shown.short };
     const rec = shown.rec;
-    const progress = gateProgress(c, shown.num, shown.year);
-    const statusName = closeState(c, rec);
     const periodChecks = firmPeriodChecks(c, rec);
-    const monthChip = statusName === 'Closed' ? 'green' : (statusName === 'In review' ? 'yellow' : 'grey');
     let details = '';
     if (st.profileEdit) {
       const p = c.firmProfile || {};
@@ -4495,7 +4453,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     } else {
       details = `<p class="text-body2">${esc(c.firmProfile.contact || c.name)}. <button type="button" class="link" id="addProfile">Add client details</button></p>`;
     }
-    const checks = periodChecks.map((chk) => `<div class="d-flex align-center gap-8 flex-wrap"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><span>${esc(chk.label)}</span></label>${chk.required ? '<span class="status status-grey">Required</span>' : ''}${chk.by ? `<span class="text-body2 text-secondary">${esc(chk.by + ', ' + chk.at)}</span>` : ''}${chk.note ? `<span class="text-body2">${esc(chk.note)}</span>` : ''}<button type="button" class="link" data-note-open="${chk.id}">${chk.note ? 'Edit note' : 'Add note'}</button>${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="link" data-save-note="${chk.id}">Save note</button>` : ''}</div>`).join('');
+    const checks = periodChecks.map((chk) => `<div class="d-flex align-center gap-8 flex-wrap"><label class="checkbox-wrap"><input class="checkbox" type="checkbox" data-check="${chk.id}" id="chk-${chk.id}"${chk.done ? ' checked' : ''}><span>${esc(chk.label)}</span></label>${chk.required ? '<span class="status status-grey">Required</span>' : ''}${chk.note ? `<span class="text-body2">${esc(chk.note)}</span>` : ''}<button type="button" class="link" data-note-open="${chk.id}">${chk.note ? 'Edit note' : 'Add note'}</button>${st.openNote === chk.id ? `<input class="input" id="note-${chk.id}" placeholder="Add note"><button type="button" class="link" data-save-note="${chk.id}">Save note</button>` : ''}</div>`).join('');
     const notes = c.monthNotes.filter((n) => n.month === month.label).map((n) => `<p class="text-body2">${esc(n.text)} <span class="text-secondary">${esc(n.period)}</span></p>`).join('');
     const connRows = c.accounting ? connectionRows(c) : [];
     const connBad = connRows.filter((row) => row.label !== 'Connected');
@@ -4504,19 +4462,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ? connBad.map((row) => `<div class="d-flex align-center justify-between gap-8"><p class="text-body2">${brandMark(row.logo, 18)} ${esc(row.name)}</p><span class="status status-yellow">Connection lost</span></div>`).join('')
       : '';
     const closeRow = (title, desc, chip, kind, extra) => `<div class="d-flex align-center justify-between gap-16"><div><p class="text-body2">${title}</p><p class="text-caption">${desc}</p>${extra || ''}</div><span class="status status-${kind}">${chip}</span></div>`;
-    const syncCopy = !c.accounting ? null : (rec.sync === 'failed' ? { desc: connectionLost(c) ? 'Connection lost, so syncs did not run.' : 'Syncs failed in this period.', chip: 'Failed', kind: 'red' } : (rec.sync === 'unchecked' ? { desc: 'Not checked yet.', chip: 'Not checked', kind: 'grey' } : { desc: 'Syncs passed in this period.', chip: 'Passed', kind: 'green' }));
-    const reconCopy = !c.accounting ? null : (rec.recon === 'failed' ? { desc: 'Reconciliation failed in this period.', chip: 'Failed', kind: 'red' } : (rec.recon === 'unchecked' ? { desc: 'Not checked yet.', chip: 'Not checked', kind: 'grey' } : { desc: 'Reconciliation passed in this period.', chip: 'Passed', kind: 'green' }));
+    const syncCopy = !c.accounting ? null : (rec.sync === 'failed' ? { desc: 'Syncs failed.', chip: 'Failed', kind: 'red' } : (rec.sync === 'unchecked' ? { desc: 'Not checked.', chip: 'Not checked', kind: 'grey' } : { desc: 'Syncs passed.', chip: 'Passed', kind: 'green' }));
+    const reconCopy = !c.accounting ? null : (rec.recon === 'failed' ? { desc: 'Reconciliation failed.', chip: 'Failed', kind: 'red' } : (rec.recon === 'unchecked' ? { desc: 'Not checked.', chip: 'Not checked', kind: 'grey' } : { desc: 'Reconciliation passed.', chip: 'Passed', kind: 'green' }));
     const evidence = !c.accounting
       ? '<p class="text-body2">Not set up for this client.</p>'
       : closeRow('Syncs', syncCopy.desc, syncCopy.chip, syncCopy.kind) + closeRow('Reconciliation', reconCopy.desc, reconCopy.chip, reconCopy.kind) + '<p class="text-body2">Daily summaries, Mappings, and Revenue recognition are not set up for this client.</p>';
-    const history = periodList().map((item) => {
-      const rowRec = tieRecord(c, item.month, item.year);
-      const rowProgress = gateProgress(c, item.month, item.year);
-      const rowStatus = closeState(c, rowRec);
-      const kind = rowStatus === 'Closed' ? 'green' : (rowStatus === 'In review' ? 'yellow' : 'grey');
-      const healthAt = rowRec.closed && rowRec.healthAtClose ? rowRec.healthAtClose.label : '—';
-      const events = (rowRec.events || []).map((ev) => ev.type === 'close' ? 'Closed by ' + ev.who + ', ' + ev.at : (ev.type === 'reopen' ? 'Reopened by ' + ev.who + ', ' + ev.at + (ev.reason ? ' — ' + ev.reason : '') : 'Reviewed by ' + ev.who + ', ' + ev.at + ' — ' + (ev.reason || ''))).join('; ') || '—';
-      return `<tr><td>${esc(item.label)}</td><td><span class="status status-${kind}">${esc(rowStatus)}</span></td><td>${esc(rowProgress.label)}</td><td>${esc(healthAt)}</td><td>${esc(events)}</td><td>${esc(lastCheckedLabel(c))}</td></tr>`;
+    const history = Object.keys(c.tie || {}).sort().map((key) => {
+      const rowRec = c.tie[key];
+      const parts = key.split('-');
+      const label = closeMonthName(Number(parts[1])) + ' ' + parts[0];
+      const events = (rowRec.events || []).map((ev) => ev.type === 'close' ? 'Closed by ' + ev.who + ', ' + ev.at : (ev.type === 'reopen' ? 'Reopened by ' + ev.who + ', ' + ev.at + (ev.reason ? ' — ' + ev.reason : '') : '')).filter(Boolean).join('; ') || '—';
+      const status = rowRec.closed ? '<span class="status status-green">Closed</span>' : '<span class="text-body2">Open</span>';
+      return `<tr><td>${esc(label)}</td><td>${status}</td><td>${tiePassed(rowRec)} of 2</td><td>${esc(events)}</td></tr>`;
     }).join('');
     return `<div class="page-stack">
       ${healthReportBlock(c)}
@@ -4526,17 +4483,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
           <button type="button" class="btn-icon" id="monthPrev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button>
           <span class="text-h2">${esc(month.label)}</span>
           <button type="button" class="btn-icon" id="monthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>
-          <span class="status status-${monthChip}">${esc(statusName)}</span>
         </div>
         <div class="d-flex align-center gap-8 flex-wrap">
-          ${closeActionHtml(nextCloseAction(c, shown.num, shown.year), c.id)}
+          ${rec.closed ? '<span class="status status-green">Closed</span>' : `<button type="button" class="btn" data-close-month="${c.id}">Close ${esc(month.short)}</button>`}
           <button type="button" class="link" id="nextClient">Next client</button>
         </div>
       </div>
-      <p>${progressHtml(c, shown.num, shown.year)}</p>
-      ${gateItems(c, shown.num, shown.year).map((item) => `<div class="d-flex align-center justify-between gap-8"><span class="text-body2">${esc(item.label)}${item.required ? '' : ' <span class="text-caption text-secondary">Optional</span>'}</span><span class="text-body2">${item.state === 'passed' ? 'Passed' : (item.state === 'failed' ? 'Failed' : (item.state === 'na' ? 'Not applicable' : (item.state === 'cant' ? "Can't check" : 'Not checked')))}</span></div>`).join('')}
+      <p class="text-body2">${tiePassed(rec)} of 2</p>
+      <div class="d-flex align-center gap-8 flex-wrap">${tieChip('Syncs', rec.sync)}${tieChip('Reconciliation', rec.recon)}</div>
       </div>
-      <p class="form-error-msg" id="closeNeed" hidden></p>
+      ${st.closeBlock === c.id ? `<p class="form-error-msg">${esc(tieUnmet(rec).join('. ') + '.')}</p>` : ''}
       ${details}
       <div class="d-flex gap-16">
         <div class="flex-1 page-stack">
@@ -4553,7 +4509,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         </div>
       </div>
       <p><button type="button" class="link" id="showHistory">${st.historyOpen ? 'Hide history' : 'History'}</button></p>
-      ${st.historyOpen ? `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th></tr></thead><tbody>${history}</tbody></table></div>` : ''}
+      ${st.historyOpen ? `<div class="table-wrap"><table class="synder-table"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Activity</th></tr></thead><tbody>${history}</tbody></table></div>` : ''}
     </div>`;
   }
   function clientBillingTab() {
@@ -5352,7 +5308,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       else st.closePage = pages - 1;
       renderMain();
     });
-    bindClick('checkAllClose', checkAllClients);
+    bindClick('checkAllClose', checkAllMonth);
     m.querySelectorAll('[data-mon]').forEach((tr) => bindOpenRow(tr, () => openDetails(tr.dataset.mon, 'monitoring')));
     m.querySelectorAll('[data-mon-open]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.monOpen, 'monitoring'); });
     m.querySelectorAll('[data-mon-fix]').forEach((b) => b.onclick = (e) => {
@@ -5397,12 +5353,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-close-month]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const c = findOrg(b.dataset.closeMonth);
-      if (!c || !c.accounting) return;
-      const rec = tieRecord(c);
-      const unmet = gateUnmet(c);
-      if (unmet.length) { st.closeBlock = c.id; renderMain(); return; }
-      rec.closed = true;
-      c.monthStatus = 'Closed';
+      if (!c) return;
+      if (!recordClose(c)) { st.closeBlock = c.id; renderMain(); return; }
       st.closeBlock = '';
       renderMain();
     });
@@ -5414,7 +5366,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       tieRecord(c).review = true;
       showKitToast(c.name + ' marked in review');
     });
-    m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openReconDialog(b.dataset.startRecon); });
+    m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.startRecon); });
     m.querySelectorAll('[data-close-details]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.closeDetails); });
     m.querySelectorAll('[data-open-work]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.openWork); });
     m.querySelectorAll('[data-approve-person]').forEach((b) => b.onclick = (e) => {
@@ -6309,37 +6261,39 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
   });
-  function paintAct() {
-    const role = (st && st.viewerRole) || 'Admin';
-    document.querySelectorAll('#actSeg button').forEach((b) => b.classList.toggle('active', b.dataset.act === role));
-  }
-  document.querySelectorAll('#actSeg button').forEach((b) => b.onclick = () => {
-    if (st) st.viewerRole = b.dataset.act;
-    paintAct();
-    if (typeof mode !== 'undefined' && mode !== 'onboarding') render();
-  });
-  paintAct();
   function shiftSharedMonth(dir) {
-    const list = periodList();
-    const index = list.findIndex((item) => item.year === closeYearNum() && item.month === closeMonthNum());
-    const next = list[Math.max(0, Math.min(list.length - 1, (index < 0 ? 0 : index) + dir))];
-    if (!next) return;
-    st.closeMonthNum = next.month;
-    st.closeYear = next.year;
+    let month = closeMonthNum() + dir;
+    let year = closeYearNum();
+    if (month < 1) { month = 12; year -= 1; }
+    if (month > 12) { month = 1; year += 1; }
+    if (year < 2025 || year > 2027) return;
+    st.closeMonthNum = month;
+    st.closeYear = year;
     st.closeBlock = '';
+    renderMain();
+  }
+  function checkAllMonth() {
+    listedClients().forEach((c) => {
+      if (!c.accounting) return;
+      const rec = tieRecord(c);
+      if (rec.closed) return;
+      if (rec.sync === 'unchecked') rec.sync = 'passed';
+      if (rec.recon === 'unchecked') rec.recon = 'passed';
+    });
+    showKitToast('Checked all clients');
     renderMain();
   }
   function recordClose(c, month, year) {
     month = month || closeMonthNum();
     year = year || closeYearNum();
     const rec = tieRecord(c, month, year);
-    if (!canCloseBooks() || !monthHasEnded(year, month) || firstOpenEarlier(c, month, year) || gateUnmet(c, month, year).length || blocksClose(c) && !(rec.resolved && rec.resolved.reason) || connectionLost(c)) return false;
+    if (rec.closed) return true;
+    if (tieUnmet(rec).length) return false;
     rec.closed = true;
     rec.review = false;
-    rec.healthAtClose = healthSnapshot(c);
-    rec.checklist = firmChecklist.concat(c.extraChecks || []).map((row) => ({ id: row.id, label: row.label, required: !!row.required }));
     rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
     c.monthStatus = 'Closed';
+    showKitToast(closeMonthName(month) + ' closed');
     return true;
   }
   function openResolveDialog(id) {
@@ -6376,18 +6330,18 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     };
   }
   function openReopenDialog(id) {
-    if (!canCloseBooks()) return;
     const c = findOrg(id);
     if (!c) return;
     const rec = tieRecord(c);
-    const { modal, close } = dialogShell('Reopen ' + esc(closeMonthName()) + ' ' + closeYearNum(), '<p class="text-body2">' + esc(c.name) + ' goes back to Open for this month.</p><div class="form-field"><label class="form-label form-label-required" for="reopenReason">Reason</label><textarea class="input" id="reopenReason"></textarea></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reopenSave">Reopen</button>');
+    const { modal, close } = dialogShell('Reopen ' + esc(closeMonthName()) + ' ' + closeYearNum(), '<p class="text-body2">' + esc(c.name) + ' goes back to Open for this month.</p><div class="form-field"><label class="form-label" for="reopenReason">Reason</label><textarea class="input" id="reopenReason"></textarea></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reopenSave">Reopen</button>');
     modal.querySelector('#reopenSave').onclick = () => {
       const input = modal.querySelector('#reopenReason');
-      if (!(input.value || '').trim()) { fieldError(input, 'Required'); return; }
+      const reason = (input && input.value || '').trim();
       rec.closed = false;
       rec.review = false;
       c.monthStatus = 'Open';
-      rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason: input.value.trim() });
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason });
       close();
       renderMain();
     };
