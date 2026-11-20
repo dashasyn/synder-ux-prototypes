@@ -799,8 +799,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const src = (acct, name) => acct + ' · ' + name;
     return [
       Object.assign({ id: 'e1', name: 'Harbor Coffee Co', company: 'Harbor Coffee Co LLC' }, on('QuickBooks', ['Stripe', 'PayPal', 'Shopify'], [], 'Essential')),
-      Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC' }, on('QuickBooks', four.slice(), [
-        { key: 'uncategorized', count: 3, amount: 842.15, accounts: 'Uncategorized Expense', equity: 'Opening Balance Equity at zero', source: src('QuickBooks', 'Tidewater Dental LLC'), items: [{ name: 'Office Depot', amount: 214.40 }, { name: 'Unknown card', amount: 88.00 }, { name: 'Supplies', amount: 539.75 }] }
+      Object.assign({ id: 'e2', name: 'Tidewater Dental', company: 'Tidewater Dental LLC', syncFails: [
+        { id: 'sy0', integration: 'Stripe', name: 'Stripe payout', amount: 214.40, date: 'Oct 3, 2025', reason: 'The connection timed out.', kind: 'timeout', retry: 'ok' },
+        { id: 'sy1', integration: 'Shopify', name: 'Shopify order', amount: 88, date: 'Oct 18, 2025', reason: 'The amount does not match the books.', kind: 'mismatch' },
+        { id: 'sy2', integration: 'PayPal', name: 'PayPal fee', amount: 40, date: 'Sep 9, 2025', reason: 'The connection timed out.', kind: 'timeout', retry: 'fail' }
+      ] }, on('QuickBooks', four.slice(), [
+        { key: 'uncategorized', count: 3, amount: 842.15, accounts: 'Uncategorized Expense', equity: 'Opening Balance Equity at zero', source: src('QuickBooks', 'Tidewater Dental LLC'), items: [{ name: 'Office Depot', amount: 214.40, date: 'Oct 3, 2025' }, { name: 'Unknown card', amount: 88.00, date: 'Oct 18, 2025' }, { name: 'Supplies', amount: 539.75, date: 'Sep 22, 2025' }] }
       ], 'Pro')),
       Object.assign({ id: 'e3', name: 'Northline Outfitters', company: 'Northline Outfitters LLC' }, on('QuickBooks', four.slice(), [], 'Premium')),
       Object.assign({ id: 'e4', name: 'Brightpath Studio' }, off),
@@ -812,7 +816,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ], 'Pro')),
       Object.assign({ id: 'e8', name: 'Kestrel Analytics', pre: { status: 'done', outcome: 'gap', period: 'Oct 1 - 31, 2026', history: [{ status: 'done', outcome: 'ok', period: 'Sep 1 - 30, 2026' }] } }, off),
       Object.assign({ id: 'e9', name: 'Lumen Dental Lab', company: 'Lumen Dental Lab LLC' }, on('QuickBooks', [], [
-        { key: 'undeposited', unapplied: 24, funds: 0, older: 10, amount: 3207.87, account: 'Undeposited Funds', customers: ['Harbor Dental Group', 'Northside Clinic', 'Oak Family Dentistry'], source: src('QuickBooks', 'Lumen Dental Lab LLC'), items: [{ name: 'Harbor Dental Group', amount: 640.00 }, { name: 'Northside Clinic', amount: 1280.50 }, { name: 'Oak Family Dentistry', amount: 1287.37 }] }
+        { key: 'undeposited', unapplied: 24, funds: 0, older: 10, amount: 3207.87, account: 'Undeposited Funds', customers: ['Harbor Dental Group', 'Northside Clinic', 'Oak Family Dentistry'], source: src('QuickBooks', 'Lumen Dental Lab LLC'), items: [{ name: 'Harbor Dental Group', amount: 640.00, date: 'Oct 4, 2025' }, { name: 'Northside Clinic', amount: 1280.50, date: 'Oct 19, 2025' }, { name: 'Oak Family Dentistry', amount: 1287.37, date: 'Sep 12, 2025' }] }
       ], 'Premium')),
       Object.assign({ id: 'e10', name: 'Fable Coffee Roasters', company: 'Fable Coffee Roasters LLC' }, off),
       Object.assign({ id: 'e11', name: 'Pinecrest Realty', company: 'Pinecrest Realty LLC' }, on('Xero', ['Stripe', 'Shopify'], [
@@ -4025,32 +4029,29 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return { group: group, score: score };
   }
   function monBoard(c) {
-    if (!c || !isQuickBooks(c)) {
-      const xero = !!(c && c.accounting === 'Xero');
-      return { group: 'cant', severity: '', score: 0, trend: 'flat', delta: 0, issue: xero ? 'Xero, not supported yet' : 'Books not connected', tip: xero ? 'Health checks are available for QuickBooks only.' : 'Books not connected', logo: '' };
-    }
     const month = monMonthNum();
     const year = monYearNum();
-    const key = c.id + '|' + c.name;
-    const now = monProfile(monHash(key + '|' + year + '-' + month));
+    const rows = monthChecks(c, month, year).rows;
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
-    const prev = monProfile(monHash(key + '|' + prevYear + '-' + prevMonth));
-    const delta = now.score - prev.score;
-    const h = monHash(key + '|' + year + '-' + month);
-    const issues = {
-      needs: [
-        { issue: '3 expenses have no category', tip: 'Uncategorized and suspense items: 3 items in Uncategorized Expense.', logo: 'QuickBooks' },
-        { issue: "24 customer payments aren't matched to an invoice or deposit", tip: '24 unapplied payments, $3,207.87. Account: Undeposited Funds.', logo: 'QuickBooks' }
-      ],
-      waiting: [
-        { issue: 'Connection lost', tip: 'Stripe needs access again.', logo: 'Stripe' },
-        { issue: 'Connection lost', tip: 'QuickBooks needs access again.', logo: 'QuickBooks' }
-      ],
-      clear: [{ issue: '', tip: 'Uncategorized and Undeposited passed.', logo: '' }]
+    const prevRows = monthChecks(c, prevMonth, prevYear).rows;
+    const scoreOf = (list) => {
+      const req = list.filter((row) => row.required && row.blocks !== false);
+      if (!req.length) return 0;
+      return Math.round(10 * req.filter((row) => row.done).length / req.length);
     };
-    const pick = issues[now.group][h % issues[now.group].length];
-    return { group: now.group, severity: now.group === 'needs' ? 'risk' : (now.group === 'waiting' ? 'watch' : 'healthy'), score: now.score, trend: delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat'), delta: Math.abs(delta), issue: pick.issue, tip: pick.tip, logo: pick.logo };
+    const score = scoreOf(rows);
+    const delta = score - scoreOf(prevRows);
+    const open = rows.filter((row) => row.required && row.blocks !== false && !row.done);
+    let group = 'clear';
+    if (!c || !c.accounting) group = 'cant';
+    else if (open[0] && open[0].id === 'connection') group = 'waiting';
+    else if (open.length) group = 'needs';
+    else if (!isQuickBooks(c)) group = 'cant';
+    const top = open[0];
+    const logo = top && top.id === 'connection' ? (top.sourceName || '') : (top && isQuickBooks(c) ? 'QuickBooks' : '');
+    const severity = group === 'needs' ? 'risk' : (group === 'waiting' ? 'watch' : (group === 'clear' ? 'healthy' : ''));
+    return { group: group, severity: severity, score: score, trend: delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat'), delta: Math.abs(delta), issue: top ? top.label : (group === 'cant' && c && c.accounting === 'Xero' ? "Can't check · not available for Xero" : (group === 'cant' ? 'Books not connected' : '')), tip: top ? (top.reason || top.label) : 'All checks passed.', logo: logo };
   }
   function monTrendText(board) {
     if (board.trend === 'up') return '↑ ' + board.delta + ' vs previous month';
@@ -4528,7 +4529,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const backLabel = st.from === 'monitoring' ? 'Back to monitoring' : (st.from === 'monthclose' ? 'Back to month close' : 'Back to clients');
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="${backHref}">${backLabel}</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientAccountingLine(c))}</p></div>${clientVariant === 'v2' ? '' : `<div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div>`}</div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientVariant === 'v2' ? v2Subtitle(c) : clientAccountingLine(c))}</p></div>${clientVariant === 'v2' ? '' : `<div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div>`}</div>
       ${tabHtml}
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : (clientVariant === 'v2' ? clientWorkImproved(c) : clientWorkTab(c, off)))}
     </div>`;
@@ -4583,22 +4584,90 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const summary = healthSummary(c);
     return { label: summary.label || 'All good' };
   }
+  const V2_ACCOUNTS = ['Advertising', 'Cost of goods sold', 'Meals and entertainment', 'Office supplies', 'Rent'];
+  const V2_MATCHES = ['Invoice 1041', 'Invoice 1042', 'Deposit Oct 31'];
+  function lostSourceName(c) {
+    if (!c) return 'QuickBooks';
+    if (c.userDisconnected || booksLost(c)) return c.accounting === 'Xero' ? 'Xero' : 'QuickBooks';
+    const lost = lostIntegrations(c);
+    if (lost.length) return lost[0].source;
+    return c.accounting === 'Xero' ? 'Xero' : 'QuickBooks';
+  }
+  function payoutPlatform(c) {
+    const pay = ['Stripe', 'PayPal', 'Square', 'Shopify', 'Amazon'];
+    const list = (c && c.integrations) || [];
+    return list.find((name) => pay.indexOf(name) >= 0) || list[0] || '';
+  }
+  function synderAsOf(c, rec) {
+    if (rec && rec.asOf) return rec.asOf;
+    if (c && c.checked && String(c.checked).trim()) return String(c.checked).trim();
+    return 'Nov 18, 2026, 9:14 (UTC+2)';
+  }
+  function dateInMonth(text, year, month) {
+    const match = String(text || '').match(/^([A-Za-z]+)\s+\d+,\s+(\d+)/);
+    if (!match) return false;
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return names.indexOf(match[1].slice(0, 3)) + 1 === month && Number(match[2]) === year;
+  }
+  function expenseSentence(n) {
+    return n === 1 ? '1 expense has no category' : n + ' expenses have no category';
+  }
+  function paymentSentence(n) {
+    return n === 1 ? "1 customer payment isn't matched to an invoice" : n + " customer payments aren't matched to an invoice";
+  }
+  function syncSentence(n) {
+    return n === 1 ? '1 sync failed' : n + ' syncs failed';
+  }
+  function reconSentence(c) {
+    const platform = payoutPlatform(c);
+    return platform ? 'Check that ' + platform + ' payouts match the bank' : 'Check that payouts match the bank';
+  }
+  function reconResultText(result) {
+    if (!result) return '';
+    return 'Reconciled · ' + result.account + ' · difference ' + money(result.difference || 0) + ' · ' + result.who + ' · ' + result.when;
+  }
+  function historyLine(ev) {
+    const who = ev.who || 'Ignat P.';
+    const when = ev.at || '';
+    if (ev.type === 'close') return 'Closed · ' + who + ' · ' + when;
+    if (ev.type === 'reopen') return 'Reopened · ' + who + ' · ' + when;
+    if (ev.type === 'review') return 'Marked in review · ' + who + ' · ' + when;
+    if (ev.type === 'open') return 'Back to open · ' + who + ' · ' + when;
+    if (ev.type === 'check') return (ev.done ? 'Marked done' : 'Marked not done') + ' · ' + (ev.label || 'Check') + ' · ' + who + ' · ' + when;
+    if (ev.type === 'resolve') return 'Resolved · ' + who + ' · ' + when;
+    return (ev.type || 'Event') + ' · ' + who + ' · ' + when;
+  }
+  function v2BooksBalance() { return 4280; }
   function seedTie(c, month, year) {
     const closed = !!c.accounting && c.monthStatus === 'Closed' && month === 10 && year === 2025;
-    let sync = 'passed';
-    let recon = 'passed';
-    if (!c.accounting) { sync = 'unchecked'; recon = 'unchecked'; }
-    else if (!closed && (hasHealthIssues(c) || connectionLost(c))) { sync = 'failed'; recon = 'unchecked'; }
-    else if (!closed && (c.id.charCodeAt(c.id.length - 1) + month) % 2 === 0) recon = 'unchecked';
+    const review = !closed && c.monthStatus === 'In review' && month === 10 && year === 2025;
+    const when = 'Nov 3, 2025, 16:40 (UTC+2)';
     const checks = {};
-    if (closed) {
+    const events = [];
+    let sync = 'unchecked';
+    let recon = 'unchecked';
+    const canPass = closed && isQuickBooks(c) && c.setup !== false && onboardingState(c) === 'done' && !connectionLost(c);
+    if (canPass) {
+      sync = 'passed';
+      recon = 'passed';
       firmChecklist.filter((row) => row.required && checklistApplies(row, c)).forEach((row) => {
-        checks[row.id] = { done: true, by: 'Ignat P.', at: 'Oct 31, 2025, 16:40 (UTC+2)' };
+        checks[row.id] = { done: true, by: 'Ignat P.', at: when };
+        events.push({ type: 'check', label: row.label, done: true, who: 'Ignat P.', at: when });
+      });
+    } else if (closed) {
+      firmChecklist.filter((row) => row.required && checklistApplies(row, c)).forEach((row) => {
+        checks[row.id] = { done: true, by: 'Ignat P.', at: when };
+        events.push({ type: 'check', label: row.label, done: true, who: 'Ignat P.', at: when });
       });
     }
-    return {
-      sync, recon, closed, review: false, checks: checks, events: closed ? [{ type: 'close', who: 'Ignat P.', at: 'Oct 31, 2025, 16:40 (UTC+2)', reason: '' }] : []
+    if (review) events.push({ type: 'review', who: 'Ignat P.', at: 'Nov 2, 2025, 11:05 (UTC+2)' });
+    if (closed) events.push({ type: 'close', who: 'Ignat P.', at: when, reason: '' });
+    const rec = {
+      sync: sync, recon: recon, closed: closed, review: review, checks: checks, events: events,
+      asOf: closed ? when : synderAsOf(c, null), syncChecked: canPass, uncatDone: canPass, fundsDone: canPass
     };
+    if (canPass) rec.reconResult = { account: (payoutPlatform(c) || 'Checking') + ' · Main', difference: 0, who: 'Synder', when: when };
+    return rec;
   }
   function tieRecord(c, month, year) {
     ensureWork(c);
@@ -4661,29 +4730,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return 'Not checked. Start reconciliation to record the account, statement balance, and as-of date.';
   }
   function gateItems(c, month, year) {
-    const rec = tieRecord(c, month, year);
-    const locked = !c.accounting ? 'na' : ((c.checking || connectionLost(c) || blocksClose(c)) ? 'cant' : '');
-    const uncat = healthIssue(c, 'uncategorized');
-    const funds = healthIssue(c, 'undeposited');
-    const items = [
-      { id: 'syncs', label: 'Syncs', state: locked || rec.sync, required: true, tip: rec.sync === 'failed' ? 'A sync failed in this period.' : 'Syncs reflect only a failed sync.' },
-      { id: 'recon', label: 'Reconciliation', state: locked || rec.recon, required: true, tip: reconTip(rec) },
-      { id: 'uncat', label: 'Uncategorized', state: locked || (uncat ? 'failed' : 'passed'), required: true, tip: uncatDetail(uncat), count: uncat ? uncat.count : 0 },
-      { id: 'funds', label: 'Undeposited', state: locked || (funds ? 'failed' : 'passed'), required: true, tip: fundsDetail(funds), count: funds ? funds.unapplied : 0 }
-    ];
-    firmPeriodChecks(c, rec).forEach((chk) => {
-      items.push({ id: chk.id, label: chk.label, state: locked || (chk.done ? 'passed' : 'unchecked'), required: !!chk.required, tip: chk.by ? chk.by + ', ' + chk.at : '', note: chk.note, by: chk.by, at: chk.at, kind: 'firm' });
+    return monthChecks(c, month, year).rows.map((row) => {
+      const blocks = row.blocks !== false && !!row.required;
+      const state = row.done ? 'passed' : (blocks ? 'unchecked' : 'na');
+      return { id: row.id, label: row.label, state: state, required: blocks, tip: row.reason || row.label, kind: row.kind === 'firm' ? 'firm' : row.kind, count: row.count || 0 };
     });
-    return items;
   }
   function gateLeft(c, month, year) {
     const rec = tieRecord(c, month, year);
     const waived = !!(rec.resolved && rec.resolved.reason);
-    const rank = { syncs: 0, uncat: 1, funds: 2 };
-    return gateItems(c, month, year).filter((item) => item.required && item.state !== 'passed' && item.state !== 'na' && !(item.state === 'cant' && waived)).sort((a, b) => {
-      const weight = (item) => item.kind === 'firm' ? 3 : (item.id === 'recon' ? 4 : (rank[item.id] == null ? 3 : rank[item.id]));
-      return weight(a) - weight(b);
-    });
+    return gateItems(c, month, year).filter((item) => item.required && item.state !== 'passed' && item.state !== 'na' && !(item.state === 'cant' && waived));
   }
   function gateProgress(c, month, year) {
     const items = gateItems(c, month, year).filter((item) => item.required);
@@ -4706,9 +4762,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     return null;
   }
   function actionForItem(item) {
+    if (item.id === 'connection') return { label: item.label, go: 'reconnect', outlined: true };
+    if (item.id === 'setup') return { label: 'Finish setup', go: 'connect', outlined: true };
     if (item.id === 'syncs') return { label: 'Fix syncs', go: 'work', outlined: true };
-    if (item.id === 'uncat') return { label: 'Review ' + (item.count || 0) + ' uncategorized', go: 'work', outlined: true };
-    if (item.id === 'funds') return { label: 'Review ' + (item.count || 0) + ' unapplied payments', go: 'work', outlined: true };
+    if (item.id === 'uncat') return { label: item.label, go: 'work', outlined: true };
+    if (item.id === 'funds') return { label: item.label, go: 'work', outlined: true };
     if (item.id === 'recon') return { label: 'Start reconciliation', go: 'recon', outlined: true };
     if (item.id === 'bank') return { label: 'Add bank statements', go: 'work', outlined: true };
     return { label: item.label, go: 'work', outlined: true };
@@ -4718,13 +4776,9 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     year = year || closeYearNum();
     const rec = tieRecord(c, month, year);
     if (!c.accounting) return { label: 'Connect', go: 'connect', outlined: true };
-    if (connectionLost(c)) return { label: 'Reconnect', go: 'reconnect', outlined: true };
     if (c.checking) return { label: 'Checking…', go: 'wait', outlined: true };
     if (rec.closed) return { label: 'Closed', go: 'closed', outlined: false };
     if (!monthHasEnded(year, month)) return { label: closeMonthName(month) + " hasn't ended", go: 'wait', outlined: true };
-    const earlier = firstOpenEarlier(c, month, year);
-    if (earlier) return { label: 'Close ' + earlier.short + ' first', go: 'earlier', outlined: true, month: earlier.month, year: earlier.year };
-    if (blocksClose(c) && !(rec.resolved && rec.resolved.reason)) return { label: 'Resolve', go: 'resolve', outlined: true };
     const left = gateLeft(c, month, year);
     if (left.length) return actionForItem(left[0]);
     if (!canCloseBooks()) return { label: 'Ask a manager to close', go: 'ask', outlined: true };
@@ -4753,9 +4807,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function progressHtml(c, month, year) {
     const progress = gateProgress(c, month, year);
     if (!c.accounting) return '<span class="text-body2">—</span>';
-    let left = progress.left;
-    if (connectionLost(c)) left = [{ id: 'connection', label: 'Connection lost' }];
-    else if (blocksClose(c) && !(tieRecord(c, month, year).resolved && tieRecord(c, month, year).resolved.reason)) left = [{ id: 'resolve', label: cantCheckReason(c) }];
+    const left = progress.left;
     const links = left.map((item) => `<button type="button" class="link" data-left="${esc(item.id)}" data-left-client="${c.id}">${esc(item.label)}</button>`).join(', ');
     return `<span class="text-body2">${progress.done} of ${progress.total} done${left.length ? '. Left: ' : ''}</span>${links ? ' ' + links : ''}`;
   }
@@ -4797,13 +4849,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const yearOpts = CLOSE_YEARS.map((n) => `<option value="${n}"${n === year ? ' selected' : ''}>${n}</option>`).join('');
     const body = page.slice.map((c) => {
       const rec = tieRecord(c);
-      const note = st.closeBlock === c.id ? `<tr><td colspan="4"><p class="form-error-msg">${esc(tieUnmet(rec).join('. ') + '.')}</p></td></tr>` : '';
+      const openTop = monthChecks(c, month, year).rows.filter((row) => row.required && row.blocks !== false && !row.done);
+      const note = st.closeBlock === c.id ? `<tr><td colspan="4"><p class="form-error-msg">${esc((gateLeft(c, month, year).map((item) => item.label).join('. ') || 'Something is still open') + '.')}</p></td></tr>` : '';
       const action = rec.closed
         ? '<span class="status status-green">Closed</span>'
         : `<button type="button" class="btn" data-close-month="${c.id}">Close ${esc(closeMonthName())}</button>`;
       const review = rec.closed ? '' : `<button type="button" class="dropdown-item" data-mark-review="${c.id}">Mark in review</button>`;
       const reopen = rec.closed ? `<button type="button" class="dropdown-item" data-reopen="${c.id}">Reopen</button>` : '';
-      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td><div class="d-flex align-center gap-8 flex-wrap">${tieChip('Syncs', rec.sync)}${tieChip('Reconciliation', rec.recon)}</div></td><td><span class="text-body2">${tiePassed(rec)} of 2</span> <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
+      const checkCell = rec.closed ? '<span class="status status-green">Closed</span>' : (openTop.length ? '<span class="text-body2">' + esc(openTop[0].label) + '</span>' : '<span class="status status-green">All done</span>');
+      return `<tr><td><button type="button" class="link" data-open-work="${c.id}">${esc(c.name)}</button></td><td>${checkCell}</td><td>${progressHtml(c, month, year)} <button type="button" class="link" data-close-details="${c.id}">details</button></td><td><div class="d-flex align-center justify-end gap-8">${action}<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="close-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-close-${c.id}"><button type="button" class="dropdown-item" data-open-work="${c.id}">Open client</button>${review}<button type="button" class="dropdown-item" data-start-recon="${c.id}">Start reconciliation</button>${reopen}</div></div></div></td></tr>${note}`;
     }).join('') || '<tr><td colspan="4" class="text-body2">No clients match.</td></tr>';
     return `<div class="flow-wide page-stack">
       ${pageHeader('Month close', '', "Check each client's books for the month and mark the month closed in Synder. Closing doesn't change anything in QuickBooks or Xero.")}
@@ -4983,61 +5037,154 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     st.v2Fix = '';
     render();
   }
-  function v2SyncItems(c, rec) {
-    if (rec.sync === 'passed') return [];
-    if (!rec.syncItems) {
-      const n = rec.sync === 'failed' ? 3 : 1;
-      const labels = ['Stripe payout', 'Shopify order', 'PayPal fee'];
-      const reasons = ['The payout did not post.', 'The order did not reach the books.', 'The fee did not match the books.'];
-      const shown = v2Shown(c);
-      rec.syncItems = [];
-      for (let i = 0; i < n; i++) rec.syncItems.push({ id: 'sy' + i, name: labels[i], amount: [214.40, 88, 540.15][i] || 120, date: shown.short.slice(0, 3) + ' ' + (3 + i * 8) + ', ' + shown.year, reason: reasons[i], open: true });
+  function v2Subtitle(c) {
+    if (!c || !c.accounting) return 'Accounting not connected';
+    if (connectionLost(c)) return lostSourceName(c) + ' connection lost';
+    if (c.setup === false || onboardingState(c) !== 'done') return 'Finish setup';
+    const books = c.accounting === 'QuickBooks' ? 'QuickBooks Online' : c.accounting;
+    return books + ' · Connected';
+  }
+  function monthSyncItems(c, rec, month, year) {
+    const key = 'syncItems';
+    if (!rec[key]) {
+      const source = (c.syncFails || []).filter((item) => dateInMonth(item.date, year, month));
+      rec[key] = source.map((item) => ({ id: item.id, name: item.name, amount: item.amount, date: item.date, reason: item.reason, kind: item.kind || 'timeout', retry: item.retry || 'ok', integration: item.integration || '', open: true }));
     }
-    return rec.syncItems.filter((item) => item.open);
+    return rec[key];
+  }
+  function monthBookItems(c, rec, kind, month, year) {
+    const listKey = kind === 'uncat' ? 'uncatOpen' : 'fundsOpen';
+    if (!rec[listKey]) {
+      const issue = healthIssue(c, kind === 'uncat' ? 'uncategorized' : 'undeposited');
+      const source = (issue && issue.items) || [];
+      rec[listKey] = source.filter((item) => !item.date || dateInMonth(item.date, year, month)).map((item, i) => ({ id: kind + i, name: item.name, amount: item.amount, date: item.date || '', open: true }));
+    }
+    return rec[listKey];
+  }
+  function closedStatus(row, rec, when) {
+    if (row.kind === 'firm') {
+      if (!row.done) return 'Not done';
+      const saved = (rec.checks || {})[row.id] || {};
+      return (saved.by || 'Ignat P.') + ' · ' + (saved.at || when);
+    }
+    if (row.id === 'recon' && rec.reconResult) return reconResultText(rec.reconResult);
+    if (row.done) return 'Synder, as of ' + (row.asOf || rec.asOf || when);
+    return row.reason || 'Not done';
+  }
+  function freezeClosedRow(row, rec, when) {
+    return {
+      id: row.id, label: row.label, caption: row.caption || '', reason: row.reason || '', status: closedStatus(row, rec, when),
+      required: !!row.required, done: !!row.done, kind: row.kind, blocks: row.blocks !== false && !!row.required,
+      asOf: row.asOf || '', sourceName: row.sourceName || '', count: row.count || 0
+    };
+  }
+  function buildMonthRows(c, rec, month, year) {
+    const rows = [];
+    const lost = connectionLost(c);
+    const src = lostSourceName(c);
+    const asOf = synderAsOf(c, rec);
+    const recheck = rec.recheck || {};
+    const xero = c.accounting === 'Xero';
+    const noBooks = !c.accounting;
+    const unfinished = !!(c.accounting && (c.setup === false || onboardingState(c) !== 'done'));
+    const canRun = !!(c.accounting && isQuickBooks(c) && !unfinished && !lost);
+    if (unfinished) rows.push({ id: 'setup', label: 'Finish setup', caption: '', reason: '', required: true, done: false, kind: 'setup', blocks: true, sourceName: src });
+    if (lost) rows.push({ id: 'connection', label: src + ' connection lost', caption: '', reason: '', required: true, done: false, kind: 'reconnect', blocks: true, sourceName: src });
+    const cant = (id, label, caption, reason) => rows.push({ id: id, label: label, caption: caption, reason: reason, asOf: asOf, required: false, done: false, kind: 'info', blocks: false });
+    const waiting = (id, label, caption) => rows.push({ id: id, label: label, caption: caption, reason: "Can't check · waiting for " + src, asOf: asOf, required: true, done: false, kind: 'wait', blocks: true });
+    if (noBooks) cant('syncs', 'Syncs', '', "Can't check · books not connected");
+    else if (xero) cant('syncs', 'Syncs', '', "Can't check · not available for Xero");
+    else if (unfinished) cant('syncs', 'Syncs', '', "Can't check · finish setup first");
+    else if (lost) waiting('syncs', 'Syncs', '');
+    else if (recheck.syncs) rows.push({ id: 'syncs', label: 'Syncs', caption: '', reason: 'Re-check needed', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true });
+    else {
+      const open = monthSyncItems(c, rec, month, year).filter((item) => item.open);
+      if (open.length) {
+        rec.sync = 'failed';
+        rows.push({ id: 'syncs', label: syncSentence(open.length), caption: 'Syncs', reason: '', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true, count: open.length });
+      } else if (rec.sync === 'passed' || rec.syncChecked) {
+        rec.sync = 'passed';
+        rows.push({ id: 'syncs', label: 'Syncs', caption: '', reason: '', asOf: asOf, required: true, done: true, kind: 'synder', blocks: true });
+      } else rows.push({ id: 'syncs', label: 'Syncs', caption: '', reason: 'Not run', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true });
+    }
+    const bookRow = (id, emptyLabel, caption, sentence, doneKey) => {
+      if (noBooks) { cant(id, emptyLabel, caption, "Can't check · books not connected"); return; }
+      if (xero) { cant(id, emptyLabel, caption, "Can't check · not available for Xero"); return; }
+      if (unfinished) { cant(id, emptyLabel, caption, "Can't check · finish setup first"); return; }
+      if (lost) { waiting(id, emptyLabel, caption); return; }
+      if (recheck[id]) { rows.push({ id: id, label: emptyLabel, caption: caption, reason: 'Re-check needed', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true }); return; }
+      const open = monthBookItems(c, rec, id, month, year).filter((item) => item.open);
+      if (open.length) rows.push({ id: id, label: sentence(open.length), caption: caption, reason: '', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true, count: open.length });
+      else {
+        rec[doneKey] = true;
+        rows.push({ id: id, label: emptyLabel, caption: caption, reason: '', asOf: asOf, required: true, done: true, kind: 'synder', blocks: true });
+      }
+    };
+    bookRow('uncat', 'Uncategorized', 'Uncategorized', expenseSentence, 'uncatDone');
+    bookRow('funds', 'Undeposited', 'Undeposited', paymentSentence, 'fundsDone');
+    if (noBooks) cant('recon', 'Reconciliation', 'Reconciliation', "Can't check · books not connected");
+    else if (xero) cant('recon', 'Reconciliation', 'Reconciliation', "Can't check · not available for Xero");
+    else if (unfinished) cant('recon', 'Reconciliation', 'Reconciliation', "Can't check · finish setup first");
+    else if (lost) waiting('recon', 'Reconciliation', 'Reconciliation');
+    else if (recheck.recon) rows.push({ id: 'recon', label: 'Reconciliation', caption: 'Reconciliation', reason: 'Re-check needed', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true });
+    else if (rec.recon === 'passed' && rec.reconResult) rows.push({ id: 'recon', label: 'Reconciliation', caption: 'Reconciliation', reason: reconResultText(rec.reconResult), asOf: asOf, required: true, done: true, kind: 'synder', blocks: true, status: reconResultText(rec.reconResult) });
+    else rows.push({ id: 'recon', label: reconSentence(c), caption: 'Reconciliation', reason: 'Not run', asOf: asOf, required: true, done: false, kind: 'synder', blocks: true });
+    if (!canRun && !xero && !noBooks && !unfinished && !lost) { /* QuickBooks that can run already handled */ }
+    firmPeriodChecks(c, rec).forEach((chk) => rows.push({ id: chk.id, label: chk.label, caption: "Your firm's check", reason: '', required: !!chk.required, done: !!chk.done, kind: 'firm', blocks: !!chk.required }));
+    return rows;
+  }
+  function monthChecks(c, month, year) {
+    const rec = tieRecord(c, month, year);
+    const shown = { num: month, year: year, label: closeMonthName(month) + ' ' + year, short: closeMonthName(month), rec: rec };
+    if (rec.closed && rec.snapshot && rec.snapshot.length) return { shown: shown, rows: rec.snapshot };
+    const rows = buildMonthRows(c, rec, month, year);
+    if (rec.closed) {
+      const when = ((rec.events || []).find((ev) => ev.type === 'close') || {}).at || 'Nov 3, 2025, 16:40 (UTC+2)';
+      rec.snapshot = rows.map((row) => freezeClosedRow(row, rec, when));
+      return { shown: shown, rows: rec.snapshot };
+    }
+    return { shown: shown, rows: rows };
+  }
+  function applyClose(c, month, year) {
+    const rec = tieRecord(c, month, year);
+    if (rec.closed) return;
+    const pack = monthChecks(c, month, year);
+    const when = stampLabel(new Date());
+    rec.asOf = when;
+    rec.snapshot = pack.rows.map((row) => freezeClosedRow(row, rec, when));
+    rec.closed = true;
+    rec.review = false;
+    if (!rec.events) rec.events = [];
+    rec.events.push({ type: 'close', who: actorName(), at: when, reason: '' });
+    c.monthStatus = 'Closed';
+  }
+  function applyReopen(c, month, year) {
+    const rec = tieRecord(c, month, year);
+    rec.closed = false;
+    rec.snapshot = null;
+    rec.review = false;
+    rec.recheck = { syncs: true, uncat: true, funds: true, recon: true };
+    rec.sync = 'unchecked';
+    rec.syncChecked = false;
+    rec.recon = 'unchecked';
+    rec.reconResult = null;
+    rec.uncatDone = false;
+    rec.fundsDone = false;
+    if (!rec.events) rec.events = [];
+    rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason: '' });
+    c.monthStatus = 'Open';
+  }
+  function v2SyncItems(c, rec) {
+    const shown = v2Shown(c);
+    return monthSyncItems(c, rec, shown.num, shown.year).filter((item) => item.open);
   }
   function v2BookItems(c, rec, key) {
-    const issue = healthIssue(c, key === 'uncat' ? 'uncategorized' : 'undeposited');
-    const doneKey = key === 'uncat' ? 'uncatDone' : 'fundsDone';
-    const listKey = key === 'uncat' ? 'uncatOpen' : 'fundsOpen';
-    if (rec[doneKey] || !issue) return [];
-    if (!rec[listKey]) {
-      const source = (issue.items && issue.items.length) ? issue.items : [{ name: key === 'uncat' ? 'Uncategorized Expense' : 'Undeposited Funds', amount: issue.amount || 0 }];
-      rec[listKey] = source.map((item, i) => ({ id: key + i, name: item.name, amount: item.amount, open: true }));
-    }
-    return rec[listKey].filter((item) => item.open);
-  }
-  function v2Unmatched(c, rec) {
-    if (!rec.unmatched) {
-      const shown = v2Shown(c);
-      rec.unmatched = 12 + (monHash(c.id + '|' + shown.year + '-' + shown.num) % 70);
-    }
-    return rec.unmatched;
-  }
-  function v2DoneLine(row, rec) {
-    if (row.kind === 'firm' && rec.checks[row.id] && rec.checks[row.id].by) return 'Done · ' + rec.checks[row.id].by + ' · ' + rec.checks[row.id].at;
-    const ev = (rec.events || []).find((item) => item.type === 'close');
-    if (ev) return 'Done · ' + ev.who + ' · ' + String(ev.at).split(',').slice(0, 2).join(',');
-    return 'Done';
+    const shown = v2Shown(c);
+    return monthBookItems(c, rec, key, shown.num, shown.year).filter((item) => item.open);
   }
   function v2Checks(c) {
     const shown = v2Shown(c);
-    const rec = shown.rec;
-    const lost = connectionLost(c);
-    const runningHealth = c.monRunning === 'health' || c.checking;
-    const runningRecon = c.monRunning === 'recon';
-    const rows = [];
-    if (lost) rows.push({ id: 'connection', label: (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks') + ' connection lost', source: 'Synder', required: true, done: false, running: false, kind: 'reconnect', reason: '' });
-    const syncOpen = v2SyncItems(c, rec);
-    rows.push({ id: 'syncs', label: 'Syncs', source: 'Synder', required: true, done: rec.sync === 'passed', running: false, kind: 'synder', reason: rec.sync === 'passed' ? '' : (lost ? 'Waiting for the connection' : (syncOpen.length + ' sync' + (syncOpen.length === 1 ? '' : 's') + ' failed')) });
-    rows.push({ id: 'recon', label: 'Reconciliation', source: 'Synder', required: true, done: rec.recon === 'passed' && !runningRecon, running: runningRecon, kind: 'synder', reason: rec.recon === 'passed' ? '' : ('Not run · ' + v2Unmatched(c, rec) + ' unmatched items') });
-    if (isQuickBooks(c)) {
-      const uncatOpen = v2BookItems(c, rec, 'uncat');
-      const fundsOpen = v2BookItems(c, rec, 'funds');
-      rows.push({ id: 'uncat', label: 'Uncategorized', source: 'Synder', required: true, done: !uncatOpen.length && !runningHealth, running: runningHealth, kind: 'synder', reason: uncatOpen.length ? (uncatOpen.length + ' items in Uncategorized') : '' });
-      rows.push({ id: 'funds', label: 'Undeposited', source: 'Synder', required: true, done: !fundsOpen.length && !runningHealth, running: runningHealth, kind: 'synder', reason: fundsOpen.length ? (fundsOpen.length + ' unapplied payments') : '' });
-    }
-    firmPeriodChecks(c, rec).forEach((chk) => rows.push({ id: chk.id, label: chk.label, source: 'Firm check', required: !!chk.required, done: !!chk.done, running: false, kind: 'firm', reason: '' }));
-    return { shown: shown, rows: rows };
+    return monthChecks(c, shown.num, shown.year);
   }
   function v2Head(c, fixing) {
     const shown = v2Shown(c);
@@ -5045,30 +5192,46 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const ended = monthHasEnded(shown.year, shown.num);
     const chip = monthStatusChip(rec.closed ? 'Closed' : (rec.review ? 'In review' : 'Open'));
     const next = v2AtNow(shown.num, shown.year) ? '<span class="btn-icon" aria-hidden="true"></span>' : '<button type="button" class="btn-icon" id="v2MonthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>';
-    const review = rec.closed ? '' : (rec.review ? '<button type="button" class="dropdown-item" id="v2Open">Back to open</button>' : '<button type="button" class="dropdown-item" id="v2Review">Mark in review</button>');
+    const review = rec.closed ? '' : (rec.review ? '<button type="button" class="dropdown-item" id="v2Open">Back to open</button>' : '<button type="button" class="dropdown-item" id="v2Review">Mark in review</button><p class="text-caption" style="padding: 0 12px 8px">Tells your team you\'re checking it. Doesn\'t block closing.</p>');
     const menu = '<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2head" aria-label="More actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2head">' + review + '<button type="button" class="dropdown-item" id="v2NextClient">Next client</button>' + (rec.closed ? '<button type="button" class="dropdown-item" id="v2Reopen">Reopen</button>' : '') + '</div></div>';
     const closeBtn = fixing || rec.closed ? '' : (ended ? '<button type="button" class="btn" id="v2Close">Close ' + esc(shown.short) + '</button>' : '<span class="text-body2 text-secondary">Month not ended yet</span>');
-    return '<div class="d-flex align-center justify-between gap-16 flex-wrap"><div class="d-flex align-center gap-8"><button type="button" class="btn-icon" id="v2Prev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><span class="text-subtitle1">' + esc(shown.label) + '</span>' + next + chip + '</div><div class="d-flex align-center gap-8"><button type="button" class="btn-outlined" id="v2History">History</button>' + menu + closeBtn + '</div></div>';
+    const note = closeBtn && closeBtn.indexOf('v2Close') >= 0 ? '<p class="text-body2 text-secondary text-right">Closing marks the month done in Synder only.</p>' : '';
+    return '<div class="d-flex align-center justify-between gap-16 flex-wrap"><div class="d-flex align-center gap-8"><button type="button" class="btn-icon" id="v2Prev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><span class="text-subtitle1">' + esc(shown.label) + '</span>' + next + chip + '</div><div class="d-flex flex-col gap-8"><div class="d-flex align-center justify-end gap-8"><button type="button" class="btn-outlined" id="v2History">History</button>' + menu + closeBtn + '</div>' + note + '</div></div>';
+  }
+  function v2Select(id, options, placeholder) {
+    return '<select class="select" id="' + id + '" data-v2-pick="' + id + '"><option value="">' + esc(placeholder) + '</option>' + options.map((name) => '<option>' + esc(name) + '</option>').join('') + '</select>';
   }
   function v2FixScreen(c, kind) {
     const shown = v2Shown(c);
     const rec = shown.rec;
     const back = '<button type="button" class="link" id="v2FixBack">Back to ' + esc(shown.short) + ' checks</button>';
+    if (connectionLost(c)) return '<div class="page-stack">' + back + '<h2 class="text-h2">Can\'t check</h2><p class="text-body2">Can\'t check · waiting for ' + esc(lostSourceName(c)) + '</p></div>';
     if (kind === 'syncs') {
       const items = v2SyncItems(c, rec);
-      const rows = items.map((item) => '<div class="work-row d-flex align-center justify-between gap-16"><div><p class="text-body2">' + esc(item.name) + ' · ' + esc(money(item.amount)) + '</p><p class="text-body2 text-secondary">' + esc(item.date) + ' · ' + esc(item.reason) + '</p></div><button type="button" class="btn-outlined" data-v2-retry="' + item.id + '">Retry</button></div>').join('') || '<p class="text-body2">No failed syncs left.</p>';
-      return '<div class="page-stack">' + back + '<h2 class="text-h2">Failed syncs</h2><p class="text-body2">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + (items.length ? '<div><button type="button" class="btn" id="v2RetryAll">Retry all</button></div>' : '') + '</div>';
+      const retryable = items.some((item) => item.kind !== 'mismatch');
+      const rows = items.map((item) => {
+        const button = item.kind === 'mismatch'
+          ? '<button type="button" class="btn-outlined" data-v2-review="' + item.id + '">Review</button>'
+          : '<button type="button" class="btn-outlined" data-v2-retry="' + item.id + '">Send to QuickBooks again</button>';
+        return '<div class="work-row d-flex align-center justify-between gap-16"><div><p class="text-body2">' + esc(item.name) + ' · ' + esc(money(item.amount)) + '</p><p class="text-body2 text-secondary">' + esc(item.date) + ' · ' + esc(item.reason) + '</p></div>' + button + '</div>';
+      }).join('') || '<p class="text-body2">No failed syncs in ' + esc(shown.label) + '.</p>';
+      const primary = items.length ? (retryable ? '<div><button type="button" class="btn" id="v2RetryAll">Retry all</button></div>' : '') : '<div><button type="button" class="btn" id="v2RetryAll">Check syncs</button></div>';
+      return '<div class="page-stack">' + back + '<h2 class="text-h2">Failed syncs</h2><p class="text-body2">Sends the sync to QuickBooks again.</p><p class="text-body2 text-secondary">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + primary + '</div>';
     }
     if (kind === 'uncat' || kind === 'funds') {
       const items = v2BookItems(c, rec, kind);
-      const verb = kind === 'uncat' ? 'Categorize' : 'Apply';
-      const title = kind === 'uncat' ? 'Uncategorized' : 'Undeposited';
-      const rows = items.map((item) => '<div class="work-row d-flex align-center justify-between gap-16"><span class="text-body2">' + esc(item.name) + (item.amount ? ' · ' + esc(money(item.amount)) : '') + '</span><button type="button" class="btn-outlined" data-v2-resolve="' + item.id + '">' + verb + '</button></div>').join('') || '<p class="text-body2">Nothing left in this check.</p>';
-      return '<div class="page-stack">' + back + '<h2 class="text-h2">' + title + '</h2><p class="text-body2">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + (items.length ? '<div><button type="button" class="btn" id="v2ResolveAll">' + verb + ' all</button></div>' : '') + '</div>';
+      const uncat = kind === 'uncat';
+      const verb = uncat ? 'Categorize' : 'Apply';
+      const title = uncat ? 'Uncategorized' : 'Undeposited';
+      const does = uncat ? 'Sets the category in QuickBooks.' : 'Matches the payment to an invoice in QuickBooks.';
+      const rows = items.map((item) => '<div class="work-row page-stack"><div class="d-flex align-center justify-between gap-16"><p class="text-body2">' + esc(item.name) + (item.amount ? ' · ' + esc(money(item.amount)) : '') + (item.date ? ' · ' + esc(item.date) : '') + '</p></div><div class="form-field">' + v2Select('pick-' + item.id, uncat ? V2_ACCOUNTS : V2_MATCHES, uncat ? 'Choose an account' : 'Choose an invoice or deposit') + '<p class="form-error-msg" id="err-' + item.id + '" hidden>Required</p></div><div><button type="button" class="btn-outlined" data-v2-resolve="' + item.id + '">' + verb + '</button></div></div>').join('') || '<p class="text-body2">Nothing left in this check for ' + esc(shown.label) + '.</p>';
+      const all = items.length ? '<div><button type="button" class="btn" id="v2ResolveAll">' + verb + ' all</button></div>' : '';
+      return '<div class="page-stack">' + back + '<h2 class="text-h2">' + title + '</h2><p class="text-body2">' + does + '</p><p class="text-body2 text-secondary">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + all + '</div>';
     }
-    const many = (c.integrations || []).length > 1;
-    const pick = many ? '<div class="form-field"><label class="form-label form-label-required" for="v2Plat">Payment platform</label><select class="select" id="v2Plat"><option value="">Select a payment platform</option>' + (c.integrations || []).map((name) => '<option>' + esc(String(name).toUpperCase()) + ' · Main</option>').join('') + '</select><p class="form-error-msg" id="v2PlatErr" hidden>Required</p></div>' : '<p class="text-body2">' + esc(c.name) + ' · ' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online') + ' · ' + esc(shown.label) + '.</p>';
-    return '<div class="page-stack">' + back + '<h2 class="text-h2">Start reconciliation</h2>' + pick + '<div><button type="button" class="btn" id="v2ReconGo">Start reconciliation</button></div></div>';
+    const accounts = (c.integrations || []).map((name) => name + ' · Main');
+    if (!accounts.length) accounts.push('Checking');
+    const diff = money(v2BooksBalance());
+    return '<div class="page-stack">' + back + '<h2 class="text-h2">Start reconciliation</h2><p class="text-body2">Records the statement balance for this account.</p><div class="form-field"><label class="form-label form-label-required" for="v2Acct">Account</label>' + v2Select('v2Acct', accounts, 'Choose an account') + '<p class="form-error-msg" id="v2AcctErr" hidden>Required</p></div><div class="form-field"><label class="form-label form-label-required" for="v2End">Statement end date</label><input class="input" id="v2End" type="date"><p class="form-error-msg" id="v2EndErr" hidden>Required</p></div><div class="form-field"><label class="form-label form-label-required" for="v2Bal">Statement ending balance</label><input class="input" id="v2Bal" inputmode="decimal" placeholder="0.00"><p class="form-error-msg" id="v2BalErr" hidden>Required</p></div><p class="text-body2">Balance in the books ' + diff + '</p><p class="text-body2" id="v2Diff">Difference ' + diff + '</p><p class="form-error-msg" id="v2DiffErr" hidden>Difference must be $0.00</p><div><button type="button" class="btn" id="v2ReconGo">Start reconciliation</button></div></div>';
   }
   function clientWorkImproved(c) {
     const fixing = st.v2Fix || '';
@@ -5077,41 +5240,50 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const pack = v2Checks(c);
     const shown = pack.shown;
     const rec = shown.rec;
-    const requiredRows = pack.rows.filter((row) => row.required);
-    const optional = pack.rows.filter((row) => !row.required);
-    const openReq = rec.closed ? [] : requiredRows.filter((row) => !row.done);
-    const done = rec.closed ? pack.rows.slice() : requiredRows.filter((row) => row.done);
+    const rows = pack.rows;
+    const optional = rec.closed ? [] : rows.filter((row) => row.kind === 'firm' && !row.required);
+    const main = rows.filter((row) => rec.closed || !(row.kind === 'firm' && !row.required));
+    const openReq = rec.closed ? [] : main.filter((row) => !row.done);
+    const blocking = openReq.filter((row) => row.required && row.blocks !== false);
+    const done = rec.closed ? rows.slice() : main.filter((row) => row.done);
     const closedEv = (rec.events || []).find((item) => item.type === 'close');
     const title = rec.closed
-      ? shown.short + ' closed on ' + (closedEv ? String(closedEv.at).split(',').slice(0, 2).join(',') : 'Oct 31, 2025') + ' by ' + (closedEv ? closedEv.who : 'Ignat P.')
-      : 'Before you close ' + shown.short + ' · ' + (openReq.length ? openReq.length + ' left' : 'All done');
-    const alert = !rec.closed && st.v2Block && openReq.length ? '<div class="alert alert-error" id="v2Alert"><span class="material-icons" aria-hidden="true">error</span><span>' + openReq.length + ' check' + (openReq.length === 1 ? '' : 's') + ' left before you can close ' + esc(shown.short) + '</span></div>' : '';
+      ? shown.short + ' closed on ' + (closedEv ? String(closedEv.at).split(',').slice(0, 2).join(',') : 'Nov 3, 2025') + ' by ' + (closedEv ? closedEv.who : 'Ignat P.')
+      : 'Before you close ' + shown.short + ' · ' + (blocking.length ? blocking.length + ' left' : 'All done');
+    const alert = !rec.closed && st.v2Block && blocking.length ? '<div class="alert alert-error" id="v2Alert"><span class="material-icons" aria-hidden="true">error</span><span>' + blocking.length + ' check' + (blocking.length === 1 ? '' : 's') + ' left before you can close ' + esc(shown.short) + '</span></div>' : '';
     const rowHtml = (row, folded) => {
-      const blocked = !folded && st.v2Block && row.required && !row.done;
-      const caption = '<p class="text-body2 text-secondary">' + esc(row.source) + '</p>' + (!folded && row.reason ? '<p class="text-body2 text-secondary">' + esc(row.reason) + '</p>' : '') + (folded ? '<p class="text-body2 text-secondary">' + esc(v2DoneLine(row, rec)) + '</p>' : '') + (blocked ? '<p class="form-error-msg">Required to close</p>' : '');
+      const blocked = !folded && st.v2Block && row.required && row.blocks !== false && !row.done;
+      const bits = [];
+      if (row.caption) bits.push('<p class="text-caption">' + esc(row.caption) + '</p>');
+      if (!folded && row.reason) bits.push('<p class="text-body2 text-secondary">' + esc(row.reason) + '</p>');
+      if (!folded && row.asOf) bits.push('<p class="text-caption">as of ' + esc(row.asOf) + '</p>');
+      if (folded) bits.push('<p class="text-body2 text-secondary">' + esc(row.status || closedStatus(row, rec, row.asOf || '')) + '</p>');
+      if (blocked) bits.push('<p class="form-error-msg">Required to close</p>');
       let action = '';
-      if (!folded && row.kind === 'reconnect') action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-reconnect="' + c.id + '">Reconnect</button>';
-      else if (!folded && row.kind === 'synder') action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-fix="' + row.id + '">Fix</button>';
-      else if (!folded) action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-done="' + row.id + '">Mark done</button>';
-      else if (row.kind === 'firm') action = '<button type="button" class="btn-text" data-v2-undo="' + row.id + '">Undo</button>';
-      return '<tr id="v2row-' + row.id + '"><td><div><p class="text-body2">' + esc(row.label) + '</p>' + caption + '</div></td><td class="text-right">' + action + '</td></tr>';
+      if (!folded && !rec.closed && row.kind === 'reconnect') action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-reconnect="' + c.id + '">Reconnect ' + esc(row.sourceName || '') + '</button>';
+      else if (!folded && !rec.closed && row.kind === 'setup') action = '<button type="button" class="link" id="v2act-' + row.id + '" data-v2-setup="' + c.id + '">Finish setup</button>';
+      else if (!folded && !rec.closed && row.kind === 'synder') action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-fix="' + row.id + '">Fix</button>';
+      else if (!folded && !rec.closed && row.kind === 'firm' && !row.done) action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-done="' + row.id + '">Mark done</button>';
+      else if (!rec.closed && row.kind === 'firm' && row.done) action = '<button type="button" class="btn-text" data-v2-undo="' + row.id + '">Undo</button>';
+      return '<tr id="v2row-' + row.id + '"><td><div><p class="text-body2">' + esc(row.label) + '</p>' + bits.join('') + '</div></td><td class="text-right">' + action + '</td></tr>';
     };
-    const optRow = (row) => '<div class="work-row d-flex align-center justify-between gap-16"><div><p class="text-body2">' + esc(row.label) + '</p><p class="text-body2 text-secondary">Firm check</p></div>' + (row.done ? '<button type="button" class="btn-text" data-v2-undo="' + row.id + '">Undo</button>' : '<button type="button" class="btn-outlined" data-v2-done="' + row.id + '">Mark done</button>') + '</div>';
-    const fold = done.length ? '<tfoot><tr><td colspan="2"><button type="button" class="link" id="v2ShowDone">' + (st.v2ShowDone ? 'Hide' : done.length + ' done · Show') + '</button></td></tr></tfoot>' : '';
+    const optRow = (row) => '<div class="work-row d-flex align-center justify-between gap-16"><div><p class="text-body2">' + esc(row.label) + '</p><p class="text-caption">Your firm\'s check</p></div>' + (row.done ? '<button type="button" class="btn-text" data-v2-undo="' + row.id + '">Undo</button>' : '<button type="button" class="btn-outlined" data-v2-done="' + row.id + '">Mark done</button>') + '</div>';
+    const foldLabel = st.v2ShowDone ? 'Hide finished checks' : ('Show ' + done.length + ' finished check' + (done.length === 1 ? '' : 's'));
+    const fold = done.length ? '<tfoot><tr><td colspan="2"><button type="button" class="link" id="v2ShowDone">' + foldLabel + '</button></td></tr></tfoot>' : '';
     const body = openReq.map((row) => rowHtml(row, false)).join('') + (st.v2ShowDone ? done.map((row) => rowHtml(row, true)).join('') : '');
-    const opt = optional.length ? '<div><button type="button" class="link" id="v2Opt">Optional · ' + optional.length + '</button>' + (st.v2Opt ? optional.map(optRow).join('') : '') + '</div>' : '';
-    return '<div class="page-stack">' + head + alert + '<h2 class="text-h2">' + esc(title) + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Check</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody>' + fold + '</table></div>' + (rec.closed ? '' : opt) + '</div>';
+    const optLabel = optional.length + ' optional check' + (optional.length === 1 ? '' : 's') + ' (not needed to close)';
+    const opt = optional.length ? '<div><button type="button" class="link" id="v2Opt">' + optLabel + '</button>' + (st.v2Opt ? optional.map(optRow).join('') : '') + '</div>' : '';
+    return '<div class="page-stack">' + head + alert + '<h2 class="text-h2">' + esc(title) + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Check</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody>' + fold + '</table></div>' + opt + '</div>';
   }
   function openWorkHistory(c) {
     const old = document.getElementById('historySheet');
     if (old) old.remove();
     const shown = v2Shown(c);
     const notes = (c.monthNotes || []).filter((note) => note.month === shown.label).map((note) => '<p class="text-body2">' + esc(note.text) + ' <span class="text-secondary">' + esc(note.period || '') + '</span></p>').join('') || '<p class="text-body2">No notes for this month.</p>';
-    const events = (shown.rec.events || []).map((ev) => ev.type === 'close' ? 'Closed by ' + ev.who + ', ' + ev.at : (ev.type === 'reopen' ? 'Reopened by ' + ev.who + ', ' + ev.at : '')).filter(Boolean);
-    const timeline = '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Month</th><th>Status</th><th>Last activity</th></tr></thead><tbody><tr><td>' + esc(shown.label) + '</td><td>' + (shown.rec.closed ? 'Closed' : 'Open') + '</td><td>' + esc(events[events.length - 1] || 'No events for this month.') + '</td></tr></tbody></table></div>';
+    const events = (shown.rec.events || []).map((ev) => '<p class="text-body2">' + esc(historyLine(ev)) + '</p>').join('') || '<p class="text-body2">No events for this month.</p>';
     const wrap = document.createElement('div');
     wrap.id = 'historySheet';
-    wrap.innerHTML = '<div class="synder-side-sheet-bg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true"><div class="synder-side-sheet-header"><span>History</span><button type="button" class="btn-icon" id="historyClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body text-body2"><h2 class="text-h2">Notes</h2>' + notes + '<div class="form-field"><textarea class="textarea" id="v2Note" placeholder="Write a note for ' + esc(shown.short) + '"></textarea></div><p class="form-error-msg" id="v2NoteErr" hidden>Required</p><button type="button" class="btn" id="v2AddNote">Add note</button><h2 class="text-h2">Timeline</h2>' + timeline + '</div></div>';
+    wrap.innerHTML = '<div class="synder-side-sheet-bg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true"><div class="synder-side-sheet-header"><span>History</span><button type="button" class="btn-icon" id="historyClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body"><h2 class="text-h2">Notes</h2>' + notes + '<div class="form-field"><textarea class="textarea" id="v2Note" placeholder="Write a note for ' + esc(shown.short) + '"></textarea></div><p class="form-error-msg" id="v2NoteErr" hidden>Required</p><button type="button" class="btn" id="v2AddNote">Add note</button><h2 class="text-h2">Events</h2>' + events + '</div></div>';
     document.body.appendChild(wrap);
     const close = () => wrap.remove();
     wrap.querySelector('#historyClose').onclick = close;
@@ -5727,17 +5899,24 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     bindClick('v2ShowDone', () => { st.v2ShowDone = !st.v2ShowDone; renderMain(); });
     bindClick('v2Opt', () => { st.v2Opt = !st.v2Opt; renderMain(); });
     m.querySelectorAll('[data-v2-reconnect]').forEach((b) => b.onclick = () => openClientConnect(b.dataset.v2Reconnect));
+    const firmLabel = (c, id) => ((firmChecklist.concat(c.extraChecks || [])).find((row) => row.id === id) || {}).label || 'Check';
     bindClick('v2Review', () => {
       const c = findOrg(st.clientId);
       if (!c) return;
-      const shown = v2Shown(c);
-      if (!shown.rec.closed) shown.rec.review = true;
+      const rec = v2Shown(c).rec;
+      if (rec.closed) return;
+      rec.review = true;
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'review', who: actorName(), at: stampLabel(new Date()) });
       renderMain();
     });
     bindClick('v2Open', () => {
       const c = findOrg(st.clientId);
       if (!c) return;
-      v2Shown(c).rec.review = false;
+      const rec = v2Shown(c).rec;
+      rec.review = false;
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'open', who: actorName(), at: stampLabel(new Date()) });
       renderMain();
     });
     bindClick('v2NextClient', () => {
@@ -5750,17 +5929,14 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const c = findOrg(st.clientId);
       if (!c) return;
       const shown = v2Shown(c);
-      shown.rec.closed = false;
-      if (!shown.rec.events) shown.rec.events = [];
-      shown.rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason: '' });
-      renderMain();
+      openReopenDialog(c.id, shown.num, shown.year);
     });
     bindClick('v2Close', () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const pack = v2Checks(c);
       if (!monthHasEnded(pack.shown.year, pack.shown.num)) return;
-      const left = pack.rows.filter((row) => row.required && !row.done);
+      const left = pack.rows.filter((row) => row.required && row.blocks !== false && !row.done);
       if (left.length) {
         st.v2Block = true;
         st.v2ShowDone = false;
@@ -5769,32 +5945,41 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         if (btn) btn.focus();
         return;
       }
-      pack.shown.rec.closed = true;
-      pack.shown.rec.review = false;
-      if (!pack.shown.rec.events) pack.shown.rec.events = [];
-      pack.shown.rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
-      st.v2Block = false;
-      showKitToast(pack.shown.short + ' closed in Synder. Nothing changed in QuickBooks.');
-      renderMain();
+      const books = c.accounting === 'Xero' ? 'Xero' : 'QuickBooks';
+      const { modal, close } = dialogShell('Close ' + esc(pack.shown.label) + ' for ' + esc(c.name) + '?', '<p class="text-body2">This marks ' + esc(pack.shown.short) + ' as done in Synder. Nothing changes in ' + books + ', and ' + books + ' stays editable. You can reopen it from the ⋯ menu.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="confirmCloseMonth">Close ' + esc(pack.shown.short) + '</button>');
+      modal.querySelector('#confirmCloseMonth').onclick = () => {
+        applyClose(c, pack.shown.num, pack.shown.year);
+        st.v2Block = false;
+        close();
+        showKitToast(pack.shown.short + ' closed in Synder. Nothing changed in ' + books + '.');
+        render();
+      };
     });
     bindClick('v2FixBack', () => { st.v2Fix = ''; render(); });
     const v2Finish = (c, key) => {
+      if (connectionLost(c)) return;
       const rec = v2Shown(c).rec;
-      if (key === 'syncs') rec.sync = 'passed';
-      else if (key === 'recon') rec.recon = 'passed';
-      else if (key === 'uncat') rec.uncatDone = true;
-      else if (key === 'funds') rec.fundsDone = true;
-      const left = v2Checks(c).rows.filter((row) => row.required && !row.done);
-      if (!left.length) st.v2Block = false;
+      rec.asOf = stampLabel(new Date());
+      if (!rec.recheck) rec.recheck = {};
+      if (key === 'syncs') { rec.sync = 'passed'; rec.syncChecked = true; rec.recheck.syncs = false; }
+      else if (key === 'recon') { rec.recon = 'passed'; rec.recheck.recon = false; }
+      else if (key === 'uncat') { rec.uncatDone = true; rec.recheck.uncat = false; }
+      else if (key === 'funds') { rec.fundsDone = true; rec.recheck.funds = false; }
       st.v2Fix = '';
+      const left = v2Checks(c).rows.filter((row) => row.required && row.blocks !== false && !row.done);
+      if (!left.length) st.v2Block = false;
       render();
     };
     m.querySelectorAll('[data-v2-done]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const rec = v2Shown(c).rec;
-      rec.checks[b.dataset.v2Done] = { done: true, by: actorName(), at: stampLabel(new Date()) };
-      const left = v2Checks(c).rows.filter((row) => row.required && !row.done);
+      if (rec.closed) return;
+      const when = stampLabel(new Date());
+      rec.checks[b.dataset.v2Done] = { done: true, by: actorName(), at: when };
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'check', label: firmLabel(c, b.dataset.v2Done), done: true, who: actorName(), at: when });
+      const left = v2Checks(c).rows.filter((row) => row.required && row.blocks !== false && !row.done);
       if (!left.length) st.v2Block = false;
       renderMain();
     });
@@ -5802,58 +5987,147 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const c = findOrg(st.clientId);
       if (!c) return;
       const rec = v2Shown(c).rec;
+      if (rec.closed) return;
       if (rec.checks[b.dataset.v2Undo]) rec.checks[b.dataset.v2Undo].done = false;
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'check', label: firmLabel(c, b.dataset.v2Undo), done: false, who: actorName(), at: stampLabel(new Date()) });
       renderMain();
     });
+    m.querySelectorAll('[data-v2-setup]').forEach((b) => b.onclick = () => openClientConnect(b.dataset.v2Setup));
     m.querySelectorAll('[data-v2-fix]').forEach((b) => b.onclick = () => {
       st.v2Fix = b.dataset.v2Fix;
       render();
     });
+    const retrySync = (item) => {
+      if (!item || !item.open || item.kind === 'mismatch') return 'skip';
+      if (item.retry === 'fail') { item.reason = 'The connection timed out again.'; return 'fail'; }
+      item.open = false;
+      return 'sent';
+    };
     m.querySelectorAll('[data-v2-retry]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
-      if (!c) return;
+      if (!c || connectionLost(c)) return;
       const rec = v2Shown(c).rec;
       const item = (rec.syncItems || []).find((row) => row.id === b.dataset.v2Retry);
-      if (item) item.open = false;
+      const result = retrySync(item);
+      if (result === 'fail') { showKitToast('The sync still failed.'); renderMain(); return; }
+      if (result !== 'sent') return;
+      showKitToast('Sent to QuickBooks again.', () => { item.open = true; rec.sync = 'failed'; rec.syncChecked = false; render(); });
       if (v2SyncItems(c, rec).length) renderMain();
       else v2Finish(c, 'syncs');
     });
-    bindClick('v2RetryAll', () => {
+    m.querySelectorAll('[data-v2-review]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const rec = v2Shown(c).rec;
-      (rec.syncItems || []).forEach((item) => { item.open = false; });
-      v2Finish(c, 'syncs');
+      const item = (rec.syncItems || []).find((row) => row.id === b.dataset.v2Review);
+      if (!item) return;
+      const { modal, close } = dialogShell('Review this sync', '<p class="text-body2">' + esc(item.reason) + '</p><p class="text-body2">Sending it again will not fix a mismatch.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="v2MarkReviewed">Mark reviewed</button>');
+      modal.querySelector('#v2MarkReviewed').onclick = () => {
+        item.open = false;
+        close();
+        showKitToast('Marked for review.', () => { item.open = true; rec.sync = 'failed'; rec.syncChecked = false; render(); });
+        if (v2SyncItems(c, rec).length) renderMain();
+        else v2Finish(c, 'syncs');
+      };
     });
+    bindClick('v2RetryAll', () => {
+      const c = findOrg(st.clientId);
+      if (!c || connectionLost(c)) return;
+      const rec = v2Shown(c).rec;
+      const open = (rec.syncItems || []).filter((item) => item.open);
+      if (!open.length) { v2Finish(c, 'syncs'); return; }
+      let failed = 0;
+      const sent = [];
+      open.forEach((item) => {
+        const result = retrySync(item);
+        if (result === 'sent') sent.push(item);
+        else if (result === 'fail') failed += 1;
+      });
+      if (sent.length) showKitToast('Sent to QuickBooks again.', () => { sent.forEach((item) => { item.open = true; }); rec.sync = 'failed'; rec.syncChecked = false; render(); });
+      else if (failed) showKitToast('The sync still failed.');
+      if (v2SyncItems(c, rec).length) renderMain();
+      else v2Finish(c, 'syncs');
+    });
+    const resolveOne = (c, item) => {
+      const pick = document.getElementById('pick-' + item.id);
+      const err = document.getElementById('err-' + item.id);
+      if (!pick || !pick.value) { if (err) err.hidden = false; return false; }
+      if (err) err.hidden = true;
+      item.open = false;
+      item.choice = pick.value;
+      return true;
+    };
     m.querySelectorAll('[data-v2-resolve]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
-      if (!c) return;
+      if (!c || connectionLost(c)) return;
       const rec = v2Shown(c).rec;
       const key = st.v2Fix === 'funds' ? 'funds' : 'uncat';
       const list = key === 'uncat' ? rec.uncatOpen : rec.fundsOpen;
       const item = (list || []).find((row) => row.id === b.dataset.v2Resolve);
-      if (item) item.open = false;
+      if (!item || !resolveOne(c, item)) return;
+      const msg = key === 'uncat' ? 'Category set in QuickBooks.' : 'Payment matched to an invoice.';
+      showKitToast(msg, () => { item.open = true; rec[key === 'uncat' ? 'uncatDone' : 'fundsDone'] = false; render(); });
       if (v2BookItems(c, rec, key).length) renderMain();
       else v2Finish(c, key);
     });
     bindClick('v2ResolveAll', () => {
       const c = findOrg(st.clientId);
-      if (!c) return;
+      if (!c || connectionLost(c)) return;
       const rec = v2Shown(c).rec;
       const key = st.v2Fix === 'funds' ? 'funds' : 'uncat';
-      const list = key === 'uncat' ? rec.uncatOpen : rec.fundsOpen;
-      (list || []).forEach((item) => { item.open = false; });
-      v2Finish(c, key);
+      const uncat = key === 'uncat';
+      const { modal, close } = dialogShell(uncat ? 'Categorize all' : 'Apply all', '<p class="text-body2">' + (uncat ? 'Sets the category in QuickBooks.' : 'Matches the payment to an invoice in QuickBooks.') + '</p><div class="form-field"><label class="form-label form-label-required" for="v2AllPick">' + (uncat ? 'Account' : 'Invoice or deposit') + '</label>' + v2Select('v2AllPick', uncat ? V2_ACCOUNTS : V2_MATCHES, uncat ? 'Choose an account' : 'Choose an invoice or deposit') + '<p class="form-error-msg" id="v2AllErr" hidden>Required</p></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="v2AllGo">' + (uncat ? 'Categorize all' : 'Apply all') + '</button>');
+      modal.querySelector('#v2AllGo').onclick = () => {
+        const pick = modal.querySelector('#v2AllPick');
+        if (!pick.value) { modal.querySelector('#v2AllErr').hidden = false; return; }
+        const list = (uncat ? rec.uncatOpen : rec.fundsOpen) || [];
+        const touched = list.filter((item) => item.open);
+        touched.forEach((item) => { item.open = false; item.choice = pick.value; });
+        close();
+        showKitToast(uncat ? 'Category set in QuickBooks.' : 'Payment matched to an invoice.', () => { touched.forEach((item) => { item.open = true; }); rec[uncat ? 'uncatDone' : 'fundsDone'] = false; render(); });
+        if (v2BookItems(c, rec, key).length) renderMain();
+        else v2Finish(c, key);
+      };
     });
+    const paintDiff = () => {
+      const bal = document.getElementById('v2Bal');
+      const out = document.getElementById('v2Diff');
+      if (!bal || !out) return;
+      const raw = String(bal.value || '').replace(/[^0-9.-]/g, '');
+      const entered = raw === '' || raw === '-' ? NaN : Number(raw);
+      const diff = Math.round((v2BooksBalance() - (isNaN(entered) ? 0 : entered)) * 100) / 100;
+      out.textContent = 'Difference ' + money(isNaN(entered) ? v2BooksBalance() : diff);
+    };
+    const balInput = document.getElementById('v2Bal');
+    if (balInput) balInput.oninput = paintDiff;
     bindClick('v2ReconGo', () => {
       const c = findOrg(st.clientId);
-      if (!c) return;
+      if (!c || connectionLost(c)) return;
       if (c.id === 'e3') {
         showKitToast('A reconciliation for this month exists already. Delete or replace it in Transaction reconciliation before starting a new one.');
         return;
       }
-      const plat = document.getElementById('v2Plat');
-      if (plat && !plat.value) { const err = document.getElementById('v2PlatErr'); if (err) err.hidden = false; return; }
+      const acct = document.getElementById('v2Acct');
+      const end = document.getElementById('v2End');
+      const bal = document.getElementById('v2Bal');
+      let bad = false;
+      [[acct, 'v2AcctErr'], [end, 'v2EndErr'], [bal, 'v2BalErr']].forEach((pair) => {
+        const err = document.getElementById(pair[1]);
+        if (!pair[0] || !(pair[0].value || '').trim()) { if (err) err.hidden = false; bad = true; }
+        else if (err) err.hidden = true;
+      });
+      if (bad) return;
+      const entered = Number(String(bal.value).replace(/[^0-9.-]/g, ''));
+      const diff = Math.round((v2BooksBalance() - entered) * 100) / 100;
+      const diffErr = document.getElementById('v2DiffErr');
+      if (Math.abs(diff) > 0.001) { if (diffErr) diffErr.hidden = false; paintDiff(); return; }
+      if (diffErr) diffErr.hidden = true;
+      const rec = v2Shown(c).rec;
+      const when = stampLabel(new Date());
+      rec.reconResult = { account: acct.value, difference: 0, who: actorName(), when: when };
+      rec.recon = 'passed';
+      showKitToast('Reconciliation recorded.', () => { rec.recon = 'unchecked'; rec.reconResult = null; render(); });
       v2Finish(c, 'recon');
     });
     bindClick('nextClient', () => {
@@ -6153,7 +6427,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     m.querySelectorAll('[data-left]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
       const id = b.dataset.leftClient || st.clientId;
-      if (b.dataset.left === 'connection') openClientConnect(id);
+      if (b.dataset.left === 'connection' || b.dataset.left === 'setup') openClientConnect(id);
       else if (b.dataset.left === 'resolve') openResolveDialog(id);
       else if (b.dataset.left === 'recon') openReconDialog(id);
       else openDetails(id, st.page === 'monthclose' ? 'monthclose' : (st.from || 'monthclose'));
@@ -6173,7 +6447,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       e.stopPropagation();
       const c = findOrg(b.dataset.markReview);
       if (!c) return;
-      tieRecord(c).review = true;
+      const rec = tieRecord(c);
+      rec.review = true;
+      if (!rec.events) rec.events = [];
+      rec.events.push({ type: 'review', who: actorName(), at: stampLabel(new Date()) });
       showKitToast(c.name + ' marked in review');
     });
     m.querySelectorAll('[data-start-recon]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openCloseClient(b.dataset.startRecon); });
@@ -7181,11 +7458,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   }
   function checkAllMonth() {
     listedClients().forEach((c) => {
-      if (!c.accounting) return;
       const rec = tieRecord(c);
-      if (rec.closed) return;
-      if (rec.sync === 'unchecked') rec.sync = 'passed';
-      if (rec.recon === 'unchecked') rec.recon = 'passed';
+      if (rec.closed || !isQuickBooks(c) || connectionLost(c) || c.setup === false || onboardingState(c) !== 'done') return;
+      rec.asOf = stampLabel(new Date());
+      rec.syncChecked = true;
+      if (rec.recheck) rec.recheck.syncs = false;
+      const open = monthSyncItems(c, rec, closeMonthNum(), closeYearNum()).filter((item) => item.open);
+      rec.sync = open.length ? 'failed' : 'passed';
     });
     showKitToast('Checked all clients');
     renderMain();
@@ -7195,12 +7474,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     year = year || closeYearNum();
     const rec = tieRecord(c, month, year);
     if (rec.closed) return true;
-    if (tieUnmet(rec).length) return false;
-    rec.closed = true;
-    rec.review = false;
-    rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
-    c.monthStatus = 'Closed';
-    showKitToast(closeMonthName(month) + ' closed');
+    if (gateLeft(c, month, year).length) return false;
+    applyClose(c, month, year);
+    const books = c.accounting === 'Xero' ? 'Xero' : 'QuickBooks';
+    showKitToast(closeMonthName(month) + ' closed in Synder. Nothing changed in ' + books + '.');
     return true;
   }
   function openResolveDialog(id) {
@@ -7236,21 +7513,16 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMain();
     };
   }
-  function openReopenDialog(id) {
+  function openReopenDialog(id, month, year) {
     const c = findOrg(id);
     if (!c) return;
-    const rec = tieRecord(c);
-    const { modal, close } = dialogShell('Reopen ' + esc(closeMonthName()) + ' ' + closeYearNum(), '<p class="text-body2">' + esc(c.name) + ' goes back to Open for this month.</p><div class="form-field"><label class="form-label" for="reopenReason">Reason</label><textarea class="input" id="reopenReason"></textarea></div>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reopenSave">Reopen</button>');
+    month = month || closeMonthNum();
+    year = year || closeYearNum();
+    const { modal, close } = dialogShell('Reopen ' + esc(closeMonthName(month)) + ' ' + year + '?', '<p class="text-body2">Synder will re-check this month before it can be closed again.</p>', '<button type="button" class="btn-outlined" data-cancel>Cancel</button><button type="button" class="btn" id="reopenSave">Reopen</button>');
     modal.querySelector('#reopenSave').onclick = () => {
-      const input = modal.querySelector('#reopenReason');
-      const reason = (input && input.value || '').trim();
-      rec.closed = false;
-      rec.review = false;
-      c.monthStatus = 'Open';
-      if (!rec.events) rec.events = [];
-      rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason });
+      applyReopen(c, month, year);
       close();
-      renderMain();
+      render();
     };
   }
   function clearV10Storage() {
