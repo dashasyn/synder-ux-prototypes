@@ -485,6 +485,11 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <button data-m="new" type="button">New firm</button>
       <button data-m="existing" type="button">Existing firm</button>
     </div>
+    <span>Client details</span>
+    <div class="seg" id="clientSeg" aria-label="Client details">
+      <button data-client="v1" type="button" class="active">Current</button>
+      <button data-client="v2" type="button">Improved</button>
+    </div>
     <button type="button" class="proto-reset" id="protoReset">Reset</button>
   </div>
 
@@ -634,9 +639,21 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   ];
 
   let mode = 'firm'; // 'onboarding' | 'firm'
+  let clientVariant = 'v1';
+  (function readClientVariant() {
+    const q = new URL(location.href).searchParams.get('client');
+    if (q === 'v1' || q === 'v2') clientVariant = q;
+    else {
+      try {
+        const saved = localStorage.getItem('fcs-client-variant');
+        if (saved === 'v1' || saved === 'v2') clientVariant = saved;
+      } catch (e) {}
+    }
+  })();
   function writeLocation(hash, push) {
     const url = new URL(location.href);
     url.searchParams.delete('btn');
+    url.searchParams.set('client', clientVariant === 'v2' ? 'v2' : 'v1');
     const next = url.pathname + url.search + (hash || '');
     if (location.pathname + location.search + location.hash === next) return;
     if (push) history.pushState(null, '', next);
@@ -905,6 +922,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function renderMode() {
     const variant = ob && ob.variant === 'existing' ? 'existing' : 'new';
     document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('active', b.dataset.m === variant));
+    document.querySelectorAll('#clientSeg button').forEach((b) => b.classList.toggle('active', b.dataset.client === clientVariant));
   }
 
   function obShell(inner, review) {
@@ -4510,7 +4528,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <a class="page-back" id="backClients" href="${backHref}">${backLabel}</a>
       <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientAccountingLine(c))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
       ${tabHtml}
-      ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : clientWorkTab(c, off))}
+      ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : (clientVariant === 'v2' ? clientWorkImproved(c) : clientWorkTab(c, off)))}
     </div>`;
   }
   function boardMonthIndex() {
@@ -4931,6 +4949,97 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       <div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Month</th><th>Status</th><th>Checks</th><th>Health at close</th><th>Latest run</th><th>Last activity</th><th class="text-right">Events</th></tr></thead><tbody><tr><td><span class="text-body2">${esc(month.label)} (shown)</span></td><td><span class="status status-${chip[0]}">${chip[1]}</span></td><td><span class="text-body2">${done}/${periodChecks.length}</span></td><td><span class="text-body2">—</span></td><td><span class="text-body2">${c.accounting ? (rec.sync === 'passed' ? 'Passed' : (rec.sync === 'failed' ? 'Failed' : '—')) : '—'}</span></td><td><span class="text-body2">${events.length ? esc(events[events.length - 1]) : '—'}</span></td><td class="text-right"><button type="button" class="link" id="showEvents">Events</button></td></tr></tbody></table></div>
       ${st.eventsOpen ? `<div class="box box--white page-stack"><h3 class="text-subtitle1">Events</h3>${events.length ? events.map((line) => `<p class="text-body2">${esc(line)}</p>`).join('') : '<p class="text-body2">No events for this month.</p>'}</div>` : ''}
     </div>`;
+  }
+  function v2Shown(c) {
+    const month = st && st.workMonth ? st.workMonth : 10;
+    const year = st && st.workYear ? st.workYear : 2025;
+    return { num: month, year: year, label: closeMonthName(month) + ' ' + year, short: closeMonthName(month), rec: tieRecord(c, month, year) };
+  }
+  function v2Shift(dir) {
+    const c = findOrg(st.clientId);
+    if (!c) return;
+    const shown = v2Shown(c);
+    let month = shown.num + dir;
+    let year = shown.year;
+    if (month < 1) { month = 12; year -= 1; }
+    if (month > 12) { month = 1; year += 1; }
+    if (year < 2024 || year > 2027) return;
+    st.workMonth = month;
+    st.workYear = year;
+    st.v2Need = '';
+    renderMain();
+  }
+  function v2Checks(c) {
+    const shown = v2Shown(c);
+    const rec = shown.rec;
+    const runningHealth = c.monRunning === 'health' || c.checking;
+    const runningRecon = c.monRunning === 'recon';
+    const rows = [];
+    const synder = (id, label, done, tip, running) => rows.push({ id: id, label: label, source: 'Synder', required: true, done: !!done && !running, running: !!running, tip: tip || '', kind: 'synder' });
+    synder('syncs', 'Syncs', rec.sync === 'passed', rec.sync === 'failed' ? 'A sync failed in this period.' : 'Syncs passed in this period.', false);
+    synder('recon', 'Reconciliation', rec.recon === 'passed', rec.recon === 'passed' ? 'Reconciliation passed in this period.' : 'Reconciliation still needs a run for this month.', runningRecon);
+    if (isQuickBooks(c)) {
+      const uncat = healthIssue(c, 'uncategorized');
+      const funds = healthIssue(c, 'undeposited');
+      synder('uncat', 'Uncategorized', !uncat, uncat ? uncatDetail(uncat) : 'No expenses are missing a category.', runningHealth);
+      synder('funds', 'Undeposited', !funds, funds ? fundsDetail(funds) : 'No customer payments are waiting to be matched.', runningHealth);
+    }
+    firmPeriodChecks(c, rec).forEach((chk) => rows.push({ id: chk.id, label: chk.label, source: 'Firm', required: !!chk.required, done: !!chk.done, running: false, tip: '', kind: 'firm' }));
+    return { shown: shown, rows: rows };
+  }
+  function clientWorkImproved(c) {
+    const pack = v2Checks(c);
+    const shown = pack.shown;
+    const rec = shown.rec;
+    const open = pack.rows.filter((row) => !row.done);
+    const done = pack.rows.filter((row) => row.done);
+    const required = pack.rows.filter((row) => row.required);
+    const left = required.filter((row) => !row.done);
+    const line = left.length
+      ? left.length + ' of ' + required.length + ' checks left before you can close ' + shown.short + '.'
+      : 'All checks done. You can close ' + shown.short + '.';
+    const chip = rec.closed ? '<span class="status status-green">Closed</span>' : '<span class="status status-grey">Open</span>';
+    const menu = `<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2head" aria-label="More actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2head">${rec.closed ? '' : '<button type="button" class="dropdown-item" id="v2Review">Mark in review</button>'}<button type="button" class="dropdown-item" id="v2NextClient">Next client</button>${rec.closed ? '<button type="button" class="dropdown-item" id="v2Reopen">Reopen</button>' : ''}</div></div>`;
+    const closeBtn = rec.closed ? '' : '<button type="button" class="btn" id="v2Close">Close ' + esc(shown.short) + '</button>';
+    const rowHtml = (row) => {
+      const status = row.running ? '<span class="status status-blue">Running</span>' : (row.done ? '<span class="status status-green">Done</span>' : '<span class="status status-yellow">Needs action</span>');
+      const source = '<span class="status status-grey">' + row.source + '</span>';
+      const required = row.required && row.source === 'Firm' ? '<p class="text-caption">Required</p>' : '';
+      const need = st.v2Need === row.id ? '<p class="form-error-msg">Required</p>' : '';
+      const name = row.tip ? '<span class="tooltip-wrap"><span class="text-body2" tabindex="0">' + esc(row.label) + '</span><span class="tooltip" role="tooltip">' + esc(row.tip) + '</span></span>' : '<span class="text-body2">' + esc(row.label) + '</span>';
+      let action = '';
+      if (row.kind === 'synder') action = '<button type="button" class="btn-outlined" data-v2-fix="' + row.id + '">Fix</button>';
+      else if (row.done) action = '<button type="button" class="btn-outlined" data-v2-undo="' + row.id + '">Undo</button><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2-' + row.id + '" aria-label="More actions for ' + esc(row.label) + '"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2-' + row.id + '"><button type="button" class="dropdown-item" data-v2-undo="' + row.id + '">Undo</button></div></div>';
+      else action = '<button type="button" class="btn-outlined" data-v2-done="' + row.id + '">Mark done</button>';
+      return '<tr id="v2row-' + row.id + '"><td><div>' + name + required + need + '</div></td><td>' + source + '</td><td>' + status + '</td><td class="text-right"><div class="d-flex align-center justify-end gap-8">' + action + '</div></td></tr>';
+    };
+    const fold = done.length ? '<tr><td colspan="4"><button type="button" class="link" id="v2ShowDone">' + (st.v2ShowDone ? 'Hide ' : '') + done.length + ' done</button></td></tr>' : '';
+    const body = open.map(rowHtml).join('') + fold + (st.v2ShowDone ? done.map(rowHtml).join('') : '');
+    return '<div class="page-stack"><div class="d-flex align-center justify-between gap-16 flex-wrap"><div class="d-flex align-center gap-8"><button type="button" class="btn-icon" id="v2Prev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><span class="text-subtitle1">' + esc(shown.label) + '</span><button type="button" class="btn-icon" id="v2MonthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>' + chip + '</div><div class="d-flex align-center gap-8">' + '<button type="button" class="btn-outlined" id="v2History">History</button>' + menu + closeBtn + '</div></div><p class="text-body2">' + esc(line) + '</p><h2 class="text-h2">Before you close ' + esc(shown.short) + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Check</th><th>Source</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div></div>';
+  }
+  function openWorkHistory(c) {
+    const old = document.getElementById('historySheet');
+    if (old) old.remove();
+    const shown = v2Shown(c);
+    const notes = (c.monthNotes || []).filter((note) => note.month === shown.label).map((note) => '<p class="text-body2">' + esc(note.text) + ' <span class="text-secondary">' + esc(note.period || '') + '</span></p>').join('') || '<p class="text-body2">No notes for this month.</p>';
+    const events = (shown.rec.events || []).map((ev) => ev.type === 'close' ? 'Closed by ' + ev.who + ', ' + ev.at : (ev.type === 'reopen' ? 'Reopened by ' + ev.who + ', ' + ev.at : '')).filter(Boolean);
+    const timeline = '<div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Month</th><th>Status</th><th>Last activity</th></tr></thead><tbody><tr><td>' + esc(shown.label) + '</td><td>' + (shown.rec.closed ? 'Closed' : 'Open') + '</td><td>' + esc(events[events.length - 1] || 'No events for this month.') + '</td></tr></tbody></table></div>';
+    const wrap = document.createElement('div');
+    wrap.id = 'historySheet';
+    wrap.innerHTML = '<div class="synder-side-sheet-bg"></div><div class="synder-side-sheet" role="dialog" aria-modal="true"><div class="synder-side-sheet-header"><span>History</span><button type="button" class="btn-icon" id="historyClose" aria-label="Close"><span class="material-icons">close</span></button></div><div class="synder-side-sheet-body text-body2"><h2 class="text-h2">Notes</h2>' + notes + '<div class="form-field"><textarea class="textarea" id="v2Note" placeholder="Write a note for ' + esc(shown.short) + '"></textarea></div><p class="form-error-msg" id="v2NoteErr" hidden>Required</p><button type="button" class="btn" id="v2AddNote">Add note</button><h2 class="text-h2">Timeline</h2>' + timeline + '</div></div>';
+    document.body.appendChild(wrap);
+    const close = () => wrap.remove();
+    wrap.querySelector('#historyClose').onclick = close;
+    wrap.querySelector('.synder-side-sheet-bg').onclick = close;
+    wrap.querySelector('#v2AddNote').onclick = () => {
+      const input = wrap.querySelector('#v2Note');
+      const text = (input.value || '').trim();
+      if (!text) { wrap.querySelector('#v2NoteErr').hidden = false; return; }
+      if (!Array.isArray(c.monthNotes)) c.monthNotes = [];
+      c.monthNotes.push({ month: shown.label, text: text, period: 'The whole of ' + shown.short });
+      close();
+      openWorkHistory(c);
+    };
   }
   function clientBillingTab() {
     return `<div class="page-stack"><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Synder product</th><th>Billing plan</th><th>Addons</th><th>Renewal date</th><th>Syncs amount renewal</th></tr></thead><tbody><tr><td><span class="text-body2">Synder Sync</span></td><td><span class="text-body2">Pro, Yearly</span></td><td><span class="text-body2">—</span></td><td><span class="text-body2">09/30/2027</span></td><td><span class="text-body2">11/30/2026</span></td></tr></tbody></table></div></div>`;
@@ -5527,6 +5636,80 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMain();
     });
     bindClick('showEvents', () => { st.eventsOpen = !st.eventsOpen; renderMain(); });
+    bindClick('v2Prev', () => v2Shift(-1));
+    bindClick('v2MonthNext', () => v2Shift(1));
+    bindClick('v2History', () => { const c = findOrg(st.clientId); if (c) openWorkHistory(c); });
+    bindClick('v2ShowDone', () => { st.v2ShowDone = !st.v2ShowDone; renderMain(); });
+    bindClick('v2Review', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const shown = v2Shown(c);
+      if (!shown.rec.closed) shown.rec.review = true;
+      renderMain();
+    });
+    bindClick('v2NextClient', () => {
+      const list = listedClients();
+      const i = list.findIndex((item) => item.id === st.clientId);
+      const next = list[(i + 1) % list.length];
+      if (next) openDetails(next.id, st.from);
+    });
+    bindClick('v2Reopen', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const shown = v2Shown(c);
+      shown.rec.closed = false;
+      if (!shown.rec.events) shown.rec.events = [];
+      shown.rec.events.push({ type: 'reopen', who: actorName(), at: stampLabel(new Date()), reason: '' });
+      renderMain();
+    });
+    bindClick('v2Close', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const pack = v2Checks(c);
+      const left = pack.rows.filter((row) => row.required && !row.done);
+      if (left.length) {
+        st.v2Need = left[0].id;
+        st.v2ShowDone = false;
+        render();
+        const row = document.getElementById('v2row-' + left[0].id);
+        if (row) row.scrollIntoView({ block: 'center' });
+        return;
+      }
+      pack.shown.rec.closed = true;
+      pack.shown.rec.review = false;
+      if (!pack.shown.rec.events) pack.shown.rec.events = [];
+      pack.shown.rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
+      st.v2Need = '';
+      showKitToast(pack.shown.short + ' closed in Synder. Nothing changed in QuickBooks.');
+      renderMain();
+    });
+    m.querySelectorAll('[data-v2-done]').forEach((b) => b.onclick = () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      rec.checks[b.dataset.v2Done] = { done: true, by: actorName(), at: stampLabel(new Date()) };
+      if (st.v2Need === b.dataset.v2Done) st.v2Need = '';
+      renderMain();
+    });
+    m.querySelectorAll('[data-v2-undo]').forEach((b) => b.onclick = () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      if (rec.checks[b.dataset.v2Undo]) rec.checks[b.dataset.v2Undo].done = false;
+      renderMain();
+    });
+    m.querySelectorAll('[data-v2-fix]').forEach((b) => b.onclick = () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      const id = b.dataset.v2Fix;
+      if (id === 'syncs') rec.sync = 'passed';
+      else if (id === 'recon') { rec.recon = 'passed'; openMonRecon(c.id); if (st.v2Need === id) st.v2Need = ''; renderMain(); return; }
+      else if (id === 'uncat') c.issues = (c.issues || []).filter((issue) => issue.key !== 'uncategorized');
+      else if (id === 'funds') c.issues = (c.issues || []).filter((issue) => issue.key !== 'undeposited');
+      if (st.v2Need === id) st.v2Need = '';
+      openMonHealth(c.id);
+    });
     bindClick('nextClient', () => {
       const list = listedClients();
       const i = list.findIndex((item) => item.id === st.clientId);
@@ -6630,7 +6813,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     else if (st.ctx === 'firm' && (st.page === 'manage' || st.page === 'buylicenses' || st.page === 'buyplans')) h = '#billing/manage' + ((st.manageTab === 'buy' || st.page === 'buylicenses' || st.page === 'buyplans') ? '/buy' : '');
     else if (st.ctx === 'firm' && st.page === 'billing') h = '#billing' + (st.licencesOn ? '/licences' : '');
     else if (st.ctx === 'firm' && st.page === 'client' && st.clientId) h += '/' + st.clientId;
-    if (location.hash !== h) writeLocation(h);
+    writeLocation(h);
     if (celebrateOnClients && ob && ob.variant !== 'existing' && st && st.page === 'clients' && !sc().clients.length) {
       celebrateOnClients = false;
       rainSparkles(maybeAutoStory);
@@ -6818,6 +7001,13 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   document.querySelectorAll('#modeSeg button').forEach((b) => b.onclick = () => {
     if (b.dataset.m === 'existing') enterExisting();
     else restartOnboarding();
+  });
+  document.querySelectorAll('#clientSeg button').forEach((b) => b.onclick = () => {
+    clientVariant = b.dataset.client === 'v2' ? 'v2' : 'v1';
+    try { localStorage.setItem('fcs-client-variant', clientVariant); } catch (e) {}
+    renderMode();
+    if (st && st.page === 'clientdetail') render();
+    else writeLocation(location.hash);
   });
   function shiftSharedMonth(dir) {
     let month = closeMonthNum() + dir;
