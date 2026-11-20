@@ -4609,8 +4609,8 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const year = closeYearNum();
     return { num: month, year, label: closeMonthName(month) + ' ' + year, short: closeMonthName(month), rec: tieRecord(c, month, year) };
   }
-  function workMonthNum() { return st && st.workMonth ? st.workMonth : 11; }
-  function workYearNum() { return st && st.workYear ? st.workYear : 2026; }
+  function workMonthNum() { return st && st.workMonth ? st.workMonth : 10; }
+  function workYearNum() { return st && st.workYear ? st.workYear : 2025; }
   function workShown(c) {
     const month = workMonthNum();
     const year = workYearNum();
@@ -4950,24 +4950,51 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       ${st.eventsOpen ? `<div class="box box--white page-stack"><h3 class="text-subtitle1">Events</h3>${events.length ? events.map((line) => `<p class="text-body2">${esc(line)}</p>`).join('') : '<p class="text-body2">No events for this month.</p>'}</div>` : ''}
     </div>`;
   }
-  function v2Shown(c) {
-    const month = st && st.workMonth ? st.workMonth : 10;
-    const year = st && st.workYear ? st.workYear : 2025;
-    return { num: month, year: year, label: closeMonthName(month) + ' ' + year, short: closeMonthName(month), rec: tieRecord(c, month, year) };
+  function v2Shown(c) { return workShown(c); }
+  function v2Future(month, year) {
+    const now = currentPeriod();
+    return year > now.year || (year === now.year && month > now.month);
+  }
+  function v2AtNow(month, year) {
+    const now = currentPeriod();
+    return year === now.year && month === now.month;
   }
   function v2Shift(dir) {
     const c = findOrg(st.clientId);
     if (!c) return;
     const shown = v2Shown(c);
+    if (dir > 0 && (v2AtNow(shown.num, shown.year) || v2Future(shown.num, shown.year))) return;
     let month = shown.num + dir;
     let year = shown.year;
     if (month < 1) { month = 12; year -= 1; }
     if (month > 12) { month = 1; year += 1; }
-    if (year < 2024 || year > 2027) return;
+    if (year < 2024 || v2Future(month, year)) return;
     st.workMonth = month;
     st.workYear = year;
-    st.v2Need = '';
+    st.v2Block = false;
+    st.v2Fix = '';
     renderMain();
+  }
+  function v2SyncItems(c, rec) {
+    if (rec.sync === 'passed') return [];
+    if (!rec.syncItems) {
+      const n = rec.sync === 'failed' ? 3 : 1;
+      const labels = ['Stripe payout', 'Shopify order', 'PayPal fee'];
+      rec.syncItems = [];
+      for (let i = 0; i < n; i++) rec.syncItems.push({ id: 'sy' + i, name: labels[i], open: true });
+    }
+    return rec.syncItems.filter((item) => item.open);
+  }
+  function v2BookItems(c, rec, key) {
+    const issue = healthIssue(c, key === 'uncat' ? 'uncategorized' : 'undeposited');
+    const doneKey = key === 'uncat' ? 'uncatDone' : 'fundsDone';
+    const listKey = key === 'uncat' ? 'uncatOpen' : 'fundsOpen';
+    if (rec[doneKey] || !issue) return [];
+    if (!rec[listKey]) {
+      const source = (issue.items && issue.items.length) ? issue.items : [{ name: key === 'uncat' ? 'Uncategorized Expense' : 'Undeposited Funds', amount: issue.amount || 0 }];
+      rec[listKey] = source.map((item, i) => ({ id: key + i, name: item.name, amount: item.amount, open: true }));
+    }
+    return rec[listKey].filter((item) => item.open);
   }
   function v2Checks(c) {
     const shown = v2Shown(c);
@@ -4975,47 +5002,75 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const runningHealth = c.monRunning === 'health' || c.checking;
     const runningRecon = c.monRunning === 'recon';
     const rows = [];
-    const synder = (id, label, done, tip, running) => rows.push({ id: id, label: label, source: 'Synder', required: true, done: !!done && !running, running: !!running, tip: tip || '', kind: 'synder' });
-    synder('syncs', 'Syncs', rec.sync === 'passed', rec.sync === 'failed' ? 'A sync failed in this period.' : 'Syncs passed in this period.', false);
-    synder('recon', 'Reconciliation', rec.recon === 'passed', rec.recon === 'passed' ? 'Reconciliation passed in this period.' : 'Reconciliation still needs a run for this month.', runningRecon);
+    const add = (row) => rows.push(row);
+    const syncOpen = v2SyncItems(c, rec);
+    add({ id: 'syncs', label: 'Syncs', source: 'Synder', required: true, done: rec.sync === 'passed', running: false, kind: 'synder', reason: rec.sync === 'passed' ? '' : (syncOpen.length + ' sync' + (syncOpen.length === 1 ? '' : 's') + ' failed') });
+    add({ id: 'recon', label: 'Reconciliation', source: 'Synder', required: true, done: rec.recon === 'passed' && !runningRecon, running: runningRecon, kind: 'synder', reason: rec.recon === 'passed' ? '' : 'Reconciliation has not been run for this month.' });
     if (isQuickBooks(c)) {
-      const uncat = healthIssue(c, 'uncategorized');
-      const funds = healthIssue(c, 'undeposited');
-      synder('uncat', 'Uncategorized', !uncat, uncat ? uncatDetail(uncat) : 'No expenses are missing a category.', runningHealth);
-      synder('funds', 'Undeposited', !funds, funds ? fundsDetail(funds) : 'No customer payments are waiting to be matched.', runningHealth);
+      const uncatOpen = v2BookItems(c, rec, 'uncat');
+      const fundsOpen = v2BookItems(c, rec, 'funds');
+      add({ id: 'uncat', label: 'Uncategorized', source: 'Synder', required: true, done: !uncatOpen.length && !runningHealth, running: runningHealth, kind: 'synder', reason: uncatOpen.length ? (uncatOpen.length + ' items in Uncategorized') : '' });
+      add({ id: 'funds', label: 'Undeposited', source: 'Synder', required: true, done: !fundsOpen.length && !runningHealth, running: runningHealth, kind: 'synder', reason: fundsOpen.length ? (fundsOpen.length + ' unapplied payments') : '' });
     }
-    firmPeriodChecks(c, rec).forEach((chk) => rows.push({ id: chk.id, label: chk.label, source: 'Firm', required: !!chk.required, done: !!chk.done, running: false, tip: '', kind: 'firm' }));
+    firmPeriodChecks(c, rec).forEach((chk) => add({ id: chk.id, label: chk.label, source: 'Firm check', required: !!chk.required, done: !!chk.done, running: false, kind: 'firm', reason: '' }));
     return { shown: shown, rows: rows };
   }
+  function v2Head(c) {
+    const shown = v2Shown(c);
+    const rec = shown.rec;
+    const ended = monthHasEnded(shown.year, shown.num);
+    const chip = monthStatusChip(rec.closed ? 'Closed' : (rec.review ? 'In review' : 'Open'));
+    const next = v2AtNow(shown.num, shown.year) ? '<span class="btn-icon" aria-hidden="true"></span>' : '<button type="button" class="btn-icon" id="v2MonthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>';
+    const review = rec.closed ? '' : (rec.review ? '<button type="button" class="dropdown-item" id="v2Open">Back to open</button>' : '<button type="button" class="dropdown-item" id="v2Review">Mark in review</button>');
+    const menu = '<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2head" aria-label="More actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2head">' + review + '<button type="button" class="dropdown-item" id="v2NextClient">Next client</button>' + (rec.closed ? '<button type="button" class="dropdown-item" id="v2Reopen">Reopen</button>' : '') + '</div></div>';
+    const closeBtn = rec.closed ? '' : (ended ? '<button type="button" class="btn" id="v2Close">Close ' + esc(shown.short) + '</button>' : '<span class="text-body2 text-secondary">Month not ended yet</span>');
+    return '<div class="d-flex align-center justify-between gap-16 flex-wrap"><div class="d-flex align-center gap-8"><button type="button" class="btn-icon" id="v2Prev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><span class="text-subtitle1">' + esc(shown.label) + '</span>' + next + chip + '</div><div class="d-flex align-center gap-8"><button type="button" class="btn-outlined" id="v2History">History</button>' + menu + closeBtn + '</div></div>';
+  }
+  function v2FixScreen(c, kind) {
+    const shown = v2Shown(c);
+    const rec = shown.rec;
+    const back = '<button type="button" class="link" id="v2FixBack">Back to ' + esc(shown.short) + ' checks</button>';
+    if (kind === 'syncs') {
+      const items = v2SyncItems(c, rec);
+      const rows = items.map((item) => '<div class="work-row d-flex align-center justify-between gap-16"><span class="text-body2">' + esc(item.name) + '</span><button type="button" class="btn-outlined" data-v2-retry="' + item.id + '">Retry</button></div>').join('') || '<p class="text-body2">No failed syncs left.</p>';
+      return '<div class="page-stack">' + back + '<h2 class="text-h2">Failed syncs</h2><p class="text-body2">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + (items.length ? '<div><button type="button" class="btn" id="v2RetryAll">Retry all</button></div>' : '') + '</div>';
+    }
+    if (kind === 'uncat' || kind === 'funds') {
+      const items = v2BookItems(c, rec, kind);
+      const verb = kind === 'uncat' ? 'Categorize' : 'Apply';
+      const title = kind === 'uncat' ? 'Uncategorized' : 'Undeposited';
+      const rows = items.map((item) => '<div class="work-row d-flex align-center justify-between gap-16"><span class="text-body2">' + esc(item.name) + (item.amount ? ' · ' + esc(money(item.amount)) : '') + '</span><button type="button" class="btn-outlined" data-v2-resolve="' + item.id + '">' + verb + '</button></div>').join('') || '<p class="text-body2">Nothing left in this check.</p>';
+      return '<div class="page-stack">' + back + '<h2 class="text-h2">' + title + '</h2><p class="text-body2">' + esc(c.name) + ' · ' + esc(shown.label) + '</p>' + rows + (items.length ? '<div><button type="button" class="btn" id="v2ResolveAll">' + verb + ' all</button></div>' : '') + '</div>';
+    }
+    const many = (c.integrations || []).length > 1;
+    const pick = many ? '<div class="form-field"><label class="form-label form-label-required" for="v2Plat">Payment platform</label><select class="select" id="v2Plat"><option value="">Select a payment platform</option>' + (c.integrations || []).map((name) => '<option>' + esc(String(name).toUpperCase()) + ' · Main</option>').join('') + '</select><p class="form-error-msg" id="v2PlatErr" hidden>Required</p></div>' : '<p class="text-body2">' + esc(c.name) + ' · ' + (c.accounting === 'Xero' ? 'Xero' : 'QuickBooks Online') + ' · ' + esc(shown.label) + '.</p>';
+    return '<div class="page-stack">' + back + '<h2 class="text-h2">Start reconciliation</h2>' + pick + '<div><button type="button" class="btn" id="v2ReconGo">Start reconciliation</button></div></div>';
+  }
   function clientWorkImproved(c) {
+    const head = v2Head(c);
+    if (st.v2Fix) return '<div class="page-stack">' + head + v2FixScreen(c, st.v2Fix) + '</div>';
     const pack = v2Checks(c);
     const shown = pack.shown;
-    const rec = shown.rec;
-    const open = pack.rows.filter((row) => !row.done);
+    const openReq = pack.rows.filter((row) => !row.done && row.required);
+    const openOpt = pack.rows.filter((row) => !row.done && !row.required);
     const done = pack.rows.filter((row) => row.done);
-    const required = pack.rows.filter((row) => row.required);
-    const left = required.filter((row) => !row.done);
-    const line = left.length
-      ? left.length + ' of ' + required.length + ' checks left before you can close ' + shown.short + '.'
-      : 'All checks done. You can close ' + shown.short + '.';
-    const chip = rec.closed ? '<span class="status status-green">Closed</span>' : '<span class="status status-grey">Open</span>';
-    const menu = `<div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2head" aria-label="More actions"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2head">${rec.closed ? '' : '<button type="button" class="dropdown-item" id="v2Review">Mark in review</button>'}<button type="button" class="dropdown-item" id="v2NextClient">Next client</button>${rec.closed ? '<button type="button" class="dropdown-item" id="v2Reopen">Reopen</button>' : ''}</div></div>`;
-    const closeBtn = rec.closed ? '' : '<button type="button" class="btn" id="v2Close">Close ' + esc(shown.short) + '</button>';
+    const title = 'Before you close ' + shown.short + ' · ' + (openReq.length ? openReq.length + ' left' : 'All done');
+    const alert = st.v2Block && openReq.length ? '<div class="alert alert-error" id="v2Alert"><span class="material-icons" aria-hidden="true">error</span><span>' + openReq.length + ' check' + (openReq.length === 1 ? '' : 's') + ' left before you can close ' + esc(shown.short) + '</span></div>' : '';
     const rowHtml = (row) => {
       const status = row.running ? '<span class="status status-blue">Running</span>' : (row.done ? '<span class="status status-green">Done</span>' : '<span class="status status-yellow">Needs action</span>');
-      const source = '<span class="status status-grey">' + row.source + '</span>';
-      const required = row.required && row.source === 'Firm' ? '<p class="text-caption">Required</p>' : '';
-      const need = st.v2Need === row.id ? '<p class="form-error-msg">Required</p>' : '';
-      const name = row.tip ? '<span class="tooltip-wrap"><span class="text-body2" tabindex="0">' + esc(row.label) + '</span><span class="tooltip" role="tooltip">' + esc(row.tip) + '</span></span>' : '<span class="text-body2">' + esc(row.label) + '</span>';
+      const blocked = st.v2Block && row.required && !row.done;
+      const caption = blocked
+        ? '<p class="form-error-msg">Required</p>'
+        : '<p class="text-body2 text-secondary">' + esc(row.source) + '</p>' + (!row.done && row.reason ? '<p class="text-body2 text-secondary">' + esc(row.reason) + '</p>' : '') + (!row.required && row.kind === 'firm' ? '<p class="text-caption">Optional</p>' : '');
       let action = '';
-      if (row.kind === 'synder') action = '<button type="button" class="btn-outlined" data-v2-fix="' + row.id + '">Fix</button>';
-      else if (row.done) action = '<button type="button" class="btn-outlined" data-v2-undo="' + row.id + '">Undo</button><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="v2-' + row.id + '" aria-label="More actions for ' + esc(row.label) + '"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-v2-' + row.id + '"><button type="button" class="dropdown-item" data-v2-undo="' + row.id + '">Undo</button></div></div>';
-      else action = '<button type="button" class="btn-outlined" data-v2-done="' + row.id + '">Mark done</button>';
-      return '<tr id="v2row-' + row.id + '"><td><div>' + name + required + need + '</div></td><td>' + source + '</td><td>' + status + '</td><td class="text-right"><div class="d-flex align-center justify-end gap-8">' + action + '</div></td></tr>';
+      if (!row.done && row.kind === 'synder') action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-fix="' + row.id + '">Fix</button>';
+      else if (!row.done) action = '<button type="button" class="btn-outlined" id="v2act-' + row.id + '" data-v2-done="' + row.id + '">Mark done</button>';
+      else if (row.kind === 'firm') action = '<button type="button" class="btn-text" data-v2-undo="' + row.id + '">Undo</button>';
+      return '<tr id="v2row-' + row.id + '"><td><div><p class="text-body2">' + esc(row.label) + '</p>' + caption + '</div></td><td>' + status + '</td><td class="text-right">' + action + '</td></tr>';
     };
-    const fold = done.length ? '<tr><td colspan="4"><button type="button" class="link" id="v2ShowDone">' + (st.v2ShowDone ? 'Hide ' : '') + done.length + ' done</button></td></tr>' : '';
-    const body = open.map(rowHtml).join('') + fold + (st.v2ShowDone ? done.map(rowHtml).join('') : '');
-    return '<div class="page-stack"><div class="d-flex align-center justify-between gap-16 flex-wrap"><div class="d-flex align-center gap-8"><button type="button" class="btn-icon" id="v2Prev" aria-label="Previous month"><span class="material-icons">chevron_left</span></button><span class="text-subtitle1">' + esc(shown.label) + '</span><button type="button" class="btn-icon" id="v2MonthNext" aria-label="Next month"><span class="material-icons">chevron_right</span></button>' + chip + '</div><div class="d-flex align-center gap-8">' + '<button type="button" class="btn-outlined" id="v2History">History</button>' + menu + closeBtn + '</div></div><p class="text-body2">' + esc(line) + '</p><h2 class="text-h2">Before you close ' + esc(shown.short) + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Check</th><th>Source</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div></div>';
+    const fold = done.length ? '<tr><td colspan="3"><button type="button" class="link" id="v2ShowDone">' + (st.v2ShowDone ? 'Hide ' : '') + done.length + ' done</button></td></tr>' : '';
+    const body = openReq.map(rowHtml).join('') + openOpt.map(rowHtml).join('') + fold + (st.v2ShowDone ? done.map(rowHtml).join('') : '');
+    return '<div class="page-stack">' + head + alert + '<h2 class="text-h2">' + esc(title) + '</h2><div class="table-wrap"><table class="synder-table table--lg"><thead><tr><th>Check</th><th>Status</th><th class="text-right">Actions</th></tr></thead><tbody>' + body + '</tbody></table></div></div>';
   }
   function openWorkHistory(c) {
     const old = document.getElementById('historySheet');
@@ -5647,6 +5702,12 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       if (!shown.rec.closed) shown.rec.review = true;
       renderMain();
     });
+    bindClick('v2Open', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      v2Shown(c).rec.review = false;
+      renderMain();
+    });
     bindClick('v2NextClient', () => {
       const list = listedClients();
       const i = list.findIndex((item) => item.id === st.clientId);
@@ -5666,29 +5727,43 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       const c = findOrg(st.clientId);
       if (!c) return;
       const pack = v2Checks(c);
+      if (!monthHasEnded(pack.shown.year, pack.shown.num)) return;
       const left = pack.rows.filter((row) => row.required && !row.done);
       if (left.length) {
-        st.v2Need = left[0].id;
+        st.v2Block = true;
         st.v2ShowDone = false;
         render();
-        const row = document.getElementById('v2row-' + left[0].id);
-        if (row) row.scrollIntoView({ block: 'center' });
+        const btn = document.getElementById('v2act-' + left[0].id);
+        if (btn) btn.focus();
         return;
       }
       pack.shown.rec.closed = true;
       pack.shown.rec.review = false;
       if (!pack.shown.rec.events) pack.shown.rec.events = [];
       pack.shown.rec.events.push({ type: 'close', who: actorName(), at: stampLabel(new Date()), reason: '' });
-      st.v2Need = '';
+      st.v2Block = false;
       showKitToast(pack.shown.short + ' closed in Synder. Nothing changed in QuickBooks.');
       renderMain();
     });
+    bindClick('v2FixBack', () => { st.v2Fix = ''; renderMain(); });
+    const v2Finish = (c, key) => {
+      const rec = v2Shown(c).rec;
+      if (key === 'syncs') rec.sync = 'passed';
+      else if (key === 'recon') rec.recon = 'passed';
+      else if (key === 'uncat') rec.uncatDone = true;
+      else if (key === 'funds') rec.fundsDone = true;
+      const left = v2Checks(c).rows.filter((row) => row.required && !row.done);
+      if (!left.length) st.v2Block = false;
+      st.v2Fix = '';
+      renderMain();
+    };
     m.querySelectorAll('[data-v2-done]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const rec = v2Shown(c).rec;
       rec.checks[b.dataset.v2Done] = { done: true, by: actorName(), at: stampLabel(new Date()) };
-      if (st.v2Need === b.dataset.v2Done) st.v2Need = '';
+      const left = v2Checks(c).rows.filter((row) => row.required && !row.done);
+      if (!left.length) st.v2Block = false;
       renderMain();
     });
     m.querySelectorAll('[data-v2-undo]').forEach((b) => b.onclick = () => {
@@ -5699,16 +5774,55 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       renderMain();
     });
     m.querySelectorAll('[data-v2-fix]').forEach((b) => b.onclick = () => {
+      st.v2Fix = b.dataset.v2Fix;
+      renderMain();
+    });
+    m.querySelectorAll('[data-v2-retry]').forEach((b) => b.onclick = () => {
       const c = findOrg(st.clientId);
       if (!c) return;
       const rec = v2Shown(c).rec;
-      const id = b.dataset.v2Fix;
-      if (id === 'syncs') rec.sync = 'passed';
-      else if (id === 'recon') { rec.recon = 'passed'; openMonRecon(c.id); if (st.v2Need === id) st.v2Need = ''; renderMain(); return; }
-      else if (id === 'uncat') c.issues = (c.issues || []).filter((issue) => issue.key !== 'uncategorized');
-      else if (id === 'funds') c.issues = (c.issues || []).filter((issue) => issue.key !== 'undeposited');
-      if (st.v2Need === id) st.v2Need = '';
-      openMonHealth(c.id);
+      const item = (rec.syncItems || []).find((row) => row.id === b.dataset.v2Retry);
+      if (item) item.open = false;
+      if (v2SyncItems(c, rec).length) renderMain();
+      else v2Finish(c, 'syncs');
+    });
+    bindClick('v2RetryAll', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      (rec.syncItems || []).forEach((item) => { item.open = false; });
+      v2Finish(c, 'syncs');
+    });
+    m.querySelectorAll('[data-v2-resolve]').forEach((b) => b.onclick = () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      const key = st.v2Fix === 'funds' ? 'funds' : 'uncat';
+      const list = key === 'uncat' ? rec.uncatOpen : rec.fundsOpen;
+      const item = (list || []).find((row) => row.id === b.dataset.v2Resolve);
+      if (item) item.open = false;
+      if (v2BookItems(c, rec, key).length) renderMain();
+      else v2Finish(c, key);
+    });
+    bindClick('v2ResolveAll', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      const rec = v2Shown(c).rec;
+      const key = st.v2Fix === 'funds' ? 'funds' : 'uncat';
+      const list = key === 'uncat' ? rec.uncatOpen : rec.fundsOpen;
+      (list || []).forEach((item) => { item.open = false; });
+      v2Finish(c, key);
+    });
+    bindClick('v2ReconGo', () => {
+      const c = findOrg(st.clientId);
+      if (!c) return;
+      if (c.id === 'e3') {
+        showKitToast('A reconciliation for this month exists already. Delete or replace it in Transaction reconciliation before starting a new one.');
+        return;
+      }
+      const plat = document.getElementById('v2Plat');
+      if (plat && !plat.value) { const err = document.getElementById('v2PlatErr'); if (err) err.hidden = false; return; }
+      v2Finish(c, 'recon');
     });
     bindClick('nextClient', () => {
       const list = listedClients();
