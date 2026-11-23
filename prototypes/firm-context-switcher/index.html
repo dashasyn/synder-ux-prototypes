@@ -518,7 +518,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
         <div class="dropdown-menu" id="helpMenu">
           <button type="button" class="dropdown-item" data-top="helpcenter"><span class="material-icons">menu_book</span>Help center</button>
           <button type="button" class="dropdown-item" data-top="support"><span class="material-icons">chat_bubble_outline</span>Contact support</button>
-          <a class="dropdown-item" href="https://synder.com" target="_blank" rel="noopener noreferrer"><span class="material-icons">person_search</span>Find an accountant</a>
+          <a class="dropdown-item" id="findAccountant" href="https://synder.com" target="_blank" rel="noopener noreferrer"><span class="material-icons">person_search</span>Find an accountant</a>
         </div>
       </div>
       <div class="dropdown row-menu">
@@ -7214,7 +7214,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
       st.ctx = 'firm'; st.orgId = null; st.clientId = null;
       if (!st.page || st.page === 'dashboard') st.page = 'clients';
     }
-    if (st && st.ctx === 'firm' && st.page === 'dashboard') st.page = 'clients';
+    if (st && st.ctx === 'firm' && (st.page === 'dashboard' || st.page === 'orgsettings' || st.page === 'activity' || st.page === 'how')) st.page = 'clients';
     if (st && (st.openAdd || st.page === 'addone')) { st.openAdd = false; st.page = 'clients'; startAddClient(); return; }
     if (st && st.page !== 'billing' && st.page !== 'buyplans') st.plansOpen = false;
     ensureFirmLic();
@@ -7256,8 +7256,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     } else maybeAutoStory();
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
     if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); watchSync(); }
+    const inOrg = !!(st && st.ctx === 'org');
     const bal = document.querySelector('#topBalance');
-    if (bal) bal.hidden = !(st && st.ctx === 'org');
+    if (bal) bal.hidden = !inOrg;
+    const how = document.querySelector('.topbar-right [data-top="how"]');
+    if (how) how.hidden = !inOrg;
+    const ai = document.getElementById('connectAi');
+    if (ai) ai.hidden = !inOrg;
+    const find = document.getElementById('findAccountant');
+    if (find) find.hidden = !inOrg;
   }
   function showFirmWelcome() {
     if (document.getElementById('firmWelcome')) return;
@@ -7553,9 +7560,10 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
   function goTop(page) { closeMenus(); st.page = page; st.clientId = null; save(); render(); }
   function renderUserMenu() {
     const items = [];
-    if (sc().firm) items.push(['myfirm', 'domain', 'Clients']);
-    items.push(['orgsettings', 'tune', 'Organization settings'], ['activity', 'history', 'Activity log'],
-      ['profile', 'person_outline', 'User profile'], ['orglist', 'list', 'List of organizations']);
+    const inOrg = !!(st && st.ctx === 'org');
+    if (inOrg && sc().firm) items.push(['myfirm', 'domain', 'Clients']);
+    if (inOrg) items.push(['orgsettings', 'tune', 'Organization settings'], ['activity', 'history', 'Activity log']);
+    items.push(['profile', 'person_outline', 'User profile'], ['orglist', 'list', 'List of organizations']);
     $('userMenu').innerHTML = `<div class="dropdown-item"><span class="text-body2"><span class="text-bold">Ignat Plot</span><br><span class="text-secondary">ignat@wlslabs.com</span></span></div>` +
       items.map(([k, ic, l]) => `<button type="button" class="dropdown-item" data-um="${k}"><span class="material-icons">${ic}</span>${l}</button>`).join('') +
       `<div class="dropdown-divider"></div><button type="button" class="dropdown-item" data-um="logout"><span class="material-icons">logout</span>Log out</button>`;
