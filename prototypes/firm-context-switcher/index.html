@@ -7257,14 +7257,15 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (mode !== 'onboarding' && ob && ob.variant === 'existing' && ob.welcomePending && !ob.welcomeSeen && st && st.page === 'clients') showFirmWelcome();
     if (mode !== 'onboarding') { ensurePreSeeds(); ensureFirmLic(); watchSync(); }
     const inOrg = !!(st && st.ctx === 'org');
-    const bal = document.querySelector('#topBalance');
-    if (bal) bal.hidden = !inOrg;
-    const how = document.querySelector('.topbar-right [data-top="how"]');
-    if (how) how.hidden = !inOrg;
-    const ai = document.getElementById('connectAi');
-    if (ai) ai.hidden = !inOrg;
-    const find = document.getElementById('findAccountant');
-    if (find) find.hidden = !inOrg;
+    const showTop = (el) => {
+      if (!el) return;
+      el.hidden = !inOrg;
+      el.style.display = inOrg ? '' : 'none';
+    };
+    showTop(document.querySelector('#topBalance'));
+    showTop(document.querySelector('.topbar-right [data-top="how"]'));
+    showTop(document.getElementById('connectAi'));
+    showTop(document.getElementById('findAccountant'));
   }
   function showFirmWelcome() {
     if (document.getElementById('firmWelcome')) return;
