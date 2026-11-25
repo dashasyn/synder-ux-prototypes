@@ -2553,6 +2553,17 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     if (isClient(id)) touchRecent(id);
     save(); render();
   }
+  function openInSynder(id) {
+    const c = findOrg(id);
+    if (!c || !isClient(id)) return;
+    st.ctx = 'org';
+    st.orgId = id;
+    st.clientId = id;
+    st.page = 'dashboard';
+    touchRecent(id);
+    save();
+    render();
+  }
   function showNeedConnect(c) {
     const old = document.getElementById('needConnect');
     if (old) old.remove();
@@ -4540,7 +4551,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const backLabel = st.from === 'monitoring' ? 'Back to monitoring' : (st.from === 'monthclose' ? 'Back to month close' : 'Back to clients');
     return `<div class="flow-wide page-stack">
       <a class="page-back" id="backClients" href="${backHref}">${backLabel}</a>
-      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientVariant === 'v2' ? v2Subtitle(c) : clientAccountingLine(c))}</p></div><div class="synder-page-actions"><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}"><button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button><button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
+      <div class="synder-page-header"><div class="synder-page-header-text"><h1 class="synder-page-title">${esc(c.name)}</h1><p class="synder-page-subtitle">${esc(clientVariant === 'v2' ? v2Subtitle(c) : clientAccountingLine(c))}</p></div><div class="synder-page-actions"><button type="button" class="btn" id="openInSynder" data-open-synder="${c.id}">Open in Synder</button><div class="row-menu"><button type="button" class="btn-icon btn-dots" data-menu="detail-${c.id}" aria-label="More actions for ${esc(c.name)}"><span class="material-icons">more_horiz</span></button><div class="dropdown-menu" id="rowmenu-detail-${c.id}">${clientVariant === 'v2' ? '' : `<button type="button" class="dropdown-item" data-goto="${c.id}">Open in Synder</button>`}<button type="button" class="dropdown-item danger" id="removeThisClient">Remove client</button></div></div></div></div>
       ${tabHtml}
       ${tab === 'billing' ? clientBillingTab(c) : (tab === 'colleagues' ? clientColleaguesTab(c) : (clientVariant === 'v2' ? clientWorkImproved(c) : clientWorkTab(c, off)))}
     </div>`;
@@ -5583,6 +5594,7 @@ img.integration-logo.logo-lg { width: 40px; height: 40px; }
     const m = $('main');
     m.querySelectorAll('[data-see]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openDetails(b.dataset.see); });
     m.querySelectorAll('[data-goto]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openClient(b.dataset.goto); });
+    m.querySelectorAll('[data-open-synder]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openInSynder(b.dataset.openSynder); });
     m.querySelectorAll('[data-pre-run]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreUpload(b.dataset.preRun); });
     m.querySelectorAll('[data-pre-view]').forEach((b) => b.onclick = (e) => { e.stopPropagation(); openPreassessment(b.dataset.preView); });
     bindPreOverlay(m);
