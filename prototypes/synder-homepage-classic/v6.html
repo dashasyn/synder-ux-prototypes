@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Synder.com homepage, classic · 6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#1C1F23;--bg2:#121518;--black:#0A0C0F;--navy:#002658;--navy2:#01204F;--blue:#1A73E8;--blue-h:#1767D6;--brand:#2081F3;--sky:#50B2F9;--ice:#ACD2FF;--link:#6FAFFF;--green:#16C08D;--tx:#FFFFFF;--mut:#A9B4C2;--line:rgba(255,255,255,.10);--card:#171A1E;--r-btn:8px;--r-card:16px;--r-sm:8px}
+:root{--bg:#1C1F23;--bg2:#121518;--black:#0A0C0F;--navy:#002658;--navy2:#01204F;--cta:#00FEB2;--cta-h:#68FFD2;--cta-tx:#01204F;--brand:#2081F3;--sky:#50B2F9;--ice:#ACD2FF;--link:#6FAFFF;--green:#16C08D;--tx:#FFFFFF;--mut:#A9B4C2;--line:rgba(255,255,255,.10);--card:#171A1E;--r-btn:8px;--r-card:16px;--r-sm:8px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;padding-top:44px;font-family:Inter,system-ui,sans-serif;font-size:17px;line-height:1.6;color:var(--tx);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}h1,h2,h3,p,ul,figure,blockquote{margin:0}ul{padding:0;list-style:none}img{display:block;max-width:100%}
@@ -22,17 +22,16 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .sec{padding:112px 0}.sh{text-align:center;max-width:880px;margin:0 auto 48px}.h1,.h2,.sh .lead{text-wrap:balance}.sh .lead{margin-top:16px}
 /* buttons: one primary, one secondary, one text link */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:var(--r-btn);font-size:16px;font-weight:600;line-height:1;border:1px solid transparent;transition:background .15s,border-color .15s,transform .15s;white-space:nowrap}
-.btn-p{background:var(--blue);color:#fff;box-shadow:0 6px 20px -8px rgba(32,129,243,.8)}.btn-p:hover{background:var(--blue-h);transform:translateY(-1px)}
+.btn-p{background:var(--cta);color:var(--cta-tx);box-shadow:0 6px 22px -10px rgba(0,254,178,.7)}.btn-p:hover{background:var(--cta-h);transform:translateY(-1px)}
 .btn-s{border-color:rgba(255,255,255,.35);color:#fff}.btn-s:hover{border-color:#fff;background:rgba(255,255,255,.06)}
 .btn-sm{height:40px;padding:0 16px;font-size:15px}
 .tlink{display:inline-flex;align-items:center;gap:6px;color:var(--link);font-weight:600;font-size:16px}.tlink:hover{color:#fff}.tlink span{transition:transform .15s}.tlink:hover span{transform:translateX(3px)}
 /* announcement */
-.ann{background:linear-gradient(90deg,#002658,#1C60B8);font-size:15px;text-align:center;padding:9px 16px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap}
-.ann b{font-weight:600}.ann a{font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:var(--r-btn);padding:3px 12px;font-size:14px}.ann a:hover{background:rgba(255,255,255,.1)}
+.ann{position:relative;background:linear-gradient(90deg,#002658,#1C60B8);font-size:14px;text-align:center;padding:6px 48px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap}
+.ann b{font-weight:600}.ann a{font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px}.ann a:hover{color:var(--ice)}.ann-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:#DCE5F0}.ann-x:hover{background:rgba(255,255,255,.12);color:#fff}.ann.gone{display:none}
 /* header */
 .hdr{position:sticky;top:44px;z-index:50;background:rgba(0,38,88,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
-.util{display:flex;justify-content:flex-end;gap:22px;font-size:14px;color:#C9D3DF;padding-top:8px}.util a{display:inline-flex;align-items:center;gap:6px}.util a:hover{color:#fff}.util img{width:14px;height:14px}
-.nr{display:flex;align-items:center;gap:28px;height:64px}
+.nr{display:flex;align-items:center;gap:28px;height:68px}
 .logo img{height:30px;width:auto}
 .menu{display:flex;gap:4px;align-items:center;flex:1}
 .mi{position:relative}.mi>a,.mi>button{display:inline-flex;align-items:center;gap:4px;padding:8px 10px;font-size:15px;font-weight:500;color:#E3EAF3;border-radius:var(--r-sm)}
@@ -45,7 +44,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dd h4{margin:4px 8px 6px;font-size:14px;font-weight:600;letter-spacing:.06em;color:#8FA0B5}
 .dd a{display:block;padding:8px;border-radius:var(--r-sm);font-size:15px;font-weight:500;color:#fff}.dd a:hover{background:rgba(255,255,255,.06)}
 .dd a small{display:block;font-size:14px;font-weight:400;color:var(--mut);margin-top:2px}
-.nav-cta{display:flex;gap:10px}
+.nav-cta{display:flex;gap:10px;align-items:center}.login{font-size:15px;font-weight:600;color:#fff;padding:8px 10px;border-radius:var(--r-sm)}.login:hover{background:rgba(255,255,255,.08)}
 .burger{display:none;width:40px;height:40px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.25);align-items:center;justify-content:center;margin-left:auto}
 .burger i,.burger i::before,.burger i::after{display:block;width:18px;height:2px;background:#fff;border-radius:2px;position:relative}.burger i::before,.burger i::after{content:"";position:absolute}.burger i::before{top:-6px}.burger i::after{top:6px}
 /* hero */
@@ -53,7 +52,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero::before{content:"";position:absolute;inset:-20% 10% auto;height:520px;background:radial-gradient(closest-side,rgba(32,129,243,.35),transparent);pointer-events:none}
 .hero .w{position:relative}
 .hero .h1{max-width:900px;margin:0 auto}
-.checks{display:flex;justify-content:center;flex-wrap:wrap;gap:12px 28px;margin:28px 0 36px;font-size:16px;color:#DCE5F0}.checks li{display:flex;align-items:center;gap:8px}.checks img{width:18px;height:18px}
+.checks{display:flex;justify-content:center;flex-wrap:wrap;gap:12px 28px;margin:20px 0 28px;font-size:16px;color:#DCE5F0}.checks li{display:flex;align-items:center;gap:8px}.checks img{width:18px;height:18px}
 .hcta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
 .trial{margin-top:14px;font-size:14px;color:#C9D3DF}
 .logos{margin-top:80px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:20px 48px;opacity:.9}
@@ -85,7 +84,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* two-card */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:32px;display:flex;flex-direction:column;gap:20px}
-.card .ph{min-height:220px}.card p{color:var(--mut)}.card .tlink{margin-top:auto}
+.card .ph{min-height:220px}.auto .card .ph{min-height:170px;padding:20px}.card p{color:var(--mut)}.card .tlink{margin-top:auto}
 /* products */
 .tools{background:var(--black)}
 .prod{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;background:linear-gradient(135deg,#0F2230,#0B0F14 60%);border:1px solid var(--line);border-radius:var(--r-card);padding:48px;margin-bottom:24px}
@@ -115,12 +114,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .kpis{display:grid;gap:12px}
 .kpi{background:linear-gradient(135deg,rgba(0,38,88,.6),rgba(23,26,30,1));border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px}
 .kpi strong{display:block;font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.02em}.kpi span{font-size:15px;color:var(--mut)}
+.stories{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.scard{padding:32px}.slogo{height:44px;display:flex;align-items:center}.slogo img{width:auto}
+.scard blockquote{flex:1;font-size:16px;line-height:1.6;color:#DCE5F0}.skpi{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}.skpi strong{display:block;font-size:22px;line-height:1.25;font-weight:700}.skpi span{font-size:14px;color:var(--mut)}
 /* cta */
 .cta{padding:0 0 112px}
 .ctab{background:linear-gradient(90deg,#002658,#1C60B8);border-radius:24px;padding:72px 32px;text-align:center;position:relative;overflow:hidden}
 .ctab::before{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;background:radial-gradient(closest-side,rgba(80,178,249,.35),transparent)}
 .ctab>*{position:relative}.ctab p{color:#DCE5F0;max-width:620px;margin:16px auto 32px}
-.ctab .btn-p{background:#fff;color:#002658;box-shadow:none}.ctab .btn-p:hover{background:#E8F2FF}
+
 /* footer */
 .ft{background:var(--bg2);border-top:1px solid var(--line);padding:72px 0 32px;font-size:15px;color:var(--mut)}
 .fg{display:grid;grid-template-columns:repeat(5,1fr);gap:40px 32px}
@@ -133,14 +134,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* responsive */
 @media(max-width:1080px){.menu .mi>a,.menu .mi>button{padding:8px 7px;font-size:14px}.nr{gap:16px}}
 @media(max-width:960px){
- .util{display:none}.burger{display:inline-flex}
+ .burger{display:inline-flex}
  .menu{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;background:#0B1730;padding:12px 16px 20px;border-bottom:1px solid var(--line);max-height:calc(100vh - 140px);overflow:auto}
  .hdr.open .menu{display:flex}
  .menu .mi>a,.menu .mi>button{width:100%;justify-content:space-between;font-size:16px;padding:12px 8px}
  .dd{position:static;opacity:1;visibility:visible;transform:none;display:none;box-shadow:none;min-width:0;border:0;background:transparent;padding:0 0 8px 8px}
  .dd.c2{grid-template-columns:1fr;min-width:0}.mi.x .dd{display:grid}.mi:hover .dd{display:none}.mi.x:hover .dd{display:grid}
  .nav-cta .btn-s{display:none}.nav-cta{margin-left:auto}.burger{margin-left:0}
- .g2,.prod,.story{grid-template-columns:1fr}.ints{grid-template-columns:repeat(2,1fr)}.fg{grid-template-columns:repeat(3,1fr)}
+ .g2,.prod,.story,.stories{grid-template-columns:1fr}.ints{grid-template-columns:repeat(2,1fr)}.fg{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:600px){
  .h1{font-size:36px}.h2{font-size:30px}.h3{font-size:20px}.sec{padding:72px 0}.hero{padding:56px 0 48px}
@@ -150,16 +151,15 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
  .fcard,.prod,.card,.story .card,.badges{padding:24px}.fcard .ph{min-height:200px}
  .tabs{justify-content:flex-start}.ints .int{height:80px}.band .w{gap:24px}.blogos{gap:22px}.blogos img{height:22px}
  .story blockquote{font-size:18px}.ctab{padding:48px 20px}.fg{grid-template-columns:1fr 1fr;gap:32px 20px}
- .ann{font-size:14px;gap:8px}
+ .ann{display:block;padding:6px 44px 6px 14px;line-height:1.45}.ann a{margin-left:6px;white-space:nowrap}
 }
 </style></head>
 <body>
 <div class="vbar"><span>Synder.com homepage, classic</span><div class="vsw"><a href="v1.html">1</a><a href="v2.html">2</a><a href="v3.html">3</a><a href="v4.html">4</a><a href="v5.html">5</a><a href="v6.html" aria-current="true">6</a></div></div>
 
-<div class="ann"><span><b>Synder Black Friday:</b> Up To 40% Off Yearly Plans</span><a href="#">Claim My Offer →</a></div>
+<div class="ann" id="ann"><span><b>Synder Black Friday:</b> Up To 40% Off Yearly Plans</span><a href="https://synder.com/black-friday-2026">Claim My Offer →</a><button class="ann-x" aria-label="Dismiss banner" id="annx"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>
 
 <header class="hdr" id="hdr">
- <div class="w util"><a href="#"><img src="assets/svg/search.svg" alt="">Search</a><a href="#">Log in</a><a href="#">Why Synder</a><a href="#">Customer Stories</a></div>
  <div class="w nr">
   <a class="logo" href="#"><img src="assets/svg/synder-logo-white.svg" alt="Synder" width="111" height="40"></a>
   <nav class="menu" aria-label="Main">
@@ -168,26 +168,25 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
     <div><h4>FEATURES</h4><a href="#">Multi-Channel Data Sync</a><a href="#">Historical Data Import</a><a href="#">Sales Tax Automation</a><a href="#">Invoice Matching</a><a href="#">Journal Entry Creation</a><a href="#">Multi-currency Accounting</a><a href="#">Product Matching</a><a href="#">Auto Reconciliation</a><a href="#">Inventory Tracking</a><a href="#">Financial Reporting</a><a href="#">MCP Server</a></div></div></div>
    <div class="mi"><button aria-haspopup="true">Solutions <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
     <div class="dd c2"><div><h4>BY INDUSTRY</h4><a href="#">Ecommerce</a><a href="#">Retail &amp; Consumer Goods</a><a href="#">Technology &amp; SaaS</a><a href="#">Accounting Firms</a><a href="#">Health &amp; Wellness</a><a href="#">Professional Services</a><a href="#">Nonprofit</a></div>
-    <div><h4>BY ROLE</h4><a href="#">Business Owner</a><a href="#">Executive Management</a><a href="#">CFO</a><a href="#">Controller</a><a href="#">Accountant</a></div></div></div>
-   <div class="mi"><a href="#">Mid-Size Business</a></div>
+    <div><h4>BY ROLE</h4><a href="#">Business Owner</a><a href="#">Executive Management</a><a href="#">CFO</a><a href="#">Controller</a><a href="#">Accountant</a><h4 style="margin-top:12px">MORE</h4><a href="https://synder.com/industry/medium-business/">Mid-Size Business</a><a href="https://synder.com/why-synder/">Why Synder</a></div></div></div>
    <div class="mi"><button aria-haspopup="true">Integrations <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
     <div class="dd c2"><div><h4>POPULAR INTEGRATIONS</h4><a href="#">Shopify+QuickBooks</a><a href="#">Stripe+QuickBooks</a><a href="#">Amazon+QuickBooks</a><a href="#">Square+QuickBooks</a><a href="#">PayPal+QuickBooks</a><a href="#">Clover+QuickBooks</a></div>
     <div><h4>ACCOUNTING PLATFORMS / ERPs</h4><a href="#">QuickBooks Online</a><a href="#">QuickBooks Desktop</a><a href="#">Xero</a><a href="#">Sage Intacct</a><a href="#">NetSuite</a><a href="#">Intuit Enterprise Suite</a><a href="#" style="color:var(--link)">See all integrations →</a></div></div></div>
    <div class="mi"><a href="#">Pricing</a></div>
    <div class="mi"><button aria-haspopup="true">Resources <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
-    <div class="dd c2" style="left:auto;right:-120px"><div><h4>LEARN</h4><a href="#">Webinars</a><a href="#">Blog</a><a href="#">Synder vs. Alternatives</a><a href="#">Success Stories</a><a href="#">Events</a><a href="#">Downloadables</a><a href="#">Tools</a></div>
+    <div class="dd c2" style="left:auto;right:-120px"><div><h4>LEARN</h4><a href="#">Webinars</a><a href="#">Blog</a><a href="#">Synder vs. Alternatives</a><a href="#">Success Stories</a><a href="https://synder.com/success-stories/">Customer Stories</a><a href="#">Events</a><a href="#">Downloadables</a><a href="#">Tools</a></div>
     <div><h4>ABOUT SYNDER</h4><a href="#">About Us<small>Get to know our mission, values, and the team behind Synder</small></a><a href="#">Synder News<small>Explore latest Synder milestones</small></a><a href="#">Synder in Press<small>Discover how Synder is making headlines in the industry</small></a></div></div></div>
   </nav>
-  <div class="nav-cta"><a class="btn btn-s btn-sm" href="#">Sign up free</a><a class="btn btn-p btn-sm" href="#">Book a demo</a></div>
+  <div class="nav-cta"><a class="login" href="https://go.synder.com/auth#/?product=ALL">Log in</a><a class="btn btn-s btn-sm" href="https://go.synder.com/signup?product=ALL&amp;from=headermain">Sign up free</a><a class="btn btn-p btn-sm" href="https://synder.com/book-a-demo/">Book a demo</a></div>
   <button class="burger" aria-label="Open menu" aria-expanded="false" id="burger"><i></i></button>
  </div>
 </header>
 
 <section class="hero">
  <div class="w">
-  <h1 class="h1">Accounting Automation Software <span class="grad">for Retail, Ecommerce and SaaS</span></h1>
+  <h1 class="h1">Accounting Automation Software for Retail, Ecommerce and SaaS</h1>
   <ul class="checks"><li><img src="assets/svg/check.svg" alt="">One platform for all channels</li><li><img src="assets/svg/check.svg" alt="">Fast month-end close without manual work</li><li><img src="assets/svg/check.svg" alt="">AI insights for strategic analysis</li></ul>
-  <div class="hcta"><a class="btn btn-p" href="#">Book a demo</a><a class="btn btn-s" href="#">Sign up free</a></div>
+  <div class="hcta"><a class="btn btn-p" href="https://synder.com/book-a-demo/">Book a demo</a><a class="btn btn-s" href="https://go.synder.com/signup?product=ALL&amp;from=headermain">Sign up free</a></div>
   <p class="trial">15-day free trial</p>
   <div class="logos" aria-label="Customers">
    <span class="wm lt">aarke</span><span class="wm it">Kittl</span><span class="wm it" style="font-weight:500">Healthy Meals Direct</span>
@@ -203,42 +202,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <section class="sec" id="automates">
  <div class="w">
   <div class="sh"><h2 class="h2">What Synder automates, so you don’t have to lift a finger</h2></div>
-  <div class="tabs" role="tablist" data-tabs="a">
-   <button class="tab" role="tab" aria-selected="true">Automated data sync</button><button class="tab" role="tab" aria-selected="false">Streamlined reconciliation</button><button class="tab" role="tab" aria-selected="false">Smart categorization</button><button class="tab" role="tab" aria-selected="false">Revenue recognition</button>
-  </div>
-  <div class="fcard">
-   <div class="panel on" data-p="a"><h3 class="h3">Automated data sync</h3><p>Sales, fees, refunds, and taxes from 30+ platforms post to your ledger automatically as individual transactions with full SKU and customer detail, or as a daily, monthly, or payout-based summary per channel.</p>
-    <div class="ph"><b>Picture</b><span>Illustration: Square and Stripe amounts flowing into the books, over NetSuite, Sage Intacct, QuickBooks and Xero ledger screens, with fees and subscriptions marked “Tracked properly”.</span></div></div>
-   <div class="panel" data-p="a"><h3 class="h3">Streamlined reconciliation</h3><p>Sync each sale, fee, refund, and tax to a clearing account, then reconcile both sides inside Synder. The matching engine flags discrepancies before month end, and every reconciled period is logged for audit.</p>
-    <div class="ph"><b>Picture</b><span>Illustration: payment system and accounting books side by side, matching, above a table of matched transactions.</span></div></div>
-   <div class="panel" data-p="a"><h3 class="h3">Automated categorization</h3><p>Set if-then rules by amount, vendor, description, or location – Synder assigns the right accounts, classes, and tax codes to every transaction as it syncs across all connected platforms.</p>
-    <div class="ph"><b>Picture</b><span>Illustration: transactions matched by rules to accounts in Oracle NetSuite, Sage Intacct, QuickBooks and Xero.</span></div></div>
-   <div class="panel" data-p="a"><h3 class="h3">GAAP-compliant revenue recognition for subscriptions</h3><p>Synder builds ASC 606-compliant recognition schedules from Stripe data or an Excel upload, recognizes revenue monthly on the P&amp;L, and tracks upgrades, cancellations, and prorations.</p>
-    <div class="ph"><b>Picture</b><span>Product view: a revenue recognition schedule showing recognized and deferred revenue by month.</span></div></div>
-   <a class="btn btn-p" href="#">Book a demo</a>
-  </div>
- </div>
-</section>
-
-<section class="sec" style="padding-top:0">
- <div class="w">
-  <div class="sh"><h2 class="h2">Consolidate your data in one source of truth</h2><p class="lead">Connect 30+ sales channels to top ledgers and ERPs, with flexibility to expand through custom setups.</p></div>
-  <div class="ints">
-   <a class="int" href="#"><img src="assets/svg/netsuite-white.svg" alt="Oracle NetSuite logo" width="139" height="51" class="sq"></a>
-   <a class="int" href="#"><img src="assets/svg/quickbooks-intuit.svg" alt="QuickBooks by Intuit logo" width="148" height="39"></a>
-   <a class="int" href="#"><img src="assets/svg/xero.svg" alt="Xero logo" width="69" height="68" class="sq"></a>
-   <a class="int" href="#"><img src="assets/svg/sage-intacct.svg" alt="Sage Intacct logo" width="211" height="41"></a>
-  </div>
-  <div style="text-align:center"><a class="btn btn-s" href="#">See all integrations</a></div>
- </div>
-</section>
-
-<section class="sec" style="padding-top:0">
- <div class="w">
-  <div class="sh"><h2 class="h2">Built for high-volume, high-stakes finance</h2></div>
-  <div class="g2">
-   <div class="card"><h3 class="h3">Advanced customization</h3><div class="ph"><b>Picture</b><span>Two blue gears with network connection lines and labels reading Smart Rules and Custom development.</span></div><p>Tailor everything: from renaming line items and pulling in metadata to removing taxes and setting up custom transaction mapping, so it works the way you need.</p><a class="tlink" href="#">Schedule a meeting <span>→</span></a></div>
-   <div class="card"><h3 class="h3">Enterprise-grade security</h3><div class="ph"><b>Picture</b><span>Compliance with GDPR, HIPAA, and CCPA, an AICPA SOC seal and a blue padlock symbolizing security.</span></div><p>With Synder, your data stays safe with SOC 2 Type 2 certified security, GDPR and HIPAA readiness, and end-to-end encryption, built for privacy and full compliance.</p><a class="tlink" href="#">Learn more about security <span>→</span></a></div>
+  <div class="g2 auto">
+   <div class="card"><div class="ph"><b>Picture</b><span>Illustration: Square and Stripe amounts flowing into the books, over NetSuite, Sage Intacct, QuickBooks and Xero ledger screens.</span></div><h3 class="h3">Automated data sync</h3><p>Sales, fees, refunds, and taxes from 30+ platforms post to your ledger automatically as individual transactions with full SKU and customer detail, or as a daily, monthly, or payout-based summary per channel.</p><a class="tlink" href="https://synder.com/product/multi-channel-sync/">Learn more <span>→</span></a></div>
+   <div class="card"><div class="ph"><b>Picture</b><span>Illustration: payment system and accounting books side by side, matching, above a table of matched transactions.</span></div><h3 class="h3">Streamlined reconciliation</h3><p>Sync each sale, fee, refund, and tax to a clearing account, then reconcile both sides inside Synder. The matching engine flags discrepancies before month end, and every reconciled period is logged for audit.</p><a class="tlink" href="https://synder.com/product/auto-reconciliation/">Learn more <span>→</span></a></div>
+   <div class="card"><div class="ph"><b>Picture</b><span>Illustration: transactions matched by rules to accounts in Oracle NetSuite, Sage Intacct, QuickBooks and Xero.</span></div><h3 class="h3">Automated categorization</h3><p>Set if-then rules by amount, vendor, description, or location – Synder assigns the right accounts, classes, and tax codes to every transaction as it syncs across all connected platforms.</p><a class="tlink" href="https://synder.com/product/transaction-categorisation/">Learn more <span>→</span></a></div>
+   <div class="card"><div class="ph"><b>Picture</b><span>Product view: a revenue recognition schedule showing recognized and deferred revenue by month.</span></div><h3 class="h3">GAAP-compliant revenue recognition for subscriptions</h3><p>Synder builds ASC 606-compliant recognition schedules from Stripe data or an Excel upload, recognizes revenue monthly on the P&amp;L, and tracks upgrades, cancellations, and prorations.</p><a class="tlink" href="https://synder.com/industry/revenue-recognition/">Learn more <span>→</span></a></div>
   </div>
  </div>
 </section>
@@ -282,24 +250,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <section class="sec" style="padding-top:0">
  <div class="w">
   <div class="sh"><h2 class="h2">What Synder customers say</h2></div>
-  <div class="tabs" role="tablist" data-tabs="c" style="max-width:640px">
-   <button class="tab" role="tab" aria-selected="true">Ecommerce/retail</button><button class="tab" role="tab" aria-selected="false">SaaS</button><button class="tab" role="tab" aria-selected="false">Accounting firm</button>
+  <div class="stories">
+   <div class="card scard"><div class="slogo"><img src="assets/svg/playyourcourt.svg" alt="PlayYourCourt customer logo" width="278" height="208" style="height:44px"></div><blockquote>“Instead of a bookkeeper spending 40 hours a month manually reviewing thousands of transactions each month—clicking into each one, checking metadata, and categorizing it—Synder does it all automatically, the moment the charge happens. Which means we save 480 hours and almost $24K yearly.”</blockquote><div class="who"><div><h3>Justin McKelvey</h3><p>Head of Product at PlayYourCourt</p></div></div><ul class="skpi"><li><strong class="grad">480+ hours</strong><span>Saved yearly on transaction categorization</span></li><li><strong class="grad">$24K+</strong><span>Saved on bookkeeping services yearly</span></li><li><strong class="grad">No manual entry</strong><span>Effortless Stripe-QuickBooks integration</span></li></ul><a class="tlink" href="https://synder.com/success-stories/playyourcourt/">Read the full story <span>→</span></a></div>
+   <div class="card scard"><div class="slogo"><img src="assets/svg/stape-white.svg" alt="Stape customer logo" width="95" height="40" style="height:34px"></div><blockquote>“Synder drastically speeds up the process of reconciliation and eliminates the need to manually check massive transaction files. It now takes me about 40 minutes to finish and review a month’s data, whereas manually, it would have taken at least two days.”</blockquote><div class="who"><div><h3>Olena Svoiak</h3><p>Financial Manager at Stape</p></div></div><ul class="skpi"><li><strong class="grad">95% time</strong><span>Saved on manual reconciliation</span></li><li><strong class="grad">180 hours</strong><span>Saved yearly on reviewing end-of-the-month data</span></li><li><strong class="grad">100% GAAP-compliant</strong><span>Revenue recognition and reporting</span></li></ul><a class="tlink" href="https://synder.com/success-stories/stape/">Read the full story <span>→</span></a></div>
+   <div class="card scard"><div class="slogo"><span class="wm" style="font-weight:600">Decimal</span></div><blockquote>“Since integrating Synder, Decimal has streamlined workflows, reduced reconciliation time by over 50%, and saved 6-8 hours per client each month, enabling the team to focus on strategic advisory services and client growth.”</blockquote><div class="who"><div><h3>Kristin Miller</h3><p>Team Lead at Decimal</p></div></div><ul class="skpi"><li><strong class="grad">140 hours</strong><span>Saved monthly on month-end close</span></li><li><strong class="grad">20 clients</strong><span>Successfully integrated with Synder</span></li><li><strong class="grad">9 platforms</strong><span>Accurate automated bookkeeping for Stripe, PayPal, Shopify, Amazon, QuickBooks, and more</span></li></ul><a class="tlink" href="https://synder.com/success-stories/decimal/">Read the full story <span>→</span></a></div>
   </div>
-  <div class="panel on" data-p="c"><div class="story">
-   <div class="card"><blockquote>“Instead of a bookkeeper spending 40 hours a month manually reviewing thousands of transactions each month—clicking into each one, checking metadata, and categorizing it—Synder does it all automatically, the moment the charge happens. Which means we save 480 hours and almost $24K yearly.”</blockquote>
-    <div class="meta"><div class="who"><div><h3>Justin McKelvey</h3><p>Head of Product at PlayYourCourt</p></div></div><img src="assets/svg/playyourcourt.svg" alt="PlayYourCourt customer logo" width="278" height="208" style="height:48px"></div><a class="tlink" href="#">Read the full story <span>→</span></a></div>
-   <div class="kpis"><div class="kpi"><strong class="grad">480+ hours</strong><span>Saved yearly on transaction categorization</span></div><div class="kpi"><strong class="grad">$24K+</strong><span>Saved on bookkeeping services yearly</span></div><div class="kpi"><strong class="grad">No manual entry</strong><span>Effortless Stripe-QuickBooks integration</span></div></div>
-  </div></div>
-  <div class="panel" data-p="c"><div class="story">
-   <div class="card"><blockquote>“Synder drastically speeds up the process of reconciliation and eliminates the need to manually check massive transaction files. It now takes me about 40 minutes to finish and review a month’s data, whereas manually, it would have taken at least two days.”</blockquote>
-    <div class="meta"><div class="who"><div><h3>Olena Svoiak</h3><p>Financial Manager at Stape</p></div></div><img src="assets/svg/stape-white.svg" alt="Stape customer logo" width="95" height="40"></div><a class="tlink" href="#">Read the full story <span>→</span></a></div>
-   <div class="kpis"><div class="kpi"><strong class="grad">95% time</strong><span>Saved on manual reconciliation</span></div><div class="kpi"><strong class="grad">180 hours</strong><span>Saved yearly on reviewing end-of-the-month data</span></div><div class="kpi"><strong class="grad">100% GAAP-compliant</strong><span>Revenue recognition and reporting</span></div></div>
-  </div></div>
-  <div class="panel" data-p="c"><div class="story">
-   <div class="card"><blockquote>“Since integrating Synder, Decimal has streamlined workflows, reduced reconciliation time by over 50%, and saved 6-8 hours per client each month, enabling the team to focus on strategic advisory services and client growth.”</blockquote>
-    <div class="meta"><div class="who"><div><h3>Kristin Miller</h3><p>Team Lead at Decimal</p></div></div><span class="wm" style="font-weight:600">Decimal</span></div><a class="tlink" href="#">Read the full story <span>→</span></a></div>
-   <div class="kpis"><div class="kpi"><strong class="grad">140 hours</strong><span>Saved monthly on month-end close</span></div><div class="kpi"><strong class="grad">20 clients</strong><span>Successfully integrated with Synder</span></div><div class="kpi"><strong class="grad">9 platforms</strong><span>Accurate automated bookkeeping for Stripe, PayPal, Shopify, Amazon, QuickBooks, and more</span></div></div>
-  </div></div>
  </div>
 </section>
 
@@ -310,7 +265,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <footer class="ft">
  <div class="w">
   <div class="fg">
-   <div><h4>Synder</h4><ul><li><a href="#">Integrations</a></li><li><a href="#">Pricing</a></li><li><a href="#">Demo</a></li><li><a href="#">Status</a></li><li><a href="#">Trust Report</a></li></ul>
+   <div><h4>Synder</h4><ul><li><a href="https://synder.com/why-synder/">Why Synder</a></li><li><a href="https://synder.com/success-stories/">Customer Stories</a></li><li><a href="#">Integrations</a></li><li><a href="#">Pricing</a></li><li><a href="#">Demo</a></li><li><a href="#">Status</a></li><li><a href="#">Trust Report</a></li></ul>
     <h4 style="margin-top:28px">Products</h4><ul><li><a href="#">Synder Insights</a></li><li><a href="#">Synder Sync</a></li><li><a href="#">Synder RevRec</a></li></ul></div>
    <div><h4>Industries</h4><ul><li><a href="#">Ecommerce</a></li><li><a href="#">Retail &amp; Consumer Goods</a></li><li><a href="#">Technology &amp; SaaS</a></li><li><a href="#">Accounting Firms</a></li><li><a href="#">Health &amp; Wellness</a></li><li><a href="#">Professional Services</a></li><li><a href="#">Nonprofit</a></li></ul>
     <h4 style="margin-top:28px">Features</h4><ul><li><a href="#">Multi-Channel Data Sync</a></li><li><a href="#">Historical Data Import</a></li><li><a href="#">Sales Tax Automation</a></li><li><a href="#">Invoice Matching</a></li><li><a href="#">Journal Entry Creation</a></li><li><a href="#">Multi-currency Accounting</a></li><li><a href="#">Product Matching</a></li><li><a href="#">Auto Reconciliation</a></li><li><a href="#">Inventory Tracking</a></li><li><a href="#">Financial Reporting</a></li><li><a href="#">MCP Server</a></li></ul></div>
@@ -318,7 +273,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    <div><h4>Company</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Press</a></li><li><a href="#">Careers</a></li><li><a href="#">Locations</a></li><li><a href="#">Contact Us</a></li></ul>
     <h4 style="margin-top:28px">Legal</h4><ul><li><a href="#">Privacy</a></li><li><a href="#">Terms and Conditions</a></li><li><a href="#">Sitemap</a></li></ul>
 </div>
-   <div><h4>Contact us</h4><ul class="contact"><li><img src="assets/svg/phone.svg" alt=""><a href="#">(415) 539-2507</a></li><li><img src="assets/svg/mail.svg" alt=""><a href="#">help@synder.com</a></li><li><img src="assets/svg/location.svg" alt=""><span>1390 Market Street, Suite 200<br>San Francisco, CA 94102</span></li></ul>
+   <div><h4>Contact us</h4><ul class="contact"><li><img src="assets/svg/phone.svg" alt=""><a href="tel:+14155392507">(415) 539-2507</a></li><li><img src="assets/svg/mail.svg" alt=""><a href="#">help@synder.com</a></li><li><img src="assets/svg/location.svg" alt=""><span>1390 Market Street, Suite 200<br>San Francisco, CA 94102</span></li></ul>
     <h4 style="margin-top:28px">Follow us</h4><div class="soc"><a href="#" aria-label="X (Twitter)"><img src="assets/svg/x-twitter.svg" alt=""></a><a href="#" aria-label="Facebook"><img src="assets/svg/facebook.svg" alt=""></a><a href="#" aria-label="LinkedIn"><img src="assets/svg/linkedin.svg" alt=""></a><a href="#" aria-label="Instagram"><img src="assets/svg/instagram.svg" alt=""></a><a href="#" aria-label="YouTube"><img src="assets/svg/youtube.svg" alt=""></a></div>
     <div class="fbad"><span class="bt">QuickBooks Solution Provider</span><span class="bt">Xero Growth App 2025</span><span class="bt">Stripe Verified Partner</span><span class="bt">Square Certified Partner</span><span class="bt">Backed by Y Combinator</span></div></div>
   </div>
@@ -326,7 +281,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
  </div>
 </footer>
 <script>
-document.querySelectorAll('[data-tabs]').forEach(function(tl){var k=tl.dataset.tabs,tabs=tl.querySelectorAll('.tab'),ps=document.querySelectorAll('.panel[data-p="'+k+'"]');tabs.forEach(function(t,i){t.addEventListener('click',function(){tabs.forEach(function(x,j){x.setAttribute('aria-selected',j===i)});ps.forEach(function(p,j){p.classList.toggle('on',j===i)})})})});
+document.getElementById('annx').addEventListener('click',function(){document.getElementById('ann').classList.add('gone')});
 var h=document.getElementById('hdr'),b=document.getElementById('burger');b.addEventListener('click',function(){var o=h.classList.toggle('open');b.setAttribute('aria-expanded',o)});
 document.querySelectorAll('.mi>button').forEach(function(x){x.addEventListener('click',function(){if(window.innerWidth<=960)x.parentNode.classList.toggle('x')})});
 </script>
