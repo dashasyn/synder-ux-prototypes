@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Synder.com homepage, classic · 1</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#1C1F23;--bg2:#121518;--black:#0A0C0F;--navy:#002658;--navy2:#01204F;--cta:#00FEB2;--cta-h:#68FFD2;--cta-tx:#01204F;--brand:#2081F3;--sky:#50B2F9;--ice:#ACD2FF;--link:#6FAFFF;--green:#16C08D;--tx:#FFFFFF;--mut:#A9B4C2;--line:rgba(255,255,255,.10);--card:#171A1E;--r-btn:8px;--r-card:16px;--r-sm:8px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
@@ -153,10 +153,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
  .ann{display:block;padding:6px 44px 6px 14px;line-height:1.45}.ann a{margin-left:6px;white-space:nowrap}
 }
 
-/* round 8: prod type scale (measured on synder.com at 1440: H1 Poppins 60/72 600, H2 Poppins 38/52 600, H3 Inter 24/36 700) */
-.h1{font-family:Poppins,Inter,system-ui,sans-serif;font-size:60px;line-height:72px;font-weight:600;letter-spacing:0}
+/* round 8: prod type scale (synder.com at 1440: H1 60/72 600, H2 38/52 600, H3 24/36 700; Inter sized to the same rendered width) */
+.h1{font-size:63px;line-height:72px;font-weight:600;letter-spacing:0}
 .hero .h1{max-width:1040px}
-.h2{font-family:Poppins,Inter,system-ui,sans-serif;font-size:38px;line-height:52px;font-weight:600;letter-spacing:0}
+.h2{font-size:40px;line-height:52px;font-weight:600;letter-spacing:0}
 .sh{max-width:1160px}
 .h3{font-size:24px;line-height:36px;font-weight:700;letter-spacing:0}
 .tlink{color:#00FEB2;font-weight:700;font-size:17px;text-decoration:underline;text-decoration-color:rgba(0,254,178,.45);text-decoration-thickness:1.5px;text-underline-offset:5px}
@@ -170,6 +170,34 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @media(max-width:600px){.h1{font-size:36px;line-height:44px}.h2{font-size:30px;line-height:40px}.h3{font-size:20px;line-height:28px}.hsi{padding:28px 24px}.hsi p{font-size:17px}}
 .ctab .h2{font-size:32px;line-height:48px}
 @media(max-width:600px){.ctab .h2{font-size:28px;line-height:38px}}
+
+/* round 9: single family (Inter), widths matched to prod; type floor */
+.ann,.ann a,.ann b{font-size:16px}
+.menu .mi>a,.menu .mi>button,.btn,.btn-sm{font-size:16px}
+.trial{font-size:16px}
+.ph b{font-size:15px}.ph span{font-size:16px}
+.chipl span,.tag{font-size:15px}
+.rate,.rate *{font-size:16px}
+.bt,.bt *{font-size:15px}
+.av{font-size:16px}
+.hsi .tlink{margin-top:auto}
+.card p,.prod p,.hsi p{font-size:20px;line-height:30px;color:#fff}
+.sh .lead{font-size:20px;line-height:30px;color:#DCE5F0}
+.cons .tlink{margin-top:8px}
+.ctab .h2{font-size:40px;line-height:52px}
+footer a,footer p,footer span,footer li,footer h4,footer small,footer b{font-size:16px}
+.fb,.fb *{font-size:15px}
+@media(max-width:1080px){.menu .mi>a,.menu .mi>button{font-size:15px}}
+@media(max-width:960px){.menu .mi>a,.menu .mi>button{font-size:16px}}
+@media(max-width:600px){.h1{font-size:38px;line-height:46px}.h2{font-size:32px;line-height:42px}.card p,.prod p,.hsi p{font-size:18px;line-height:28px}.ctab .h2{font-size:30px;line-height:40px}}
+
+.ft h4,.ft a,.ft p,.ft li,.ft span,.ft b,.ft .soc2,.fb span{font-size:16px}
+.fbad .bt{font-size:15px;height:38px}
+.ph b{font-size:16px}
+.story li span,.stories li span,li>span{font-size:16px}
+.quote h3,.who h3,.story h3,.rate h3,.band h3{font-size:20px;line-height:28px}
+.bt i,.fbad .bt i{font-size:15px}
+@media(max-width:600px){.nav-cta .btn{font-size:15px}}
 </style></head>
 <body>
 <div class="vbar"><span>Synder.com homepage, classic</span><div class="vsw"><a href="v6.html" aria-current="true">1</a><a href="v1.html">2</a><a href="v2.html">3</a><a href="v3.html">4</a><a href="v4.html">5</a><a href="v5.html">6</a></div></div>
@@ -226,12 +254,23 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
  </div>
 </section>
 
+<section class="sec cons" style="padding-top:0">
+ <div class="w">
+  <div class="sh"><h2 class="h2">Consolidate your data in one source of truth</h2><p class="lead">Connect 30+ sales channels to top ledgers and ERPs, with flexibility to expand through custom setups.</p></div>
+  <div class="ints">
+   <div class="int"><img src="assets/svg/shopify.svg" alt="Shopify"></div><div class="int"><img src="assets/svg/stripe-white.svg" alt="Stripe"></div><div class="int"><span class="wm" style="font-weight:700">amazon</span></div><div class="int"><span class="wm it" style="font-weight:700">PayPal</span></div>
+   <div class="int"><img src="assets/svg/quickbooks-intuit.svg" alt="QuickBooks"></div><div class="int"><img src="assets/svg/xero.svg" alt="Xero" class="sq"></div><div class="int"><img src="assets/svg/netsuite-white.svg" alt="Oracle NetSuite"></div><div class="int"><img src="assets/svg/sage-intacct.svg" alt="Sage Intacct"></div>
+  </div>
+  <p style="text-align:center"><a class="tlink" href="https://synder.com/integrations/">See all integrations <span>→</span></a></p>
+ </div>
+</section>
+
 <section class="sec" id="high-stakes" style="padding-top:0">
  <div class="w">
   <div class="sh"><h2 class="h2">Built for high-volume, high-stakes finance</h2></div>
   <div class="hsp">
-   <div class="hsi"><div class="chipl"><span>Smart Rules</span><span>Custom development</span></div><h3 class="h3">Advanced customization</h3><p>Tailor everything: from renaming line items and pulling in metadata to removing taxes and setting up custom transaction mapping, so it works the way you need.</p><a class="btn btn-s" href="https://synder.com/book-a-demo/">Schedule a meeting</a></div>
-   <div class="hsi"><div class="chipl"><span>SOC 2 Type 2</span><span>GDPR</span><span>HIPAA</span><span>CCPA</span></div><h3 class="h3">Enterprise-grade security</h3><p>With Synder, your data stays safe with SOC 2 Type 2 certified security, GDPR and HIPAA readiness, and end-to-end encryption, built for privacy and full compliance.</p><a class="btn btn-s" href="https://synder.com/soctwo/">Learn more about security</a></div>
+   <div class="hsi"><div class="chipl"><span>Smart Rules</span><span>Custom development</span></div><h3 class="h3">Advanced customization</h3><p>Tailor everything: from renaming line items and pulling in metadata to removing taxes and setting up custom transaction mapping, so it works the way you need.</p><a class="tlink" href="https://synder.com/book-a-demo/">Schedule a meeting <span>→</span></a></div>
+   <div class="hsi"><div class="chipl"><span>SOC 2 Type 2</span><span>GDPR</span><span>HIPAA</span><span>CCPA</span></div><h3 class="h3">Enterprise-grade security</h3><p>With Synder, your data stays safe with SOC 2 Type 2 certified security, GDPR and HIPAA readiness, and end-to-end encryption, built for privacy and full compliance.</p><a class="tlink" href="https://synder.com/soctwo/">Learn more about security <span>→</span></a></div>
   </div>
  </div>
 </section>
