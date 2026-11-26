@@ -28,7 +28,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .tlink{display:inline-flex;align-items:center;gap:6px;color:var(--link);font-weight:600;font-size:16px}.tlink:hover{color:#fff}.tlink span{transition:transform .15s}.tlink:hover span{transform:translateX(3px)}
 /* announcement */
 .ann{position:relative;background:linear-gradient(90deg,#002658,#1C60B8);font-size:14px;text-align:center;padding:6px 48px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap}
-.ann b{font-weight:600}.ann a{font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px}.ann a:hover{color:var(--ice)}.ann-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:#DCE5F0}.ann-x:hover{background:rgba(255,255,255,.12);color:#fff}.ann.gone{display:none}
+.ann b{font-weight:600}.ann a{font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px}.ann a:hover{color:var(--ice)}.ann-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:#DCE5F0}.ann-x:hover{background:rgba(255,255,255,.12);color:#fff}.ann.gone{display:none}.ann-s{display:none}@media(max-width:639px){.ann-l{display:none}.ann-s{display:inline}.ann{white-space:nowrap}}
 /* header */
 .hdr{position:sticky;top:44px;z-index:50;background:rgba(0,38,88,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
 .nr{display:flex;align-items:center;gap:28px;height:68px}
@@ -43,8 +43,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .dd.c2{grid-template-columns:1fr 1fr;min-width:520px}
 .dd h4{margin:4px 8px 6px;font-size:14px;font-weight:600;letter-spacing:.06em;color:#8FA0B5}
 .dd a{display:block;padding:8px;border-radius:var(--r-sm);font-size:15px;font-weight:500;color:#fff}.dd a:hover{background:rgba(255,255,255,.06)}
-.dd a small{display:block;font-size:14px;font-weight:400;color:var(--mut);margin-top:2px}
-.nav-cta{display:flex;gap:10px;align-items:center}.login{font-size:15px;font-weight:600;color:#fff;padding:8px 10px;border-radius:var(--r-sm)}.login:hover{background:rgba(255,255,255,.08)}
+.dd a.dsearch{display:flex;align-items:center;gap:10px;margin-bottom:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#DCE5F0}.dd a.dsearch:hover{border-color:rgba(255,255,255,.3);color:#fff}.dd a small{display:block;font-size:14px;font-weight:400;color:var(--mut);margin-top:2px}
+.nav-cta{display:flex;gap:10px;align-items:center}.btn-o{background:transparent;color:#fff;border-color:rgba(255,255,255,.28)}.btn-o:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
 .burger{display:none;width:40px;height:40px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.25);align-items:center;justify-content:center;margin-left:auto}
 .burger i,.burger i::before,.burger i::after{display:block;width:18px;height:2px;background:#fff;border-radius:2px;position:relative}.burger i::before,.burger i::after{content:"";position:absolute}.burger i::before{top:-6px}.burger i::after{top:6px}
 /* hero */
@@ -114,7 +114,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .kpis{display:grid;gap:12px}
 .kpi{background:linear-gradient(135deg,rgba(0,38,88,.6),rgba(23,26,30,1));border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px}
 .kpi strong{display:block;font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.02em}.kpi span{font-size:15px;color:var(--mut)}
-.stories{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.scard{padding:32px}.slogo{height:44px;display:flex;align-items:center}.slogo img{width:auto}
+.stories{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.scard{padding:32px}.scard blockquote{margin-bottom:4px}@media(min-width:961px){.stories{grid-template-rows:repeat(7,auto);row-gap:0}.scard{display:grid;grid-row:span 7;grid-template-rows:subgrid;row-gap:20px}.skpi{grid-row:span 3;grid-template-rows:subgrid;row-gap:12px}.scard blockquote{align-self:start}.scard .tlink{align-self:end}}.slogo{height:44px;display:flex;align-items:center}.slogo img{width:auto}
 .scard blockquote{flex:1;font-size:16px;line-height:1.6;color:#DCE5F0}.skpi{display:grid;gap:12px;padding-top:20px;border-top:1px solid var(--line)}.skpi strong{display:block;font-size:22px;line-height:1.25;font-weight:700}.skpi span{font-size:14px;color:var(--mut)}
 /* cta */
 .cta{padding:0 0 112px}
@@ -157,7 +157,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <body>
 <div class="vbar"><span>Synder.com homepage, classic</span><div class="vsw"><a href="v1.html">1</a><a href="v2.html">2</a><a href="v3.html">3</a><a href="v4.html">4</a><a href="v5.html">5</a><a href="v6.html" aria-current="true">6</a></div></div>
 
-<div class="ann" id="ann"><span><b>Synder Black Friday:</b> Up To 40% Off Yearly Plans</span><a href="https://synder.com/black-friday-2026">Claim My Offer →</a><button class="ann-x" aria-label="Dismiss banner" id="annx"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>
+<div class="ann" id="ann"><span class="ann-l"><b>Synder Black Friday:</b> Up To 40% Off Yearly Plans</span><span class="ann-s"><b>Black Friday:</b> Up To 40% Off</span><a href="https://synder.com/black-friday-2026">Claim My Offer →</a><button class="ann-x" aria-label="Dismiss banner" id="annx"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>
 
 <header class="hdr" id="hdr">
  <div class="w nr">
@@ -174,10 +174,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
     <div><h4>ACCOUNTING PLATFORMS / ERPs</h4><a href="#">QuickBooks Online</a><a href="#">QuickBooks Desktop</a><a href="#">Xero</a><a href="#">Sage Intacct</a><a href="#">NetSuite</a><a href="#">Intuit Enterprise Suite</a><a href="#" style="color:var(--link)">See all integrations →</a></div></div></div>
    <div class="mi"><a href="#">Pricing</a></div>
    <div class="mi"><button aria-haspopup="true">Resources <svg class="chev" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
-    <div class="dd c2" style="left:auto;right:-120px"><div><h4>LEARN</h4><a href="#">Webinars</a><a href="#">Blog</a><a href="#">Synder vs. Alternatives</a><a href="#">Success Stories</a><a href="https://synder.com/success-stories/">Customer Stories</a><a href="#">Events</a><a href="#">Downloadables</a><a href="#">Tools</a></div>
+    <div class="dd c2" style="left:auto;right:-120px"><div><a class="dsearch" href="https://synder.com/help/"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search help center</a><h4>LEARN</h4><a href="#">Webinars</a><a href="#">Blog</a><a href="#">Synder vs. Alternatives</a><a href="#">Success Stories</a><a href="https://synder.com/success-stories/">Customer Stories</a><a href="#">Events</a><a href="#">Downloadables</a><a href="#">Tools</a></div>
     <div><h4>ABOUT SYNDER</h4><a href="#">About Us<small>Get to know our mission, values, and the team behind Synder</small></a><a href="#">Synder News<small>Explore latest Synder milestones</small></a><a href="#">Synder in Press<small>Discover how Synder is making headlines in the industry</small></a></div></div></div>
   </nav>
-  <div class="nav-cta"><a class="login" href="https://go.synder.com/auth#/?product=ALL">Log in</a><a class="btn btn-s btn-sm" href="https://go.synder.com/signup?product=ALL&amp;from=headermain">Sign up free</a><a class="btn btn-p btn-sm" href="https://synder.com/book-a-demo/">Book a demo</a></div>
+  <div class="nav-cta"><a class="btn btn-sm btn-o" href="https://go.synder.com/auth#/?product=ALL">Log in</a><a class="btn btn-s btn-sm" href="https://go.synder.com/signup?product=ALL&amp;from=headermain">Sign up free</a><a class="btn btn-p btn-sm" href="https://synder.com/book-a-demo/">Book a demo</a></div>
   <button class="burger" aria-label="Open menu" aria-expanded="false" id="burger"><i></i></button>
  </div>
 </header>
